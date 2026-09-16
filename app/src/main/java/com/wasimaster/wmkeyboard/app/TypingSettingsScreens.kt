@@ -1780,6 +1780,42 @@ internal fun TypingGesturesSettings(
             item {
                 val valueFormat = stringResource(R.string.typing_value_multiplier_suffix)
                 SliderSetting(
+                    R.string.typing_gesture_start_radius_title,
+                    subtitle = stringResource(R.string.typing_gesture_start_radius_subtitle),
+                    value = settings.gesture.startRadius,
+                    range = 0.5f..4f,
+                    display = { valueFormat.format("%.1f".format(it)) },
+                    info = stringResource(R.string.typing_gesture_start_radius_info),
+                    default = SettingsDefaults.gesture.startRadius,
+                ) { scope.launch { repository.setGestureStartRadius(it) } }
+            }
+            item {
+                val valueFormat = stringResource(R.string.typing_value_multiplier_suffix)
+                SliderSetting(
+                    R.string.typing_gesture_end_radius_title,
+                    subtitle = stringResource(R.string.typing_gesture_end_radius_subtitle),
+                    value = settings.gesture.endRadius,
+                    range = 0.5f..4f,
+                    display = { valueFormat.format("%.1f".format(it)) },
+                    info = stringResource(R.string.typing_gesture_end_radius_info),
+                    default = SettingsDefaults.gesture.endRadius,
+                ) { scope.launch { repository.setGestureEndRadius(it) } }
+            }
+            item {
+                val valueFormat = stringResource(R.string.typing_value_multiplier_suffix)
+                SliderSetting(
+                    R.string.typing_gesture_near_radius_title,
+                    subtitle = stringResource(R.string.typing_gesture_near_radius_subtitle),
+                    value = settings.gesture.nearRadius,
+                    range = 0.5f..4f,
+                    display = { valueFormat.format("%.1f".format(it)) },
+                    info = stringResource(R.string.typing_gesture_near_radius_info),
+                    default = SettingsDefaults.gesture.nearRadius,
+                ) { scope.launch { repository.setGestureNearRadius(it) } }
+            }
+            item {
+                val valueFormat = stringResource(R.string.typing_value_multiplier_suffix)
+                SliderSetting(
                     R.string.typing_swipe_start_distance_title,
                     subtitle = stringResource(R.string.typing_swipe_start_distance_subtitle),
                     value = settings.gesture.startThresholdSlop,

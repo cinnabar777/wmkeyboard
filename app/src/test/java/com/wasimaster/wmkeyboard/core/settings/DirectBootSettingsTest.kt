@@ -14,6 +14,14 @@ import org.junit.Test
 class DirectBootSettingsTest {
 
     @Test
+    fun `gesture settings default radii are expected`() {
+        val gesture = GestureSettings()
+        assertEquals(1.6f, gesture.startRadius, 1e-4f)
+        assertEquals(1.6f, gesture.endRadius, 1e-4f)
+        assertEquals(1.5f, gesture.nearRadius, 1e-4f)
+    }
+
+    @Test
     fun `tools that need locked storage are dropped`() {
         val settings = KeyboardSettings(
             enabledTools = listOf(

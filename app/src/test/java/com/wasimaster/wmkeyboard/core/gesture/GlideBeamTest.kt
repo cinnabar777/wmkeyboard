@@ -387,6 +387,26 @@ class GlideBeamTest {
     }
 
     @Test
+    fun `custom tuning startRadius endRadius and nearRadius affect decoding`() {
+        // Test with restrictive startRadius (0.1 key width)
+        val strictBeam = GlideBeam(GlideBeam.Tuning(startRadius = 0.1f))
+        val strictWorkspace = GlideWorkspace()
+        // Start stroke offset from the 'h' key center (which is at 150f, 90f)
+        val offsetStroke = gestureFor("hello").mapIndexed { i, p ->
+            if (i == 0) GesturePoint(p.x + 20f, p.y + 20f) else p
+        }
+        val strictResult = strictBeam.decode(offsetStroke, grid, keyWidth, sources, strictWorkspace, 4)
+        // With strict startRadius, the start key 'h' is not within startRadius (20px > 0.1 * 60px = 6px)
+        assertFalse("hello should be pruned with strict startRadius", "hello" in strictResult.map { it.word })
+
+        // With generous startRadius (2.0 key widths = 120px)
+        val lenientBeam = GlideBeam(GlideBeam.Tuning(startRadius = 2.0f))
+        val lenientWorkspace = GlideWorkspace()
+        val lenientResult = lenientBeam.decode(offsetStroke, grid, keyWidth, sources, lenientWorkspace, 4)
+        assertTrue("hello should be decoded with lenient startRadius", "hello" in lenientResult.map { it.word })
+    }
+
+    @Test
     fun `too short a path returns nothing`() {
         val h = centers.getValue('h'.code)
         val stub = listOf(

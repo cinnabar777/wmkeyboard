@@ -2983,9 +2983,13 @@ open class WMKeyboardService : InputMethodService() {
                     }
                     loadDictionariesAndEmoji()
                 }
-                // How much of the dictionary a swipe may answer with. Cheap to
-                // set — the engine ignores a value it already has.
-                suggestionEngine?.glideVocabularyRank = settings.gesture.vocabulary.rank
+                // Update glide tuning (vocabulary rank, start/end/near radii)
+                suggestionEngine?.updateGlideTuning(
+                    startRadius = settings.gesture.startRadius,
+                    endRadius = settings.gesture.endRadius,
+                    nearRadius = settings.gesture.nearRadius,
+                    vocabularyRank = settings.gesture.vocabulary.rank,
+                )
                 // The offensive-word filter is per language and reads only the
                 // enabled ones, so switching a language on has to widen it.
                 // Cheap enough to do here rather than through a full reload:
@@ -3384,7 +3388,12 @@ open class WMKeyboardService : InputMethodService() {
                     .mapNotNull { id -> customTries[id]?.let { SecondaryDictionary(id, it) } }
                 englishAsSecondary = "en" in secondaryIds && !lang.isEnglish
                 fieldDetectionShift = fieldDetectionShift(_uiState.value.settings)
-                glideVocabularyRank = _uiState.value.settings.gesture.vocabulary.rank
+                updateGlideTuning(
+                    startRadius = _uiState.value.settings.gesture.startRadius,
+                    endRadius = _uiState.value.settings.gesture.endRadius,
+                    nearRadius = _uiState.value.settings.gesture.nearRadius,
+                    vocabularyRank = _uiState.value.settings.gesture.vocabulary.rank,
+                )
                 ngramReranker = NgramReranker(
                     userLexicon,
                     seedBigrams,

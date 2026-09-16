@@ -4520,6 +4520,12 @@ data class GestureSettings(
      * starts sooner); higher needs a more deliberate swipe before it takes over
      * from a tap. Default 2×.
      */
+    /** How far the stroke's first sample may sit from the word's first key, in key widths. */
+    val startRadius: Float = 1.6f,
+    /** How far the stroke's last sample may sit from the word's last key, in key widths. */
+    val endRadius: Float = 1.6f,
+    /** How close the stroke must pass to a key for that key's subtree to be walked (path error radius), in key widths. */
+    val nearRadius: Float = 1.5f,
     val startThresholdSlop: Float = 2f,
     /**
      * How long after the last keypress a glide is held back, in ms. During this
@@ -5925,6 +5931,9 @@ class SettingsRepository(private val context: Context) {
         /** The toggle the possessive swipe shipped as, read only to migrate it. */
         private val GESTURE_APOSTROPHE_S = booleanPreferencesKey("gesture_apostrophe_s")
         private val GESTURE_AUTO_SPACE = booleanPreferencesKey("gesture_auto_space")
+        private val GESTURE_START_RADIUS = floatPreferencesKey("gesture_start_radius")
+        private val GESTURE_END_RADIUS = floatPreferencesKey("gesture_end_radius")
+        private val GESTURE_NEAR_RADIUS = floatPreferencesKey("gesture_near_radius")
         private val GESTURE_START_THRESHOLD_SLOP = floatPreferencesKey("gesture_start_threshold_slop")
         private val GESTURE_POST_TYPE_COOLDOWN_MS = intPreferencesKey("gesture_post_type_cooldown_ms")
         private val GESTURE_HANDWRITE_DOT_COOLDOWN_MS = intPreferencesKey("gesture_handwrite_dot_cooldown_ms")
@@ -7008,6 +7017,9 @@ class SettingsRepository(private val context: Context) {
                     ?.let { runCatching { GlideApostropheKey.valueOf(it) }.getOrNull() }
                     ?: legacyPossessiveKey(p, defaults),
                 autoSpaceAfterGlide = p[GESTURE_AUTO_SPACE] ?: defaults.gesture.autoSpaceAfterGlide,
+                startRadius = p[GESTURE_START_RADIUS] ?: defaults.gesture.startRadius,
+                endRadius = p[GESTURE_END_RADIUS] ?: defaults.gesture.endRadius,
+                nearRadius = p[GESTURE_NEAR_RADIUS] ?: defaults.gesture.nearRadius,
                 startThresholdSlop = p[GESTURE_START_THRESHOLD_SLOP] ?: defaults.gesture.startThresholdSlop,
                 postTypeCooldownMs = p[GESTURE_POST_TYPE_COOLDOWN_MS] ?: defaults.gesture.postTypeCooldownMs,
                 handwriteDotCooldownMs = p[GESTURE_HANDWRITE_DOT_COOLDOWN_MS] ?: defaults.gesture.handwriteDotCooldownMs,
@@ -11327,6 +11339,15 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setGestureAutoSpace(value: Boolean) =
         editPrefs { it[GESTURE_AUTO_SPACE] = value }
+
+    suspend fun setGestureStartRadius(value: Float) =
+        editPrefs { it[GESTURE_START_RADIUS] = value.coerceIn(0.5f, 4f) }
+
+    suspend fun setGestureEndRadius(value: Float) =
+        editPrefs { it[GESTURE_END_RADIUS] = value.coerceIn(0.5f, 4f) }
+
+    suspend fun setGestureNearRadius(value: Float) =
+        editPrefs { it[GESTURE_NEAR_RADIUS] = value.coerceIn(0.5f, 4f) }
 
     suspend fun setGestureStartThresholdSlop(value: Float) =
         editPrefs { it[GESTURE_START_THRESHOLD_SLOP] = value.coerceIn(0.5f, 4f) }

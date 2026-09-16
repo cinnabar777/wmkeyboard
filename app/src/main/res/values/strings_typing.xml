@@ -493,6 +493,18 @@
 
 
 
+    <string name="typing_gesture_start_radius_title">Gesture start radius</string>
+    <string name="typing_gesture_start_radius_subtitle">How far the start of a swipe may sit from the first key</string>
+    <string name="typing_gesture_start_radius_info">How far, in key widths, the stroke\'s first touch may sit from the start key of a word. A larger radius allows sloppier initial placements, while a smaller radius requires more precise starting points.</string>
+
+    <string name="typing_gesture_end_radius_title">Gesture end radius</string>
+    <string name="typing_gesture_end_radius_subtitle">How far the end of a swipe may sit from the last key</string>
+    <string name="typing_gesture_end_radius_info">How far, in key widths, the stroke\'s final sample may sit from the last key of a word. A larger radius tolerates lifts that drift off the key, while a smaller radius requires stopping precisely on the final letter.</string>
+
+    <string name="typing_gesture_near_radius_title">Path error radius</string>
+    <string name="typing_gesture_near_radius_subtitle">How close a stroke must pass to a key to consider its subtree</string>
+    <string name="typing_gesture_near_radius_info">How close, in key widths, the drawn stroke must pass to a key for that key\'s subtree to be evaluated by the decoder. Raising this allows wider corner-cutting, while lowering it speeds up decoding by pruning keys further away.</string>
+
     <string name="typing_swipe_start_distance_title">Swipe start distance</string>
     <string name="typing_swipe_start_distance_subtitle">How far to move before a glide starts. A low value is more sensitive</string>
     <string name="typing_swipe_start_distance_info">This is the finger movement that changes a press into a glide. It is a multiple of the system touch slop. A low value starts the glide sooner and is more sensitive, but a still press can start a glide. A high value needs a more deliberate swipe.</string>

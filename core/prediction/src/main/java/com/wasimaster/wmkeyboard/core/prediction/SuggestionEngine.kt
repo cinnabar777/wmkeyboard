@@ -708,8 +708,37 @@ class SuggestionEngine(
     private val beamWorkspace = ThreadLocal.withInitial { BeamWorkspace() }
 
     @Volatile
-    private var glideBeam = GlideBeam()
+    private var glideTuning = GlideBeam.Tuning()
+
+    @Volatile
+    private var glideBeam = GlideBeam(glideTuning)
     private val glideWorkspace = ThreadLocal.withInitial { GlideWorkspace() }
+
+    /**
+     * Tuning parameters for glide decoding (startRadius, endRadius, nearRadius,
+     * vocabularyRank, etc.). Rebuilds [glideBeam] and [deepGlideBeam] on update.
+     */
+    fun updateGlideTuning(
+        startRadius: Float = glideTuning.startRadius,
+        endRadius: Float = glideTuning.endRadius,
+        nearRadius: Float = glideTuning.nearRadius,
+        vocabularyRank: Int = glideTuning.vocabularyRank,
+    ) {
+        if (glideTuning.startRadius == startRadius &&
+            glideTuning.endRadius == endRadius &&
+            glideTuning.nearRadius == nearRadius &&
+            glideTuning.vocabularyRank == vocabularyRank
+        ) return
+
+        glideTuning = glideTuning.copy(
+            startRadius = startRadius,
+            endRadius = endRadius,
+            nearRadius = nearRadius,
+            vocabularyRank = vocabularyRank,
+        )
+        glideBeam = GlideBeam(glideTuning)
+        deepGlideBeam = GlideBeam(glideTuning.copy(vocabularyRank = 0))
+    }
 
     /**
      * How many of a dictionary's commonest words a swipe may decode to, 0 for
@@ -718,11 +747,10 @@ class SuggestionEngine(
      * but its tuning (the workspace is the caller's), so replacing it costs an
      * allocation and no state.
      */
-    var glideVocabularyRank: Int = 0
+    var glideVocabularyRank: Int
+        get() = glideTuning.vocabularyRank
         set(value) {
-            if (field == value) return
-            field = value
-            glideBeam = GlideBeam(GlideBeam.Tuning(vocabularyRank = value))
+            updateGlideTuning(vocabularyRank = value)
         }
 
     /**
@@ -733,7 +761,8 @@ class SuggestionEngine(
      * deep search is the one moment the user has said the common word was
      * not what they meant.
      */
-    private val deepGlideBeam = GlideBeam(GlideBeam.Tuning(vocabularyRank = 0))
+    @Volatile
+    private var deepGlideBeam = GlideBeam(glideTuning.copy(vocabularyRank = 0))
 
     /**
      * The romanization a glide is decoded through, when the layout's keys and
