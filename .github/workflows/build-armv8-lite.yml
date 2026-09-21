@@ -1,0 +1,53 @@
+name: Build ARMv8 Lite APK
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: build-armv8-lite-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  WMKB_ENABLE_PLAY_STORE: "false"
+  WMKB_ENABLE_GMS: "false"
+  GRADLE_OPTS: -Dorg.gradle.jvmargs=-Xmx4g -Dorg.gradle.daemon=false
+
+jobs:
+  build:
+    name: Build ARMv8 Lite Fast APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          build-scan-publish: false
+
+      - name: Build ARMv8 Lite Fast APKs
+        run: |
+          ./gradlew assembleLiteEnFast assembleLiteIntlFast --stacktrace
+
+      - name: Upload ARMv8 Lite En Fast APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: wmkeyboard-armv8-lite-en-fast
+          path: app/build/outputs/apk/liteEn/fast/*.apk
+          retention-days: 14
+
+      - name: Upload ARMv8 Lite Intl Fast APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: wmkeyboard-armv8-lite-intl-fast
+          path: app/build/outputs/apk/liteIntl/fast/*.apk
+          retention-days: 14

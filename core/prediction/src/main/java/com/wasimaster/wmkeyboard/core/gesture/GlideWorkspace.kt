@@ -144,6 +144,10 @@ class GlideWorkspace {
     var endKey = BooleanArray(INITIAL_KEYS); private set
 
     val children = com.wasimaster.wmkeyboard.core.prediction.ChildBuffer()
+    val lookAheadChildren = com.wasimaster.wmkeyboard.core.prediction.ChildBuffer()
+
+    /** Scratch score array for kthBest floor tracking without allocation. */
+    var scoreScratch = DoubleArray(INITIAL)
 
     /**
      * Where a candidate column is built before anyone knows whether it is worth

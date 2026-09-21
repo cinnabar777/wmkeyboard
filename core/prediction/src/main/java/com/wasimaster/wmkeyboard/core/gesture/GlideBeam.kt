@@ -522,6 +522,8 @@ class GlideBeam(private val tuning: Tuning = Tuning()) {
         )
         val read = rescoreShape(ranked, keys, ws, shapes).take(limit)
         if (ahead.isNullOrEmpty()) return read
+        val readWords = read.mapTo(HashSet()) { it.word }
+        val filteredAhead = ahead.values.filterNot { it.word in readWords }
         // Merged into one ranked list so a caller sees the decoder's whole
         // opinion in score order; `Candidate.ahead` is what tells the two
         // apart, and every caller that cares checks it.
@@ -533,7 +535,7 @@ class GlideBeam(private val tuning: Tuning = Tuning()) {
         // guess extending it paid nothing. "thing" drawn to its last letter
         // lost to "things" on that gap alone, and a word the stroke had
         // spelled out could be beaten by any longer word it started.
-        val completions = rescoreShape(ahead.values.toList(), keys, ws, shapes)
+        val completions = rescoreShape(filteredAhead, keys, ws, shapes)
             .take(lookAhead)
         return (read + completions).sortedWith(
             compareByDescending<Candidate> { it.score }.thenBy { it.word }
@@ -734,7 +736,7 @@ class GlideBeam(private val tuning: Tuning = Tuning()) {
                         tuning.shapeWeight * shape
                     if (score > floor - EPS || results.size < k) {
                         emit(ws.materialize(s), score, shape.toDouble(), src.tier, results)
-                        if (results.size >= k) floor = kthBest(results, k)
+                        if (results.size >= k) floor = kthBest(results, k, ws)
                     }
                 }
                 if (ahead != null && budget[0] > 0 && length >= MIN_LOOKAHEAD_PREFIX) {
@@ -909,13 +911,13 @@ class GlideBeam(private val tuning: Tuning = Tuning()) {
         var steps = 0
         while (steps < MAX_WORD_LENGTH) {
             if (walker.isWord(at) && walker.frequency(at) == best) break
-            val count = walker.childrenInto(at, ws.children)
+            val count = walker.childrenInto(at, ws.lookAheadChildren)
             var next = -1
             var label = '\u0000'
             for (i in 0 until count) {
-                if (walker.maxSubtree(ws.children.nodes[i]) == best) {
-                    next = ws.children.nodes[i]
-                    label = ws.children.labels[i]
+                if (walker.maxSubtree(ws.lookAheadChildren.nodes[i]) == best) {
+                    next = ws.lookAheadChildren.nodes[i]
+                    label = ws.lookAheadChildren.labels[i]
                     break
                 }
             }
@@ -1759,13 +1761,18 @@ class GlideBeam(private val tuning: Tuning = Tuning()) {
         }
     }
 
-    private fun kthBest(results: HashMap<String, Candidate>, k: Int): Double {
-        if (results.size < k) return Double.NEGATIVE_INFINITY
-        val scores = DoubleArray(results.size)
+    private fun kthBest(results: HashMap<String, Candidate>, k: Int, ws: GlideWorkspace): Double {
+        val size = results.size
+        if (size < k) return Double.NEGATIVE_INFINITY
+        var scratch = ws.scoreScratch
+        if (scratch.size < size) {
+            scratch = DoubleArray(size)
+            ws.scoreScratch = scratch
+        }
         var i = 0
-        for (c in results.values) scores[i++] = c.score
-        scores.sort()
-        return scores[scores.size - k]
+        for (c in results.values) scratch[i++] = c.score
+        java.util.Arrays.sort(scratch, 0, size)
+        return scratch[size - k]
     }
 
     private fun distance(a: GesturePoint, b: GesturePoint): Float {

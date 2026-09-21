@@ -196,6 +196,7 @@ class KeyOffsets(private val storageFile: File?) {
      * there is nothing learned yet. Characters sharing a key keep sharing it:
      * the shift is a function of the drawn position alone.
      */
+    @Synchronized
     fun shifted(keys: List<KeyCenter>, keyWidth: Float): List<KeyCenter> {
         if (isEmpty() || keyWidth <= 0f) return keys
         val out = FloatArray(2)

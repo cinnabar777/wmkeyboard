@@ -272,6 +272,10 @@ android {
             // `initWith` copies it from release, which is already false --
             // stated here because it is the reason this build type exists.
             isDebuggable = false
+            // Fast build type falls back to the debug signing key if no release key exists
+            // so testing builds for phones can be installed easily.
+            signingConfig = signingConfigs.findByName("release")?.takeIf { it.storeFile?.exists() == true }
+                ?: signingConfigs.findByName("debug")
             // Library modules declare only `debug` and `release`, so their
             // `release` variant is what a `fast` app links against.
             matchingFallbacks += "release"
