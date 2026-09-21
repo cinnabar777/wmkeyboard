@@ -1,4 +1,4 @@
-name: Build ARMv8 Lite APK
+name: Build ARMv8 Lite Release APK
 
 on:
   push:
@@ -17,7 +17,7 @@ env:
 
 jobs:
   build:
-    name: Build ARMv8 Lite Fast APK
+    name: Build ARMv8 Lite Release APK
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -34,20 +34,20 @@ jobs:
         with:
           build-scan-publish: false
 
-      - name: Build ARMv8 Lite Fast APKs
+      - name: Build ARMv8 Lite Release APKs (Debug Signed)
         run: |
-          ./gradlew assembleLiteEnFast assembleLiteIntlFast --stacktrace
+          ./gradlew assembleLiteEnRelease assembleLiteRelease --stacktrace
 
-      - name: Upload ARMv8 Lite En Fast APK
+      - name: Upload ARMv8 Lite En Release APK
         uses: actions/upload-artifact@v4
         with:
-          name: wmkeyboard-armv8-lite-en-fast
-          path: app/build/outputs/apk/liteEn/fast/*.apk
+          name: wmkeyboard-armv8-lite-en-release
+          path: app/build/outputs/apk/liteEn/release/*.apk
           retention-days: 14
 
-      - name: Upload ARMv8 Lite Intl Fast APK
+      - name: Upload ARMv8 Lite Intl Release APK
         uses: actions/upload-artifact@v4
         with:
-          name: wmkeyboard-armv8-lite-intl-fast
-          path: app/build/outputs/apk/liteIntl/fast/*.apk
+          name: wmkeyboard-armv8-lite-intl-release
+          path: app/build/outputs/apk/liteIntl/release/*.apk
           retention-days: 14

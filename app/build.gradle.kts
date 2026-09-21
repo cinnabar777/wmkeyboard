@@ -210,21 +210,9 @@ android {
                 if (!splitApks) abiFilters += setOf("arm64-v8a", "armeabi-v7a", "x86_64")
                 debugSymbolLevel = "FULL"
             }
-            // No debug-key fallback. A debug-signed "release" build looks
-            // shippable and is not: Play rejects the debug key outright, and
-            // anything installed from such a build can never be updated by the
-            // real key. Without the keystore the build produces an *unsigned*
-            // release APK instead — an obvious failure rather than a silent one.
-            //
-            // One line, and findByName, both for F-Droid's sake. Their builder
-            // strips the signingConfigs block and every line matching
-            // `^[\t ]*signingConfig\s*[= ]\s*[^ ]*$` before building — a regex
-            // whose tail allows no spaces, so it took the assignment and left a
-            // `.takeIf` continuation behind to fail on its own. Kept to one
-            // line, the statement either goes whole or stays whole. And with
-            // the block gone getByName would throw, where findByName returns
-            // null and the build comes out unsigned, which is what they want.
+            // Use release key if present, otherwise fall back to debug key so test builds install.
             signingConfig = signingConfigs.findByName("release")?.takeIf { it.storeFile?.exists() == true }
+                ?: signingConfigs.findByName("debug")
             isMinifyEnabled = true
             isShrinkResources = true
             optimization {

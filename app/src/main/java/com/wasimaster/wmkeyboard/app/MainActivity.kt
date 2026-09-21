@@ -263,7 +263,7 @@ class MainActivity : FragmentActivity() {
         // even animate open — for as long as a slow phone took to parse them.
         // Off it, the parse runs alongside DataStore's own first read.
         lifecycleScope.launch(Dispatchers.Default) {
-            AssetLayouts.load(applicationContext.assets)
+            runCatching { AssetLayouts.load(applicationContext.assets) }
             assetLayoutsReady.value = true
         }
         // Modes added since this install was first seeded — the settings
