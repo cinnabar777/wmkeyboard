@@ -36,7 +36,7 @@ jobs:
 
       - name: Build ARMv8 Lite Release APKs (Debug Signed)
         run: |
-          ./gradlew assembleLiteEnRelease assembleLiteRelease --stacktrace
+          ./gradlew assembleLiteEnRelease assembleLiteIntlRelease -Pwmkb.enablePlayStore=false -Pwmkb.enableGms=false --stacktrace
 
       - name: Upload ARMv8 Lite En Release APK
         uses: actions/upload-artifact@v4
