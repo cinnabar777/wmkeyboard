@@ -22,8 +22,14 @@ import org.junit.Test
  */
 class SettingsSearchIndexTest {
 
-    private val appDir = File("src/main/java/com/wasimaster/wmkeyboard/app")
-    private val valuesDir = File("src/main/res/values")
+    private val appDir = listOf(
+        File("src/main/java/com/wasimaster/wmkeyboard/app"),
+        File("app/src/main/java/com/wasimaster/wmkeyboard/app"),
+    ).first { it.exists() }
+    private val valuesDir = listOf(
+        File("src/main/res/values"),
+        File("app/src/main/res/values"),
+    ).first { it.exists() }
 
     /** The two files search is built from: the index, and the matcher. */
     private val searchFiles = listOf(

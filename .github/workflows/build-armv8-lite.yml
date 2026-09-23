@@ -13,7 +13,7 @@ concurrency:
 env:
   WMKB_ENABLE_PLAY_STORE: "false"
   WMKB_ENABLE_GMS: "false"
-  GRADLE_OPTS: -Dorg.gradle.jvmargs=-Xmx4g -Dorg.gradle.daemon=false
+  GRADLE_OPTS: -Dorg.gradle.jvmargs=-Xmx4g -Dkotlin.daemon.jvmargs=-Xmx4g -Dorg.gradle.daemon=false
 
 jobs:
   build:

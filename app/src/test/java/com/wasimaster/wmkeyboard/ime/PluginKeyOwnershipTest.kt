@@ -27,7 +27,12 @@ import org.junit.Test
 class PluginKeyOwnershipTest {
 
     private fun source(path: String): String {
-        val file = File(path)
+        val candidates = listOf(
+            File(path),
+            File(path.removePrefix("../")),
+            File("feature/ime/src/main/java/com/wasimaster/wmkeyboard/ime/" + path.substringAfter("wmkeyboard/ime/")),
+        )
+        val file = candidates.firstOrNull { it.isFile } ?: candidates.first()
         assertTrue("source not found at ${file.absolutePath}", file.isFile)
         return file.readText()
     }

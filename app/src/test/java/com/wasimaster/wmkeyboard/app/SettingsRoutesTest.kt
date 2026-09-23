@@ -21,7 +21,10 @@ import org.junit.Test
  */
 class SettingsRoutesTest {
 
-    private val appDir = File("src/main/java/com/wasimaster/wmkeyboard/app")
+    private val appDir = listOf(
+        File("src/main/java/com/wasimaster/wmkeyboard/app"),
+        File("app/src/main/java/com/wasimaster/wmkeyboard/app"),
+    ).first { it.exists() }
 
     private val appSources: List<File> by lazy {
         appDir.walkTopDown().filter { it.isFile && it.extension == "kt" }.toList()

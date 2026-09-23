@@ -78,18 +78,28 @@ internal class XmlSearchStrings(
 
     companion object {
         /** The strings the settings app's index reads: its own, and the two library modules it names. */
-        fun forApp(): XmlSearchStrings = XmlSearchStrings(
-            rClasses = listOf(
-                com.wasimaster.wmkeyboard.R::class.java,
-                com.wasimaster.wmkeyboard.common.R::class.java,
-                com.wasimaster.wmkeyboard.ime.R::class.java,
-            ),
-            valuesDirs = listOf(
-                File("src/main/res/values"),
-                File("src/full/res/values"),
-                File("../core/common/src/main/res/values"),
-                File("../feature/ime/src/main/res/values"),
-            ),
-        )
+        fun forApp(): XmlSearchStrings {
+            fun resolve(path: String): File {
+                val candidates = listOf(
+                    File(path),
+                    File("app", path),
+                    File(path.removePrefix("../")),
+                )
+                return candidates.firstOrNull { it.isDirectory } ?: File(path)
+            }
+            return XmlSearchStrings(
+                rClasses = listOf(
+                    com.wasimaster.wmkeyboard.R::class.java,
+                    com.wasimaster.wmkeyboard.common.R::class.java,
+                    com.wasimaster.wmkeyboard.ime.R::class.java,
+                ),
+                valuesDirs = listOf(
+                    resolve("src/main/res/values"),
+                    resolve("src/full/res/values"),
+                    resolve("../core/common/src/main/res/values"),
+                    resolve("../feature/ime/src/main/res/values"),
+                ),
+            )
+        }
     }
 }
