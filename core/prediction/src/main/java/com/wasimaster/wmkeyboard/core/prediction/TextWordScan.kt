@@ -72,11 +72,7 @@ object TextWordScan {
         val midSentence = LinkedHashMap<String, Int>()
     }
 
-    fun scan(
-        text: CharSequence,
-        enders: CharArray,
-        getDictionarySpelling: ((String) -> String?)? = null,
-    ): Result {
+    fun scan(text: CharSequence, enders: CharArray): Result {
         if (text.isEmpty()) return Result.EMPTY
         val tallies = LinkedHashMap<String, Tally>()
         val pairCounts = LinkedHashMap<Pair<String, String>, Int>()
@@ -175,28 +171,21 @@ object TextWordScan {
         }
 
         val words = tallies.values.map { tally ->
-            val dictSpelling = getDictionarySpelling?.invoke(tally.key)
-            val spelling = if (tally.midSentence.containsKey(tally.key)) {
-                // If lowercase surface was seen mid-sentence, conflict with uppercase resolves to lowercase.
-                tally.key
-            } else if (tally.midSentence.isNotEmpty()) {
-                // Seen mid-sentence with capitalization. Use dictionary spelling if available, else best surface.
-                if (dictSpelling != null) {
-                    dictSpelling
-                } else {
-                    var best: String? = null
-                    var bestCount = 0
-                    for ((surface, count) in tally.midSentence) {
-                        if (count > bestCount) {
-                            best = surface
-                            bestCount = count
-                        }
-                    }
-                    best ?: tally.key
+            val lowerCount = tally.midSentence[tally.key] ?: 0
+            var bestCap: String? = null
+            var bestCapCount = 0
+            for ((surface, count) in tally.midSentence) {
+                if (surface != tally.key && count > bestCapCount) {
+                    bestCap = surface
+                    bestCapCount = count
                 }
+            }
+
+            // Majority voting: capitalized surface wins mid-sentence only if strictly more frequent than lowercase.
+            val spelling = if (bestCap != null && bestCapCount > lowerCount) {
+                bestCap
             } else {
-                // Only seen at sentence start. Use dictionary spelling if available, else lowercase.
-                dictSpelling ?: tally.key
+                tally.key
             }
 
             Word(

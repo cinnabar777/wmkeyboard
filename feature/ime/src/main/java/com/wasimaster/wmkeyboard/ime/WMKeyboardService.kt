@@ -16348,33 +16348,6 @@ open class WMKeyboardService : InputMethodService() {
         glideShapes.learn(sample, entry.word)
     }
 
-    /**
-     * Generates a synthetic gesture sample tracing key centers for [word] if no gesture
-     * shapes exist for it yet.
-     */
-    private fun generateSyntheticGestureForWord(word: String) {
-        if (glideShapes.countFor(word) > 0) return
-        val keys = rawTouchKeys.ifEmpty { return }
-        val engine = suggestionEngine ?: return
-        val keyWidthPx = cachedRawKeyMapWidth.takeIf { it > 0f } ?: return
-        val rawMap = rawKeyMapFor(keys, keyWidthPx)
-        val points = ArrayList<GesturePoint>()
-        var at = 0
-        var t = 0L
-        while (at < word.length) {
-            val codePoint = word.codePointAt(at)
-            at += Character.charCount(codePoint)
-            val idx = rawMap.keyIndex(codePoint)
-            if (idx < 0) return
-            val kc = keys.getOrNull(idx) ?: return
-            points.add(GesturePoint(kc.x, kc.y, t))
-            t += 50L
-        }
-        if (points.size < 2) return
-        val shape = engine.glideShapeOf(points, keyWidthPx) ?: return
-        val sample = GlideShapeSample(shapeKeyFor(keys, keyWidthPx), shape)
-        glideShapes.learn(sample, word)
-    }
 
     /**
      * A decoded stroke: the words it could be, and whether the top two are a
@@ -26210,7 +26183,6 @@ open class WMKeyboardService : InputMethodService() {
 
     /** The last scan behind the Learn from text panel: every word and pair in the text it read. */
     private var learnScan: TextWordScan.Result = TextWordScan.Result.EMPTY
-    private var learnAutoPlan: LearnPlan? = null
     private var learnJob: Job? = null
     private var learnSeq = 0
 
@@ -26247,89 +26219,19 @@ open class WMKeyboardService : InputMethodService() {
             origin = fieldTextOrigin
             partial = !fieldTextComplete
         }
-        // Move the cursor to the beginning of the text as requested
-        if (ic != null && text.isNotEmpty()) {
-            val startPos = origin ?: 0
-            ic.finishComposingText()
-            ic.setSelection(startPos, startPos)
-            expectedSelStart = startPos
-            expectedSelEnd = startPos
-        }
 
         learnJob = serviceScope.launch {
-            val scan = withContext(Dispatchers.Default) {
-                TextWordScan.scan(
-                    text,
-                    SENTENCE_ENDERS,
-                    getDictionarySpelling = { key ->
-                        suggestionEngine?.displayOf(key)?.takeIf { it != key }
-                    },
-                )
-            }
+            val scan = withContext(Dispatchers.Default) { TextWordScan.scan(text, SENTENCE_ENDERS) }
             if (seq != learnSeq || _uiState.value.panel != PanelMode.LEARN_FROM_TEXT) return@launch
             learnScan = scan
             val settings = _uiState.value.settings
-            val blacklist = settings.suggestionSources.blacklist
-
-            // Separate verified/known words from unknown words
-            val knownWords = ArrayList<TextWordScan.Word>()
-            val unknownScanWords = ArrayList<TextWordScan.Word>()
-            for (word in scan.words) {
-                if (word.key.length in 2..UserLexicon.MAX_WORD_LENGTH && word.key !in blacklist) {
-                    if (isKnownWord(word.key)) {
-                        knownWords.add(word)
-                    } else {
-                        unknownScanWords.add(word)
-                    }
-                }
-            }
-
-            // Automatically learn known words and n-grams from the text into personal dictionary
-            if (learningAllowed) {
-                for (word in knownWords) {
-                    userLexicon.learnWord(
-                        word.spelling,
-                        count = word.count,
-                        caseEvidence = word.caseEvidence,
-                    )
-                    if (settings.suggestionStrip.learnFromTextSyntheticGestures) {
-                        generateSyntheticGestureForWord(word.spelling)
-                    }
-                }
-
-                val autoPlan = LearnFromText.plan(
-                    scan,
-                    renames = emptyMap(),
-                    isKnown = ::isKnownWord,
-                    blacklist = blacklist,
-                )
-                learnAutoPlan = autoPlan
-                for ((pair, count) in autoPlan.pairCounts) {
-                    repeat(count) { userLexicon.learnBigram(pair.first, pair.second) }
-                }
-                for ((triple, count) in autoPlan.tripleCounts) {
-                    repeat(count) { userLexicon.learnTrigram(triple.first, triple.second, triple.third) }
-                }
-                for ((skip, count) in autoPlan.skipCounts) {
-                    repeat(count) { userLexicon.learnSkip1gram(skip.first, skip.second) }
-                }
-                for ((skip2, count) in autoPlan.skip2Counts) {
-                    repeat(count) { userLexicon.learnSkip2gram(skip2.first, skip2.second) }
-                }
-            }
-
             val found = LearnFromText.sorted(
-                unknownScanWords.map { word ->
-                    LearnRow(
-                        key = word.key,
-                        spelling = word.spelling,
-                        count = word.count,
-                        seen = pendingLearn.sightings(word.key),
-                        start = word.firstStart,
-                        length = word.firstLength,
-                        caseEvidence = word.caseEvidence,
-                    )
-                },
+                LearnFromText.rowsFor(
+                    scan,
+                    isKnown = ::isKnownWord,
+                    blacklist = settings.suggestionSources.blacklist,
+                    sightings = pendingLearn::sightings,
+                ),
                 settings.suggestionStrip.learnFromTextSort,
             )
             updateLearnFromText {
@@ -26429,50 +26331,82 @@ open class WMKeyboardService : InputMethodService() {
         if (chosen.isEmpty()) return
         vibrate()
         val settings = _uiState.value.settings
-        for (row in chosen) {
+        val scan = learnScan
+        val blacklist = settings.suggestionSources.blacklist
+
+        // Prepare data on main thread
+        val isFirstBatch = ui.rows.size == LearnFromText.rowsFor(
+            scan,
+            isKnown = ::isKnownWord,
+            blacklist = blacklist,
+            sightings = pendingLearn::sightings,
+        ).take(LearnFromText.MAX_ROWS).size
+
+        val renames = LearnFromText.renamesOf(chosen)
+        val handAddBatch = chosen.map { row ->
             val spelling = row.finalSpelling.trim()
-            addWordsByHand(listOf(spelling to (row.edited != null || row.caseEvidence)))
-            if (row.count > 1 && learningAllowed) {
-                userLexicon.learnWord(spelling, count = row.count - 1, caseEvidence = (row.edited != null || row.caseEvidence))
+            spelling to (row.edited != null || row.caseEvidence)
+        }
+
+        // Run batch updates
+        addWordsByHand(handAddBatch)
+
+        if (learningAllowed) {
+            // Learn additional occurrences for user-added words
+            for (row in chosen) {
+                val spelling = row.finalSpelling.trim()
+                if (row.count > 1) {
+                    userLexicon.learnWord(
+                        spelling,
+                        count = row.count - 1,
+                        caseEvidence = (row.edited != null || row.caseEvidence),
+                    )
+                }
             }
-            if (settings.suggestionStrip.learnFromTextSyntheticGestures) {
-                generateSyntheticGestureForWord(spelling)
+
+            // Learn unigrams for known words in the scanned text once per scan session
+            if (isFirstBatch) {
+                for (word in scan.words) {
+                    if (word.key.length in 2..UserLexicon.MAX_WORD_LENGTH &&
+                        word.key !in blacklist &&
+                        isKnownWord(word.key)
+                    ) {
+                        userLexicon.learnWord(
+                            word.spelling,
+                            count = word.count,
+                            caseEvidence = word.caseEvidence,
+                        )
+                    }
+                }
             }
         }
-        var pairs = 0
+
+        var pairCount = 0
         if (settings.suggestionStrip.learnFromTextPairs && learningAllowed) {
             val plan = LearnFromText.plan(
-                learnScan,
-                renames = LearnFromText.renamesOf(chosen),
+                scan,
+                renames = renames,
                 isKnown = ::isKnownWord,
-                blacklist = settings.suggestionSources.blacklist,
+                blacklist = blacklist,
             )
-            val autoPlan = learnAutoPlan
             for ((pair, count) in plan.pairCounts) {
-                val alreadyLearned = autoPlan?.pairCounts?.get(pair) ?: 0
-                val delta = (count - alreadyLearned).coerceAtLeast(0)
-                repeat(delta) { userLexicon.learnBigram(pair.first, pair.second) }
+                repeat(count) { userLexicon.learnBigram(pair.first, pair.second) }
             }
             for ((triple, count) in plan.tripleCounts) {
-                val alreadyLearned = autoPlan?.tripleCounts?.get(triple) ?: 0
-                val delta = (count - alreadyLearned).coerceAtLeast(0)
-                repeat(delta) { userLexicon.learnTrigram(triple.first, triple.second, triple.third) }
+                repeat(count) { userLexicon.learnTrigram(triple.first, triple.second, triple.third) }
             }
             for ((skip, count) in plan.skipCounts) {
-                val alreadyLearned = autoPlan?.skipCounts?.get(skip) ?: 0
-                val delta = (count - alreadyLearned).coerceAtLeast(0)
-                repeat(delta) { userLexicon.learnSkip1gram(skip.first, skip.second) }
+                repeat(count) { userLexicon.learnSkip1gram(skip.first, skip.second) }
             }
             for ((skip2, count) in plan.skip2Counts) {
-                val alreadyLearned = autoPlan?.skip2Counts?.get(skip2) ?: 0
-                val delta = (count - alreadyLearned).coerceAtLeast(0)
-                repeat(delta) { userLexicon.learnSkip2gram(skip2.first, skip2.second) }
+                repeat(count) { userLexicon.learnSkip2gram(skip2.first, skip2.second, skip2.third) }
             }
-            pairs = plan.pairs.size
+            pairCount = plan.pairs.size
         }
-        val added = chosen.mapTo(HashSet()) { it.key }
+
+        val addedKeys = chosen.mapTo(HashSet()) { it.key }
         updateLearnFromText {
-            it.copy(rows = it.rows.filterNot { row -> row.key in added }, result = LearnResult(chosen.size, pairs))
+            it.copy(rows = it.rows.filterNot { row -> row.key in addedKeys }, result = LearnResult(chosen.size, pairCount))
         }
         refreshSuggestions()
     }

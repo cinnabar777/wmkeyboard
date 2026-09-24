@@ -6923,12 +6923,6 @@ data class SuggestionStripSettings(
      * chip; on by default.
      */
     val learnFromTextPairs: Boolean = true,
-    /**
-     * Whether Learn from text generates and saves a synthetic gesture string
-     * for any learned word that does not already have gesture data.
-     * Off by default.
-     */
-    val learnFromTextSyntheticGestures: Boolean = false,
 ) {
     /** Whether the fixed-spelling map applies to [langId]. */
     fun spellingMapEnabledFor(langId: String): Boolean = langId !in spellingMapOffLangs
@@ -7400,7 +7394,6 @@ class SettingsRepository(private val context: Context) {
         private val DELETE_EDITS_IMPORTED_LISTS = booleanPreferencesKey("delete_edits_imported_lists")
         private val LEARN_FROM_TEXT_SORT = stringPreferencesKey("learn_from_text_sort")
         private val LEARN_FROM_TEXT_PAIRS = booleanPreferencesKey("learn_from_text_pairs")
-        private val LEARN_FROM_TEXT_SYNTHETIC_GESTURES = booleanPreferencesKey("learn_from_text_synthetic_gestures")
         private val INLINE_EMOJI_SEARCH = booleanPreferencesKey("inline_emoji_search")
         private val INLINE_AUTOFILL = booleanPreferencesKey("inline_autofill")
         private val GESTURE_TYPING = booleanPreferencesKey("gesture_typing")
@@ -9079,8 +9072,6 @@ class SettingsRepository(private val context: Context) {
                     ?: defaults.suggestionStrip.learnFromTextSort,
                 learnFromTextPairs = p[LEARN_FROM_TEXT_PAIRS]
                     ?: defaults.suggestionStrip.learnFromTextPairs,
-                learnFromTextSyntheticGestures = p[LEARN_FROM_TEXT_SYNTHETIC_GESTURES]
-                    ?: defaults.suggestionStrip.learnFromTextSyntheticGestures,
             ),
             longPressDelayMs = p[LONG_PRESS_DELAY] ?: defaults.longPressDelayMs,
             keyRepeat = KeyRepeatSettings(
@@ -13493,9 +13484,6 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setLearnFromTextPairs(value: Boolean) =
         editPrefs { it[LEARN_FROM_TEXT_PAIRS] = value }
-
-    suspend fun setLearnFromTextSyntheticGestures(value: Boolean) =
-        editPrefs { it[LEARN_FROM_TEXT_SYNTHETIC_GESTURES] = value }
 
     suspend fun setContactSuggestions(value: Boolean) =
         editPrefs { it[CONTACT_SUGGESTIONS] = value }

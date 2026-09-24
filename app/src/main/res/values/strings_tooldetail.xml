@@ -897,7 +897,4 @@
     <string name="tooldetail_media_wiki_hint">https://commons.wikimedia.org</string>
     <string name="tooldetail_hold_nothing_value">Does nothing</string>
     <string name="tooldetail_hold_nothing_subtitle">The hold only vibrates. Nothing opens and nothing runs.</string>
-    <string name="tooldetail_learn_from_text_group">Learn from text</string>
-    <string name="tooldetail_learn_from_text_synthetic_gestures_title">Synthetic gesture strings</string>
-    <string name="tooldetail_learn_from_text_synthetic_gestures_subtitle">Add synthetic gesture data for learned words that do not have gesture data</string>
 </resources>
