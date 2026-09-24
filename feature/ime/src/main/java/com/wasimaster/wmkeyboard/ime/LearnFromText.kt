@@ -141,7 +141,8 @@ object LearnFromText {
         fun ok(key: String) = verdicts.getOrPut(key) { key !in blacklist && isKnown(key) }
 
         val pairs = LinkedHashMap<Pair<String, String>, Int>()
-        for (((a, b), count) in scan.pairCounts) {
+        for ((pairKey, count) in scan.pairCounts) {
+            val (a, b) = pairKey
             val x = map(a)
             val y = map(b)
             if (ok(x) && ok(y)) {
@@ -151,7 +152,8 @@ object LearnFromText {
         }
 
         val triples = LinkedHashMap<Triple<String, String, String>, Int>()
-        for (((a, b, c), count) in scan.tripleCounts) {
+        for ((tripleKey, count) in scan.tripleCounts) {
+            val (a, b, c) = tripleKey
             val x = map(a)
             val y = map(b)
             val z = map(c)
@@ -162,7 +164,8 @@ object LearnFromText {
         }
 
         val skips = LinkedHashMap<Pair<String, String>, Int>()
-        for (((a, b), count) in scan.skipCounts) {
+        for ((skipKey, count) in scan.skipCounts) {
+            val (a, b) = skipKey
             val x = map(a)
             val y = map(b)
             if (ok(x) && ok(y)) {
@@ -172,7 +175,8 @@ object LearnFromText {
         }
 
         val skips2 = LinkedHashMap<Pair<String, String>, Int>()
-        for (((a, b), count) in scan.skip2Counts) {
+        for ((skip2Key, count) in scan.skip2Counts) {
+            val (a, b) = skip2Key
             val x = map(a)
             val y = map(b)
             if (ok(x) && ok(y)) {
