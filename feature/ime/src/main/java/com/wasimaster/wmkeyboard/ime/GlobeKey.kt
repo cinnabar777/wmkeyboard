@@ -29,7 +29,7 @@ internal fun globeTapGuarded(now: Long, lastTypedAt: Long, guardMs: Int): Boolea
  */
 internal fun KeyAction.typesIntoField(): Boolean = when (this) {
     KeyAction.Text, is KeyAction.KeymanKey, KeyAction.Space, KeyAction.Delete,
-    KeyAction.ForwardDelete, KeyAction.Enter, KeyAction.Newline,
+    KeyAction.ForwardDelete, KeyAction.Enter, KeyAction.Newline, KeyAction.EditorAction,
     -> true
     else -> false
 }

@@ -92,6 +92,21 @@ sealed interface KeyAction {
      */
     @Serializable @SerialName("newline") data object Newline : KeyAction
 
+    /**
+     * Fires the field's own action — Send, Search, Go, Done — whatever the shift
+     * key says: the mirror of [Newline].
+     *
+     * The enter key's hold offers it while a shift the user put up has turned
+     * the key into a line break (`LayoutBehaviorSettings.shiftEnterNewline`).
+     * The key's corner already shows the action it traded away, and a hold
+     * that typed yet another line break left no way to send short of dropping
+     * the shift first. Not [Enter]: that one reads the shift, which is the
+     * whole reason it breaks the line.
+     *
+     * In a field that declares no action it does what an unshifted Enter does.
+     */
+    @Serializable @SerialName("editor_action") data object EditorAction : KeyAction
+
     /** Steps LETTERS → SYMBOLS → SYMBOLS_SHIFTED → SYMBOLS. */
     @Serializable @SerialName("symbols") data object Symbols : KeyAction
 
@@ -419,6 +434,8 @@ fun KeyAction.fallbackLabel(): String = when (this) {
     // reaches here. The alternates popup does: the entry the enter key offers
     // carries the icon, but one an author wrote by hand may not.
     KeyAction.Newline -> "⏎"
+    // Drawn from the field's action slot when the enter key offers it.
+    KeyAction.EditorAction -> "↵"
     KeyAction.None -> ""
     is KeyAction.Mod -> when (key) {
         ModifierKey.CTRL -> "Ctrl"

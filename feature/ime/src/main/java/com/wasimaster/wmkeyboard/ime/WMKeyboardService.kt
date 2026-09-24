@@ -6192,7 +6192,7 @@ open class WMKeyboardService : InputMethodService() {
         val frameId = when (key.action) {
             KeyAction.Space -> "K_SPACE"
             KeyAction.Delete -> "K_BKSP"
-            KeyAction.Enter, KeyAction.Newline -> "K_ENTER"
+            KeyAction.Enter, KeyAction.Newline, KeyAction.EditorAction -> "K_ENTER"
             else -> null
         }
         val frame = frameId?.let { currentLayout(_uiState.value).keymanFrames[it] }
@@ -6326,6 +6326,9 @@ open class WMKeyboardService : InputMethodService() {
             // The enter key's long-press alternate, and any layout that binds a
             // newline key of its own: a line break, never the field's action.
             KeyAction.Newline -> onNewline()
+            // The enter key's hold while a shift has turned the key into a line
+            // break: the field's action, which the shift would otherwise block.
+            KeyAction.EditorAction -> onEditorAction()
             KeyAction.Symbols -> toggleSymbols()
             KeyAction.Letters -> _uiState.update {
                 it.copy(layoutMode = LayoutMode.LETTERS, fnLocked = false, fnReturn = null)
@@ -10118,8 +10121,11 @@ open class WMKeyboardService : InputMethodService() {
      * event's meta state. Null for a tap on the on-screen Enter, which asks the
      * ui state instead. They are deliberately separate: a physical shift is
      * held, not latched, so it never appears in [KeyboardUiState.shiftState].
+     *
+     * [ignoreShift] leaves Shift+Enter's override out entirely, for the one
+     * caller that exists to get past it ([onEditorAction]).
      */
-    private fun onEnter(hardwareShift: Boolean? = null) {
+    private fun onEnter(hardwareShift: Boolean? = null, ignoreShift: Boolean = false) {
         val state = _uiState.value
         // Enter belongs to whichever keyboard-owned field has the keys, and
         // never to the app behind the panel.
@@ -10150,7 +10156,7 @@ open class WMKeyboardService : InputMethodService() {
         // box declares Send, so this is the only way to put a line break in a
         // message without sending it. The key draws the newline glyph while the
         // override is live (see enterActionFor), so it still does what it shows.
-        val forceNewline = state.settings.layoutBehavior.shiftEnterNewline &&
+        val forceNewline = !ignoreShift && state.settings.layoutBehavior.shiftEnterNewline &&
             (hardwareShift ?: state.softShiftForcesNewline)
         // Same decoder that labels the key, so Enter always does what the
         // key is drawing — including an app's own actionId behind a custom
@@ -10227,6 +10233,20 @@ open class WMKeyboardService : InputMethodService() {
      * expansion that has parked the caret inside itself swallows the break
      * rather than breaking the text it just inserted.
      */
+    /**
+     * [KeyAction.EditorAction]: Enter as if no shift were up, which is the
+     * enter key's hold while Shift+Enter's override has the key.
+     *
+     * The shift the user put up to break lines goes down with it. It was held
+     * for the length of the message, and the message is gone: kept, it would
+     * turn the next Enter in the emptied box into a line break too.
+     */
+    private fun onEditorAction() {
+        val shiftForNewlines = _uiState.value.softShiftForcesNewline
+        onEnter(ignoreShift = true)
+        if (shiftForNewlines) consumeShift()
+    }
+
     private fun onNewline() {
         val ic = currentInputConnection ?: return
         recordStat { onSeparator(System.currentTimeMillis(), SystemClock.uptimeMillis()) }

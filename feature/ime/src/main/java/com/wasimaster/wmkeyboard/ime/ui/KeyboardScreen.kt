@@ -841,6 +841,39 @@ private fun enterHintSlot(state: KeyboardUiState): String? {
 }
 
 /**
+ * The enter key with its hold matched to its face: while a shift has turned the
+ * key into a line break ([enterHintSlot]), the line break its hold offers
+ * becomes the field's own action instead.
+ *
+ * The hold is the only other way to reach what the key traded away, and the
+ * corner hint already promises it there. Offering a second line break in its
+ * place left Send unreachable until the shift went down, which the corner said
+ * it would not be.
+ *
+ * Swapped here rather than in the layout rewrite that adds the line break:
+ * that one is deliberately not keyed on the shift, so a press of it does not
+ * rebuild the grid, while this runs with the key's face on every shift press
+ * already.
+ */
+private fun Key.withEnterHoldFor(state: KeyboardUiState): Key {
+    if (action != KeyAction.Enter) return this
+    val field = state.enterAction
+    if (field == EnterAction.DEFAULT || state.effectiveEnterAction != EnterAction.DEFAULT) return this
+    val index = actionAlternates.indexOfFirst { it.action == KeyAction.Newline }
+    if (index < 0) return this
+    val fieldAction = KeyAlternate(
+        action = KeyAction.EditorAction,
+        // An app's own wording is text, and it is the whole of what the key
+        // would say, so the entry says it too.
+        label = state.enterActionLabel.takeIf { field == EnterAction.CUSTOM }.orEmpty(),
+        // The glyph the key's face would wear, handed over as a slot: the popup
+        // has no field to read one from (see [AlternateAction]).
+        icon = IconDefaults.enterActionSlot(field),
+    )
+    return copy(actionAlternates = actionAlternates.toMutableList().apply { this[index] = fieldAction })
+}
+
+/**
  * What a screen reader says for one key, before it is worded.
  *
  * Held as a resource id rather than as finished text so that [keyVisual] stays
@@ -12990,7 +13023,7 @@ internal fun keyVisual(
         else -> palette.keyText
     }
     return KeyVisual(
-        key = key,
+        key = key.withEnterHoldFor(state),
         label = displayLabel(key, state),
         spoken = spokenLabel(key, state),
         latch = latch,
@@ -19101,6 +19134,9 @@ private fun AlternateAction(
         KeyAction.Delete -> IconSlots.KEY_BACKSPACE
         KeyAction.ForwardDelete -> IconSlots.KEY_FORWARD_DELETE
         KeyAction.Enter, KeyAction.Newline -> IconSlots.KEY_ENTER
+        // The field's action, whose glyph the enter key's swap hands over in
+        // `icon` (see [withEnterHoldFor]); a hand-written one gets the return.
+        KeyAction.EditorAction -> alternate.icon ?: IconSlots.KEY_ENTER
         KeyAction.LanguageSwitch -> IconSlots.KEY_GLOBE
         KeyAction.InputMethodPicker, is KeyAction.SwitchInputMethod -> IconSlots.KEY_INPUT_METHOD_PICKER
         KeyAction.Emoji -> IconSlots.KEY_EMOJI
@@ -19113,7 +19149,7 @@ private fun AlternateAction(
     val spoken = alternate.label.ifBlank {
         tool?.let { toolLabel(it) }
             ?: editOp?.let { stringResource(textEditDescription(it)) }
-            ?: alternateActionSpoken(action)?.let { stringResource(it) }
+            ?: (editorActionSpoken(alternate) ?: alternateActionSpoken(action))?.let { stringResource(it) }
             .orEmpty()
     }
     // A text-editing alternate (Page Up on a held Home) draws its operation's
@@ -19155,6 +19191,26 @@ private fun AlternateAction(
 
 /** What an unlabelled space alternate draws: the keycap legend for the space bar. */
 private const val AlternateSpaceGlyph = "␣"
+
+/**
+ * The name of a [KeyAction.EditorAction] entry, read off the slot it draws:
+ * "Send" rather than "Enter", the same word the enter key itself is read out
+ * as in that field ([enterActionSpoken]). Null for any other entry.
+ */
+private fun editorActionSpoken(alternate: KeyAlternate): Int? =
+    if (alternate.action != KeyAction.EditorAction) {
+        null
+    } else {
+        when (alternate.icon) {
+            IconSlots.KEY_ENTER_SEARCH -> R.string.ime_enter_search
+            IconSlots.KEY_ENTER_SEND -> R.string.ime_enter_send
+            IconSlots.KEY_ENTER_GO -> R.string.ime_enter_go
+            IconSlots.KEY_ENTER_NEXT -> R.string.ime_enter_next
+            IconSlots.KEY_ENTER_PREVIOUS -> R.string.ime_enter_previous
+            IconSlots.KEY_ENTER_DONE -> R.string.ime_enter_done
+            else -> R.string.ime_enter_default
+        }
+    }
 
 /**
  * The spoken name of an action alternate that draws from an icon slot — the
