@@ -672,6 +672,16 @@ open class WMKeyboardService : InputMethodService() {
      * nothing new returns at once; one with changes copies its maps under its
      * own lock and encodes and writes the copy outside it.
      */
+    /**
+     * Writes the clipboard history on [persistDispatcher]. The store encodes
+     * its whole history on every save, and the listener that calls this runs
+     * on the main thread for every copy — including the ones a paired computer
+     * pushes while the user is typing.
+     */
+    private fun saveClipboardSoon() {
+        serviceScope.launch(persistDispatcher) { clipboardStore.save() }
+    }
+
     private fun saveLearningStores() {
         userLexicon.save()
         pendingLearn.save()
@@ -2488,7 +2498,7 @@ open class WMKeyboardService : InputMethodService() {
                     val added = clipboardStore.addImage(
                         copied, imageMime, source, sensitive = flaggedSensitive,
                     )
-                    clipboardStore.save()
+                    saveClipboardSoon()
                     _uiState.update { it.copy(clipboardItems = clipboardStore.items()) }
                     if (added != null && state.settings.clipboard.suggestRecent) {
                         showClipboardSuggestion(added)
@@ -2515,7 +2525,7 @@ open class WMKeyboardService : InputMethodService() {
         } else {
             clipboardStore.add(text, source, sensitive = sensitive)
         }
-        clipboardStore.save()
+        saveClipboardSoon()
         _uiState.update { it.copy(clipboardItems = clipboardStore.items()) }
         // A secret is never offered as a strip chip: the whole point of the chip
         // is that it sits in view above the keys while you type something else.
@@ -2644,7 +2654,7 @@ open class WMKeyboardService : InputMethodService() {
 
                     if (copied != null) {
                         val added = clipboardStore.addImage(copied, mimeType, "System UI")
-                        clipboardStore.save()
+                        saveClipboardSoon()
                         _uiState.update { it.copy(clipboardItems = clipboardStore.items()) }
                         if (added != null && state.settings.clipboard.suggestRecent) {
                             showClipboardSuggestion(added)
@@ -2744,7 +2754,7 @@ open class WMKeyboardService : InputMethodService() {
             added = true
         }
         if (!added) return
-        clipboardStore.save()
+        saveClipboardSoon()
         _uiState.update { it.copy(clipboardItems = clipboardStore.items()) }
     }
 
@@ -2850,7 +2860,7 @@ open class WMKeyboardService : InputMethodService() {
                 clipboardStore.setLinkPreview(clip.id, preview)
                 _uiState.update { it.copy(clipboardItems = clipboardStore.items()) }
             }
-            clipboardStore.save()
+            saveClipboardSoon()
         }
     }
 
@@ -3181,7 +3191,7 @@ open class WMKeyboardService : InputMethodService() {
                 if (settings.clipboard.sensitiveHandling == SensitiveClipHandling.KEEP &&
                     clipboardStore.clearSensitive()
                 ) {
-                    clipboardStore.save()
+                    saveClipboardSoon()
                     _uiState.update { it.copy(clipboardItems = clipboardStore.items()) }
                 }
                 // Flipping pinned-first/last re-sorts the store, so refresh the
@@ -3245,7 +3255,7 @@ open class WMKeyboardService : InputMethodService() {
                 if (linkPreviewsEnabled == true && !settings.clipboard.linkPreviews) {
                     linkPreviewJob?.cancel()
                     clipboardStore.clearLinkPreviews()
-                    clipboardStore.save()
+                    saveClipboardSoon()
                     _uiState.update { it.copy(clipboardItems = clipboardStore.items()) }
                 }
                 linkPreviewsEnabled = settings.clipboard.linkPreviews
@@ -5959,8 +5969,10 @@ open class WMKeyboardService : InputMethodService() {
         // Blocking, and on the same queue as the hide's saves: the process is
         // going, so this waits for a hide's save still in flight and then
         // writes whatever changed since.
-        runBlocking(persistDispatcher) { saveLearningStores() }
-        clipboardStore.save()
+        runBlocking(persistDispatcher) {
+            saveLearningStores()
+            clipboardStore.save()
+        }
         micBlockWatcher.stop()
         voiceEngine.cancel()
         whisperRecorder?.let { rec -> whisperRecorder = null; runCatching { rec.stop() } }
@@ -18821,7 +18833,7 @@ open class WMKeyboardService : InputMethodService() {
                         size = 0,
                         sourceApp = event.deviceName,
                     )
-                    clipboardStore.save()
+                    saveClipboardSoon()
                     _uiState.update { it.copy(clipboardItems = clipboardStore.items()) }
                 }
                 if (state.panel == PanelMode.KDE_CONNECT) kdeNotice(getString(R.string.ime_kde_notice_file_received, event.fileName))
@@ -29316,7 +29328,7 @@ open class WMKeyboardService : InputMethodService() {
 
         if (pasted != null) {
             clipboardStore.remove(pasted.id)
-            clipboardStore.save()
+            saveClipboardSoon()
             _uiState.update { it.copy(clipboardItems = clipboardStore.items()) }
         }
         if (!clearPrimary) return
@@ -29539,7 +29551,7 @@ open class WMKeyboardService : InputMethodService() {
     private fun commitImageClip(item: com.wasimaster.wmkeyboard.core.clipboard.ClipItem) {
         val file = item.imagePath?.let(::File)?.takeIf { it.exists() } ?: run {
             clipboardStore.remove(item.id)
-            clipboardStore.save()
+            saveClipboardSoon()
             _uiState.update { it.copy(clipboardItems = clipboardStore.items()) }
             return
         }
@@ -29726,7 +29738,7 @@ open class WMKeyboardService : InputMethodService() {
 
     fun onClipboardPin(item: com.wasimaster.wmkeyboard.core.clipboard.ClipItem) {
         clipboardStore.setPinned(item.id, !item.pinned)
-        clipboardStore.save()
+        saveClipboardSoon()
         _uiState.update { it.copy(clipboardItems = clipboardStore.items()) }
     }
 
@@ -29743,12 +29755,12 @@ open class WMKeyboardService : InputMethodService() {
     fun onClipboardDelete(item: com.wasimaster.wmkeyboard.core.clipboard.ClipItem) {
         if (!_uiState.value.settings.clipboard.undoDelete) {
             clipboardStore.remove(item.id)
-            clipboardStore.save()
+            saveClipboardSoon()
             _uiState.update { it.copy(clipboardItems = clipboardStore.items()) }
             return
         }
         val removed = clipboardStore.detach(item.id) ?: return
-        clipboardStore.save()
+        saveClipboardSoon()
         _uiState.update { state ->
             state.copy(
                 clipboardItems = clipboardStore.items(),
@@ -29771,7 +29783,7 @@ open class WMKeyboardService : InputMethodService() {
         clipUndoJob = null
         vibrate()
         undo.items.forEach { clipboardStore.reattach(it) }
-        clipboardStore.save()
+        saveClipboardSoon()
         _uiState.update { it.copy(clipboardItems = clipboardStore.items(), clipboardUndo = null) }
     }
 
@@ -29879,7 +29891,7 @@ open class WMKeyboardService : InputMethodService() {
         }
         val saved = clipboardStore.editText(edit.id, edit.draft)
             ?: clipboardStore.add(edit.draft)
-        clipboardStore.save()
+        saveClipboardSoon()
         _uiState.update { state ->
             state.copy(
                 clipEdit = null,

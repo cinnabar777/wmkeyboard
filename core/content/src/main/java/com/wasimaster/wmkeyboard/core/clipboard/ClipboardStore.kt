@@ -1,5 +1,6 @@
 package com.wasimaster.wmkeyboard.core.clipboard
 
+import com.wasimaster.wmkeyboard.core.util.SnapshotFile
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -201,6 +202,9 @@ class ClipboardStore(
     private val json = Json { ignoreUnknownKeys = true }
     private var nextId = 1L
 
+    /** Where [save] writes, so the encode and the write can run off the caller's thread. */
+    private val snapshotFile = storageFile?.let(::SnapshotFile)
+
     companion object {
         const val DEFAULT_EXPIRY_MILLIS = 24L * 60 * 60 * 1000 // 1 day
         const val DEFAULT_MAX_ITEMS = 100
@@ -221,6 +225,9 @@ class ClipboardStore(
      */
     @Synchronized
     fun reload() {
+        // A save drawn before this describes the list being thrown away; it
+        // must not land over whatever the settings app left in the file.
+        snapshotFile?.supersede()
         items.clear()
         nextId = 1L
         restore()
@@ -572,13 +579,17 @@ class ClipboardStore(
     @Synchronized
     fun search(query: String): List<ClipItem> = items().filter { it.matchesQuery(query) }
 
-    @Synchronized
+    /**
+     * Writes the history. The list is copied under the store's lock; the
+     * encoding — the whole history, every time, text and markup included —
+     * and the write happen outside it, so the caller can run this on any
+     * thread and the store stays usable meanwhile. Saves on different
+     * threads land in the order their copies were taken ([SnapshotFile]).
+     */
     fun save() {
-        val file = storageFile ?: return
-        runCatching {
-            file.parentFile?.mkdirs()
-            file.writeText(json.encodeToString(Snapshot(items.toList())))
-        }
+        val file = snapshotFile ?: return
+        val (ticket, snapshot) = synchronized(this) { file.ticket() to Snapshot(items.toList()) }
+        file.write(ticket) { json.encodeToString(snapshot) }
     }
 
     private fun prune(now: Long) {
