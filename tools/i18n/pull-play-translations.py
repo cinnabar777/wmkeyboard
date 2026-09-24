@@ -49,6 +49,11 @@ PLACEHOLDER = re.compile(r"%(?:(\d+)\$)?([a-zA-Z])")
 # Gemini sometimes emits "% s", which is not a valid conversion and throws.
 MALFORMED = re.compile(r"%[ \t]+[a-zA-Z]")
 DASHES = re.compile(r"[–—]")
+# Characters XML 1.0 does not allow anywhere in a document, escaped or not.
+# aapt2 hands back whatever Play stored, and 0.5.12 carried four Icelandic
+# values that were nothing but U+0000, which failed every build at
+# mergeResources with "An invalid XML character (Unicode: 0x0)".
+FORBIDDEN = re.compile("[\x00-\x08\x0b\x0c\x0e-\x1f\ud800-\udfff\ufffe\uffff]")
 
 
 def find_aapt2() -> str:
@@ -186,6 +191,13 @@ def main() -> int:
                 continue
             if args.locale and locale not in args.locale:
                 continue
+            bad = list(_forbidden(value))
+            if bad:
+                # A plurals missing one of its quantities throws at runtime,
+                # so one broken item takes the whole plurals back to English.
+                for detail in bad:
+                    dropped.append(f"{locale}/{key}{detail}")
+                continue
             unsafe = False
             if default is not None:
                 for severity, detail in _compare(default, value):
@@ -205,6 +217,7 @@ def main() -> int:
         print(f"  skipped {skipped_untranslatable} keys marked translatable=false")
 
     total = 0
+    written: list[Path] = []
     for module in sorted(buckets):
         for locale in sorted(buckets[module]):
             rows = sorted(buckets[module][locale], key=lambda r: r[1])
@@ -215,6 +228,7 @@ def main() -> int:
                 continue
             out.parent.mkdir(parents=True, exist_ok=True)
             out.write_text(_render(rows), encoding="utf-8")
+            written.append(out)
 
     print(f"\n{total} translated resources across "
           f"{len({l for m in buckets for l in buckets[m]})} locales"
@@ -232,7 +246,43 @@ def main() -> int:
     report("warnings (kept; the translation is safe but lost an argument)",
            warnings, 15)
     report("DROPPED (would crash; these fall back to English)", dropped, 25)
+
+    leaks = _scan_written(written)
+    if leaks:
+        print(f"\nFAILED: {len(leaks)} character(s) XML 1.0 forbids reached "
+              "the written files; aapt will reject them:", file=sys.stderr)
+        for line in leaks:
+            print(f"  {line}", file=sys.stderr)
+        return 1
     return 0
+
+
+def _forbidden(value):
+    """Yield a detail line per string or plural item holding a character
+    XML 1.0 forbids."""
+    items = sorted(value.items()) if isinstance(value, dict) else [(None, value)]
+    for quantity, text in items:
+        found = sorted({f"U+{ord(c):04X}" for c in FORBIDDEN.findall(text)})
+        if found:
+            where = f" [{quantity}]" if quantity else ""
+            yield f"{where} holds {', '.join(found)}, which XML 1.0 forbids"
+
+
+def _scan_written(paths):
+    """Re-read every strings.xml this run wrote and list any forbidden
+    character still in it, so a gap in the per-value guard fails loudly
+    here instead of at the next build's mergeResources."""
+    leaks = []
+    for path in paths:
+        text = path.read_text(encoding="utf-8")
+        # Not splitlines(): it also breaks on U+000B, U+000C and U+001C..1E,
+        # which are exactly what this looks for.
+        for m in FORBIDDEN.finditer(text):
+            lineno = text.count("\n", 0, m.start()) + 1
+            col = m.start() - text.rfind("\n", 0, m.start())
+            leaks.append(f"{path.relative_to(REPO)}:{lineno}:{col} "
+                         f"U+{ord(m.group()):04X}")
+    return leaks
 
 
 def _compare(default, value):
