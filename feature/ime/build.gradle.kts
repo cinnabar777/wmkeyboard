@@ -53,6 +53,11 @@ android {
     // tests. 2g matches :app, where the same ceiling was found the hard way —
     // see the EOFException note there.
     testOptions.unitTests.all { it.maxHeapSize = "2g" }
+    // Without the merged resources Robolectric knows no string at all, and
+    // composables under test now resolve real ones: SearchQueryText reaches
+    // PublishFieldSelection, which reads :core:common's cut/copy/paste labels.
+    // Costs an AAPT2 link per test run of this module; :app keeps it off.
+    testOptions.unitTests.isIncludeAndroidResources = true
 }
 
 // Compose compiler skippability/stability report, on demand:
