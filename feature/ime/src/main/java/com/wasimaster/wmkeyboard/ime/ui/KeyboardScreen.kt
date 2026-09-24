@@ -164,6 +164,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.MutableLongState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.produceState
@@ -13958,42 +13959,7 @@ private fun KeyRows(
     // finished strokes waiting for recognition come back from service state.
     var hwActiveStroke by remember { mutableStateOf<List<Offset>>(emptyList()) }
 
-    // Touch-exploration pass-through: while a screen reader is running and the
-    // user picked that mode, the app's own accessibility service hands the key
-    // grid's rectangle back to the keyboard so its gestures (spacebar cursor
-    // slide, backspace word swipe, glide, handwriting) still see real touches.
-    //
-    // Only the grid, never the whole window: the suggestion strip, the toolbar
-    // and every panel stay outside it, so TalkBack keeps exploring those
-    // normally. A panel replacing the keys takes this composable with it,
-    // which retracts the carve-out on its own.
-    val passthroughKeys = LocalTouchExploration.current &&
-        state.settings.accessibility.screenReader == ScreenReaderMode.PASSTHROUGH &&
-        LocalPassthroughService.current
-    val hostView = LocalView.current
-    // A board drawn as a picture in the settings app (the theme editor, the
-    // layout cards) is not the keyboard: it must neither carve a pass-through
-    // hole in the app nor clear the one the real keyboard holds, which lives in
-    // the same process and publishes to the same place.
-    val ownsPassthrough = !LocalKeyboardPreviewHost.current
-    LaunchedEffect(passthroughKeys, boxOrigin, boxSize, hostView, ownsPassthrough) {
-        if (!ownsPassthrough) return@LaunchedEffect
-        if (!passthroughKeys || boxSize.width == 0 || boxSize.height == 0) {
-            KeyboardPassthrough.publishRegion(null)
-        } else {
-            // boxOrigin is relative to the compose root (the IME's input
-            // view); the framework wants display coordinates.
-            val origin = IntArray(2).also { hostView.getLocationOnScreen(it) }
-            val left = origin[0] + boxOrigin.x.roundToInt()
-            val top = origin[1] + boxOrigin.y.roundToInt()
-            KeyboardPassthrough.publishRegion(
-                android.graphics.Rect(left, top, left + boxSize.width, top + boxSize.height),
-            )
-        }
-    }
-    DisposableEffect(ownsPassthrough) {
-        onDispose { if (ownsPassthrough) KeyboardPassthrough.publishRegion(null) }
-    }
+    KeyGridPassthrough(state, boxOrigin, boxSize)
 
     // Drives the age fade. Keyed on `visible`, which flips twice a stroke, so
     // this restarts when a glide begins and ends — not when the finger moves.
@@ -15181,68 +15147,7 @@ private fun KeyRows(
             }
             // Hoisted out of the render loop so the digit row resolves in the
             // same pass as the body rows below; null when it is not shown.
-            val extraRow = if (numberRow) {
-                // Follows the same guard as the pad itself, so a search box
-                // opened over a number field gets its digit row back.
-                val kind = if (numericPadActive(state)) state.fieldKind else FieldKind.TEXT
-                val authored = state.authoredNumberRow(state.layoutMode)
-                // The digit row tracks the active layer (and, optionally, shift)
-                // so the same slot serves more symbols the deeper the user goes:
-                // digits on letters/symbols-1, extra symbols on symbols-2, and —
-                // when the option is on — the symbol fill row while shift is held
-                // on the letters layer.
-                val shiftSymbols = state.settings.layoutBehavior.numberRowShiftSymbols
-                // On an expanded tablet grid this row also carries backspace,
-                // which the body gave up to make room for the mirrored shift —
-                // so the two answers have to come from the same condition, or
-                // the keyboard has no backspace on it anywhere. Never over a
-                // numeric field: that path keeps the four-column keypad, so
-                // nothing was given up and a stray ⌫ would just be litter.
-                val tabletRow = state.layouts.gridWidth != null && !numericPadActive(state)
-                val otherDigits = otherNumeralDigits(state)
-                remember(
-                    kind,
-                    authored,
-                    state.layoutMode,
-                    state.shiftState,
-                    shiftSymbols,
-                    fillRow,
-                    tabletRow,
-                    otherDigits,
-                ) {
-                    // The field's own rows and the shift-symbols option come
-                    // before a row the layout authored: a number row edited in
-                    // the layout editor is for typing text, and must not put a
-                    // second set of digits over a keypad or turn the option off.
-                    val base = when {
-                        // A keypad already leads with digits, so the row
-                        // carries what the pad lacks rather than a second set
-                        // of the same numbers.
-                        kind == FieldKind.PHONE ->
-                            listOf("+", "*", "#", ",", ";", "(", ")", "-", "/", ".")
-                                .map { Key(it) }
-                        kind.isNumericPad ->
-                            listOf("+", "-", "*", "/", "=", "(", ")", "%", ":", ".")
-                                .map { Key(it) }
-                        // Opt-in: holding shift on the letters layer turns the
-                        // digits into the symbol layer's bracket/math fill row,
-                        // so symbols are reachable without switching layers.
-                        state.layoutMode == LayoutMode.LETTERS &&
-                            state.shiftState != ShiftState.OFF && shiftSymbols -> fillRow
-                        // A layout can supply its own row for this layer.
-                        authored != null -> authored
-                        // Symbols-2 reuses the number-row slot for the arrow and
-                        // comparison symbols it has nowhere else to put.
-                        state.layoutMode == LayoutMode.SYMBOLS_SHIFTED ->
-                            BuiltInLayouts.defaultNumberRow(LayoutLayer.SYMBOLS_SHIFTED)
-                        // The digits, with the symbol layer's long-presses.
-                        else -> BuiltInLayouts.defaultNumberRow(LayoutLayer.LETTERS)
-                    }.withOtherNumerals(otherDigits)
-                    if (tabletRow) base.expandNumberRowForTablet() else base
-                }
-            } else {
-                null
-            }
+            val extraRow = if (numberRow) rememberExtraRow(state, fillRow) else null
             val (numberRowVisual, bodyBlocks) =
                 rememberKeyGrid(gridState, layout, bodyRows, extraRow, palette, gridWeight)
             if (numberRowVisual != null) {
@@ -15342,77 +15247,23 @@ private fun KeyRows(
         // The key a chord drag would fire on, lit for the same reason (#345).
         if (chordDrag.active) GridPressHighlight(chordDrag.pressRect, state.settings)
 
-        // Autopilot, made visible: the letters the dictionary expects next drawn
-        // at the size their touch area has grown to, and the boundary each one
-        // claimed. Both halves are off by default — the feature is meant to be
-        // quiet — so this composes to nothing for most people.
-        val autopilotShow = smartHit && state.settings.layoutBehavior.autopilotShowEffect
-        val autopilotOutline = smartHit && state.settings.layoutBehavior.autopilotOutline
-        if (autopilotShow || autopilotOutline) {
-            AutopilotOverlay(
-                centers = keyCenters,
-                bounds = keyBounds,
-                bias = state.nextLetterBias,
-                strength = hitStrength.value,
-                keyWidth = keyWidth.value,
-                boardSize = Size(boxSize.width.toFloat(), boxSize.height.toFloat()),
-                glideActive = trail.visible,
-                lastKeyPress = lastKeyPressTime,
-                label = { ch ->
-                    letterKeys[ch]?.let { displayLabel(it, state) } ?: ch.toString()
-                },
-                settings = state.settings,
-                palette = palette,
-                kb = kbTheme,
-                showEffect = autopilotShow,
-                visualScale = state.settings.layoutBehavior.autopilotVisualScale,
-                outline = autopilotOutline,
-            )
-        }
-
-        // The octopus (discussion #102): the word each key is on its way to,
-        // floating over that key. Above autopilot, because a key face grown
-        // over a word would hide it, and below everything a finger owns.
-        OctopusOverlay(
-            // A stroke's own alternates while one is being drawn, the buffer's
-            // words otherwise. Two fields rather than one because the flick
-            // asks, at the lift, what was over the key the finger went down on.
-            words = if (trail.visible) state.octopusGlide else state.octopus,
-            bounds = keyBounds,
+        // Autopilot's drawn letters and the octopus words over the keys.
+        KeyGridWordOverlays(
+            state = state,
+            smartHit = smartHit,
+            keyCenters = keyCenters,
+            keyBounds = keyBounds,
+            hitStrength = hitStrength.value,
             keyWidth = keyWidth.value,
-            boardSize = Size(boxSize.width.toFloat(), boxSize.height.toFloat()),
-            // A stroke does *not* hide these: mid-glide they carry the
-            // alternates, hung off the keys that reach them, which is the whole
-            // of Mokhyy's idea on the thread. The picker does hide them —
-            // it is already asking the user a question, and a second set of
-            // offers on the board would be answering a different one.
-            hidden = picker.words.isNotEmpty(),
-            // The widest setting of [GlideCommitColorScope]: the promised word
-            // drawn on its own key in the strip's colour, so the board answers
-            // at a glance. Only while a stroke is being drawn, since between
-            // strokes these words are the buffer's and no lift is pending.
-            promised = state.autocorrectWord?.takeIf {
-                trail.visible &&
-                    state.settings.gesture.commitColorScope ==
-                    GlideCommitColorScope.EVERYWHERE
-            },
-            promiseColor = state.settings.suggestionStrip.primaryColor
-                ?.let { Color(it.toInt()) },
-            settings = state.settings,
+            boxSize = boxSize,
+            glideActive = trail.visible,
+            lastKeyPressTime = lastKeyPressTime,
+            letterKeys = letterKeys,
             palette = palette,
-            kb = kbTheme,
-            rects = octopusRects,
+            kbTheme = kbTheme,
+            pickerOpen = picker.words.isNotEmpty(),
+            octopusRects = octopusRects,
         )
-        // Which keys are carrying a word, pushed to the draw-time flags the
-        // hints read. A SideEffect rather than a LaunchedEffect: no coroutine
-        // per keystroke, and it runs after the composition it belongs to has
-        // been applied, which is where a write for draw-time readers belongs.
-        val occupancy = LocalOctopusOccupancy.current
-        val suppressing = state.settings.octopus.enabled &&
-            state.settings.octopus.suppressHints
-        SideEffect {
-            occupancy.set(if (suppressing) state.octopus.keys else emptySet())
-        }
 
         // The press bursts, over the decals and under the trail. Composed only
         // while particles live; the frame loop dies with them.
@@ -15581,40 +15432,8 @@ private fun KeyRows(
             }
         }
 
-        // The stroke's floating layer: the word pill riding above the finger
-        // and, when a stroke stops to ask, the picker's targets. Its own
-        // window, with room above the grid — see [GlideOverlay]. The pill
-        // stands down while the picker is up: it would be answering a question
-        // the picker is still asking, and with the same word.
-        val glide = state.settings.gesture
-        // Cased through the commit's own ladder, so a stroke drawn through the
-        // shift key previews "That" and not the "that" it used to (#162): the
-        // board's shift never changes for a drawn gesture, and the crossings
-        // ride in on the preview instead.
-        val pillWord = state.glideWord
-            ?.takeIf { glide.wordPreview && trail.visible && !trail.released && picker.words.isEmpty() }
-            ?.let { word ->
-                state.glideCased[word]
-                    ?: displayCaseForShift(word, shiftForGlide(state.shiftState, state.glideCase))
-            }
-        // The pill carries the strip's promise when the user has asked for it
-        // there (#121). It is the surface the eye is actually on while a stroke
-        // is being drawn, so a colour shown only on the strip is a colour
-        // mostly unread. Null keeps the pill's own text colour.
-        val pillPromise = state.settings.suggestionStrip.primaryColor
-            ?.takeIf {
-                glide.commitColorScope != GlideCommitColorScope.STRIP &&
-                    state.glideWord != null &&
-                    state.glideWord.equals(state.autocorrectWord, ignoreCase = true)
-            }
-            ?.let { Color(it.toInt()) }
-        // A trigger the lift will expand shows what it expands to (#205).
-        val pillExpansion = pillWord?.let { shown ->
-            state.glideWord?.let(state.glideExpansions::get)?.previewFor(shown)
-        }
-        if (pillWord != null || picker.words.isNotEmpty()) {
-            GlideOverlay(trail, picker, pillWord, glide, boxSize, pillPromise, pillExpansion, state.glideExpansions)
-        }
+        // The stroke's floating layer: the word pill and the picker.
+        GlideStrokeOverlay(state, trail, picker, boxSize)
 
         // The alternates a layer peek is holding open (issue #108). Hung off a
         // stand-in the size of the key's own cell rather than off the key
@@ -15626,6 +15445,266 @@ private fun KeyRows(
             layerPeek, state.settings.popup, stampedOnKey, stampedOnText,
             shifted = state.shiftCasesText(),
         )
+    }
+}
+
+/**
+ * The row in the number-row slot for [state]'s layer and field, or the digits.
+ *
+ * Its own function rather than inline in [KeyRows] for ART's sake: the board's
+ * grid runs on every keystroke, and inlined this pushed [KeyRows] past the
+ * 10,000-instruction limit above which ART compiles nothing, AOT or JIT.
+ */
+@Composable
+private fun rememberExtraRow(state: KeyboardUiState, fillRow: List<Key>): List<Key> {
+    // Follows the same guard as the pad itself, so a search box
+    // opened over a number field gets its digit row back.
+    val kind = if (numericPadActive(state)) state.fieldKind else FieldKind.TEXT
+    val authored = state.authoredNumberRow(state.layoutMode)
+    // The digit row tracks the active layer (and, optionally, shift)
+    // so the same slot serves more symbols the deeper the user goes:
+    // digits on letters/symbols-1, extra symbols on symbols-2, and —
+    // when the option is on — the symbol fill row while shift is held
+    // on the letters layer.
+    val shiftSymbols = state.settings.layoutBehavior.numberRowShiftSymbols
+    // On an expanded tablet grid this row also carries backspace,
+    // which the body gave up to make room for the mirrored shift —
+    // so the two answers have to come from the same condition, or
+    // the keyboard has no backspace on it anywhere. Never over a
+    // numeric field: that path keeps the four-column keypad, so
+    // nothing was given up and a stray ⌫ would just be litter.
+    val tabletRow = state.layouts.gridWidth != null && !numericPadActive(state)
+    val otherDigits = otherNumeralDigits(state)
+    return remember(
+        kind,
+        authored,
+        state.layoutMode,
+        state.shiftState,
+        shiftSymbols,
+        fillRow,
+        tabletRow,
+        otherDigits,
+    ) {
+        // The field's own rows and the shift-symbols option come
+        // before a row the layout authored: a number row edited in
+        // the layout editor is for typing text, and must not put a
+        // second set of digits over a keypad or turn the option off.
+        val base = when {
+            // A keypad already leads with digits, so the row
+            // carries what the pad lacks rather than a second set
+            // of the same numbers.
+            kind == FieldKind.PHONE ->
+                listOf("+", "*", "#", ",", ";", "(", ")", "-", "/", ".")
+                    .map { Key(it) }
+            kind.isNumericPad ->
+                listOf("+", "-", "*", "/", "=", "(", ")", "%", ":", ".")
+                    .map { Key(it) }
+            // Opt-in: holding shift on the letters layer turns the
+            // digits into the symbol layer's bracket/math fill row,
+            // so symbols are reachable without switching layers.
+            state.layoutMode == LayoutMode.LETTERS &&
+                state.shiftState != ShiftState.OFF && shiftSymbols -> fillRow
+            // A layout can supply its own row for this layer.
+            authored != null -> authored
+            // Symbols-2 reuses the number-row slot for the arrow and
+            // comparison symbols it has nowhere else to put.
+            state.layoutMode == LayoutMode.SYMBOLS_SHIFTED ->
+                BuiltInLayouts.defaultNumberRow(LayoutLayer.SYMBOLS_SHIFTED)
+            // The digits, with the symbol layer's long-presses.
+            else -> BuiltInLayouts.defaultNumberRow(LayoutLayer.LETTERS)
+        }.withOtherNumerals(otherDigits)
+        if (tabletRow) base.expandNumberRowForTablet() else base
+    }
+}
+
+/**
+ * Autopilot's drawn letters and the octopus words over the grid, with the
+ * occupancy flags the corner hints read.
+ *
+ * Split out of [KeyRows] only to keep that function under ART's
+ * 10,000-instruction huge-method limit: it runs on every keystroke, and above
+ * the limit ART compiles nothing, AOT or JIT.
+ */
+@Composable
+private fun BoxScope.KeyGridWordOverlays(
+    state: KeyboardUiState,
+    smartHit: Boolean,
+    keyCenters: Map<Int, Offset>,
+    keyBounds: Map<Int, Rect>,
+    hitStrength: Float,
+    keyWidth: Float,
+    boxSize: IntSize,
+    glideActive: Boolean,
+    lastKeyPressTime: MutableLongState,
+    letterKeys: Map<Char, Key>,
+    palette: KeyPalette,
+    kbTheme: KbTheme,
+    pickerOpen: Boolean,
+    octopusRects: OctopusRects,
+) {
+    // Autopilot, made visible: the letters the dictionary expects next drawn
+    // at the size their touch area has grown to, and the boundary each one
+    // claimed. Both halves are off by default — the feature is meant to be
+    // quiet — so this composes to nothing for most people.
+    val autopilotShow = smartHit && state.settings.layoutBehavior.autopilotShowEffect
+    val autopilotOutline = smartHit && state.settings.layoutBehavior.autopilotOutline
+    if (autopilotShow || autopilotOutline) {
+        AutopilotOverlay(
+            centers = keyCenters,
+            bounds = keyBounds,
+            bias = state.nextLetterBias,
+            strength = hitStrength,
+            keyWidth = keyWidth,
+            boardSize = Size(boxSize.width.toFloat(), boxSize.height.toFloat()),
+            glideActive = glideActive,
+            lastKeyPress = lastKeyPressTime,
+            label = { ch ->
+                letterKeys[ch]?.let { displayLabel(it, state) } ?: ch.toString()
+            },
+            settings = state.settings,
+            palette = palette,
+            kb = kbTheme,
+            showEffect = autopilotShow,
+            visualScale = state.settings.layoutBehavior.autopilotVisualScale,
+            outline = autopilotOutline,
+        )
+    }
+
+    // The octopus (discussion #102): the word each key is on its way to,
+    // floating over that key. Above autopilot, because a key face grown
+    // over a word would hide it, and below everything a finger owns.
+    OctopusOverlay(
+        // A stroke's own alternates while one is being drawn, the buffer's
+        // words otherwise. Two fields rather than one because the flick
+        // asks, at the lift, what was over the key the finger went down on.
+        words = if (glideActive) state.octopusGlide else state.octopus,
+        bounds = keyBounds,
+        keyWidth = keyWidth,
+        boardSize = Size(boxSize.width.toFloat(), boxSize.height.toFloat()),
+        // A stroke does *not* hide these: mid-glide they carry the
+        // alternates, hung off the keys that reach them, which is the whole
+        // of Mokhyy's idea on the thread. The picker does hide them —
+        // it is already asking the user a question, and a second set of
+        // offers on the board would be answering a different one.
+        hidden = pickerOpen,
+        // The widest setting of [GlideCommitColorScope]: the promised word
+        // drawn on its own key in the strip's colour, so the board answers
+        // at a glance. Only while a stroke is being drawn, since between
+        // strokes these words are the buffer's and no lift is pending.
+        promised = state.autocorrectWord?.takeIf {
+            glideActive &&
+                state.settings.gesture.commitColorScope ==
+                GlideCommitColorScope.EVERYWHERE
+        },
+        promiseColor = state.settings.suggestionStrip.primaryColor
+            ?.let { Color(it.toInt()) },
+        settings = state.settings,
+        palette = palette,
+        kb = kbTheme,
+        rects = octopusRects,
+    )
+    // Which keys are carrying a word, pushed to the draw-time flags the
+    // hints read. A SideEffect rather than a LaunchedEffect: no coroutine
+    // per keystroke, and it runs after the composition it belongs to has
+    // been applied, which is where a write for draw-time readers belongs.
+    val occupancy = LocalOctopusOccupancy.current
+    val suppressing = state.settings.octopus.enabled &&
+        state.settings.octopus.suppressHints
+    SideEffect {
+        occupancy.set(if (suppressing) state.octopus.keys else emptySet())
+    }
+}
+
+/**
+ * The stroke's floating layer for [KeyRows]: the word pill riding above the
+ * finger and, when a stroke stops to ask, the picker's targets. Its own
+ * function to keep [KeyRows] under ART's huge-method limit.
+ */
+@Composable
+private fun GlideStrokeOverlay(
+    state: KeyboardUiState,
+    trail: GlideTrail,
+    picker: GlidePickerState,
+    boxSize: IntSize,
+) {
+    // The stroke's floating layer: the word pill riding above the finger
+    // and, when a stroke stops to ask, the picker's targets. Its own
+    // window, with room above the grid — see [GlideOverlay]. The pill
+    // stands down while the picker is up: it would be answering a question
+    // the picker is still asking, and with the same word.
+    val glide = state.settings.gesture
+    // Cased through the commit's own ladder, so a stroke drawn through the
+    // shift key previews "That" and not the "that" it used to (#162): the
+    // board's shift never changes for a drawn gesture, and the crossings
+    // ride in on the preview instead.
+    val pillWord = state.glideWord
+        ?.takeIf { glide.wordPreview && trail.visible && !trail.released && picker.words.isEmpty() }
+        ?.let { word ->
+            state.glideCased[word]
+                ?: displayCaseForShift(word, shiftForGlide(state.shiftState, state.glideCase))
+        }
+    // The pill carries the strip's promise when the user has asked for it
+    // there (#121). It is the surface the eye is actually on while a stroke
+    // is being drawn, so a colour shown only on the strip is a colour
+    // mostly unread. Null keeps the pill's own text colour.
+    val pillPromise = state.settings.suggestionStrip.primaryColor
+        ?.takeIf {
+            glide.commitColorScope != GlideCommitColorScope.STRIP &&
+                state.glideWord != null &&
+                state.glideWord.equals(state.autocorrectWord, ignoreCase = true)
+        }
+        ?.let { Color(it.toInt()) }
+    // A trigger the lift will expand shows what it expands to (#205).
+    val pillExpansion = pillWord?.let { shown ->
+        state.glideWord?.let(state.glideExpansions::get)?.previewFor(shown)
+    }
+    if (pillWord != null || picker.words.isNotEmpty()) {
+        GlideOverlay(trail, picker, pillWord, glide, boxSize, pillPromise, pillExpansion, state.glideExpansions)
+    }
+}
+
+/**
+ * Publishes the key grid's rectangle for touch-exploration pass-through, and
+ * takes it back. Its own function to keep [KeyRows] under ART's huge-method
+ * limit.
+ */
+@Composable
+private fun KeyGridPassthrough(state: KeyboardUiState, boxOrigin: Offset, boxSize: IntSize) {
+    // Touch-exploration pass-through: while a screen reader is running and the
+    // user picked that mode, the app's own accessibility service hands the key
+    // grid's rectangle back to the keyboard so its gestures (spacebar cursor
+    // slide, backspace word swipe, glide, handwriting) still see real touches.
+    //
+    // Only the grid, never the whole window: the suggestion strip, the toolbar
+    // and every panel stay outside it, so TalkBack keeps exploring those
+    // normally. A panel replacing the keys takes this composable with it,
+    // which retracts the carve-out on its own.
+    val passthroughKeys = LocalTouchExploration.current &&
+        state.settings.accessibility.screenReader == ScreenReaderMode.PASSTHROUGH &&
+        LocalPassthroughService.current
+    val hostView = LocalView.current
+    // A board drawn as a picture in the settings app (the theme editor, the
+    // layout cards) is not the keyboard: it must neither carve a pass-through
+    // hole in the app nor clear the one the real keyboard holds, which lives in
+    // the same process and publishes to the same place.
+    val ownsPassthrough = !LocalKeyboardPreviewHost.current
+    LaunchedEffect(passthroughKeys, boxOrigin, boxSize, hostView, ownsPassthrough) {
+        if (!ownsPassthrough) return@LaunchedEffect
+        if (!passthroughKeys || boxSize.width == 0 || boxSize.height == 0) {
+            KeyboardPassthrough.publishRegion(null)
+        } else {
+            // boxOrigin is relative to the compose root (the IME's input
+            // view); the framework wants display coordinates.
+            val origin = IntArray(2).also { hostView.getLocationOnScreen(it) }
+            val left = origin[0] + boxOrigin.x.roundToInt()
+            val top = origin[1] + boxOrigin.y.roundToInt()
+            KeyboardPassthrough.publishRegion(
+                android.graphics.Rect(left, top, left + boxSize.width, top + boxSize.height),
+            )
+        }
+    }
+    DisposableEffect(ownsPassthrough) {
+        onDispose { if (ownsPassthrough) KeyboardPassthrough.publishRegion(null) }
     }
 }
 
