@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">Eksperimental</string>
     <string name="core_intel_llm_tier_recommended_label">Direkomendasikan</string>
     <string name="core_intel_llm_tier_untested_label">Belum diuji</string>
+    <string name="core_intel_ocr_download_error_http">Server GitHub tidak mengirimkan file tersebut. Kode kesalahannya adalah HTTP %1$s.</string>
+    <string name="core_intel_ocr_download_error_interrupted">Koneksi terhenti selama pengunduhan. Coba lagi.</string>
+    <string name="core_intel_ocr_download_error_no_space">Penyimpanan di perangkat Anda tidak cukup. Anda harus mengosongkan sekitar %1$s MB terlebih dahulu.</string>
+    <string name="core_intel_ocr_pack_error_broken">Data bahasa yang diunduh rusak, sehingga pemindai tidak dapat menggunakannya. Unduh kembali.</string>
 </resources>

@@ -115,6 +115,7 @@
     <string name="core_content_selection_macro_chat_strike">Зачеркнат</string>
     <string name="core_content_selection_macro_colour">Цвят</string>
     <string name="core_content_selection_macro_copy">Копирай</string>
+    <string name="core_content_selection_macro_deepl_write">DeepL Write</string>
     <string name="core_content_selection_macro_digits_latin">Цифри</string>
     <string name="core_content_selection_macro_email">Имейл</string>
     <string name="core_content_selection_macro_fancy">Ефектно</string>

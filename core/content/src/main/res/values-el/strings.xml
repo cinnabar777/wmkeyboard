@@ -115,6 +115,7 @@
     <string name="core_content_selection_macro_chat_strike">Διακριτική γραμμή</string>
     <string name="core_content_selection_macro_colour">Χρώμα</string>
     <string name="core_content_selection_macro_copy">Αντιγραφή</string>
+    <string name="core_content_selection_macro_deepl_write">DeepL Write</string>
     <string name="core_content_selection_macro_digits_latin">Ψηφία</string>
     <string name="core_content_selection_macro_email">Email</string>
     <string name="core_content_selection_macro_fancy">Εντυπωσιακό</string>

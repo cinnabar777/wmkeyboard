@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">Experimenteel</string>
     <string name="core_intel_llm_tier_recommended_label">Aanbevolen</string>
     <string name="core_intel_llm_tier_untested_label">Niet getest</string>
+    <string name="core_intel_ocr_download_error_http">De GitHub-server heeft het bestand niet verzonden. De foutcode is HTTP %1$s.</string>
+    <string name="core_intel_ocr_download_error_interrupted">De verbinding werd verbroken tijdens het downloaden. Probeer het opnieuw.</string>
+    <string name="core_intel_ocr_download_error_no_space">Er is onvoldoende opslagruimte op je apparaat. Je moet eerst ongeveer %1$s MB vrijmaken.</string>
+    <string name="core_intel_ocr_pack_error_broken">De gedownloade taalgegevens zijn beschadigd, waardoor de scanner ze niet kon gebruiken. Download ze opnieuw.</string>
 </resources>

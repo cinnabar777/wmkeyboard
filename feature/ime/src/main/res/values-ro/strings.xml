@@ -2,6 +2,13 @@
 <!-- Machine translated by Google Play. Do not edit by hand:
      regenerate with tools/i18n/pull-play-translations.py. -->
 <resources>
+    <string name="ime_ai_chat_ask_explain">Explică simplu</string>
+    <string name="ime_ai_chat_ask_explain_prompt">Explică asta în cuvinte simple.</string>
+    <string name="ime_ai_chat_ask_hint">Pune o întrebare despre text sau începe cu una dintre acestea.</string>
+    <string name="ime_ai_chat_ask_summary">Rezumat</string>
+    <string name="ime_ai_chat_ask_summary_prompt">Oferă-mi un scurt rezumat al acestui lucru.</string>
+    <string name="ime_ai_chat_ask_words">Cuvinte grele</string>
+    <string name="ime_ai_chat_ask_words_prompt">Explică cuvintele și ideile dificile din acest text.</string>
     <string name="ime_ai_chat_attach_desc">Trimite textul câmpului împreună cu mesajul</string>
     <string name="ime_ai_chat_attach_remove_desc">Nu trimite textul câmpului</string>
     <plurals name="ime_ai_chat_attached_field">
@@ -12,6 +19,8 @@
         <item quantity="one">Selecția ta însoțește mesajul: %1$d caracter</item>
         <item quantity="other">Selecția ta însoțește mesajul: %1$d caractere</item>
     </plurals>
+    <string name="ime_ai_chat_attached_tool">Despre %1$s</string>
+    <string name="ime_ai_chat_attached_tool_selection">Despre un fragment din %1$s</string>
     <plurals name="ime_ai_chat_attachment_sent">
         <item quantity="one">Cu %1$d caracter de text</item>
         <item quantity="other">Cu %1$d caractere de text</item>
@@ -99,6 +108,10 @@
     <string name="ime_ai_truncated_notice">Modelul s-a oprit prematur. Mărește „Lungimea maximă a răspunsului” în setările instrumentului.</string>
     <string name="ime_ai_view_changes">Modificări</string>
     <string name="ime_ai_view_result">Rezultat</string>
+    <string name="ime_ask_ai_label_dict">Dicționar: %1$s</string>
+    <string name="ime_ask_ai_label_grammar">Verificare gramaticală</string>
+    <string name="ime_ask_ai_label_vocab">Vocabular: %1$s</string>
+    <string name="ime_ask_ai_label_wiki">Wikipedia: %1$s</string>
     <string name="ime_autofill_dismiss_desc">Ascunde sugestiile de completare automată</string>
     <string name="ime_calc_degrees_label">grade</string>
     <string name="ime_calc_insert_action">Inserează</string>
@@ -127,6 +140,7 @@
     <string name="ime_camera_permission_action">Permite camera</string>
     <string name="ime_camera_permission_body">Instrumentul cameră are nevoie de permisiune pentru a utiliza camera. Aplicația face o fotografie doar atunci când apeși pe declanșator.</string>
     <string name="ime_camera_retake_action">Refaceți</string>
+    <string name="ime_camera_search_action">Caută</string>
     <string name="ime_camera_send_action">Trimite</string>
     <string name="ime_camera_shutter_desc">Fă o fotografie</string>
     <string name="ime_camera_starting_progress">Se pornește camera…</string>
@@ -144,6 +158,10 @@
     <string name="ime_clip_chip_image">Imagine copiată</string>
     <string name="ime_clip_chip_item">Element copiat</string>
     <string name="ime_clip_chip_screenshot">Captură de ecran</string>
+    <plurals name="ime_clip_deleted">
+        <item quantity="one">Clip șters</item>
+        <item quantity="other">%1$d clipuri șterse</item>
+    </plurals>
     <string name="ime_clip_edit">Editează</string>
     <string name="ime_clip_edit_placeholder">Introduceți textul elementului</string>
     <string name="ime_clip_edit_rich_note">Salvarea unei modificări elimină formatarea</string>
@@ -162,6 +180,18 @@
     <string name="ime_clip_info_private_detail">Tastatura ascunde acest clip în panou și îl șterge mai devreme decât alte clipuri.</string>
     <string name="ime_clip_info_size">Dimensiune</string>
     <string name="ime_clip_info_type">Tip</string>
+    <plurals name="ime_clip_left_days">
+        <item quantity="one">%d zi rămasă</item>
+        <item quantity="other">%d zile rămase</item>
+    </plurals>
+    <plurals name="ime_clip_left_hours">
+        <item quantity="one">%d oră rămasă</item>
+        <item quantity="other">%d ore rămase</item>
+    </plurals>
+    <plurals name="ime_clip_left_minutes">
+        <item quantity="one">%d min rămas</item>
+        <item quantity="other">%d min rămase</item>
+    </plurals>
     <string name="ime_clip_number_desc">Clip %1$d</string>
     <string name="ime_clip_pin">Fixați</string>
     <string name="ime_clip_send_as_sticker">Trimite ca sticker</string>
@@ -172,6 +202,7 @@
     <string name="ime_clip_type_rich_text">Text îmbogățit</string>
     <string name="ime_clip_type_text">Text</string>
     <string name="ime_clip_type_video">Video</string>
+    <string name="ime_clip_undo_delete">Anulare</string>
     <string name="ime_clip_unpin">Anulează fixarea</string>
     <string name="ime_clip_video_desc">Video copiat</string>
     <string name="ime_clipboard_no_match">Niciun clip nu se potrivește cu „%1$s”.</string>
@@ -203,10 +234,12 @@
     <string name="ime_dict_add_vocab_action">Adaugă în vocabular</string>
     <string name="ime_dict_antonyms_label">Antonime</string>
     <string name="ime_dict_error">Aplicația nu poate accesa dicționarul. Verificați rețeaua și încercați din nou.</string>
+    <string name="ime_dict_from">De la %1$s</string>
     <string name="ime_dict_idle_info">Caută un cuvânt în engleză. Apasă bara de căutare și scrie. Poți, de asemenea, să plasezi cursorul pe un cuvânt înainte de a deschide instrumentul.</string>
     <string name="ime_dict_insert_action">Inserează</string>
     <string name="ime_dict_lookup_desc">Caută cuvântul</string>
     <string name="ime_dict_lookup_progress">Se caută „%1$s”…</string>
+    <string name="ime_dict_no_sources">Toate sursele de dicționar sunt oprite. Activează una din setările instrumentului Dicționar.</string>
     <string name="ime_dict_not_found_empty">Nicio intrare pentru „%1$s”. Verifică ortografia sau încearcă forma de bază a cuvântului.</string>
     <string name="ime_dict_play_desc">Redă pronunția</string>
     <string name="ime_dict_search_active_hint">Scrie un cuvânt…</string>
@@ -314,7 +347,15 @@
     <string name="ime_glide_word_list_offer">Scrierea prin glisare necesită o listă de cuvinte %1$s</string>
     <string name="ime_glide_word_list_offer_dismiss_desc">Închide</string>
     <string name="ime_grammar_all_filtered_empty">Toate problemele găsite sunt ascunse de filtru</string>
+    <string name="ime_grammar_ask_ai_desc">Întreabă inteligența artificială despre această problemă</string>
     <string name="ime_grammar_category_kind_label">%1$s • %2$s</string>
+    <string name="ime_grammar_deepl_action_desc">Îmbunătățiți textul cu DeepL Write</string>
+    <string name="ime_grammar_deepl_dismiss_desc">Închide rezultatul DeepL Write</string>
+    <string name="ime_grammar_deepl_error">DeepL Write nu a răspuns</string>
+    <string name="ime_grammar_deepl_replace_action">Înlocuiește</string>
+    <string name="ime_grammar_deepl_replace_failed_toast">Textul din acest câmp nu poate fi înlocuit</string>
+    <string name="ime_grammar_deepl_title">DeepL Write</string>
+    <string name="ime_grammar_deepl_unchanged">DeepL Write nu are nicio modificare de efectuat</string>
     <string name="ime_grammar_dialect_desc">Selectează dialectul</string>
     <string name="ime_grammar_dismiss_desc">Ascunde această problemă</string>
     <string name="ime_grammar_empty_hint">Introduceți text sau deschideți un câmp care conține text. Problemele vor apărea aici. Verificările rulează offline.</string>
@@ -346,6 +387,7 @@
     <string name="ime_icons_empty_info">Pentru a adăuga pachete de pictograme, deschideți setările.</string>
     <string name="ime_icons_more_label">Mai multe pachete de pictograme</string>
     <string name="ime_icons_pick_info">Apasă pe un pachet de pictograme pentru a-l folosi pe taste și instrumente.</string>
+    <string name="ime_image_search_by_photo_desc">Caută cu o fotografie</string>
     <string name="ime_image_search_empty">Nicio imagine pentru „%1$s”</string>
     <string name="ime_image_search_hint">Caută imagini</string>
     <string name="ime_image_search_need_key_body">Căutarea de imagini necesită o cheie API de la Brave Search. Adaugă o cheie în setările pentru acest instrument.</string>
@@ -375,6 +417,8 @@
     <string name="ime_kde_loop">Repetă</string>
     <string name="ime_kde_media_empty_body">Pornește un player acolo și va apărea aici</string>
     <string name="ime_kde_media_empty_title">Nu se redă nimic pe calculator</string>
+    <string name="ime_kde_media_unsupported_body">KDE Connect nu permite unui telefon să controleze muzica sau videoclipurile. KDE Connect pe Mac nu face niciodată acest lucru</string>
+    <string name="ime_kde_media_unsupported_title">Acest computer nu își partajează playerele</string>
     <string name="ime_kde_not_listening">O altă aplicație de pe acest telefon folosește portul KDE Connect. Computerele pot găsi în continuare această tastatură, dar apăsați Reîmprospătare pe această parte.</string>
     <string name="ime_kde_notice_clipboard_empty">Nimic în clipboard de trimis</string>
     <string name="ime_kde_notice_clipboard_sent">Clipboard trimis</string>
@@ -425,10 +469,12 @@
     <string name="ime_kde_send_empty">Trimite clipboard-ul, ceea ce ai scris sau fișiere. Ceea ce trimite calculatorul ajunge aici și în Descărcări</string>
     <string name="ime_kde_send_field">Text în câmp</string>
     <string name="ime_kde_send_files">Fișiere…</string>
+    <string name="ime_kde_send_unsupported">Acest computer nu acceptă fișiere sau text de pe telefon</string>
     <string name="ime_kde_settings">Setări</string>
     <string name="ime_kde_shuffle">Amestecă</string>
     <string name="ime_kde_slides_end">Sfârșit</string>
     <string name="ime_kde_slides_next">Următorul diapozitiv</string>
+    <string name="ime_kde_slides_no_pointer">Acest computer nu are un indicator pentru diapozitive</string>
     <string name="ime_kde_slides_pointer">Ține apăsat și trage pentru indicator</string>
     <string name="ime_kde_slides_previous">Slide-ul anterior</string>
     <string name="ime_kde_slides_start">Start</string>
@@ -488,11 +534,25 @@
     <string name="ime_language_switch_title">Limbă de introducere</string>
     <string name="ime_launcher_activities_label">Ecrane</string>
     <string name="ime_launcher_app_info_action">Informații aplicație</string>
+    <string name="ime_launcher_combo_label">%1$s + %2$s</string>
+    <string name="ime_launcher_combo_open_action">Deschide ambele în ecran divizat</string>
+    <string name="ime_launcher_combo_remove_action">Elimină această pereche</string>
+    <string name="ime_launcher_combos_label">Perechi pentru ecran divizat</string>
     <string name="ime_launcher_empty">Nicio aplicație nu se potrivește</string>
+    <string name="ime_launcher_floating_unsupported">Este posibil ca acest dispozitiv să o deschidă pe tot ecranul</string>
     <string name="ime_launcher_hidden_label">Ascuns din grilă</string>
     <string name="ime_launcher_hide_action">Ascunde aplicația din grilă</string>
     <string name="ime_launcher_loading">Se încarcă aplicațiile…</string>
+    <string name="ime_launcher_menu_close">Închide meniul</string>
     <string name="ime_launcher_not_exported_label">Nu poate fi deschis din afara aplicației</string>
+    <string name="ime_launcher_open_action">Deschide</string>
+    <string name="ime_launcher_open_floating_action">Deschide într-o fereastră plutitoare</string>
+    <string name="ime_launcher_open_split_action">Deschide în ecran divizat</string>
+    <string name="ime_launcher_page_action">Ecrane, ascunde și informații despre aplicație…</string>
+    <string name="ime_launcher_page_no_screens_action">Ascunde și informații despre aplicație…</string>
+    <string name="ime_launcher_pair_action">Asociați în ecran divizat cu…</string>
+    <string name="ime_launcher_pair_cancel">Anulează</string>
+    <string name="ime_launcher_pair_prompt">Atinge aplicația pentru a o deschide lângă %1$s</string>
     <string name="ime_launcher_pin_action">Fixează aplicația</string>
     <string name="ime_launcher_pinned_label">Fixat</string>
     <string name="ime_launcher_recents_label">Recent</string>
@@ -668,9 +728,11 @@
     <string name="ime_sandbox_offer_only">Glisați folosind doar cuvintele dvs.?</string>
     <string name="ime_sandbox_offer_prefer">Ajustezi glisarea la cuvintele tale?</string>
     <string name="ime_search_attribution_brave">prin Brave</string>
+    <string name="ime_selection_ask_ai">Întreabă AI</string>
     <string name="ime_selection_macro_back_desc">Înapoi la acțiunile de selecție</string>
     <string name="ime_selection_macro_bengali_unavailable_toast">Bengaleza nu este încărcată</string>
     <string name="ime_selection_macro_busy_desc">Se lucrează</string>
+    <string name="ime_selection_macro_deepl_clean_toast">DeepL Write nu are nimic de schimbat</string>
     <string name="ime_selection_macro_find_none_toast">Nicio altă potrivire</string>
     <string name="ime_selection_macro_grammar_clean_toast">Nimic de corectat</string>
     <string name="ime_selection_macro_grammar_unavailable_toast">Verificatorul gramatical nu este disponibil</string>
@@ -679,6 +741,7 @@
     <string name="ime_selection_macro_nothing_to_undo_toast">Nimic de anulat</string>
     <string name="ime_selection_macro_open_in_desc">Deschide în %1$s</string>
     <string name="ime_selection_macro_stop_label">Stop</string>
+    <string name="ime_selection_quote">Citat</string>
     <string name="ime_service_already_in_settings_toast">Ești deja în setări</string>
     <string name="ime_service_autocorrect_off_toast">Corecția automată este oprită</string>
     <string name="ime_service_autocorrect_on_toast">Corecția automată este activată</string>
@@ -709,6 +772,11 @@
     <string name="ime_service_phonetic_english_needs_secondary_toast">Activați engleza la Limbi, %1$s, De asemenea, sugerați din</string>
     <string name="ime_service_phonetic_english_off_toast">Sunt sugerate doar cuvinte în engleză</string>
     <string name="ime_service_phonetic_english_on_toast">Cuvintele englezești rămân englezești</string>
+    <string name="ime_service_photo_search_blocked">Economisirea datelor nu permite căutărilor web să utilizeze această conexiune</string>
+    <string name="ime_service_photo_search_metered_ask">Această conexiune este limitată. Pentru a trimite fotografia, apăsați din nou pe Căutare.</string>
+    <string name="ime_service_photo_search_no_app">Nicio aplicație de pe acest telefon nu poate efectua căutări cu fotografii</string>
+    <string name="ime_service_photo_search_no_browser">Niciun browser de pe acest telefon nu poate deschide rezultatele</string>
+    <string name="ime_service_photo_search_sending">Se trimite fotografia către site-ul de căutare</string>
     <string name="ime_service_plugins_all_off_notice">Fiecare plugin instalat este oprit. Activează unul din Gestionare pluginuri.</string>
     <string name="ime_service_plugins_off_notice">Pluginurile sunt oprite. Activează-le din Setări pentru a le instala și rula.</string>
     <string name="ime_service_power_saving_off_toast">Economisirea energiei este oprită</string>
@@ -789,10 +857,22 @@
     <string name="ime_sound_volume_label">Volum</string>
     <string name="ime_sticker_add_desc">Adaugă stickere</string>
     <string name="ime_sticker_add_to_pack_action">Adăugați la %1$s</string>
+    <string name="ime_sticker_info_emoji">Emoji: %1$s</string>
+    <string name="ime_sticker_info_keywords">Cuvinte cheie: %1$s</string>
+    <string name="ime_sticker_info_pack">Pachet: %1$s</string>
+    <string name="ime_sticker_info_untitled">Fără titlu</string>
     <string name="ime_sticker_local_search_empty">Niciunul dintre stickerele tale nu se potrivește cu „%1$s”</string>
     <string name="ime_sticker_manage_packs_action">Gestionați pachetele</string>
     <string name="ime_sticker_need_key_body">Instrumentul de stickere are nevoie de o cheie API de la Klipy sau GIPHY. Ambele chei sunt gratuite. Adaugă o cheie în setările pentru acest instrument.</string>
     <string name="ime_sticker_no_packs_empty">Încă nu există pachete de stickere. Creează un pachet în setări. De asemenea, poți apăsa lung pe un sticker din Klipy sau GIPHY pentru a-l salva aici.</string>
+    <plurals name="ime_sticker_offer_count">
+        <item quantity="one">%1$d autocolant</item>
+        <item quantity="other">%1$d autocolante</item>
+    </plurals>
+    <string name="ime_sticker_offer_dismiss_desc">Ascunde stickerele pentru %1$s</string>
+    <string name="ime_sticker_offer_item_desc">Trimite stickerul %1$s</string>
+    <string name="ime_sticker_offer_item_untitled_desc">Trimite acest sticker</string>
+    <string name="ime_sticker_offer_more">+%1$d</string>
     <string name="ime_sticker_pack_all_label">Toate</string>
     <string name="ime_sticker_pack_empty">Acest pachet este gol.</string>
     <string name="ime_sticker_save_new_pack_action">Salvează într-un pachet nou</string>
@@ -803,8 +883,24 @@
     <string name="ime_suggestion_hold_label">Opțiuni cuvânt</string>
     <string name="ime_suggestion_never_suggest">Nu sugera niciodată \"%1$s\"</string>
     <string name="ime_suggestions_show_desc">Afișează bara de sugestii</string>
+    <string name="ime_symbol_row_delete_confirm_body">Setul și toate intrările sale vor fi șterse. Un mod de tastatură care îl oferea va afișa celelalte seturi ale tale în schimb.</string>
+    <string name="ime_symbol_row_delete_confirm_title">Ștergeți \"%1$s\"?</string>
+    <string name="ime_symbol_row_delete_set">Șterge setul „%1$s”</string>
+    <string name="ime_symbol_row_hide_in_mode">Ascundeți rândul în %1$s</string>
+    <string name="ime_symbol_row_remove">Elimină \"%1$s\"</string>
+    <string name="ime_symbol_row_settings">Setări rând simboluri</string>
     <string name="ime_symbol_set_switch_desc">Comută setul de simboluri</string>
     <string name="ime_symbols_recents_label">Recente</string>
+    <string name="ime_synonyms_close_desc">Închide sinonimele</string>
+    <string name="ime_synonyms_failed">Nu s-a putut accesa o sursă de sinonime. Verifică conexiunea și încearcă din nou.</string>
+    <string name="ime_synonyms_from">De la %1$s</string>
+    <string name="ime_synonyms_loading">Se caută sinonime…</string>
+    <string name="ime_synonyms_no_sources">Toate sursele de sinonime sunt oprite. Activează una din Tastare, Sugestii, Surse de sinonime.</string>
+    <string name="ime_synonyms_not_found">Nu s-au găsit sinonime pentru „%1$s”.</string>
+    <string name="ime_synonyms_pick_desc">Folosește \"%1$s\"</string>
+    <string name="ime_synonyms_retry">Încearcă din nou</string>
+    <string name="ime_synonyms_similar_note">Nu sunt listate sinonime pentru acest cuvânt. Aceste cuvinte au un sens similar.</string>
+    <string name="ime_synonyms_title">Sinonime pentru „%1$s”</string>
     <string name="ime_textedit_doc_end_desc">Mergeți la sfârșitul textului</string>
     <string name="ime_textedit_doc_start_desc">Mută la începutul textului</string>
     <string name="ime_textedit_down_desc">Deplasați în jos</string>
@@ -925,7 +1021,10 @@
     <string name="ime_toolbox_hint_mode">Modul %1$s este activat, așa că tastatura salvează acest aranjament pentru acel mod. Alte aplicații le păstrează pe ale lor.</string>
     <string name="ime_trackpad_hint">Trage pentru a muta cursorul</string>
     <string name="ime_trackpad_surface_desc">Trackpad. Trageți pentru a muta cursorul, mențineți și trageți pentru a selecta, atingeți de două ori pentru a selecta un cuvânt</string>
+    <string name="ime_translate_all_languages_info">De asemenea, limbile de descărcat</string>
+    <string name="ime_translate_all_languages_label">Toate limbile</string>
     <string name="ime_translate_auto_detect_label">Detectează limba</string>
+    <string name="ime_translate_deepl_label">DeepL</string>
     <string name="ime_translate_download_failed_error">Descărcarea nu s-a finalizat. Verifică conexiunea, apoi încearcă din nou.</string>
     <string name="ime_translate_download_of_total_progress">%1$s din %2$s</string>
     <string name="ime_translate_downloaded_desc">Descărcat</string>
@@ -1063,6 +1162,10 @@
     <string name="ime_voice_status_mic_blocked">Microfonul este blocat. Activează accesul la microfon din Setări rapide, apoi încearcă din nou.</string>
     <string name="ime_voice_status_no_model">Tastarea vocală offline nu are încă un model</string>
     <string name="ime_voice_status_no_server">Serverul de transcriere nu are încă o adresă</string>
+    <plurals name="ime_voice_status_stops_in">
+        <item quantity="one">Se oprește în %d secundă. Apasă pentru a termina acum.</item>
+        <item quantity="other">Se oprește în %d secunde. Apasă pentru a termina acum.</item>
+    </plurals>
     <string name="ime_voice_status_transcribing">Se transcrie…</string>
     <string name="ime_voice_stop_desc">Opriți ascultarea</string>
     <string name="ime_voice_strip_allow_action">Permite</string>
@@ -1101,6 +1204,7 @@
     <string name="ime_web_search_need_key_body">Căutarea web necesită o cheie API de la Brave Search. Adăugați o cheie în setările pentru acest instrument.</string>
     <string name="ime_web_search_open_desc">Deschide în browser</string>
     <string name="ime_wiki_back_desc">Înapoi la rezultate</string>
+    <string name="ime_wiki_expand_desc">Măriți înălțimea articolului</string>
     <string name="ime_wiki_full_error">Aplicația nu poate încărca textul articolului.</string>
     <string name="ime_wiki_full_progress">Se încarcă articolul complet…</string>
     <string name="ime_wiki_idle_info">Caută un subiect pe %1$s.wikipedia.org. Citește rezumatul, deschide linkurile și inserează textul sau adresa articolului.</string>
@@ -1112,8 +1216,12 @@
     <string name="ime_wiki_links_progress">Se încarcă linkurile…</string>
     <string name="ime_wiki_no_results_empty">Căutarea nu a găsit nimic pentru „%1$s”.</string>
     <string name="ime_wiki_no_summary_empty">Acest articol nu are niciun rezumat.</string>
+    <string name="ime_wiki_open_browser_desc">Deschide articolul în browser</string>
+    <string name="ime_wiki_quote_markdown">„%1$s” (din [Wikipedia: %2$s](%3$s))</string>
+    <string name="ime_wiki_quote_plain">\"%1$s\" (Wikipedia: %2$s, %3$s)</string>
     <string name="ime_wiki_search_active_hint">Căutați pe Wikipedia. Apăsați Enter pentru a căuta</string>
     <string name="ime_wiki_search_hint">Căutați pe Wikipedia…</string>
+    <string name="ime_wiki_shrink_desc">Redu articolul la înălțimea tastaturii din nou</string>
     <string name="ime_wiki_tab_full_label">Articol complet</string>
     <string name="ime_wiki_tab_links_label">Linkuri</string>
     <string name="ime_wiki_tab_summary_label">Rezumat</string>
@@ -1163,6 +1271,7 @@
     <string name="ime_word_menu_delete">Șterge \"%1$s\"</string>
     <string name="ime_word_menu_edit">Editează…</string>
     <string name="ime_word_menu_search_all">Caută toate cuvintele pentru \"%1$s\"</string>
+    <string name="ime_word_menu_synonyms">Sinonime pentru \"%1$s\"</string>
     <string name="ime_word_spell_apply_desc">Folosește această ortografie</string>
     <string name="ime_word_spell_cancel_desc">Nu modificați ortografia</string>
     <string name="ime_word_spell_hint">Introduceți o nouă ortografie pentru \"%1$s\"</string>

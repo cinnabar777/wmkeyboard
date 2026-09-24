@@ -2,6 +2,13 @@
 <!-- Machine translated by Google Play. Do not edit by hand:
      regenerate with tools/i18n/pull-play-translations.py. -->
 <resources>
+    <string name="ime_ai_chat_ask_explain">Jelaskan dengan sederhana</string>
+    <string name="ime_ai_chat_ask_explain_prompt">Jelaskan ini dengan kata-kata sederhana.</string>
+    <string name="ime_ai_chat_ask_hint">Ajukan pertanyaan tentang teks tersebut, atau mulai dengan salah satu dari ini.</string>
+    <string name="ime_ai_chat_ask_summary">Ringkas</string>
+    <string name="ime_ai_chat_ask_summary_prompt">Berikan ringkasan singkat tentang ini.</string>
+    <string name="ime_ai_chat_ask_words">Kata-kata sulit</string>
+    <string name="ime_ai_chat_ask_words_prompt">Jelaskan kata-kata dan ide sulit di sini.</string>
     <string name="ime_ai_chat_attach_desc">Kirim teks dari kolom dengan pesan</string>
     <string name="ime_ai_chat_attach_remove_desc">Jangan kirim teks dari kolom tersebut</string>
     <plurals name="ime_ai_chat_attached_field">
@@ -12,6 +19,8 @@
         <item quantity="one">Pilihan Anda disertakan dengan pesan: %1$d karakter</item>
         <item quantity="other">Pilihan Anda disertakan dengan pesan: %1$d karakter</item>
     </plurals>
+    <string name="ime_ai_chat_attached_tool">Tentang %1$s</string>
+    <string name="ime_ai_chat_attached_tool_selection">Tentang kutipan dari %1$s</string>
     <plurals name="ime_ai_chat_attachment_sent">
         <item quantity="one">Dengan %1$d karakter teks</item>
         <item quantity="other">Dengan %1$d karakter teks</item>
@@ -99,6 +108,10 @@
     <string name="ime_ai_truncated_notice">Model berhenti lebih awal. Tingkatkan “Panjang respons maksimum” di pengaturan alat.</string>
     <string name="ime_ai_view_changes">Perubahan</string>
     <string name="ime_ai_view_result">Hasil</string>
+    <string name="ime_ask_ai_label_dict">Kamus: %1$s</string>
+    <string name="ime_ask_ai_label_grammar">Pemeriksaan tata bahasa</string>
+    <string name="ime_ask_ai_label_vocab">Kosakata: %1$s</string>
+    <string name="ime_ask_ai_label_wiki">Wikipedia: %1$s</string>
     <string name="ime_autofill_dismiss_desc">Sembunyikan saran isi otomatis</string>
     <string name="ime_calc_degrees_label">derajat</string>
     <string name="ime_calc_insert_action">Sisipkan</string>
@@ -127,6 +140,7 @@
     <string name="ime_camera_permission_action">Izinkan kamera</string>
     <string name="ime_camera_permission_body">Alat kamera memerlukan izin untuk menggunakan kamera. Aplikasi hanya mengambil foto saat Anda menekan tombol rana.</string>
     <string name="ime_camera_retake_action">Ambil ulang</string>
+    <string name="ime_camera_search_action">Cari</string>
     <string name="ime_camera_send_action">Kirim</string>
     <string name="ime_camera_shutter_desc">Ambil foto</string>
     <string name="ime_camera_starting_progress">Memulai kamera…</string>
@@ -144,6 +158,10 @@
     <string name="ime_clip_chip_image">Gambar disalin</string>
     <string name="ime_clip_chip_item">Item yang disalin</string>
     <string name="ime_clip_chip_screenshot">Tangkapan layar</string>
+    <plurals name="ime_clip_deleted">
+        <item quantity="one">Klip dihapus</item>
+        <item quantity="other">%1$d klip dihapus</item>
+    </plurals>
     <string name="ime_clip_edit">Edit</string>
     <string name="ime_clip_edit_placeholder">Ketik teks klip</string>
     <string name="ime_clip_edit_rich_note">Menyimpan perubahan akan menghilangkan pemformatan</string>
@@ -162,6 +180,18 @@
     <string name="ime_clip_info_private_detail">Papan klip menyembunyikan klip ini di panel dan menghapusnya lebih cepat daripada klip lainnya.</string>
     <string name="ime_clip_info_size">Ukuran</string>
     <string name="ime_clip_info_type">Tipe</string>
+    <plurals name="ime_clip_left_days">
+        <item quantity="one">%d hari tersisa</item>
+        <item quantity="other">%d hari tersisa</item>
+    </plurals>
+    <plurals name="ime_clip_left_hours">
+        <item quantity="one">tersisa %d jam</item>
+        <item quantity="other">tersisa %d jam</item>
+    </plurals>
+    <plurals name="ime_clip_left_minutes">
+        <item quantity="one">%d menit tersisa</item>
+        <item quantity="other">%d menit tersisa</item>
+    </plurals>
     <string name="ime_clip_number_desc">Klip %1$d</string>
     <string name="ime_clip_pin">Sematkan</string>
     <string name="ime_clip_send_as_sticker">Kirim sebagai stiker</string>
@@ -172,6 +202,7 @@
     <string name="ime_clip_type_rich_text">Teks kaya</string>
     <string name="ime_clip_type_text">Teks</string>
     <string name="ime_clip_type_video">Video</string>
+    <string name="ime_clip_undo_delete">Urungkan</string>
     <string name="ime_clip_unpin">Lepas sematan</string>
     <string name="ime_clip_video_desc">Video disalin</string>
     <string name="ime_clipboard_no_match">Tidak ada klip yang cocok dengan “%1$s”.</string>
@@ -203,10 +234,12 @@
     <string name="ime_dict_add_vocab_action">Tambahkan ke kosakata</string>
     <string name="ime_dict_antonyms_label">Antonim</string>
     <string name="ime_dict_error">Aplikasi tidak dapat menjangkau kamus. Periksa jaringan Anda dan coba lagi.</string>
+    <string name="ime_dict_from">Dari %1$s</string>
     <string name="ime_dict_idle_info">Cari kata bahasa Inggris. Tekan bilah pencarian dan ketik. Anda juga dapat meletakkan kursor pada kata sebelum membuka alat.</string>
     <string name="ime_dict_insert_action">Sisipkan</string>
     <string name="ime_dict_lookup_desc">Cari kata tersebut</string>
     <string name="ime_dict_lookup_progress">Mencari “%1$s”…</string>
+    <string name="ime_dict_no_sources">Semua sumber kamus tidak aktif. Aktifkan salah satu di setelan alat Kamus.</string>
     <string name="ime_dict_not_found_empty">Tidak ada entri untuk “%1$s”. Periksa ejaannya, atau coba bentuk dasar kata tersebut.</string>
     <string name="ime_dict_play_desc">Putar pelafalan</string>
     <string name="ime_dict_search_active_hint">Ketik kata…</string>
@@ -314,7 +347,15 @@
     <string name="ime_glide_word_list_offer">Pengetikan luncur memerlukan daftar kata %1$s</string>
     <string name="ime_glide_word_list_offer_dismiss_desc">Tutup</string>
     <string name="ime_grammar_all_filtered_empty">Setiap masalah yang ditemukan disembunyikan oleh filter</string>
+    <string name="ime_grammar_ask_ai_desc">Tanya AI tentang masalah ini</string>
     <string name="ime_grammar_category_kind_label">%1$s • %2$s</string>
+    <string name="ime_grammar_deepl_action_desc">Perbaiki teks dengan DeepL Write</string>
+    <string name="ime_grammar_deepl_dismiss_desc">Tutup hasil DeepL Write</string>
+    <string name="ime_grammar_deepl_error">DeepL Write tidak merespons</string>
+    <string name="ime_grammar_deepl_replace_action">Ganti</string>
+    <string name="ime_grammar_deepl_replace_failed_toast">Teks di kolom ini tidak dapat diganti</string>
+    <string name="ime_grammar_deepl_title">DeepL Write</string>
+    <string name="ime_grammar_deepl_unchanged">DeepL Write tidak memiliki perubahan</string>
     <string name="ime_grammar_dialect_desc">Pilih dialek</string>
     <string name="ime_grammar_dismiss_desc">Sembunyikan masalah ini</string>
     <string name="ime_grammar_empty_hint">Ketik teks, atau buka kolom yang berisi teks. Masalah akan muncul di sini. Pemeriksaan berjalan secara offline.</string>
@@ -346,6 +387,7 @@
     <string name="ime_icons_empty_info">Untuk menambahkan paket ikon, buka pengaturan.</string>
     <string name="ime_icons_more_label">Paket ikon lainnya</string>
     <string name="ime_icons_pick_info">Tekan paket ikon untuk menggunakannya pada tombol dan alat.</string>
+    <string name="ime_image_search_by_photo_desc">Telusuri dengan foto</string>
     <string name="ime_image_search_empty">Tidak ada gambar untuk “%1$s”</string>
     <string name="ime_image_search_hint">Cari gambar</string>
     <string name="ime_image_search_idle">Ketik pencarian dan tekan enter. Tekan gambar untuk menyisipkannya. Tekan dan tahan untuk menyisipkan tautannya.</string>
@@ -376,6 +418,8 @@
     <string name="ime_kde_loop">Ulangi</string>
     <string name="ime_kde_media_empty_body">Mulai pemutar di sana dan itu akan muncul di sini</string>
     <string name="ime_kde_media_empty_title">Tidak ada yang diputar di komputer</string>
+    <string name="ime_kde_media_unsupported_body">KDE Connect miliknya tidak memungkinkan ponsel mengontrol musik atau video. KDE Connect di Mac tidak pernah bisa melakukannya</string>
+    <string name="ime_kde_media_unsupported_title">Komputer ini tidak membagikan pemutarnya</string>
     <string name="ime_kde_not_listening">Aplikasi lain di ponsel ini menggunakan port KDE Connect. Komputer masih dapat menemukan keyboard ini, tetapi tekan Segarkan di sisi ini.</string>
     <string name="ime_kde_notice_clipboard_empty">Tidak ada yang bisa dikirim dari papan klip</string>
     <string name="ime_kde_notice_clipboard_sent">Papan klip terkirim</string>
@@ -426,10 +470,12 @@
     <string name="ime_kde_send_empty">Kirim papan klip, apa yang Anda tulis, atau file. Apa yang dikirim komputer akan mendarat di sini dan di Unduhan</string>
     <string name="ime_kde_send_field">Teks di kolom</string>
     <string name="ime_kde_send_files">File…</string>
+    <string name="ime_kde_send_unsupported">Komputer ini tidak menerima file atau teks dari ponsel</string>
     <string name="ime_kde_settings">Pengaturan</string>
     <string name="ime_kde_shuffle">Acak</string>
     <string name="ime_kde_slides_end">Akhir</string>
     <string name="ime_kde_slides_next">Slide berikutnya</string>
+    <string name="ime_kde_slides_no_pointer">Komputer ini tidak memiliki penunjuk untuk slide</string>
     <string name="ime_kde_slides_pointer">Tahan dan seret untuk penunjuk</string>
     <string name="ime_kde_slides_previous">Slide sebelumnya</string>
     <string name="ime_kde_slides_start">Mulai</string>
@@ -489,11 +535,25 @@
     <string name="ime_language_switch_title">Bahasa input</string>
     <string name="ime_launcher_activities_label">Layar</string>
     <string name="ime_launcher_app_info_action">Info aplikasi</string>
+    <string name="ime_launcher_combo_label">%1$s + %2$s</string>
+    <string name="ime_launcher_combo_open_action">Buka keduanya dalam layar terbagi</string>
+    <string name="ime_launcher_combo_remove_action">Hapus pasangan ini</string>
+    <string name="ime_launcher_combos_label">Pasangan layar terbagi</string>
     <string name="ime_launcher_empty">Tidak ada aplikasi yang cocok</string>
+    <string name="ime_launcher_floating_unsupported">Perangkat ini mungkin akan membukanya dalam layar penuh</string>
     <string name="ime_launcher_hidden_label">Disembunyikan dari kisi</string>
     <string name="ime_launcher_hide_action">Sembunyikan aplikasi dari kisi</string>
     <string name="ime_launcher_loading">Memuat aplikasi…</string>
+    <string name="ime_launcher_menu_close">Tutup menu</string>
     <string name="ime_launcher_not_exported_label">Tidak dapat dibuka dari luar aplikasi</string>
+    <string name="ime_launcher_open_action">Buka</string>
+    <string name="ime_launcher_open_floating_action">Buka di jendela mengambang</string>
+    <string name="ime_launcher_open_split_action">Buka di layar terpisah</string>
+    <string name="ime_launcher_page_action">Layar, sembunyikan, dan info Aplikasi…</string>
+    <string name="ime_launcher_page_no_screens_action">Sembunyikan dan info Aplikasi…</string>
+    <string name="ime_launcher_pair_action">Pasangkan di layar terpisah dengan…</string>
+    <string name="ime_launcher_pair_cancel">Batal</string>
+    <string name="ime_launcher_pair_prompt">Ketuk aplikasi untuk dibuka di samping %1$s</string>
     <string name="ime_launcher_pin_action">Sematkan aplikasi</string>
     <string name="ime_launcher_pinned_label">Disematkan</string>
     <string name="ime_launcher_recents_label">Terbaru</string>
@@ -669,9 +729,11 @@
     <string name="ime_sandbox_offer_only">Geser hanya menggunakan kata-kata Anda?</string>
     <string name="ime_sandbox_offer_prefer">Sesuaikan gesekan dengan kata-kata Anda?</string>
     <string name="ime_search_attribution_brave">via Brave</string>
+    <string name="ime_selection_ask_ai">Tanya AI</string>
     <string name="ime_selection_macro_back_desc">Kembali ke tindakan pilihan</string>
     <string name="ime_selection_macro_bengali_unavailable_toast">Bahasa Bengali tidak dimuat</string>
     <string name="ime_selection_macro_busy_desc">Sedang memproses</string>
+    <string name="ime_selection_macro_deepl_clean_toast">DeepL Write tidak memiliki apa pun untuk diubah</string>
     <string name="ime_selection_macro_find_none_toast">Tidak ada kecocokan lain</string>
     <string name="ime_selection_macro_grammar_clean_toast">Tidak ada yang perlu diperbaiki</string>
     <string name="ime_selection_macro_grammar_unavailable_toast">Pemeriksa tata bahasa tidak tersedia</string>
@@ -680,6 +742,7 @@
     <string name="ime_selection_macro_nothing_to_undo_toast">Tidak ada lagi yang bisa dibatalkan</string>
     <string name="ime_selection_macro_open_in_desc">Buka di %1$s</string>
     <string name="ime_selection_macro_stop_label">Berhenti</string>
+    <string name="ime_selection_quote">Kutip</string>
     <string name="ime_service_already_in_settings_toast">Anda sudah berada di pengaturan</string>
     <string name="ime_service_autocorrect_off_toast">Koreksi otomatis nonaktif</string>
     <string name="ime_service_autocorrect_on_toast">Koreksi otomatis aktif</string>
@@ -710,6 +773,11 @@
     <string name="ime_service_phonetic_english_needs_secondary_toast">Aktifkan bahasa Inggris di bawah Bahasa, %1$s, Juga sarankan dari</string>
     <string name="ime_service_phonetic_english_off_toast">Kata-kata bahasa Inggris hanya disarankan</string>
     <string name="ime_service_phonetic_english_on_toast">Kata bahasa Inggris tetap dalam bahasa Inggris</string>
+    <string name="ime_service_photo_search_blocked">Penghemat data tidak mengizinkan pencarian web menggunakan koneksi ini</string>
+    <string name="ime_service_photo_search_metered_ask">Koneksi ini terukur. Untuk mengirim foto, tekan Cari lagi.</string>
+    <string name="ime_service_photo_search_no_app">Tidak ada aplikasi di ponsel ini yang dapat mencari dengan foto</string>
+    <string name="ime_service_photo_search_no_browser">Tidak ada browser di ponsel ini yang dapat membuka hasilnya</string>
+    <string name="ime_service_photo_search_sending">Mengirim foto ke situs pencarian</string>
     <string name="ime_service_plugins_all_off_notice">Setiap plugin yang Anda instal dinonaktifkan. Aktifkan salah satu di bawah Kelola plugin.</string>
     <string name="ime_service_plugins_off_notice">Plugin dimatikan. Nyalakan di Pengaturan untuk menginstal dan menjalankannya.</string>
     <string name="ime_service_power_saving_off_toast">Penghemat daya nonaktif</string>
@@ -790,10 +858,22 @@
     <string name="ime_sound_volume_label">Volume</string>
     <string name="ime_sticker_add_desc">Tambahkan stiker</string>
     <string name="ime_sticker_add_to_pack_action">Tambahkan ke %1$s</string>
+    <string name="ime_sticker_info_emoji">Emoji: %1$s</string>
+    <string name="ime_sticker_info_keywords">Kata kunci: %1$s</string>
+    <string name="ime_sticker_info_pack">Paket: %1$s</string>
+    <string name="ime_sticker_info_untitled">Tanpa judul</string>
     <string name="ime_sticker_local_search_empty">Tidak ada stiker Anda yang cocok dengan “%1$s”</string>
     <string name="ime_sticker_manage_packs_action">Kelola paket</string>
     <string name="ime_sticker_need_key_body">Alat stiker memerlukan kunci API dari Klipy atau GIPHY. Kedua kunci tersebut gratis. Tambahkan kunci di pengaturan untuk alat ini.</string>
     <string name="ime_sticker_no_packs_empty">Belum ada paket stiker. Buat paket di pengaturan. Anda juga dapat menekan dan menahan stiker dari Klipy atau GIPHY untuk menyimpannya di sini.</string>
+    <plurals name="ime_sticker_offer_count">
+        <item quantity="one">%1$d stiker</item>
+        <item quantity="other">%1$d stiker</item>
+    </plurals>
+    <string name="ime_sticker_offer_dismiss_desc">Sembunyikan stiker untuk %1$s</string>
+    <string name="ime_sticker_offer_item_desc">Kirim stiker %1$s</string>
+    <string name="ime_sticker_offer_item_untitled_desc">Kirim stiker ini</string>
+    <string name="ime_sticker_offer_more">+%1$d</string>
     <string name="ime_sticker_pack_all_label">Semua</string>
     <string name="ime_sticker_pack_empty">Paket ini kosong.</string>
     <string name="ime_sticker_save_new_pack_action">Simpan ke paket baru</string>
@@ -804,8 +884,24 @@
     <string name="ime_suggestion_hold_label">Opsi kata</string>
     <string name="ime_suggestion_never_suggest">Jangan pernah sarankan \"%1$s\"</string>
     <string name="ime_suggestions_show_desc">Tampilkan baris saran</string>
+    <string name="ime_symbol_row_delete_confirm_body">Set tersebut dan semua entrinya akan dihapus. Mode papan tik yang menawarkannya akan menampilkan set Anda yang lain sebagai gantinya.</string>
+    <string name="ime_symbol_row_delete_confirm_title">Hapus \"%1$s\"?</string>
+    <string name="ime_symbol_row_delete_set">Hapus set \"%1$s\"</string>
+    <string name="ime_symbol_row_hide_in_mode">Sembunyikan baris di %1$s</string>
+    <string name="ime_symbol_row_remove">Hapus \"%1$s\"</string>
+    <string name="ime_symbol_row_settings">Pengaturan baris simbol</string>
     <string name="ime_symbol_set_switch_desc">Ganti set simbol</string>
     <string name="ime_symbols_recents_label">Terbaru</string>
+    <string name="ime_synonyms_close_desc">Tutup sinonim</string>
+    <string name="ime_synonyms_failed">Tidak dapat menjangkau sumber sinonim. Periksa koneksi Anda dan coba lagi.</string>
+    <string name="ime_synonyms_from">Dari %1$s</string>
+    <string name="ime_synonyms_loading">Mencari sinonim…</string>
+    <string name="ime_synonyms_no_sources">Semua sumber sinonim nonaktif. Aktifkan salah satu di Mengetik, Saran, Sumber sinonim.</string>
+    <string name="ime_synonyms_not_found">Sinonim untuk \"%1$s\" tidak ditemukan.</string>
+    <string name="ime_synonyms_pick_desc">Gunakan \"%1$s\"</string>
+    <string name="ime_synonyms_retry">Coba lagi</string>
+    <string name="ime_synonyms_similar_note">Tidak ada sinonim yang tercantum untuk kata ini. Kata-kata ini memiliki arti yang serupa.</string>
+    <string name="ime_synonyms_title">Sinonim untuk \"%1$s\"</string>
     <string name="ime_textedit_doc_end_desc">Pindah ke akhir teks</string>
     <string name="ime_textedit_doc_start_desc">Pindah ke awal teks</string>
     <string name="ime_textedit_down_desc">Pindah ke bawah</string>
@@ -926,7 +1022,10 @@
     <string name="ime_toolbox_hint_mode">Mode %1$s aktif, jadi papan ketik menyimpan pengaturan ini untuk mode tersebut. Aplikasi lain menyimpan pengaturannya sendiri.</string>
     <string name="ime_trackpad_hint">Seret untuk memindahkan kursor</string>
     <string name="ime_trackpad_surface_desc">Trackpad. Seret untuk memindahkan kursor, tahan dan seret untuk memilih, ketuk dua kali untuk memilih kata</string>
+    <string name="ime_translate_all_languages_info">Termasuk bahasa yang akan diunduh</string>
+    <string name="ime_translate_all_languages_label">Semua bahasa</string>
     <string name="ime_translate_auto_detect_label">Deteksi bahasa</string>
+    <string name="ime_translate_deepl_label">DeepL</string>
     <string name="ime_translate_download_failed_error">Unduhan tidak selesai. Periksa koneksi, lalu coba lagi.</string>
     <string name="ime_translate_download_of_total_progress">%1$s dari %2$s</string>
     <string name="ime_translate_downloaded_desc">Diunduh</string>
@@ -1064,6 +1163,10 @@
     <string name="ime_voice_status_mic_blocked">Mikrofon diblokir. Aktifkan akses Mikrofon di Pengaturan Cepat, lalu coba lagi.</string>
     <string name="ime_voice_status_no_model">Pengetikan suara offline belum memiliki model</string>
     <string name="ime_voice_status_no_server">Server transkripsi belum memiliki alamat</string>
+    <plurals name="ime_voice_status_stops_in">
+        <item quantity="one">Berhenti dalam %d detik. Tekan untuk selesai sekarang.</item>
+        <item quantity="other">Berhenti dalam %d detik. Tekan untuk selesai sekarang.</item>
+    </plurals>
     <string name="ime_voice_status_transcribing">Mentranskripsikan…</string>
     <string name="ime_voice_stop_desc">Berhenti mendengarkan</string>
     <string name="ime_voice_strip_allow_action">Izinkan</string>
@@ -1102,6 +1205,7 @@
     <string name="ime_web_search_need_key_body">Pencarian web memerlukan kunci API dari Brave Search. Tambahkan kunci di pengaturan untuk alat ini.</string>
     <string name="ime_web_search_open_desc">Buka di browser</string>
     <string name="ime_wiki_back_desc">Kembali ke hasil</string>
+    <string name="ime_wiki_expand_desc">Buat artikel menjadi lebih tinggi</string>
     <string name="ime_wiki_full_error">Aplikasi tidak dapat memuat teks artikel.</string>
     <string name="ime_wiki_full_progress">Memuat artikel lengkap…</string>
     <string name="ime_wiki_idle_info">Cari subjek di %1$s.wikipedia.org. Baca ringkasan, buka tautan, dan masukkan teks atau alamat artikel.</string>
@@ -1113,8 +1217,12 @@
     <string name="ime_wiki_links_progress">Memuat tautan…</string>
     <string name="ime_wiki_no_results_empty">Pencarian tidak menemukan apa pun untuk “%1$s”.</string>
     <string name="ime_wiki_no_summary_empty">Artikel ini tidak memiliki ringkasan.</string>
+    <string name="ime_wiki_open_browser_desc">Buka artikel di peramban</string>
+    <string name="ime_wiki_quote_markdown">\"%1$s\" (dari [Wikipedia: %2$s](%3$s))</string>
+    <string name="ime_wiki_quote_plain">\"%1$s\" (Wikipedia: %2$s, %3$s)</string>
     <string name="ime_wiki_search_active_hint">Cari di Wikipedia. Tekan enter untuk mencari</string>
     <string name="ime_wiki_search_hint">Cari Wikipedia…</string>
+    <string name="ime_wiki_shrink_desc">Kembalikan artikel ke tinggi keyboard</string>
     <string name="ime_wiki_tab_full_label">Artikel lengkap</string>
     <string name="ime_wiki_tab_links_label">Tautan</string>
     <string name="ime_wiki_tab_summary_label">Ringkasan</string>
@@ -1164,6 +1272,7 @@
     <string name="ime_word_menu_delete">Hapus \"%1$s\"</string>
     <string name="ime_word_menu_edit">Edit…</string>
     <string name="ime_word_menu_search_all">Cari semua kata untuk \"%1$s\"</string>
+    <string name="ime_word_menu_synonyms">Sinonim untuk \"%1$s\"</string>
     <string name="ime_word_spell_apply_desc">Gunakan ejaan ini</string>
     <string name="ime_word_spell_cancel_desc">Biarkan ejaan apa adanya</string>
     <string name="ime_word_spell_hint">Ketik ejaan baru untuk \"%1$s\"</string>

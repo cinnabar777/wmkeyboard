@@ -2,6 +2,13 @@
 <!-- Machine translated by Google Play. Do not edit by hand:
      regenerate with tools/i18n/pull-play-translations.py. -->
 <resources>
+    <string name="ime_ai_chat_ask_explain">Expliquer simplement</string>
+    <string name="ime_ai_chat_ask_explain_prompt">Expliquez ceci en termes simples.</string>
+    <string name="ime_ai_chat_ask_hint">Posez une question sur le texte ou commencez par l\'une de ces suggestions.</string>
+    <string name="ime_ai_chat_ask_summary">Résumer</string>
+    <string name="ime_ai_chat_ask_summary_prompt">Donnez-moi un court résumé de ceci.</string>
+    <string name="ime_ai_chat_ask_words">Mots difficiles</string>
+    <string name="ime_ai_chat_ask_words_prompt">Expliquez les mots et les idées difficiles dans ce texte.</string>
     <string name="ime_ai_chat_attach_desc">Envoyer le texte du champ avec le message</string>
     <string name="ime_ai_chat_attach_remove_desc">Ne pas envoyer le texte du champ</string>
     <plurals name="ime_ai_chat_attached_field">
@@ -12,6 +19,8 @@
         <item quantity="one">Votre sélection accompagne le message : %1$d caractère</item>
         <item quantity="other">Votre sélection accompagne le message : %1$d caractères</item>
     </plurals>
+    <string name="ime_ai_chat_attached_tool">À propos de %1$s</string>
+    <string name="ime_ai_chat_attached_tool_selection">À propos d\'un passage de %1$s</string>
     <plurals name="ime_ai_chat_attachment_sent">
         <item quantity="one">Avec %1$d caractère de texte</item>
         <item quantity="other">Avec %1$d caractères de texte</item>
@@ -99,6 +108,10 @@
     <string name="ime_ai_truncated_notice">Le modèle s\'est arrêté prématurément. Augmentez la « Longueur maximale de réponse » dans les paramètres de l\'outil.</string>
     <string name="ime_ai_view_changes">Modifications</string>
     <string name="ime_ai_view_result">Résultat</string>
+    <string name="ime_ask_ai_label_dict">Dictionnaire : %1$s</string>
+    <string name="ime_ask_ai_label_grammar">Vérification grammaticale</string>
+    <string name="ime_ask_ai_label_vocab">Vocabulaire : %1$s</string>
+    <string name="ime_ask_ai_label_wiki">Wikipédia : %1$s</string>
     <string name="ime_autofill_dismiss_desc">Masquer les suggestions de saisie automatique</string>
     <string name="ime_calc_degrees_label">deg</string>
     <string name="ime_calc_insert_action">Insérer</string>
@@ -127,6 +140,7 @@
     <string name="ime_camera_permission_action">Autoriser l\'appareil photo</string>
     <string name="ime_camera_permission_body">L\'outil appareil photo a besoin d\'une autorisation pour utiliser l\'appareil photo. L\'application prend une photo uniquement lorsque vous appuyez sur le déclencheur.</string>
     <string name="ime_camera_retake_action">Reprendre</string>
+    <string name="ime_camera_search_action">Rechercher</string>
     <string name="ime_camera_send_action">Envoyer</string>
     <string name="ime_camera_shutter_desc">Prendre une photo</string>
     <string name="ime_camera_starting_progress">Démarrage de la caméra…</string>
@@ -144,6 +158,10 @@
     <string name="ime_clip_chip_image">Image copiée</string>
     <string name="ime_clip_chip_item">Élément copié</string>
     <string name="ime_clip_chip_screenshot">Capture d\'écran</string>
+    <plurals name="ime_clip_deleted">
+        <item quantity="one">Clip supprimé</item>
+        <item quantity="other">%1$d clips supprimés</item>
+    </plurals>
     <string name="ime_clip_edit">Modifier</string>
     <string name="ime_clip_edit_placeholder">Saisissez le texte du clip</string>
     <string name="ime_clip_edit_rich_note">L\'enregistrement d\'une modification supprime la mise en forme</string>
@@ -162,6 +180,18 @@
     <string name="ime_clip_info_private_detail">Le clavier masque ce clip dans le panneau et le supprime plus rapidement que les autres clips.</string>
     <string name="ime_clip_info_size">Taille</string>
     <string name="ime_clip_info_type">Type</string>
+    <plurals name="ime_clip_left_days">
+        <item quantity="one">%d jour restant</item>
+        <item quantity="other">%d jours restants</item>
+    </plurals>
+    <plurals name="ime_clip_left_hours">
+        <item quantity="one">%d h restante</item>
+        <item quantity="other">%d h restantes</item>
+    </plurals>
+    <plurals name="ime_clip_left_minutes">
+        <item quantity="one">%d min restante</item>
+        <item quantity="other">%d min restantes</item>
+    </plurals>
     <string name="ime_clip_number_desc">Clip %1$d</string>
     <string name="ime_clip_pin">Épingler</string>
     <string name="ime_clip_send_as_sticker">Envoyer comme autocollant</string>
@@ -172,6 +202,7 @@
     <string name="ime_clip_type_rich_text">Texte enrichi</string>
     <string name="ime_clip_type_text">Texte</string>
     <string name="ime_clip_type_video">Vidéo</string>
+    <string name="ime_clip_undo_delete">Annuler</string>
     <string name="ime_clip_unpin">Détacher</string>
     <string name="ime_clip_video_desc">Vidéo copiée</string>
     <string name="ime_clipboard_no_match">Aucun élément ne correspond à « %1$s ».</string>
@@ -203,10 +234,12 @@
     <string name="ime_dict_add_vocab_action">Ajouter au vocabulaire</string>
     <string name="ime_dict_antonyms_label">Antonymes</string>
     <string name="ime_dict_error">L\'application ne peut pas atteindre le dictionnaire. Vérifiez votre réseau et réessayez.</string>
+    <string name="ime_dict_from">Depuis %1$s</string>
     <string name="ime_dict_idle_info">Recherchez un mot anglais. Appuyez sur la barre de recherche et tapez. Vous pouvez également placer le curseur sur un mot avant d\'ouvrir l\'outil.</string>
     <string name="ime_dict_insert_action">Insérer</string>
     <string name="ime_dict_lookup_desc">Rechercher le mot</string>
     <string name="ime_dict_lookup_progress">Recherche de « %1$s »…</string>
+    <string name="ime_dict_no_sources">Toutes les sources de dictionnaire sont désactivées. Activez-en une dans les paramètres de l\'outil Dictionnaire.</string>
     <string name="ime_dict_not_found_empty">Aucune entrée pour « %1$s ». Vérifiez l\'orthographe ou essayez la forme de base du mot.</string>
     <string name="ime_dict_play_desc">Écouter la prononciation</string>
     <string name="ime_dict_search_active_hint">Tapez un mot…</string>
@@ -314,7 +347,15 @@
     <string name="ime_glide_word_list_offer">La saisie par glissement nécessite une liste de mots %1$s</string>
     <string name="ime_glide_word_list_offer_dismiss_desc">Ignorer</string>
     <string name="ime_grammar_all_filtered_empty">Tous les problèmes trouvés sont masqués par le filtre</string>
+    <string name="ime_grammar_ask_ai_desc">Demander à l\'IA à propos de ce problème</string>
     <string name="ime_grammar_category_kind_label">%1$s • %2$s</string>
+    <string name="ime_grammar_deepl_action_desc">Améliorer le texte avec DeepL Write</string>
+    <string name="ime_grammar_deepl_dismiss_desc">Fermer le résultat de DeepL Write</string>
+    <string name="ime_grammar_deepl_error">DeepL Write n\'a pas répondu</string>
+    <string name="ime_grammar_deepl_replace_action">Remplacer</string>
+    <string name="ime_grammar_deepl_replace_failed_toast">Le texte dans ce champ ne peut pas être remplacé</string>
+    <string name="ime_grammar_deepl_title">DeepL Write</string>
+    <string name="ime_grammar_deepl_unchanged">DeepL Write n\'a rien à modifier</string>
     <string name="ime_grammar_dialect_desc">Sélectionnez le dialecte</string>
     <string name="ime_grammar_dismiss_desc">Masquer ce problème</string>
     <string name="ime_grammar_empty_hint">Tapez du texte ou ouvrez un champ contenant du texte. Les problèmes s\'affichent ici. Les vérifications s\'effectuent hors ligne.</string>
@@ -346,6 +387,7 @@
     <string name="ime_icons_empty_info">Pour ajouter des packs d\'icônes, ouvrez les paramètres.</string>
     <string name="ime_icons_more_label">Plus de packs d\'icônes</string>
     <string name="ime_icons_pick_info">Appuyez sur un pack d\'icônes pour l\'utiliser sur les touches et les outils.</string>
+    <string name="ime_image_search_by_photo_desc">Rechercher avec une photo</string>
     <string name="ime_image_search_empty">Aucune image pour « %1$s »</string>
     <string name="ime_image_search_hint">Rechercher des images</string>
     <string name="ime_image_search_idle">Tapez une recherche et appuyez sur Entrée. Appuyez sur une image pour l\'insérer. Maintenez appuyé pour insérer son lien.</string>
@@ -376,6 +418,8 @@
     <string name="ime_kde_loop">Répéter</string>
     <string name="ime_kde_media_empty_body">Lancez un lecteur là-bas et il apparaîtra ici</string>
     <string name="ime_kde_media_empty_title">Rien n\'est en cours de lecture sur l\'ordinateur</string>
+    <string name="ime_kde_media_unsupported_body">Son KDE Connect ne permet pas à un téléphone de contrôler la musique ou la vidéo. KDE Connect sur Mac ne le permet jamais</string>
+    <string name="ime_kde_media_unsupported_title">Cet ordinateur ne partage pas ses lecteurs</string>
     <string name="ime_kde_not_listening">Une autre application sur ce téléphone utilise le port KDE Connect. Les ordinateurs peuvent toujours trouver ce clavier, mais appuyez sur Actualiser de ce côté.</string>
     <string name="ime_kde_notice_clipboard_empty">Rien dans le presse-papiers à envoyer</string>
     <string name="ime_kde_notice_clipboard_sent">Presse-papiers envoyé</string>
@@ -426,10 +470,12 @@
     <string name="ime_kde_send_empty">Envoyez le presse-papiers, ce que vous avez écrit ou des fichiers. Ce que l\'ordinateur envoie arrive ici et dans Téléchargements</string>
     <string name="ime_kde_send_field">Texte dans le champ</string>
     <string name="ime_kde_send_files">Fichiers…</string>
+    <string name="ime_kde_send_unsupported">Cet ordinateur n\'accepte pas les fichiers ni le texte provenant du téléphone</string>
     <string name="ime_kde_settings">Paramètres</string>
     <string name="ime_kde_shuffle">Aléatoire</string>
     <string name="ime_kde_slides_end">Fin</string>
     <string name="ime_kde_slides_next">Diapositive suivante</string>
+    <string name="ime_kde_slides_no_pointer">Cet ordinateur ne dispose pas de pointeur pour les diapositives</string>
     <string name="ime_kde_slides_pointer">Maintenir et faire glisser pour le pointeur</string>
     <string name="ime_kde_slides_previous">Diapositive précédente</string>
     <string name="ime_kde_slides_start">Démarrer</string>
@@ -489,11 +535,25 @@
     <string name="ime_language_switch_title">Langue de saisie</string>
     <string name="ime_launcher_activities_label">Écrans</string>
     <string name="ime_launcher_app_info_action">Infos sur l\'application</string>
+    <string name="ime_launcher_combo_label">%1$s + %2$s</string>
+    <string name="ime_launcher_combo_open_action">Ouvrir les deux en écran partagé</string>
+    <string name="ime_launcher_combo_remove_action">Supprimer cette paire</string>
+    <string name="ime_launcher_combos_label">Paires pour l\'écran partagé</string>
     <string name="ime_launcher_empty">Aucune application ne correspond</string>
+    <string name="ime_launcher_floating_unsupported">Cet appareil peut l\'ouvrir en plein écran</string>
     <string name="ime_launcher_hidden_label">Masqué de la grille</string>
     <string name="ime_launcher_hide_action">Masquer l\'application de la grille</string>
     <string name="ime_launcher_loading">Chargement des applications…</string>
+    <string name="ime_launcher_menu_close">Fermer le menu</string>
     <string name="ime_launcher_not_exported_label">Non ouvrable depuis l\'extérieur de l\'application</string>
+    <string name="ime_launcher_open_action">Ouvrir</string>
+    <string name="ime_launcher_open_floating_action">Ouvrir dans une fenêtre flottante</string>
+    <string name="ime_launcher_open_split_action">Ouvrir en écran partagé</string>
+    <string name="ime_launcher_page_action">Écrans, masquer et informations sur l\'application…</string>
+    <string name="ime_launcher_page_no_screens_action">Masquer et infos sur l\'appli…</string>
+    <string name="ime_launcher_pair_action">Associer en écran partagé avec…</string>
+    <string name="ime_launcher_pair_cancel">Annuler</string>
+    <string name="ime_launcher_pair_prompt">Appuyez sur l\'application à ouvrir à côté de %1$s</string>
     <string name="ime_launcher_pin_action">Épingler l\'application</string>
     <string name="ime_launcher_pinned_label">Épinglé</string>
     <string name="ime_launcher_recents_label">Récent</string>
@@ -669,9 +729,11 @@
     <string name="ime_sandbox_offer_only">Glisser en utilisant uniquement vos mots ?</string>
     <string name="ime_sandbox_offer_prefer">Adapter le balayage à vos mots ?</string>
     <string name="ime_search_attribution_brave">via Brave</string>
+    <string name="ime_selection_ask_ai">Demander à l\'IA</string>
     <string name="ime_selection_macro_back_desc">Retour aux actions de sélection</string>
     <string name="ime_selection_macro_bengali_unavailable_toast">Le bengali n\'est pas chargé</string>
     <string name="ime_selection_macro_busy_desc">En cours</string>
+    <string name="ime_selection_macro_deepl_clean_toast">DeepL Write n\'a rien à modifier</string>
     <string name="ime_selection_macro_find_none_toast">Aucune autre correspondance</string>
     <string name="ime_selection_macro_grammar_clean_toast">Rien à corriger</string>
     <string name="ime_selection_macro_grammar_unavailable_toast">Le correcteur grammatical n\'est pas disponible</string>
@@ -680,6 +742,7 @@
     <string name="ime_selection_macro_nothing_to_undo_toast">Rien à annuler</string>
     <string name="ime_selection_macro_open_in_desc">Ouvrir dans %1$s</string>
     <string name="ime_selection_macro_stop_label">Arrêter</string>
+    <string name="ime_selection_quote">Citation</string>
     <string name="ime_service_already_in_settings_toast">Vous êtes déjà dans les paramètres</string>
     <string name="ime_service_autocorrect_off_toast">La correction automatique est désactivée</string>
     <string name="ime_service_autocorrect_on_toast">La correction automatique est activée</string>
@@ -710,6 +773,11 @@
     <string name="ime_service_phonetic_english_needs_secondary_toast">Activez l\'anglais sous Langues, %1$s, Suggérer également à partir de</string>
     <string name="ime_service_phonetic_english_off_toast">Les mots anglais sont seulement suggérés</string>
     <string name="ime_service_phonetic_english_on_toast">Les mots anglais restent en anglais</string>
+    <string name="ime_service_photo_search_blocked">L\'économiseur de données ne permet pas aux recherches Web d\'utiliser cette connexion</string>
+    <string name="ime_service_photo_search_metered_ask">Cette connexion est limitée. Pour envoyer la photo, appuyez à nouveau sur Rechercher.</string>
+    <string name="ime_service_photo_search_no_app">Aucune application sur ce téléphone ne peut effectuer de recherche avec une photo</string>
+    <string name="ime_service_photo_search_no_browser">Aucun navigateur sur ce téléphone ne peut ouvrir les résultats</string>
+    <string name="ime_service_photo_search_sending">Envoi de la photo au site de recherche</string>
     <string name="ime_service_plugins_all_off_notice">Tous les plugins installés sont désactivés. Activez-en un dans Gérer les plugins.</string>
     <string name="ime_service_plugins_off_notice">Les plugins sont désactivés. Activez-les dans les paramètres pour les installer et les exécuter.</string>
     <string name="ime_service_power_saving_off_toast">L\'économie d\'énergie est désactivée</string>
@@ -790,10 +858,22 @@
     <string name="ime_sound_volume_label">Volume</string>
     <string name="ime_sticker_add_desc">Ajouter des autocollants</string>
     <string name="ime_sticker_add_to_pack_action">Ajouter à %1$s</string>
+    <string name="ime_sticker_info_emoji">Emoji : %1$s</string>
+    <string name="ime_sticker_info_keywords">Mots-clés : %1$s</string>
+    <string name="ime_sticker_info_pack">Pack : %1$s</string>
+    <string name="ime_sticker_info_untitled">Sans titre</string>
     <string name="ime_sticker_local_search_empty">Aucun de vos autocollants ne correspond à « %1$s »</string>
     <string name="ime_sticker_manage_packs_action">Gérer les packs</string>
     <string name="ime_sticker_need_key_body">L\'outil d\'autocollants nécessite une clé API de Klipy ou GIPHY. Les deux clés sont gratuites. Ajoutez une clé dans les paramètres de cet outil.</string>
     <string name="ime_sticker_no_packs_empty">Aucun pack d\'autocollants pour le moment. Créez un pack dans les paramètres. Vous pouvez également appuyer longuement sur un autocollant de Klipy ou GIPHY pour l\'enregistrer ici.</string>
+    <plurals name="ime_sticker_offer_count">
+        <item quantity="one">%1$d autocollant</item>
+        <item quantity="other">%1$d autocollants</item>
+    </plurals>
+    <string name="ime_sticker_offer_dismiss_desc">Masquer les autocollants pour %1$s</string>
+    <string name="ime_sticker_offer_item_desc">Envoyer le sticker %1$s</string>
+    <string name="ime_sticker_offer_item_untitled_desc">Envoyer cet autocollant</string>
+    <string name="ime_sticker_offer_more">+%1$d</string>
     <string name="ime_sticker_pack_all_label">Tout</string>
     <string name="ime_sticker_pack_empty">Ce pack est vide.</string>
     <string name="ime_sticker_save_new_pack_action">Enregistrer dans un nouveau pack</string>
@@ -804,8 +884,24 @@
     <string name="ime_suggestion_hold_label">Options de mots</string>
     <string name="ime_suggestion_never_suggest">Ne jamais suggérer \"%1$s\"</string>
     <string name="ime_suggestions_show_desc">Afficher la barre de suggestions</string>
+    <string name="ime_symbol_row_delete_confirm_body">L\'ensemble et toutes ses entrées seront supprimés. Un mode de clavier qui le proposait affichera vos autres ensembles à la place.</string>
+    <string name="ime_symbol_row_delete_confirm_title">Supprimer \"%1$s\" ?</string>
+    <string name="ime_symbol_row_delete_set">Supprimer le jeu \"%1$s\"</string>
+    <string name="ime_symbol_row_hide_in_mode">Masquer la ligne dans %1$s</string>
+    <string name="ime_symbol_row_remove">Supprimer \"%1$s\"</string>
+    <string name="ime_symbol_row_settings">Paramètres de la ligne de symboles</string>
     <string name="ime_symbol_set_switch_desc">Changer le jeu de symboles</string>
     <string name="ime_symbols_recents_label">Récents</string>
+    <string name="ime_synonyms_close_desc">Fermer les synonymes</string>
+    <string name="ime_synonyms_failed">Impossible d\'accéder à la source des synonymes. Vérifiez votre connexion et réessayez.</string>
+    <string name="ime_synonyms_from">De %1$s</string>
+    <string name="ime_synonyms_loading">Recherche de synonymes...</string>
+    <string name="ime_synonyms_no_sources">Toutes les sources de synonymes sont désactivées. Activez-en une dans Saisie, Suggestions, Sources de synonymes.</string>
+    <string name="ime_synonyms_not_found">Aucun synonyme trouvé pour \"%1$s\".</string>
+    <string name="ime_synonyms_pick_desc">Utiliser \"%1$s\"</string>
+    <string name="ime_synonyms_retry">Réessayer</string>
+    <string name="ime_synonyms_similar_note">Aucun synonyme n\'est listé pour ce mot. Ces mots ont une signification similaire.</string>
+    <string name="ime_synonyms_title">Synonymes pour \"%1$s\"</string>
     <string name="ime_textedit_doc_end_desc">Aller à la fin du texte</string>
     <string name="ime_textedit_doc_start_desc">Aller au début du texte</string>
     <string name="ime_textedit_down_desc">Déplacer vers le bas</string>
@@ -926,7 +1022,10 @@
     <string name="ime_toolbox_hint_mode">Le mode %1$s est activé, donc le clavier enregistre cet agencement pour ce mode. Les autres applications conservent le leur.</string>
     <string name="ime_trackpad_hint">Faites glisser pour déplacer le curseur</string>
     <string name="ime_trackpad_surface_desc">Pavé tactile. Faites glisser pour déplacer le curseur, maintenez et faites glisser pour sélectionner, appuyez deux fois pour sélectionner un mot</string>
+    <string name="ime_translate_all_languages_info">Également les langues à télécharger</string>
+    <string name="ime_translate_all_languages_label">Toutes les langues</string>
     <string name="ime_translate_auto_detect_label">Détecter la langue</string>
+    <string name="ime_translate_deepl_label">DeepL</string>
     <string name="ime_translate_download_failed_error">Le téléchargement n\'a pas abouti. Vérifiez la connexion, puis réessayez.</string>
     <string name="ime_translate_download_of_total_progress">%1$s sur %2$s</string>
     <string name="ime_translate_downloaded_desc">Téléchargé</string>
@@ -1064,6 +1163,10 @@
     <string name="ime_voice_status_mic_blocked">Le microphone est bloqué. Activez l\'accès au microphone dans les paramètres rapides, puis réessayez.</string>
     <string name="ime_voice_status_no_model">La saisie vocale hors ligne n\'a pas encore de modèle</string>
     <string name="ime_voice_status_no_server">Le serveur de transcription n\'a pas encore d\'adresse</string>
+    <plurals name="ime_voice_status_stops_in">
+        <item quantity="one">S\'arrête dans %d seconde. Appuyez pour terminer maintenant.</item>
+        <item quantity="other">S\'arrête dans %d secondes. Appuyez pour terminer maintenant.</item>
+    </plurals>
     <string name="ime_voice_status_transcribing">Transcription…</string>
     <string name="ime_voice_stop_desc">Arrêter l\'écoute</string>
     <string name="ime_voice_strip_allow_action">Autoriser</string>
@@ -1102,6 +1205,7 @@
     <string name="ime_web_search_need_key_body">La recherche Web nécessite une clé API de Brave Search. Ajoutez une clé dans les paramètres de cet outil.</string>
     <string name="ime_web_search_open_desc">Ouvrir dans le navigateur</string>
     <string name="ime_wiki_back_desc">Retour aux résultats</string>
+    <string name="ime_wiki_expand_desc">Agrandir l\'article</string>
     <string name="ime_wiki_full_error">L\'application ne peut pas charger le texte de l\'article.</string>
     <string name="ime_wiki_full_progress">Chargement de l\'article complet…</string>
     <string name="ime_wiki_idle_info">Recherchez un sujet sur %1$s.wikipedia.org. Lisez le résumé, ouvrez les liens et insérez du texte ou l\'adresse de l\'article.</string>
@@ -1113,8 +1217,12 @@
     <string name="ime_wiki_links_progress">Chargement des liens…</string>
     <string name="ime_wiki_no_results_empty">La recherche n\'a rien donné pour « %1$s ».</string>
     <string name="ime_wiki_no_summary_empty">Cet article n\'a pas de résumé.</string>
+    <string name="ime_wiki_open_browser_desc">Ouvrir l\'article dans le navigateur</string>
+    <string name="ime_wiki_quote_markdown">\"%1$s\" (extrait de [Wikipédia : %2$s](%3$s))</string>
+    <string name="ime_wiki_quote_plain">\"%1$s\" (Wikipédia : %2$s, %3$s)</string>
     <string name="ime_wiki_search_active_hint">Rechercher sur Wikipédia. Appuyez sur Entrée pour rechercher</string>
     <string name="ime_wiki_search_hint">Rechercher sur Wikipédia…</string>
+    <string name="ime_wiki_shrink_desc">Réduire à nouveau l\'article à la hauteur du clavier</string>
     <string name="ime_wiki_tab_full_label">Article complet</string>
     <string name="ime_wiki_tab_links_label">Liens</string>
     <string name="ime_wiki_tab_summary_label">Résumé</string>
@@ -1164,6 +1272,7 @@
     <string name="ime_word_menu_delete">Supprimer \"%1$s\"</string>
     <string name="ime_word_menu_edit">Modifier…</string>
     <string name="ime_word_menu_search_all">Rechercher tous les mots pour \"%1$s\"</string>
+    <string name="ime_word_menu_synonyms">Synonymes pour \"%1$s\"</string>
     <string name="ime_word_spell_apply_desc">Utiliser cette orthographe</string>
     <string name="ime_word_spell_cancel_desc">Laisser l\'orthographe telle quelle</string>
     <string name="ime_word_spell_hint">Saisissez une nouvelle orthographe pour \"%1$s\"</string>

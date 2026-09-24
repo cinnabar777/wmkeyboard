@@ -35,6 +35,7 @@
     <string name="common_enable">Activar</string>
     <string name="common_error_generic">Algo no funcionó. Inténtalo de nuevo.</string>
     <string name="common_error_network">Sin conexión. Comprueba tu red e inténtalo de nuevo.</string>
+    <string name="common_error_no_internet_permission">Esta versión del teclado no puede conectarse a Internet.</string>
     <string name="common_error_timeout">La solicitud tardó demasiado. Inténtalo de nuevo.</string>
     <string name="common_export">Exportar</string>
     <string name="common_import">Importar</string>

@@ -115,6 +115,7 @@
     <string name="core_content_selection_macro_chat_strike">Gạch ngang</string>
     <string name="core_content_selection_macro_colour">Màu sắc</string>
     <string name="core_content_selection_macro_copy">Sao chép</string>
+    <string name="core_content_selection_macro_deepl_write">DeepL Write</string>
     <string name="core_content_selection_macro_digits_latin">Chữ số</string>
     <string name="core_content_selection_macro_email">Email</string>
     <string name="core_content_selection_macro_fancy">Đẹp mắt</string>

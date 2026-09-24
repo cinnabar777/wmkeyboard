@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">Eksperimentāls</string>
     <string name="core_intel_llm_tier_recommended_label">Ieteicams</string>
     <string name="core_intel_llm_tier_untested_label">Nepārbaudīts</string>
+    <string name="core_intel_ocr_download_error_http">GitHub serveris nenosūtīja failu. Kļūdas kods ir HTTP %1$s.</string>
+    <string name="core_intel_ocr_download_error_interrupted">Lejupielādes laikā savienojums tika pārtraukts. Mēģiniet vēlreiz.</string>
+    <string name="core_intel_ocr_download_error_no_space">Ierīcē nav pietiekami daudz vietas. Vispirms jāatbrīvo aptuveni %1$s MB.</string>
+    <string name="core_intel_ocr_pack_error_broken">Lejupielādētie valodas dati ir bojāti, tāpēc skeneris tos nevarēja izmantot. Lejupielādējiet tos vēlreiz.</string>
 </resources>

@@ -35,6 +35,7 @@
     <string name="common_enable">Attiva</string>
     <string name="common_error_generic">Qualcosa non ha funzionato. Riprova.</string>
     <string name="common_error_network">Nessuna connessione. Controlla la rete e riprova.</string>
+    <string name="common_error_no_internet_permission">Questa versione della tastiera non può connettersi a Internet.</string>
     <string name="common_error_timeout">La richiesta ha richiesto troppo tempo. Riprova.</string>
     <string name="common_export">Esporta</string>
     <string name="common_import">Importa</string>

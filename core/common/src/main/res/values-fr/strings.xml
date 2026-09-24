@@ -35,6 +35,7 @@
     <string name="common_enable">Activer</string>
     <string name="common_error_generic">Une erreur est survenue. Réessayez.</string>
     <string name="common_error_network">Aucune connexion. Vérifiez votre réseau et réessayez.</string>
+    <string name="common_error_no_internet_permission">Cette version du clavier ne peut pas se connecter à Internet.</string>
     <string name="common_error_timeout">La requête a pris trop de temps. Réessayez.</string>
     <string name="common_export">Exporter</string>
     <string name="common_import">Importer</string>

@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">Experimentální</string>
     <string name="core_intel_llm_tier_recommended_label">Doporučeno</string>
     <string name="core_intel_llm_tier_untested_label">Netestováno</string>
+    <string name="core_intel_ocr_download_error_http">Server GitHub soubor neodeslal. Kód chyby je HTTP %1$s.</string>
+    <string name="core_intel_ocr_download_error_interrupted">Během stahování došlo k přerušení spojení. Zkuste to znovu.</string>
+    <string name="core_intel_ocr_download_error_no_space">V zařízení není dostatek úložného prostoru. Nejprve musíte uvolnit přibližně %1$s MB.</string>
+    <string name="core_intel_ocr_pack_error_broken">Stažená jazyková data jsou poškozená, takže je skener nemohl použít. Stáhněte je znovu.</string>
 </resources>

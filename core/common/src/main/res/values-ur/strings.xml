@@ -35,6 +35,7 @@
     <string name="common_enable">آن کریں</string>
     <string name="common_error_generic">کچھ کام نہیں کیا۔ دوبارہ کوشش کریں۔</string>
     <string name="common_error_network">کوئی کنکشن نہیں۔ اپنے نیٹ ورک کو چیک کریں اور دوبارہ کوشش کریں۔</string>
+    <string name="common_error_no_internet_permission">کی بورڈ کا یہ ورژن انٹرنیٹ سے منسلک نہیں ہو سکتا۔</string>
     <string name="common_error_timeout">درخواست میں بہت زیادہ وقت لگا۔ دوبارہ کوشش کریں۔</string>
     <string name="common_export">برآمد کریں</string>
     <string name="common_import">درآمد</string>

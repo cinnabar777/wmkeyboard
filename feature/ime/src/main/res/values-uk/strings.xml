@@ -2,6 +2,13 @@
 <!-- Machine translated by Google Play. Do not edit by hand:
      regenerate with tools/i18n/pull-play-translations.py. -->
 <resources>
+    <string name="ime_ai_chat_ask_explain">Пояснити просто</string>
+    <string name="ime_ai_chat_ask_explain_prompt">Поясніть це простими словами.</string>
+    <string name="ime_ai_chat_ask_hint">Запитайте про текст або почніть з одного з цих варіантів.</string>
+    <string name="ime_ai_chat_ask_summary">Підсумувати</string>
+    <string name="ime_ai_chat_ask_summary_prompt">Надай мені короткий виклад цього.</string>
+    <string name="ime_ai_chat_ask_words">Складні слова</string>
+    <string name="ime_ai_chat_ask_words_prompt">Поясніть складні слова та ідеї в цьому тексті.</string>
     <string name="ime_ai_chat_attach_desc">Надіслати текст поля разом із повідомленням</string>
     <string name="ime_ai_chat_attach_remove_desc">Не надсилати текст поля</string>
     <plurals name="ime_ai_chat_attached_field">
@@ -12,6 +19,8 @@
         <item quantity="one">Ваш вибір додається до повідомлення: %1$d символ</item>
         <item quantity="other">Ваш вибір додається до повідомлення: %1$d символів</item>
     </plurals>
+    <string name="ime_ai_chat_attached_tool">Про %1$s</string>
+    <string name="ime_ai_chat_attached_tool_selection">Про уривок з %1$s</string>
     <plurals name="ime_ai_chat_attachment_sent">
         <item quantity="one">З %1$d символом тексту</item>
         <item quantity="other">З %1$d символами тексту</item>
@@ -99,6 +108,10 @@
     <string name="ime_ai_truncated_notice">Модель зупинилася завчасно. Збільште «Максимальну довжину відповіді» в налаштуваннях інструмента.</string>
     <string name="ime_ai_view_changes">Зміни</string>
     <string name="ime_ai_view_result">Результат</string>
+    <string name="ime_ask_ai_label_dict">Словник: %1$s</string>
+    <string name="ime_ask_ai_label_grammar">Перевірка граматики</string>
+    <string name="ime_ask_ai_label_vocab">Словник: %1$s</string>
+    <string name="ime_ask_ai_label_wiki">Вікіпедія: %1$s</string>
     <string name="ime_autofill_dismiss_desc">Приховати пропозиції автозаповнення</string>
     <string name="ime_calc_degrees_label">град</string>
     <string name="ime_calc_insert_action">Вставити</string>
@@ -127,6 +140,7 @@
     <string name="ime_camera_permission_action">Дозволити камеру</string>
     <string name="ime_camera_permission_body">Інструменту камери потрібен дозвіл на використання камери. Додаток робить фото лише тоді, коли ви натискаєте кнопку затвора.</string>
     <string name="ime_camera_retake_action">Перезняти</string>
+    <string name="ime_camera_search_action">Пошук</string>
     <string name="ime_camera_send_action">Надіслати</string>
     <string name="ime_camera_shutter_desc">Зробити фото</string>
     <string name="ime_camera_starting_progress">Запуск камери…</string>
@@ -144,6 +158,10 @@
     <string name="ime_clip_chip_image">Скопійоване зображення</string>
     <string name="ime_clip_chip_item">Скопійований елемент</string>
     <string name="ime_clip_chip_screenshot">Знімок екрана</string>
+    <plurals name="ime_clip_deleted">
+        <item quantity="one">Кліп видалено</item>
+        <item quantity="other">Видалено кліпів: %1$d</item>
+    </plurals>
     <string name="ime_clip_edit">Редагувати</string>
     <string name="ime_clip_edit_placeholder">Введіть текст кліпу</string>
     <string name="ime_clip_edit_rich_note">Збереження змін призведе до втрати форматування</string>
@@ -162,6 +180,18 @@
     <string name="ime_clip_info_private_detail">Клавіатура приховує цей фрагмент на панелі та видаляє його раніше за інші фрагменти.</string>
     <string name="ime_clip_info_size">Розмір</string>
     <string name="ime_clip_info_type">Тип</string>
+    <plurals name="ime_clip_left_days">
+        <item quantity="one">Залишився %d день</item>
+        <item quantity="other">Залишилося %d днів</item>
+    </plurals>
+    <plurals name="ime_clip_left_hours">
+        <item quantity="one">Залишилася %d год</item>
+        <item quantity="other">Залишилося %d год</item>
+    </plurals>
+    <plurals name="ime_clip_left_minutes">
+        <item quantity="one">Залишилася %d хв</item>
+        <item quantity="other">Залишилося %d хв</item>
+    </plurals>
     <string name="ime_clip_number_desc">Кліп %1$d</string>
     <string name="ime_clip_pin">Закріпити</string>
     <string name="ime_clip_send_as_sticker">Надіслати як стікер</string>
@@ -172,6 +202,7 @@
     <string name="ime_clip_type_rich_text">Форматований текст</string>
     <string name="ime_clip_type_text">Текст</string>
     <string name="ime_clip_type_video">Відео</string>
+    <string name="ime_clip_undo_delete">Скасувати</string>
     <string name="ime_clip_unpin">Відкріпити</string>
     <string name="ime_clip_video_desc">Скопійоване відео</string>
     <string name="ime_clipboard_no_match">Немає кліпів, що відповідають “%1$s”.</string>
@@ -203,10 +234,12 @@
     <string name="ime_dict_add_vocab_action">Додати до словника</string>
     <string name="ime_dict_antonyms_label">Антоніми</string>
     <string name="ime_dict_error">Додаток не може отримати доступ до словника. Перевірте мережу та спробуйте ще раз.</string>
+    <string name="ime_dict_from">З %1$s</string>
     <string name="ime_dict_idle_info">Знайдіть англійське слово. Натисніть на рядок пошуку та введіть текст. Ви також можете встановити курсор на слово перед відкриттям інструмента.</string>
     <string name="ime_dict_insert_action">Вставити</string>
     <string name="ime_dict_lookup_desc">Знайти слово</string>
     <string name="ime_dict_lookup_progress">Пошук «%1$s»…</string>
+    <string name="ime_dict_no_sources">Усі джерела словників вимкнено. Увімкніть одне з них у налаштуваннях інструмента «Словник».</string>
     <string name="ime_dict_not_found_empty">Немає запису для “%1$s”. Перевірте написання або спробуйте базову форму слова.</string>
     <string name="ime_dict_play_desc">Відтворити вимову</string>
     <string name="ime_dict_search_active_hint">Введіть слово…</string>
@@ -314,7 +347,15 @@
     <string name="ime_glide_word_list_offer">Для введення жестами потрібен список слів %1$s</string>
     <string name="ime_glide_word_list_offer_dismiss_desc">Відхилити</string>
     <string name="ime_grammar_all_filtered_empty">Усі знайдені проблеми приховані фільтром</string>
+    <string name="ime_grammar_ask_ai_desc">Запитати ШІ про цю проблему</string>
     <string name="ime_grammar_category_kind_label">%1$s • %2$s</string>
+    <string name="ime_grammar_deepl_action_desc">Покращити текст за допомогою DeepL Write</string>
+    <string name="ime_grammar_deepl_dismiss_desc">Закрити результат DeepL Write</string>
+    <string name="ime_grammar_deepl_error">DeepL Write не відповів</string>
+    <string name="ime_grammar_deepl_replace_action">Замінити</string>
+    <string name="ime_grammar_deepl_replace_failed_toast">Текст у цьому полі неможливо замінити</string>
+    <string name="ime_grammar_deepl_title">DeepL Write</string>
+    <string name="ime_grammar_deepl_unchanged">DeepL Write немає що змінювати</string>
     <string name="ime_grammar_dialect_desc">Виберіть діалект</string>
     <string name="ime_grammar_dismiss_desc">Приховати цю проблему</string>
     <string name="ime_grammar_empty_hint">Введіть текст або відкрийте поле, що містить текст. Проблеми відображатимуться тут. Перевірка виконується офлайн.</string>
@@ -346,6 +387,7 @@
     <string name="ime_icons_empty_info">Щоб додати набори іконок, відкрийте налаштування.</string>
     <string name="ime_icons_more_label">Більше наборів іконок</string>
     <string name="ime_icons_pick_info">Натисніть на пакет іконок, щоб використовувати його на клавішах та інструментах.</string>
+    <string name="ime_image_search_by_photo_desc">Пошук за фото</string>
     <string name="ime_image_search_empty">Немає зображень для «%1$s»</string>
     <string name="ime_image_search_hint">Пошук зображень</string>
     <string name="ime_image_search_need_key_body">Для пошуку зображень потрібен ключ API від Brave Search. Додайте ключ у налаштуваннях цього інструмента.</string>
@@ -375,6 +417,8 @@
     <string name="ime_kde_loop">Повторити</string>
     <string name="ime_kde_media_empty_body">Запустіть програвач там, і він з\'явиться тут</string>
     <string name="ime_kde_media_empty_title">На комп\'ютері нічого не відтворюється</string>
+    <string name="ime_kde_media_unsupported_body">Його KDE Connect не дозволяє телефону керувати музикою або відео. KDE Connect на Mac ніколи цього не робить</string>
+    <string name="ime_kde_media_unsupported_title">Цей комп\'ютер не надає доступ до своїх плеєрів</string>
     <string name="ime_kde_not_listening">Інший додаток на цьому телефоні використовує порт KDE Connect. Комп\'ютери все ще можуть знайти цю клавіатуру, але натисніть «Оновити» з цього боку.</string>
     <string name="ime_kde_notice_clipboard_empty">У буфері обміну немає нічого для надсилання</string>
     <string name="ime_kde_notice_clipboard_sent">Буфер обміну надіслано</string>
@@ -425,10 +469,12 @@
     <string name="ime_kde_send_empty">Надсилайте вміст буфера обміну, написаний текст або файли. Те, що надсилає комп\'ютер, потрапляє сюди та в папку \"Завантаження\"</string>
     <string name="ime_kde_send_field">Текст у полі</string>
     <string name="ime_kde_send_files">Файли…</string>
+    <string name="ime_kde_send_unsupported">Цей комп\'ютер не приймає файли або текст з телефону</string>
     <string name="ime_kde_settings">Налаштування</string>
     <string name="ime_kde_shuffle">Перемішати</string>
     <string name="ime_kde_slides_end">Кінець</string>
     <string name="ime_kde_slides_next">Наступний слайд</string>
+    <string name="ime_kde_slides_no_pointer">Цей комп\'ютер не має вказівника для слайдів</string>
     <string name="ime_kde_slides_pointer">Утримуйте та перетягуйте для вказівника</string>
     <string name="ime_kde_slides_previous">Попередній слайд</string>
     <string name="ime_kde_slides_start">Пуск</string>
@@ -488,11 +534,25 @@
     <string name="ime_language_switch_title">Мова введення</string>
     <string name="ime_launcher_activities_label">Екрани</string>
     <string name="ime_launcher_app_info_action">Інформація про додаток</string>
+    <string name="ime_launcher_combo_label">%1$s + %2$s</string>
+    <string name="ime_launcher_combo_open_action">Відкрити обидва в розділеному екрані</string>
+    <string name="ime_launcher_combo_remove_action">Видалити цю пару</string>
+    <string name="ime_launcher_combos_label">Пари в розділеному екрані</string>
     <string name="ime_launcher_empty">Немає відповідних програм</string>
+    <string name="ime_launcher_floating_unsupported">Цей пристрій може відкривати його на весь екран</string>
     <string name="ime_launcher_hidden_label">Приховано з сітки</string>
     <string name="ime_launcher_hide_action">Приховати додаток із сітки</string>
     <string name="ime_launcher_loading">Завантаження додатків…</string>
+    <string name="ime_launcher_menu_close">Закрити меню</string>
     <string name="ime_launcher_not_exported_label">Не можна відкрити з-за меж програми</string>
+    <string name="ime_launcher_open_action">Відкрити</string>
+    <string name="ime_launcher_open_floating_action">Відкрити у плаваючому вікні</string>
+    <string name="ime_launcher_open_split_action">Відкрити в розділеному екрані</string>
+    <string name="ime_launcher_page_action">Екрани, приховати та інформація про додаток…</string>
+    <string name="ime_launcher_page_no_screens_action">Приховати та інформація про додаток…</string>
+    <string name="ime_launcher_pair_action">Пара в розділеному екрані з…</string>
+    <string name="ime_launcher_pair_cancel">Скасувати</string>
+    <string name="ime_launcher_pair_prompt">Торкніться додатка, щоб відкрити його поруч із %1$s</string>
     <string name="ime_launcher_pin_action">Закріпити додаток</string>
     <string name="ime_launcher_pinned_label">Закріплено</string>
     <string name="ime_launcher_recents_label">Нещодавні</string>
@@ -668,9 +728,11 @@
     <string name="ime_sandbox_offer_only">Свайпати, використовуючи лише ваші слова?</string>
     <string name="ime_sandbox_offer_prefer">Налаштувати введення жестами під ваші слова?</string>
     <string name="ime_search_attribution_brave">через Brave</string>
+    <string name="ime_selection_ask_ai">Запитати ШІ</string>
     <string name="ime_selection_macro_back_desc">Назад до дій з виділеним</string>
     <string name="ime_selection_macro_bengali_unavailable_toast">Бенгальська мова не завантажена</string>
     <string name="ime_selection_macro_busy_desc">Виконується</string>
+    <string name="ime_selection_macro_deepl_clean_toast">DeepL Write немає чого змінювати</string>
     <string name="ime_selection_macro_find_none_toast">Більше немає збігів</string>
     <string name="ime_selection_macro_grammar_clean_toast">Немає що виправляти</string>
     <string name="ime_selection_macro_grammar_unavailable_toast">Перевірка граматики недоступна</string>
@@ -679,6 +741,7 @@
     <string name="ime_selection_macro_nothing_to_undo_toast">Більше нічого скасувати</string>
     <string name="ime_selection_macro_open_in_desc">Відкрити в %1$s</string>
     <string name="ime_selection_macro_stop_label">Зупинити</string>
+    <string name="ime_selection_quote">Цитувати</string>
     <string name="ime_service_already_in_settings_toast">Ви вже в налаштуваннях</string>
     <string name="ime_service_autocorrect_off_toast">Автокорекцію вимкнено</string>
     <string name="ime_service_autocorrect_on_toast">Автокорекція увімкнена</string>
@@ -709,6 +772,11 @@
     <string name="ime_service_phonetic_english_needs_secondary_toast">Увімкніть англійську в розділі Мови, %1$s, Також пропонувати з</string>
     <string name="ime_service_phonetic_english_off_toast">Пропонуються лише англійські слова</string>
     <string name="ime_service_phonetic_english_on_toast">Англійські слова залишаються англійськими</string>
+    <string name="ime_service_photo_search_blocked">Економія трафіку не дозволяє веб-пошуку використовувати це з\'єднання</string>
+    <string name="ime_service_photo_search_metered_ask">Це з\'єднання з лімітованим трафіком. Щоб надіслати фото, знову натисніть «Пошук».</string>
+    <string name="ime_service_photo_search_no_app">На цьому телефоні немає додатків, які можуть шукати за фото</string>
+    <string name="ime_service_photo_search_no_browser">На цьому телефоні немає браузера, який міг би відкрити результати</string>
+    <string name="ime_service_photo_search_sending">Надсилання фото на сайт пошуку</string>
     <string name="ime_service_plugins_all_off_notice">Усі встановлені вами плагіни вимкнено. Увімкніть один із них у розділі \"Керування плагінами\".</string>
     <string name="ime_service_plugins_off_notice">Плагіни вимкнено. Увімкніть їх у налаштуваннях, щоб інсталювати та запускати.</string>
     <string name="ime_service_power_saving_off_toast">Енергозбереження вимкнено</string>
@@ -789,10 +857,22 @@
     <string name="ime_sound_volume_label">Гучність</string>
     <string name="ime_sticker_add_desc">Додати стікери</string>
     <string name="ime_sticker_add_to_pack_action">Додати до %1$s</string>
+    <string name="ime_sticker_info_emoji">Емодзі: %1$s</string>
+    <string name="ime_sticker_info_keywords">Ключові слова: %1$s</string>
+    <string name="ime_sticker_info_pack">Набір: %1$s</string>
+    <string name="ime_sticker_info_untitled">Без назви</string>
     <string name="ime_sticker_local_search_empty">Жоден ваш стікер не відповідає “%1$s”</string>
     <string name="ime_sticker_manage_packs_action">Керування наборами</string>
     <string name="ime_sticker_need_key_body">Для інструмента стікерів потрібен ключ API від Klipy або GIPHY. Обидва ключі безкоштовні. Додайте ключ у налаштуваннях цього інструмента.</string>
     <string name="ime_sticker_no_packs_empty">Поки що немає наборів стікерів. Створіть набір у налаштуваннях. Ви також можете натиснути й утримувати стікер з Klipy або GIPHY, щоб зберегти його тут.</string>
+    <plurals name="ime_sticker_offer_count">
+        <item quantity="one">%1$d стікер</item>
+        <item quantity="other">%1$d стікерів</item>
+    </plurals>
+    <string name="ime_sticker_offer_dismiss_desc">Приховати стікери для %1$s</string>
+    <string name="ime_sticker_offer_item_desc">Надіслати стікер %1$s</string>
+    <string name="ime_sticker_offer_item_untitled_desc">Надіслати цю наліпку</string>
+    <string name="ime_sticker_offer_more">+%1$d</string>
     <string name="ime_sticker_pack_all_label">Усі</string>
     <string name="ime_sticker_pack_empty">Цей набір порожній.</string>
     <string name="ime_sticker_save_new_pack_action">Зберегти в новий набір</string>
@@ -803,8 +883,24 @@
     <string name="ime_suggestion_hold_label">Параметри слова</string>
     <string name="ime_suggestion_never_suggest">Ніколи не пропонувати \"%1$s\"</string>
     <string name="ime_suggestions_show_desc">Показувати рядок підказок</string>
+    <string name="ime_symbol_row_delete_confirm_body">Набір і всі його записи будуть видалені. Режим клавіатури, який його пропонував, показуватиме ваші інші набори.</string>
+    <string name="ime_symbol_row_delete_confirm_title">Видалити \"%1$s\"?</string>
+    <string name="ime_symbol_row_delete_set">Видалити набір \"%1$s\"</string>
+    <string name="ime_symbol_row_hide_in_mode">Приховати рядок у %1$s</string>
+    <string name="ime_symbol_row_remove">Видалити \"%1$s\"</string>
+    <string name="ime_symbol_row_settings">Налаштування ряду символів</string>
     <string name="ime_symbol_set_switch_desc">Перемкнути набір символів</string>
     <string name="ime_symbols_recents_label">Нещодавні</string>
+    <string name="ime_synonyms_close_desc">Закрити синоніми</string>
+    <string name="ime_synonyms_failed">Не вдалося з\'єднатися з джерелом синонімів. Перевірте з\'єднання та спробуйте ще раз.</string>
+    <string name="ime_synonyms_from">З %1$s</string>
+    <string name="ime_synonyms_loading">Пошук синонімів…</string>
+    <string name="ime_synonyms_no_sources">Усі джерела синонімів вимкнено. Увімкніть одне з них у розділі «Введення», «Пропозиції», «Джерела синонімів».</string>
+    <string name="ime_synonyms_not_found">Синонімів для \"%1$s\" не знайдено.</string>
+    <string name="ime_synonyms_pick_desc">Використати \"%1$s\"</string>
+    <string name="ime_synonyms_retry">Спробувати знову</string>
+    <string name="ime_synonyms_similar_note">Для цього слова немає синонімів. Ці слова мають схоже значення.</string>
+    <string name="ime_synonyms_title">Синоніми до «%1$s»</string>
     <string name="ime_textedit_doc_end_desc">Перейти в кінець тексту</string>
     <string name="ime_textedit_doc_start_desc">Перейти на початок тексту</string>
     <string name="ime_textedit_down_desc">Перемістити вниз</string>
@@ -925,7 +1021,10 @@
     <string name="ime_toolbox_hint_mode">Увімкнено режим %1$s, тому клавіатура зберігає це розташування для цього режиму. Інші програми зберігають свої власні.</string>
     <string name="ime_trackpad_hint">Перетягніть, щоб перемістити курсор</string>
     <string name="ime_trackpad_surface_desc">Трекпад. Перетягніть, щоб перемістити курсор, утримуйте та перетягніть, щоб виділити, торкніться двічі, щоб вибрати слово</string>
+    <string name="ime_translate_all_languages_info">Також мови для завантаження</string>
+    <string name="ime_translate_all_languages_label">Усі мови</string>
     <string name="ime_translate_auto_detect_label">Визначити мову</string>
+    <string name="ime_translate_deepl_label">DeepL</string>
     <string name="ime_translate_download_failed_error">Завантаження не завершено. Перевірте з\'єднання та спробуйте ще раз.</string>
     <string name="ime_translate_download_of_total_progress">%1$s з %2$s</string>
     <string name="ime_translate_downloaded_desc">Завантажено</string>
@@ -1063,6 +1162,10 @@
     <string name="ime_voice_status_mic_blocked">Мікрофон заблоковано. Увімкніть доступ до мікрофона в швидких налаштуваннях, а потім спробуйте знову.</string>
     <string name="ime_voice_status_no_model">Для офлайн-голосового введення ще немає моделі</string>
     <string name="ime_voice_status_no_server">Сервер транскрипції ще не має адреси</string>
+    <plurals name="ime_voice_status_stops_in">
+        <item quantity="one">Зупинка через %d секунду. Натисніть, щоб завершити зараз.</item>
+        <item quantity="other">Зупинка через %d секунд. Натисніть, щоб завершити зараз.</item>
+    </plurals>
     <string name="ime_voice_status_transcribing">Розпізнавання…</string>
     <string name="ime_voice_stop_desc">Припинити прослуховування</string>
     <string name="ime_voice_strip_allow_action">Дозволити</string>
@@ -1101,6 +1204,7 @@
     <string name="ime_web_search_need_key_body">Для веб-пошуку потрібен ключ API від Brave Search. Додайте ключ у налаштуваннях цього інструменту.</string>
     <string name="ime_web_search_open_desc">Відкрити в браузері</string>
     <string name="ime_wiki_back_desc">Назад до результатів</string>
+    <string name="ime_wiki_expand_desc">Збільшити статтю</string>
     <string name="ime_wiki_full_error">Додаток не може завантажити текст статті.</string>
     <string name="ime_wiki_full_progress">Завантаження повної статті…</string>
     <string name="ime_wiki_idle_info">Шукайте тему на %1$s.wikipedia.org. Читайте резюме, відкривайте посилання та вставляйте текст або адресу статті.</string>
@@ -1112,8 +1216,12 @@
     <string name="ime_wiki_links_progress">Завантаження посилань…</string>
     <string name="ime_wiki_no_results_empty">Пошук нічого не дав для “%1$s”.</string>
     <string name="ime_wiki_no_summary_empty">Ця стаття не має короткого опису.</string>
+    <string name="ime_wiki_open_browser_desc">Відкрити статтю в браузері</string>
+    <string name="ime_wiki_quote_markdown">\"%1$s\" (з [Wikipedia: %2$s](%3$s))</string>
+    <string name="ime_wiki_quote_plain">\"%1$s\" (Вікіпедія: %2$s, %3$s)</string>
     <string name="ime_wiki_search_active_hint">Пошук у Вікіпедії. Натисніть Enter для пошуку</string>
     <string name="ime_wiki_search_hint">Пошук у Вікіпедії…</string>
+    <string name="ime_wiki_shrink_desc">Повернути статті висоту клавіатури</string>
     <string name="ime_wiki_tab_full_label">Повна стаття</string>
     <string name="ime_wiki_tab_links_label">Посилання</string>
     <string name="ime_wiki_tab_summary_label">Підсумок</string>
@@ -1163,6 +1271,7 @@
     <string name="ime_word_menu_delete">Видалити \"%1$s\"</string>
     <string name="ime_word_menu_edit">Редагувати…</string>
     <string name="ime_word_menu_search_all">Шукати всі слова для \"%1$s\"</string>
+    <string name="ime_word_menu_synonyms">Синоніми до \"%1$s\"</string>
     <string name="ime_word_spell_apply_desc">Використати це написання</string>
     <string name="ime_word_spell_cancel_desc">Залишити правопис без змін</string>
     <string name="ime_word_spell_hint">Введіть новий варіант написання для \"%1$s\"</string>

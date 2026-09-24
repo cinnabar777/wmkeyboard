@@ -2,6 +2,13 @@
 <!-- Machine translated by Google Play. Do not edit by hand:
      regenerate with tools/i18n/pull-play-translations.py. -->
 <resources>
+    <string name="ime_ai_chat_ask_explain">Razloži preprosto</string>
+    <string name="ime_ai_chat_ask_explain_prompt">Razloži to s preprostimi besedami.</string>
+    <string name="ime_ai_chat_ask_hint">Zastavite vprašanje o besedilu ali začnite z enim od teh.</string>
+    <string name="ime_ai_chat_ask_summary">Povzemi</string>
+    <string name="ime_ai_chat_ask_summary_prompt">Podaj mi kratek povzetek tega.</string>
+    <string name="ime_ai_chat_ask_words">Težke besede</string>
+    <string name="ime_ai_chat_ask_words_prompt">Razloži težke besede in ideje v tem besedilu.</string>
     <string name="ime_ai_chat_attach_desc">Pošlji besedilo polja s sporočilom</string>
     <string name="ime_ai_chat_attach_remove_desc">Ne pošlji besedila polja</string>
     <plurals name="ime_ai_chat_attached_field">
@@ -12,6 +19,8 @@
         <item quantity="one">Vaša izbira gre s sporočilom: %1$d znak</item>
         <item quantity="other">Vaša izbira gre s sporočilom: %1$d znakov</item>
     </plurals>
+    <string name="ime_ai_chat_attached_tool">O %1$s</string>
+    <string name="ime_ai_chat_attached_tool_selection">O odlomku iz %1$s</string>
     <plurals name="ime_ai_chat_attachment_sent">
         <item quantity="one">Z %1$d znakom besedila</item>
         <item quantity="other">Z %1$d znaki besedila</item>
@@ -99,6 +108,10 @@
     <string name="ime_ai_truncated_notice">Model se je prezgodaj ustavil. Povečajte »Največja dolžina odgovora« v nastavitvah orodja.</string>
     <string name="ime_ai_view_changes">Spremembe</string>
     <string name="ime_ai_view_result">Rezultat</string>
+    <string name="ime_ask_ai_label_dict">Slovar: %1$s</string>
+    <string name="ime_ask_ai_label_grammar">Preverjanje slovnice</string>
+    <string name="ime_ask_ai_label_vocab">Besedišče: %1$s</string>
+    <string name="ime_ask_ai_label_wiki">Wikipedia: %1$s</string>
     <string name="ime_autofill_dismiss_desc">Skrij predloge za samodejno izpolnjevanje</string>
     <string name="ime_calc_degrees_label">stop</string>
     <string name="ime_calc_insert_action">Vstavi</string>
@@ -127,6 +140,7 @@
     <string name="ime_camera_permission_action">Dovoli kamero</string>
     <string name="ime_camera_permission_body">Orodje za kamero potrebuje dovoljenje za uporabo kamere. Aplikacija posname fotografijo samo, ko pritisnete sprožilec.</string>
     <string name="ime_camera_retake_action">Ponovno posnemi</string>
+    <string name="ime_camera_search_action">Išči</string>
     <string name="ime_camera_send_action">Pošlji</string>
     <string name="ime_camera_shutter_desc">Posnemi fotografijo</string>
     <string name="ime_camera_starting_progress">Zaganjanje kamere…</string>
@@ -144,6 +158,10 @@
     <string name="ime_clip_chip_image">Kopirana slika</string>
     <string name="ime_clip_chip_item">Kopiran element</string>
     <string name="ime_clip_chip_screenshot">Posnetek zaslona</string>
+    <plurals name="ime_clip_deleted">
+        <item quantity="one">Posnetek izbrisan</item>
+        <item quantity="other">%1$d posnetkov izbrisanih</item>
+    </plurals>
     <string name="ime_clip_edit">Uredi</string>
     <string name="ime_clip_edit_placeholder">Vnesite besedilo izrezka</string>
     <string name="ime_clip_edit_rich_note">Shranjevanje spremembe odstrani oblikovanje</string>
@@ -162,6 +180,18 @@
     <string name="ime_clip_info_private_detail">Tipkovnica skrije ta posnetek v plošči in ga izbriše prej kot druge posnetke.</string>
     <string name="ime_clip_info_size">Velikost</string>
     <string name="ime_clip_info_type">Vrsta</string>
+    <plurals name="ime_clip_left_days">
+        <item quantity="one">Še %d dan</item>
+        <item quantity="other">Še %d dni</item>
+    </plurals>
+    <plurals name="ime_clip_left_hours">
+        <item quantity="one">Preostala %d h</item>
+        <item quantity="other">Preostalih %d h</item>
+    </plurals>
+    <plurals name="ime_clip_left_minutes">
+        <item quantity="one">Preostala %d min</item>
+        <item quantity="other">Preostalih %d min</item>
+    </plurals>
     <string name="ime_clip_number_desc">Posnetek %1$d</string>
     <string name="ime_clip_pin">Pripni</string>
     <string name="ime_clip_send_as_sticker">Pošlji kot nalepko</string>
@@ -172,6 +202,7 @@
     <string name="ime_clip_type_rich_text">Obogateno besedilo</string>
     <string name="ime_clip_type_text">Besedilo</string>
     <string name="ime_clip_type_video">Video</string>
+    <string name="ime_clip_undo_delete">Razveljavi</string>
     <string name="ime_clip_unpin">Odpni</string>
     <string name="ime_clip_video_desc">Kopiran videoposnetek</string>
     <string name="ime_clipboard_no_match">Noben posnetek se ne ujema z “%1$s”.</string>
@@ -203,10 +234,12 @@
     <string name="ime_dict_add_vocab_action">Dodaj v besednjak</string>
     <string name="ime_dict_antonyms_label">Protipomenke</string>
     <string name="ime_dict_error">Aplikacija ne more dostopati do slovarja. Preverite omrežno povezavo in poskusite znova.</string>
+    <string name="ime_dict_from">Od %1$s</string>
     <string name="ime_dict_idle_info">Poiščite angleško besedo. Pritisnite iskalno vrstico in tipkajte. Kazalko lahko postavite na besedo tudi preden odprete orodje.</string>
     <string name="ime_dict_insert_action">Vstavi</string>
     <string name="ime_dict_lookup_desc">Poišči besedo</string>
     <string name="ime_dict_lookup_progress">Iščem »%1$s«…</string>
+    <string name="ime_dict_no_sources">Vsi viri slovarjev so izklopljeni. Vklopite enega v nastavitvah orodja Slovar.</string>
     <string name="ime_dict_not_found_empty">Ni vnosa za „%1$s“. Preverite črkovanje ali poskusite z osnovno obliko besede.</string>
     <string name="ime_dict_play_desc">Predvajaj izgovorjavo</string>
     <string name="ime_dict_search_active_hint">Vnesite besedo...</string>
@@ -314,7 +347,15 @@
     <string name="ime_glide_word_list_offer">Drsno tipkanje potrebuje seznam besed %1$s</string>
     <string name="ime_glide_word_list_offer_dismiss_desc">Zavrzi</string>
     <string name="ime_grammar_all_filtered_empty">Vse najdene težave so skrite s filtrom</string>
+    <string name="ime_grammar_ask_ai_desc">Vprašaj umetno inteligenco o tej težavi</string>
     <string name="ime_grammar_category_kind_label">%1$s • %2$s</string>
+    <string name="ime_grammar_deepl_action_desc">Izboljšajte besedilo z DeepL Write</string>
+    <string name="ime_grammar_deepl_dismiss_desc">Zapri rezultat DeepL Write</string>
+    <string name="ime_grammar_deepl_error">DeepL Write se ni odzval</string>
+    <string name="ime_grammar_deepl_replace_action">Zamenjaj</string>
+    <string name="ime_grammar_deepl_replace_failed_toast">Besedila v tem polju ni mogoče zamenjati</string>
+    <string name="ime_grammar_deepl_title">DeepL Write</string>
+    <string name="ime_grammar_deepl_unchanged">DeepL Write nima česa spremeniti</string>
     <string name="ime_grammar_dialect_desc">Izberite narečje</string>
     <string name="ime_grammar_dismiss_desc">Skrij to težavo</string>
     <string name="ime_grammar_empty_hint">Vnesite besedilo ali odprite polje, ki vsebuje besedilo. Tukaj se bodo prikazale težave. Preverjanje poteka brez povezave.</string>
@@ -346,6 +387,7 @@
     <string name="ime_icons_empty_info">Za dodajanje paketov ikon odprite nastavitve.</string>
     <string name="ime_icons_more_label">Več paketov ikon</string>
     <string name="ime_icons_pick_info">Pritisnite paket ikon, da ga uporabite na tipkah in orodjih.</string>
+    <string name="ime_image_search_by_photo_desc">Iskanje s fotografijo</string>
     <string name="ime_image_search_empty">Ni slik za »%1$s«</string>
     <string name="ime_image_search_hint">Išči slike</string>
     <string name="ime_image_search_need_key_body">Iskanje slik zahteva ključ API od iskalnika Brave Search. V nastavitvah za to orodje dodajte ključ.</string>
@@ -375,6 +417,8 @@
     <string name="ime_kde_loop">Ponovi</string>
     <string name="ime_kde_media_empty_body">Zaženite predvajalnik tam in prikazal se bo tukaj</string>
     <string name="ime_kde_media_empty_title">V računalniku se nič ne predvaja</string>
+    <string name="ime_kde_media_unsupported_body">Njegov KDE Connect ne omogoča nadzora glasbe ali videoposnetkov s telefonom. KDE Connect na računalniku Mac tega nikoli ne zmore.</string>
+    <string name="ime_kde_media_unsupported_title">Ta računalnik ne deli svojih predvajalnikov</string>
     <string name="ime_kde_not_listening">Druga aplikacija v tem telefonu uporablja vrata KDE Connect. Računalniki lahko še vedno najdejo to tipkovnico, vendar na tej strani pritisnite Osveži.</string>
     <string name="ime_kde_notice_clipboard_empty">V odložišču ni ničesar za pošiljanje</string>
     <string name="ime_kde_notice_clipboard_sent">Odložišče poslano</string>
@@ -425,10 +469,12 @@
     <string name="ime_kde_send_empty">Pošlji odložišče, kar si napisal, ali datoteke. Kar pošlje računalnik, bo pristalo tukaj in v mapi Prenosi</string>
     <string name="ime_kde_send_field">Besedilo v polju</string>
     <string name="ime_kde_send_files">Datoteke…</string>
+    <string name="ime_kde_send_unsupported">Ta računalnik ne sprejema datotek ali besedila iz telefona</string>
     <string name="ime_kde_settings">Nastavitve</string>
     <string name="ime_kde_shuffle">Premešaj</string>
     <string name="ime_kde_slides_end">Konec</string>
     <string name="ime_kde_slides_next">Naslednji diapozitiv</string>
+    <string name="ime_kde_slides_no_pointer">Ta računalnik nima kazalca za prosojnice</string>
     <string name="ime_kde_slides_pointer">Pridržite in povlecite za kazalec</string>
     <string name="ime_kde_slides_previous">Prejšnja prosojnica</string>
     <string name="ime_kde_slides_start">Začni</string>
@@ -488,11 +534,25 @@
     <string name="ime_language_switch_title">Vnosni jezik</string>
     <string name="ime_launcher_activities_label">Zasloni</string>
     <string name="ime_launcher_app_info_action">Podatki o aplikaciji</string>
+    <string name="ime_launcher_combo_label">%1$s + %2$s</string>
+    <string name="ime_launcher_combo_open_action">Odpri obe v razdeljenem zaslonu</string>
+    <string name="ime_launcher_combo_remove_action">Odstrani ta par</string>
+    <string name="ime_launcher_combos_label">Pari za razdeljen zaslon</string>
     <string name="ime_launcher_empty">Nobena aplikacija se ne ujema</string>
+    <string name="ime_launcher_floating_unsupported">Ta naprava jo morda odpre čez cel zaslon</string>
     <string name="ime_launcher_hidden_label">Skrito v mreži</string>
     <string name="ime_launcher_hide_action">Skrij aplikacijo iz mreže</string>
     <string name="ime_launcher_loading">Nalaganje aplikacij…</string>
+    <string name="ime_launcher_menu_close">Zapri meni</string>
     <string name="ime_launcher_not_exported_label">Ni mogoče odpreti zunaj aplikacije</string>
+    <string name="ime_launcher_open_action">Odpri</string>
+    <string name="ime_launcher_open_floating_action">Odprite v lebdečem oknu</string>
+    <string name="ime_launcher_open_split_action">Odpri v razdeljenem zaslonu</string>
+    <string name="ime_launcher_page_action">Zasloni, skrivanje in informacije o aplikaciji...</string>
+    <string name="ime_launcher_page_no_screens_action">Skrij in informacije o aplikaciji...</string>
+    <string name="ime_launcher_pair_action">Seznani v razdeljenem zaslonu z...</string>
+    <string name="ime_launcher_pair_cancel">Prekliči</string>
+    <string name="ime_launcher_pair_prompt">Tapnite aplikacijo, ki jo želite odpreti poleg %1$s</string>
     <string name="ime_launcher_pin_action">Pripni aplikacijo</string>
     <string name="ime_launcher_pinned_label">Pripeto</string>
     <string name="ime_launcher_recents_label">Nedavno</string>
@@ -668,9 +728,11 @@
     <string name="ime_sandbox_offer_only">Drsenje samo z uporabo vaših besed?</string>
     <string name="ime_sandbox_offer_prefer">Prilagodite drsenje svojim besedam?</string>
     <string name="ime_search_attribution_brave">prek Brave</string>
+    <string name="ime_selection_ask_ai">Vprašaj umetno inteligenco</string>
     <string name="ime_selection_macro_back_desc">Nazaj na dejanja izbire</string>
     <string name="ime_selection_macro_bengali_unavailable_toast">Bengalščina ni naložena</string>
     <string name="ime_selection_macro_busy_desc">V obdelavi</string>
+    <string name="ime_selection_macro_deepl_clean_toast">DeepL Write nima česa spremeniti</string>
     <string name="ime_selection_macro_find_none_toast">Ni drugega zadetka</string>
     <string name="ime_selection_macro_grammar_clean_toast">Ničesar ni treba popraviti</string>
     <string name="ime_selection_macro_grammar_unavailable_toast">Preverjalnik slovnice ni na voljo</string>
@@ -679,6 +741,7 @@
     <string name="ime_selection_macro_nothing_to_undo_toast">Ničesar več za razveljavitev</string>
     <string name="ime_selection_macro_open_in_desc">Odpri v %1$s</string>
     <string name="ime_selection_macro_stop_label">Ustavi</string>
+    <string name="ime_selection_quote">Citiraj</string>
     <string name="ime_service_already_in_settings_toast">Že ste v nastavitvah</string>
     <string name="ime_service_autocorrect_off_toast">Samodejno popravljanje je izklopljeno</string>
     <string name="ime_service_autocorrect_on_toast">Samodejno popravljanje je vklopljeno</string>
@@ -709,6 +772,11 @@
     <string name="ime_service_phonetic_english_needs_secondary_toast">Vklopite angleščino pod Jeziki, %1$s, Prav tako predlagaj iz</string>
     <string name="ime_service_phonetic_english_off_toast">Angleške besede so le predlagane</string>
     <string name="ime_service_phonetic_english_on_toast">Angleške besede ostanejo angleške</string>
+    <string name="ime_service_photo_search_blocked">Varčevanje s podatki ne dovoljuje spletnim iskanjem uporabe te povezave</string>
+    <string name="ime_service_photo_search_metered_ask">Ta povezava je merjena. Za pošiljanje fotografije znova pritisnite Iskanje.</string>
+    <string name="ime_service_photo_search_no_app">Nobena aplikacija v tem telefonu ne more iskati s fotografijo</string>
+    <string name="ime_service_photo_search_no_browser">Noben brskalnik v tem telefonu ne more odpreti rezultatov</string>
+    <string name="ime_service_photo_search_sending">Pošiljanje fotografije na iskalno mesto.</string>
     <string name="ime_service_plugins_all_off_notice">Vsi nameščeni vtičniki so izklopljeni. Vklopite katerega od njih v razdelku Upravljanje vtičnikov.</string>
     <string name="ime_service_plugins_off_notice">Vtičniki so izklopljeni. Vklopite jih v Nastavitvah, da jih namestite in zaženete.</string>
     <string name="ime_service_power_saving_off_toast">Varčevanje z energijo je izklopljeno</string>
@@ -789,10 +857,22 @@
     <string name="ime_sound_volume_label">Glasnost</string>
     <string name="ime_sticker_add_desc">Dodaj nalepke</string>
     <string name="ime_sticker_add_to_pack_action">Dodaj v %1$s</string>
+    <string name="ime_sticker_info_emoji">Emoji: %1$s</string>
+    <string name="ime_sticker_info_keywords">Ključne besede: %1$s</string>
+    <string name="ime_sticker_info_pack">Paket: %1$s</string>
+    <string name="ime_sticker_info_untitled">Brez naslova</string>
     <string name="ime_sticker_local_search_empty">Nobena vaša nalepka se ne ujema z “%1$s”</string>
     <string name="ime_sticker_manage_packs_action">Upravljanje paketov</string>
     <string name="ime_sticker_need_key_body">Orodje za nalepke potrebuje ključ API od Klipy ali GIPHY. Oba ključa sta brezplačna. Dodajte ključ v nastavitvah za to orodje.</string>
     <string name="ime_sticker_no_packs_empty">Še ni paketov nalepk. Ustvarite paket v nastavitvah. Prav tako lahko pritisnete in pridržite nalepko iz Klipy ali GIPHY, da jo shranite tukaj.</string>
+    <plurals name="ime_sticker_offer_count">
+        <item quantity="one">%1$d nalepka</item>
+        <item quantity="other">%1$d nalepk</item>
+    </plurals>
+    <string name="ime_sticker_offer_dismiss_desc">Skrij nalepke za %1$s</string>
+    <string name="ime_sticker_offer_item_desc">Pošlji nalepko %1$s</string>
+    <string name="ime_sticker_offer_item_untitled_desc">Pošlji to nalepko</string>
+    <string name="ime_sticker_offer_more">+%1$d</string>
     <string name="ime_sticker_pack_all_label">Vse</string>
     <string name="ime_sticker_pack_empty">Ta paket je prazen.</string>
     <string name="ime_sticker_save_new_pack_action">Shrani v nov paket</string>
@@ -803,8 +883,24 @@
     <string name="ime_suggestion_hold_label">Možnosti besede</string>
     <string name="ime_suggestion_never_suggest">Nikoli ne predlagaj \"%1$s\"</string>
     <string name="ime_suggestions_show_desc">Prikaži vrstico s predlogi</string>
+    <string name="ime_symbol_row_delete_confirm_body">Komplet in vsi njegovi vnosi bodo izbrisani. Tipkovni način, ki ga je ponujal, bo namesto tega prikazal vaše druge komplete.</string>
+    <string name="ime_symbol_row_delete_confirm_title">Izbrišem \"%1$s\"?</string>
+    <string name="ime_symbol_row_delete_set">Izbriši nabor \"%1$s\"</string>
+    <string name="ime_symbol_row_hide_in_mode">Skrij vrstico v %1$s</string>
+    <string name="ime_symbol_row_remove">Odstrani \"%1$s\"</string>
+    <string name="ime_symbol_row_settings">Nastavitve vrstice s simboli</string>
     <string name="ime_symbol_set_switch_desc">Preklopi nabor simbolov</string>
     <string name="ime_symbols_recents_label">Nedavno</string>
+    <string name="ime_synonyms_close_desc">Zapri sopomenke</string>
+    <string name="ime_synonyms_failed">Ni bilo mogoče doseči vira sopomenk. Preverite povezavo in poskusite znova.</string>
+    <string name="ime_synonyms_from">Iz %1$s</string>
+    <string name="ime_synonyms_loading">Iskanje sopomenk…</string>
+    <string name="ime_synonyms_no_sources">Vsi viri sinonimov so izklopljeni. Vklopite enega v Tipkanje, Predlogi, Viri sinonimov.</string>
+    <string name="ime_synonyms_not_found">Za »%1$s« ni bilo mogoče najti nobenih sopomenk.</string>
+    <string name="ime_synonyms_pick_desc">Uporabi \"%1$s\"</string>
+    <string name="ime_synonyms_retry">Poskusite znova</string>
+    <string name="ime_synonyms_similar_note">Za to besedo ni navedenih sopomenk. Te besede imajo podoben pomen.</string>
+    <string name="ime_synonyms_title">Sopomenke za \"%1$s\"</string>
     <string name="ime_textedit_doc_end_desc">Premakni na konec besedila</string>
     <string name="ime_textedit_doc_start_desc">Premakni na začetek besedila</string>
     <string name="ime_textedit_down_desc">Premakni navzdol</string>
@@ -925,7 +1021,10 @@
     <string name="ime_toolbox_hint_mode">Način %1$s je vklopljen, zato tipkovnica shrani to razporeditev za ta način. Druge aplikacije ohranijo svojo.</string>
     <string name="ime_trackpad_hint">Povlecite za premikanje kazalca</string>
     <string name="ime_trackpad_surface_desc">Sledilna ploščica. Povlecite za premikanje kazalca, pridržite in povlecite za izbiro, dvakrat tapnite za izbiro besede</string>
+    <string name="ime_translate_all_languages_info">Tudi jeziki za prenos</string>
+    <string name="ime_translate_all_languages_label">Vsi jeziki</string>
     <string name="ime_translate_auto_detect_label">Zaznaj jezik</string>
+    <string name="ime_translate_deepl_label">DeepL</string>
     <string name="ime_translate_download_failed_error">Prenos ni bil dokončan. Preverite povezavo in poskusite znova.</string>
     <string name="ime_translate_download_of_total_progress">%1$s od %2$s</string>
     <string name="ime_translate_downloaded_desc">Preneseno</string>
@@ -1063,6 +1162,10 @@
     <string name="ime_voice_status_mic_blocked">Mikrofon je blokiran. V hitrih nastavitvah vklopite dostop do mikrofona in poskusite znova.</string>
     <string name="ime_voice_status_no_model">Glasovno tipkanje brez povezave še nima modela</string>
     <string name="ime_voice_status_no_server">Strežnik za prepisovanje še nima naslova</string>
+    <plurals name="ime_voice_status_stops_in">
+        <item quantity="one">Ustavi se čez %d sekundo. Pritisnite za takojšen zaključek.</item>
+        <item quantity="other">Ustavi se čez %d sekund. Pritisnite za takojšen zaključek.</item>
+    </plurals>
     <string name="ime_voice_status_transcribing">Prepisovanje…</string>
     <string name="ime_voice_stop_desc">Ustavi poslušanje</string>
     <string name="ime_voice_strip_allow_action">Dovoli</string>
@@ -1102,6 +1205,7 @@
     <string name="ime_web_search_need_key_body">Spletno iskanje potrebuje ključ API iz Brave Search. Dodajte ključ v nastavitvah za to orodje.</string>
     <string name="ime_web_search_open_desc">Odpri v brskalniku</string>
     <string name="ime_wiki_back_desc">Nazaj na rezultate</string>
+    <string name="ime_wiki_expand_desc">Povečaj članek</string>
     <string name="ime_wiki_full_error">Aplikacija ne more naložiti besedila članka.</string>
     <string name="ime_wiki_full_progress">Nalaganje celotnega članka…</string>
     <string name="ime_wiki_idle_info">Iščite temo na %1$s.wikipedia.org. Preberite povzetek, odprite povezave in vstavite besedilo ali naslov članka.</string>
@@ -1113,8 +1217,12 @@
     <string name="ime_wiki_links_progress">Nalaganje povezav…</string>
     <string name="ime_wiki_no_results_empty">Iskanje ni našlo ničesar za \"%1$s\".</string>
     <string name="ime_wiki_no_summary_empty">Ta članek nima povzetka.</string>
+    <string name="ime_wiki_open_browser_desc">Odpri članek v brskalniku</string>
+    <string name="ime_wiki_quote_markdown">\"%1$s\" (iz [Wikipedia: %2$s](%3$s))</string>
+    <string name="ime_wiki_quote_plain">\"%1$s\" (Wikipedija: %2$s, %3$s)</string>
     <string name="ime_wiki_search_active_hint">Išči po Wikipediji. Pritisnite Enter za iskanje</string>
     <string name="ime_wiki_search_hint">Išči po Wikipediji…</string>
+    <string name="ime_wiki_shrink_desc">Vrni članek na višino tipkovnice</string>
     <string name="ime_wiki_tab_full_label">Celoten članek</string>
     <string name="ime_wiki_tab_links_label">Povezave</string>
     <string name="ime_wiki_tab_summary_label">Povzetek</string>
@@ -1164,6 +1272,7 @@
     <string name="ime_word_menu_delete">Izbriši \"%1$s\"</string>
     <string name="ime_word_menu_edit">Uredi...</string>
     <string name="ime_word_menu_search_all">Išči vse besede za \"%1$s\"</string>
+    <string name="ime_word_menu_synonyms">Sopomenke za \"%1$s\"</string>
     <string name="ime_word_spell_apply_desc">Uporabi to črkovanje</string>
     <string name="ime_word_spell_cancel_desc">Pusti črkovanje pri miru</string>
     <string name="ime_word_spell_hint">Vnesite novo črkovanje za \"%1$s\"</string>

@@ -115,6 +115,7 @@
     <string name="core_content_selection_macro_chat_strike">توسط بخط</string>
     <string name="core_content_selection_macro_colour">اللون</string>
     <string name="core_content_selection_macro_copy">نسخ</string>
+    <string name="core_content_selection_macro_deepl_write">DeepL Write</string>
     <string name="core_content_selection_macro_digits_latin">أرقام</string>
     <string name="core_content_selection_macro_email">البريد الإلكتروني</string>
     <string name="core_content_selection_macro_fancy">مزخرف</string>

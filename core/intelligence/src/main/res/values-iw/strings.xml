@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">ניסיוני</string>
     <string name="core_intel_llm_tier_recommended_label">מומלץ</string>
     <string name="core_intel_llm_tier_untested_label">לא נבדק</string>
+    <string name="core_intel_ocr_download_error_http">שרת GitHub לא שלח את הקובץ. קוד השגיאה הוא HTTP %1$s.</string>
+    <string name="core_intel_ocr_download_error_interrupted">החיבור הופסק במהלך ההורדה. נסה שוב.</string>
+    <string name="core_intel_ocr_download_error_no_space">אין מספיק שטח אחסון במכשיר שלך. עליך לפנות כ-%1$s MB תחילה.</string>
+    <string name="core_intel_ocr_pack_error_broken">נתוני השפה שהורדו פגומים, ולכן הסורק לא הצליח להשתמש בהם. יש להוריד אותם שוב.</string>
 </resources>

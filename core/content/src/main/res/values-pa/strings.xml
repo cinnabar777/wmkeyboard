@@ -115,6 +115,7 @@
     <string name="core_content_selection_macro_chat_strike">ਸਟ੍ਰਾਈਕ</string>
     <string name="core_content_selection_macro_colour">ਰੰਗ</string>
     <string name="core_content_selection_macro_copy">ਕਾਪੀ ਕਰੋ</string>
+    <string name="core_content_selection_macro_deepl_write">DeepL Write</string>
     <string name="core_content_selection_macro_digits_latin">ਅੰਕ</string>
     <string name="core_content_selection_macro_email">ਈਮੇਲ</string>
     <string name="core_content_selection_macro_fancy">ਫੈਂਸੀ</string>

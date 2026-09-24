@@ -115,6 +115,7 @@
     <string name="core_content_selection_macro_chat_strike">Perbraukti</string>
     <string name="core_content_selection_macro_colour">Spalva</string>
     <string name="core_content_selection_macro_copy">Kopijuoti</string>
+    <string name="core_content_selection_macro_deepl_write">DeepL rašyba</string>
     <string name="core_content_selection_macro_digits_latin">Skaitmenys</string>
     <string name="core_content_selection_macro_email">El. paštas</string>
     <string name="core_content_selection_macro_fancy">Išgalvotas</string>

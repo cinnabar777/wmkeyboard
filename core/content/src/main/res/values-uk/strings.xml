@@ -115,6 +115,7 @@
     <string name="core_content_selection_macro_chat_strike">Закреслений</string>
     <string name="core_content_selection_macro_colour">Колір</string>
     <string name="core_content_selection_macro_copy">Копіювати</string>
+    <string name="core_content_selection_macro_deepl_write">DeepL Write</string>
     <string name="core_content_selection_macro_digits_latin">Цифри</string>
     <string name="core_content_selection_macro_email">Ел. пошта</string>
     <string name="core_content_selection_macro_fancy">Вигадливий</string>

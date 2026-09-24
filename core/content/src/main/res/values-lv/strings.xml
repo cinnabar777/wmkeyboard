@@ -115,6 +115,7 @@
     <string name="core_content_selection_macro_chat_strike">Pārsvītrot</string>
     <string name="core_content_selection_macro_colour">Krāsa</string>
     <string name="core_content_selection_macro_copy">Kopēt</string>
+    <string name="core_content_selection_macro_deepl_write">DeepL Write</string>
     <string name="core_content_selection_macro_digits_latin">Cipari</string>
     <string name="core_content_selection_macro_email">E-pasts</string>
     <string name="core_content_selection_macro_fancy">Izsmalcināts</string>

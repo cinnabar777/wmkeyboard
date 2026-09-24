@@ -35,6 +35,7 @@
     <string name="common_enable">Aktivera</string>
     <string name="common_error_generic">Något fungerade inte. Försök igen.</string>
     <string name="common_error_network">Ingen anslutning. Kontrollera ditt nätverk och försök igen.</string>
+    <string name="common_error_no_internet_permission">Denna version av tangentbordet kan inte ansluta till internet.</string>
     <string name="common_error_timeout">Begäran tog för lång tid. Försök igen.</string>
     <string name="common_export">Exportera</string>
     <string name="common_import">Importera</string>

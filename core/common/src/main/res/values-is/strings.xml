@@ -35,6 +35,7 @@
     <string name="common_enable">Kveikja á</string>
     <string name="common_error_generic">Eitthvað fór úrskeiðis. Reyndu aftur.</string>
     <string name="common_error_network">Engin tenging. Athugaðu netið þitt og reyndu aftur.</string>
+    <string name="common_error_no_internet_permission">Þessi útgáfa af lyklaborðinu getur ekki tengst internetinu.</string>
     <string name="common_error_timeout">Beiðnin tók of langan tíma. Reyndu aftur.</string>
     <string name="common_export">Flytja út</string>
     <string name="common_import">Flytja inn</string>

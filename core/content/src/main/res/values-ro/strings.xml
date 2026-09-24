@@ -115,6 +115,7 @@
     <string name="core_content_selection_macro_chat_strike">Tăiat</string>
     <string name="core_content_selection_macro_colour">Culoare</string>
     <string name="core_content_selection_macro_copy">Copiază</string>
+    <string name="core_content_selection_macro_deepl_write">DeepL Write</string>
     <string name="core_content_selection_macro_digits_latin">Cifre</string>
     <string name="core_content_selection_macro_email">E-mail</string>
     <string name="core_content_selection_macro_fancy">Elegant</string>

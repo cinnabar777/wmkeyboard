@@ -35,6 +35,7 @@
     <string name="common_enable">Ota käyttöön</string>
     <string name="common_error_generic">Jokin ei toiminut. Yritä uudelleen.</string>
     <string name="common_error_network">Ei yhteyttä. Tarkista verkkosi ja yritä uudelleen.</string>
+    <string name="common_error_no_internet_permission">Tämä näppäimistöversio ei voi muodostaa yhteyttä internetiin.</string>
     <string name="common_error_timeout">Pyyntö kesti liian kauan. Yritä uudelleen.</string>
     <string name="common_export">Vie</string>
     <string name="common_import">Tuo</string>

@@ -35,6 +35,7 @@
     <string name="common_enable">Lülita sisse</string>
     <string name="common_error_generic">Midagi läks valesti. Proovi uuesti.</string>
     <string name="common_error_network">Ühendus puudub. Kontrollige võrku ja proovige uuesti.</string>
+    <string name="common_error_no_internet_permission">See klaviatuuri versioon ei saa internetiga ühendust luua.</string>
     <string name="common_error_timeout">Päring võttis liiga kaua aega. Proovige uuesti.</string>
     <string name="common_export">Ekspordi</string>
     <string name="common_import">Impordi</string>

@@ -35,6 +35,7 @@
     <string name="common_enable">تشغيل</string>
     <string name="common_error_generic">حدث خطأ ما. حاول مجدداً.</string>
     <string name="common_error_network">لا يوجد اتصال. تحقق من شبكتك وحاول مجدداً.</string>
+    <string name="common_error_no_internet_permission">هذا الإصدار من لوحة المفاتيح لا يمكنه الاتصال بالإنترنت.</string>
     <string name="common_error_timeout">استغرق الطلب وقتًا طويلاً. حاول مجددًا.</string>
     <string name="common_export">تصدير</string>
     <string name="common_import">استيراد</string>

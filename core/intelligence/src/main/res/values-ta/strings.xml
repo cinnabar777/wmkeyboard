@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">சோதனைமுறை</string>
     <string name="core_intel_llm_tier_recommended_label">பரிந்துரைக்கப்பட்டது</string>
     <string name="core_intel_llm_tier_untested_label">சோதிக்கப்படாதது</string>
+    <string name="core_intel_ocr_download_error_http">GitHub சேவையகம் கோப்பை அனுப்பவில்லை. பிழை குறியீடு HTTP %1$s.</string>
+    <string name="core_intel_ocr_download_error_interrupted">பதிவிறக்கத்தின்போது இணைப்பு துண்டிக்கப்பட்டது. மீண்டும் முயற்சிக்கவும்.</string>
+    <string name="core_intel_ocr_download_error_no_space">உங்கள் சாதனத்தில் போதிய சேமிப்பிடம் இல்லை. நீங்கள் சுமார் %1$s MB-ஐ முதலில் காலி செய்ய வேண்டும்.</string>
+    <string name="core_intel_ocr_pack_error_broken">பதிவிறக்கம் செய்யப்பட்ட மொழித் தரவு சேதமடைந்துள்ளது, எனவே ஸ்கேனரால் அதைப் பயன்படுத்த முடியவில்லை. மீண்டும் பதிவிறக்கவும்.</string>
 </resources>

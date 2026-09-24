@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">实验性</string>
     <string name="core_intel_llm_tier_recommended_label">推荐</string>
     <string name="core_intel_llm_tier_untested_label">未测试</string>
+    <string name="core_intel_ocr_download_error_http">GitHub 服务器未发送文件。错误代码为 HTTP %1$s。</string>
+    <string name="core_intel_ocr_download_error_interrupted">下载过程中连接中断。请重试。</string>
+    <string name="core_intel_ocr_download_error_no_space">您的设备存储空间不足。您必须先释放约 %1$s MB 的空间。</string>
+    <string name="core_intel_ocr_pack_error_broken">下载的语言数据已损坏，扫描仪无法使用。请重新下载。</string>
 </resources>

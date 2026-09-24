@@ -35,6 +35,7 @@
     <string name="common_enable">Zapnúť</string>
     <string name="common_error_generic">Niečo nefungovalo. Skúste to znova.</string>
     <string name="common_error_network">Žiadne pripojenie. Skontrolujte svoju sieť a skúste to znova.</string>
+    <string name="common_error_no_internet_permission">Táto verzia klávesnice sa nemôže pripojiť na internet.</string>
     <string name="common_error_timeout">Požiadavka trvala príliš dlho. Skúste to znova.</string>
     <string name="common_export">Exportovať</string>
     <string name="common_import">Importovať</string>

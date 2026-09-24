@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">Jaribio</string>
     <string name="core_intel_llm_tier_recommended_label">Inayopendekezwa</string>
     <string name="core_intel_llm_tier_untested_label">Haijajaribiwa</string>
+    <string name="core_intel_ocr_download_error_http">Seva ya GitHub haikutuma faili. Msimbo wa hitilafu ni HTTP %1$s.</string>
+    <string name="core_intel_ocr_download_error_interrupted">Muunganisho umesimama wakati wa kupakua. Jaribu tena.</string>
+    <string name="core_intel_ocr_download_error_no_space">Hakuna nafasi ya kutosha ya kuhifadhi kwenye kifaa chako. Lazima ufungue takriban MB %1$s kwanza.</string>
+    <string name="core_intel_ocr_pack_error_broken">Data ya lugha iliyopakuliwa imeharibika, kwa hivyo kichanganuzi hakikuweza kuitumia. Ipakue tena.</string>
 </resources>

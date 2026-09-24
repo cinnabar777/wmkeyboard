@@ -115,6 +115,7 @@
     <string name="core_content_selection_macro_chat_strike">ขีดฆ่า</string>
     <string name="core_content_selection_macro_colour">สี</string>
     <string name="core_content_selection_macro_copy">คัดลอก</string>
+    <string name="core_content_selection_macro_deepl_write">DeepL Write</string>
     <string name="core_content_selection_macro_digits_latin">ตัวเลข</string>
     <string name="core_content_selection_macro_email">อีเมล</string>
     <string name="core_content_selection_macro_fancy">แฟนซี</string>

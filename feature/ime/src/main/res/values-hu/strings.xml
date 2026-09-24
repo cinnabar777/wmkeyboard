@@ -2,6 +2,13 @@
 <!-- Machine translated by Google Play. Do not edit by hand:
      regenerate with tools/i18n/pull-play-translations.py. -->
 <resources>
+    <string name="ime_ai_chat_ask_explain">Magyarázza el egyszerűen</string>
+    <string name="ime_ai_chat_ask_explain_prompt">Magyarázd el ezt egyszerű szavakkal.</string>
+    <string name="ime_ai_chat_ask_hint">Tegyen fel kérdést a szöveggel kapcsolatban, vagy kezdje az alábbiak valamelyikével.</string>
+    <string name="ime_ai_chat_ask_summary">Összegzés</string>
+    <string name="ime_ai_chat_ask_summary_prompt">Írj egy rövid összefoglalót erről.</string>
+    <string name="ime_ai_chat_ask_words">Nehéz szavak</string>
+    <string name="ime_ai_chat_ask_words_prompt">Magyarázd el a nehéz szavakat és ötleteket ebben.</string>
     <string name="ime_ai_chat_attach_desc">Mező szövegének küldése az üzenettel együtt</string>
     <string name="ime_ai_chat_attach_remove_desc">Ne küldje el a mező szövegét</string>
     <plurals name="ime_ai_chat_attached_field">
@@ -12,6 +19,8 @@
         <item quantity="one">A kijelölés az üzenettel együtt megy: %1$d karakter</item>
         <item quantity="other">A kijelölés az üzenettel együtt megy: %1$d karakter</item>
     </plurals>
+    <string name="ime_ai_chat_attached_tool">Erről: %1$s</string>
+    <string name="ime_ai_chat_attached_tool_selection">Egy részlet a következőből: %1$s</string>
     <plurals name="ime_ai_chat_attachment_sent">
         <item quantity="one">%1$d karakter szöveggel</item>
         <item quantity="other">%1$d karakter szöveggel</item>
@@ -99,6 +108,10 @@
     <string name="ime_ai_truncated_notice">A modell korán leállt. Növelje a „Maximális válaszhossz” értéket az eszköz beállításaiban.</string>
     <string name="ime_ai_view_changes">Változások</string>
     <string name="ime_ai_view_result">Eredmény</string>
+    <string name="ime_ask_ai_label_dict">Szótár: %1$s</string>
+    <string name="ime_ask_ai_label_grammar">Nyelvtani ellenőrzés</string>
+    <string name="ime_ask_ai_label_vocab">Szókincs: %1$s</string>
+    <string name="ime_ask_ai_label_wiki">Wikipédia: %1$s</string>
     <string name="ime_autofill_dismiss_desc">Automatikus kiegészítési javaslatok elrejtése</string>
     <string name="ime_calc_degrees_label">fok</string>
     <string name="ime_calc_insert_action">Beszúrás</string>
@@ -127,6 +140,7 @@
     <string name="ime_camera_permission_action">Kamera engedélyezése</string>
     <string name="ime_camera_permission_body">A kamera eszköznek engedélyre van szüksége a kamera használatához. Az alkalmazás csak akkor készít fényképet, ha megnyomja az exponálógombot.</string>
     <string name="ime_camera_retake_action">Újra</string>
+    <string name="ime_camera_search_action">Keresés</string>
     <string name="ime_camera_send_action">Küldés</string>
     <string name="ime_camera_shutter_desc">Fénykép készítése</string>
     <string name="ime_camera_starting_progress">Kamera indítása…</string>
@@ -143,6 +157,10 @@
     <string name="ime_clip_chip_image">Másolt kép</string>
     <string name="ime_clip_chip_item">Másolt elem</string>
     <string name="ime_clip_chip_screenshot">Képernyőkép</string>
+    <plurals name="ime_clip_deleted">
+        <item quantity="one">Klip törölve</item>
+        <item quantity="other">%1$d klip törölve</item>
+    </plurals>
     <string name="ime_clip_edit">Szerkesztés</string>
     <string name="ime_clip_edit_placeholder">Írja be a klip szövegét</string>
     <string name="ime_clip_edit_rich_note">A módosítás mentése eltávolítja a formázást</string>
@@ -161,6 +179,18 @@
     <string name="ime_clip_info_private_detail">A billentyűzet elrejti ezt a klipet a panelen, és hamarabb törli, mint a többi klipet.</string>
     <string name="ime_clip_info_size">Méret</string>
     <string name="ime_clip_info_type">Típus</string>
+    <plurals name="ime_clip_left_days">
+        <item quantity="one">%d nap maradt</item>
+        <item quantity="other">%d nap maradt</item>
+    </plurals>
+    <plurals name="ime_clip_left_hours">
+        <item quantity="one">%d óra van hátra</item>
+        <item quantity="other">%d óra van hátra</item>
+    </plurals>
+    <plurals name="ime_clip_left_minutes">
+        <item quantity="one">%d perc maradt</item>
+        <item quantity="other">%d perc maradt</item>
+    </plurals>
     <string name="ime_clip_number_desc">%1$d. vágólap-elem</string>
     <string name="ime_clip_pin">Rögzítés</string>
     <string name="ime_clip_send_as_sticker">Küldés matricaként</string>
@@ -171,6 +201,7 @@
     <string name="ime_clip_type_rich_text">Formázott szöveg</string>
     <string name="ime_clip_type_text">Szöveg</string>
     <string name="ime_clip_type_video">Videó</string>
+    <string name="ime_clip_undo_delete">Visszavonás</string>
     <string name="ime_clip_unpin">Kitűzés megszüntetése</string>
     <string name="ime_clip_video_desc">Másolt videó</string>
     <string name="ime_clipboard_no_match">Nincs találat a(z) „%1$s” kifejezésre.</string>
@@ -202,10 +233,12 @@
     <string name="ime_dict_add_vocab_action">Hozzáadás a szókincshez</string>
     <string name="ime_dict_antonyms_label">Antonímák</string>
     <string name="ime_dict_error">Az alkalmazás nem éri el a szótárat. Ellenőrizd a hálózati kapcsolatot, és próbáld újra.</string>
+    <string name="ime_dict_from">Forrás: %1$s</string>
     <string name="ime_dict_idle_info">Keress meg egy angol szót. Nyomd meg a keresősávot és gépelj. A kurzort egy szóra is helyezheted az eszköz megnyitása előtt.</string>
     <string name="ime_dict_insert_action">Beszúrás</string>
     <string name="ime_dict_lookup_desc">Szó keresése</string>
     <string name="ime_dict_lookup_progress">„%1$s” keresése…</string>
+    <string name="ime_dict_no_sources">Minden szótárforrás ki van kapcsolva. Kapcsoljon be egyet a Szótár eszköz beállításaiban.</string>
     <string name="ime_dict_not_found_empty">Nincs bejegyzés a következőhöz: „%1$s”. Ellenőrizd a helyesírást, vagy próbáld meg a szó alapalakját.</string>
     <string name="ime_dict_play_desc">Kiejtés lejátszása</string>
     <string name="ime_dict_search_active_hint">Írjon be egy szót…</string>
@@ -313,7 +346,15 @@
     <string name="ime_glide_word_list_offer">A csúsztatásos gépeléshez %1$s szójegyzék szükséges</string>
     <string name="ime_glide_word_list_offer_dismiss_desc">Elvetés</string>
     <string name="ime_grammar_all_filtered_empty">Minden talált probléma elrejtve a szűrő által</string>
+    <string name="ime_grammar_ask_ai_desc">Kérdezze meg az AI-t erről a problémáról</string>
     <string name="ime_grammar_category_kind_label">%1$s • %2$s</string>
+    <string name="ime_grammar_deepl_action_desc">Szöveg javítása a DeepL Write segítségével</string>
+    <string name="ime_grammar_deepl_dismiss_desc">A DeepL Write eredmény bezárása</string>
+    <string name="ime_grammar_deepl_error">A DeepL Write nem válaszolt</string>
+    <string name="ime_grammar_deepl_replace_action">Csere</string>
+    <string name="ime_grammar_deepl_replace_failed_toast">A mezőben lévő szöveg nem cserélhető le</string>
+    <string name="ime_grammar_deepl_title">DeepL Write</string>
+    <string name="ime_grammar_deepl_unchanged">A DeepL Write nem talált javítanivalót</string>
     <string name="ime_grammar_dialect_desc">Válaszd ki a nyelvjárást</string>
     <string name="ime_grammar_dismiss_desc">Probléma elrejtése</string>
     <string name="ime_grammar_empty_hint">Írjon be szöveget, vagy nyisson meg egy szöveget tartalmazó mezőt. A problémák itt jelennek meg. Az ellenőrzés offline módban fut.</string>
@@ -345,6 +386,7 @@
     <string name="ime_icons_empty_info">Ikoncsomagok hozzáadásához nyissa meg a beállításokat.</string>
     <string name="ime_icons_more_label">További ikoncsomagok</string>
     <string name="ime_icons_pick_info">Nyomjon meg egy ikoncsomagot, hogy használhassa a billentyűkön és az eszközökön.</string>
+    <string name="ime_image_search_by_photo_desc">Keresés fénykép alapján</string>
     <string name="ime_image_search_empty">Nincsenek képek a következőre: „%1$s”</string>
     <string name="ime_image_search_hint">Képek keresése</string>
     <string name="ime_image_search_need_key_body">A képkereséshez API-kulcs szükséges a Brave Search-től. Adjon hozzá egy kulcsot az eszköz beállításaiban.</string>
@@ -374,6 +416,8 @@
     <string name="ime_kde_loop">Ismétlés</string>
     <string name="ime_kde_media_empty_body">Indítson el egy lejátszót ott, és meg fog jelenni itt</string>
     <string name="ime_kde_media_empty_title">Semmi sem játszik a számítógépen</string>
+    <string name="ime_kde_media_unsupported_body">A KDE Connect nem teszi lehetővé, hogy a telefon vezérelje a zenét vagy a videót. A Macen futó KDE Connect ezt sosem teszi lehetővé</string>
+    <string name="ime_kde_media_unsupported_title">Ez a számítógép nem osztja meg a lejátszóit</string>
     <string name="ime_kde_not_listening">Egy másik alkalmazás ezen a telefonon használja a KDE Connect portot. A számítógépek továbbra is megtalálhatják ezt a billentyűzetet, de nyomd meg a Frissítés gombot ezen az oldalon.</string>
     <string name="ime_kde_notice_clipboard_empty">Nincs semmi a vágólapon, amit el lehetne küldeni</string>
     <string name="ime_kde_notice_clipboard_sent">Vágólap elküldve</string>
@@ -424,10 +468,12 @@
     <string name="ime_kde_send_empty">Küldje el a vágólapot, amit írt, vagy fájlokat. Amit a számítógép küld, az ide és a Letöltések mappába kerül</string>
     <string name="ime_kde_send_field">Szöveg a mezőben</string>
     <string name="ime_kde_send_files">Fájlok…</string>
+    <string name="ime_kde_send_unsupported">Ez a számítógép nem fogad fájlokat vagy szöveget a telefonról</string>
     <string name="ime_kde_settings">Beállítások</string>
     <string name="ime_kde_shuffle">Véletlen sorrend</string>
     <string name="ime_kde_slides_end">Vége</string>
     <string name="ime_kde_slides_next">Következő dia</string>
+    <string name="ime_kde_slides_no_pointer">Ez a számítógép nem rendelkezik mutatóeszközzel a diákhoz</string>
     <string name="ime_kde_slides_pointer">Tartsa lenyomva és húzza a mutatóhoz</string>
     <string name="ime_kde_slides_previous">Előző dia</string>
     <string name="ime_kde_slides_start">Indítás</string>
@@ -487,11 +533,25 @@
     <string name="ime_language_switch_title">Beviteli nyelv</string>
     <string name="ime_launcher_activities_label">Képernyők</string>
     <string name="ime_launcher_app_info_action">Alkalmazásinformáció</string>
+    <string name="ime_launcher_combo_label">%1$s + %2$s</string>
+    <string name="ime_launcher_combo_open_action">Megnyitás osztott képernyőn</string>
+    <string name="ime_launcher_combo_remove_action">Pár eltávolítása</string>
+    <string name="ime_launcher_combos_label">Osztott képernyős párok</string>
     <string name="ime_launcher_empty">Nincs találat</string>
+    <string name="ime_launcher_floating_unsupported">Ez az eszköz teljes képernyőn nyithatja meg</string>
     <string name="ime_launcher_hidden_label">Elrejtve a rácsból</string>
     <string name="ime_launcher_hide_action">Alkalmazás elrejtése a rácsból</string>
     <string name="ime_launcher_loading">Alkalmazások betöltése…</string>
+    <string name="ime_launcher_menu_close">Menü bezárása</string>
     <string name="ime_launcher_not_exported_label">Az alkalmazáson kívülről nem nyitható meg</string>
+    <string name="ime_launcher_open_action">Megnyitás</string>
+    <string name="ime_launcher_open_floating_action">Megnyitás lebegő ablakban</string>
+    <string name="ime_launcher_open_split_action">Megnyitás osztott képernyőn</string>
+    <string name="ime_launcher_page_action">Képernyők, elrejtés és alkalmazásinformációk…</string>
+    <string name="ime_launcher_page_no_screens_action">Elrejtés és alkalmazásinformáció…</string>
+    <string name="ime_launcher_pair_action">Párosítás osztott képernyőn ezzel…</string>
+    <string name="ime_launcher_pair_cancel">Mégse</string>
+    <string name="ime_launcher_pair_prompt">Koppintson az alkalmazásra a(z) %1$s melletti megnyitáshoz</string>
     <string name="ime_launcher_pin_action">Alkalmazás rögzítése</string>
     <string name="ime_launcher_pinned_label">Kitűzve</string>
     <string name="ime_launcher_recents_label">Legutóbbiak</string>
@@ -667,9 +727,11 @@
     <string name="ime_sandbox_offer_only">Csak a szavaid használatával húzzál?</string>
     <string name="ime_sandbox_offer_prefer">Szeretnéd a csúsztatást a szavaidhoz igazítani?</string>
     <string name="ime_search_attribution_brave">a Brave-en keresztül</string>
+    <string name="ime_selection_ask_ai">Kérdezze meg az AI-t</string>
     <string name="ime_selection_macro_back_desc">Vissza a kijelölési műveletekhez</string>
     <string name="ime_selection_macro_bengali_unavailable_toast">A bengáli nyelv nincs betöltve</string>
     <string name="ime_selection_macro_busy_desc">Folyamatban</string>
+    <string name="ime_selection_macro_deepl_clean_toast">A DeepL Write nem talált javítanivalót</string>
     <string name="ime_selection_macro_find_none_toast">Nincs más találat</string>
     <string name="ime_selection_macro_grammar_clean_toast">Nincs javítanivaló</string>
     <string name="ime_selection_macro_grammar_unavailable_toast">A nyelvhelyesség-ellenőrző nem érhető el</string>
@@ -678,6 +740,7 @@
     <string name="ime_selection_macro_nothing_to_undo_toast">Nincs mit visszavonni</string>
     <string name="ime_selection_macro_open_in_desc">Megnyitás itt: %1$s</string>
     <string name="ime_selection_macro_stop_label">Leállítás</string>
+    <string name="ime_selection_quote">Idézet</string>
     <string name="ime_service_already_in_settings_toast">Már a beállításokban vagy</string>
     <string name="ime_service_autocorrect_off_toast">Automatikus javítás kikapcsolva</string>
     <string name="ime_service_autocorrect_on_toast">Automatikus javítás bekapcsolva</string>
@@ -708,6 +771,11 @@
     <string name="ime_service_phonetic_english_needs_secondary_toast">Kapcsolja be az angolt a Nyelvek alatt, %1$s, Javaslatok innen is</string>
     <string name="ime_service_phonetic_english_off_toast">Csak angol szavak javasoltak</string>
     <string name="ime_service_phonetic_english_on_toast">Az angol szavak angolok maradnak</string>
+    <string name="ime_service_photo_search_blocked">Az adatforgalom-kímélő nem engedélyezi a webes kereséseknek ezt a kapcsolatot</string>
+    <string name="ime_service_photo_search_metered_ask">Ez a kapcsolat korlátozott adatforgalmú. A fénykép elküldéséhez nyomja meg újra a Keresés gombot.</string>
+    <string name="ime_service_photo_search_no_app">Ezen a telefonon nincs olyan alkalmazás, amely fényképpel tudna keresni</string>
+    <string name="ime_service_photo_search_no_browser">Ezen a telefonon nincs böngésző, amely megnyithatná az eredményeket</string>
+    <string name="ime_service_photo_search_sending">Fénykép küldése a keresőoldalra</string>
     <string name="ime_service_plugins_all_off_notice">Minden telepített bővítmény ki van kapcsolva. Kapcsoljon be egyet a Bővítmények kezelése menüpontban.</string>
     <string name="ime_service_plugins_off_notice">A bővítmények ki vannak kapcsolva. A telepítéshez és futtatáshoz kapcsolja be őket a Beállításokban.</string>
     <string name="ime_service_power_saving_off_toast">Energiatakarékos üzemmód kikapcsolva</string>
@@ -788,10 +856,22 @@
     <string name="ime_sound_volume_label">Hangerő</string>
     <string name="ime_sticker_add_desc">Matricák hozzáadása</string>
     <string name="ime_sticker_add_to_pack_action">Hozzáadás ide: %1$s</string>
+    <string name="ime_sticker_info_emoji">Emoji: %1$s</string>
+    <string name="ime_sticker_info_keywords">Kulcsszavak: %1$s</string>
+    <string name="ime_sticker_info_pack">Csomag: %1$s</string>
+    <string name="ime_sticker_info_untitled">Nincs cím</string>
     <string name="ime_sticker_local_search_empty">Nincs a „%1$s” kifejezésre illeszkedő matricája</string>
     <string name="ime_sticker_manage_packs_action">Csomagok kezelése</string>
     <string name="ime_sticker_need_key_body">A matricaeszközhöz API-kulcs szükséges a Klipy-től vagy a GIPHY-től. Mindkét kulcs ingyenes. Add meg a kulcsot az eszköz beállításaiban.</string>
     <string name="ime_sticker_no_packs_empty">Még nincsenek matricacsomagok. Hozz létre egyet a beállításokban. A Klipy vagy GIPHY matricáit is megnyomva és nyomva tartva elmentheted őket ide.</string>
+    <plurals name="ime_sticker_offer_count">
+        <item quantity="one">%1$d matrica</item>
+        <item quantity="other">%1$d matrica</item>
+    </plurals>
+    <string name="ime_sticker_offer_dismiss_desc">Matricák elrejtése ehhez: %1$s</string>
+    <string name="ime_sticker_offer_item_desc">%1$s matrica küldése</string>
+    <string name="ime_sticker_offer_item_untitled_desc">Küldje el ezt a matricát</string>
+    <string name="ime_sticker_offer_more">+%1$d</string>
     <string name="ime_sticker_pack_all_label">Összes</string>
     <string name="ime_sticker_pack_empty">Ez a csomag üres.</string>
     <string name="ime_sticker_save_new_pack_action">Mentés új csomagba</string>
@@ -802,8 +882,24 @@
     <string name="ime_suggestion_hold_label">Szóbeállítások</string>
     <string name="ime_suggestion_never_suggest">Soha ne javasolja ezt: \"%1$s\"</string>
     <string name="ime_suggestions_show_desc">Javaslatsáv megjelenítése</string>
+    <string name="ime_symbol_row_delete_confirm_body">A készlet és az összes bejegyzése törlődik. Egy billentyűzetmód, amely felkínálta, helyette a többi készletét mutatja.</string>
+    <string name="ime_symbol_row_delete_confirm_title">Törli a következőt: \"%1$s\"?</string>
+    <string name="ime_symbol_row_delete_set">A(z) \"%1$s\" készlet törlése</string>
+    <string name="ime_symbol_row_hide_in_mode">Sor elrejtése itt: %1$s</string>
+    <string name="ime_symbol_row_remove">\"%1$s\" eltávolítása</string>
+    <string name="ime_symbol_row_settings">Szimbólumsorszakasz beállításai</string>
     <string name="ime_symbol_set_switch_desc">Szimbólumkészlet váltása</string>
     <string name="ime_symbols_recents_label">Legutóbbiak</string>
+    <string name="ime_synonyms_close_desc">Szinonimák bezárása</string>
+    <string name="ime_synonyms_failed">Nem sikerült elérni a szinonimaforrást. Ellenőrizze a kapcsolatot, és próbálja újra.</string>
+    <string name="ime_synonyms_from">Forrás: %1$s</string>
+    <string name="ime_synonyms_loading">Szinonimák keresése…</string>
+    <string name="ime_synonyms_no_sources">Minden szinonimaforrás ki van kapcsolva. Kapcsoljon be egyet a Gépelés, Javaslatok, Szinonimaforrások menüpontban.</string>
+    <string name="ime_synonyms_not_found">Nem találhatók szinonimák a következőhöz: \"%1$s\".</string>
+    <string name="ime_synonyms_pick_desc">Használja ezt: \"%1$s\"</string>
+    <string name="ime_synonyms_retry">Próbálja újra</string>
+    <string name="ime_synonyms_similar_note">Ehhez a szóhoz nincsenek szinonimák. Ezeknek a szavaknak hasonló a jelentésük.</string>
+    <string name="ime_synonyms_title">Szinonimák ehhez: „%1$s”</string>
     <string name="ime_textedit_doc_end_desc">Ugrás a szöveg végére</string>
     <string name="ime_textedit_doc_start_desc">Ugrás a szöveg elejére</string>
     <string name="ime_textedit_down_desc">Mozgatás lefelé</string>
@@ -924,7 +1020,10 @@
     <string name="ime_toolbox_hint_mode">A(z) %1$s mód be van kapcsolva, így a billentyűzet elmenti ezt az elrendezést ehhez a módhoz. Más alkalmazások megtartják a sajátjukat.</string>
     <string name="ime_trackpad_hint">Húzza a kurzor mozgatásához</string>
     <string name="ime_trackpad_surface_desc">Érintőpad. Húzza az ujját a kurzor mozgatásához, tartsa lenyomva és húzza a kijelöléshez, koppintson kétszer egy szó kijelöléséhez</string>
+    <string name="ime_translate_all_languages_info">A letöltendő nyelvek is</string>
+    <string name="ime_translate_all_languages_label">Minden nyelv</string>
     <string name="ime_translate_auto_detect_label">Nyelv felismerése</string>
+    <string name="ime_translate_deepl_label">DeepL</string>
     <string name="ime_translate_download_failed_error">A letöltés nem fejeződött be. Ellenőrizze a kapcsolatot, majd próbálja újra.</string>
     <string name="ime_translate_download_of_total_progress">%1$s / %2$s</string>
     <string name="ime_translate_downloaded_desc">Letöltve</string>
@@ -1062,6 +1161,10 @@
     <string name="ime_voice_status_mic_blocked">A mikrofon le van tiltva. Kapcsolja be a mikrofon-hozzáférést a Gyorsbeállításokban, majd próbálja újra.</string>
     <string name="ime_voice_status_no_model">Az offline hangalapú gépeléshez még nincs modell</string>
     <string name="ime_voice_status_no_server">Az átíró szervernek még nincs címe</string>
+    <plurals name="ime_voice_status_stops_in">
+        <item quantity="one">Leáll %d másodperc múlva. Koppintson a befejezéshez.</item>
+        <item quantity="other">Leáll %d másodperc múlva. Koppintson a befejezéshez.</item>
+    </plurals>
     <string name="ime_voice_status_transcribing">Átírás…</string>
     <string name="ime_voice_stop_desc">Meghallgatás leállítása</string>
     <string name="ime_voice_strip_allow_action">Engedélyezés</string>
@@ -1100,6 +1203,7 @@
     <string name="ime_web_search_need_key_body">A webes kereséshez API-kulcs szükséges a Brave Search-től. Adjon meg egy kulcsot az eszköz beállításaiban.</string>
     <string name="ime_web_search_open_desc">Megnyitás a böngészőben</string>
     <string name="ime_wiki_back_desc">Vissza az eredményekhez</string>
+    <string name="ime_wiki_expand_desc">Cikk nagyítása</string>
     <string name="ime_wiki_full_error">Az alkalmazás nem tudja betölteni a cikk szövegét.</string>
     <string name="ime_wiki_full_progress">A teljes cikk betöltése…</string>
     <string name="ime_wiki_idle_info">Keress egy témát a %1$s.wikipedia.org oldalon. Olvasd el az összefoglalót, nyisd meg a linkeket, és illessz be szöveget vagy a cikk címét.</string>
@@ -1111,8 +1215,12 @@
     <string name="ime_wiki_links_progress">Linkek betöltése…</string>
     <string name="ime_wiki_no_results_empty">A keresés nem talált semmit a következőre: „%1$s”.</string>
     <string name="ime_wiki_no_summary_empty">Ennek a cikknek nincs összefoglalója.</string>
+    <string name="ime_wiki_open_browser_desc">A cikk megnyitása a böngészőben</string>
+    <string name="ime_wiki_quote_markdown">\"%1$s\" (forrás: [Wikipédia: %2$s](%3$s))</string>
+    <string name="ime_wiki_quote_plain">\"%1$s\" (Wikipedia: %2$s, %3$s)</string>
     <string name="ime_wiki_search_active_hint">Keresés a Wikipédián. Nyomja meg az Entert a kereséshez</string>
     <string name="ime_wiki_search_hint">Wikipédia keresése…</string>
+    <string name="ime_wiki_shrink_desc">A cikk legyen újra a billentyűzet magasságú</string>
     <string name="ime_wiki_tab_full_label">Teljes cikk</string>
     <string name="ime_wiki_tab_links_label">Linkek</string>
     <string name="ime_wiki_tab_summary_label">Összegzés</string>
@@ -1162,6 +1270,7 @@
     <string name="ime_word_menu_delete">\"%1$s\" törlése</string>
     <string name="ime_word_menu_edit">Szerkesztés…</string>
     <string name="ime_word_menu_search_all">Az összes szó keresése a(z) „%1$s” kifejezésre</string>
+    <string name="ime_word_menu_synonyms">Szinonimák erre: „%1$s”</string>
     <string name="ime_word_spell_apply_desc">Ezen helyesírás használata</string>
     <string name="ime_word_spell_cancel_desc">Helyesírás változatlanul hagyása</string>
     <string name="ime_word_spell_hint">Írjon be egy új helyesírást a(z) „%1$s” szóhoz</string>

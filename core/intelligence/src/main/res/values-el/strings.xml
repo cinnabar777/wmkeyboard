@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">Πειραματικό</string>
     <string name="core_intel_llm_tier_recommended_label">Προτεινόμενο</string>
     <string name="core_intel_llm_tier_untested_label">Ανεξέλεγκτο</string>
+    <string name="core_intel_ocr_download_error_http">Ο διακομιστής GitHub δεν έστειλε το αρχείο. Ο κωδικός σφάλματος είναι HTTP %1$s.</string>
+    <string name="core_intel_ocr_download_error_interrupted">Η σύνδεση διακόπηκε κατά τη λήψη. Προσπαθήστε ξανά.</string>
+    <string name="core_intel_ocr_download_error_no_space">Δεν υπάρχει αρκετός αποθηκευτικός χώρος στη συσκευή σας. Πρέπει πρώτα να ελευθερώσετε περίπου %1$s MB.</string>
+    <string name="core_intel_ocr_pack_error_broken">Τα δεδομένα της ληφθείσας γλώσσας είναι κατεστραμμένα, επομένως ο σαρωτής δεν μπόρεσε να τα χρησιμοποιήσει. Πραγματοποιήστε ξανά λήψη.</string>
 </resources>

@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">Eksperymentalne</string>
     <string name="core_intel_llm_tier_recommended_label">Zalecane</string>
     <string name="core_intel_llm_tier_untested_label">Nietestowane</string>
+    <string name="core_intel_ocr_download_error_http">Serwer GitHub nie wysłał pliku. Kod błędu to HTTP %1$s.</string>
+    <string name="core_intel_ocr_download_error_interrupted">Połączenie zostało przerwane podczas pobierania. Spróbuj ponownie.</string>
+    <string name="core_intel_ocr_download_error_no_space">Na Twoim urządzeniu nie ma wystarczającej ilości miejsca. Najpierw musisz zwolnić około %1$s MB.</string>
+    <string name="core_intel_ocr_pack_error_broken">Pobrane dane językowe są uszkodzone, więc skaner nie mógł z nich skorzystać. Pobierz je ponownie.</string>
 </resources>

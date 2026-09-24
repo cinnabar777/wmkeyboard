@@ -2,6 +2,13 @@
 <!-- Machine translated by Google Play. Do not edit by hand:
      regenerate with tools/i18n/pull-play-translations.py. -->
 <resources>
+    <string name="ime_ai_chat_ask_explain">Explica-ho de manera senzilla</string>
+    <string name="ime_ai_chat_ask_explain_prompt">Explica-ho amb paraules senzilles.</string>
+    <string name="ime_ai_chat_ask_hint">Fes una pregunta sobre el text o comença amb una d\'aquestes.</string>
+    <string name="ime_ai_chat_ask_summary">Resumir</string>
+    <string name="ime_ai_chat_ask_summary_prompt">Fes un resum breu d\'això.</string>
+    <string name="ime_ai_chat_ask_words">Paraules difícils</string>
+    <string name="ime_ai_chat_ask_words_prompt">Explica les paraules i idees difícils d\'això.</string>
     <string name="ime_ai_chat_attach_desc">Envia el text del camp amb el missatge</string>
     <string name="ime_ai_chat_attach_remove_desc">No enviïs el text del camp</string>
     <plurals name="ime_ai_chat_attached_field">
@@ -12,6 +19,8 @@
         <item quantity="one">La vostra selecció acompanya el missatge: %1$d caràcter</item>
         <item quantity="other">La vostra selecció acompanya el missatge: %1$d caràcters</item>
     </plurals>
+    <string name="ime_ai_chat_attached_tool">Sobre %1$s</string>
+    <string name="ime_ai_chat_attached_tool_selection">Sobre un fragment de %1$s</string>
     <plurals name="ime_ai_chat_attachment_sent">
         <item quantity="one">Amb %1$d caràcter de text</item>
         <item quantity="other">Amb %1$d caràcters de text</item>
@@ -99,6 +108,10 @@
     <string name="ime_ai_truncated_notice">El model s\'ha aturat abans d\'hora. Augmenta la \"Longitud màxima de resposta\" a la configuració de l\'eina.</string>
     <string name="ime_ai_view_changes">Canvis</string>
     <string name="ime_ai_view_result">Resultat</string>
+    <string name="ime_ask_ai_label_dict">Diccionari: %1$s</string>
+    <string name="ime_ask_ai_label_grammar">Corrector gramatical</string>
+    <string name="ime_ask_ai_label_vocab">Vocabulari: %1$s</string>
+    <string name="ime_ask_ai_label_wiki">Viquipèdia: %1$s</string>
     <string name="ime_autofill_dismiss_desc">Amaga els suggeriments d\'emplenament automàtic</string>
     <string name="ime_calc_degrees_label">graus</string>
     <string name="ime_calc_insert_action">Inserir</string>
@@ -127,6 +140,7 @@
     <string name="ime_camera_permission_action">Permet la càmera</string>
     <string name="ime_camera_permission_body">L\'eina de càmera necessita permís per utilitzar la càmera. L\'aplicació només fa una foto quan prems el disparador.</string>
     <string name="ime_camera_retake_action">Torna a fer</string>
+    <string name="ime_camera_search_action">Cerca</string>
     <string name="ime_camera_send_action">Enviar</string>
     <string name="ime_camera_shutter_desc">Fes una foto</string>
     <string name="ime_camera_starting_progress">Iniciant la càmera…</string>
@@ -144,6 +158,10 @@
     <string name="ime_clip_chip_image">Imatge copiada</string>
     <string name="ime_clip_chip_item">Element copiat</string>
     <string name="ime_clip_chip_screenshot">Captura de pantalla</string>
+    <plurals name="ime_clip_deleted">
+        <item quantity="one">Retall suprimit</item>
+        <item quantity="other">%1$d retalls suprimits</item>
+    </plurals>
     <string name="ime_clip_edit">Edita</string>
     <string name="ime_clip_edit_placeholder">Escriu el text del clip</string>
     <string name="ime_clip_edit_rich_note">Desar un canvi elimina el format</string>
@@ -162,6 +180,18 @@
     <string name="ime_clip_info_private_detail">El teclat amaga aquest clip al tauler i l\'esborra abans que els altres clips.</string>
     <string name="ime_clip_info_size">Mida</string>
     <string name="ime_clip_info_type">Tipus</string>
+    <plurals name="ime_clip_left_days">
+        <item quantity="one">%d dia restant</item>
+        <item quantity="other">%d dies restants</item>
+    </plurals>
+    <plurals name="ime_clip_left_hours">
+        <item quantity="one">Queda %d h</item>
+        <item quantity="other">Queden %d h</item>
+    </plurals>
+    <plurals name="ime_clip_left_minutes">
+        <item quantity="one">queda %d min</item>
+        <item quantity="other">queden %d min</item>
+    </plurals>
     <string name="ime_clip_number_desc">Retall %1$d</string>
     <string name="ime_clip_pin">Fixar</string>
     <string name="ime_clip_send_as_sticker">Enviar com a adhesiu</string>
@@ -172,6 +202,7 @@
     <string name="ime_clip_type_rich_text">Text enriquit</string>
     <string name="ime_clip_type_text">Text</string>
     <string name="ime_clip_type_video">Vídeo</string>
+    <string name="ime_clip_undo_delete">Desfés</string>
     <string name="ime_clip_unpin">Desancora</string>
     <string name="ime_clip_video_desc">Vídeo copiat</string>
     <string name="ime_clipboard_no_match">Cap retall coincideix amb “%1$s”.</string>
@@ -203,10 +234,12 @@
     <string name="ime_dict_add_vocab_action">Afegeix al vocabulari</string>
     <string name="ime_dict_antonyms_label">Antònims</string>
     <string name="ime_dict_error">L\'aplicació no pot accedir al diccionari. Comprova la teva xarxa i torna-ho a provar.</string>
+    <string name="ime_dict_from">De %1$s</string>
     <string name="ime_dict_idle_info">Cerca una paraula en anglès. Prem la barra de cerca i escriu. També pots posar el cursor sobre una paraula abans d\'obrir l\'eina.</string>
     <string name="ime_dict_insert_action">Insereix</string>
     <string name="ime_dict_lookup_desc">Cerca la paraula</string>
     <string name="ime_dict_lookup_progress">Cercant “%1$s”…</string>
+    <string name="ime_dict_no_sources">Totes les fonts del diccionari estan desactivades. Activa\'n una a la configuració de l\'eina Diccionari.</string>
     <string name="ime_dict_not_found_empty">No hi ha cap entrada per a “%1$s”. Comprova l\'ortografia o prova la forma base de la paraula.</string>
     <string name="ime_dict_play_desc">Reprodueix la pronunciació</string>
     <string name="ime_dict_search_active_hint">Escriviu una paraula…</string>
@@ -314,7 +347,15 @@
     <string name="ime_glide_word_list_offer">L\'escriptura lliscant necessita una llista de paraules %1$s</string>
     <string name="ime_glide_word_list_offer_dismiss_desc">Ignora</string>
     <string name="ime_grammar_all_filtered_empty">Tots els problemes trobats estan ocults pel filtre</string>
+    <string name="ime_grammar_ask_ai_desc">Pregunta a la IA sobre aquest problema</string>
     <string name="ime_grammar_category_kind_label">%1$s • %2$s</string>
+    <string name="ime_grammar_deepl_action_desc">Millora el text amb DeepL Write</string>
+    <string name="ime_grammar_deepl_dismiss_desc">Tanca el resultat de DeepL Write</string>
+    <string name="ime_grammar_deepl_error">DeepL Write no ha respost</string>
+    <string name="ime_grammar_deepl_replace_action">Reemplaça</string>
+    <string name="ime_grammar_deepl_replace_failed_toast">El text en aquest camp no es pot substituir</string>
+    <string name="ime_grammar_deepl_title">DeepL Write</string>
+    <string name="ime_grammar_deepl_unchanged">DeepL Write no té res a canviar</string>
     <string name="ime_grammar_dialect_desc">Seleccioneu el dialecte</string>
     <string name="ime_grammar_dismiss_desc">Amaga aquest problema</string>
     <string name="ime_grammar_empty_hint">Escriviu text o obriu un camp que contingui text. Els problemes es mostraran aquí. Les comprovacions s\'executen fora de línia.</string>
@@ -346,6 +387,7 @@
     <string name="ime_icons_empty_info">Per afegir paquets d\'icones, obriu la configuració.</string>
     <string name="ime_icons_more_label">Més paquets d\'icones</string>
     <string name="ime_icons_pick_info">Premeu un paquet d\'icones per utilitzar-lo a les tecles i eines.</string>
+    <string name="ime_image_search_by_photo_desc">Cerca amb una foto</string>
     <string name="ime_image_search_empty">No hi ha imatges per a “%1$s”</string>
     <string name="ime_image_search_hint">Cerca imatges</string>
     <string name="ime_image_search_idle">Escriu una cerca i prem intro. Prem una imatge per inserir-la. Mantén premut per inserir-ne l\'enllaç.</string>
@@ -376,6 +418,8 @@
     <string name="ime_kde_loop">Repeteix</string>
     <string name="ime_kde_media_empty_body">Inicieu un reproductor allà i apareixerà aquí</string>
     <string name="ime_kde_media_empty_title">No s\'està reproduint res a l\'ordinador</string>
+    <string name="ime_kde_media_unsupported_body">El seu KDE Connect no permet que un telèfon controli música o vídeo. KDE Connect en un Mac mai ho fa</string>
+    <string name="ime_kde_media_unsupported_title">Aquest ordinador no comparteix els seus reproductors</string>
     <string name="ime_kde_not_listening">Una altra aplicació en aquest telèfon utilitza el port de KDE Connect. Els ordinadors encara poden trobar aquest teclat, però prem Actualitza en aquest costat.</string>
     <string name="ime_kde_notice_clipboard_empty">No hi ha res al porta-retalls per enviar</string>
     <string name="ime_kde_notice_clipboard_sent">Portapapers enviat</string>
@@ -426,10 +470,12 @@
     <string name="ime_kde_send_empty">Envia el porta-retalls, el que has escrit o fitxers. El que envia l\'ordinador arriba aquí i a les Baixades</string>
     <string name="ime_kde_send_field">Text al camp</string>
     <string name="ime_kde_send_files">Fitxers…</string>
+    <string name="ime_kde_send_unsupported">Aquest ordinador no accepta fitxers ni text del telèfon</string>
     <string name="ime_kde_settings">Configuració</string>
     <string name="ime_kde_shuffle">Barreja</string>
     <string name="ime_kde_slides_end">Final</string>
     <string name="ime_kde_slides_next">Següent diapositiva</string>
+    <string name="ime_kde_slides_no_pointer">Aquest ordinador no té cap punter per a les diapositives</string>
     <string name="ime_kde_slides_pointer">Mantén premut i arrossega per al punter</string>
     <string name="ime_kde_slides_previous">Diapositiva anterior</string>
     <string name="ime_kde_slides_start">Inicia</string>
@@ -489,11 +535,25 @@
     <string name="ime_language_switch_title">Llengua d\'entrada</string>
     <string name="ime_launcher_activities_label">Pantalles</string>
     <string name="ime_launcher_app_info_action">Informació de l\'aplicació</string>
+    <string name="ime_launcher_combo_label">%1$s + %2$s</string>
+    <string name="ime_launcher_combo_open_action">Obre tots dos en pantalla dividida</string>
+    <string name="ime_launcher_combo_remove_action">Elimina aquesta parella</string>
+    <string name="ime_launcher_combos_label">Parelles de pantalla dividida</string>
     <string name="ime_launcher_empty">No hi ha cap aplicació que coincideixi</string>
+    <string name="ime_launcher_floating_unsupported">Aquest dispositiu pot obrir-la a pantalla completa</string>
     <string name="ime_launcher_hidden_label">Amagat de la graella</string>
     <string name="ime_launcher_hide_action">Amaga l\'aplicació de la graella</string>
     <string name="ime_launcher_loading">Carregant aplicacions...</string>
+    <string name="ime_launcher_menu_close">Tanca el menú</string>
     <string name="ime_launcher_not_exported_label">No es pot obrir des de fora de l\'aplicació</string>
+    <string name="ime_launcher_open_action">Obre</string>
+    <string name="ime_launcher_open_floating_action">Obre en una finestra flotant</string>
+    <string name="ime_launcher_open_split_action">Obre en pantalla dividida</string>
+    <string name="ime_launcher_page_action">Pantalles, amaga i informació de l\'aplicació…</string>
+    <string name="ime_launcher_page_no_screens_action">Amagar i informació de l\'aplicació...</string>
+    <string name="ime_launcher_pair_action">Emparella en pantalla dividida amb…</string>
+    <string name="ime_launcher_pair_cancel">Cancel·la</string>
+    <string name="ime_launcher_pair_prompt">Toqueu l\'aplicació per obrir-la al costat de %1$s</string>
     <string name="ime_launcher_pin_action">Fixa l\'aplicació</string>
     <string name="ime_launcher_pinned_label">Fixat</string>
     <string name="ime_launcher_recents_label">Recents</string>
@@ -669,9 +729,11 @@
     <string name="ime_sandbox_offer_only">Lliscar utilitzant només les teves paraules?</string>
     <string name="ime_sandbox_offer_prefer">Vols ajustar el lliscament a les teves paraules?</string>
     <string name="ime_search_attribution_brave">via Brave</string>
+    <string name="ime_selection_ask_ai">Demana a la IA</string>
     <string name="ime_selection_macro_back_desc">Torna a les accions de selecció</string>
     <string name="ime_selection_macro_bengali_unavailable_toast">El bengalí no està carregat</string>
     <string name="ime_selection_macro_busy_desc">Processant</string>
+    <string name="ime_selection_macro_deepl_clean_toast">DeepL Write no té res a canviar</string>
     <string name="ime_selection_macro_find_none_toast">Cap altra coincidència</string>
     <string name="ime_selection_macro_grammar_clean_toast">Res a corregir</string>
     <string name="ime_selection_macro_grammar_unavailable_toast">El corrector gramatical no està disponible</string>
@@ -680,6 +742,7 @@
     <string name="ime_selection_macro_nothing_to_undo_toast">No hi ha res per desfer</string>
     <string name="ime_selection_macro_open_in_desc">Obre a %1$s</string>
     <string name="ime_selection_macro_stop_label">Atura</string>
+    <string name="ime_selection_quote">Cita</string>
     <string name="ime_service_already_in_settings_toast">Ja sou a la configuració</string>
     <string name="ime_service_autocorrect_off_toast">L\'autocorrecció està desactivada</string>
     <string name="ime_service_autocorrect_on_toast">L\'autocorrecció està activada</string>
@@ -710,6 +773,11 @@
     <string name="ime_service_phonetic_english_needs_secondary_toast">Activa l\'anglès a Idiomes, %1$s, També suggerir des de</string>
     <string name="ime_service_phonetic_english_off_toast">Les paraules en anglès només es suggereixen</string>
     <string name="ime_service_phonetic_english_on_toast">Les paraules en anglès es mantenen en anglès</string>
+    <string name="ime_service_photo_search_blocked">L\'estalvi de dades no permet que les cerques web utilitzin aquesta connexió</string>
+    <string name="ime_service_photo_search_metered_ask">Aquesta connexió està mesurada. Per enviar la foto, torna a prémer Cercar.</string>
+    <string name="ime_service_photo_search_no_app">Cap aplicació en aquest telèfon pot cercar amb una foto</string>
+    <string name="ime_service_photo_search_no_browser">Cap navegador d\'aquest telèfon pot obrir els resultats</string>
+    <string name="ime_service_photo_search_sending">S\'està enviant la foto al lloc de cerca</string>
     <string name="ime_service_plugins_all_off_notice">Tots els connectors que heu instal·lat estan desactivats. Activeu-ne un a Gestiona els connectors.</string>
     <string name="ime_service_plugins_off_notice">Els connectors estan desactivats. Activeu-los a Configuració per instal·lar-los i executar-los.</string>
     <string name="ime_service_power_saving_off_toast">L\'estalvi d\'energia està desactivat</string>
@@ -790,10 +858,22 @@
     <string name="ime_sound_volume_label">Volum</string>
     <string name="ime_sticker_add_desc">Afegeix adhesius</string>
     <string name="ime_sticker_add_to_pack_action">Afegeix a %1$s</string>
+    <string name="ime_sticker_info_emoji">Emoji: %1$s</string>
+    <string name="ime_sticker_info_keywords">Paraules clau: %1$s</string>
+    <string name="ime_sticker_info_pack">Paquet: %1$s</string>
+    <string name="ime_sticker_info_untitled">Sense títol</string>
     <string name="ime_sticker_local_search_empty">Cap dels teus adhesius coincideix amb “%1$s”</string>
     <string name="ime_sticker_manage_packs_action">Gestiona els paquets</string>
     <string name="ime_sticker_need_key_body">L\'eina d\'adhesius necessita una clau API de Klipy o GIPHY. Ambdues claus són gratuïtes. Afegeix una clau a la configuració d\'aquesta eina.</string>
     <string name="ime_sticker_no_packs_empty">Encara no hi ha paquets d\'adhesius. Creeu-ne un a la configuració. També podeu prémer i mantenir premut un adhesiu de Klipy o GIPHY per desar-lo aquí.</string>
+    <plurals name="ime_sticker_offer_count">
+        <item quantity="one">%1$d adhesiu</item>
+        <item quantity="other">%1$d adhesius</item>
+    </plurals>
+    <string name="ime_sticker_offer_dismiss_desc">Amaga els adhesius per a %1$s</string>
+    <string name="ime_sticker_offer_item_desc">Envia l\'adhesiu %1$s</string>
+    <string name="ime_sticker_offer_item_untitled_desc">Envia aquest adhesiu</string>
+    <string name="ime_sticker_offer_more">+%1$d</string>
     <string name="ime_sticker_pack_all_label">Tot</string>
     <string name="ime_sticker_pack_empty">Aquest paquet és buit.</string>
     <string name="ime_sticker_save_new_pack_action">Desa en un paquet nou</string>
@@ -804,8 +884,24 @@
     <string name="ime_suggestion_hold_label">Opcions de paraula</string>
     <string name="ime_suggestion_never_suggest">No suggerir mai \"%1$s\"</string>
     <string name="ime_suggestions_show_desc">Mostra la barra de suggeriments</string>
+    <string name="ime_symbol_row_delete_confirm_body">El conjunt i totes les seves entrades s\'eliminaran. Un mode de teclat que l\'oferia mostrarà els vostres altres conjunts en el seu lloc.</string>
+    <string name="ime_symbol_row_delete_confirm_title">Voleu eliminar \"%1$s\"?</string>
+    <string name="ime_symbol_row_delete_set">Suprimeix el conjunt \"%1$s\"</string>
+    <string name="ime_symbol_row_hide_in_mode">Amaga la fila a %1$s</string>
+    <string name="ime_symbol_row_remove">Suprimeix \"%1$s\"</string>
+    <string name="ime_symbol_row_settings">Configuració de la fila de símbols</string>
     <string name="ime_symbol_set_switch_desc">Canvia el conjunt de símbols</string>
     <string name="ime_symbols_recents_label">Recents</string>
+    <string name="ime_synonyms_close_desc">Tanca els sinònims</string>
+    <string name="ime_synonyms_failed">No s\'ha pogut contactar amb cap font de sinònims. Comproveu la connexió i torneu-ho a provar.</string>
+    <string name="ime_synonyms_from">De %1$s</string>
+    <string name="ime_synonyms_loading">S\'estan cercant sinònims…</string>
+    <string name="ime_synonyms_no_sources">Totes les fonts de sinònims estan desactivades. Activa\'n una a Escriptura, Suggeriments, Fonts de sinònims.</string>
+    <string name="ime_synonyms_not_found">No s\'han trobat sinònims per a \"%1$s\".</string>
+    <string name="ime_synonyms_pick_desc">Utilitza \"%1$s\"</string>
+    <string name="ime_synonyms_retry">Torna-ho a provar</string>
+    <string name="ime_synonyms_similar_note">No hi ha sinònims llistats per a aquesta paraula. Aquestes paraules tenen un significat semblant.</string>
+    <string name="ime_synonyms_title">Sinònims de \"%1$s\"</string>
     <string name="ime_textedit_doc_end_desc">Ves al final del text</string>
     <string name="ime_textedit_doc_start_desc">Vés al principi del text</string>
     <string name="ime_textedit_down_desc">Mou cap avall</string>
@@ -926,7 +1022,10 @@
     <string name="ime_toolbox_hint_mode">El mode %1$s està activat, així que el teclat desa aquesta disposició per a aquest mode. Les altres aplicacions mantenen la seva pròpia.</string>
     <string name="ime_trackpad_hint">Arrossega per moure el cursor</string>
     <string name="ime_trackpad_surface_desc">Trackpad. Arrossega per moure el cursor, mantén premut i arrossega per seleccionar, toca dues vegades per seleccionar una paraula</string>
+    <string name="ime_translate_all_languages_info">També els idiomes per descarregar</string>
+    <string name="ime_translate_all_languages_label">Tots els idiomes</string>
     <string name="ime_translate_auto_detect_label">Detecta l\'idioma</string>
+    <string name="ime_translate_deepl_label">DeepL</string>
     <string name="ime_translate_download_failed_error">La descàrrega no ha finalitzat. Comproveu la connexió i torneu-ho a provar.</string>
     <string name="ime_translate_download_of_total_progress">%1$s de %2$s</string>
     <string name="ime_translate_downloaded_desc">Descarregat</string>
@@ -1064,6 +1163,10 @@
     <string name="ime_voice_status_mic_blocked">El micròfon està bloquejat. Activeu l\'accés al micròfon a la configuració ràpida i torneu-ho a provar.</string>
     <string name="ime_voice_status_no_model">L\'escriptura per veu fora de línia encara no té cap model</string>
     <string name="ime_voice_status_no_server">El servidor de transcripció encara no té cap adreça</string>
+    <plurals name="ime_voice_status_stops_in">
+        <item quantity="one">S\'atura en %d segon. Prem per finalitzar ara.</item>
+        <item quantity="other">S\'atura en %d segons. Prem per finalitzar ara.</item>
+    </plurals>
     <string name="ime_voice_status_transcribing">Transcrivint...</string>
     <string name="ime_voice_stop_desc">Atura l\'escolta</string>
     <string name="ime_voice_strip_allow_action">Permet</string>
@@ -1102,6 +1205,7 @@
     <string name="ime_web_search_need_key_body">La cerca web necessita una clau d\'API de Brave Search. Afegiu una clau a la configuració d\'aquesta eina.</string>
     <string name="ime_web_search_open_desc">Obre al navegador</string>
     <string name="ime_wiki_back_desc">Torna als resultats</string>
+    <string name="ime_wiki_expand_desc">Fes l\'article més alt</string>
     <string name="ime_wiki_full_error">L\'aplicació no pot carregar el text de l\'article.</string>
     <string name="ime_wiki_full_progress">Carregant l\'article complet…</string>
     <string name="ime_wiki_idle_info">Cerca un tema a %1$s.wikipedia.org. Llegeix el resum, obre els enllaços i insereix text o l\'adreça de l\'article.</string>
@@ -1113,8 +1217,12 @@
     <string name="ime_wiki_links_progress">S\'estan carregant els enllaços…</string>
     <string name="ime_wiki_no_results_empty">La cerca no ha trobat res per a “%1$s”.</string>
     <string name="ime_wiki_no_summary_empty">Aquest article no té cap resum.</string>
+    <string name="ime_wiki_open_browser_desc">Obre l\'article al navegador</string>
+    <string name="ime_wiki_quote_markdown">\"%1$s\" (de [Viquipèdia: %2$s](%3$s))</string>
+    <string name="ime_wiki_quote_plain">\"%1$s\" (Viquipèdia: %2$s, %3$s)</string>
     <string name="ime_wiki_search_active_hint">Cerca a la Viquipèdia. Prem intro per cercar</string>
     <string name="ime_wiki_search_hint">Cerca a la Viquipèdia…</string>
+    <string name="ime_wiki_shrink_desc">Torna a posar l\'article a l\'alçada del teclat</string>
     <string name="ime_wiki_tab_full_label">Article complet</string>
     <string name="ime_wiki_tab_links_label">Enllaços</string>
     <string name="ime_wiki_tab_summary_label">Resum</string>
@@ -1164,6 +1272,7 @@
     <string name="ime_word_menu_delete">Suprimeix \"%1$s\"</string>
     <string name="ime_word_menu_edit">Edita...</string>
     <string name="ime_word_menu_search_all">Cerca totes les paraules per a \"%1$s\"</string>
+    <string name="ime_word_menu_synonyms">Sinònims de \"%1$s\"</string>
     <string name="ime_word_spell_apply_desc">Utilitza aquesta ortografia</string>
     <string name="ime_word_spell_cancel_desc">Deixa l\'ortografia tal com està</string>
     <string name="ime_word_spell_hint">Escriu una nova ortografia per a \"%1$s\"</string>

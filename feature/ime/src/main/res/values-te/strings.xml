@@ -2,6 +2,13 @@
 <!-- Machine translated by Google Play. Do not edit by hand:
      regenerate with tools/i18n/pull-play-translations.py. -->
 <resources>
+    <string name="ime_ai_chat_ask_explain">సరళంగా వివరించండి</string>
+    <string name="ime_ai_chat_ask_explain_prompt">దీనిని సరళమైన పదాలలో వివరించండి.</string>
+    <string name="ime_ai_chat_ask_hint">వచనం గురించి ఒక ప్రశ్న అడగండి లేదా వీటిలో ఒకదానితో ప్రారంభించండి.</string>
+    <string name="ime_ai_chat_ask_summary">సారాంశం</string>
+    <string name="ime_ai_chat_ask_summary_prompt">దీని గురించి నాకు చిన్న సారాంశాన్ని ఇవ్వండి.</string>
+    <string name="ime_ai_chat_ask_words">కఠినమైన పదాలు</string>
+    <string name="ime_ai_chat_ask_words_prompt">దీనిలోని కష్టమైన పదాలను మరియు ఆలోచనలను వివరించండి.</string>
     <string name="ime_ai_chat_attach_desc">ఫీల్డ్ యొక్క వచనాన్ని సందేశంతో పంపండి</string>
     <string name="ime_ai_chat_attach_remove_desc">ఫీల్డ్‌లోని టెక్స్ట్‌ను పంపవద్దు</string>
     <plurals name="ime_ai_chat_attached_field">
@@ -12,6 +19,8 @@
         <item quantity="one">మీ ఎంపిక సందేశంతో వెళ్తుంది: %1$d అక్షరం</item>
         <item quantity="other">మీ ఎంపిక సందేశంతో వెళ్తుంది: %1$d అక్షరాలు</item>
     </plurals>
+    <string name="ime_ai_chat_attached_tool">%1$s గురించి</string>
+    <string name="ime_ai_chat_attached_tool_selection">%1$s నుండి ఒక భాగం గురించి</string>
     <plurals name="ime_ai_chat_attachment_sent">
         <item quantity="one">%1$d అక్షరంతో</item>
         <item quantity="other">%1$d అక్షరాలతో</item>
@@ -99,6 +108,10 @@
     <string name="ime_ai_truncated_notice">మోడల్ త్వరగా ఆగిపోయింది. సాధనం యొక్క సెట్టింగ్‌లలో “గరిష్ట ప్రతిస్పందన పొడవు”ను పెంచండి.</string>
     <string name="ime_ai_view_changes">మార్పులు</string>
     <string name="ime_ai_view_result">ఫలితం</string>
+    <string name="ime_ask_ai_label_dict">నిఘంటువు: %1$s</string>
+    <string name="ime_ask_ai_label_grammar">వ్యాకరణ తనిఖీ</string>
+    <string name="ime_ask_ai_label_vocab">పదజాలం: %1$s</string>
+    <string name="ime_ask_ai_label_wiki">వికీపీడియా: %1$s</string>
     <string name="ime_autofill_dismiss_desc">ఆటోఫిల్ సూచనలను దాచు</string>
     <string name="ime_calc_degrees_label">డిగ్రీలు</string>
     <string name="ime_calc_insert_action">చొప్పించు</string>
@@ -127,6 +140,7 @@
     <string name="ime_camera_permission_action">కెమెరాను అనుమతించు</string>
     <string name="ime_camera_permission_body">కెమెరాను ఉపయోగించడానికి కెమెరా టూల్‌కు అనుమతి అవసరం. మీరు షట్టర్‌ను నొక్కినప్పుడు మాత్రమే యాప్ ఫోటో తీస్తుంది.</string>
     <string name="ime_camera_retake_action">మళ్లీ తీసుకోండి</string>
+    <string name="ime_camera_search_action">శోధించు</string>
     <string name="ime_camera_send_action">పంపు</string>
     <string name="ime_camera_shutter_desc">ఫోటో తీయండి</string>
     <string name="ime_camera_starting_progress">కెమెరాను ప్రారంభిస్తోంది…</string>
@@ -144,6 +158,10 @@
     <string name="ime_clip_chip_image">కాపీ చేసిన చిత్రం</string>
     <string name="ime_clip_chip_item">కాపీ చేసిన అంశం</string>
     <string name="ime_clip_chip_screenshot">స్క్రీన్‌షాట్</string>
+    <plurals name="ime_clip_deleted">
+        <item quantity="one">క్లిప్ తొలగించబడింది</item>
+        <item quantity="other">%1$d క్లిప్‌లు తొలగించబడ్డాయి</item>
+    </plurals>
     <string name="ime_clip_edit">సవరించు</string>
     <string name="ime_clip_edit_placeholder">క్లిప్ యొక్క వచనాన్ని టైప్ చేయండి</string>
     <string name="ime_clip_edit_rich_note">మార్పును సేవ్ చేయడం వల్ల ఫార్మాటింగ్ తొలగించబడుతుంది</string>
@@ -162,6 +180,18 @@
     <string name="ime_clip_info_private_detail">కీబోర్డ్ ఈ క్లిప్‌ను ప్యానెల్‌లో దాచి ఉంచుతుంది మరియు ఇతర క్లిప్‌ల కంటే త్వరగా తొలగిస్తుంది.</string>
     <string name="ime_clip_info_size">పరిమాణం</string>
     <string name="ime_clip_info_type">రకం</string>
+    <plurals name="ime_clip_left_days">
+        <item quantity="one">%d రోజు మిగిలి ఉంది</item>
+        <item quantity="other">%d రోజులు మిగిలి ఉన్నాయి</item>
+    </plurals>
+    <plurals name="ime_clip_left_hours">
+        <item quantity="one">%d గంట మిగిలి ఉంది</item>
+        <item quantity="other">%d గంటలు మిగిలి ఉన్నాయి</item>
+    </plurals>
+    <plurals name="ime_clip_left_minutes">
+        <item quantity="one">%d నిమిషం మిగిలి ఉంది</item>
+        <item quantity="other">%d నిమిషాలు మిగిలి ఉన్నాయి</item>
+    </plurals>
     <string name="ime_clip_number_desc">క్లిప్ %1$d</string>
     <string name="ime_clip_pin">పిన్ చేయండి</string>
     <string name="ime_clip_send_as_sticker">స్టిక్కర్‌గా పంపండి</string>
@@ -172,6 +202,7 @@
     <string name="ime_clip_type_rich_text">రిచ్ టెక్స్ట్</string>
     <string name="ime_clip_type_text">టెక్స్ట్</string>
     <string name="ime_clip_type_video">వీడియో</string>
+    <string name="ime_clip_undo_delete">రద్దు చేయి</string>
     <string name="ime_clip_unpin">అన్‌పిన్ చేయండి</string>
     <string name="ime_clip_video_desc">కాపీ చేసిన వీడియో</string>
     <string name="ime_clipboard_no_match">“%1$s” కి సరిపోయే క్లిప్‌లు ఏవీ లేవు.</string>
@@ -203,10 +234,12 @@
     <string name="ime_dict_add_vocab_action">వొకాబ్‌కు జోడించు</string>
     <string name="ime_dict_antonyms_label">వ్యతిరేక పదాలు</string>
     <string name="ime_dict_error">యాప్ డిక్షనరీని చేరుకోలేదు. మీ నెట్‌వర్క్‌ను తనిఖీ చేసి మళ్ళీ ప్రయత్నించండి.</string>
+    <string name="ime_dict_from">%1$s నుండి</string>
     <string name="ime_dict_idle_info">ఆంగ్ల పదాన్ని వెతకండి. సెర్చ్ బార్‌ను నొక్కి టైప్ చేయండి. మీరు ఈ సాధనాన్ని తెరవడానికి ముందే కర్సర్‌ను ఒక పదంపై ఉంచవచ్చు.</string>
     <string name="ime_dict_insert_action">చొప్పించు</string>
     <string name="ime_dict_lookup_desc">పదాన్ని వెతకండి</string>
     <string name="ime_dict_lookup_progress">“%1$s” కోసం వెతుకుతోంది…</string>
+    <string name="ime_dict_no_sources">అన్ని డిక్షనరీ మూలాలు ఆపివేయబడ్డాయి. డిక్షనరీ టూల్ సెట్టింగ్‌లలో ఒకదానిని ఆన్ చేయండి.</string>
     <string name="ime_dict_not_found_empty">“%1$s” కోసం ఎంట్రీ లేదు. స్పెల్లింగ్‌ను తనిఖీ చేయండి లేదా పదం యొక్క మూల రూపాన్ని ప్రయత్నించండి.</string>
     <string name="ime_dict_play_desc">ఉచ్చారణను ప్లే చేయండి</string>
     <string name="ime_dict_search_active_hint">ఒక పదాన్ని టైప్ చేయండి…</string>
@@ -314,7 +347,15 @@
     <string name="ime_glide_word_list_offer">గ్లైడ్ టైపింగ్‌కు %1$s పదాల జాబితా అవసరం</string>
     <string name="ime_glide_word_list_offer_dismiss_desc">తీసివేయి</string>
     <string name="ime_grammar_all_filtered_empty">కనుగొనబడిన ప్రతి సమస్య ఫిల్టర్ ద్వారా దాచబడింది</string>
+    <string name="ime_grammar_ask_ai_desc">ఈ సమస్య గురించి AIని అడగండి</string>
     <string name="ime_grammar_category_kind_label">%1$s • %2$s</string>
+    <string name="ime_grammar_deepl_action_desc">DeepL రైట్‌తో వచనాన్ని మెరుగుపరచండి</string>
+    <string name="ime_grammar_deepl_dismiss_desc">DeepL రైట్ ఫలితాన్ని మూసివేయండి</string>
+    <string name="ime_grammar_deepl_error">DeepL రైట్ స్పందించలేదు</string>
+    <string name="ime_grammar_deepl_replace_action">భర్తీ చేయి</string>
+    <string name="ime_grammar_deepl_replace_failed_toast">ఈ ఫీల్డ్‌లోని వచనాన్ని భర్తీ చేయడం సాధ్యం కాదు</string>
+    <string name="ime_grammar_deepl_title">DeepL రైట్</string>
+    <string name="ime_grammar_deepl_unchanged">DeepL రైట్‌లో మార్చడానికి ఏమీ లేదు</string>
     <string name="ime_grammar_dialect_desc">మాండలికాన్ని ఎంచుకోండి</string>
     <string name="ime_grammar_dismiss_desc">ఈ సమస్యను దాచండి</string>
     <string name="ime_grammar_empty_hint">టెక్స్ట్‌ను టైప్ చేయండి లేదా టెక్స్ట్ ఉన్న ఫీల్డ్‌ను తెరవండి. సమస్యలు ఇక్కడ కనిపిస్తాయి. తనిఖీలు ఆఫ్‌లైన్‌లో జరుగుతాయి.</string>
@@ -346,6 +387,7 @@
     <string name="ime_icons_empty_info">ఐకాన్ ప్యాక్‌లను జోడించడానికి, సెట్టింగ్‌లను తెరవండి.</string>
     <string name="ime_icons_more_label">మరిన్ని ఐకాన్ ప్యాక్‌లు</string>
     <string name="ime_icons_pick_info">కీలు మరియు టూల్స్‌పై ఉపయోగించడానికి ఒక ఐకాన్ ప్యాక్‌ను నొక్కండి.</string>
+    <string name="ime_image_search_by_photo_desc">ఫోటోతో వెతకండి</string>
     <string name="ime_image_search_empty">“%1$s” కోసం చిత్రాలు లేవు</string>
     <string name="ime_image_search_hint">చిత్రాలను శోధించండి</string>
     <string name="ime_image_search_need_key_body">చిత్ర శోధనకు Brave Search నుండి API కీ అవసరం. ఈ సాధనం కోసం సెట్టింగ్‌లలో కీని జోడించండి.</string>
@@ -375,6 +417,8 @@
     <string name="ime_kde_loop">రిపీట్</string>
     <string name="ime_kde_media_empty_body">అక్కడ ప్లేయర్‌ని ప్రారంభించండి, అది ఇక్కడ కనిపిస్తుంది</string>
     <string name="ime_kde_media_empty_title">కంప్యూటర్‌లో ఏదీ ప్లే అవ్వడం లేదు</string>
+    <string name="ime_kde_media_unsupported_body">దీని KDE కనెక్ట్ ఫోన్ ద్వారా సంగీతం లేదా వీడియోను నియంత్రించడానికి అనుమతించదు. Macలో KDE కనెక్ట్ ఎప్పటికీ అలా చేయదు</string>
+    <string name="ime_kde_media_unsupported_title">ఈ కంప్యూటర్ దాని ప్లేయర్‌లను షేర్ చేయదు</string>
     <string name="ime_kde_not_listening">ఈ ఫోన్‌లోని మరొక యాప్ KDE కనెక్ట్ పోర్ట్‌ను ఉపయోగిస్తోంది. కంప్యూటర్లు ఇప్పటికీ ఈ కీబోర్డ్‌ను కనుగొనగలవు, కానీ ఈ వైపు రిఫ్రెష్ నొక్కండి.</string>
     <string name="ime_kde_notice_clipboard_empty">క్లిప్‌బోర్డ్‌లో పంపడానికి ఏమీ లేదు</string>
     <string name="ime_kde_notice_clipboard_sent">క్లిప్‌బోర్డ్ పంపబడింది</string>
@@ -425,10 +469,12 @@
     <string name="ime_kde_send_empty">క్లిప్‌బోర్డ్, మీరు రాసినవి లేదా ఫైళ్లను పంపండి. కంప్యూటర్ పంపేవి ఇక్కడ మరియు డౌన్‌లోడ్స్‌లో కనిపిస్తాయి.</string>
     <string name="ime_kde_send_field">ఫీల్డ్‌లోని టెక్స్ట్</string>
     <string name="ime_kde_send_files">ఫైళ్లు...</string>
+    <string name="ime_kde_send_unsupported">ఈ కంప్యూటర్ ఫోన్ నుండి ఫైల్‌లను లేదా వచనాన్ని అంగీకరించదు</string>
     <string name="ime_kde_settings">సెట్టింగ్‌లు</string>
     <string name="ime_kde_shuffle">షఫుల్</string>
     <string name="ime_kde_slides_end">ముగింపు</string>
     <string name="ime_kde_slides_next">తదుపరి స్లయిడ్</string>
+    <string name="ime_kde_slides_no_pointer">ఈ కంప్యూటర్‌లో స్లైడ్‌ల కోసం పాయింటర్ లేదు</string>
     <string name="ime_kde_slides_pointer">పాయింటర్ కోసం పట్టుకుని లాగండి</string>
     <string name="ime_kde_slides_previous">మునుపటి స్లయిడ్</string>
     <string name="ime_kde_slides_start">ప్రారంభించు</string>
@@ -488,11 +534,25 @@
     <string name="ime_language_switch_title">ఇన్‌పుట్ భాష</string>
     <string name="ime_launcher_activities_label">స్క్రీన్‌లు</string>
     <string name="ime_launcher_app_info_action">యాప్ సమాచారం</string>
+    <string name="ime_launcher_combo_label">%1$s + %2$s</string>
+    <string name="ime_launcher_combo_open_action">రెండింటినీ స్ప్లిట్ స్క్రీన్‌లో తెరవండి</string>
+    <string name="ime_launcher_combo_remove_action">ఈ జతను తొలగించు</string>
+    <string name="ime_launcher_combos_label">స్ప్లిట్ స్క్రీన్ జతలు</string>
     <string name="ime_launcher_empty">ఏ యాప్‌లు సరిపోలడం లేదు</string>
+    <string name="ime_launcher_floating_unsupported">ఈ పరికరం దీన్ని పూర్తి స్క్రీన్‌లో తెరవవచ్చు</string>
     <string name="ime_launcher_hidden_label">గ్రిడ్ నుండి దాచబడింది</string>
     <string name="ime_launcher_hide_action">గ్రిడ్ నుండి యాప్‌ను దాచు</string>
     <string name="ime_launcher_loading">యాప్‌లను లోడ్ చేస్తోంది…</string>
+    <string name="ime_launcher_menu_close">మెనూను మూసివేయి</string>
     <string name="ime_launcher_not_exported_label">యాప్ వెలుపల నుండి తెరవలేము</string>
+    <string name="ime_launcher_open_action">తెరువు</string>
+    <string name="ime_launcher_open_floating_action">ఫ్లోటింగ్ విండోలో తెరవండి</string>
+    <string name="ime_launcher_open_split_action">స్ప్లిట్ స్క్రీన్‌లో తెరవండి</string>
+    <string name="ime_launcher_page_action">స్క్రీన్‌లు, దాచు మరియు యాప్ సమాచారం…</string>
+    <string name="ime_launcher_page_no_screens_action">దాచు మరియు యాప్ సమాచారం…</string>
+    <string name="ime_launcher_pair_action">దీనితో స్ప్లిట్ స్క్రీన్‌లో జత చేయండి…</string>
+    <string name="ime_launcher_pair_cancel">రద్దు చేయి</string>
+    <string name="ime_launcher_pair_prompt">%1$s పక్కన తెరవడానికి యాప్‌ను నొక్కండి</string>
     <string name="ime_launcher_pin_action">యాప్‌ను పిన్ చేయండి</string>
     <string name="ime_launcher_pinned_label">పిన్ చేయబడింది</string>
     <string name="ime_launcher_recents_label">ఇటీవలివి</string>
@@ -668,9 +728,11 @@
     <string name="ime_sandbox_offer_only">మీ పదాలను మాత్రమే ఉపయోగించి స్వైప్ చేయాలా?</string>
     <string name="ime_sandbox_offer_prefer">మీ పదాలకు అనుగుణంగా స్వైపింగ్‌ను సర్దుబాటు చేయాలా?</string>
     <string name="ime_search_attribution_brave">Brave ద్వారా</string>
+    <string name="ime_selection_ask_ai">AIని అడగండి</string>
     <string name="ime_selection_macro_back_desc">ఎంపిక చర్యలకు తిరిగి వెళ్ళు</string>
     <string name="ime_selection_macro_bengali_unavailable_toast">బెంగాలీ లోడ్ కాలేదు</string>
     <string name="ime_selection_macro_busy_desc">పని జరుగుతోంది</string>
+    <string name="ime_selection_macro_deepl_clean_toast">DeepL రైట్‌లో మార్చడానికి ఏమీ లేదు</string>
     <string name="ime_selection_macro_find_none_toast">మరే ఇతర సరిపోలిక లేదు</string>
     <string name="ime_selection_macro_grammar_clean_toast">సరిచేయడానికి ఏమీ లేదు</string>
     <string name="ime_selection_macro_grammar_unavailable_toast">గ్రామర్ చెకర్ అందుబాటులో లేదు</string>
@@ -679,6 +741,7 @@
     <string name="ime_selection_macro_nothing_to_undo_toast">అన్‌డూ చేయడానికి ఏమీ లేదు</string>
     <string name="ime_selection_macro_open_in_desc">%1$s లో తెరవండి</string>
     <string name="ime_selection_macro_stop_label">ఆపు</string>
+    <string name="ime_selection_quote">కోట్</string>
     <string name="ime_service_already_in_settings_toast">మీరు ఇప్పటికే సెట్టింగ్‌లలో ఉన్నారు</string>
     <string name="ime_service_autocorrect_off_toast">ఆటోకరెక్ట్ ఆఫ్ చేయబడింది</string>
     <string name="ime_service_autocorrect_on_toast">ఆటోకరెక్ట్ ఆన్‌లో ఉంది</string>
@@ -709,6 +772,11 @@
     <string name="ime_service_phonetic_english_needs_secondary_toast">భాషల కింద ఆంగ్లాన్ని ఆన్ చేయండి, %1$s, దీని నుండి కూడా సూచించండి</string>
     <string name="ime_service_phonetic_english_off_toast">ఇంగ్లీష్ పదాలు మాత్రమే సూచించబడతాయి</string>
     <string name="ime_service_phonetic_english_on_toast">ఆంగ్ల పదాలు ఆంగ్లంలోనే ఉంటాయి</string>
+    <string name="ime_service_photo_search_blocked">డేటా సేవర్ ఈ కనెక్షన్‌ని ఉపయోగించి వెబ్ శోధనలను అనుమతించదు</string>
+    <string name="ime_service_photo_search_metered_ask">ఈ కనెక్షన్ మీటర్ చేయబడింది. ఫోటోను పంపడానికి, మళ్ళీ శోధించు నొక్కండి.</string>
+    <string name="ime_service_photo_search_no_app">ఈ ఫోన్‌లో ఫోటోతో వెతకడానికి ఏ యాప్ లేదు</string>
+    <string name="ime_service_photo_search_no_browser">ఈ ఫోన్‌లో ఫలితాలను తెరవడానికి ఏ బ్రౌజర్ లేదు</string>
+    <string name="ime_service_photo_search_sending">శోధన సైట్‌కు ఫోటోను పంపుతోంది</string>
     <string name="ime_service_plugins_all_off_notice">మీరు ఇన్‌స్టాల్ చేసిన ప్రతి ప్లగిన్ ఆఫ్ చేయబడింది. ప్లగిన్‌లను నిర్వహించు విభాగంలో ఒకదాన్ని ఆన్ చేయండి.</string>
     <string name="ime_service_plugins_off_notice">ప్లగిన్‌లు ఆపివేయబడ్డాయి. వాటిని ఇన్‌స్టాల్ చేయడానికి మరియు రన్ చేయడానికి సెట్టింగ్‌లలో ఆన్ చేయండి.</string>
     <string name="ime_service_power_saving_off_toast">పవర్ సేవింగ్ ఆఫ్ చేయబడింది</string>
@@ -789,10 +857,22 @@
     <string name="ime_sound_volume_label">వాల్యూమ్</string>
     <string name="ime_sticker_add_desc">స్టిక్కర్లను జోడించు</string>
     <string name="ime_sticker_add_to_pack_action">%1$sకి జోడించు</string>
+    <string name="ime_sticker_info_emoji">ఎమోజి: %1$s</string>
+    <string name="ime_sticker_info_keywords">కీవర్డ్‌లు: %1$s</string>
+    <string name="ime_sticker_info_pack">ప్యాక్: %1$s</string>
+    <string name="ime_sticker_info_untitled">శీర్షిక లేదు</string>
     <string name="ime_sticker_local_search_empty">మీ స్టిక్కర్‌లేవీ “%1$s”తో సరిపోలడం లేదు</string>
     <string name="ime_sticker_manage_packs_action">ప్యాక్‌లను నిర్వహించండి</string>
     <string name="ime_sticker_need_key_body">స్టిక్కర్ సాధనానికి Klipy లేదా GIPHY నుండి API కీ అవసరం. రెండు కీలు ఉచితం. ఈ సాధనం కోసం సెట్టింగ్‌లలో కీని జోడించండి.</string>
     <string name="ime_sticker_no_packs_empty">ఇంకా స్టిక్కర్ ప్యాక్‌లు లేవు. సెట్టింగ్‌లలో ఒక ప్యాక్‌ని సృష్టించండి. మీరు Klipy లేదా GIPHY నుండి స్టిక్కర్‌ను నొక్కి పట్టుకోవడం ద్వారా కూడా ఇక్కడ సేవ్ చేయవచ్చు.</string>
+    <plurals name="ime_sticker_offer_count">
+        <item quantity="one">%1$d స్టిక్కర్</item>
+        <item quantity="other">%1$d స్టిక్కర్లు</item>
+    </plurals>
+    <string name="ime_sticker_offer_dismiss_desc">%1$s కోసం స్టిక్కర్‌లను దాచండి</string>
+    <string name="ime_sticker_offer_item_desc">స్టిక్కర్ %1$s పంపండి</string>
+    <string name="ime_sticker_offer_item_untitled_desc">ఈ స్టిక్కర్‌ని పంపండి</string>
+    <string name="ime_sticker_offer_more">+%1$d</string>
     <string name="ime_sticker_pack_all_label">అన్నీ</string>
     <string name="ime_sticker_pack_empty">ఈ ప్యాక్ ఖాళీగా ఉంది.</string>
     <string name="ime_sticker_save_new_pack_action">కొత్త ప్యాక్‌లో సేవ్ చేయండి</string>
@@ -803,8 +883,24 @@
     <string name="ime_suggestion_hold_label">పద ఎంపికలు</string>
     <string name="ime_suggestion_never_suggest">\"%1$s\"ని ఎప్పుడూ సూచించవద్దు</string>
     <string name="ime_suggestions_show_desc">సలహాల స్ట్రిప్‌ను చూపించు</string>
+    <string name="ime_symbol_row_delete_confirm_body">ఈ సెట్ మరియు దానిలోని అన్ని ఎంట్రీలు తొలగించబడతాయి. దీన్ని అందించే కీబోర్డ్ మోడ్ బదులుగా మీ ఇతర సెట్‌లను చూపుతుంది.</string>
+    <string name="ime_symbol_row_delete_confirm_title">\"%1$s\"ని తొలగించాలా?</string>
+    <string name="ime_symbol_row_delete_set">\"%1$s\" సెట్‌ను తొలగించు</string>
+    <string name="ime_symbol_row_hide_in_mode">%1$s లో అడ్డు వరుసను దాచండి</string>
+    <string name="ime_symbol_row_remove">\"%1$s\"ని తీసివేయి</string>
+    <string name="ime_symbol_row_settings">సింబల్ వరుస సెట్టింగ్‌లు</string>
     <string name="ime_symbol_set_switch_desc">చిహ్నాల సెట్‌ను మార్చండి</string>
     <string name="ime_symbols_recents_label">ఇటీవలివి</string>
+    <string name="ime_synonyms_close_desc">సమానార్థకాలను మూసివేయి</string>
+    <string name="ime_synonyms_failed">సమానార్థక మూలాన్ని చేరుకోలేకపోయాము. కనెక్షన్‌ని తనిఖీ చేసి మళ్లీ ప్రయత్నించండి.</string>
+    <string name="ime_synonyms_from">%1$s నుండి</string>
+    <string name="ime_synonyms_loading">పర్యాయపదాల కోసం వెతుకుతోంది…</string>
+    <string name="ime_synonyms_no_sources">అన్ని పర్యాయపదాల మూలాలు ఆఫ్‌లో ఉన్నాయి. టైపింగ్, సూచనలు, పర్యాయపదాల మూలాలలో ఒకదాన్ని ఆన్ చేయండి.</string>
+    <string name="ime_synonyms_not_found">\"%1$s\" కోసం పర్యాయపదాలు కనుగొనబడలేదు.</string>
+    <string name="ime_synonyms_pick_desc">\"%1$s\"ని ఉపయోగించండి</string>
+    <string name="ime_synonyms_retry">మళ్ళీ ప్రయత్నించండి</string>
+    <string name="ime_synonyms_similar_note">ఈ పదానికి పర్యాయపదాలు ఏవీ లేవు. ఈ పదాలు సారూప్య అర్థాన్ని కలిగి ఉన్నాయి.</string>
+    <string name="ime_synonyms_title">\"%1$s\" కోసం పర్యాయపదాలు</string>
     <string name="ime_textedit_doc_end_desc">టెక్స్ట్ చివరకి వెళ్ళండి</string>
     <string name="ime_textedit_doc_start_desc">టెక్స్ట్ ప్రారంభానికి వెళ్లండి</string>
     <string name="ime_textedit_down_desc">కిందకు వెళ్ళండి</string>
@@ -925,7 +1021,10 @@
     <string name="ime_toolbox_hint_mode">%1$s మోడ్ ఆన్‌లో ఉంది, కాబట్టి కీబోర్డ్ ఆ మోడ్ కోసం ఈ అమరికను సేవ్ చేస్తుంది. ఇతర యాప్‌లు వాటి స్వంత అమరికలను కలిగి ఉంటాయి.</string>
     <string name="ime_trackpad_hint">కర్సర్‌ను తరలించడానికి లాగండి</string>
     <string name="ime_trackpad_surface_desc">ట్రాక్‌ప్యాడ్. కర్సర్‌ను తరలించడానికి లాగండి, ఎంచుకోవడానికి పట్టుకుని లాగండి, పదాన్ని ఎంచుకోవడానికి రెండుసార్లు నొక్కండి</string>
+    <string name="ime_translate_all_languages_info">డౌన్‌లోడ్ చేయాల్సిన భాషలు కూడా</string>
+    <string name="ime_translate_all_languages_label">అన్ని భాషలు</string>
     <string name="ime_translate_auto_detect_label">భాషను గుర్తించు</string>
+    <string name="ime_translate_deepl_label">DeepL</string>
     <string name="ime_translate_download_failed_error">డౌన్‌లోడ్ పూర్తి కాలేదు. కనెక్షన్‌ని తనిఖీ చేసి, మళ్ళీ ప్రయత్నించండి.</string>
     <string name="ime_translate_download_of_total_progress">%2$s లో %1$s</string>
     <string name="ime_translate_downloaded_desc">డౌన్‌లోడ్ చేయబడింది</string>
@@ -1063,6 +1162,10 @@
     <string name="ime_voice_status_mic_blocked">మైక్రోఫోన్ బ్లాక్ చేయబడింది. క్విక్ సెట్టింగ్‌లలో మైక్రోఫోన్ యాక్సెస్‌ను ఆన్ చేసి, ఆపై మళ్లీ ప్రయత్నించండి.</string>
     <string name="ime_voice_status_no_model">ఆఫ్‌లైన్ వాయిస్ టైపింగ్‌కు ఇంకా మోడల్ లేదు</string>
     <string name="ime_voice_status_no_server">ట్రాన్స్‌క్రిప్షన్ సర్వర్‌కు ఇంకా చిరునామా లేదు</string>
+    <plurals name="ime_voice_status_stops_in">
+        <item quantity="one">%d సెకనులో ఆగిపోతుంది. ఇప్పుడే పూర్తి చేయడానికి నొక్కండి.</item>
+        <item quantity="other">%d సెకన్లలో ఆగిపోతుంది. ఇప్పుడే పూర్తి చేయడానికి నొక్కండి.</item>
+    </plurals>
     <string name="ime_voice_status_transcribing">ట్రాన్స్‌క్రైబ్ చేస్తోంది…</string>
     <string name="ime_voice_stop_desc">వినడం ఆపండి</string>
     <string name="ime_voice_strip_allow_action">అనుమతించు</string>
@@ -1102,6 +1205,7 @@
     <string name="ime_web_search_need_key_body">వెబ్ సెర్చ్‌కి Brave సెర్చ్ నుండి API కీ అవసరం. ఈ టూల్ కోసం సెట్టింగ్‌లలో కీని జోడించండి.</string>
     <string name="ime_web_search_open_desc">బ్రౌజర్‌లో తెరవండి</string>
     <string name="ime_wiki_back_desc">ఫలితాలకు తిరిగి వెళ్ళు</string>
+    <string name="ime_wiki_expand_desc">వ్యాసాన్ని పెద్దదిగా చేయండి</string>
     <string name="ime_wiki_full_error">యాప్ వ్యాసం యొక్క పాఠ్యాన్ని లోడ్ చేయలేకపోతోంది.</string>
     <string name="ime_wiki_full_progress">పూర్తి కథనాన్ని లోడ్ చేస్తోంది…</string>
     <string name="ime_wiki_idle_info">%1$s.wikipedia.orgలో ఒక అంశం కోసం వెతకండి. సారాంశాన్ని చదవండి, లింక్‌లను తెరవండి మరియు వచనాన్ని లేదా వ్యాసం యొక్క చిరునామాను చొప్పించండి.</string>
@@ -1113,8 +1217,12 @@
     <string name="ime_wiki_links_progress">లింక్‌లను లోడ్ చేస్తోంది…</string>
     <string name="ime_wiki_no_results_empty">“%1$s” కోసం శోధనలో ఏమీ దొరకలేదు.</string>
     <string name="ime_wiki_no_summary_empty">ఈ కథనానికి సారాంశం లేదు.</string>
+    <string name="ime_wiki_open_browser_desc">బ్రౌజర్‌లో కథనాన్ని తెరవండి</string>
+    <string name="ime_wiki_quote_markdown">\"%1$s\" ([వికీపీడియా: %2$s](%3$s) నుండి)</string>
+    <string name="ime_wiki_quote_plain">\"%1$s\" (వికీపీడియా: %2$s, %3$s)</string>
     <string name="ime_wiki_search_active_hint">వికీపీడియాలో వెతకండి. వెతకడానికి ఎంటర్ నొక్కండి</string>
     <string name="ime_wiki_search_hint">వికీపీడియాలో వెతకండి…</string>
+    <string name="ime_wiki_shrink_desc">వ్యాసాన్ని మళ్ళీ కీబోర్డ్ ఎత్తుకు తగ్గించండి</string>
     <string name="ime_wiki_tab_full_label">పూర్తి వ్యాసం</string>
     <string name="ime_wiki_tab_links_label">లింకులు</string>
     <string name="ime_wiki_tab_summary_label">సారాంశం</string>
@@ -1164,6 +1272,7 @@
     <string name="ime_word_menu_delete">\"%1$s\"ని తొలగించు</string>
     <string name="ime_word_menu_edit">సవరించు...</string>
     <string name="ime_word_menu_search_all">\"%1$s\" కోసం అన్ని పదాలను శోధించండి</string>
+    <string name="ime_word_menu_synonyms">\"%1$s\" కోసం పర్యాయపదాలు</string>
     <string name="ime_word_spell_apply_desc">ఈ స్పెల్లింగ్‌ను ఉపయోగించు</string>
     <string name="ime_word_spell_cancel_desc">స్పెల్లింగ్‌ను అలాగే వదిలేయండి</string>
     <string name="ime_word_spell_hint">\"%1$s\" కోసం కొత్త స్పెల్లింగ్‌ను టైప్ చేయండి</string>

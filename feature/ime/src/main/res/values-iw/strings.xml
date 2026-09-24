@@ -2,6 +2,13 @@
 <!-- Machine translated by Google Play. Do not edit by hand:
      regenerate with tools/i18n/pull-play-translations.py. -->
 <resources>
+    <string name="ime_ai_chat_ask_explain">הסבר בפשטות</string>
+    <string name="ime_ai_chat_ask_explain_prompt">הסבר זאת במילים פשוטות.</string>
+    <string name="ime_ai_chat_ask_hint">שאל שאלה על הטקסט, או התחל עם אחת מאלו.</string>
+    <string name="ime_ai_chat_ask_summary">סכם</string>
+    <string name="ime_ai_chat_ask_summary_prompt">תן לי סיכום קצר של זה.</string>
+    <string name="ime_ai_chat_ask_words">מילים קשות</string>
+    <string name="ime_ai_chat_ask_words_prompt">הסבר את המילים והרעיונות הקשים בטקסט זה.</string>
     <string name="ime_ai_chat_attach_desc">שלח את הטקסט של השדה עם ההודעה</string>
     <string name="ime_ai_chat_attach_remove_desc">אל תשלח את הטקסט של השדה</string>
     <plurals name="ime_ai_chat_attached_field">
@@ -12,6 +19,8 @@
         <item quantity="one">הבחירה שלך מצורפת להודעה: %1$d תו</item>
         <item quantity="other">הבחירה שלך מצורפת להודעה: %1$d תווים</item>
     </plurals>
+    <string name="ime_ai_chat_attached_tool">אודות %1$s</string>
+    <string name="ime_ai_chat_attached_tool_selection">לגבי קטע מתוך %1$s</string>
     <plurals name="ime_ai_chat_attachment_sent">
         <item quantity="one">עם תו %1$d של טקסט</item>
         <item quantity="other">עם %1$d תווים של טקסט</item>
@@ -99,6 +108,10 @@
     <string name="ime_ai_truncated_notice">המודל עצר מוקדם. הגדל את \"אורך תגובה מקסימלי\" בהגדרות הכלי.</string>
     <string name="ime_ai_view_changes">שינויים</string>
     <string name="ime_ai_view_result">תוצאה</string>
+    <string name="ime_ask_ai_label_dict">מילון: %1$s</string>
+    <string name="ime_ask_ai_label_grammar">בדיקת דקדוק</string>
+    <string name="ime_ask_ai_label_vocab">אוצר מילים: %1$s</string>
+    <string name="ime_ask_ai_label_wiki">ויקיפדיה: %1$s</string>
     <string name="ime_autofill_dismiss_desc">הסתר את הצעות המילוי האוטומטי</string>
     <string name="ime_calc_degrees_label">מעלות</string>
     <string name="ime_calc_insert_action">הכנס</string>
@@ -127,6 +140,7 @@
     <string name="ime_camera_permission_action">אפשר גישה למצלמה</string>
     <string name="ime_camera_permission_body">כלי המצלמה זקוק להרשאה כדי להשתמש במצלמה. האפליקציה מצלמת רק כשאתה לוחץ על כפתור הצילום.</string>
     <string name="ime_camera_retake_action">צלם שוב</string>
+    <string name="ime_camera_search_action">חיפוש</string>
     <string name="ime_camera_send_action">שלח</string>
     <string name="ime_camera_shutter_desc">צלם תמונה</string>
     <string name="ime_camera_starting_progress">מפעיל את המצלמה...</string>
@@ -144,6 +158,10 @@
     <string name="ime_clip_chip_image">תמונה שהועתקה</string>
     <string name="ime_clip_chip_item">פריט שהועתק</string>
     <string name="ime_clip_chip_screenshot">צילום מסך</string>
+    <plurals name="ime_clip_deleted">
+        <item quantity="one">קטע נמחק</item>
+        <item quantity="other">%1$d קטעים נמחקו</item>
+    </plurals>
     <string name="ime_clip_edit">עריכה</string>
     <string name="ime_clip_edit_placeholder">הקלד את טקסט הקליפ</string>
     <string name="ime_clip_edit_rich_note">שמירת שינוי תסיר את העיצוב</string>
@@ -162,6 +180,18 @@
     <string name="ime_clip_info_private_detail">המקלדת מסתירה את הקטע הזה בלוח ומוחקת אותו מוקדם יותר מקטעים אחרים.</string>
     <string name="ime_clip_info_size">גודל</string>
     <string name="ime_clip_info_type">סוג</string>
+    <plurals name="ime_clip_left_days">
+        <item quantity="one">נותר יום אחד</item>
+        <item quantity="other">נותרו %d ימים</item>
+    </plurals>
+    <plurals name="ime_clip_left_hours">
+        <item quantity="one">נותרה שעה %d</item>
+        <item quantity="other">נותרו %d שעות</item>
+    </plurals>
+    <plurals name="ime_clip_left_minutes">
+        <item quantity="one">%d דקה נותרה</item>
+        <item quantity="other">%d דקות נותרו</item>
+    </plurals>
     <string name="ime_clip_number_desc">קליפ %1$d</string>
     <string name="ime_clip_pin">נעץ</string>
     <string name="ime_clip_send_as_sticker">שלח כמדבקה</string>
@@ -172,6 +202,7 @@
     <string name="ime_clip_type_rich_text">טקסט עשיר</string>
     <string name="ime_clip_type_text">טקסט</string>
     <string name="ime_clip_type_video">וידאו</string>
+    <string name="ime_clip_undo_delete">בטל</string>
     <string name="ime_clip_unpin">בטל נעילה</string>
     <string name="ime_clip_video_desc">סרטון שהועתק</string>
     <string name="ime_clipboard_no_match">אין קטעים התואמים ל-“%1$s”.</string>
@@ -203,10 +234,12 @@
     <string name="ime_dict_add_vocab_action">הוספה לאוצר מילים</string>
     <string name="ime_dict_antonyms_label">הפכים</string>
     <string name="ime_dict_error">האפליקציה לא מצליחה להגיע למילון. בדוק את הרשת ונסה שוב.</string>
+    <string name="ime_dict_from">מתוך %1$s</string>
     <string name="ime_dict_idle_info">חפש מילה באנגלית. לחץ על שורת החיפוש והקלד. ניתן גם להציב את הסמן על מילה לפני פתיחת הכלי.</string>
     <string name="ime_dict_insert_action">הכנס</string>
     <string name="ime_dict_lookup_desc">חפש את המילה</string>
     <string name="ime_dict_lookup_progress">מחפש \"%1$s\"...</string>
+    <string name="ime_dict_no_sources">כל מקורות המילון כבויים. הפעל אחד מהם בהגדרות כלי המילון.</string>
     <string name="ime_dict_not_found_empty">אין ערך עבור “%1$s”. בדוק את האיות, או נסה את צורת הבסיס של המילה.</string>
     <string name="ime_dict_play_desc">השמע את ההגייה</string>
     <string name="ime_dict_search_active_hint">הקלד מילה...</string>
@@ -314,7 +347,15 @@
     <string name="ime_glide_word_list_offer">הקלדת החלקה דורשת רשימת מילים %1$s</string>
     <string name="ime_glide_word_list_offer_dismiss_desc">בטל</string>
     <string name="ime_grammar_all_filtered_empty">כל בעיה שנמצאה מוסתרת על ידי המסנן</string>
+    <string name="ime_grammar_ask_ai_desc">שאל את ה-AI לגבי בעיה זו</string>
     <string name="ime_grammar_category_kind_label">%1$s • %2$s</string>
+    <string name="ime_grammar_deepl_action_desc">שפר את הטקסט בעזרת DeepL Write</string>
+    <string name="ime_grammar_deepl_dismiss_desc">סגור את תוצאת DeepL Write</string>
+    <string name="ime_grammar_deepl_error">DeepL Write לא הגיב</string>
+    <string name="ime_grammar_deepl_replace_action">החלפה</string>
+    <string name="ime_grammar_deepl_replace_failed_toast">לא ניתן להחליף את הטקסט בשדה זה</string>
+    <string name="ime_grammar_deepl_title">DeepL Write</string>
+    <string name="ime_grammar_deepl_unchanged">ל-DeepL Write אין מה לשנות</string>
     <string name="ime_grammar_dialect_desc">בחר את הניב</string>
     <string name="ime_grammar_dismiss_desc">הסתר בעיה זו</string>
     <string name="ime_grammar_empty_hint">הקלד טקסט, או פתח שדה המכיל טקסט. הבעיות יופיעו כאן. הבדיקות מתבצעות במצב לא מקוון.</string>
@@ -346,6 +387,7 @@
     <string name="ime_icons_empty_info">כדי להוסיף חבילות סמלים, פתח את ההגדרות.</string>
     <string name="ime_icons_more_label">חבילות סמלים נוספות</string>
     <string name="ime_icons_pick_info">לחץ על חבילת סמלים כדי להשתמש בה על המקשים והכלים.</string>
+    <string name="ime_image_search_by_photo_desc">חיפוש עם תמונה</string>
     <string name="ime_image_search_empty">אין תמונות עבור \"%1$s\"</string>
     <string name="ime_image_search_hint">חיפוש תמונות</string>
     <string name="ime_image_search_need_key_body">חיפוש תמונות דורש מפתח API מ-Brave Search. הוסף מפתח בהגדרות עבור כלי זה.</string>
@@ -375,6 +417,8 @@
     <string name="ime_kde_loop">חזור</string>
     <string name="ime_kde_media_empty_body">הפעל נגן שם והוא יופיע כאן</string>
     <string name="ime_kde_media_empty_title">שום דבר לא מתנגן במחשב</string>
+    <string name="ime_kde_media_unsupported_body">KDE Connect לא מאפשר לטלפון לשלוט במוזיקה או בווידאו. KDE Connect ב-Mac לעולם לא מאפשר זאת</string>
+    <string name="ime_kde_media_unsupported_title">מחשב זה אינו משתף את הנגנים שלו</string>
     <string name="ime_kde_not_listening">אפליקציה אחרת בטלפון זה משתמשת בפורט של KDE Connect. מחשבים עדיין יכולים למצוא את המקלדת הזו, אך יש ללחוץ על \'רענן\' בצד זה.</string>
     <string name="ime_kde_notice_clipboard_empty">אין תוכן בלוח לשליחה</string>
     <string name="ime_kde_notice_clipboard_sent">הלוח נשלח</string>
@@ -425,10 +469,12 @@
     <string name="ime_kde_send_empty">שלח את הלוח, את מה שכתבת, או קבצים. מה שהמחשב שולח מגיע לכאן ולתיקיית ההורדות</string>
     <string name="ime_kde_send_field">טקסט בשדה</string>
     <string name="ime_kde_send_files">קבצים...</string>
+    <string name="ime_kde_send_unsupported">מחשב זה אינו מקבל קבצים או טקסט מהטלפון</string>
     <string name="ime_kde_settings">הגדרות</string>
     <string name="ime_kde_shuffle">ערבוב</string>
     <string name="ime_kde_slides_end">סוף</string>
     <string name="ime_kde_slides_next">השקופית הבאה</string>
+    <string name="ime_kde_slides_no_pointer">למחשב זה אין מצביע לשקופיות</string>
     <string name="ime_kde_slides_pointer">החזק וגרור עבור הסמן</string>
     <string name="ime_kde_slides_previous">השקופית הקודמת</string>
     <string name="ime_kde_slides_start">התחלה</string>
@@ -488,11 +534,25 @@
     <string name="ime_language_switch_title">שפת קלט</string>
     <string name="ime_launcher_activities_label">מסכים</string>
     <string name="ime_launcher_app_info_action">פרטי אפליקציה</string>
+    <string name="ime_launcher_combo_label">%1$s + %2$s</string>
+    <string name="ime_launcher_combo_open_action">פתיחת שניהם במסך מפוצל</string>
+    <string name="ime_launcher_combo_remove_action">הסר זוג זה</string>
+    <string name="ime_launcher_combos_label">זוגות למסך מפוצל</string>
     <string name="ime_launcher_empty">אין אפליקציות תואמות</string>
+    <string name="ime_launcher_floating_unsupported">ייתכן שמכשיר זה יפתח את האפליקציה במסך מלא</string>
     <string name="ime_launcher_hidden_label">מוסתר מהרשת</string>
     <string name="ime_launcher_hide_action">הסתר את האפליקציה מהרשת</string>
     <string name="ime_launcher_loading">טוען אפליקציות...</string>
+    <string name="ime_launcher_menu_close">סגירת התפריט</string>
     <string name="ime_launcher_not_exported_label">לא ניתן לפתיחה מחוץ לאפליקציה</string>
+    <string name="ime_launcher_open_action">פתח</string>
+    <string name="ime_launcher_open_floating_action">פתח בחלון צף</string>
+    <string name="ime_launcher_open_split_action">פתח במסך מפוצל</string>
+    <string name="ime_launcher_page_action">מסכים, הסתרה ופרטי אפליקציה...</string>
+    <string name="ime_launcher_page_no_screens_action">הסתרה ופרטי אפליקציה...</string>
+    <string name="ime_launcher_pair_action">זוג במסך מפוצל עם...</string>
+    <string name="ime_launcher_pair_cancel">ביטול</string>
+    <string name="ime_launcher_pair_prompt">הקש על האפליקציה כדי לפתוח לצד %1$s</string>
     <string name="ime_launcher_pin_action">הצמד אפליקציה</string>
     <string name="ime_launcher_pinned_label">נעוץ</string>
     <string name="ime_launcher_recents_label">אחרונים</string>
@@ -668,9 +728,11 @@
     <string name="ime_sandbox_offer_only">להחליק באמצעות המילים שלך בלבד?</string>
     <string name="ime_sandbox_offer_prefer">לכוון את ההחלקה למילים שלך?</string>
     <string name="ime_search_attribution_brave">דרך Brave</string>
+    <string name="ime_selection_ask_ai">שאל את ה-AI</string>
     <string name="ime_selection_macro_back_desc">חזרה לפעולות הבחירה</string>
     <string name="ime_selection_macro_bengali_unavailable_toast">בנגלית לא טעונה</string>
     <string name="ime_selection_macro_busy_desc">עובד</string>
+    <string name="ime_selection_macro_deepl_clean_toast">ל-DeepL Write אין מה לשנות</string>
     <string name="ime_selection_macro_find_none_toast">אין התאמה אחרת</string>
     <string name="ime_selection_macro_grammar_clean_toast">אין מה לתקן</string>
     <string name="ime_selection_macro_grammar_unavailable_toast">בודק הדקדוק אינו זמין</string>
@@ -679,6 +741,7 @@
     <string name="ime_selection_macro_nothing_to_undo_toast">לא נותר מה לבטל</string>
     <string name="ime_selection_macro_open_in_desc">פתח ב-%1$s</string>
     <string name="ime_selection_macro_stop_label">עצור</string>
+    <string name="ime_selection_quote">ציטוט</string>
     <string name="ime_service_already_in_settings_toast">אתה כבר נמצא בהגדרות</string>
     <string name="ime_service_autocorrect_off_toast">תיקון אוטומטי כבוי</string>
     <string name="ime_service_autocorrect_on_toast">תיקון אוטומטי מופעל</string>
@@ -709,6 +772,11 @@
     <string name="ime_service_phonetic_english_needs_secondary_toast">הפעל אנגלית תחת שפות, %1$s, וגם הצעות מתוך</string>
     <string name="ime_service_phonetic_english_off_toast">מילים באנגלית מוצעות בלבד</string>
     <string name="ime_service_phonetic_english_on_toast">מילים באנגלית נשארות באנגלית</string>
+    <string name="ime_service_photo_search_blocked">שומר הנתונים אינו מאפשר לחיפושי אינטרנט להשתמש בחיבור זה</string>
+    <string name="ime_service_photo_search_metered_ask">חיבור זה הוא מדוד. כדי לשלוח את התמונה, לחץ שוב על חיפוש.</string>
+    <string name="ime_service_photo_search_no_app">אין אפליקציה בטלפון זה שיכולה לבצע חיפוש באמצעות תמונה</string>
+    <string name="ime_service_photo_search_no_browser">אף דפדפן בטלפון זה לא יכול לפתוח את התוצאות</string>
+    <string name="ime_service_photo_search_sending">שולח את התמונה לאתר החיפוש</string>
     <string name="ime_service_plugins_all_off_notice">כל התוספים שהתקנת כבויים. הפעל אחד תחת \'ניהול תוספים\'.</string>
     <string name="ime_service_plugins_off_notice">תוספים כבויים. הפעל אותם בהגדרות כדי להתקין ולהריץ אותם.</string>
     <string name="ime_service_power_saving_off_toast">חיסכון בחשמל כבוי</string>
@@ -789,10 +857,22 @@
     <string name="ime_sound_volume_label">עוצמת קול</string>
     <string name="ime_sticker_add_desc">הוספת מדבקות</string>
     <string name="ime_sticker_add_to_pack_action">הוסף ל-%1$s</string>
+    <string name="ime_sticker_info_emoji">אימוג\'י: %1$s</string>
+    <string name="ime_sticker_info_keywords">מילות מפתח: %1$s</string>
+    <string name="ime_sticker_info_pack">חבילה: %1$s</string>
+    <string name="ime_sticker_info_untitled">ללא כותרת</string>
     <string name="ime_sticker_local_search_empty">אף מדבקה שלך לא תואמת ל-“%1$s”</string>
     <string name="ime_sticker_manage_packs_action">נהל חבילות</string>
     <string name="ime_sticker_need_key_body">כלי המדבקות זקוק למפתח API מ-Klipy או GIPHY. שני המפתחות בחינם. הוסף מפתח בהגדרות עבור כלי זה.</string>
     <string name="ime_sticker_no_packs_empty">אין עדיין חבילות מדבקות. צור חבילה בהגדרות. ניתן גם ללחוץ לחיצה ארוכה על מדבקה מ-Klipy או GIPHY כדי לשמור אותה כאן.</string>
+    <plurals name="ime_sticker_offer_count">
+        <item quantity="one">מדבקה %1$d</item>
+        <item quantity="other">%1$d מדבקות</item>
+    </plurals>
+    <string name="ime_sticker_offer_dismiss_desc">הסתר את המדבקות עבור %1$s</string>
+    <string name="ime_sticker_offer_item_desc">שלח מדבקה %1$s</string>
+    <string name="ime_sticker_offer_item_untitled_desc">שלח את המדבקה הזו</string>
+    <string name="ime_sticker_offer_more">+%1$d</string>
     <string name="ime_sticker_pack_all_label">הכל</string>
     <string name="ime_sticker_pack_empty">החבילה הזו ריקה.</string>
     <string name="ime_sticker_save_new_pack_action">שמור לחבילה חדשה</string>
@@ -803,8 +883,24 @@
     <string name="ime_suggestion_hold_label">אפשרויות מילה</string>
     <string name="ime_suggestion_never_suggest">לעולם אל תציע את \"%1$s\"</string>
     <string name="ime_suggestions_show_desc">הצג את סרגל ההצעות</string>
+    <string name="ime_symbol_row_delete_confirm_body">הערכה וכל הערכים שבה יימחקו. מצב מקלדת שהציע אותה יציג במקום זאת את הערכות האחרות שלך.</string>
+    <string name="ime_symbol_row_delete_confirm_title">למחוק את \"%1$s\"?</string>
+    <string name="ime_symbol_row_delete_set">מחיקת הערכה \"%1$s\"</string>
+    <string name="ime_symbol_row_hide_in_mode">הסתר את השורה ב-%1$s</string>
+    <string name="ime_symbol_row_remove">הסר את \"%1$s\"</string>
+    <string name="ime_symbol_row_settings">הגדרות שורת סמלים</string>
     <string name="ime_symbol_set_switch_desc">החלף את קבוצת הסמלים</string>
     <string name="ime_symbols_recents_label">אחרונים</string>
+    <string name="ime_synonyms_close_desc">סגור מילים נרדפות</string>
+    <string name="ime_synonyms_failed">לא ניתן היה להגיע למקור מילים נרדפות. בדוק את החיבור ונסה שוב.</string>
+    <string name="ime_synonyms_from">מתוך %1$s</string>
+    <string name="ime_synonyms_loading">מחפש מילים נרדפות...</string>
+    <string name="ime_synonyms_no_sources">כל מקורות המילים הנרדפות כבויים. הפעל אחד מהם תחת הקלדה, הצעות, מקורות מילים נרדפות.</string>
+    <string name="ime_synonyms_not_found">לא נמצאו מילים נרדפות עבור \"%1$s\".</string>
+    <string name="ime_synonyms_pick_desc">השתמש ב-\"%1$s\"</string>
+    <string name="ime_synonyms_retry">נסה שוב</string>
+    <string name="ime_synonyms_similar_note">לא מופיעות מילים נרדפות למילה זו. למילים אלו יש משמעות דומה.</string>
+    <string name="ime_synonyms_title">מילים נרדפות עבור \"%1$s\"</string>
     <string name="ime_textedit_doc_end_desc">עבור לסוף הטקסט</string>
     <string name="ime_textedit_doc_start_desc">עבור לתחילת הטקסט</string>
     <string name="ime_textedit_down_desc">הזז למטה</string>
@@ -925,7 +1021,10 @@
     <string name="ime_toolbox_hint_mode">מצב %1$s פעיל, לכן המקלדת שומרת את הסידור הזה עבור מצב זה. אפליקציות אחרות שומרות על סידור משלהן.</string>
     <string name="ime_trackpad_hint">גרור כדי להזיז את הסמן</string>
     <string name="ime_trackpad_surface_desc">משטח מגע. גרור כדי להזיז את הסמן, החזק וגרור כדי לבחור, הקש פעמיים כדי לבחור מילה</string>
+    <string name="ime_translate_all_languages_info">גם השפות להורדה</string>
+    <string name="ime_translate_all_languages_label">כל השפות</string>
     <string name="ime_translate_auto_detect_label">זהה שפה</string>
+    <string name="ime_translate_deepl_label">DeepL</string>
     <string name="ime_translate_download_failed_error">ההורדה לא הושלמה. בדוק את החיבור ונסה שוב.</string>
     <string name="ime_translate_download_of_total_progress">%1$s מתוך %2$s</string>
     <string name="ime_translate_downloaded_desc">הורד</string>
@@ -1063,6 +1162,10 @@
     <string name="ime_voice_status_mic_blocked">המיקרופון חסום. הפעל גישה למיקרופון בהגדרות המהירות, ואז נסה שוב.</string>
     <string name="ime_voice_status_no_model">להקלדה קולית במצב לא מקוון עדיין אין מודל</string>
     <string name="ime_voice_status_no_server">לשרת התמלול עדיין אין כתובת</string>
+    <plurals name="ime_voice_status_stops_in">
+        <item quantity="one">עוצר בעוד שנייה אחת. לחץ כדי לסיים כעת.</item>
+        <item quantity="other">עוצר בעוד %d שניות. לחץ כדי לסיים כעת.</item>
+    </plurals>
     <string name="ime_voice_status_transcribing">מתמלל...</string>
     <string name="ime_voice_stop_desc">הפסקת האזנה</string>
     <string name="ime_voice_strip_allow_action">אפשר</string>
@@ -1101,6 +1204,7 @@
     <string name="ime_web_search_need_key_body">חיפוש באינטרנט דורש מפתח API מ-Brave Search. הוסף מפתח בהגדרות עבור כלי זה.</string>
     <string name="ime_web_search_open_desc">פתח בדפדפן</string>
     <string name="ime_wiki_back_desc">חזרה לתוצאות</string>
+    <string name="ime_wiki_expand_desc">הגדלת המאמר</string>
     <string name="ime_wiki_full_error">האפליקציה לא יכולה לטעון את טקסט המאמר.</string>
     <string name="ime_wiki_full_progress">טוען את המאמר המלא...</string>
     <string name="ime_wiki_idle_info">חפש נושא ב-%1$s.wikipedia.org. קרא את הסיכום, פתח את הקישורים והוסף טקסט או את כתובת המאמר.</string>
@@ -1112,8 +1216,12 @@
     <string name="ime_wiki_links_progress">טוען קישורים...</string>
     <string name="ime_wiki_no_results_empty">החיפוש לא מצא תוצאות עבור \"%1$s\".</string>
     <string name="ime_wiki_no_summary_empty">למאמר זה אין סיכום.</string>
+    <string name="ime_wiki_open_browser_desc">פתיחת המאמר בדפדפן</string>
+    <string name="ime_wiki_quote_markdown">\"%1$s\" (מתוך [ויקיפדיה: %2$s](%3$s))</string>
+    <string name="ime_wiki_quote_plain">\"%1$s\" (ויקיפדיה: %2$s, %3$s)</string>
     <string name="ime_wiki_search_active_hint">חפש בוויקיפדיה. לחץ על Enter כדי לחפש</string>
     <string name="ime_wiki_search_hint">חיפוש בוויקיפדיה…</string>
+    <string name="ime_wiki_shrink_desc">החזר את המאמר לגובה המקלדת</string>
     <string name="ime_wiki_tab_full_label">מאמר מלא</string>
     <string name="ime_wiki_tab_links_label">קישורים</string>
     <string name="ime_wiki_tab_summary_label">סיכום</string>
@@ -1163,6 +1271,7 @@
     <string name="ime_word_menu_delete">מחק את \"%1$s\"</string>
     <string name="ime_word_menu_edit">עריכה...</string>
     <string name="ime_word_menu_search_all">חיפוש \"%1$s\" בכל המילים</string>
+    <string name="ime_word_menu_synonyms">מילים נרדפות עבור \"%1$s\"</string>
     <string name="ime_word_spell_apply_desc">השתמש באיות זה</string>
     <string name="ime_word_spell_cancel_desc">השאר את האיות כפי שהוא</string>
     <string name="ime_word_spell_hint">הקלד איות חדש עבור \"%1$s\"</string>

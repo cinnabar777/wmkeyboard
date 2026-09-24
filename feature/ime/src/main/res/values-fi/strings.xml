@@ -2,6 +2,13 @@
 <!-- Machine translated by Google Play. Do not edit by hand:
      regenerate with tools/i18n/pull-play-translations.py. -->
 <resources>
+    <string name="ime_ai_chat_ask_explain">Selitä yksinkertaisesti</string>
+    <string name="ime_ai_chat_ask_explain_prompt">Selitä tämä yksinkertaisin sanoin.</string>
+    <string name="ime_ai_chat_ask_hint">Esitä tekstiä koskeva kysymys tai aloita jollakin näistä.</string>
+    <string name="ime_ai_chat_ask_summary">Tiivistä</string>
+    <string name="ime_ai_chat_ask_summary_prompt">Anna lyhyt yhteenveto tästä.</string>
+    <string name="ime_ai_chat_ask_words">Vaikeat sanat</string>
+    <string name="ime_ai_chat_ask_words_prompt">Selitä tämän vaikeat sanat ja ideat.</string>
     <string name="ime_ai_chat_attach_desc">Lähetä kentän teksti viestin mukana</string>
     <string name="ime_ai_chat_attach_remove_desc">Älä lähetä kentän tekstiä</string>
     <plurals name="ime_ai_chat_attached_field">
@@ -12,6 +19,8 @@
         <item quantity="one">Valintasi liitetään viestiin: %1$d merkki</item>
         <item quantity="other">Valintasi liitetään viestiin: %1$d merkkiä</item>
     </plurals>
+    <string name="ime_ai_chat_attached_tool">Tietoa: %1$s</string>
+    <string name="ime_ai_chat_attached_tool_selection">Tietoja kohdasta %1$s</string>
     <plurals name="ime_ai_chat_attachment_sent">
         <item quantity="one">%1$d tekstimerkillä</item>
         <item quantity="other">%1$d tekstimerkillä</item>
@@ -99,6 +108,10 @@
     <string name="ime_ai_truncated_notice">Malli pysähtyi ennenaikaisesti. Lisää \"Vastauksen enimmäispituus\" työkalun asetuksista.</string>
     <string name="ime_ai_view_changes">Muutokset</string>
     <string name="ime_ai_view_result">Tulos</string>
+    <string name="ime_ask_ai_label_dict">Sanakirja: %1$s</string>
+    <string name="ime_ask_ai_label_grammar">Kieliopin tarkistus</string>
+    <string name="ime_ask_ai_label_vocab">Sanasto: %1$s</string>
+    <string name="ime_ask_ai_label_wiki">Wikipedia: %1$s</string>
     <string name="ime_autofill_dismiss_desc">Piilota automaattisen täydennyksen ehdotukset</string>
     <string name="ime_calc_degrees_label">astetta</string>
     <string name="ime_calc_insert_action">Lisää</string>
@@ -127,6 +140,7 @@
     <string name="ime_camera_permission_action">Salli kamera</string>
     <string name="ime_camera_permission_body">Kameratyökalu tarvitsee luvan käyttää kameraa. Sovellus ottaa kuvan vain, kun painat laukaisinta.</string>
     <string name="ime_camera_retake_action">Ota uudelleen</string>
+    <string name="ime_camera_search_action">Hae</string>
     <string name="ime_camera_send_action">Lähetä</string>
     <string name="ime_camera_shutter_desc">Ota valokuva</string>
     <string name="ime_camera_starting_progress">Käynnistetään kameraa…</string>
@@ -144,6 +158,10 @@
     <string name="ime_clip_chip_image">Kopioitu kuva</string>
     <string name="ime_clip_chip_item">Kopioitu kohde</string>
     <string name="ime_clip_chip_screenshot">Kuvakaappaus</string>
+    <plurals name="ime_clip_deleted">
+        <item quantity="one">Leike poistettu</item>
+        <item quantity="other">%1$d leikettä poistettu</item>
+    </plurals>
     <string name="ime_clip_edit">Muokkaa</string>
     <string name="ime_clip_edit_placeholder">Kirjoita leikkeen teksti</string>
     <string name="ime_clip_edit_rich_note">Muutoksen tallentaminen poistaa muotoilun</string>
@@ -162,6 +180,18 @@
     <string name="ime_clip_info_private_detail">Näppäimistö piilottaa tämän leikkeen paneelissa ja poistaa sen nopeammin kuin muut leikkeet.</string>
     <string name="ime_clip_info_size">Koko</string>
     <string name="ime_clip_info_type">Tyyppi</string>
+    <plurals name="ime_clip_left_days">
+        <item quantity="one">%d päivä jäljellä</item>
+        <item quantity="other">%d päivää jäljellä</item>
+    </plurals>
+    <plurals name="ime_clip_left_hours">
+        <item quantity="one">%d t jäljellä</item>
+        <item quantity="other">%d t jäljellä</item>
+    </plurals>
+    <plurals name="ime_clip_left_minutes">
+        <item quantity="one">%d min jäljellä</item>
+        <item quantity="other">%d min jäljellä</item>
+    </plurals>
     <string name="ime_clip_number_desc">Leike %1$d</string>
     <string name="ime_clip_pin">Kiinnitä</string>
     <string name="ime_clip_send_as_sticker">Lähetä tarrana</string>
@@ -172,6 +202,7 @@
     <string name="ime_clip_type_rich_text">RTF-teksti</string>
     <string name="ime_clip_type_text">Teksti</string>
     <string name="ime_clip_type_video">Video</string>
+    <string name="ime_clip_undo_delete">Kumoa</string>
     <string name="ime_clip_unpin">Irrota kiinnitys</string>
     <string name="ime_clip_video_desc">Kopioitu video</string>
     <string name="ime_clipboard_no_match">Mikään leike ei vastaa hakua ”%1$s”.</string>
@@ -203,10 +234,12 @@
     <string name="ime_dict_add_vocab_action">Lisää sanastoon</string>
     <string name="ime_dict_antonyms_label">Antonyymit</string>
     <string name="ime_dict_error">Sovellus ei saa yhteyttä sanakirjaan. Tarkista verkkoyhteytesi ja yritä uudelleen.</string>
+    <string name="ime_dict_from">Lähteestä %1$s</string>
     <string name="ime_dict_idle_info">Etsi englanninkielinen sana. Paina hakupalkkia ja kirjoita. Voit myös viedä kohdistimen sanan päälle ennen työkalun avaamista.</string>
     <string name="ime_dict_insert_action">Lisää</string>
     <string name="ime_dict_lookup_desc">Etsi sana</string>
     <string name="ime_dict_lookup_progress">Etsitään ”%1$s”…</string>
+    <string name="ime_dict_no_sources">Kaikki sanakirjalähteet ovat pois päältä. Ota jokin niistä käyttöön sanakirjatyökalun asetuksista.</string>
     <string name="ime_dict_not_found_empty">Ei merkintää sanalle ”%1$s”. Tarkista oikeinkirjoitus tai kokeile sanan perusmuotoa.</string>
     <string name="ime_dict_play_desc">Toista ääntäminen</string>
     <string name="ime_dict_search_active_hint">Kirjoita sana…</string>
@@ -314,7 +347,15 @@
     <string name="ime_glide_word_list_offer">Pyyhkäisykirjoitus vaatii %1$s-sanaluettelon</string>
     <string name="ime_glide_word_list_offer_dismiss_desc">Hylkää</string>
     <string name="ime_grammar_all_filtered_empty">Suodatin piilottaa kaikki löytyneet ongelmat</string>
+    <string name="ime_grammar_ask_ai_desc">Kysy tekoälyltä tästä ongelmasta</string>
     <string name="ime_grammar_category_kind_label">%1$s • %2$s</string>
+    <string name="ime_grammar_deepl_action_desc">Paranna tekstiä DeepL Writella</string>
+    <string name="ime_grammar_deepl_dismiss_desc">Sulje DeepL Write -tulos</string>
+    <string name="ime_grammar_deepl_error">DeepL Write ei vastannut</string>
+    <string name="ime_grammar_deepl_replace_action">Korvaa</string>
+    <string name="ime_grammar_deepl_replace_failed_toast">Tämän kentän tekstiä ei voi korvata</string>
+    <string name="ime_grammar_deepl_title">DeepL Write</string>
+    <string name="ime_grammar_deepl_unchanged">DeepL Write ei löytänyt mitään muutettavaa</string>
     <string name="ime_grammar_dialect_desc">Valitse murre</string>
     <string name="ime_grammar_dismiss_desc">Piilota tämä ongelma</string>
     <string name="ime_grammar_empty_hint">Kirjoita tekstiä tai avaa kenttä, jossa on tekstiä. Ongelmat näkyvät tässä. Tarkistukset suoritetaan offline-tilassa.</string>
@@ -346,6 +387,7 @@
     <string name="ime_icons_empty_info">Lisää kuvakepakkauksia avaamalla asetukset.</string>
     <string name="ime_icons_more_label">Lisää kuvakepaketteja</string>
     <string name="ime_icons_pick_info">Paina kuvakepakettia käyttääksesi sitä näppäimissä ja työkaluissa.</string>
+    <string name="ime_image_search_by_photo_desc">Hae valokuvalla</string>
     <string name="ime_image_search_empty">Ei kuvia haulle ”%1$s”</string>
     <string name="ime_image_search_hint">Hae kuvia</string>
     <string name="ime_image_search_idle">Kirjoita hakusana ja paina enteriä. Lisää kuva painamalla sitä. Lisää kuvan linkki painamalla ja pitämällä sitä pohjassa.</string>
@@ -376,6 +418,8 @@
     <string name="ime_kde_loop">Toista</string>
     <string name="ime_kde_media_empty_body">Käynnistä soitin siellä, niin se näkyy täällä</string>
     <string name="ime_kde_media_empty_title">Tietokoneella ei toisteta mitään</string>
+    <string name="ime_kde_media_unsupported_body">KDE Connect ei salli puhelimen hallita musiikkia tai videota. Macin KDE Connect ei tee sitä koskaan.</string>
+    <string name="ime_kde_media_unsupported_title">Tämä tietokone ei jaa soittimiaan</string>
     <string name="ime_kde_not_listening">Jokin muu tämän puhelimen sovellus käyttää KDE Connect -porttia. Tietokoneet voivat yhä löytää tämän näppäimistön, mutta paina Päivitä tältä puolelta.</string>
     <string name="ime_kde_notice_clipboard_empty">Leikepöydällä ei ole mitään lähetettävää</string>
     <string name="ime_kde_notice_clipboard_sent">Leikepöytä lähetetty</string>
@@ -426,10 +470,12 @@
     <string name="ime_kde_send_empty">Lähetä leikepöytä, kirjoittamasi teksti tai tiedostoja. Tietokoneen lähettämä sisältö päätyy tänne ja Lataukset-kansioon</string>
     <string name="ime_kde_send_field">Teksti kentässä</string>
     <string name="ime_kde_send_files">Tiedostot…</string>
+    <string name="ime_kde_send_unsupported">Tämä tietokone ei hyväksy tiedostoja tai tekstiä puhelimesta</string>
     <string name="ime_kde_settings">Asetukset</string>
     <string name="ime_kde_shuffle">Sekoita</string>
     <string name="ime_kde_slides_end">Loppu</string>
     <string name="ime_kde_slides_next">Seuraava dia</string>
+    <string name="ime_kde_slides_no_pointer">Tässä tietokoneessa ei ole osoitinta dioille</string>
     <string name="ime_kde_slides_pointer">Pidä painettuna ja vedä osoitinta varten</string>
     <string name="ime_kde_slides_previous">Edellinen dia</string>
     <string name="ime_kde_slides_start">Aloita</string>
@@ -489,11 +535,25 @@
     <string name="ime_language_switch_title">Syöttökieli</string>
     <string name="ime_launcher_activities_label">Näytöt</string>
     <string name="ime_launcher_app_info_action">Sovelluksen tiedot</string>
+    <string name="ime_launcher_combo_label">%1$s + %2$s</string>
+    <string name="ime_launcher_combo_open_action">Avaa molemmat jaetulla näytöllä</string>
+    <string name="ime_launcher_combo_remove_action">Poista tämä pari</string>
+    <string name="ime_launcher_combos_label">Jaetun näytön parit</string>
     <string name="ime_launcher_empty">Ei vastaavia sovelluksia</string>
+    <string name="ime_launcher_floating_unsupported">Tämä laite saattaa avata sen koko näytön tilassa</string>
     <string name="ime_launcher_hidden_label">Piilotettu ruudukosta</string>
     <string name="ime_launcher_hide_action">Piilota sovellus ruudukosta</string>
     <string name="ime_launcher_loading">Ladataan sovelluksia…</string>
+    <string name="ime_launcher_menu_close">Sulje valikko</string>
     <string name="ime_launcher_not_exported_label">Ei avattavissa sovelluksen ulkopuolelta</string>
+    <string name="ime_launcher_open_action">Avaa</string>
+    <string name="ime_launcher_open_floating_action">Avaa kelluvassa ikkunassa</string>
+    <string name="ime_launcher_open_split_action">Avaa jaetussa näytössä</string>
+    <string name="ime_launcher_page_action">Näytöt, piilota ja sovellustiedot…</string>
+    <string name="ime_launcher_page_no_screens_action">Piilota ja sovellustiedot…</string>
+    <string name="ime_launcher_pair_action">Muodosta pari jaetussa näytössä sovelluksen... kanssa</string>
+    <string name="ime_launcher_pair_cancel">Peruuta</string>
+    <string name="ime_launcher_pair_prompt">Napauta sovellusta, joka avataan kohteen %1$s viereen</string>
     <string name="ime_launcher_pin_action">Kiinnitä sovellus</string>
     <string name="ime_launcher_pinned_label">Kiinnitetty</string>
     <string name="ime_launcher_recents_label">Viimeisimmät</string>
@@ -669,9 +729,11 @@
     <string name="ime_sandbox_offer_only">Pyyhkäise käyttäen vain sanojasi?</string>
     <string name="ime_sandbox_offer_prefer">Haluatko mukauttaa pyyhkäisyn sanoillesi?</string>
     <string name="ime_search_attribution_brave">Braven kautta</string>
+    <string name="ime_selection_ask_ai">Kysy tekoälyltä</string>
     <string name="ime_selection_macro_back_desc">Takaisin valintatoimintoihin</string>
     <string name="ime_selection_macro_bengali_unavailable_toast">Bengalia ei ole ladattu</string>
     <string name="ime_selection_macro_busy_desc">Työskentelee</string>
+    <string name="ime_selection_macro_deepl_clean_toast">DeepL Writellä ei ole mitään muutettavaa</string>
     <string name="ime_selection_macro_find_none_toast">Ei muuta vastaavuutta</string>
     <string name="ime_selection_macro_grammar_clean_toast">Ei korjattavaa</string>
     <string name="ime_selection_macro_grammar_unavailable_toast">Kieliopin tarkistus ei ole käytettävissä</string>
@@ -680,6 +742,7 @@
     <string name="ime_selection_macro_nothing_to_undo_toast">Ei kumottavaa</string>
     <string name="ime_selection_macro_open_in_desc">Avaa sovelluksessa %1$s</string>
     <string name="ime_selection_macro_stop_label">Pysäytä</string>
+    <string name="ime_selection_quote">Lainaus</string>
     <string name="ime_service_already_in_settings_toast">Olet jo asetuksissa</string>
     <string name="ime_service_autocorrect_off_toast">Automaattinen korjaus on pois päältä</string>
     <string name="ime_service_autocorrect_on_toast">Automaattinen korjaus on päällä</string>
@@ -710,6 +773,11 @@
     <string name="ime_service_phonetic_english_needs_secondary_toast">Kytke englanti päälle kohdasta Kielet, %1$s, Ehdota myös kielestä</string>
     <string name="ime_service_phonetic_english_off_toast">Englanninkielisiä sanoja vain ehdotetaan</string>
     <string name="ime_service_phonetic_english_on_toast">Englanninkieliset sanat pysyvät englanninkielisinä</string>
+    <string name="ime_service_photo_search_blocked">Tiedonsäästötila estää verkkohakuja käyttämästä tätä yhteyttä</string>
+    <string name="ime_service_photo_search_metered_ask">Tämä yhteys on rajoitettu. Lähetä kuva painamalla Hakua uudelleen.</string>
+    <string name="ime_service_photo_search_no_app">Tässä puhelimessa ei ole sovellusta, joka voi hakea valokuvalla</string>
+    <string name="ime_service_photo_search_no_browser">Mikään tämän puhelimen selain ei voi avata tuloksia</string>
+    <string name="ime_service_photo_search_sending">Lähetetään valokuvaa hakusivustolle</string>
     <string name="ime_service_plugins_all_off_notice">Kaikki asentamasi laajennukset on kytketty pois päältä. Kytke jokin päälle kohdasta Hallitse laajennuksia.</string>
     <string name="ime_service_plugins_off_notice">Liitännäiset on kytketty pois päältä. Kytke ne päälle asetuksista asentaaksesi ja käyttääksesi niitä.</string>
     <string name="ime_service_power_saving_off_toast">Virransäästö on pois päältä</string>
@@ -790,10 +858,22 @@
     <string name="ime_sound_volume_label">Äänenvoimakkuus</string>
     <string name="ime_sticker_add_desc">Lisää tarroja</string>
     <string name="ime_sticker_add_to_pack_action">Lisää kohteeseen %1$s</string>
+    <string name="ime_sticker_info_emoji">Emoji: %1$s</string>
+    <string name="ime_sticker_info_keywords">Avainsanat: %1$s</string>
+    <string name="ime_sticker_info_pack">Paketti: %1$s</string>
+    <string name="ime_sticker_info_untitled">Ei otsikkoa</string>
     <string name="ime_sticker_local_search_empty">Yksikään tarroistasi ei vastaa hakua ”%1$s”</string>
     <string name="ime_sticker_manage_packs_action">Hallitse paketteja</string>
     <string name="ime_sticker_need_key_body">Tarratyökalu tarvitsee API-avaimen Klipy- tai GIPHY-palvelusta. Molemmat avaimet ovat ilmaisia. Lisää avain tämän työkalun asetuksiin.</string>
     <string name="ime_sticker_no_packs_empty">Ei vielä tarrapaketteja. Luo paketti asetuksissa. Voit myös tallentaa tarran tänne painamalla sitä pitkään Klipy- tai GIPHY-palvelussa.</string>
+    <plurals name="ime_sticker_offer_count">
+        <item quantity="one">%1$d tarra</item>
+        <item quantity="other">%1$d tarraa</item>
+    </plurals>
+    <string name="ime_sticker_offer_dismiss_desc">Piilota tarrat kohteelle %1$s</string>
+    <string name="ime_sticker_offer_item_desc">Lähetä tarra %1$s</string>
+    <string name="ime_sticker_offer_item_untitled_desc">Lähetä tämä tarra</string>
+    <string name="ime_sticker_offer_more">+%1$d</string>
     <string name="ime_sticker_pack_all_label">Kaikki</string>
     <string name="ime_sticker_pack_empty">Tämä paketti on tyhjä.</string>
     <string name="ime_sticker_save_new_pack_action">Tallenna uuteen pakettiin</string>
@@ -804,8 +884,24 @@
     <string name="ime_suggestion_hold_label">Sana-asetukset</string>
     <string name="ime_suggestion_never_suggest">Älä koskaan ehdota \"%1$s\"</string>
     <string name="ime_suggestions_show_desc">Näytä ehdotuspalkki</string>
+    <string name="ime_symbol_row_delete_confirm_body">Asetus ja kaikki sen merkinnät poistetaan. Näppäimistötila, joka tarjosi sen, näyttää sen sijaan muut asetuksesi.</string>
+    <string name="ime_symbol_row_delete_confirm_title">Poistetaanko \"%1$s\"?</string>
+    <string name="ime_symbol_row_delete_set">Poista \"%1$s\"-joukko</string>
+    <string name="ime_symbol_row_hide_in_mode">Piilota rivi tilassa %1$s</string>
+    <string name="ime_symbol_row_remove">Poista \"%1$s\"</string>
+    <string name="ime_symbol_row_settings">Symbolirivin asetukset</string>
     <string name="ime_symbol_set_switch_desc">Vaihda symbolijoukkoa</string>
     <string name="ime_symbols_recents_label">Viimeisimmät</string>
+    <string name="ime_synonyms_close_desc">Sulje synonyymit</string>
+    <string name="ime_synonyms_failed">Synonyymilähteeseen ei saatu yhteyttä. Tarkista yhteys ja yritä uudelleen.</string>
+    <string name="ime_synonyms_from">Alkaen %1$s</string>
+    <string name="ime_synonyms_loading">Etsitään synonyymejä…</string>
+    <string name="ime_synonyms_no_sources">Kaikki synonyymilähteet ovat pois päältä. Kytke yksi päälle kohdassa Kirjoittaminen, Ehdotukset, Synonyymilähteet.</string>
+    <string name="ime_synonyms_not_found">Synonyymejä sanalle \"%1$s\" ei löytynyt.</string>
+    <string name="ime_synonyms_pick_desc">Käytä \"%1$s\"</string>
+    <string name="ime_synonyms_retry">Yritä uudelleen</string>
+    <string name="ime_synonyms_similar_note">Tälle sanalle ei ole lueteltu synonyymejä. Näillä sanoilla on samankaltainen merkitys.</string>
+    <string name="ime_synonyms_title">Synonyymit sanalle \"%1$s\"</string>
     <string name="ime_textedit_doc_end_desc">Siirry tekstin loppuun</string>
     <string name="ime_textedit_doc_start_desc">Siirry tekstin alkuun</string>
     <string name="ime_textedit_down_desc">Siirrä alas</string>
@@ -926,7 +1022,10 @@
     <string name="ime_toolbox_hint_mode">%1$s-tila on päällä, joten näppäimistö tallentaa tämän asettelun kyseistä tilaa varten. Muut sovellukset säilyttävät omansa.</string>
     <string name="ime_trackpad_hint">Vedä siirtääksesi kohdistinta</string>
     <string name="ime_trackpad_surface_desc">Ohjauslevy. Vedä siirtääksesi kohdistinta, pidä painettuna ja vedä valitaksesi, napauta kahdesti valitaksesi sanan</string>
+    <string name="ime_translate_all_languages_info">Myös ladattavat kielet</string>
+    <string name="ime_translate_all_languages_label">Kaikki kielet</string>
     <string name="ime_translate_auto_detect_label">Tunnista kieli</string>
+    <string name="ime_translate_deepl_label">DeepL</string>
     <string name="ime_translate_download_failed_error">Lataus ei valmistunut. Tarkista yhteys ja yritä uudelleen.</string>
     <string name="ime_translate_download_of_total_progress">%1$s / %2$s</string>
     <string name="ime_translate_downloaded_desc">Ladattu</string>
@@ -1064,6 +1163,10 @@
     <string name="ime_voice_status_mic_blocked">Mikrofoni on estetty. Ota mikrofonin käyttöoikeus käyttöön pika-asetuksista ja yritä uudelleen.</string>
     <string name="ime_voice_status_no_model">Offline-puheentunnistuksella ei ole vielä mallia</string>
     <string name="ime_voice_status_no_server">Transkriptiopalvelimella ei ole vielä osoitetta</string>
+    <plurals name="ime_voice_status_stops_in">
+        <item quantity="one">Pysähtyy %d sekunnin kuluttua. Paina lopettaaksesi nyt.</item>
+        <item quantity="other">Pysähtyy %d sekunnin kuluttua. Paina lopettaaksesi nyt.</item>
+    </plurals>
     <string name="ime_voice_status_transcribing">Muunnetaan tekstiksi…</string>
     <string name="ime_voice_stop_desc">Lopeta kuuntelu</string>
     <string name="ime_voice_strip_allow_action">Salli</string>
@@ -1103,6 +1206,7 @@
     <string name="ime_web_search_need_key_body">Verkkohaku vaatii API-avaimen Brave Searchilta. Lisää avain tämän työkalun asetuksiin.</string>
     <string name="ime_web_search_open_desc">Avaa selaimessa</string>
     <string name="ime_wiki_back_desc">Takaisin tuloksiin</string>
+    <string name="ime_wiki_expand_desc">Suurenna artikkelin kokoa</string>
     <string name="ime_wiki_full_error">Sovellus ei voi ladata artikkelin tekstiä.</string>
     <string name="ime_wiki_full_progress">Ladataan koko artikkelia…</string>
     <string name="ime_wiki_idle_info">Etsi aihetta osoitteesta %1$s.wikipedia.org. Lue yhteenveto, avaa linkit ja lisää tekstiä tai artikkelin osoite.</string>
@@ -1114,8 +1218,12 @@
     <string name="ime_wiki_links_progress">Ladataan linkkejä…</string>
     <string name="ime_wiki_no_results_empty">Haku ei löytänyt mitään hakusanalla ”%1$s”.</string>
     <string name="ime_wiki_no_summary_empty">Tällä artikkelilla ei ole tiivistelmää.</string>
+    <string name="ime_wiki_open_browser_desc">Avaa artikkeli selaimessa</string>
+    <string name="ime_wiki_quote_markdown">\"%1$s\" (lähteestä [Wikipedia: %2$s](%3$s))</string>
+    <string name="ime_wiki_quote_plain">\"%1$s\" (Wikipedia: %2$s, %3$s)</string>
     <string name="ime_wiki_search_active_hint">Hae Wikipediasta. Paina enter hakeaksesi</string>
     <string name="ime_wiki_search_hint">Hae Wikipediasta…</string>
+    <string name="ime_wiki_shrink_desc">Palauta artikkeli näppäimistön korkuiseksi</string>
     <string name="ime_wiki_tab_full_label">Koko artikkeli</string>
     <string name="ime_wiki_tab_links_label">Linkit</string>
     <string name="ime_wiki_tab_summary_label">Yhteenveto</string>
@@ -1165,6 +1273,7 @@
     <string name="ime_word_menu_delete">Poista \"%1$s\"</string>
     <string name="ime_word_menu_edit">Muokkaa…</string>
     <string name="ime_word_menu_search_all">Etsi kaikista sanoista \"%1$s\"</string>
+    <string name="ime_word_menu_synonyms">Synonyymit sanalle \"%1$s\"</string>
     <string name="ime_word_spell_apply_desc">Käytä tätä oikeinkirjoitusta</string>
     <string name="ime_word_spell_cancel_desc">Jätä oikeinkirjoitus ennalleen</string>
     <string name="ime_word_spell_hint">Kirjoita uusi oikeinkirjoitus sanalle \"%1$s\"</string>

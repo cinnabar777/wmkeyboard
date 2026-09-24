@@ -35,6 +35,7 @@
     <string name="common_enable">Увімкнути</string>
     <string name="common_error_generic">Щось пішло не так. Спробуйте ще раз.</string>
     <string name="common_error_network">Немає з\'єднання. Перевірте мережу та спробуйте ще раз.</string>
+    <string name="common_error_no_internet_permission">Ця збірка клавіатури не може підключитися до інтернету.</string>
     <string name="common_error_timeout">Запит тривав занадто довго. Спробуйте ще раз.</string>
     <string name="common_export">Експорт</string>
     <string name="common_import">Імпорт</string>

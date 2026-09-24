@@ -35,6 +35,7 @@
     <string name="common_enable">ಆನ್ ಮಾಡಿ</string>
     <string name="common_error_generic">ಏನೋ ಕೆಲಸ ಮಾಡಲಿಲ್ಲ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
     <string name="common_error_network">ಸಂಪರ್ಕವಿಲ್ಲ. ನಿಮ್ಮ ನೆಟ್‌ವರ್ಕ್ ಪರಿಶೀಲಿಸಿ ಮತ್ತು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
+    <string name="common_error_no_internet_permission">ಕೀಬೋರ್ಡ್‌ನ ಈ ಆವೃತ್ತಿಯು ಇಂಟರ್ನೆಟ್‌ಗೆ ಸಂಪರ್ಕ ಸಾಧಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ.</string>
     <string name="common_error_timeout">ವಿನಂತಿಯು ತುಂಬಾ ಸಮಯ ತೆಗೆದುಕೊಂಡಿದೆ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
     <string name="common_export">ರಫ್ತು ಮಾಡಿ</string>
     <string name="common_import">ಆಮದು ಮಾಡಿ</string>

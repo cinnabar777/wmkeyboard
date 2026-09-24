@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">Експериментальний</string>
     <string name="core_intel_llm_tier_recommended_label">Рекомендовано</string>
     <string name="core_intel_llm_tier_untested_label">Неперевірено</string>
+    <string name="core_intel_ocr_download_error_http">Сервер GitHub не надіслав файл. Код помилки: HTTP %1$s.</string>
+    <string name="core_intel_ocr_download_error_interrupted">З\'єднання перервалося під час завантаження. Спробуйте ще раз.</string>
+    <string name="core_intel_ocr_download_error_no_space">На вашому пристрої недостатньо пам’яті. Спочатку потрібно звільнити близько %1$s МБ.</string>
+    <string name="core_intel_ocr_pack_error_broken">Завантажені мовні дані пошкоджено, тому сканер не зміг їх використати. Завантажте їх знову.</string>
 </resources>

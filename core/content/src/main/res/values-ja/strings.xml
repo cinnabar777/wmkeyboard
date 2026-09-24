@@ -115,6 +115,7 @@
     <string name="core_content_selection_macro_chat_strike">取り消し線</string>
     <string name="core_content_selection_macro_colour">色</string>
     <string name="core_content_selection_macro_copy">コピー</string>
+    <string name="core_content_selection_macro_deepl_write">DeepL Write</string>
     <string name="core_content_selection_macro_digits_latin">数字</string>
     <string name="core_content_selection_macro_email">メール</string>
     <string name="core_content_selection_macro_fancy">装飾</string>

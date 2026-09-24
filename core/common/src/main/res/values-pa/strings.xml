@@ -35,6 +35,7 @@
     <string name="common_enable">ਚਾਲੂ ਕਰੋ</string>
     <string name="common_error_generic">ਕੁਝ ਕੰਮ ਨਹੀਂ ਕੀਤਾ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
     <string name="common_error_network">ਕੋਈ ਕਨੈਕਸ਼ਨ ਨਹੀਂ ਹੈ। ਆਪਣਾ ਨੈੱਟਵਰਕ ਚੈੱਕ ਕਰੋ ਅਤੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
+    <string name="common_error_no_internet_permission">ਕੀਬੋਰਡ ਦਾ ਇਹ ਬਿਲਡ ਇੰਟਰਨੈੱਟ ਨਾਲ ਕਨੈਕਟ ਨਹੀਂ ਹੋ ਸਕਦਾ।</string>
     <string name="common_error_timeout">ਬੇਨਤੀ ਨੂੰ ਬਹੁਤ ਸਮਾਂ ਲੱਗਿਆ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
     <string name="common_export">ਐਕਸਪੋਰਟ ਕਰੋ</string>
     <string name="common_import">ਇੰਪੋਰਟ ਕਰੋ</string>

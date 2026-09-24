@@ -115,6 +115,7 @@
     <string name="core_content_selection_macro_chat_strike">קו חוצה</string>
     <string name="core_content_selection_macro_colour">צבע</string>
     <string name="core_content_selection_macro_copy">העתק</string>
+    <string name="core_content_selection_macro_deepl_write">DeepL Write</string>
     <string name="core_content_selection_macro_digits_latin">ספרות</string>
     <string name="core_content_selection_macro_email">אימייל</string>
     <string name="core_content_selection_macro_fancy">מהודר</string>

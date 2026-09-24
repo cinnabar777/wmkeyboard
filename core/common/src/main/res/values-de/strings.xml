@@ -35,6 +35,7 @@
     <string name="common_enable">Einschalten</string>
     <string name="common_error_generic">Etwas hat nicht funktioniert. Versuchen Sie es erneut.</string>
     <string name="common_error_network">Keine Verbindung. Überprüfen Sie Ihr Netzwerk und versuchen Sie es erneut.</string>
+    <string name="common_error_no_internet_permission">Diese Version der Tastatur kann keine Verbindung zum Internet herstellen.</string>
     <string name="common_error_timeout">Die Anfrage hat zu lange gedauert. Versuche es erneut.</string>
     <string name="common_export">Exportieren</string>
     <string name="common_import">Importieren</string>

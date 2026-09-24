@@ -115,6 +115,7 @@
     <string name="core_content_selection_macro_chat_strike">اسٹرائیک</string>
     <string name="core_content_selection_macro_colour">رنگ</string>
     <string name="core_content_selection_macro_copy">کاپی کریں</string>
+    <string name="core_content_selection_macro_deepl_write">DeepL رائٹ</string>
     <string name="core_content_selection_macro_digits_latin">ہندسے</string>
     <string name="core_content_selection_macro_email">ای میل</string>
     <string name="core_content_selection_macro_fancy">فینسی</string>

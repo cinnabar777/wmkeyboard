@@ -35,6 +35,7 @@
     <string name="common_enable">הפעל</string>
     <string name="common_error_generic">משהו לא עבד. נסה שוב.</string>
     <string name="common_error_network">אין חיבור. בדוק את הרשת ונסה שוב.</string>
+    <string name="common_error_no_internet_permission">גרסה זו של המקלדת אינה יכולה להתחבר לאינטרנט.</string>
     <string name="common_error_timeout">הבקשה ארכה זמן רב מדי. נסה שוב.</string>
     <string name="common_export">ייצוא</string>
     <string name="common_import">ייבוא</string>

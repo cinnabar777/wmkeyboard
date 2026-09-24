@@ -35,6 +35,7 @@
     <string name="common_enable">Włącz</string>
     <string name="common_error_generic">Coś nie zadziałało. Spróbuj ponownie.</string>
     <string name="common_error_network">Brak połączenia. Sprawdź sieć i spróbuj ponownie.</string>
+    <string name="common_error_no_internet_permission">Ta wersja klawiatury nie może łączyć się z internetem.</string>
     <string name="common_error_timeout">Żądanie trwało zbyt długo. Spróbuj ponownie.</string>
     <string name="common_export">Eksportuj</string>
     <string name="common_import">Importuj</string>

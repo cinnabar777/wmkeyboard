@@ -2,6 +2,13 @@
 <!-- Machine translated by Google Play. Do not edit by hand:
      regenerate with tools/i18n/pull-play-translations.py. -->
 <resources>
+    <string name="ime_ai_chat_ask_explain">Útskýra einfaldlega</string>
+    <string name="ime_ai_chat_ask_explain_prompt">Útskýrðu þetta með einföldum orðum.</string>
+    <string name="ime_ai_chat_ask_hint">Spyrðu spurningar um textann, eða byrjaðu á einni af þessum.</string>
+    <string name="ime_ai_chat_ask_summary">Samantekt</string>
+    <string name="ime_ai_chat_ask_summary_prompt">Gefðu mér stutta samantekt á þessu.</string>
+    <string name="ime_ai_chat_ask_words">Erfið orð</string>
+    <string name="ime_ai_chat_ask_words_prompt">Útskýrðu erfið orð og hugmyndir í þessu.</string>
     <string name="ime_ai_chat_attach_desc">Senda texta reitsins með skilaboðunum</string>
     <string name="ime_ai_chat_attach_remove_desc">Ekki senda texta reitsins</string>
     <plurals name="ime_ai_chat_attached_field">
@@ -12,6 +19,8 @@
         <item quantity="one">Valið þitt fylgir skilaboðunum: %1$d stafur</item>
         <item quantity="other">Valið þitt fylgir skilaboðunum: %1$d stafir</item>
     </plurals>
+    <string name="ime_ai_chat_attached_tool">Um %1$s</string>
+    <string name="ime_ai_chat_attached_tool_selection">Um textabrot frá %1$s</string>
     <plurals name="ime_ai_chat_attachment_sent">
         <item quantity="one">Með %1$d staf í texta</item>
         <item quantity="other">Með %1$d stöfum í texta</item>
@@ -99,6 +108,10 @@
     <string name="ime_ai_truncated_notice">Líkanið stöðvaðist snemma. Auktu „Hámarks lengd svars“ í stillingum tólsins.</string>
     <string name="ime_ai_view_changes">Breytingar</string>
     <string name="ime_ai_view_result">Niðurstaða</string>
+    <string name="ime_ask_ai_label_dict">Orðabók: %1$s</string>
+    <string name="ime_ask_ai_label_grammar">Málfræðileit</string>
+    <string name="ime_ask_ai_label_vocab">Orðaforði: %1$s</string>
+    <string name="ime_ask_ai_label_wiki">Wikipedia: %1$s</string>
     <string name="ime_autofill_dismiss_desc">Fela tillögur um sjálfvirka útfyllingu</string>
     <string name="ime_calc_degrees_label">gráður</string>
     <string name="ime_calc_insert_action">Setja inn</string>
@@ -127,6 +140,7 @@
     <string name="ime_camera_permission_action">Leyfa myndavél</string>
     <string name="ime_camera_permission_body">Myndavélarverkfærið þarf leyfi til að nota myndavélina. Forritið tekur aðeins mynd þegar þú ýtir á afsmellarann.</string>
     <string name="ime_camera_retake_action">Taka aftur</string>
+    <string name="ime_camera_search_action">Leita</string>
     <string name="ime_camera_send_action">Senda</string>
     <string name="ime_camera_shutter_desc">Taka mynd</string>
     <string name="ime_camera_starting_progress">Ræsi myndavélina...</string>
@@ -144,6 +158,10 @@
     <string name="ime_clip_chip_image">Afrituð mynd</string>
     <string name="ime_clip_chip_item">Afritaður hlutur</string>
     <string name="ime_clip_chip_screenshot">Skjáskot</string>
+    <plurals name="ime_clip_deleted">
+        <item quantity="one">Klippa eytt</item>
+        <item quantity="other">%1$d klippum eytt</item>
+    </plurals>
     <string name="ime_clip_edit">Breyta</string>
     <string name="ime_clip_edit_placeholder">Sláðu inn texta klippunnar</string>
     <string name="ime_clip_edit_rich_note">Að vista breytingu fjarlægir snið</string>
@@ -162,6 +180,18 @@
     <string name="ime_clip_info_private_detail">Lyklaborðið felur þetta klipp í spjaldinu og eyðir því fyrr en öðrum klippum.</string>
     <string name="ime_clip_info_size">Stærð</string>
     <string name="ime_clip_info_type">Tegund</string>
+    <plurals name="ime_clip_left_days">
+        <item quantity="one">%d dagur eftir</item>
+        <item quantity="other">%d dagar eftir</item>
+    </plurals>
+    <plurals name="ime_clip_left_hours">
+        <item quantity="one">%d klst eftir</item>
+        <item quantity="other">%d klst eftir</item>
+    </plurals>
+    <plurals name="ime_clip_left_minutes">
+        <item quantity="one">%d mínúta eftir</item>
+        <item quantity="other">%d mínútur eftir</item>
+    </plurals>
     <string name="ime_clip_number_desc">Klippa %1$d</string>
     <string name="ime_clip_pin">Festa</string>
     <string name="ime_clip_send_as_sticker">Senda sem límmiða</string>
@@ -172,6 +202,7 @@
     <string name="ime_clip_type_rich_text">Ríkur texti</string>
     <string name="ime_clip_type_text">Texti</string>
     <string name="ime_clip_type_video">Myndband</string>
+    <string name="ime_clip_undo_delete">Afturkalla</string>
     <string name="ime_clip_unpin">Losna</string>
     <string name="ime_clip_video_desc">Afritað myndskeið</string>
     <string name="ime_clipboard_no_match">Engin úrklippa passar við „%1$s“.</string>
@@ -203,10 +234,12 @@
     <string name="ime_dict_add_vocab_action">Bæta við orðaforða</string>
     <string name="ime_dict_antonyms_label">Andheiti</string>
     <string name="ime_dict_error">Forritið nær ekki sambandi við orðabókina. Athugaðu nettenginguna og reyndu aftur.</string>
+    <string name="ime_dict_from">Frá %1$s</string>
     <string name="ime_dict_idle_info">Flettu upp ensku orði. Ýttu á leitarstikuna og skrifaðu. Þú getur líka sett bendilinn á orð áður en þú opnar verkfærið.</string>
     <string name="ime_dict_insert_action">Setja inn</string>
     <string name="ime_dict_lookup_desc">Fletta upp orðinu</string>
     <string name="ime_dict_lookup_progress">Leita að „%1$s“…</string>
+    <string name="ime_dict_no_sources">Allar orðabókarheimildir eru óvirkar. Kveiktu á einni í stillingum orðabókarverkfærisins.</string>
     <string name="ime_dict_not_found_empty">Engin færsla fyrir „%1$s“. Athugaðu stafsetninguna eða reyndu grunnform orðsins.</string>
     <string name="ime_dict_play_desc">Spila framburðinn</string>
     <string name="ime_dict_search_active_hint">Sláðu inn orð…</string>
@@ -314,7 +347,15 @@
     <string name="ime_glide_word_list_offer">Strjúkritun þarf %1$s orðalista</string>
     <string name="ime_glide_word_list_offer_dismiss_desc">Hætta við</string>
     <string name="ime_grammar_all_filtered_empty">Öll vandamál sem fundust eru falin af síunni</string>
+    <string name="ime_grammar_ask_ai_desc">Spyrðu gervigreind um þetta vandamál</string>
     <string name="ime_grammar_category_kind_label">%1$s • %2$s</string>
+    <string name="ime_grammar_deepl_action_desc">Endurbættu textann með DeepL Write</string>
+    <string name="ime_grammar_deepl_dismiss_desc">Loka DeepL Write niðurstöðunni</string>
+    <string name="ime_grammar_deepl_error">DeepL Write svaraði ekki</string>
+    <string name="ime_grammar_deepl_replace_action">Skipta út</string>
+    <string name="ime_grammar_deepl_replace_failed_toast">Ekki er hægt að skipta út textanum í þessum reit</string>
+    <string name="ime_grammar_deepl_title">DeepL Write</string>
+    <string name="ime_grammar_deepl_unchanged">DeepL Write hefur engu að breyta</string>
     <string name="ime_grammar_dialect_desc">Veldu mállýsku</string>
     <string name="ime_grammar_dismiss_desc">Fela þetta vandamál</string>
     <string name="ime_grammar_empty_hint">Sláðu inn texta, eða opnaðu reit sem inniheldur texta. Villurnar birtast hér. Athuganirnar fara fram án nettengingar.</string>
@@ -346,6 +387,7 @@
     <string name="ime_icons_empty_info">Til að bæta við táknmyndapökkum, opnaðu stillingarnar.</string>
     <string name="ime_icons_more_label">Fleiri táknapakkar</string>
     <string name="ime_icons_pick_info">Ýttu á táknmyndapakka til að nota hann á takkana og verkfærin.</string>
+    <string name="ime_image_search_by_photo_desc">Leita með mynd</string>
     <string name="ime_image_search_empty">Engar myndir fyrir „%1$s“</string>
     <string name="ime_image_search_hint">Leita að myndum</string>
     <string name="ime_image_search_idle">Sláðu inn leit og ýttu á enter. Ýttu á mynd til að setja hana inn. Ýttu og haltu inni til að setja inn tengilinn hennar.</string>
@@ -376,6 +418,8 @@
     <string name="ime_kde_loop">Endurtaka</string>
     <string name="ime_kde_media_empty_body">Ræstu spilara þar og hann birtist hér</string>
     <string name="ime_kde_media_empty_title">Ekkert er í spilun á tölvunni</string>
+    <string name="ime_kde_media_unsupported_body">KDE Connect leyfir síma ekki að stjórna tónlist eða myndböndum. KDE Connect á Mac gerir það aldrei</string>
+    <string name="ime_kde_media_unsupported_title">Þessi tölva deilir ekki spilurum sínum</string>
     <string name="ime_kde_not_listening">Annað forrit í þessum síma notar KDE Connect gáttina. Tölvur geta enn fundið þetta lyklaborð, en ýttu á Endurnýja hérna megin.</string>
     <string name="ime_kde_notice_clipboard_empty">Ekkert á klemmuspjaldinu til að senda</string>
     <string name="ime_kde_notice_clipboard_sent">Úrklippuspjald sent</string>
@@ -426,10 +470,12 @@
     <string name="ime_kde_send_empty">Sendu klemmuspjaldið, það sem þú skrifaðir, eða skrár. Það sem tölvan sendir lendir hér og í Niðurhölum</string>
     <string name="ime_kde_send_field">Texti í reitnum</string>
     <string name="ime_kde_send_files">Skrár…</string>
+    <string name="ime_kde_send_unsupported">Þessi tölva tekur ekki við skrám eða texta úr símanum</string>
     <string name="ime_kde_settings">Stillingar</string>
     <string name="ime_kde_shuffle">Stokka</string>
     <string name="ime_kde_slides_end">Enda</string>
     <string name="ime_kde_slides_next">Næsta glæra</string>
+    <string name="ime_kde_slides_no_pointer">Þessi tölva er ekki með bendil fyrir skyggnur</string>
     <string name="ime_kde_slides_pointer">Haltu inni og dragðu fyrir bendilinn</string>
     <string name="ime_kde_slides_previous">Fyrri skyggna</string>
     <string name="ime_kde_slides_start">Byrja</string>
@@ -489,11 +535,25 @@
     <string name="ime_language_switch_title">Inntakstungumál</string>
     <string name="ime_launcher_activities_label">Skjáir</string>
     <string name="ime_launcher_app_info_action">Forritsupplýsingar</string>
+    <string name="ime_launcher_combo_label">%1$s + %2$s</string>
+    <string name="ime_launcher_combo_open_action">Opna bæði í skiptum skjá</string>
+    <string name="ime_launcher_combo_remove_action">Fjarlægja þetta par</string>
+    <string name="ime_launcher_combos_label">Pör fyrir skiptan skjá</string>
     <string name="ime_launcher_empty">Engin forrit passa</string>
+    <string name="ime_launcher_floating_unsupported">Þetta tæki gæti opnað það í fullum skjá</string>
     <string name="ime_launcher_hidden_label">Falið frá ristinni</string>
     <string name="ime_launcher_hide_action">Fela forrit úr ristinni</string>
     <string name="ime_launcher_loading">Hleður forritum…</string>
+    <string name="ime_launcher_menu_close">Loka valmynd</string>
     <string name="ime_launcher_not_exported_label">Ekki hægt að opna utan úr forritinu</string>
+    <string name="ime_launcher_open_action">Opna</string>
+    <string name="ime_launcher_open_floating_action">Opna í fljótandi glugga</string>
+    <string name="ime_launcher_open_split_action">Opna í skiptum skjá</string>
+    <string name="ime_launcher_page_action">Skjáir, fela og upplýsingar um forrit…</string>
+    <string name="ime_launcher_page_no_screens_action">Fela og forritaupplýsingar…</string>
+    <string name="ime_launcher_pair_action">Para í skiptum skjá með…</string>
+    <string name="ime_launcher_pair_cancel">Hætta við</string>
+    <string name="ime_launcher_pair_prompt">Pikkaðu á forritið til að opna við hliðina á %1$s</string>
     <string name="ime_launcher_pin_action">Festa forrit</string>
     <string name="ime_launcher_pinned_label">Fastsett</string>
     <string name="ime_launcher_recents_label">Nýlegt</string>
@@ -669,9 +729,11 @@
     <string name="ime_sandbox_offer_only">Strjúka með því að nota aðeins orðin þín?</string>
     <string name="ime_sandbox_offer_prefer">Viltu stilla strokuna að orðunum þínum?</string>
     <string name="ime_search_attribution_brave">í gegnum Brave</string>
+    <string name="ime_selection_ask_ai">Spyrja gervigreind</string>
     <string name="ime_selection_macro_back_desc">Til baka í valaðgerðir</string>
     <string name="ime_selection_macro_bengali_unavailable_toast">Bengalska er ekki hlaðin</string>
     <string name="ime_selection_macro_busy_desc">Vinnur</string>
+    <string name="ime_selection_macro_deepl_clean_toast">DeepL Write hefur engu að breyta</string>
     <string name="ime_selection_macro_find_none_toast">Engin önnur samsvörun</string>
     <string name="ime_selection_macro_grammar_clean_toast">Ekkert til að laga</string>
     <string name="ime_selection_macro_grammar_unavailable_toast">Málfræðileiðrétting er ekki tiltæk</string>
@@ -680,6 +742,7 @@
     <string name="ime_selection_macro_nothing_to_undo_toast">Ekkert eftir til að afturkalla</string>
     <string name="ime_selection_macro_open_in_desc">Opna í %1$s</string>
     <string name="ime_selection_macro_stop_label">Stöðva</string>
+    <string name="ime_selection_quote">Tilvitnun</string>
     <string name="ime_service_already_in_settings_toast">Þú ert nú þegar í stillingunum</string>
     <string name="ime_service_autocorrect_off_toast">Sjálfvirk leiðrétting er óvirk</string>
     <string name="ime_service_autocorrect_on_toast">Sjálfvirk leiðrétting er kveikt</string>
@@ -710,6 +773,11 @@
     <string name="ime_service_phonetic_english_needs_secondary_toast">Kveiktu á ensku undir Tungumál, %1$s, Einnig stinga upp á frá</string>
     <string name="ime_service_phonetic_english_off_toast">Ensk orð eru aðeins lögð til</string>
     <string name="ime_service_phonetic_english_on_toast">Ensk orð haldast ensk</string>
+    <string name="ime_service_photo_search_blocked">Gagnasparnaður leyfir ekki vefleit að nota þessa tengingu</string>
+    <string name="ime_service_photo_search_metered_ask">Þessi tenging er mæld. Til að senda myndina, ýttu aftur á Leita.</string>
+    <string name="ime_service_photo_search_no_app">Ekkert forrit í þessum síma getur leitað með mynd</string>
+    <string name="ime_service_photo_search_no_browser">Enginn vafri í þessum síma getur opnað niðurstöðurnar</string>
+    <string name="ime_service_photo_search_sending">Sendir myndina á leitarsíðuna</string>
     <string name="ime_service_plugins_all_off_notice">Öll viðbætur sem þú settir upp eru slökktar. Kveiktu á einni undir Stjórna viðbótum.</string>
     <string name="ime_service_plugins_off_notice">Viðbætur eru óvirkar. Kveiktu á þeim í stillingum til að setja þær upp og keyra.</string>
     <string name="ime_service_power_saving_off_toast">Orkusparnaður er óvirkur</string>
@@ -790,10 +858,22 @@
     <string name="ime_sound_volume_label">Hljóðstyrkur</string>
     <string name="ime_sticker_add_desc">Bæta við límmiðum</string>
     <string name="ime_sticker_add_to_pack_action">Bæta við %1$s</string>
+    <string name="ime_sticker_info_emoji">Emoji: %1$s</string>
+    <string name="ime_sticker_info_keywords">Lykilorð: %1$s</string>
+    <string name="ime_sticker_info_pack">Pakki: %1$s</string>
+    <string name="ime_sticker_info_untitled">Enginn titill</string>
     <string name="ime_sticker_local_search_empty">Engir límmiðar hjá þér passa við „%1$s“</string>
     <string name="ime_sticker_manage_packs_action">Stjórna pökkum</string>
     <string name="ime_sticker_need_key_body">Umsjón tækisins fyrir límmiða þarf API lykil frá Klipy eða GIPHY. Báðir lyklar eru ókeypis. Bættu við lykli í stillingum fyrir þetta tól.</string>
     <string name="ime_sticker_no_packs_empty">Engir límmiðapakkar ennþá. Búðu til pakka í stillingunum. Þú getur líka ýtt á og haldið inni límmiða frá Klipy eða GIPHY til að vista hann hér.</string>
+    <plurals name="ime_sticker_offer_count">
+        <item quantity="one">%1$d límmiði</item>
+        <item quantity="other">%1$d límmiðar</item>
+    </plurals>
+    <string name="ime_sticker_offer_dismiss_desc">Fela límmiða fyrir %1$s</string>
+    <string name="ime_sticker_offer_item_desc">Senda límmiða %1$s</string>
+    <string name="ime_sticker_offer_item_untitled_desc">Senda þennan límmiða</string>
+    <string name="ime_sticker_offer_more">+%1$d</string>
     <string name="ime_sticker_pack_all_label">Allt</string>
     <string name="ime_sticker_pack_empty">Þessi pakki er tómur.</string>
     <string name="ime_sticker_save_new_pack_action">Vista í nýjan pakka</string>
@@ -804,8 +884,24 @@
     <string name="ime_suggestion_hold_label">Orðavalkostir</string>
     <string name="ime_suggestion_never_suggest">Aldrei stinga upp á „%1$s“</string>
     <string name="ime_suggestions_show_desc">Sýna tillögustikuna</string>
+    <string name="ime_symbol_row_delete_confirm_body">Safnið og allar færslur þess verða fjarlægðar. Lyklaborðsstilling sem bauð upp á það mun sýna önnur söfn í staðinn.</string>
+    <string name="ime_symbol_row_delete_confirm_title">Eyða \"%1$s\"?</string>
+    <string name="ime_symbol_row_delete_set">Eyða \"%1$s\" settinu</string>
+    <string name="ime_symbol_row_hide_in_mode">Fela röðina í %1$s</string>
+    <string name="ime_symbol_row_remove">Fjarlægja \"%1$s\"</string>
+    <string name="ime_symbol_row_settings">Stillingar fyrir táknaröð</string>
     <string name="ime_symbol_set_switch_desc">Skipta um táknasett</string>
     <string name="ime_symbols_recents_label">Nýlegir</string>
+    <string name="ime_synonyms_close_desc">Náskyld samheiti</string>
+    <string name="ime_synonyms_failed">Tókst ekki að ná sambandi við samheitaþjónustu. Athugaðu tenginguna og reyndu aftur.</string>
+    <string name="ime_synonyms_from">Frá %1$s</string>
+    <string name="ime_synonyms_loading">Leita að samheitum…</string>
+    <string name="ime_synonyms_no_sources">Allar samheitalindir eru óvirkar. Kveiktu á einni undir Ritun, Tillögur, Samheitalindir.</string>
+    <string name="ime_synonyms_not_found">Engin samheiti fundust fyrir \"%1$s\".</string>
+    <string name="ime_synonyms_pick_desc">Notaðu \"%1$s\"</string>
+    <string name="ime_synonyms_retry">Reyna aftur</string>
+    <string name="ime_synonyms_similar_note">Engin samheiti eru skráð fyrir þetta orð. Þessi orð hafa svipaða merkingu.</string>
+    <string name="ime_synonyms_title">Samheiti fyrir „%1$s“</string>
     <string name="ime_textedit_doc_end_desc">Fara til enda textans</string>
     <string name="ime_textedit_doc_start_desc">Fara í upphaf textans</string>
     <string name="ime_textedit_down_desc">Færa niður</string>
@@ -926,7 +1022,10 @@
     <string name="ime_toolbox_hint_mode">%1$s hamurinn er virkur, svo lyklaborðið vistar þetta fyrirkomulag fyrir þann ham. Önnur forrit halda sínu eigin.</string>
     <string name="ime_trackpad_hint">Dragðu til að færa bendilinn</string>
     <string name="ime_trackpad_surface_desc">Snertiborð. Dragðu til að færa bendilinn, haltu inni og dragðu til að velja, bankaðu tvisvar til að velja orð</string>
+    <string name="ime_translate_all_languages_info">Einnig tungumálin sem á að hlaða niður</string>
+    <string name="ime_translate_all_languages_label">Öll tungumál</string>
     <string name="ime_translate_auto_detect_label">Greina tungumál</string>
+    <string name="ime_translate_deepl_label">DeepL</string>
     <string name="ime_translate_download_failed_error">Niðurhalinu lauk ekki. Athugaðu tenginguna og reyndu aftur.</string>
     <string name="ime_translate_download_of_total_progress">%1$s af %2$s</string>
     <string name="ime_translate_downloaded_desc">Niðurhalað</string>
@@ -1064,6 +1163,10 @@
     <string name="ime_voice_status_mic_blocked">Hljóðneminn er lokaður. Kveiktu á aðgangi að hljóðnema í flýtistillingum og reyndu aftur.</string>
     <string name="ime_voice_status_no_model">Engin raddgreiningarlíkan er til staðar fyrir ótengda raddinnslátt</string>
     <string name="ime_voice_status_no_server">Umritunarþjónninn hefur ekki fengið vistfang ennþá</string>
+    <plurals name="ime_voice_status_stops_in">
+        <item quantity="one">Stöðvast eftir %d sekúndu. Ýttu til að ljúka núna.</item>
+        <item quantity="other">Stöðvast eftir %d sekúndur. Ýttu til að ljúka núna.</item>
+    </plurals>
     <string name="ime_voice_status_transcribing">Umritar…</string>
     <string name="ime_voice_stop_desc">Hætta að hlusta</string>
     <string name="ime_voice_strip_allow_action">Leyfa</string>
@@ -1103,6 +1206,7 @@
     <string name="ime_web_search_need_key_body">Vefleit þarf API-lykil frá Brave Search. Bættu við lykli í stillingum fyrir þetta verkfæri.</string>
     <string name="ime_web_search_open_desc">Opna í vafranum</string>
     <string name="ime_wiki_back_desc">Til baka í niðurstöður</string>
+    <string name="ime_wiki_expand_desc">Gera greinina hærri</string>
     <string name="ime_wiki_full_error">Forritið getur ekki hlaðið inn texta greinarinnar.</string>
     <string name="ime_wiki_full_progress">Hleður allri greininni…</string>
     <string name="ime_wiki_idle_info">Leitaðu að efni á %1$s.wikipedia.org. Lestu samantektina, opnaðu tenglana og settu inn texta eða slóð greinarinnar.</string>
@@ -1114,8 +1218,12 @@
     <string name="ime_wiki_links_progress">Hleður tenglum…</string>
     <string name="ime_wiki_no_results_empty">Leitin fann ekkert fyrir „%1$s“.</string>
     <string name="ime_wiki_no_summary_empty">Þessi grein hefur enga samantekt.</string>
+    <string name="ime_wiki_open_browser_desc">Opna greinina í vafranum</string>
+    <string name="ime_wiki_quote_markdown">\"%1$s\" (úr [Wikipedia: %2$s](%3$s))</string>
+    <string name="ime_wiki_quote_plain">\"%1$s\" (Wikipedia: %2$s, %3$s)</string>
     <string name="ime_wiki_search_active_hint">Leita á Wikipedia. Ýttu á enter til að leita</string>
     <string name="ime_wiki_search_hint">Leita á Wikipedia…</string>
+    <string name="ime_wiki_shrink_desc">Láttu greinina aftur hafa hæð lyklaborðsins</string>
     <string name="ime_wiki_tab_full_label">Full grein</string>
     <string name="ime_wiki_tab_links_label">Tenglar</string>
     <string name="ime_wiki_tab_summary_label">Samantekt</string>
@@ -1165,6 +1273,7 @@
     <string name="ime_word_menu_delete">Eyða \"%1$s\"</string>
     <string name="ime_word_menu_edit">Breyta…</string>
     <string name="ime_word_menu_search_all">Leita að öllum orðum fyrir „%1$s“</string>
+    <string name="ime_word_menu_synonyms">Samheiti fyrir \"%1$s\"</string>
     <string name="ime_word_spell_apply_desc">Nota þessa stafsetningu</string>
     <string name="ime_word_spell_cancel_desc">Ekki breyta stafsetningunni</string>
     <string name="ime_word_spell_hint">Sláðu inn nýja stafsetningu fyrir \"%1$s\"</string>

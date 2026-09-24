@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">Eksperimentalno</string>
     <string name="core_intel_llm_tier_recommended_label">Preporučeno</string>
     <string name="core_intel_llm_tier_untested_label">Netestirano</string>
+    <string name="core_intel_ocr_download_error_http">GitHub poslužitelj nije poslao datoteku. Kod pogreške je HTTP %1$s.</string>
+    <string name="core_intel_ocr_download_error_interrupted">Veza je prekinuta tijekom preuzimanja. Pokušajte ponovno.</string>
+    <string name="core_intel_ocr_download_error_no_space">Nema dovoljno prostora na vašem uređaju. Prvo morate osloboditi oko %1$s MB.</string>
+    <string name="core_intel_ocr_pack_error_broken">Preuzeti jezični podaci su oštećeni, stoga ih skener nije mogao koristiti. Preuzmite ih ponovno.</string>
 </resources>

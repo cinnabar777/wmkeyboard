@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">Eksperimentel</string>
     <string name="core_intel_llm_tier_recommended_label">Anbefalet</string>
     <string name="core_intel_llm_tier_untested_label">Utestet</string>
+    <string name="core_intel_ocr_download_error_http">GitHub-serveren sendte ikke filen. Fejlkoden er HTTP %1$s.</string>
+    <string name="core_intel_ocr_download_error_interrupted">Forbindelsen blev afbrudt under overførslen. Prøv igen.</string>
+    <string name="core_intel_ocr_download_error_no_space">Der er ikke nok lagerplads på din enhed. Du skal først frigøre ca. %1$s MB.</string>
+    <string name="core_intel_ocr_pack_error_broken">De downloadede sprogdata er beskadiget, så scanneren kunne ikke bruge dem. Download dem igen.</string>
 </resources>

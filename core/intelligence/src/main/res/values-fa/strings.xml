@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">آزمایشی</string>
     <string name="core_intel_llm_tier_recommended_label">پیشنهادی</string>
     <string name="core_intel_llm_tier_untested_label">آزمایش‌نشده</string>
+    <string name="core_intel_ocr_download_error_http">سرور GitHub فایل را ارسال نکرد. کد خطای HTTP %1$s است.</string>
+    <string name="core_intel_ocr_download_error_interrupted">اتصال در حین بارگیری قطع شد. دوباره تلاش کنید.</string>
+    <string name="core_intel_ocr_download_error_no_space">فضای ذخیره‌سازی کافی در دستگاه شما وجود ندارد. ابتدا باید حدود %1$s مگابایت فضا آزاد کنید.</string>
+    <string name="core_intel_ocr_pack_error_broken">داده‌های زبانی بارگیری‌شده آسیب دیده است، بنابراین اسکنر نتوانست از آن استفاده کند. دوباره آن را بارگیری کنید.</string>
 </resources>

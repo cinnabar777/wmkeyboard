@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">પ્રાયોગિક</string>
     <string name="core_intel_llm_tier_recommended_label">ભલામણ કરેલ</string>
     <string name="core_intel_llm_tier_untested_label">અપરીક્ષિત</string>
+    <string name="core_intel_ocr_download_error_http">GitHub સર્વરે ફાઇલ મોકલી નથી. ભૂલ કોડ HTTP %1$s છે.</string>
+    <string name="core_intel_ocr_download_error_interrupted">ડાઉનલોડ દરમિયાન કનેક્શન અટકી ગયું હતું. ફરી પ્રયાસ કરો.</string>
+    <string name="core_intel_ocr_download_error_no_space">તમારા ઉપકરણ પર પૂરતી સ્ટોરેજ નથી. તમારે પહેલા લગભગ %1$s MB ખાલી કરવી પડશે.</string>
+    <string name="core_intel_ocr_pack_error_broken">ડાઉનલોડ કરેલ ભાષાનો ડેટા ક્ષતિગ્રસ્ત છે, તેથી સ્કેનર તેનો ઉપયોગ કરી શક્યું નથી. તેને ફરીથી ડાઉનલોડ કરો.</string>
 </resources>

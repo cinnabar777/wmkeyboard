@@ -35,6 +35,7 @@
     <string name="common_enable">オンにする</string>
     <string name="common_error_generic">問題が発生しました。もう一度やり直してください。</string>
     <string name="common_error_network">接続されていません。ネットワークを確認して再試行してください。</string>
+    <string name="common_error_no_internet_permission">このキーボードのビルドはインターネットに接続できません。</string>
     <string name="common_error_timeout">リクエストに時間がかかりすぎました。もう一度やり直してください。</string>
     <string name="common_export">エクスポート</string>
     <string name="common_import">インポート</string>

@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">تجريبي</string>
     <string name="core_intel_llm_tier_recommended_label">موصى به</string>
     <string name="core_intel_llm_tier_untested_label">غير مختبر</string>
+    <string name="core_intel_ocr_download_error_http">لم يرسل خادم GitHub الملف. رمز الخطأ هو HTTP %1$s.</string>
+    <string name="core_intel_ocr_download_error_interrupted">توقف الاتصال أثناء التنزيل. حاول مجدداً.</string>
+    <string name="core_intel_ocr_download_error_no_space">لا توجد مساحة تخزين كافية على جهازك. يجب عليك توفير حوالي %1$s ميجابايت أولاً.</string>
+    <string name="core_intel_ocr_pack_error_broken">بيانات اللغة التي تم تنزيلها تالفة، لذا تعذر على الماسح الضوئي استخدامها. قم بتنزيلها مرة أخرى.</string>
 </resources>

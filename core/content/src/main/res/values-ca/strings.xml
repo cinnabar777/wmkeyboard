@@ -115,6 +115,7 @@
     <string name="core_content_selection_macro_chat_strike">Ratllat</string>
     <string name="core_content_selection_macro_colour">Color</string>
     <string name="core_content_selection_macro_copy">Copia</string>
+    <string name="core_content_selection_macro_deepl_write">DeepL Write</string>
     <string name="core_content_selection_macro_digits_latin">Dígits</string>
     <string name="core_content_selection_macro_email">Correu electrònic</string>
     <string name="core_content_selection_macro_fancy">Elegant</string>

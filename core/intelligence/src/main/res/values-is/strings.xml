@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">Tilraunakennt</string>
     <string name="core_intel_llm_tier_recommended_label">Mælt með</string>
     <string name="core_intel_llm_tier_untested_label">Óprófað</string>
+    <string name="core_intel_ocr_download_error_http">GitHub netþjónninn sendi ekki skrána. Villukóðinn er HTTP %1$s.</string>
+    <string name="core_intel_ocr_download_error_interrupted">Tengingin rofnaði meðan á niðurhali stóð. Reyndu aftur.</string>
+    <string name="core_intel_ocr_download_error_no_space">Ekki er nægt geymslupláss á tækinu þínu. Þú verður að losa um um það bil %1$s MB fyrst.</string>
+    <string name="core_intel_ocr_pack_error_broken">Niðurhalaða tungumálagagnasettið er skemmt og skanninn gat ekki notað það. Sæktu það aftur.</string>
 </resources>

@@ -115,6 +115,7 @@
     <string name="core_content_selection_macro_chat_strike">Áthúzás</string>
     <string name="core_content_selection_macro_colour">Szín</string>
     <string name="core_content_selection_macro_copy">Másolás</string>
+    <string name="core_content_selection_macro_deepl_write">DeepL Write</string>
     <string name="core_content_selection_macro_digits_latin">Számjegyek</string>
     <string name="core_content_selection_macro_email">E-mail</string>
     <string name="core_content_selection_macro_fancy">Díszes</string>

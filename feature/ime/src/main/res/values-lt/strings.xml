@@ -2,6 +2,13 @@
 <!-- Machine translated by Google Play. Do not edit by hand:
      regenerate with tools/i18n/pull-play-translations.py. -->
 <resources>
+    <string name="ime_ai_chat_ask_explain">Paaiškinti paprastai</string>
+    <string name="ime_ai_chat_ask_explain_prompt">Paaiškinkite tai paprastais žodžiais.</string>
+    <string name="ime_ai_chat_ask_hint">Užduokite klausimą apie tekstą arba pradėkite nuo vieno iš šių.</string>
+    <string name="ime_ai_chat_ask_summary">Apibendrinti</string>
+    <string name="ime_ai_chat_ask_summary_prompt">Pateikite trumpą šio teksto santrauką.</string>
+    <string name="ime_ai_chat_ask_words">Sudėtingi žodžiai</string>
+    <string name="ime_ai_chat_ask_words_prompt">Paaiškinkite sudėtingus žodžius ir idėjas šiame tekste.</string>
     <string name="ime_ai_chat_attach_desc">Siųsti lauko tekstą kartu su pranešimu</string>
     <string name="ime_ai_chat_attach_remove_desc">Nesiųsti lauko teksto</string>
     <plurals name="ime_ai_chat_attached_field">
@@ -12,6 +19,8 @@
         <item quantity="one">Jūsų pasirinkimas pridedamas prie pranešimo: %1$d simbolis</item>
         <item quantity="other">Jūsų pasirinkimas pridedamas prie pranešimo: %1$d simboliai</item>
     </plurals>
+    <string name="ime_ai_chat_attached_tool">Apie %1$s</string>
+    <string name="ime_ai_chat_attached_tool_selection">Apie ištrauką iš %1$s</string>
     <plurals name="ime_ai_chat_attachment_sent">
         <item quantity="one">Su %1$d teksto simboliu</item>
         <item quantity="other">Su %1$d teksto simboliais</item>
@@ -99,6 +108,10 @@
     <string name="ime_ai_truncated_notice">Modelis sustojo per anksti. Įrankio nustatymuose padidinkite „Maksimalų atsakymo ilgį“.</string>
     <string name="ime_ai_view_changes">Pakeitimai</string>
     <string name="ime_ai_view_result">Rezultatas</string>
+    <string name="ime_ask_ai_label_dict">Žodynas: %1$s</string>
+    <string name="ime_ask_ai_label_grammar">Gramatikos tikrinimas</string>
+    <string name="ime_ask_ai_label_vocab">Žodynas: %1$s</string>
+    <string name="ime_ask_ai_label_wiki">Vikipedija: %1$s</string>
     <string name="ime_autofill_dismiss_desc">Slėpti automatinio pildymo pasiūlymus</string>
     <string name="ime_calc_degrees_label">laipsn.</string>
     <string name="ime_calc_insert_action">Įterpti</string>
@@ -127,6 +140,7 @@
     <string name="ime_camera_permission_action">Leisti naudoti kamerą</string>
     <string name="ime_camera_permission_body">Kameros įrankiui reikia leidimo naudoti kamerą. Programa fotografuoja tik tada, kai paspaudžiate užrakto mygtuką.</string>
     <string name="ime_camera_retake_action">Fotografuoti iš naujo</string>
+    <string name="ime_camera_search_action">Ieškoti</string>
     <string name="ime_camera_send_action">Siųsti</string>
     <string name="ime_camera_shutter_desc">Fotografuoti</string>
     <string name="ime_camera_starting_progress">Paleidžiama kamera…</string>
@@ -144,6 +158,10 @@
     <string name="ime_clip_chip_image">Nukopijuotas vaizdas</string>
     <string name="ime_clip_chip_item">Nukopijuotas elementas</string>
     <string name="ime_clip_chip_screenshot">Ekrano kopija</string>
+    <plurals name="ime_clip_deleted">
+        <item quantity="one">Iškirpinys ištrintas</item>
+        <item quantity="other">Ištrinti %1$d iškirpiniai</item>
+    </plurals>
     <string name="ime_clip_edit">Redaguoti</string>
     <string name="ime_clip_edit_placeholder">Įveskite iškarpos tekstą</string>
     <string name="ime_clip_edit_rich_note">Išsaugojus pakeitimus, formatavimas bus pašalintas</string>
@@ -162,6 +180,18 @@
     <string name="ime_clip_info_private_detail">Klaviatūra paslepia šį iškarpą skydelyje ir ištrina jį greičiau nei kitus.</string>
     <string name="ime_clip_info_size">Dydis</string>
     <string name="ime_clip_info_type">Tipas</string>
+    <plurals name="ime_clip_left_days">
+        <item quantity="one">Liko %d diena</item>
+        <item quantity="other">Liko %d dienos</item>
+    </plurals>
+    <plurals name="ime_clip_left_hours">
+        <item quantity="one">Likusi %d val.</item>
+        <item quantity="other">Liko %d val.</item>
+    </plurals>
+    <plurals name="ime_clip_left_minutes">
+        <item quantity="one">Liko %d min</item>
+        <item quantity="other">Liko %d min</item>
+    </plurals>
     <string name="ime_clip_number_desc">Iškirpti %1$d</string>
     <string name="ime_clip_pin">Prisegti</string>
     <string name="ime_clip_send_as_sticker">Siųsti kaip lipduką</string>
@@ -172,6 +202,7 @@
     <string name="ime_clip_type_rich_text">Raiškusis tekstas</string>
     <string name="ime_clip_type_text">Tekstas</string>
     <string name="ime_clip_type_video">Vaizdo įrašas</string>
+    <string name="ime_clip_undo_delete">Anuliuoti</string>
     <string name="ime_clip_unpin">Atsegti</string>
     <string name="ime_clip_video_desc">Nukopijuotas vaizdo įrašas</string>
     <string name="ime_clipboard_empty">Mainų srities istorija tuščia. Nukopijuotas tekstas rodomas čia.</string>
@@ -204,10 +235,12 @@
     <string name="ime_dict_add_vocab_action">Pridėti prie žodyno</string>
     <string name="ime_dict_antonyms_label">Antonimai</string>
     <string name="ime_dict_error">Programa negali pasiekti žodyno. Patikrinkite tinklo ryšį ir bandykite dar kartą.</string>
+    <string name="ime_dict_from">Iš %1$s</string>
     <string name="ime_dict_idle_info">Ieškokite angliško žodžio. Paspauskite paieškos juostą ir įveskite tekstą. Taip pat galite užvesti žymeklį ant žodžio prieš atidarydami įrankį.</string>
     <string name="ime_dict_insert_action">Įterpti</string>
     <string name="ime_dict_lookup_desc">Ieškoti žodžio</string>
     <string name="ime_dict_lookup_progress">Ieškoma „%1$s“…</string>
+    <string name="ime_dict_no_sources">Visi žodynų šaltiniai išjungti. Įjunkite vieną iš jų žodyno įrankio nustatymuose.</string>
     <string name="ime_dict_not_found_empty">Nėra įrašo „%1$s“. Patikrinkite rašybą arba bandykite pagrindinę žodžio formą.</string>
     <string name="ime_dict_play_desc">Leisti tarimą</string>
     <string name="ime_dict_search_active_hint">Įveskite žodį…</string>
@@ -315,7 +348,15 @@
     <string name="ime_glide_word_list_offer">Braukiamajam rašymui reikia %1$s žodžių sąrašo</string>
     <string name="ime_glide_word_list_offer_dismiss_desc">Atmesti</string>
     <string name="ime_grammar_all_filtered_empty">Visos rastos problemos paslėptos filtro</string>
+    <string name="ime_grammar_ask_ai_desc">Klausti DI apie šią problemą</string>
     <string name="ime_grammar_category_kind_label">%1$s • %2$s</string>
+    <string name="ime_grammar_deepl_action_desc">Pagerinti tekstą naudojant „DeepL Write“</string>
+    <string name="ime_grammar_deepl_dismiss_desc">Uždaryti „DeepL Write“ rezultatą</string>
+    <string name="ime_grammar_deepl_error">„DeepL Write“ neatsakė</string>
+    <string name="ime_grammar_deepl_replace_action">Pakeisti</string>
+    <string name="ime_grammar_deepl_replace_failed_toast">Šiame lauke esančio teksto pakeisti negalima</string>
+    <string name="ime_grammar_deepl_title">„DeepL Write“</string>
+    <string name="ime_grammar_deepl_unchanged">„DeepL Write“ neturi ką pakeisti</string>
     <string name="ime_grammar_dialect_desc">Pasirinkite tarmę</string>
     <string name="ime_grammar_dismiss_desc">Slėpti šią problemą</string>
     <string name="ime_grammar_empty_hint">Įveskite tekstą arba atidarykite lauką, kuriame yra teksto. Problemos bus rodomos čia. Patikrinimai atliekami neprisijungus.</string>
@@ -347,6 +388,7 @@
     <string name="ime_icons_empty_info">Norėdami pridėti piktogramų paketus, atidarykite nustatymus.</string>
     <string name="ime_icons_more_label">Daugiau piktogramų paketų</string>
     <string name="ime_icons_pick_info">Paspauskite piktogramų paketą, kad naudotumėte jį klavišams ir įrankiams.</string>
+    <string name="ime_image_search_by_photo_desc">Ieškoti naudojant nuotrauką</string>
     <string name="ime_image_search_empty">Nėra vaizdų pagal užklausą „%1$s“</string>
     <string name="ime_image_search_hint">Ieškoti vaizdų</string>
     <string name="ime_image_search_need_key_body">Vaizdų paieškai reikalingas „Brave Search“ API raktas. Pridėkite raktą šio įrankio nustatymuose.</string>
@@ -376,6 +418,8 @@
     <string name="ime_kde_loop">Kartoti</string>
     <string name="ime_kde_media_empty_body">Paleiskite grotuvą ten ir jis bus rodomas čia</string>
     <string name="ime_kde_media_empty_title">Kompiuteryje niekas negroja</string>
+    <string name="ime_kde_media_unsupported_body">„KDE Connect“ neleidžia telefonui valdyti muzikos ar vaizdo įrašų. „KDE Connect“ sistemoje „Mac“ to niekada nedaro</string>
+    <string name="ime_kde_media_unsupported_title">Šis kompiuteris nebendrina savo grotuvų</string>
     <string name="ime_kde_not_listening">Kita šio telefono programėlė naudoja „KDE Connect“ prievadą. Kompiuteriai vis dar gali rasti šią klaviatūrą, tačiau paspauskite „Atnaujinti“ šioje pusėje.</string>
     <string name="ime_kde_notice_clipboard_empty">Iškarpinėje nėra ką siųsti</string>
     <string name="ime_kde_notice_clipboard_sent">Iškarpinė išsiųsta</string>
@@ -426,10 +470,12 @@
     <string name="ime_kde_send_empty">Siųskite iškarpinę, tai, ką parašėte, arba failus. Tai, ką kompiuteris išsiunčia, patenka čia ir į aplanką „Atsisiuntimai“</string>
     <string name="ime_kde_send_field">Tekstas lauke</string>
     <string name="ime_kde_send_files">Failai…</string>
+    <string name="ime_kde_send_unsupported">Šis kompiuteris nepriima failų ar teksto iš telefono</string>
     <string name="ime_kde_settings">Nustatymai</string>
     <string name="ime_kde_shuffle">Maišyti</string>
     <string name="ime_kde_slides_end">Pabaiga</string>
     <string name="ime_kde_slides_next">Kita skaidrė</string>
+    <string name="ime_kde_slides_no_pointer">Šis kompiuteris neturi žymiklio skaidrėms</string>
     <string name="ime_kde_slides_pointer">Palaikykite ir vilkite, kad valdytumėte žymeklį</string>
     <string name="ime_kde_slides_previous">Ankstesnė skaidrė</string>
     <string name="ime_kde_slides_start">Pradėti</string>
@@ -489,11 +535,25 @@
     <string name="ime_language_switch_title">Įvesties kalba</string>
     <string name="ime_launcher_activities_label">Ekranai</string>
     <string name="ime_launcher_app_info_action">Programos informacija</string>
+    <string name="ime_launcher_combo_label">%1$s + %2$s</string>
+    <string name="ime_launcher_combo_open_action">Atidaryti abi padalintame ekrane</string>
+    <string name="ime_launcher_combo_remove_action">Pašalinti šią porą</string>
+    <string name="ime_launcher_combos_label">Padalyto ekrano poros</string>
     <string name="ime_launcher_empty">Nėra atitinkančių programų</string>
+    <string name="ime_launcher_floating_unsupported">Šiame įrenginyje ji gali būti atidaryta viso ekrano režimu</string>
     <string name="ime_launcher_hidden_label">Paslėpta tinklelyje</string>
     <string name="ime_launcher_hide_action">Slėpti programą tinklelyje</string>
     <string name="ime_launcher_loading">Įkeliamos programos...</string>
+    <string name="ime_launcher_menu_close">Uždaryti meniu</string>
     <string name="ime_launcher_not_exported_label">Negalima atidaryti iš už programėlės ribų</string>
+    <string name="ime_launcher_open_action">Atidaryti</string>
+    <string name="ime_launcher_open_floating_action">Atidaryti slankiajame lange</string>
+    <string name="ime_launcher_open_split_action">Atidaryti padalintame ekrane</string>
+    <string name="ime_launcher_page_action">Ekranai, slėpti ir programos informacija…</string>
+    <string name="ime_launcher_page_no_screens_action">Slėpti ir programos informacija…</string>
+    <string name="ime_launcher_pair_action">Susieti padalintame ekrane su…</string>
+    <string name="ime_launcher_pair_cancel">Atšaukti</string>
+    <string name="ime_launcher_pair_prompt">Bakstelėkite programėlę, kad atidarytumėte šalia %1$s</string>
     <string name="ime_launcher_pin_action">Prisegti programėlę</string>
     <string name="ime_launcher_pinned_label">Prisegta</string>
     <string name="ime_launcher_recents_label">Naujausi</string>
@@ -669,9 +729,11 @@
     <string name="ime_sandbox_offer_only">Braukti naudojant tik savo žodžius?</string>
     <string name="ime_sandbox_offer_prefer">Derinti braukimą prie jūsų žodžių?</string>
     <string name="ime_search_attribution_brave">per „Brave“</string>
+    <string name="ime_selection_ask_ai">Klausti DI</string>
     <string name="ime_selection_macro_back_desc">Atgal į pasirinkimo veiksmus</string>
     <string name="ime_selection_macro_bengali_unavailable_toast">Bengalų kalba neįkelta</string>
     <string name="ime_selection_macro_busy_desc">Vykdoma</string>
+    <string name="ime_selection_macro_deepl_clean_toast">„DeepL Write“ neturi ką keisti</string>
     <string name="ime_selection_macro_find_none_toast">Daugiau atitikmenų nėra</string>
     <string name="ime_selection_macro_grammar_clean_toast">Nėra ką taisyti</string>
     <string name="ime_selection_macro_grammar_unavailable_toast">Gramatikos tikrintuvas nepasiekiamas</string>
@@ -680,6 +742,7 @@
     <string name="ime_selection_macro_nothing_to_undo_toast">Nebėra ką anuliuoti</string>
     <string name="ime_selection_macro_open_in_desc">Atidaryti naudojant %1$s</string>
     <string name="ime_selection_macro_stop_label">Stabdyti</string>
+    <string name="ime_selection_quote">Citata</string>
     <string name="ime_service_already_in_settings_toast">Jūs jau esate nustatymuose</string>
     <string name="ime_service_autocorrect_off_toast">Automatinis taisymas išjungtas</string>
     <string name="ime_service_autocorrect_on_toast">Automatinė taisa įjungta</string>
@@ -710,6 +773,11 @@
     <string name="ime_service_phonetic_english_needs_secondary_toast">Įjunkite anglų kalbą skiltyje „Kalbos“, %1$s, „Taip pat siūlyti iš“</string>
     <string name="ime_service_phonetic_english_off_toast">Siūlomi tik angliški žodžiai</string>
     <string name="ime_service_phonetic_english_on_toast">Angliški žodžiai lieka angliški</string>
+    <string name="ime_service_photo_search_blocked">Duomenų taupymo režimas neleidžia žiniatinklio paieškoms naudoti šio ryšio</string>
+    <string name="ime_service_photo_search_metered_ask">Šis ryšys yra ribojamas. Norėdami išsiųsti nuotrauką, dar kartą paspauskite „Ieškoti“.</string>
+    <string name="ime_service_photo_search_no_app">Šiame telefone nėra programėlės, galinčios ieškoti pagal nuotrauką</string>
+    <string name="ime_service_photo_search_no_browser">Šiame telefone nėra naršyklės, galinčios atidaryti rezultatus</string>
+    <string name="ime_service_photo_search_sending">Siunčiama nuotrauka į paieškos svetainę</string>
     <string name="ime_service_plugins_all_off_notice">Visi įdiegti papildiniai išjungti. Įjunkite vieną iš jų skiltyje „Tvarkyti papildinius“.</string>
     <string name="ime_service_plugins_off_notice">Papildiniai išjungti. Įjunkite juos nustatymuose, kad galėtumėte juos įdiegti ir paleisti.</string>
     <string name="ime_service_power_saving_off_toast">Energijos taupymas išjungtas</string>
@@ -790,10 +858,18 @@
     <string name="ime_sound_volume_label">Garsumas</string>
     <string name="ime_sticker_add_desc">Pridėti lipdukus</string>
     <string name="ime_sticker_add_to_pack_action">Pridėti prie %1$s</string>
+    <string name="ime_sticker_info_emoji">Jaustukas: %1$s</string>
+    <string name="ime_sticker_info_keywords">Raktažodžiai: %1$s</string>
+    <string name="ime_sticker_info_pack">Paketas: %1$s</string>
+    <string name="ime_sticker_info_untitled">Be pavadinimo</string>
     <string name="ime_sticker_local_search_empty">Nėra jūsų lipdukų, atitinkančių „%1$s“</string>
     <string name="ime_sticker_manage_packs_action">Tvarkyti paketus</string>
     <string name="ime_sticker_need_key_body">Lipdukų įrankiui reikalingas API raktas iš „Klipy“ arba „GIPHY“. Abu raktai yra nemokami. Pridėkite raktą šio įrankio nustatymuose.</string>
     <string name="ime_sticker_no_packs_empty">Dar nėra lipdukų rinkinių. Sukurkite rinkinį nustatymuose. Taip pat galite paspausti ir palaikyti lipduką iš „Klipy“ arba „GIPHY“, kad išsaugotumėte jį čia.</string>
+    <string name="ime_sticker_offer_dismiss_desc">Slėpti lipdukus, skirtus %1$s</string>
+    <string name="ime_sticker_offer_item_desc">Siųsti lipduką %1$s</string>
+    <string name="ime_sticker_offer_item_untitled_desc">Siųsti šį lipduką</string>
+    <string name="ime_sticker_offer_more">+%1$d</string>
     <string name="ime_sticker_pack_all_label">Visi</string>
     <string name="ime_sticker_pack_empty">Šis paketas tuščias.</string>
     <string name="ime_sticker_save_new_pack_action">Įrašyti į naują rinkinį</string>
@@ -804,8 +880,24 @@
     <string name="ime_suggestion_hold_label">Žodžių parinktys</string>
     <string name="ime_suggestion_never_suggest">Niekada nesiūlyti „%1$s“</string>
     <string name="ime_suggestions_show_desc">Rodyti pasiūlymų juostą</string>
+    <string name="ime_symbol_row_delete_confirm_body">Rinkinys ir visi jo įrašai bus pašalinti. Klaviatūros režimas, kuriame jis buvo siūlomas, vietoj jo rodys kitus jūsų rinkinius.</string>
+    <string name="ime_symbol_row_delete_confirm_title">Ištrinti „%1$s“?</string>
+    <string name="ime_symbol_row_delete_set">Ištrinti rinkinį „%1$s“</string>
+    <string name="ime_symbol_row_hide_in_mode">Slėpti eilutę %1$s</string>
+    <string name="ime_symbol_row_remove">Pašalinti „%1$s“</string>
+    <string name="ime_symbol_row_settings">Simbolių eilutės nustatymai</string>
     <string name="ime_symbol_set_switch_desc">Perjungti simbolių rinkinį</string>
     <string name="ime_symbols_recents_label">Naujausi</string>
+    <string name="ime_synonyms_close_desc">Uždaryti sinonimus</string>
+    <string name="ime_synonyms_failed">Nepavyko pasiekti sinonimų šaltinio. Patikrinkite ryšį ir bandykite dar kartą.</string>
+    <string name="ime_synonyms_from">Iš %1$s</string>
+    <string name="ime_synonyms_loading">Ieškoma sinonimų…</string>
+    <string name="ime_synonyms_no_sources">Visi sinonimų šaltiniai išjungti. Įjunkite vieną iš jų skiltyje „Įvedimas“, „Pasiūlymai“, „Sinonimų šaltiniai“.</string>
+    <string name="ime_synonyms_not_found">Sinonimų „%1$s“ nerasta.</string>
+    <string name="ime_synonyms_pick_desc">Naudoti „%1$s“</string>
+    <string name="ime_synonyms_retry">Bandyti dar kartą</string>
+    <string name="ime_synonyms_similar_note">Šiam žodžiui sinonimų nerasta. Šie žodžiai turi panašią reikšmę.</string>
+    <string name="ime_synonyms_title">\"%1$s\" sinonimai</string>
     <string name="ime_textedit_doc_end_desc">Pereiti į teksto pabaigą</string>
     <string name="ime_textedit_doc_start_desc">Pereiti į teksto pradžią</string>
     <string name="ime_textedit_down_desc">Judėti žemyn</string>
@@ -926,7 +1018,10 @@
     <string name="ime_toolbox_hint_mode">Įjungtas %1$s režimas, todėl klaviatūra išsaugo šį išdėstymą tam režimui. Kitos programos išlaiko savąjį.</string>
     <string name="ime_trackpad_hint">Vilkite, kad perkeltumėte žymeklį</string>
     <string name="ime_trackpad_surface_desc">Jutiklinė planšetė. Vilkite, kad perkeltumėte žymeklį, palaikykite ir vilkite, kad pasirinktumėte, bakstelėkite du kartus, kad pasirinktumėte žodį</string>
+    <string name="ime_translate_all_languages_info">Taip pat kalbos, kurias reikia atsisiųsti</string>
+    <string name="ime_translate_all_languages_label">Visos kalbos</string>
     <string name="ime_translate_auto_detect_label">Aptikti kalbą</string>
+    <string name="ime_translate_deepl_label">DeepL</string>
     <string name="ime_translate_download_failed_error">Atsisiuntimas nebuvo baigtas. Patikrinkite ryšį ir bandykite dar kartą.</string>
     <string name="ime_translate_download_of_total_progress">%1$s iš %2$s</string>
     <string name="ime_translate_downloaded_desc">Atsisiųsta</string>
@@ -1064,6 +1159,10 @@
     <string name="ime_voice_status_mic_blocked">Mikrofonas užblokuotas. Įjunkite mikrofono prieigą sparčiuosiuose nustatymuose ir bandykite dar kartą.</string>
     <string name="ime_voice_status_no_model">Balso įvedimui neprisijungus dar nėra modelio</string>
     <string name="ime_voice_status_no_server">Transkripcijos serveris dar neturi adreso</string>
+    <plurals name="ime_voice_status_stops_in">
+        <item quantity="one">Išsijungs už %d sekundės. Paspauskite, jei norite baigti dabar.</item>
+        <item quantity="other">Išsijungs už %d sekundžių. Paspauskite, jei norite baigti dabar.</item>
+    </plurals>
     <string name="ime_voice_status_transcribing">Transkribuojama...</string>
     <string name="ime_voice_stop_desc">Nustoti klausytis</string>
     <string name="ime_voice_strip_allow_action">Leisti</string>
@@ -1102,6 +1201,7 @@
     <string name="ime_web_search_need_key_body">Žiniatinklio paieškai reikalingas API raktas iš „Brave Search“. Pridėkite raktą šio įrankio nustatymuose.</string>
     <string name="ime_web_search_open_desc">Atidaryti naršyklėje</string>
     <string name="ime_wiki_back_desc">Atgal į rezultatus</string>
+    <string name="ime_wiki_expand_desc">Padidinti straipsnio aukštį</string>
     <string name="ime_wiki_full_error">Programėlė negali įkelti straipsnio teksto.</string>
     <string name="ime_wiki_full_progress">Įkeliamas visas straipsnis…</string>
     <string name="ime_wiki_idle_info">Ieškokite temos %1$s.wikipedia.org. Perskaitykite santrauką, atidarykite nuorodas ir įterpkite tekstą arba straipsnio adresą.</string>
@@ -1113,8 +1213,12 @@
     <string name="ime_wiki_links_progress">Įkeliami saitai…</string>
     <string name="ime_wiki_no_results_empty">Paieška nerado nieko pagal „%1$s“.</string>
     <string name="ime_wiki_no_summary_empty">Šis straipsnis neturi santraukos.</string>
+    <string name="ime_wiki_open_browser_desc">Atidaryti straipsnį naršyklėje</string>
+    <string name="ime_wiki_quote_markdown">„%1$s“ (iš [Vikipedijos: %2$s](%3$s))</string>
+    <string name="ime_wiki_quote_plain">„%1$s“ (Vikipedija: %2$s, %3$s)</string>
     <string name="ime_wiki_search_active_hint">Ieškoti Vikipedijoje. Paspauskite „Enter“, kad ieškotumėte</string>
     <string name="ime_wiki_search_hint">Ieškoti „Wikipedia“...</string>
+    <string name="ime_wiki_shrink_desc">Grąžinti straipsniui klaviatūros aukštį</string>
     <string name="ime_wiki_tab_full_label">Visas straipsnis</string>
     <string name="ime_wiki_tab_links_label">Nuorodos</string>
     <string name="ime_wiki_tab_summary_label">Santrauka</string>
@@ -1164,6 +1268,7 @@
     <string name="ime_word_menu_delete">Ištrinti „%1$s“</string>
     <string name="ime_word_menu_edit">Redaguoti...</string>
     <string name="ime_word_menu_search_all">Ieškoti visų žodžių „%1$s“</string>
+    <string name="ime_word_menu_synonyms">„%1$s“ sinonimai</string>
     <string name="ime_word_spell_apply_desc">Naudoti šią rašybą</string>
     <string name="ime_word_spell_cancel_desc">Palikti rašybą ramybėje</string>
     <string name="ime_word_spell_hint">Įveskite naują „%1$s“ rašybą</string>

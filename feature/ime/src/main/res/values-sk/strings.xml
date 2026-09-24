@@ -2,6 +2,13 @@
 <!-- Machine translated by Google Play. Do not edit by hand:
      regenerate with tools/i18n/pull-play-translations.py. -->
 <resources>
+    <string name="ime_ai_chat_ask_explain">Vysvetliť jednoducho</string>
+    <string name="ime_ai_chat_ask_explain_prompt">Vysvetli toto jednoduchými slovami.</string>
+    <string name="ime_ai_chat_ask_hint">Položte otázku o texte alebo začnite jednou z týchto možností.</string>
+    <string name="ime_ai_chat_ask_summary">Zhrnúť</string>
+    <string name="ime_ai_chat_ask_summary_prompt">Zhrňte mi to stručne.</string>
+    <string name="ime_ai_chat_ask_words">Zložité slová</string>
+    <string name="ime_ai_chat_ask_words_prompt">Vysvetli zložité slová a myšlienky v tomto.</string>
     <string name="ime_ai_chat_attach_desc">Odoslať text z poľa so správou</string>
     <string name="ime_ai_chat_attach_remove_desc">Neodosielať text z poľa</string>
     <plurals name="ime_ai_chat_attached_field">
@@ -12,6 +19,8 @@
         <item quantity="one">Váš výber ide so správou: %1$d znak</item>
         <item quantity="other">Váš výber ide so správou: %1$d znakov</item>
     </plurals>
+    <string name="ime_ai_chat_attached_tool">O aplikácii %1$s</string>
+    <string name="ime_ai_chat_attached_tool_selection">O pasáži z %1$s</string>
     <plurals name="ime_ai_chat_attachment_sent">
         <item quantity="one">S %1$d znakom textu</item>
         <item quantity="other">S %1$d znakmi textu</item>
@@ -99,6 +108,10 @@
     <string name="ime_ai_truncated_notice">Model sa predčasne zastavil. Zvýšte „Maximálnu dĺžku odpovede“ v nastaveniach nástroja.</string>
     <string name="ime_ai_view_changes">Zmeny</string>
     <string name="ime_ai_view_result">Výsledok</string>
+    <string name="ime_ask_ai_label_dict">Slovník: %1$s</string>
+    <string name="ime_ask_ai_label_grammar">Kontrola gramatiky</string>
+    <string name="ime_ask_ai_label_vocab">Slovná zásoba: %1$s</string>
+    <string name="ime_ask_ai_label_wiki">Wikipedia: %1$s</string>
     <string name="ime_autofill_dismiss_desc">Skryť návrhy automatického dopĺňania</string>
     <string name="ime_calc_degrees_label">stup.</string>
     <string name="ime_calc_insert_action">Vložiť</string>
@@ -127,6 +140,7 @@
     <string name="ime_camera_permission_action">Povoliť fotoaparát</string>
     <string name="ime_camera_permission_body">Nástroj fotoaparátu potrebuje povolenie na používanie fotoaparátu. Aplikácia urobí fotku iba vtedy, keď stlačíte spúšť.</string>
     <string name="ime_camera_retake_action">Znova nasnímať</string>
+    <string name="ime_camera_search_action">Hľadať</string>
     <string name="ime_camera_send_action">Odoslať</string>
     <string name="ime_camera_shutter_desc">Odfotiť</string>
     <string name="ime_camera_starting_progress">Spúšťam fotoaparát…</string>
@@ -144,6 +158,10 @@
     <string name="ime_clip_chip_image">Skopírovaný obrázok</string>
     <string name="ime_clip_chip_item">Skopírovaná položka</string>
     <string name="ime_clip_chip_screenshot">Snímka obrazovky</string>
+    <plurals name="ime_clip_deleted">
+        <item quantity="one">Výstrižok odstránený</item>
+        <item quantity="other">%1$d výstrižkov odstránených</item>
+    </plurals>
     <string name="ime_clip_edit">Upraviť</string>
     <string name="ime_clip_edit_placeholder">Napíšte text klipu</string>
     <string name="ime_clip_edit_rich_note">Uloženie zmeny zruší formátovanie</string>
@@ -162,6 +180,18 @@
     <string name="ime_clip_info_private_detail">Klávesnica tento výstrižok v paneli skryje a vymaže ho skôr ako ostatné výstrižky.</string>
     <string name="ime_clip_info_size">Veľkosť</string>
     <string name="ime_clip_info_type">Typ</string>
+    <plurals name="ime_clip_left_days">
+        <item quantity="one">Zostáva %d deň</item>
+        <item quantity="other">Zostávajú %d dni</item>
+    </plurals>
+    <plurals name="ime_clip_left_hours">
+        <item quantity="one">Zostáva %d h</item>
+        <item quantity="other">Zostáva %d h</item>
+    </plurals>
+    <plurals name="ime_clip_left_minutes">
+        <item quantity="one">Zostáva %d minúta</item>
+        <item quantity="other">Zostávajú %d minúty</item>
+    </plurals>
     <string name="ime_clip_number_desc">Výstrižok %1$d</string>
     <string name="ime_clip_pin">Pripnúť</string>
     <string name="ime_clip_send_as_sticker">Odoslať ako nálepku</string>
@@ -172,6 +202,7 @@
     <string name="ime_clip_type_rich_text">Formátovaný text</string>
     <string name="ime_clip_type_text">Text</string>
     <string name="ime_clip_type_video">Video</string>
+    <string name="ime_clip_undo_delete">Vrátiť späť</string>
     <string name="ime_clip_unpin">Odopnúť</string>
     <string name="ime_clip_video_desc">Skopírované video</string>
     <string name="ime_clipboard_no_match">Žiadne klipy sa nezhodujú s „%1$s“.</string>
@@ -203,10 +234,12 @@
     <string name="ime_dict_add_vocab_action">Pridať do slovníka</string>
     <string name="ime_dict_antonyms_label">Antonymá</string>
     <string name="ime_dict_error">Aplikácia sa nemôže pripojiť k slovníku. Skontrolujte sieť a skúste to znova.</string>
+    <string name="ime_dict_from">Z %1$s</string>
     <string name="ime_dict_idle_info">Vyhľadajte anglické slovo. Stlačte vyhľadávací panel a píšte. Pred otvorením nástroja môžete tiež umiestniť kurzor na slovo.</string>
     <string name="ime_dict_insert_action">Vložiť</string>
     <string name="ime_dict_lookup_desc">Vyhľadať slovo</string>
     <string name="ime_dict_lookup_progress">Vyhľadávam „%1$s“…</string>
+    <string name="ime_dict_no_sources">Všetky zdroje slovníka sú vypnuté. Zapnite jeden z nich v nastaveniach nástroja Slovník.</string>
     <string name="ime_dict_not_found_empty">Žiadny záznam pre „%1$s“. Skontrolujte pravopis alebo skúste základný tvar slova.</string>
     <string name="ime_dict_play_desc">Prehrať výslovnosť</string>
     <string name="ime_dict_search_active_hint">Napíšte slovo…</string>
@@ -314,7 +347,15 @@
     <string name="ime_glide_word_list_offer">Písanie kĺzaním vyžaduje zoznam slov %1$s</string>
     <string name="ime_glide_word_list_offer_dismiss_desc">Zrušiť</string>
     <string name="ime_grammar_all_filtered_empty">Všetky nájdené problémy sú skryté filtrom</string>
+    <string name="ime_grammar_ask_ai_desc">Spýtať sa AI na tento problém</string>
     <string name="ime_grammar_category_kind_label">%1$s • %2$s</string>
+    <string name="ime_grammar_deepl_action_desc">Vylepšite text pomocou DeepL Write</string>
+    <string name="ime_grammar_deepl_dismiss_desc">Zatvoriť výsledok DeepL Write</string>
+    <string name="ime_grammar_deepl_error">DeepL Write neodpovedal</string>
+    <string name="ime_grammar_deepl_replace_action">Nahradiť</string>
+    <string name="ime_grammar_deepl_replace_failed_toast">Text v tomto poli nemožno nahradiť</string>
+    <string name="ime_grammar_deepl_title">DeepL Write</string>
+    <string name="ime_grammar_deepl_unchanged">DeepL Write nemá čo zmeniť</string>
     <string name="ime_grammar_dialect_desc">Vybrať dialekt</string>
     <string name="ime_grammar_dismiss_desc">Skryť tento problém</string>
     <string name="ime_grammar_empty_hint">Napíšte text alebo otvorte pole, ktoré obsahuje text. Problémy sa zobrazia tu. Kontroly prebiehajú offline.</string>
@@ -346,6 +387,7 @@
     <string name="ime_icons_empty_info">Ak chcete pridať balíky ikon, otvorte nastavenia.</string>
     <string name="ime_icons_more_label">Ďalšie balíky ikon</string>
     <string name="ime_icons_pick_info">Stlačte balík ikon, aby ste ho použili na klávesoch a nástrojoch.</string>
+    <string name="ime_image_search_by_photo_desc">Hľadať pomocou fotky</string>
     <string name="ime_image_search_empty">Žiadne obrázky pre „%1$s“</string>
     <string name="ime_image_search_hint">Hľadať obrázky</string>
     <string name="ime_image_search_need_key_body">Vyhľadávanie obrázkov vyžaduje kľúč API od Brave Search. Pridajte kľúč v nastaveniach pre tento nástroj.</string>
@@ -375,6 +417,8 @@
     <string name="ime_kde_loop">Opakovať</string>
     <string name="ime_kde_media_empty_body">Spustite tam prehrávač a zobrazí sa tu</string>
     <string name="ime_kde_media_empty_title">V počítači sa nič neprehráva</string>
+    <string name="ime_kde_media_unsupported_body">KDE Connect neumožňuje telefónu ovládať hudbu alebo video. KDE Connect na Macu to nikdy nerobí</string>
+    <string name="ime_kde_media_unsupported_title">Tento počítač nezdieľa svoje prehrávače</string>
     <string name="ime_kde_not_listening">Iná aplikácia v tomto telefóne používa port KDE Connect. Počítače stále môžu nájsť túto klávesnicu, ale stlačte Obnoviť na tejto strane.</string>
     <string name="ime_kde_notice_clipboard_empty">V schránke nie je nič na odoslanie</string>
     <string name="ime_kde_notice_clipboard_sent">Schránka odoslaná</string>
@@ -425,10 +469,12 @@
     <string name="ime_kde_send_empty">Odoslať schránku, to, čo ste napísali, alebo súbory. To, čo odošle počítač, skončí tu a v priečinku Stiahnuté súbory</string>
     <string name="ime_kde_send_field">Text v poli</string>
     <string name="ime_kde_send_files">Súbory…</string>
+    <string name="ime_kde_send_unsupported">Tento počítač neprijíma súbory ani text z telefónu</string>
     <string name="ime_kde_settings">Nastavenia</string>
     <string name="ime_kde_shuffle">Náhodné poradie</string>
     <string name="ime_kde_slides_end">Koniec</string>
     <string name="ime_kde_slides_next">Ďalšia snímka</string>
+    <string name="ime_kde_slides_no_pointer">Tento počítač nemá ukazovateľ pre prezentácie</string>
     <string name="ime_kde_slides_pointer">Podržte a potiahnite pre ukazovateľ</string>
     <string name="ime_kde_slides_previous">Predchádzajúca snímka</string>
     <string name="ime_kde_slides_start">Štart</string>
@@ -488,11 +534,25 @@
     <string name="ime_language_switch_title">Jazyk vstupu</string>
     <string name="ime_launcher_activities_label">Obrazovky</string>
     <string name="ime_launcher_app_info_action">Informácie o aplikácii</string>
+    <string name="ime_launcher_combo_label">%1$s + %2$s</string>
+    <string name="ime_launcher_combo_open_action">Otvoriť obe v rozdelenej obrazovke</string>
+    <string name="ime_launcher_combo_remove_action">Odstrániť tento pár</string>
+    <string name="ime_launcher_combos_label">Páry rozdelenej obrazovky</string>
     <string name="ime_launcher_empty">Žiadne zhodné aplikácie</string>
+    <string name="ime_launcher_floating_unsupported">Toto zariadenie ju môže otvoriť na celú obrazovku</string>
     <string name="ime_launcher_hidden_label">Skryté z mriežky</string>
     <string name="ime_launcher_hide_action">Skryť aplikáciu z mriežky</string>
     <string name="ime_launcher_loading">Načítavanie aplikácií...</string>
+    <string name="ime_launcher_menu_close">Zavrieť ponuku</string>
     <string name="ime_launcher_not_exported_label">Nedá sa otvoriť mimo aplikácie</string>
+    <string name="ime_launcher_open_action">Otvoriť</string>
+    <string name="ime_launcher_open_floating_action">Otvoriť v plávajúcom okne</string>
+    <string name="ime_launcher_open_split_action">Otvoriť na rozdelenej obrazovke</string>
+    <string name="ime_launcher_page_action">Obrazovky, skryť a informácie o aplikácii…</string>
+    <string name="ime_launcher_page_no_screens_action">Skryť a informácie o aplikácii…</string>
+    <string name="ime_launcher_pair_action">Spárovať na rozdelenej obrazovke s...</string>
+    <string name="ime_launcher_pair_cancel">Zrušiť</string>
+    <string name="ime_launcher_pair_prompt">Klepnite na aplikáciu, ktorú chcete otvoriť vedľa %1$s</string>
     <string name="ime_launcher_pin_action">Pripnúť aplikáciu</string>
     <string name="ime_launcher_pinned_label">Pripnuté</string>
     <string name="ime_launcher_recents_label">Nedávne</string>
@@ -668,9 +728,11 @@
     <string name="ime_sandbox_offer_only">Posúvať prstom iba pomocou vašich slov?</string>
     <string name="ime_sandbox_offer_prefer">Prispôsobiť písanie ťahmi vašim slovám?</string>
     <string name="ime_search_attribution_brave">cez Brave</string>
+    <string name="ime_selection_ask_ai">Opýtať sa AI</string>
     <string name="ime_selection_macro_back_desc">Späť na akcie výberu</string>
     <string name="ime_selection_macro_bengali_unavailable_toast">Bengálčina nie je nahratá</string>
     <string name="ime_selection_macro_busy_desc">Pracujem</string>
+    <string name="ime_selection_macro_deepl_clean_toast">DeepL Write nemá čo zmeniť</string>
     <string name="ime_selection_macro_find_none_toast">Žiadna ďalšia zhoda</string>
     <string name="ime_selection_macro_grammar_clean_toast">Nič na opravu</string>
     <string name="ime_selection_macro_grammar_unavailable_toast">Kontrola gramatiky nie je k dispozícii</string>
@@ -679,6 +741,7 @@
     <string name="ime_selection_macro_nothing_to_undo_toast">Už nie je čo vrátiť späť</string>
     <string name="ime_selection_macro_open_in_desc">Otvoriť v %1$s</string>
     <string name="ime_selection_macro_stop_label">Zastaviť</string>
+    <string name="ime_selection_quote">Citát</string>
     <string name="ime_service_already_in_settings_toast">Už ste v nastaveniach</string>
     <string name="ime_service_autocorrect_off_toast">Automatické opravy sú vypnuté</string>
     <string name="ime_service_autocorrect_on_toast">Automatické opravy sú zapnuté</string>
@@ -709,6 +772,11 @@
     <string name="ime_service_phonetic_english_needs_secondary_toast">Zapnite angličtinu v časti Jazyky, %1$s, Tiež navrhovať z</string>
     <string name="ime_service_phonetic_english_off_toast">Navrhujú sa iba anglické slová</string>
     <string name="ime_service_phonetic_english_on_toast">Anglické slová zostávajú anglickými</string>
+    <string name="ime_service_photo_search_blocked">Šetrič dát nedovoľuje webovému vyhľadávaniu používať toto pripojenie</string>
+    <string name="ime_service_photo_search_metered_ask">Toto pripojenie je spoplatnené. Ak chcete odoslať fotku, stlačte znova Vyhľadať.</string>
+    <string name="ime_service_photo_search_no_app">V tomto telefóne nie je žiadna aplikácia, ktorá dokáže vyhľadávať pomocou fotky</string>
+    <string name="ime_service_photo_search_no_browser">V telefóne nie je k dispozícii žiadny prehliadač, ktorý by mohol otvoriť výsledky</string>
+    <string name="ime_service_photo_search_sending">Odosielanie fotografie na vyhľadávaciu stránku</string>
     <string name="ime_service_plugins_all_off_notice">Všetky nainštalované doplnky sú vypnuté. Zapnite niektorý z nich v časti Správa doplnkov.</string>
     <string name="ime_service_plugins_off_notice">Doplnky sú vypnuté. Zapnite ich v Nastaveniach, aby ste ich mohli nainštalovať a spustiť.</string>
     <string name="ime_service_power_saving_off_toast">Úspora energie je vypnutá</string>
@@ -790,10 +858,22 @@
     <string name="ime_sound_volume_label">Hlasitosť</string>
     <string name="ime_sticker_add_desc">Pridať nálepky</string>
     <string name="ime_sticker_add_to_pack_action">Pridať do %1$s</string>
+    <string name="ime_sticker_info_emoji">Emoji: %1$s</string>
+    <string name="ime_sticker_info_keywords">Kľúčové slová: %1$s</string>
+    <string name="ime_sticker_info_pack">Balík: %1$s</string>
+    <string name="ime_sticker_info_untitled">Bez názvu</string>
     <string name="ime_sticker_local_search_empty">Žiadne vaše nálepky sa nezhodujú s „%1$s“</string>
     <string name="ime_sticker_manage_packs_action">Spravovať balíky</string>
     <string name="ime_sticker_need_key_body">Nástroj na nálepky vyžaduje kľúč API od Klipy alebo GIPHY. Oba kľúče sú bezplatné. Pridajte kľúč v nastaveniach tohto nástroja.</string>
     <string name="ime_sticker_no_packs_empty">Zatiaľ žiadne balíky nálepiek. Vytvorte balík v nastaveniach. Nálepku z Klipy alebo GIPHY môžete tiež stlačiť a podržať, aby ste ju sem uložili.</string>
+    <plurals name="ime_sticker_offer_count">
+        <item quantity="one">%1$d nálepka</item>
+        <item quantity="other">%1$d nálepiek</item>
+    </plurals>
+    <string name="ime_sticker_offer_dismiss_desc">Skryť nálepky pre %1$s</string>
+    <string name="ime_sticker_offer_item_desc">Odoslať nálepku %1$s</string>
+    <string name="ime_sticker_offer_item_untitled_desc">Odoslať túto nálepku</string>
+    <string name="ime_sticker_offer_more">+%1$d</string>
     <string name="ime_sticker_pack_all_label">Všetky</string>
     <string name="ime_sticker_pack_empty">Tento balík je prázdny.</string>
     <string name="ime_sticker_save_new_pack_action">Uložiť do nového balíka</string>
@@ -804,8 +884,24 @@
     <string name="ime_suggestion_hold_label">Možnosti slova</string>
     <string name="ime_suggestion_never_suggest">Nikdy nenavrhovať „%1$s“</string>
     <string name="ime_suggestions_show_desc">Zobraziť panel návrhov</string>
+    <string name="ime_symbol_row_delete_confirm_body">Sada a všetky jej položky budú odstránené. Režim klávesnice, ktorý ju ponúkal, zobrazí namiesto nej vaše ostatné sady.</string>
+    <string name="ime_symbol_row_delete_confirm_title">Odstrániť \"%1$s\"?</string>
+    <string name="ime_symbol_row_delete_set">Odstrániť sadu „%1$s“</string>
+    <string name="ime_symbol_row_hide_in_mode">Skryť riadok v %1$s</string>
+    <string name="ime_symbol_row_remove">Odstrániť „%1$s“</string>
+    <string name="ime_symbol_row_settings">Nastavenia riadku symbolov</string>
     <string name="ime_symbol_set_switch_desc">Prepnúť sadu symbolov</string>
     <string name="ime_symbols_recents_label">Nedávne</string>
+    <string name="ime_synonyms_close_desc">Zatvoriť synonymá</string>
+    <string name="ime_synonyms_failed">Nepodarilo sa spojiť so zdrojom synoným. Skontrolujte pripojenie a skúste to znova.</string>
+    <string name="ime_synonyms_from">Od %1$s</string>
+    <string name="ime_synonyms_loading">Vyhľadávam synonymá...</string>
+    <string name="ime_synonyms_no_sources">Všetky zdroje synoným sú vypnuté. Zapnite jeden z nich v časti Písanie, Návrhy, Zdroje synoným.</string>
+    <string name="ime_synonyms_not_found">Pre \"%1$s\" sa nenašli žiadne synonymá.</string>
+    <string name="ime_synonyms_pick_desc">Použiť \"%1$s\"</string>
+    <string name="ime_synonyms_retry">Skúsiť znova</string>
+    <string name="ime_synonyms_similar_note">Pre toto slovo nie sú uvedené žiadne synonymá. Tieto slová majú podobný význam.</string>
+    <string name="ime_synonyms_title">Synonymá pre „%1$s“</string>
     <string name="ime_textedit_doc_end_desc">Presunúť na koniec textu</string>
     <string name="ime_textedit_doc_start_desc">Presunúť na začiatok textu</string>
     <string name="ime_textedit_down_desc">Posunúť nadol</string>
@@ -926,7 +1022,10 @@
     <string name="ime_toolbox_hint_mode">Režim %1$s je zapnutý, takže klávesnica ukladá toto usporiadanie pre tento režim. Ostatné aplikácie si udržiavajú svoje vlastné.</string>
     <string name="ime_trackpad_hint">Potiahnutím presuniete kurzor</string>
     <string name="ime_trackpad_surface_desc">Trackpad. Potiahnutím posuniete kurzor, podržaním a potiahnutím vyberiete, dvojitým klepnutím vyberiete slovo</string>
+    <string name="ime_translate_all_languages_info">Tiež jazyky na stiahnutie</string>
+    <string name="ime_translate_all_languages_label">Všetky jazyky</string>
     <string name="ime_translate_auto_detect_label">Rozpoznať jazyk</string>
+    <string name="ime_translate_deepl_label">DeepL</string>
     <string name="ime_translate_download_failed_error">Sťahovanie sa nedokončilo. Skontrolujte pripojenie a skúste to znova.</string>
     <string name="ime_translate_download_of_total_progress">%1$s z %2$s</string>
     <string name="ime_translate_downloaded_desc">Stiahnuté</string>
@@ -1064,6 +1163,10 @@
     <string name="ime_voice_status_mic_blocked">Mikrofón je zablokovaný. Zapnite prístup k mikrofónu v Rýchlych nastaveniach a skúste to znova.</string>
     <string name="ime_voice_status_no_model">Offline hlasové písanie zatiaľ nemá model</string>
     <string name="ime_voice_status_no_server">Transkripčný server zatiaľ nemá adresu</string>
+    <plurals name="ime_voice_status_stops_in">
+        <item quantity="one">Zastaví sa o %d sekundu. Stlačením dokončíte teraz.</item>
+        <item quantity="other">Zastaví sa o %d sekúnd. Stlačením dokončíte teraz.</item>
+    </plurals>
     <string name="ime_voice_status_transcribing">Prepisujem…</string>
     <string name="ime_voice_stop_desc">Zastaviť počúvanie</string>
     <string name="ime_voice_strip_allow_action">Povoliť</string>
@@ -1102,6 +1205,7 @@
     <string name="ime_web_search_need_key_body">Webové vyhľadávanie vyžaduje kľúč API od Brave Search. Pridajte kľúč v nastaveniach tohto nástroja.</string>
     <string name="ime_web_search_open_desc">Otvoriť v prehliadači</string>
     <string name="ime_wiki_back_desc">Späť na výsledky</string>
+    <string name="ime_wiki_expand_desc">Zväčšiť výšku článku</string>
     <string name="ime_wiki_full_error">Aplikácia nemôže načítať text článku.</string>
     <string name="ime_wiki_full_progress">Načítava sa celý článok…</string>
     <string name="ime_wiki_idle_info">Vyhľadajte tému na %1$s.wikipedia.org. Prečítajte si zhrnutie, otvorte odkazy a vložte text alebo adresu článku.</string>
@@ -1113,8 +1217,12 @@
     <string name="ime_wiki_links_progress">Načítavajú sa odkazy…</string>
     <string name="ime_wiki_no_results_empty">Vyhľadávanie nenašlo nič pre „%1$s“.</string>
     <string name="ime_wiki_no_summary_empty">Tento článok nemá žiadny súhrn.</string>
+    <string name="ime_wiki_open_browser_desc">Otvoriť článok v prehliadači</string>
+    <string name="ime_wiki_quote_markdown">„%1$s“ (z [Wikipedia: %2$s](%3$s))</string>
+    <string name="ime_wiki_quote_plain">„%1$s“ (Wikipedia: %2$s, %3$s)</string>
     <string name="ime_wiki_search_active_hint">Hľadať na Wikipédii. Stlačte Enter pre vyhľadávanie</string>
     <string name="ime_wiki_search_hint">Hľadať vo Wikipédii…</string>
+    <string name="ime_wiki_shrink_desc">Zmenšiť článok späť na výšku klávesnice</string>
     <string name="ime_wiki_tab_full_label">Celý článok</string>
     <string name="ime_wiki_tab_links_label">Odkazy</string>
     <string name="ime_wiki_tab_summary_label">Zhrnutie</string>
@@ -1164,6 +1272,7 @@
     <string name="ime_word_menu_delete">Odstrániť \"%1$s\"</string>
     <string name="ime_word_menu_edit">Upraviť…</string>
     <string name="ime_word_menu_search_all">Hľadať vo všetkých slovách \"%1$s\"</string>
+    <string name="ime_word_menu_synonyms">Synonymá pre „%1$s“</string>
     <string name="ime_word_spell_apply_desc">Použiť tento pravopis</string>
     <string name="ime_word_spell_cancel_desc">Ponechať pravopis tak, ako je</string>
     <string name="ime_word_spell_hint">Napíšte nový pravopis pre \"%1$s\"</string>

@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">تجرباتی</string>
     <string name="core_intel_llm_tier_recommended_label">تجویز کردہ</string>
     <string name="core_intel_llm_tier_untested_label">غیر آزمودہ</string>
+    <string name="core_intel_ocr_download_error_http">GitHub سرور نے فائل نہیں بھیجی۔ ایرر کوڈ HTTP %1$s ہے۔</string>
+    <string name="core_intel_ocr_download_error_interrupted">ڈاؤن لوڈ کے دوران کنکشن رک گیا۔ دوبارہ کوشش کریں۔</string>
+    <string name="core_intel_ocr_download_error_no_space">آپ کی ڈیوائس پر کافی اسٹوریج نہیں ہے۔ آپ کو پہلے تقریباً %1$s MB خالی کرنا ہوگا۔</string>
+    <string name="core_intel_ocr_pack_error_broken">ڈاؤن لوڈ کردہ زبان کا ڈیٹا خراب ہے، اس لیے اسکینر اسے استعمال نہیں کر سکا۔ اسے دوبارہ ڈاؤن لوڈ کریں۔</string>
 </resources>

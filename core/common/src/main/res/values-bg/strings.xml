@@ -35,6 +35,7 @@
     <string name="common_enable">Включване</string>
     <string name="common_error_generic">Нещо не проработи. Опитайте отново.</string>
     <string name="common_error_network">Няма връзка. Проверете мрежата си и опитайте отново.</string>
+    <string name="common_error_no_internet_permission">Тази компилация на клавиатурата не може да се свърже с интернет.</string>
     <string name="common_error_timeout">Заявката отне твърде много време. Опитайте отново.</string>
     <string name="common_export">Експортиране</string>
     <string name="common_import">Импортиране</string>

@@ -2,6 +2,13 @@
 <!-- Machine translated by Google Play. Do not edit by hand:
      regenerate with tools/i18n/pull-play-translations.py. -->
 <resources>
+    <string name="ime_ai_chat_ask_explain">Basitçe açıkla</string>
+    <string name="ime_ai_chat_ask_explain_prompt">Bunu basit kelimelerle açıklayın.</string>
+    <string name="ime_ai_chat_ask_hint">Metin hakkında bir soru sorun veya bunlardan biriyle başlayın.</string>
+    <string name="ime_ai_chat_ask_summary">Özetle</string>
+    <string name="ime_ai_chat_ask_summary_prompt">Bunun kısa bir özetini çıkar.</string>
+    <string name="ime_ai_chat_ask_words">Zor kelimeler</string>
+    <string name="ime_ai_chat_ask_words_prompt">Bunun içindeki zor kelimeleri ve fikirleri açıklayın.</string>
     <string name="ime_ai_chat_attach_desc">Alan metnini mesajla birlikte gönder</string>
     <string name="ime_ai_chat_attach_remove_desc">Alan metnini gönderme</string>
     <plurals name="ime_ai_chat_attached_field">
@@ -12,6 +19,8 @@
         <item quantity="one">Seçiminiz mesajla birlikte gidiyor: %1$d karakter</item>
         <item quantity="other">Seçiminiz mesajla birlikte gidiyor: %1$d karakter</item>
     </plurals>
+    <string name="ime_ai_chat_attached_tool">%1$s hakkında</string>
+    <string name="ime_ai_chat_attached_tool_selection">%1$s içinden bir pasaj hakkında</string>
     <plurals name="ime_ai_chat_attachment_sent">
         <item quantity="one">%1$d karakter metin ile</item>
         <item quantity="other">%1$d karakter metin ile</item>
@@ -99,6 +108,10 @@
     <string name="ime_ai_truncated_notice">Model erken durdu. Aracın ayarlarından “Maksimum yanıt uzunluğu”nu artırın.</string>
     <string name="ime_ai_view_changes">Değişiklikler</string>
     <string name="ime_ai_view_result">Sonuç</string>
+    <string name="ime_ask_ai_label_dict">Sözlük: %1$s</string>
+    <string name="ime_ask_ai_label_grammar">Dil bilgisi denetimi</string>
+    <string name="ime_ask_ai_label_vocab">Kelime dağarcığı: %1$s</string>
+    <string name="ime_ask_ai_label_wiki">Wikipedia: %1$s</string>
     <string name="ime_autofill_dismiss_desc">Otomatik doldurma önerilerini gizle</string>
     <string name="ime_calc_degrees_label">derece</string>
     <string name="ime_calc_insert_action">Ekle</string>
@@ -127,6 +140,7 @@
     <string name="ime_camera_permission_action">Kameraya izin ver</string>
     <string name="ime_camera_permission_body">Kamera aracının kamerayı kullanmak için izne ihtiyacı var. Uygulama yalnızca deklanşöre bastığınızda fotoğraf çeker.</string>
     <string name="ime_camera_retake_action">Yeniden çek</string>
+    <string name="ime_camera_search_action">Ara</string>
     <string name="ime_camera_send_action">Gönder</string>
     <string name="ime_camera_shutter_desc">Fotoğraf çek</string>
     <string name="ime_camera_starting_progress">Kamera başlatılıyor…</string>
@@ -144,6 +158,10 @@
     <string name="ime_clip_chip_image">Kopyalanan görsel</string>
     <string name="ime_clip_chip_item">Kopyalanan öğe</string>
     <string name="ime_clip_chip_screenshot">Ekran görüntüsü</string>
+    <plurals name="ime_clip_deleted">
+        <item quantity="one">Kırpma silindi</item>
+        <item quantity="other">%1$d kırpma silindi</item>
+    </plurals>
     <string name="ime_clip_edit">Düzenle</string>
     <string name="ime_clip_edit_placeholder">Kırpma metnini yazın</string>
     <string name="ime_clip_edit_rich_note">Değişikliği kaydetmek biçimlendirmeyi kaldırır</string>
@@ -162,6 +180,18 @@
     <string name="ime_clip_info_private_detail">Klavye bu klibi panelde gizler ve diğer kliplerden daha erken siler.</string>
     <string name="ime_clip_info_size">Boyut</string>
     <string name="ime_clip_info_type">Tür</string>
+    <plurals name="ime_clip_left_days">
+        <item quantity="one">%d gün kaldı</item>
+        <item quantity="other">%d gün kaldı</item>
+    </plurals>
+    <plurals name="ime_clip_left_hours">
+        <item quantity="one">%d saat kaldı</item>
+        <item quantity="other">%d saat kaldı</item>
+    </plurals>
+    <plurals name="ime_clip_left_minutes">
+        <item quantity="one">%d dk kaldı</item>
+        <item quantity="other">%d dk kaldı</item>
+    </plurals>
     <string name="ime_clip_number_desc">Klip %1$d</string>
     <string name="ime_clip_pin">Sabitle</string>
     <string name="ime_clip_send_as_sticker">Çıkartma olarak gönder</string>
@@ -172,6 +202,7 @@
     <string name="ime_clip_type_rich_text">Zengin metin</string>
     <string name="ime_clip_type_text">Metin</string>
     <string name="ime_clip_type_video">Video</string>
+    <string name="ime_clip_undo_delete">Geri al</string>
     <string name="ime_clip_unpin">Sabitlemeyi kaldır</string>
     <string name="ime_clip_video_desc">Kopyalanan video</string>
     <string name="ime_clipboard_no_match">“%1$s” ile eşleşen kırpma yok.</string>
@@ -203,10 +234,12 @@
     <string name="ime_dict_add_vocab_action">Kelime hazinesine ekle</string>
     <string name="ime_dict_antonyms_label">Zıt anlamlılar</string>
     <string name="ime_dict_error">Uygulama sözlüğe ulaşamıyor. Ağınızı kontrol edin ve tekrar deneyin.</string>
+    <string name="ime_dict_from">%1$s kaynağından</string>
     <string name="ime_dict_idle_info">Bir İngilizce kelimeye bakın. Arama çubuğuna basın ve yazın. Ayrıca aracı açmadan önce imleci bir kelimenin üzerine getirebilirsiniz.</string>
     <string name="ime_dict_insert_action">Ekle</string>
     <string name="ime_dict_lookup_desc">Kelimeye bak</string>
     <string name="ime_dict_lookup_progress">“%1$s” aranıyor…</string>
+    <string name="ime_dict_no_sources">Tüm sözlük kaynakları kapalı. Sözlük aracı ayarlarından birini açın.</string>
     <string name="ime_dict_not_found_empty">“%1$s” için giriş bulunamadı. Yazımı kontrol edin veya kelimenin kök halini deneyin.</string>
     <string name="ime_dict_play_desc">Telaffuzu oynat</string>
     <string name="ime_dict_search_active_hint">Bir kelime yazın…</string>
@@ -314,7 +347,15 @@
     <string name="ime_glide_word_list_offer">Kaydırmalı yazma için %1$s kelime listesi gerekir</string>
     <string name="ime_glide_word_list_offer_dismiss_desc">Kapat</string>
     <string name="ime_grammar_all_filtered_empty">Bulunan her sorun filtre tarafından gizlenmiştir</string>
+    <string name="ime_grammar_ask_ai_desc">Bu sorun hakkında yapay zekaya sor</string>
     <string name="ime_grammar_category_kind_label">%1$s • %2$s</string>
+    <string name="ime_grammar_deepl_action_desc">Metni DeepL Write ile iyileştir</string>
+    <string name="ime_grammar_deepl_dismiss_desc">DeepL Yazma sonucunu kapat</string>
+    <string name="ime_grammar_deepl_error">DeepL Write cevap vermedi</string>
+    <string name="ime_grammar_deepl_replace_action">Değiştir</string>
+    <string name="ime_grammar_deepl_replace_failed_toast">Bu alandaki metin değiştirilemiyor</string>
+    <string name="ime_grammar_deepl_title">DeepL Write</string>
+    <string name="ime_grammar_deepl_unchanged">DeepL Write\'ın değiştireceği bir şey yok</string>
     <string name="ime_grammar_dialect_desc">Lehçe seçin</string>
     <string name="ime_grammar_dismiss_desc">Bu sorunu gizle</string>
     <string name="ime_grammar_empty_hint">Metin yazın veya metin içeren bir alan açın. Sorunlar burada görünür. Denetimler çevrimdışı çalışır.</string>
@@ -346,6 +387,7 @@
     <string name="ime_icons_empty_info">Simge paketleri eklemek için ayarları açın.</string>
     <string name="ime_icons_more_label">Daha fazla simge paketi</string>
     <string name="ime_icons_pick_info">Tuşlarda ve araçlarda kullanmak için bir simge paketine basın.</string>
+    <string name="ime_image_search_by_photo_desc">Fotoğrafla ara</string>
     <string name="ime_image_search_empty">“%1$s” için görsel bulunamadı</string>
     <string name="ime_image_search_hint">Görsel ara</string>
     <string name="ime_image_search_idle">Bir arama terimi yazın ve enter tuşuna basın. Bir görseli eklemek için üzerine tıklayın. Bağlantısını eklemek için basılı tutun.</string>
@@ -376,6 +418,8 @@
     <string name="ime_kde_loop">Tekrarla</string>
     <string name="ime_kde_media_empty_body">Orada bir oynatıcı başlatın, burada görünecektir</string>
     <string name="ime_kde_media_empty_title">Bilgisayarda hiçbir şey çalmıyor</string>
+    <string name="ime_kde_media_unsupported_body">KDE Connect, telefonun müzik veya videoyu kontrol etmesine izin vermiyor. Mac üzerindeki KDE Connect bunu hiçbir zaman yapmaz</string>
+    <string name="ime_kde_media_unsupported_title">Bu bilgisayar oynatıcılarını paylaşmıyor</string>
     <string name="ime_kde_not_listening">Bu telefondaki başka bir uygulama KDE Connect bağlantı noktasını kullanıyor. Bilgisayarlar bu klavyeyi yine de bulabilir, ancak bu tarafta Yenile\'ye basın.</string>
     <string name="ime_kde_notice_clipboard_empty">Panoda gönderilecek bir şey yok</string>
     <string name="ime_kde_notice_clipboard_sent">Pano gönderildi</string>
@@ -426,10 +470,12 @@
     <string name="ime_kde_send_empty">Panoyu, yazdıklarınızı veya dosyaları gönderin. Bilgisayarın gönderdikleri buraya ve İndirilenler klasörüne düşer</string>
     <string name="ime_kde_send_field">Alandaki metin</string>
     <string name="ime_kde_send_files">Dosyalar…</string>
+    <string name="ime_kde_send_unsupported">Bu bilgisayar telefondan dosya veya metin kabul etmiyor</string>
     <string name="ime_kde_settings">Ayarlar</string>
     <string name="ime_kde_shuffle">Karıştır</string>
     <string name="ime_kde_slides_end">Son</string>
     <string name="ime_kde_slides_next">Sonraki slayt</string>
+    <string name="ime_kde_slides_no_pointer">Bu bilgisayarda slaytlar için işaretçi yok</string>
     <string name="ime_kde_slides_pointer">İmleç için basılı tutun ve sürükleyin</string>
     <string name="ime_kde_slides_previous">Önceki slayt</string>
     <string name="ime_kde_slides_start">Başlat</string>
@@ -489,11 +535,25 @@
     <string name="ime_language_switch_title">Giriş dili</string>
     <string name="ime_launcher_activities_label">Ekranlar</string>
     <string name="ime_launcher_app_info_action">Uygulama bilgisi</string>
+    <string name="ime_launcher_combo_label">%1$s + %2$s</string>
+    <string name="ime_launcher_combo_open_action">Her ikisini de bölünmüş ekranda aç</string>
+    <string name="ime_launcher_combo_remove_action">Bu çifti kaldır</string>
+    <string name="ime_launcher_combos_label">Bölünmüş ekran çiftleri</string>
     <string name="ime_launcher_empty">Eşleşen uygulama yok</string>
+    <string name="ime_launcher_floating_unsupported">Bu cihaz bunu tam ekran açabilir</string>
     <string name="ime_launcher_hidden_label">Izgaradan gizlendi</string>
     <string name="ime_launcher_hide_action">Uygulamayı ızgaradan gizle</string>
     <string name="ime_launcher_loading">Uygulamalar yükleniyor…</string>
+    <string name="ime_launcher_menu_close">Menüyü kapat</string>
     <string name="ime_launcher_not_exported_label">Uygulama dışından açılamaz</string>
+    <string name="ime_launcher_open_action">Aç</string>
+    <string name="ime_launcher_open_floating_action">Yüzen pencerede aç</string>
+    <string name="ime_launcher_open_split_action">Bölünmüş ekranda aç</string>
+    <string name="ime_launcher_page_action">Ekranlar, gizle ve Uygulama bilgisi…</string>
+    <string name="ime_launcher_page_no_screens_action">Gizle ve Uygulama bilgisi…</string>
+    <string name="ime_launcher_pair_action">Şununla bölünmüş ekranda eşleştir…</string>
+    <string name="ime_launcher_pair_cancel">İptal</string>
+    <string name="ime_launcher_pair_prompt">%1$s yanında açmak için uygulamaya dokunun</string>
     <string name="ime_launcher_pin_action">Uygulamayı sabitle</string>
     <string name="ime_launcher_pinned_label">Sabitlenmiş</string>
     <string name="ime_launcher_recents_label">Son kullanılanlar</string>
@@ -669,9 +729,11 @@
     <string name="ime_sandbox_offer_only">Sadece kendi kelimelerinizi kullanarak kaydırın mı?</string>
     <string name="ime_sandbox_offer_prefer">Kaydırmayı kelimelerinize göre ayarlayın mı?</string>
     <string name="ime_search_attribution_brave">Brave aracılığıyla</string>
+    <string name="ime_selection_ask_ai">Yapay Zekaya Sor</string>
     <string name="ime_selection_macro_back_desc">Seçim eylemlerine geri dön</string>
     <string name="ime_selection_macro_bengali_unavailable_toast">Bengalce yüklü değil</string>
     <string name="ime_selection_macro_busy_desc">Çalışıyor</string>
+    <string name="ime_selection_macro_deepl_clean_toast">DeepL Write\'ın değiştireceği bir şey yok</string>
     <string name="ime_selection_macro_find_none_toast">Başka eşleşme yok</string>
     <string name="ime_selection_macro_grammar_clean_toast">Düzeltilecek bir şey yok</string>
     <string name="ime_selection_macro_grammar_unavailable_toast">Dil bilgisi denetleyicisi kullanılamıyor</string>
@@ -680,6 +742,7 @@
     <string name="ime_selection_macro_nothing_to_undo_toast">Geri alınacak bir şey kalmadı</string>
     <string name="ime_selection_macro_open_in_desc">%1$s içinde aç</string>
     <string name="ime_selection_macro_stop_label">Durdur</string>
+    <string name="ime_selection_quote">Alıntı</string>
     <string name="ime_service_already_in_settings_toast">Zaten ayarlardasınız</string>
     <string name="ime_service_autocorrect_off_toast">Otomatik düzeltme kapalı</string>
     <string name="ime_service_autocorrect_on_toast">Otomatik düzeltme açık</string>
@@ -710,6 +773,11 @@
     <string name="ime_service_phonetic_english_needs_secondary_toast">Diller, %1$s, Şuradan öner altında İngilizce\'yi açın</string>
     <string name="ime_service_phonetic_english_off_toast">İngilizce kelimeler sadece önerilir</string>
     <string name="ime_service_phonetic_english_on_toast">İngilizce kelimeler İngilizce kalır</string>
+    <string name="ime_service_photo_search_blocked">Veri tasarrufu, web aramalarının bu bağlantıyı kullanmasına izin vermiyor</string>
+    <string name="ime_service_photo_search_metered_ask">Bu bağlantı ücretlidir. Fotoğrafı göndermek için Ara düğmesine tekrar basın.</string>
+    <string name="ime_service_photo_search_no_app">Bu telefonda fotoğrafla arama yapabilecek bir uygulama yok</string>
+    <string name="ime_service_photo_search_no_browser">Bu telefonda sonuçları açabilecek bir tarayıcı yok</string>
+    <string name="ime_service_photo_search_sending">Fotoğraf arama sitesine gönderiliyor</string>
     <string name="ime_service_plugins_all_off_notice">Yüklediğiniz tüm eklentiler kapalı. Eklentileri yönet kısmından birini açın.</string>
     <string name="ime_service_plugins_off_notice">Eklentiler kapalı. Yüklemek ve çalıştırmak için Ayarlar\'dan açın.</string>
     <string name="ime_service_power_saving_off_toast">Güç tasarrufu kapalı</string>
@@ -790,10 +858,22 @@
     <string name="ime_sound_volume_label">Ses düzeyi</string>
     <string name="ime_sticker_add_desc">Çıkartma ekle</string>
     <string name="ime_sticker_add_to_pack_action">%1$s öğesine ekle</string>
+    <string name="ime_sticker_info_emoji">Emoji: %1$s</string>
+    <string name="ime_sticker_info_keywords">Anahtar kelimeler: %1$s</string>
+    <string name="ime_sticker_info_pack">Paket: %1$s</string>
+    <string name="ime_sticker_info_untitled">Başlıksız</string>
     <string name="ime_sticker_local_search_empty">“%1$s” ile eşleşen çıkartmanız yok</string>
     <string name="ime_sticker_manage_packs_action">Paketleri yönet</string>
     <string name="ime_sticker_need_key_body">Çıkartma aracı, Klipy veya GIPHY\'den bir API anahtarına ihtiyaç duyar. Her iki anahtar da ücretsizdir. Bu araç için ayarlara bir anahtar ekleyin.</string>
     <string name="ime_sticker_no_packs_empty">Henüz çıkartma paketi yok. Ayarlardan bir paket oluşturun. Ayrıca buraya kaydetmek için Klipy veya GIPHY\'den bir çıkartmaya basılı tutabilirsiniz.</string>
+    <plurals name="ime_sticker_offer_count">
+        <item quantity="one">%1$d çıkartma</item>
+        <item quantity="other">%1$d çıkartma</item>
+    </plurals>
+    <string name="ime_sticker_offer_dismiss_desc">%1$s için çıkartmaları gizle</string>
+    <string name="ime_sticker_offer_item_desc">%1$s çıkartmasını gönder</string>
+    <string name="ime_sticker_offer_item_untitled_desc">Bu çıkartmayı gönder</string>
+    <string name="ime_sticker_offer_more">+%1$d</string>
     <string name="ime_sticker_pack_all_label">Tümü</string>
     <string name="ime_sticker_pack_empty">Bu paket boş.</string>
     <string name="ime_sticker_save_new_pack_action">Yeni bir pakete kaydet</string>
@@ -804,8 +884,24 @@
     <string name="ime_suggestion_hold_label">Kelime seçenekleri</string>
     <string name="ime_suggestion_never_suggest">\"%1$s\" ifadesini asla önerme</string>
     <string name="ime_suggestions_show_desc">Öneri şeridini göster</string>
+    <string name="ime_symbol_row_delete_confirm_body">Set ve içindeki tüm girdiler silinir. Bunu sunan bir klavye modu, bunun yerine diğer setlerinizi gösterir.</string>
+    <string name="ime_symbol_row_delete_confirm_title">\"%1$s\" silinsin mi?</string>
+    <string name="ime_symbol_row_delete_set">\"%1$s\" setini sil</string>
+    <string name="ime_symbol_row_hide_in_mode">Satırı %1$s içinde gizle</string>
+    <string name="ime_symbol_row_remove">\"%1$s\" öğesini kaldır</string>
+    <string name="ime_symbol_row_settings">Sembol satırı ayarları</string>
     <string name="ime_symbol_set_switch_desc">Sembol setini değiştir</string>
     <string name="ime_symbols_recents_label">Son kullanılanlar</string>
+    <string name="ime_synonyms_close_desc">Eşanlamlıları kapat</string>
+    <string name="ime_synonyms_failed">Eş anlamlı sözcük kaynağına ulaşılamadı. Bağlantıyı kontrol edip tekrar deneyin.</string>
+    <string name="ime_synonyms_from">%1$s kaynağından</string>
+    <string name="ime_synonyms_loading">Eş anlamlılar aranıyor...</string>
+    <string name="ime_synonyms_no_sources">Tüm eş anlamlı kaynakları kapalı. Yazma, Öneriler, Eş anlamlı kaynakları kısmından birini açın.</string>
+    <string name="ime_synonyms_not_found">\"%1$s\" için eş anlamlı bulunamadı.</string>
+    <string name="ime_synonyms_pick_desc">\"%1$s\" kullan</string>
+    <string name="ime_synonyms_retry">Tekrar dene</string>
+    <string name="ime_synonyms_similar_note">Bu kelime için eş anlamlı listelenmedi. Bu kelimeler benzer bir anlama sahiptir.</string>
+    <string name="ime_synonyms_title">\"%1$s\" için eş anlamlılar</string>
     <string name="ime_textedit_doc_end_desc">Metnin sonuna git</string>
     <string name="ime_textedit_doc_start_desc">Metnin başına git</string>
     <string name="ime_textedit_down_desc">Aşağı taşı</string>
@@ -926,7 +1022,10 @@
     <string name="ime_toolbox_hint_mode">%1$s modu açık, bu nedenle klavye bu düzeni o mod için kaydeder. Diğer uygulamalar kendininkini korur.</string>
     <string name="ime_trackpad_hint">İmleci hareket ettirmek için sürükleyin</string>
     <string name="ime_trackpad_surface_desc">İzleme dörtgeni. İmleci hareket ettirmek için sürükleyin, seçmek için basılı tutup sürükleyin, bir kelimeyi seçmek için iki kez dokunun</string>
+    <string name="ime_translate_all_languages_info">Ayrıca indirilecek diller</string>
+    <string name="ime_translate_all_languages_label">Tüm diller</string>
     <string name="ime_translate_auto_detect_label">Dili algıla</string>
+    <string name="ime_translate_deepl_label">DeepL</string>
     <string name="ime_translate_download_failed_error">İndirme tamamlanamadı. Bağlantıyı kontrol edin ve tekrar deneyin.</string>
     <string name="ime_translate_download_of_total_progress">%1$s / %2$s</string>
     <string name="ime_translate_downloaded_desc">İndirildi</string>
@@ -1064,6 +1163,10 @@
     <string name="ime_voice_status_mic_blocked">Mikrofon engellendi. Hızlı Ayarlar\'dan Mikrofon erişimini açın ve tekrar deneyin.</string>
     <string name="ime_voice_status_no_model">Çevrimdışı sesle yazma için henüz model yok</string>
     <string name="ime_voice_status_no_server">Transkripsiyon sunucusunun henüz bir adresi yok</string>
+    <plurals name="ime_voice_status_stops_in">
+        <item quantity="one">%d saniye içinde duracak. Şimdi bitirmek için basın.</item>
+        <item quantity="other">%d saniye içinde duracak. Şimdi bitirmek için basın.</item>
+    </plurals>
     <string name="ime_voice_status_transcribing">Metne dönüştürülüyor…</string>
     <string name="ime_voice_stop_desc">Dinlemeyi durdur</string>
     <string name="ime_voice_strip_allow_action">İzin ver</string>
@@ -1102,6 +1205,7 @@
     <string name="ime_web_search_need_key_body">Web araması, Brave Search\'ten bir API anahtarı gerektirir. Bu araç için ayarlara bir anahtar ekleyin.</string>
     <string name="ime_web_search_open_desc">Tarayıcıda aç</string>
     <string name="ime_wiki_back_desc">Sonuçlara geri dön</string>
+    <string name="ime_wiki_expand_desc">Makaleyi uzat</string>
     <string name="ime_wiki_full_error">Uygulama makale metnini yükleyemiyor.</string>
     <string name="ime_wiki_full_progress">Makalenin tamamı yükleniyor…</string>
     <string name="ime_wiki_idle_info">%1$s.wikipedia.org üzerinde bir konu arayın. Özeti okuyun, bağlantıları açın ve metni veya makalenin adresini ekleyin.</string>
@@ -1113,8 +1217,12 @@
     <string name="ime_wiki_links_progress">Bağlantılar yükleniyor…</string>
     <string name="ime_wiki_no_results_empty">Arama \"%1$s\" için hiçbir sonuç bulamadı.</string>
     <string name="ime_wiki_no_summary_empty">Bu makalenin özeti yok.</string>
+    <string name="ime_wiki_open_browser_desc">Makaleyi tarayıcıda aç</string>
+    <string name="ime_wiki_quote_markdown">\"%1$s\" ([Wikipedia: %2$s](%3$s) kaynağından)</string>
+    <string name="ime_wiki_quote_plain">\"%1$s\" (Wikipedia: %2$s, %3$s)</string>
     <string name="ime_wiki_search_active_hint">Wikipedia\'da ara. Aramak için enter tuşuna basın</string>
     <string name="ime_wiki_search_hint">Wikipedia\'da ara…</string>
+    <string name="ime_wiki_shrink_desc">Makaleyi tekrar klavye yüksekliğine getir</string>
     <string name="ime_wiki_tab_full_label">Tam makale</string>
     <string name="ime_wiki_tab_links_label">Bağlantılar</string>
     <string name="ime_wiki_tab_summary_label">Özet</string>
@@ -1164,6 +1272,7 @@
     <string name="ime_word_menu_delete">\"%1$s\" öğesini sil</string>
     <string name="ime_word_menu_edit">Düzenle…</string>
     <string name="ime_word_menu_search_all">\"%1$s\" için tüm kelimeleri ara</string>
+    <string name="ime_word_menu_synonyms">\"%1$s\" için eş anlamlılar</string>
     <string name="ime_word_spell_apply_desc">Bu yazımı kullan</string>
     <string name="ime_word_spell_cancel_desc">Yazımı olduğu gibi bırak</string>
     <string name="ime_word_spell_hint">\"%1$s\" için yeni bir yazım girin</string>

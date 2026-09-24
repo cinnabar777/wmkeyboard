@@ -2,6 +2,13 @@
 <!-- Machine translated by Google Play. Do not edit by hand:
      regenerate with tools/i18n/pull-play-translations.py. -->
 <resources>
+    <string name="ime_ai_chat_ask_explain">Απλή εξήγηση</string>
+    <string name="ime_ai_chat_ask_explain_prompt">Εξήγησέ το αυτό με απλά λόγια.</string>
+    <string name="ime_ai_chat_ask_hint">Κάντε μια ερώτηση σχετικά με το κείμενο ή ξεκινήστε με μία από αυτές.</string>
+    <string name="ime_ai_chat_ask_summary">Σύνοψη</string>
+    <string name="ime_ai_chat_ask_summary_prompt">Δώσε μου μια σύντομη περίληψη αυτού.</string>
+    <string name="ime_ai_chat_ask_words">Δύσκολες λέξεις</string>
+    <string name="ime_ai_chat_ask_words_prompt">Εξηγήστε τις δύσκολες λέξεις και ιδέες σε αυτό.</string>
     <string name="ime_ai_chat_attach_desc">Αποστολή του κειμένου του πεδίου με το μήνυμα</string>
     <string name="ime_ai_chat_attach_remove_desc">Να μην αποσταλεί το κείμενο του πεδίου</string>
     <plurals name="ime_ai_chat_attached_field">
@@ -12,6 +19,8 @@
         <item quantity="one">Η επιλογή σας συνοδεύει το μήνυμα: %1$d χαρακτήρας</item>
         <item quantity="other">Η επιλογή σας συνοδεύει το μήνυμα: %1$d χαρακτήρες</item>
     </plurals>
+    <string name="ime_ai_chat_attached_tool">Σχετικά με %1$s</string>
+    <string name="ime_ai_chat_attached_tool_selection">Σχετικά με ένα απόσπασμα από %1$s</string>
     <plurals name="ime_ai_chat_attachment_sent">
         <item quantity="one">Με %1$d χαρακτήρα κειμένου</item>
         <item quantity="other">Με %1$d χαρακτήρες κειμένου</item>
@@ -99,6 +108,10 @@
     <string name="ime_ai_truncated_notice">Το μοντέλο σταμάτησε πρόωρα. Αυξήστε το \"Μέγιστο μήκος απόκρισης\" στις ρυθμίσεις του εργαλείου.</string>
     <string name="ime_ai_view_changes">Αλλαγές</string>
     <string name="ime_ai_view_result">Αποτέλεσμα</string>
+    <string name="ime_ask_ai_label_dict">Λεξικό: %1$s</string>
+    <string name="ime_ask_ai_label_grammar">Γραμματικός έλεγχος</string>
+    <string name="ime_ask_ai_label_vocab">Λεξιλόγιο: %1$s</string>
+    <string name="ime_ask_ai_label_wiki">Wikipedia: %1$s</string>
     <string name="ime_autofill_dismiss_desc">Απόκρυψη των προτάσεων αυτόματης συμπλήρωσης</string>
     <string name="ime_calc_degrees_label">μοίρες</string>
     <string name="ime_calc_insert_action">Εισαγωγή</string>
@@ -127,6 +140,7 @@
     <string name="ime_camera_permission_action">Να επιτρέπεται η κάμερα</string>
     <string name="ime_camera_permission_body">Το εργαλείο κάμερας χρειάζεται άδεια για να χρησιμοποιήσει την κάμερα. Η εφαρμογή τραβάει φωτογραφία μόνο όταν πατάτε το κλείστρο.</string>
     <string name="ime_camera_retake_action">Επαναλήψη</string>
+    <string name="ime_camera_search_action">Αναζήτηση</string>
     <string name="ime_camera_send_action">Αποστολή</string>
     <string name="ime_camera_shutter_desc">Λήψη φωτογραφίας</string>
     <string name="ime_camera_starting_progress">Εκκίνηση κάμερας…</string>
@@ -144,6 +158,10 @@
     <string name="ime_clip_chip_image">Αντιγραμμένη εικόνα</string>
     <string name="ime_clip_chip_item">Αντιγραμμένο στοιχείο</string>
     <string name="ime_clip_chip_screenshot">Στιγμιότυπο οθόνης</string>
+    <plurals name="ime_clip_deleted">
+        <item quantity="one">Το απόκομμα διαγράφηκε</item>
+        <item quantity="other">%1$d αποκόμματα διαγράφηκαν</item>
+    </plurals>
     <string name="ime_clip_edit">Επεξεργασία</string>
     <string name="ime_clip_edit_placeholder">Πληκτρολογήστε το κείμενο του αποκόμματος</string>
     <string name="ime_clip_edit_rich_note">Η αποθήκευση μιας αλλαγής καταργεί τη μορφοποίηση</string>
@@ -162,6 +180,18 @@
     <string name="ime_clip_info_private_detail">Το πληκτρολόγιο κρύβει αυτό το απόκομμα στον πίνακα και το διαγράφει νωρίτερα από άλλα αποκόμματα.</string>
     <string name="ime_clip_info_size">Μέγεθος</string>
     <string name="ime_clip_info_type">Τύπος</string>
+    <plurals name="ime_clip_left_days">
+        <item quantity="one">Απέμεινε %d ημέρα</item>
+        <item quantity="other">Απέμειναν %d ημέρες</item>
+    </plurals>
+    <plurals name="ime_clip_left_hours">
+        <item quantity="one">%d ώρα απομένει</item>
+        <item quantity="other">%d ώρες απομένουν</item>
+    </plurals>
+    <plurals name="ime_clip_left_minutes">
+        <item quantity="one">Απέμεινε %d λεπτό</item>
+        <item quantity="other">Απέμειναν %d λεπτά</item>
+    </plurals>
     <string name="ime_clip_number_desc">Απόσπασμα %1$d</string>
     <string name="ime_clip_pin">Καρφίτσωμα</string>
     <string name="ime_clip_send_as_sticker">Αποστολή ως αυτοκόλλητο</string>
@@ -172,6 +202,7 @@
     <string name="ime_clip_type_rich_text">Εμπλουτισμένο κείμενο</string>
     <string name="ime_clip_type_text">Κείμενο</string>
     <string name="ime_clip_type_video">Βίντεο</string>
+    <string name="ime_clip_undo_delete">Αναίρεση</string>
     <string name="ime_clip_unpin">Ξεκαρφίτσωμα</string>
     <string name="ime_clip_video_desc">Αντιγραμμένο βίντεο</string>
     <string name="ime_clipboard_empty">Το ιστορικό του πρόχειρου είναι άδειο. Το αντιγραμμένο κείμενο εμφανίζεται εδώ.</string>
@@ -204,10 +235,12 @@
     <string name="ime_dict_add_vocab_action">Προσθήκη στο λεξιλόγιο</string>
     <string name="ime_dict_antonyms_label">Αντώνυμα</string>
     <string name="ime_dict_error">Η εφαρμογή δεν μπορεί να συνδεθεί στο λεξικό. Ελέγξτε το δίκτυό σας και δοκιμάστε ξανά.</string>
+    <string name="ime_dict_from">Από %1$s</string>
     <string name="ime_dict_idle_info">Αναζητήστε μια αγγλική λέξη. Πατήστε τη γραμμή αναζήτησης και πληκτρολογήστε. Μπορείτε επίσης να τοποθετήσετε τον κέρσορα σε μια λέξη πριν ανοίξετε το εργαλείο.</string>
     <string name="ime_dict_insert_action">Εισαγωγή</string>
     <string name="ime_dict_lookup_desc">Αναζήτηση της λέξης</string>
     <string name="ime_dict_lookup_progress">Αναζήτηση του «%1$s»…</string>
+    <string name="ime_dict_no_sources">Όλες οι πηγές λεξικών είναι απενεργοποιημένες. Ενεργοποιήστε μία στις ρυθμίσεις του εργαλείου λεξικού.</string>
     <string name="ime_dict_not_found_empty">Καμία καταχώρηση για το “%1$s”. Ελέγξτε την ορθογραφία ή δοκιμάστε τη βασική μορφή της λέξης.</string>
     <string name="ime_dict_play_desc">Αναπαραγωγή της προφοράς</string>
     <string name="ime_dict_search_active_hint">Πληκτρολογήστε μια λέξη…</string>
@@ -315,7 +348,15 @@
     <string name="ime_glide_word_list_offer">Η πληκτρολόγηση με ολίσθηση απαιτεί μια λίστα λέξεων %1$s</string>
     <string name="ime_glide_word_list_offer_dismiss_desc">Απόρριψη</string>
     <string name="ime_grammar_all_filtered_empty">Όλα τα ζητήματα που βρέθηκαν είναι κρυμμένα από το φίλτρο</string>
+    <string name="ime_grammar_ask_ai_desc">Ρωτήστε την τεχνητή νοημοσύνη σχετικά με αυτό το ζήτημα</string>
     <string name="ime_grammar_category_kind_label">%1$s • %2$s</string>
+    <string name="ime_grammar_deepl_action_desc">Βελτιώστε το κείμενο με το DeepL Write</string>
+    <string name="ime_grammar_deepl_dismiss_desc">Κλείσιμο του αποτελέσματος του DeepL Write</string>
+    <string name="ime_grammar_deepl_error">Το DeepL Write δεν αποκρίθηκε</string>
+    <string name="ime_grammar_deepl_replace_action">Αντικατάσταση</string>
+    <string name="ime_grammar_deepl_replace_failed_toast">Το κείμενο σε αυτό το πεδίο δεν μπορεί να αντικατασταθεί</string>
+    <string name="ime_grammar_deepl_title">DeepL Write</string>
+    <string name="ime_grammar_deepl_unchanged">Το DeepL Write δεν έχει τίποτα να αλλάξει</string>
     <string name="ime_grammar_dialect_desc">Επιλογή της διαλέκτου</string>
     <string name="ime_grammar_dismiss_desc">Απόκρυψη αυτού του ζητήματος</string>
     <string name="ime_grammar_empty_hint">Πληκτρολογήστε κείμενο ή ανοίξτε ένα πεδίο που περιέχει κείμενο. Τα ζητήματα εμφανίζονται εδώ. Οι έλεγχοι εκτελούνται εκτός σύνδεσης.</string>
@@ -347,6 +388,7 @@
     <string name="ime_icons_empty_info">Για να προσθέσετε πακέτα εικονιδίων, ανοίξτε τις ρυθμίσεις.</string>
     <string name="ime_icons_more_label">Περισσότερα πακέτα εικονιδίων</string>
     <string name="ime_icons_pick_info">Πατήστε ένα πακέτο εικονιδίων για να το χρησιμοποιήσετε στα πλήκτρα και τα εργαλεία.</string>
+    <string name="ime_image_search_by_photo_desc">Αναζήτηση με φωτογραφία</string>
     <string name="ime_image_search_empty">Δεν βρέθηκαν εικόνες για το “%1$s”</string>
     <string name="ime_image_search_hint">Αναζήτηση εικόνων</string>
     <string name="ime_image_search_idle">Πληκτρολογήστε μια αναζήτηση και πατήστε enter. Πατήστε μια εικόνα για να την εισαγάγετε. Πατήστε παρατεταμένα για να εισαγάγετε τον σύνδεσμό της.</string>
@@ -377,6 +419,8 @@
     <string name="ime_kde_loop">Επανάληψη</string>
     <string name="ime_kde_media_empty_body">Ξεκινήστε μια αναπαραγωγή εκεί και θα εμφανιστεί εδώ</string>
     <string name="ime_kde_media_empty_title">Δεν αναπαράγεται τίποτα στον υπολογιστή</string>
+    <string name="ime_kde_media_unsupported_body">Το KDE Connect δεν επιτρέπει σε ένα τηλέφωνο να ελέγχει μουσική ή βίντεο. Το KDE Connect σε Mac δεν το υποστηρίζει ποτέ.</string>
+    <string name="ime_kde_media_unsupported_title">Αυτός ο υπολογιστής δεν κοινοποιεί τις συσκευές αναπαραγωγής του</string>
     <string name="ime_kde_not_listening">Μια άλλη εφαρμογή σε αυτό το τηλέφωνο χρησιμοποιεί τη θύρα KDE Connect. Οι υπολογιστές μπορούν ακόμα να βρουν αυτό το πληκτρολόγιο, αλλά πατήστε Ανανέωση από αυτήν την πλευρά.</string>
     <string name="ime_kde_notice_clipboard_empty">Δεν υπάρχει τίποτα στο πρόχειρο για αποστολή</string>
     <string name="ime_kde_notice_clipboard_sent">Το πρόχειρο στάλθηκε</string>
@@ -427,10 +471,12 @@
     <string name="ime_kde_send_empty">Στείλτε το πρόχειρο, ό,τι γράψατε ή αρχεία. Ό,τι στέλνει ο υπολογιστής καταλήγει εδώ και στις Λήψεις</string>
     <string name="ime_kde_send_field">Κείμενο στο πεδίο</string>
     <string name="ime_kde_send_files">Αρχεία…</string>
+    <string name="ime_kde_send_unsupported">Αυτός ο υπολογιστής δεν δέχεται αρχεία ή κείμενο από το τηλέφωνο</string>
     <string name="ime_kde_settings">Ρυθμίσεις</string>
     <string name="ime_kde_shuffle">Τυχαία σειρά</string>
     <string name="ime_kde_slides_end">Τέλος</string>
     <string name="ime_kde_slides_next">Επόμενη διαφάνεια</string>
+    <string name="ime_kde_slides_no_pointer">Αυτός ο υπολογιστής δεν διαθέτει δείκτη για διαφάνειες</string>
     <string name="ime_kde_slides_pointer">Κρατήστε πατημένο και σύρετε για τον δείκτη</string>
     <string name="ime_kde_slides_previous">Προηγούμενη διαφάνεια</string>
     <string name="ime_kde_slides_start">Έναρξη</string>
@@ -490,11 +536,25 @@
     <string name="ime_language_switch_title">Γλώσσα εισαγωγής</string>
     <string name="ime_launcher_activities_label">Οθόνες</string>
     <string name="ime_launcher_app_info_action">Πληροφορίες εφαρμογής</string>
+    <string name="ime_launcher_combo_label">%1$s + %2$s</string>
+    <string name="ime_launcher_combo_open_action">Άνοιγμα και των δύο σε διαχωρισμένη οθόνη</string>
+    <string name="ime_launcher_combo_remove_action">Αφαίρεση αυτού του ζεύγους</string>
+    <string name="ime_launcher_combos_label">Ζεύγη διαίρεσης οθόνης</string>
     <string name="ime_launcher_empty">Δεν βρέθηκαν εφαρμογές</string>
+    <string name="ime_launcher_floating_unsupported">Αυτή η συσκευή ενδέχεται να την ανοίξει σε πλήρη οθόνη</string>
     <string name="ime_launcher_hidden_label">Κρυμμένο από το πλέγμα</string>
     <string name="ime_launcher_hide_action">Απόκρυψη εφαρμογής από το πλέγμα</string>
     <string name="ime_launcher_loading">Φόρτωση εφαρμογών…</string>
+    <string name="ime_launcher_menu_close">Κλείσιμο μενού</string>
     <string name="ime_launcher_not_exported_label">Δεν είναι δυνατό το άνοιγμα εκτός της εφαρμογής</string>
+    <string name="ime_launcher_open_action">Άνοιγμα</string>
+    <string name="ime_launcher_open_floating_action">Άνοιγμα σε αιωρούμενο παράθυρο</string>
+    <string name="ime_launcher_open_split_action">Άνοιγμα σε διαχωρισμένη οθόνη</string>
+    <string name="ime_launcher_page_action">Οθόνες, απόκρυψη και πληροφορίες εφαρμογής…</string>
+    <string name="ime_launcher_page_no_screens_action">Απόκρυψη και πληροφορίες εφαρμογής…</string>
+    <string name="ime_launcher_pair_action">Σύζευξη σε διαχωρισμένη οθόνη με…</string>
+    <string name="ime_launcher_pair_cancel">Ακύρωση</string>
+    <string name="ime_launcher_pair_prompt">Πατήστε την εφαρμογή για να ανοίξει δίπλα στο %1$s</string>
     <string name="ime_launcher_pin_action">Καρφίτσωμα εφαρμογής</string>
     <string name="ime_launcher_pinned_label">Καρφιτσωμένο</string>
     <string name="ime_launcher_recents_label">Πρόσφατα</string>
@@ -670,9 +730,11 @@
     <string name="ime_sandbox_offer_only">Σύρετε χρησιμοποιώντας μόνο τις λέξεις σας;</string>
     <string name="ime_sandbox_offer_prefer">Προσαρμογή της σάρωσης στις λέξεις σας;</string>
     <string name="ime_search_attribution_brave">μέσω Brave</string>
+    <string name="ime_selection_ask_ai">Ρωτήστε την Τεχνητή Νοημοσύνη</string>
     <string name="ime_selection_macro_back_desc">Επιστροφή στις ενέργειες επιλογής</string>
     <string name="ime_selection_macro_bengali_unavailable_toast">Τα Βεγγαλικά δεν έχουν φορτωθεί</string>
     <string name="ime_selection_macro_busy_desc">Εργασία σε εξέλιξη</string>
+    <string name="ime_selection_macro_deepl_clean_toast">Το DeepL Write δεν έχει τίποτα να αλλάξει</string>
     <string name="ime_selection_macro_find_none_toast">Δεν υπάρχει άλλη αντιστοιχία</string>
     <string name="ime_selection_macro_grammar_clean_toast">Δεν υπάρχει τίποτα προς διόρθωση</string>
     <string name="ime_selection_macro_grammar_unavailable_toast">Ο ορθογραφικός έλεγχος δεν είναι διαθέσιμος</string>
@@ -681,6 +743,7 @@
     <string name="ime_selection_macro_nothing_to_undo_toast">Δεν υπάρχει τίποτα άλλο για αναίρεση</string>
     <string name="ime_selection_macro_open_in_desc">Άνοιγμα στο %1$s</string>
     <string name="ime_selection_macro_stop_label">Διακοπή</string>
+    <string name="ime_selection_quote">Παράθεση</string>
     <string name="ime_service_already_in_settings_toast">Είστε ήδη στις ρυθμίσεις</string>
     <string name="ime_service_autocorrect_off_toast">Η αυτόματη διόρθωση είναι απενεργοποιημένη</string>
     <string name="ime_service_autocorrect_on_toast">Η αυτόματη διόρθωση είναι ενεργοποιημένη</string>
@@ -711,6 +774,11 @@
     <string name="ime_service_phonetic_english_needs_secondary_toast">Ενεργοποιήστε τα Αγγλικά στις Γλώσσες, %1$s, Επίσης προτάσεις από</string>
     <string name="ime_service_phonetic_english_off_toast">Προτείνονται μόνο αγγλικές λέξεις</string>
     <string name="ime_service_phonetic_english_on_toast">Οι αγγλικές λέξεις παραμένουν αγγλικές</string>
+    <string name="ime_service_photo_search_blocked">Η εξοικονόμηση δεδομένων δεν επιτρέπει στις αναζητήσεις ιστού να χρησιμοποιούν αυτήν τη σύνδεση</string>
+    <string name="ime_service_photo_search_metered_ask">Αυτή η σύνδεση έχει χρέωση. Για να στείλετε τη φωτογραφία, πατήστε ξανά Αναζήτηση.</string>
+    <string name="ime_service_photo_search_no_app">Δεν υπάρχει εφαρμογή σε αυτό το τηλέφωνο που να μπορεί να πραγματοποιήσει αναζήτηση με φωτογραφία</string>
+    <string name="ime_service_photo_search_no_browser">Κανένα πρόγραμμα περιήγησης σε αυτό το τηλέφωνο δεν μπορεί να ανοίξει τα αποτελέσματα</string>
+    <string name="ime_service_photo_search_sending">Αποστολή της φωτογραφίας στον ιστότοπο αναζήτησης</string>
     <string name="ime_service_plugins_all_off_notice">Κάθε πρόσθετο που εγκαταστήσατε είναι απενεργοποιημένο. Ενεργοποιήστε ένα από τη Διαχείριση πρόσθετων.</string>
     <string name="ime_service_plugins_off_notice">Τα πρόσθετα είναι απενεργοποιημένα. Ενεργοποιήστε τα στις Ρυθμίσεις για να τα εγκαταστήσετε και να τα εκτελέσετε.</string>
     <string name="ime_service_power_saving_off_toast">Η εξοικονόμηση ενέργειας είναι απενεργοποιημένη</string>
@@ -792,10 +860,22 @@
     <string name="ime_sound_volume_label">Ένταση ήχου</string>
     <string name="ime_sticker_add_desc">Προσθήκη αυτοκόλλητων</string>
     <string name="ime_sticker_add_to_pack_action">Προσθήκη στο %1$s</string>
+    <string name="ime_sticker_info_emoji">Emoji: %1$s</string>
+    <string name="ime_sticker_info_keywords">Λέξεις-κλειδιά: %1$s</string>
+    <string name="ime_sticker_info_pack">Πακέτο: %1$s</string>
+    <string name="ime_sticker_info_untitled">Χωρίς τίτλο</string>
     <string name="ime_sticker_local_search_empty">Κανένα δικό σας αυτοκόλλητο δεν ταιριάζει με το “%1$s”</string>
     <string name="ime_sticker_manage_packs_action">Διαχείριση πακέτων</string>
     <string name="ime_sticker_need_key_body">Το εργαλείο αυτοκόλλητων χρειάζεται ένα κλειδί API από το Klipy ή το GIPHY. Και τα δύο κλειδιά είναι δωρεάν. Προσθέστε ένα κλειδί στις ρυθμίσεις για αυτό το εργαλείο.</string>
     <string name="ime_sticker_no_packs_empty">Δεν υπάρχουν ακόμη πακέτα αυτοκόλλητων. Δημιουργήστε ένα πακέτο στις ρυθμίσεις. Μπορείτε επίσης να πατήσετε παρατεταμένα ένα αυτοκόλλητο από το Klipy ή το GIPHY για να το αποθηκεύσετε εδώ.</string>
+    <plurals name="ime_sticker_offer_count">
+        <item quantity="one">%1$d αυτοκόλλητο</item>
+        <item quantity="other">%1$d αυτοκόλλητα</item>
+    </plurals>
+    <string name="ime_sticker_offer_dismiss_desc">Απόκρυψη των αυτοκόλλητων για το %1$s</string>
+    <string name="ime_sticker_offer_item_desc">Αποστολή αυτοκόλλητου %1$s</string>
+    <string name="ime_sticker_offer_item_untitled_desc">Αποστολή αυτού του αυτοκόλλητου</string>
+    <string name="ime_sticker_offer_more">+%1$d</string>
     <string name="ime_sticker_pack_all_label">Όλα</string>
     <string name="ime_sticker_pack_empty">Αυτό το πακέτο είναι άδειο.</string>
     <string name="ime_sticker_save_new_pack_action">Αποθήκευση σε νέο πακέτο</string>
@@ -806,8 +886,24 @@
     <string name="ime_suggestion_hold_label">Επιλογές λέξεων</string>
     <string name="ime_suggestion_never_suggest">Να μην προτείνεται ποτέ το \"%1$s\"</string>
     <string name="ime_suggestions_show_desc">Εμφάνιση της γραμμής προτάσεων</string>
+    <string name="ime_symbol_row_delete_confirm_body">Το σύνολο και όλες οι καταχωρήσεις του θα διαγραφούν. Μια λειτουργία πληκτρολογίου που το προσέφερε εμφανίζει τώρα τα υπόλοιπα σύνολά σας.</string>
+    <string name="ime_symbol_row_delete_confirm_title">Διαγραφή του \"%1$s\";</string>
+    <string name="ime_symbol_row_delete_set">Διαγραφή του συνόλου \"%1$s\"</string>
+    <string name="ime_symbol_row_hide_in_mode">Απόκρυψη της σειράς στο %1$s</string>
+    <string name="ime_symbol_row_remove">Κατάργηση \"%1$s\"</string>
+    <string name="ime_symbol_row_settings">Ρυθμίσεις σειράς συμβόλων</string>
     <string name="ime_symbol_set_switch_desc">Εναλλαγή του συνόλου συμβόλων</string>
     <string name="ime_symbols_recents_label">Πρόσφατα</string>
+    <string name="ime_synonyms_close_desc">Κλείσιμο συνωνύμων</string>
+    <string name="ime_synonyms_failed">Δεν ήταν δυνατή η πρόσβαση σε πηγή συνωνύμων. Ελέγξτε τη σύνδεσή σας και προσπαθήστε ξανά.</string>
+    <string name="ime_synonyms_from">Από %1$s</string>
+    <string name="ime_synonyms_loading">Αναζήτηση συνωνύμων…</string>
+    <string name="ime_synonyms_no_sources">Όλες οι πηγές συνωνύμων είναι απενεργοποιημένες. Ενεργοποιήστε μία στις Πληκτρολόγηση, Προτάσεις, Πηγές συνωνύμων.</string>
+    <string name="ime_synonyms_not_found">Δεν βρέθηκαν συνώνυμα για το \"%1$s\".</string>
+    <string name="ime_synonyms_pick_desc">Χρήση του \"%1$s\"</string>
+    <string name="ime_synonyms_retry">Προσπάθεια ξανά</string>
+    <string name="ime_synonyms_similar_note">Δεν υπάρχουν συνώνυμα για αυτήν τη λέξη. Αυτές οι λέξεις έχουν παρόμοια σημασία.</string>
+    <string name="ime_synonyms_title">Συνώνυμα για το \"%1$s\"</string>
     <string name="ime_textedit_doc_end_desc">Μετάβαση στο τέλος του κειμένου</string>
     <string name="ime_textedit_doc_start_desc">Μετάβαση στην αρχή του κειμένου</string>
     <string name="ime_textedit_down_desc">Μετακίνηση προς τα κάτω</string>
@@ -928,7 +1024,10 @@
     <string name="ime_toolbox_hint_mode">Η λειτουργία %1$s είναι ενεργοποιημένη, επομένως το πληκτρολόγιο αποθηκεύει αυτή τη διάταξη για τη συγκεκριμένη λειτουργία. Άλλες εφαρμογές διατηρούν τη δική τους.</string>
     <string name="ime_trackpad_hint">Σύρετε για να μετακινήσετε τον κέρσορα</string>
     <string name="ime_trackpad_surface_desc">Trackpad. Σύρετε για να μετακινήσετε τον κέρσορα, κρατήστε πατημένο και σύρετε για επιλογή, πατήστε δύο φορές για να επιλέξετε μια λέξη</string>
+    <string name="ime_translate_all_languages_info">Επίσης τις γλώσσες για λήψη</string>
+    <string name="ime_translate_all_languages_label">Όλες οι γλώσσες</string>
     <string name="ime_translate_auto_detect_label">Αυτόματη ανίχνευση γλώσσας</string>
+    <string name="ime_translate_deepl_label">DeepL</string>
     <string name="ime_translate_download_failed_error">Η λήψη δεν ολοκληρώθηκε. Ελέγξτε τη σύνδεσή σας και προσπαθήστε ξανά.</string>
     <string name="ime_translate_download_of_total_progress">%1$s από %2$s</string>
     <string name="ime_translate_downloaded_desc">Λήφθηκε</string>
@@ -1066,6 +1165,10 @@
     <string name="ime_voice_status_mic_blocked">Το μικρόφωνο είναι μπλοκαρισμένο. Ενεργοποιήστε την πρόσβαση στο μικρόφωνο στις Γρήγορες ρυθμίσεις και δοκιμάστε ξανά.</string>
     <string name="ime_voice_status_no_model">Η πληκτρολόγηση φωνής εκτός σύνδεσης δεν διαθέτει ακόμη μοντέλο</string>
     <string name="ime_voice_status_no_server">Ο διακομιστής μεταγραφής δεν έχει ακόμη διεύθυνση</string>
+    <plurals name="ime_voice_status_stops_in">
+        <item quantity="one">Διακόπτεται σε %d δευτερόλεπτο. Πατήστε για τερματισμό τώρα.</item>
+        <item quantity="other">Διακόπτεται σε %d δευτερόλεπτα. Πατήστε για τερματισμό τώρα.</item>
+    </plurals>
     <string name="ime_voice_status_transcribing">Μεταγραφή…</string>
     <string name="ime_voice_stop_desc">Διακοπή ακρόασης</string>
     <string name="ime_voice_strip_allow_action">Να επιτρέπεται</string>
@@ -1104,6 +1207,7 @@
     <string name="ime_web_search_need_key_body">Η αναζήτηση ιστού απαιτεί ένα κλειδί API από το Brave Search. Προσθέστε ένα κλειδί στις ρυθμίσεις για αυτό το εργαλείο.</string>
     <string name="ime_web_search_open_desc">Άνοιγμα στο πρόγραμμα περιήγησης</string>
     <string name="ime_wiki_back_desc">Πίσω στα αποτελέσματα</string>
+    <string name="ime_wiki_expand_desc">Μεγέθυνση του άρθρου</string>
     <string name="ime_wiki_full_error">Η εφαρμογή δεν μπορεί να φορτώσει το κείμενο του άρθρου.</string>
     <string name="ime_wiki_full_progress">Φόρτωση ολόκληρου του άρθρου…</string>
     <string name="ime_wiki_idle_info">Αναζητήστε ένα θέμα στο %1$s.wikipedia.org. Διαβάστε τη σύνοψη, ανοίξτε τους συνδέσμους και εισαγάγετε κείμενο ή τη διεύθυνση του άρθρου.</string>
@@ -1115,8 +1219,12 @@
     <string name="ime_wiki_links_progress">Φόρτωση συνδέσμων…</string>
     <string name="ime_wiki_no_results_empty">Η αναζήτηση δεν βρήκε τίποτα για το “%1$s”.</string>
     <string name="ime_wiki_no_summary_empty">Αυτό το άρθρο δεν έχει περίληψη.</string>
+    <string name="ime_wiki_open_browser_desc">Άνοιγμα του άρθρου στο πρόγραμμα περιήγησης</string>
+    <string name="ime_wiki_quote_markdown">\"%1$s\" (από [Wikipedia: %2$s](%3$s))</string>
+    <string name="ime_wiki_quote_plain">\"%1$s\" (Wikipedia: %2$s, %3$s)</string>
     <string name="ime_wiki_search_active_hint">Αναζήτηση στη Wikipedia. Πατήστε enter για αναζήτηση</string>
     <string name="ime_wiki_search_hint">Αναζήτηση στη Wikipedia…</string>
+    <string name="ime_wiki_shrink_desc">Επαναφορά του άρθρου στο ύψος του πληκτρολογίου</string>
     <string name="ime_wiki_tab_full_label">Πλήρες άρθρο</string>
     <string name="ime_wiki_tab_links_label">Σύνδεσμοι</string>
     <string name="ime_wiki_tab_summary_label">Σύνοψη</string>
@@ -1166,6 +1274,7 @@
     <string name="ime_word_menu_delete">Διαγραφή \"%1$s\"</string>
     <string name="ime_word_menu_edit">Επεξεργασία…</string>
     <string name="ime_word_menu_search_all">Αναζήτηση σε όλες τις λέξεις για το \"%1$s\"</string>
+    <string name="ime_word_menu_synonyms">Συνώνυμα για το \"%1$s\"</string>
     <string name="ime_word_spell_apply_desc">Χρήση αυτής της ορθογραφίας</string>
     <string name="ime_word_spell_cancel_desc">Αφήστε την ορθογραφία ως έχει</string>
     <string name="ime_word_spell_hint">Πληκτρολογήστε μια νέα ορθογραφία για το \"%1$s\"</string>

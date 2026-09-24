@@ -35,6 +35,7 @@
     <string name="common_enable">ഓൺ ചെയ്യുക</string>
     <string name="common_error_generic">എന്തോ കുഴപ്പം സംഭവിച്ചു. വീണ്ടും ശ്രമിക്കുക.</string>
     <string name="common_error_network">കണക്ഷൻ ലഭ്യമല്ല. നിങ്ങളുടെ നെറ്റ്‌വർക്ക് പരിശോധിച്ച് വീണ്ടും ശ്രമിക്കുക.</string>
+    <string name="common_error_no_internet_permission">ഈ കീബോർഡ് ബിൽഡിന് ഇന്റർനെറ്റിലേക്ക് കണക്റ്റുചെയ്യാൻ കഴിയില്ല.</string>
     <string name="common_error_timeout">അഭ്യർത്ഥനയ്ക്ക് വളരെയധികം സമയമെടുത്തു. വീണ്ടും ശ്രമിക്കുക.</string>
     <string name="common_export">എക്‌സ്‌പോർട്ട് ചെയ്യുക</string>
     <string name="common_import">ഇറക്കുമതി ചെയ്യുക</string>

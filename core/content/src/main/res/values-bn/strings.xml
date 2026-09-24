@@ -115,6 +115,7 @@
     <string name="core_content_selection_macro_chat_strike">স্ট্রাইক</string>
     <string name="core_content_selection_macro_colour">রঙ</string>
     <string name="core_content_selection_macro_copy">কপি করুন</string>
+    <string name="core_content_selection_macro_deepl_write">DeepL রাইট</string>
     <string name="core_content_selection_macro_digits_latin">সংখ্যাসমূহ</string>
     <string name="core_content_selection_macro_email">ইমেইল</string>
     <string name="core_content_selection_macro_fancy">ফ্যান্সি</string>

@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">Okokuhlola</string>
     <string name="core_intel_llm_tier_recommended_label">Kunconyiwe</string>
     <string name="core_intel_llm_tier_untested_label">Akukahlolwa</string>
+    <string name="core_intel_ocr_download_error_http">Iseva ye-GitHub ayithumelanga ifayela. Ikhodi yephutha ithi HTTP %1$s.</string>
+    <string name="core_intel_ocr_download_error_interrupted">Ukuxhumana kume ngesikhathi sokulanda. Zama futhi.</string>
+    <string name="core_intel_ocr_download_error_no_space">Alukho isitoreji esanele kudivayisi yakho. Kufanele ukhulule cishe ama-MB ayi-%1$s kuqala.</string>
+    <string name="core_intel_ocr_pack_error_broken">Idatha yolimi elandiwe yonakele, ngakho iskena asikwazanga ukuyisebenzisa. Yilande futhi.</string>
 </resources>

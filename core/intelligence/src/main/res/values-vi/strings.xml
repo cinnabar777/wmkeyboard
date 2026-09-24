@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">Thử nghiệm</string>
     <string name="core_intel_llm_tier_recommended_label">Được đề xuất</string>
     <string name="core_intel_llm_tier_untested_label">Chưa được kiểm thử</string>
+    <string name="core_intel_ocr_download_error_http">Máy chủ GitHub không gửi tệp. Mã lỗi là HTTP %1$s.</string>
+    <string name="core_intel_ocr_download_error_interrupted">Kết nối đã dừng trong khi tải xuống. Hãy thử lại.</string>
+    <string name="core_intel_ocr_download_error_no_space">Thiết bị của bạn không đủ dung lượng lưu trữ. Bạn phải giải phóng khoảng %1$s MB trước.</string>
+    <string name="core_intel_ocr_pack_error_broken">Dữ liệu ngôn ngữ đã tải xuống bị hỏng nên máy quét không thể sử dụng được. Vui lòng tải xuống lại.</string>
 </resources>

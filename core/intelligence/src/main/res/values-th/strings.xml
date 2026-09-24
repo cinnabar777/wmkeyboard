@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">ทดลอง</string>
     <string name="core_intel_llm_tier_recommended_label">แนะนำ</string>
     <string name="core_intel_llm_tier_untested_label">ยังไม่ได้ทดสอบ</string>
+    <string name="core_intel_ocr_download_error_http">เซิร์ฟเวอร์ GitHub ไม่ได้ส่งไฟล์ รหัสข้อผิดพลาดคือ HTTP %1$s</string>
+    <string name="core_intel_ocr_download_error_interrupted">การเชื่อมต่อถูกขัดจังหวะระหว่างการดาวน์โหลด โปรดลองใหม่อีกครั้ง</string>
+    <string name="core_intel_ocr_download_error_no_space">พื้นที่เก็บข้อมูลบนอุปกรณ์ของคุณไม่เพียงพอ คุณต้องเพิ่มพื้นที่ว่างประมาณ %1$s MB ก่อน</string>
+    <string name="core_intel_ocr_pack_error_broken">ข้อมูลภาษาที่ดาวน์โหลดมาเสียหาย ทำให้เครื่องสแกนใช้งานไม่ได้ โปรดดาวน์โหลดใหม่อีกครั้ง</string>
 </resources>

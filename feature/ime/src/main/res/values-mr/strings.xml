@@ -2,6 +2,13 @@
 <!-- Machine translated by Google Play. Do not edit by hand:
      regenerate with tools/i18n/pull-play-translations.py. -->
 <resources>
+    <string name="ime_ai_chat_ask_explain">सोप्या भाषेत स्पष्ट करा</string>
+    <string name="ime_ai_chat_ask_explain_prompt">हे सोप्या शब्दांत स्पष्ट करा.</string>
+    <string name="ime_ai_chat_ask_hint">मजकुराबद्दल एखादा प्रश्न विचारा, किंवा यापैकी एकाने सुरुवात करा.</string>
+    <string name="ime_ai_chat_ask_summary">सारांश द्या</string>
+    <string name="ime_ai_chat_ask_summary_prompt">मला याचा थोडक्यात सारांश द्या.</string>
+    <string name="ime_ai_chat_ask_words">कठीण शब्द</string>
+    <string name="ime_ai_chat_ask_words_prompt">यातील कठीण शब्द आणि संकल्पना स्पष्ट करा.</string>
     <string name="ime_ai_chat_attach_desc">संदेशासह फील्डचा मजकूर पाठवा</string>
     <string name="ime_ai_chat_attach_remove_desc">फील्ड मधील मजकूर पाठवू नका</string>
     <plurals name="ime_ai_chat_attached_field">
@@ -12,6 +19,8 @@
         <item quantity="one">तुमची निवड संदेशासोबत जात आहे: %1$d अक्षर</item>
         <item quantity="other">तुमची निवड संदेशासोबत जात आहे: %1$d अक्षरे</item>
     </plurals>
+    <string name="ime_ai_chat_attached_tool">%1$s बद्दल</string>
+    <string name="ime_ai_chat_attached_tool_selection">%1$s मधील एका उताऱ्याबद्दल</string>
     <plurals name="ime_ai_chat_attachment_sent">
         <item quantity="one">%1$d मजकूर वर्णासह</item>
         <item quantity="other">%1$d मजकूर वर्णांसह</item>
@@ -99,6 +108,10 @@
     <string name="ime_ai_truncated_notice">मॉडेल लवकर थांबले. टूलच्या सेटिंग्जमध्ये “कमाल प्रतिसाद लांबी” वाढवा.</string>
     <string name="ime_ai_view_changes">बदल</string>
     <string name="ime_ai_view_result">निकाल</string>
+    <string name="ime_ask_ai_label_dict">शब्दकोश: %1$s</string>
+    <string name="ime_ask_ai_label_grammar">व्याकरण तपासणी</string>
+    <string name="ime_ask_ai_label_vocab">शब्दसंग्रह: %1$s</string>
+    <string name="ime_ask_ai_label_wiki">विकिपीडिया: %1$s</string>
     <string name="ime_autofill_dismiss_desc">ऑटोफिल सूचना लपवा</string>
     <string name="ime_calc_degrees_label">अंश</string>
     <string name="ime_calc_insert_action">इन्सर्ट</string>
@@ -127,6 +140,7 @@
     <string name="ime_camera_permission_action">कॅमेरा वापरण्याची परवानगी द्या</string>
     <string name="ime_camera_permission_body">कॅमेरा टूलला कॅमेरा वापरण्यासाठी परवानगीची आवश्यकता आहे. तुम्ही शटर दाबल्यावरच ॲप फोटो घेते.</string>
     <string name="ime_camera_retake_action">पुन्हा घ्या</string>
+    <string name="ime_camera_search_action">शोधा</string>
     <string name="ime_camera_send_action">पाठवा</string>
     <string name="ime_camera_shutter_desc">फोटो घ्या</string>
     <string name="ime_camera_starting_progress">कॅमेरा सुरू होत आहे…</string>
@@ -144,6 +158,10 @@
     <string name="ime_clip_chip_image">कॉपी केलेली प्रतिमा</string>
     <string name="ime_clip_chip_item">कॉपी केलेली आयटम</string>
     <string name="ime_clip_chip_screenshot">स्क्रीनशॉट</string>
+    <plurals name="ime_clip_deleted">
+        <item quantity="one">क्लिप हटवली</item>
+        <item quantity="other">%1$d क्लिप्स हटवल्या</item>
+    </plurals>
     <string name="ime_clip_edit">संपादित करा</string>
     <string name="ime_clip_edit_placeholder">क्लिपचा मजकूर टाइप करा</string>
     <string name="ime_clip_edit_rich_note">बदल सेव्ह केल्यास फॉरमॅटिंग निघून जाते</string>
@@ -162,6 +180,18 @@
     <string name="ime_clip_info_private_detail">कीबोर्ड ही क्लिप पॅनेलमध्ये लपवतो आणि इतर क्लिप्सपेक्षा लवकर हटवतो.</string>
     <string name="ime_clip_info_size">आकार</string>
     <string name="ime_clip_info_type">प्रकार</string>
+    <plurals name="ime_clip_left_days">
+        <item quantity="one">%d दिवस बाकी</item>
+        <item quantity="other">%d दिवस बाकी</item>
+    </plurals>
+    <plurals name="ime_clip_left_hours">
+        <item quantity="one">%d तास बाकी</item>
+        <item quantity="other">%d तास बाकी</item>
+    </plurals>
+    <plurals name="ime_clip_left_minutes">
+        <item quantity="one">%d मिनिट बाकी</item>
+        <item quantity="other">%d मिनिटे बाकी</item>
+    </plurals>
     <string name="ime_clip_number_desc">क्लिप %1$d</string>
     <string name="ime_clip_pin">पिन करा</string>
     <string name="ime_clip_send_as_sticker">स्टिकर म्हणून पाठवा</string>
@@ -172,6 +202,7 @@
     <string name="ime_clip_type_rich_text">रिच टेक्स्ट</string>
     <string name="ime_clip_type_text">मजकूर</string>
     <string name="ime_clip_type_video">व्हिडिओ</string>
+    <string name="ime_clip_undo_delete">पूर्ववत करा</string>
     <string name="ime_clip_unpin">अनपिन करा</string>
     <string name="ime_clip_video_desc">कॉपी केलेला व्हिडिओ</string>
     <string name="ime_clipboard_no_match">“%1$s” शी जुळणारे कोणतेही क्लिप्स नाहीत.</string>
@@ -203,10 +234,12 @@
     <string name="ime_dict_add_vocab_action">शब्दसंग्रहात जोडा</string>
     <string name="ime_dict_antonyms_label">विरुद्धार्थी शब्द</string>
     <string name="ime_dict_error">ॲप शब्दकोशापर्यंत पोहोचू शकत नाही. तुमचे नेटवर्क तपासा आणि पुन्हा प्रयत्न करा.</string>
+    <string name="ime_dict_from">%1$s कडून</string>
     <string name="ime_dict_idle_info">इंग्रजी शब्द शोधा. सर्च बार दाबा आणि टाईप करा. तुम्ही टूल उघडण्यापूर्वी कर्सर शब्दावर ठेवू शकता.</string>
     <string name="ime_dict_insert_action">इन्सर्ट करा</string>
     <string name="ime_dict_lookup_desc">शब्द शोधा</string>
     <string name="ime_dict_lookup_progress">“%1$s” शोधत आहे…</string>
+    <string name="ime_dict_no_sources">सर्व शब्दकोश स्रोत बंद आहेत. शब्दकोश साधन सेटिंग्जमध्ये एक स्रोत चालू करा.</string>
     <string name="ime_dict_not_found_empty">“%1$s” साठी कोणतीही नोंद नाही. स्पेलिंग तपासा किंवा शब्दाचे मूळ रूप वापरून पहा.</string>
     <string name="ime_dict_play_desc">उच्चार प्ले करा</string>
     <string name="ime_dict_search_active_hint">शब्द टाईप करा…</string>
@@ -314,7 +347,15 @@
     <string name="ime_glide_word_list_offer">ग्लाइड टायपिंगसाठी %1$s शब्द सूची आवश्यक आहे</string>
     <string name="ime_glide_word_list_offer_dismiss_desc">डिसमिस करा</string>
     <string name="ime_grammar_all_filtered_empty">सापडलेल्या सर्व समस्या फिल्टरमुळे लपवल्या आहेत</string>
+    <string name="ime_grammar_ask_ai_desc">या समस्येबद्दल AI ला विचारा</string>
     <string name="ime_grammar_category_kind_label">%1$s • %2$s</string>
+    <string name="ime_grammar_deepl_action_desc">DeepL Write सह मजकूर सुधारा</string>
+    <string name="ime_grammar_deepl_dismiss_desc">DeepL Write निकाल बंद करा</string>
+    <string name="ime_grammar_deepl_error">DeepL Write ने उत्तर दिले नाही</string>
+    <string name="ime_grammar_deepl_replace_action">बदला</string>
+    <string name="ime_grammar_deepl_replace_failed_toast">या क्षेत्रातील मजकूर बदलला जाऊ शकत नाही</string>
+    <string name="ime_grammar_deepl_title">DeepL Write</string>
+    <string name="ime_grammar_deepl_unchanged">DeepL Write कडे बदलण्यासाठी काहीही नाही</string>
     <string name="ime_grammar_dialect_desc">बोली निवडा</string>
     <string name="ime_grammar_dismiss_desc">ही समस्या लपवा</string>
     <string name="ime_grammar_empty_hint">मजकूर टाईप करा किंवा मजकूर असलेले फील्ड उघडा. समस्या येथे दिसतील. तपासणी ऑफलाइन केली जाते.</string>
@@ -346,6 +387,7 @@
     <string name="ime_icons_empty_info">आयकॉन पॅक जोडण्यासाठी, सेटिंग्ज उघडा.</string>
     <string name="ime_icons_more_label">अधिक आयकॉन पॅक</string>
     <string name="ime_icons_pick_info">की आणि टूलवर वापरण्यासाठी आयकॉन पॅक दाबा.</string>
+    <string name="ime_image_search_by_photo_desc">फोटोसह सर्च करा</string>
     <string name="ime_image_search_empty">“%1$s” साठी कोणतीही प्रतिमा नाही</string>
     <string name="ime_image_search_hint">प्रतिमा शोधा</string>
     <string name="ime_image_search_idle">शोध टाइप करा आणि एंटर दाबा. प्रतिमा समाविष्ट करण्यासाठी ती दाबा. तिची लिंक समाविष्ट करण्यासाठी दाबून ठेवा.</string>
@@ -376,6 +418,8 @@
     <string name="ime_kde_loop">पुनरावृत्ती करा</string>
     <string name="ime_kde_media_empty_body">तिथे एक प्लेयर सुरू करा आणि तो इथे दिसेल</string>
     <string name="ime_kde_media_empty_title">संगणकावर काहीही वाजत नाहीये</string>
+    <string name="ime_kde_media_unsupported_body">KDE Connect फोनला संगीत किंवा व्हिडिओ नियंत्रित करू देत नाही. Mac वरील KDE Connect कधीही तसे करत नाही</string>
+    <string name="ime_kde_media_unsupported_title">हे संगणक त्याचे प्लेयर शेअर करत नाही</string>
     <string name="ime_kde_not_listening">या फोनवरील दुसरे ॲप KDE कनेक्ट पोर्ट वापरत आहे. संगणक अजूनही हा कीबोर्ड शोधू शकतात, परंतु या बाजूला \'रिफ्रेश\' दाबा.</string>
     <string name="ime_kde_notice_clipboard_empty">क्लिपबोर्डवर पाठवण्यासाठी काहीही नाही</string>
     <string name="ime_kde_notice_clipboard_sent">क्लिपबोर्ड पाठवले</string>
@@ -426,10 +470,12 @@
     <string name="ime_kde_send_empty">क्लिपबोर्ड, तुम्ही लिहिलेले मजकूर किंवा फाइल्स पाठवा. संगणक जे काही पाठवतो ते येथे आणि \'डाउनलोड्स\'मध्ये येते.</string>
     <string name="ime_kde_send_field">फील्डमधील मजकूर</string>
     <string name="ime_kde_send_files">फाईल्स…</string>
+    <string name="ime_kde_send_unsupported">हा संगणक फोनवरून फाईल्स किंवा मजकूर स्वीकारत नाही</string>
     <string name="ime_kde_settings">सेटिंग्ज</string>
     <string name="ime_kde_shuffle">शफल करा</string>
     <string name="ime_kde_slides_end">शेवट</string>
     <string name="ime_kde_slides_next">पुढील स्लाइड</string>
+    <string name="ime_kde_slides_no_pointer">या संगणकावर स्लाईड्ससाठी पॉइंटर नाही</string>
     <string name="ime_kde_slides_pointer">पॉइंटरसाठी धरून ठेवा आणि ड्रॅग करा</string>
     <string name="ime_kde_slides_previous">मागील स्लाइड</string>
     <string name="ime_kde_slides_start">सुरू करा</string>
@@ -489,11 +535,25 @@
     <string name="ime_language_switch_title">इनपुट भाषा</string>
     <string name="ime_launcher_activities_label">स्क्रीन</string>
     <string name="ime_launcher_app_info_action">ॲप माहिती</string>
+    <string name="ime_launcher_combo_label">%1$s + %2$s</string>
+    <string name="ime_launcher_combo_open_action">स्प्लिट स्क्रीनमध्ये दोन्ही उघडा</string>
+    <string name="ime_launcher_combo_remove_action">ही जोडी काढून टाका</string>
+    <string name="ime_launcher_combos_label">स्प्लिट स्क्रीन जोड्या</string>
     <string name="ime_launcher_empty">कोणतेही ॲप जुळत नाही</string>
+    <string name="ime_launcher_floating_unsupported">हे डिव्हाइस ते पूर्ण स्क्रीनवर उघडू शकते</string>
     <string name="ime_launcher_hidden_label">ग्रिडमधून लपवलेले</string>
     <string name="ime_launcher_hide_action">ग्रिडमधून ॲप लपवा</string>
     <string name="ime_launcher_loading">ॲप्स लोड होत आहेत...</string>
+    <string name="ime_launcher_menu_close">मेनू बंद करा</string>
     <string name="ime_launcher_not_exported_label">ॲपच्या बाहेरून उघडता येत नाही</string>
+    <string name="ime_launcher_open_action">उघडा</string>
+    <string name="ime_launcher_open_floating_action">फ्लोटिंग विंडोमध्ये उघडा</string>
+    <string name="ime_launcher_open_split_action">स्प्लिट स्क्रीनमध्ये उघडा</string>
+    <string name="ime_launcher_page_action">स्क्रीन, लपवा आणि ॲप माहिती...</string>
+    <string name="ime_launcher_page_no_screens_action">लपवा आणि ॲप माहिती...</string>
+    <string name="ime_launcher_pair_action">स्प्लिट स्क्रीनमध्ये जोडी करा...</string>
+    <string name="ime_launcher_pair_cancel">रद्द करा</string>
+    <string name="ime_launcher_pair_prompt">%1$s च्या बाजूला उघडण्यासाठी ॲपवर टॅप करा</string>
     <string name="ime_launcher_pin_action">ॲप पिन करा</string>
     <string name="ime_launcher_pinned_label">पिन केलेले</string>
     <string name="ime_launcher_recents_label">अलीकडील</string>
@@ -669,9 +729,11 @@
     <string name="ime_sandbox_offer_only">फक्त तुमच्या शब्दांचा वापर करून स्वाइप करायचे आहे का?</string>
     <string name="ime_sandbox_offer_prefer">तुमच्या शब्दांनुसार स्वाइपिंग ट्यून करायचे आहे का?</string>
     <string name="ime_search_attribution_brave">Brave द्वारे</string>
+    <string name="ime_selection_ask_ai">AI ला विचारा</string>
     <string name="ime_selection_macro_back_desc">निवड कृतींकडे परत जा</string>
     <string name="ime_selection_macro_bengali_unavailable_toast">बंगाली भाषा लोड झालेली नाही</string>
     <string name="ime_selection_macro_busy_desc">काम सुरू आहे</string>
+    <string name="ime_selection_macro_deepl_clean_toast">DeepL Write कडे बदलण्यासाठी काहीही नाही</string>
     <string name="ime_selection_macro_find_none_toast">दुसरी कोणतीही जुळणी नाही</string>
     <string name="ime_selection_macro_grammar_clean_toast">दुरुस्त करण्यासाठी काहीही नाही</string>
     <string name="ime_selection_macro_grammar_unavailable_toast">व्याकरण तपासक उपलब्ध नाही</string>
@@ -680,6 +742,7 @@
     <string name="ime_selection_macro_nothing_to_undo_toast">पूर्ववत करण्यासाठी काहीही शिल्लक नाही</string>
     <string name="ime_selection_macro_open_in_desc">%1$s मध्ये उघडा</string>
     <string name="ime_selection_macro_stop_label">थांबा</string>
+    <string name="ime_selection_quote">कोट</string>
     <string name="ime_service_already_in_settings_toast">तुम्ही आधीच सेटिंग्जमध्ये आहात</string>
     <string name="ime_service_autocorrect_off_toast">ऑटोकरेक्ट बंद आहे</string>
     <string name="ime_service_autocorrect_on_toast">ऑटोकरेक्ट चालू आहे</string>
@@ -710,6 +773,11 @@
     <string name="ime_service_phonetic_english_needs_secondary_toast">भाषा अंतर्गत इंग्रजी चालू करा, %1$s, यावरून देखील सुचवा</string>
     <string name="ime_service_phonetic_english_off_toast">केवळ इंग्रजी शब्द सुचवले जातात</string>
     <string name="ime_service_phonetic_english_on_toast">इंग्रजी शब्द इंग्रजीच राहतात</string>
+    <string name="ime_service_photo_search_blocked">डेटा सेव्हर वेब सर्चला या कनेक्शनचा वापर करण्यास परवानगी देत नाही</string>
+    <string name="ime_service_photo_search_metered_ask">हे कनेक्शन मीटर केलेले आहे. फोटो पाठवण्यासाठी, पुन्हा शोध दाबा.</string>
+    <string name="ime_service_photo_search_no_app">या फोनवरील कोणतेही ॲप फोटोसह शोधू शकत नाही</string>
+    <string name="ime_service_photo_search_no_browser">या फोनमधील कोणतेही ब्राउझर निकाल उघडू शकत नाही</string>
+    <string name="ime_service_photo_search_sending">फोटो सर्च साइटवर पाठवत आहे</string>
     <string name="ime_service_plugins_all_off_notice">तुम्ही इंस्टॉल केलेले प्रत्येक प्लगइन बंद आहे. प्लगइन व्यवस्थापित करा अंतर्गत एक चालू करा.</string>
     <string name="ime_service_plugins_off_notice">प्लगइन्स बंद आहेत. ते इंस्टॉल आणि रन करण्यासाठी सेटिंग्जमध्ये जाऊन चालू करा.</string>
     <string name="ime_service_power_saving_off_toast">पॉवर सेव्हिंग बंद आहे</string>
@@ -790,10 +858,22 @@
     <string name="ime_sound_volume_label">व्हॉल्यूम</string>
     <string name="ime_sticker_add_desc">स्टिकर्स जोडा</string>
     <string name="ime_sticker_add_to_pack_action">%1$s मध्ये जोडा</string>
+    <string name="ime_sticker_info_emoji">इमोजी: %1$s</string>
+    <string name="ime_sticker_info_keywords">कीवर्ड: %1$s</string>
+    <string name="ime_sticker_info_pack">पॅक: %1$s</string>
+    <string name="ime_sticker_info_untitled">शीर्षक नाही</string>
     <string name="ime_sticker_local_search_empty">तुमच्या कोणत्याही स्टिकर्सशी “%1$s” जुळत नाही</string>
     <string name="ime_sticker_manage_packs_action">पॅक व्यवस्थापित करा</string>
     <string name="ime_sticker_need_key_body">स्टिकर टूलला Klipy किंवा GIPHY कडून API की आवश्यक आहे. दोन्ही की मोफत आहेत. या टूलच्या सेटिंग्जमध्ये की जोडा.</string>
     <string name="ime_sticker_no_packs_empty">अद्याप कोणतेही स्टिकर पॅक नाहीत. सेटिंग्जमध्ये एक पॅक तयार करा. तुम्ही Klipy किंवा GIPHY मधील स्टिकर दाबून धरून ते येथे सेव्ह करू शकता.</string>
+    <plurals name="ime_sticker_offer_count">
+        <item quantity="one">%1$d स्टिकर</item>
+        <item quantity="other">%1$d स्टिकर्स</item>
+    </plurals>
+    <string name="ime_sticker_offer_dismiss_desc">%1$s साठी स्टिकर्स लपवा</string>
+    <string name="ime_sticker_offer_item_desc">स्टिकर %1$s पाठवा</string>
+    <string name="ime_sticker_offer_item_untitled_desc">हे स्टिकर पाठवा</string>
+    <string name="ime_sticker_offer_more">+%1$d</string>
     <string name="ime_sticker_pack_all_label">सर्व</string>
     <string name="ime_sticker_pack_empty">हे पॅक रिकामे आहे.</string>
     <string name="ime_sticker_save_new_pack_action">नवीन पॅकमध्ये सेव्ह करा</string>
@@ -804,8 +884,24 @@
     <string name="ime_suggestion_hold_label">शब्द पर्याय</string>
     <string name="ime_suggestion_never_suggest">\"%1$s\" कधीही सुचवू नका</string>
     <string name="ime_suggestions_show_desc">सूचना पट्टी दाखवा</string>
+    <string name="ime_symbol_row_delete_confirm_body">हे संच आणि त्यातील सर्व एन्ट्री काढून टाकल्या जातील. ज्या कीबोर्ड मोडमध्ये हे उपलब्ध होते, तो मोड त्याऐवजी तुमचे इतर संच दर्शवेल.</string>
+    <string name="ime_symbol_row_delete_confirm_title">\"%1$s\" हटवायचे?</string>
+    <string name="ime_symbol_row_delete_set">\"%1$s\" संच हटवा</string>
+    <string name="ime_symbol_row_hide_in_mode">%1$s मध्ये ओळ लपवा</string>
+    <string name="ime_symbol_row_remove">\"%1$s\" काढा</string>
+    <string name="ime_symbol_row_settings">सिम्बॉल रो सेटिंग्ज</string>
     <string name="ime_symbol_set_switch_desc">चिन्ह संच बदला</string>
     <string name="ime_symbols_recents_label">अलीकडील</string>
+    <string name="ime_synonyms_close_desc">जवळचे समानार्थी शब्द</string>
+    <string name="ime_synonyms_failed">समानार्थी शब्दांच्या स्रोतापर्यंत पोहोचता आले नाही. कनेक्शन तपासा आणि पुन्हा प्रयत्न करा.</string>
+    <string name="ime_synonyms_from">%1$s कडून</string>
+    <string name="ime_synonyms_loading">समानार्थी शब्द शोधत आहे...</string>
+    <string name="ime_synonyms_no_sources">सर्व समानार्थी शब्द स्रोत बंद आहेत. टायपिंग, सूचना, समानार्थी शब्द स्रोत मध्ये जाऊन एक चालू करा.</string>
+    <string name="ime_synonyms_not_found">\"%1$s\" साठी कोणतेही समानार्थी शब्द सापडले नाहीत.</string>
+    <string name="ime_synonyms_pick_desc">\"%1$s\" वापरा</string>
+    <string name="ime_synonyms_retry">पुन्हा प्रयत्न करा</string>
+    <string name="ime_synonyms_similar_note">या शब्दासाठी कोणतेही समानार्थी शब्द सूचीबद्ध नाहीत. या शब्दांचा अर्थ समान आहे.</string>
+    <string name="ime_synonyms_title">\"%1$s\" साठी समानार्थी शब्द</string>
     <string name="ime_textedit_doc_end_desc">मजकुराच्या शेवटी जा</string>
     <string name="ime_textedit_doc_start_desc">मजकुराच्या सुरुवातीला जा</string>
     <string name="ime_textedit_down_desc">खाली हलवा</string>
@@ -926,7 +1022,10 @@
     <string name="ime_toolbox_hint_mode">%1$s मोड चालू आहे, म्हणून कीबोर्ड त्या मोडसाठी ही मांडणी जतन करतो. इतर ॲप्स स्वतःची मांडणी ठेवतात.</string>
     <string name="ime_trackpad_hint">कर्सर हलवण्यासाठी ड्रॅग करा</string>
     <string name="ime_trackpad_surface_desc">ट्रॅकपॅड. कर्सर हलवण्यासाठी ड्रॅग करा, निवडण्यासाठी धरून ठेवा आणि ड्रॅग करा, शब्द निवडण्यासाठी दोनदा टॅप करा</string>
+    <string name="ime_translate_all_languages_info">डाउनलोड करण्याच्या भाषा देखील</string>
+    <string name="ime_translate_all_languages_label">सर्व भाषा</string>
     <string name="ime_translate_auto_detect_label">भाषा ओळखा</string>
+    <string name="ime_translate_deepl_label">DeepL</string>
     <string name="ime_translate_download_failed_error">डाउनलोड पूर्ण झाले नाही. कनेक्शन तपासा आणि पुन्हा प्रयत्न करा.</string>
     <string name="ime_translate_download_of_total_progress">%2$s पैकी %1$s</string>
     <string name="ime_translate_downloaded_desc">डाउनलोड केलेले</string>
@@ -1064,6 +1163,10 @@
     <string name="ime_voice_status_mic_blocked">मायक्रोफोन ब्लॉक केला आहे. क्विक सेटिंग्जमध्ये मायक्रोफोन ॲक्सेस चालू करा, त्यानंतर पुन्हा प्रयत्न करा.</string>
     <string name="ime_voice_status_no_model">ऑफलाइन व्हॉइस टायपिंगसाठी अद्याप कोणतेही मॉडेल नाही</string>
     <string name="ime_voice_status_no_server">ट्रान्सक्रिप्शन सर्व्हरकडे अजून पत्ता नाही</string>
+    <plurals name="ime_voice_status_stops_in">
+        <item quantity="one">%d सेकंदात थांबेल. आता पूर्ण करण्यासाठी दाबा.</item>
+        <item quantity="other">%d सेकंदात थांबेल. आता पूर्ण करण्यासाठी दाबा.</item>
+    </plurals>
     <string name="ime_voice_status_transcribing">लिप्यंतरण करत आहे...</string>
     <string name="ime_voice_stop_desc">ऐकणे थांबवा</string>
     <string name="ime_voice_strip_allow_action">परवानगी द्या</string>
@@ -1102,6 +1205,7 @@
     <string name="ime_web_search_need_key_body">वेब सर्चसाठी Brave Search कडून API की आवश्यक आहे. या टूलसाठी सेटिंग्जमध्ये एक की जोडा.</string>
     <string name="ime_web_search_open_desc">ब्राउझरमध्ये उघडा</string>
     <string name="ime_wiki_back_desc">निकाल परत</string>
+    <string name="ime_wiki_expand_desc">लेखाची लांबी वाढवा</string>
     <string name="ime_wiki_full_error">ॲप लेखाचा मजकूर लोड करू शकत नाही.</string>
     <string name="ime_wiki_full_progress">पूर्ण लेख लोड करत आहे...</string>
     <string name="ime_wiki_idle_info">%1$s.wikipedia.org वर विषयासाठी शोधा. सारांश वाचा, लिंक्स उघडा आणि मजकूर किंवा लेखाचा पत्ता समाविष्ट करा.</string>
@@ -1113,8 +1217,12 @@
     <string name="ime_wiki_links_progress">लिंक्स लोड होत आहेत...</string>
     <string name="ime_wiki_no_results_empty">सर्चमध्ये “%1$s” साठी काहीही सापडले नाही.</string>
     <string name="ime_wiki_no_summary_empty">या लेखाचा कोणताही सारांश नाही.</string>
+    <string name="ime_wiki_open_browser_desc">ब्राउझरमध्ये लेख उघडा</string>
+    <string name="ime_wiki_quote_markdown">\"%1$s\" ([Wikipedia: %2$s](%3$s) कडून)</string>
+    <string name="ime_wiki_quote_plain">\"%1$s\" (विकिपीडिया: %2$s, %3$s)</string>
     <string name="ime_wiki_search_active_hint">विकिपीडिया शोधा. शोधण्यासाठी एंटर दाबा</string>
     <string name="ime_wiki_search_hint">विकिपीडिया शोधा…</string>
+    <string name="ime_wiki_shrink_desc">लेख पुन्हा कीबोर्डच्या उंचीचा करा</string>
     <string name="ime_wiki_tab_full_label">पूर्ण लेख</string>
     <string name="ime_wiki_tab_links_label">लिंक्स</string>
     <string name="ime_wiki_tab_summary_label">सारांश</string>
@@ -1164,6 +1272,7 @@
     <string name="ime_word_menu_delete">\"%1$s\" हटवा</string>
     <string name="ime_word_menu_edit">संपादित करा…</string>
     <string name="ime_word_menu_search_all">\"%1$s\" साठी सर्व शब्दांमध्ये शोधा</string>
+    <string name="ime_word_menu_synonyms">\"%1$s\" साठी समानार्थी शब्द</string>
     <string name="ime_word_spell_apply_desc">हे स्पेलिंग वापरा</string>
     <string name="ime_word_spell_cancel_desc">स्पेलिंग तसेच राहू द्या</string>
     <string name="ime_word_spell_hint">\"%1$s\" साठी नवीन स्पेलिंग टाईप करा</string>

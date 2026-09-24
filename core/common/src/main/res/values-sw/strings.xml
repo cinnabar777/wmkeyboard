@@ -35,6 +35,7 @@
     <string name="common_enable">Washa</string>
     <string name="common_error_generic">Kitu hakikufanya kazi. Jaribu tena.</string>
     <string name="common_error_network">Hakuna muunganisho. Angalia mtandao wako na ujaribu tena.</string>
+    <string name="common_error_no_internet_permission">Toleo hili la kibodi haliwezi kuunganishwa kwenye mtandao.</string>
     <string name="common_error_timeout">Ombi limechukua muda mrefu sana. Jaribu tena.</string>
     <string name="common_export">Hamisha</string>
     <string name="common_import">Ingiza</string>

@@ -115,6 +115,7 @@
     <string name="core_content_selection_macro_chat_strike">취소선</string>
     <string name="core_content_selection_macro_colour">색상</string>
     <string name="core_content_selection_macro_copy">복사</string>
+    <string name="core_content_selection_macro_deepl_write">DeepL Write</string>
     <string name="core_content_selection_macro_digits_latin">숫자</string>
     <string name="core_content_selection_macro_email">이메일</string>
     <string name="core_content_selection_macro_fancy">멋진</string>

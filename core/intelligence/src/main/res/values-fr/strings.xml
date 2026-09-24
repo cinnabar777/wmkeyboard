@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">Expérimental</string>
     <string name="core_intel_llm_tier_recommended_label">Recommandé</string>
     <string name="core_intel_llm_tier_untested_label">Non testé</string>
+    <string name="core_intel_ocr_download_error_http">Le serveur GitHub n\'a pas envoyé le fichier. Le code d\'erreur est HTTP %1$s.</string>
+    <string name="core_intel_ocr_download_error_interrupted">La connexion a été interrompue pendant le téléchargement. Réessayez.</string>
+    <string name="core_intel_ocr_download_error_no_space">L\'espace de stockage sur votre appareil est insuffisant. Vous devez d\'abord libérer environ %1$s Mo.</string>
+    <string name="core_intel_ocr_pack_error_broken">Les données linguistiques téléchargées sont endommagées, le scanner n\'a donc pas pu les utiliser. Téléchargez-les à nouveau.</string>
 </resources>

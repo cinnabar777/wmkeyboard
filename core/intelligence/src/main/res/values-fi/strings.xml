@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">Kokeellinen</string>
     <string name="core_intel_llm_tier_recommended_label">Suositeltu</string>
     <string name="core_intel_llm_tier_untested_label">Testaamaton</string>
+    <string name="core_intel_ocr_download_error_http">GitHub-palvelin ei lähettänyt tiedostoa. Virhekoodi on HTTP %1$s.</string>
+    <string name="core_intel_ocr_download_error_interrupted">Yhteys katkesi latauksen aikana. Yritä uudelleen.</string>
+    <string name="core_intel_ocr_download_error_no_space">Laitteessasi ei ole tarpeeksi tallennustilaa. Sinun on vapautettava ensin noin %1$s Mt.</string>
+    <string name="core_intel_ocr_pack_error_broken">Ladattu kielidata on vahingoittunut, joten skanneri ei voinut käyttää sitä. Lataa se uudelleen.</string>
 </resources>

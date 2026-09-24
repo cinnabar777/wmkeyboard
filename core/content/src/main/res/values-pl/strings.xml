@@ -115,6 +115,7 @@
     <string name="core_content_selection_macro_chat_strike">Przekreślenie</string>
     <string name="core_content_selection_macro_colour">Kolor</string>
     <string name="core_content_selection_macro_copy">Kopiuj</string>
+    <string name="core_content_selection_macro_deepl_write">DeepL Write</string>
     <string name="core_content_selection_macro_digits_latin">Cyfry</string>
     <string name="core_content_selection_macro_email">E-mail</string>
     <string name="core_content_selection_macro_fancy">Ozdobne</string>

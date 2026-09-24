@@ -35,6 +35,7 @@
     <string name="common_enable">Aktifkan</string>
     <string name="common_error_generic">Terjadi kesalahan. Coba lagi.</string>
     <string name="common_error_network">Tidak ada koneksi. Periksa jaringan Anda dan coba lagi.</string>
+    <string name="common_error_no_internet_permission">Build papan ketik ini tidak dapat terhubung ke internet.</string>
     <string name="common_error_timeout">Permintaan terlalu lama. Coba lagi.</string>
     <string name="common_export">Ekspor</string>
     <string name="common_import">Impor</string>

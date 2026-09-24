@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">ప్రయోగాత్మక</string>
     <string name="core_intel_llm_tier_recommended_label">సిఫార్సు చేయబడింది</string>
     <string name="core_intel_llm_tier_untested_label">పరీక్షించబడలేదు</string>
+    <string name="core_intel_ocr_download_error_http">GitHub సర్వర్ ఫైల్‌ను పంపలేదు. ఎర్రర్ కోడ్ HTTP %1$s.</string>
+    <string name="core_intel_ocr_download_error_interrupted">డౌన్‌లోడ్ సమయంలో కనెక్షన్ ఆగిపోయింది. మళ్ళీ ప్రయత్నించండి.</string>
+    <string name="core_intel_ocr_download_error_no_space">మీ పరికరంలో తగినంత నిల్వ లేదు. మీరు ముందుగా సుమారు %1$s MB ఖాళీ చేయాలి.</string>
+    <string name="core_intel_ocr_pack_error_broken">డౌన్‌లోడ్ చేసిన భాషా డేటా దెబ్బతింది, కాబట్టి స్కానర్ దానిని ఉపయోగించలేకపోయింది. దయచేసి మళ్ళీ డౌన్‌లోడ్ చేయండి.</string>
 </resources>

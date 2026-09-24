@@ -35,6 +35,7 @@
     <string name="common_enable">Slå til</string>
     <string name="common_error_generic">Noget gik galt. Prøv igen.</string>
     <string name="common_error_network">Ingen forbindelse. Tjek dit netværk og prøv igen.</string>
+    <string name="common_error_no_internet_permission">Denne version af tastaturet kan ikke oprette forbindelse til internettet.</string>
     <string name="common_error_timeout">Anmodningen tog for lang tid. Prøv igen.</string>
     <string name="common_export">Eksportér</string>
     <string name="common_import">Importér</string>

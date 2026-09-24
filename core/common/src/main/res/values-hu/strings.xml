@@ -35,6 +35,7 @@
     <string name="common_enable">Bekapcsolás</string>
     <string name="common_error_generic">Valami nem sikerült. Próbálja újra.</string>
     <string name="common_error_network">Nincs kapcsolat. Ellenőrizd a hálózatot, és próbáld újra.</string>
+    <string name="common_error_no_internet_permission">A billentyűzet ezen verziója nem tud csatlakozni az internethez.</string>
     <string name="common_error_timeout">A kérés túl sokáig tartott. Próbálja újra.</string>
     <string name="common_export">Exportálás</string>
     <string name="common_import">Importálás</string>

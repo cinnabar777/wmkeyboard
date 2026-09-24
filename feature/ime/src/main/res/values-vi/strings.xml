@@ -2,6 +2,13 @@
 <!-- Machine translated by Google Play. Do not edit by hand:
      regenerate with tools/i18n/pull-play-translations.py. -->
 <resources>
+    <string name="ime_ai_chat_ask_explain">Giải thích đơn giản</string>
+    <string name="ime_ai_chat_ask_explain_prompt">Hãy giải thích điều này bằng những từ ngữ đơn giản.</string>
+    <string name="ime_ai_chat_ask_hint">Đặt câu hỏi về văn bản hoặc bắt đầu với một trong những gợi ý này.</string>
+    <string name="ime_ai_chat_ask_summary">Tóm tắt</string>
+    <string name="ime_ai_chat_ask_summary_prompt">Cho tôi bản tóm tắt ngắn gọn về nội dung này.</string>
+    <string name="ime_ai_chat_ask_words">Từ khó</string>
+    <string name="ime_ai_chat_ask_words_prompt">Giải thích các từ và ý tưởng khó trong nội dung này.</string>
     <string name="ime_ai_chat_attach_desc">Gửi văn bản của trường cùng với tin nhắn</string>
     <string name="ime_ai_chat_attach_remove_desc">Không gửi văn bản của trường này</string>
     <plurals name="ime_ai_chat_attached_field">
@@ -12,6 +19,8 @@
         <item quantity="one">Lựa chọn của bạn đi kèm với tin nhắn: %1$d ký tự</item>
         <item quantity="other">Lựa chọn của bạn đi kèm với tin nhắn: %1$d ký tự</item>
     </plurals>
+    <string name="ime_ai_chat_attached_tool">Về %1$s</string>
+    <string name="ime_ai_chat_attached_tool_selection">Về một đoạn văn từ %1$s</string>
     <plurals name="ime_ai_chat_attachment_sent">
         <item quantity="one">Với %1$d ký tự văn bản</item>
         <item quantity="other">Với %1$d ký tự văn bản</item>
@@ -99,6 +108,10 @@
     <string name="ime_ai_truncated_notice">Mô hình đã dừng sớm. Hãy tăng \"Độ dài phản hồi tối đa\" trong cài đặt của công cụ.</string>
     <string name="ime_ai_view_changes">Các thay đổi</string>
     <string name="ime_ai_view_result">Kết quả</string>
+    <string name="ime_ask_ai_label_dict">Từ điển: %1$s</string>
+    <string name="ime_ask_ai_label_grammar">Kiểm tra ngữ pháp</string>
+    <string name="ime_ask_ai_label_vocab">Từ vựng: %1$s</string>
+    <string name="ime_ask_ai_label_wiki">Wikipedia: %1$s</string>
     <string name="ime_autofill_dismiss_desc">Ẩn các gợi ý tự động điền</string>
     <string name="ime_calc_degrees_label">độ</string>
     <string name="ime_calc_insert_action">Chèn</string>
@@ -127,6 +140,7 @@
     <string name="ime_camera_permission_action">Cho phép truy cập máy ảnh</string>
     <string name="ime_camera_permission_body">Công cụ máy ảnh cần quyền truy cập máy ảnh. Ứng dụng chỉ chụp ảnh khi bạn nhấn nút chụp.</string>
     <string name="ime_camera_retake_action">Chụp lại</string>
+    <string name="ime_camera_search_action">Tìm kiếm</string>
     <string name="ime_camera_send_action">Gửi</string>
     <string name="ime_camera_shutter_desc">Chụp ảnh</string>
     <string name="ime_camera_starting_progress">Đang khởi động máy ảnh…</string>
@@ -144,6 +158,10 @@
     <string name="ime_clip_chip_image">Hình ảnh đã sao chép</string>
     <string name="ime_clip_chip_item">Mục đã sao chép</string>
     <string name="ime_clip_chip_screenshot">Ảnh chụp màn hình</string>
+    <plurals name="ime_clip_deleted">
+        <item quantity="one">Đã xóa clip</item>
+        <item quantity="other">Đã xóa %1$d clip</item>
+    </plurals>
     <string name="ime_clip_edit">Chỉnh sửa</string>
     <string name="ime_clip_edit_placeholder">Nhập văn bản của clip</string>
     <string name="ime_clip_edit_rich_note">Việc lưu thay đổi sẽ xóa định dạng</string>
@@ -162,6 +180,18 @@
     <string name="ime_clip_info_private_detail">Bàn phím ẩn clip này trong bảng và xóa nó sớm hơn các clip khác.</string>
     <string name="ime_clip_info_size">Kích thước</string>
     <string name="ime_clip_info_type">Loại</string>
+    <plurals name="ime_clip_left_days">
+        <item quantity="one">Còn %d ngày</item>
+        <item quantity="other">Còn %d ngày</item>
+    </plurals>
+    <plurals name="ime_clip_left_hours">
+        <item quantity="one">còn %d giờ</item>
+        <item quantity="other">còn %d giờ</item>
+    </plurals>
+    <plurals name="ime_clip_left_minutes">
+        <item quantity="one">còn %d phút</item>
+        <item quantity="other">còn %d phút</item>
+    </plurals>
     <string name="ime_clip_number_desc">Clip %1$d</string>
     <string name="ime_clip_pin">Ghim</string>
     <string name="ime_clip_send_as_sticker">Gửi dưới dạng nhãn dán</string>
@@ -172,6 +202,7 @@
     <string name="ime_clip_type_rich_text">Văn bản đa dạng thức</string>
     <string name="ime_clip_type_text">Văn bản</string>
     <string name="ime_clip_type_video">Video</string>
+    <string name="ime_clip_undo_delete">Hoàn tác</string>
     <string name="ime_clip_unpin">Bỏ ghim</string>
     <string name="ime_clip_video_desc">Video đã sao chép</string>
     <string name="ime_clipboard_no_match">Không có đoạn clip nào khớp với “%1$s”.</string>
@@ -203,10 +234,12 @@
     <string name="ime_dict_add_vocab_action">Thêm vào từ vựng</string>
     <string name="ime_dict_antonyms_label">Từ trái nghĩa</string>
     <string name="ime_dict_error">Ứng dụng không thể kết nối với từ điển. Hãy kiểm tra mạng của bạn và thử lại.</string>
+    <string name="ime_dict_from">Từ %1$s</string>
     <string name="ime_dict_idle_info">Tra cứu một từ tiếng Anh. Nhấn vào thanh tìm kiếm và nhập từ. Bạn cũng có thể đặt con trỏ vào một từ trước khi mở công cụ.</string>
     <string name="ime_dict_insert_action">Chèn</string>
     <string name="ime_dict_lookup_desc">Tra cứu từ</string>
     <string name="ime_dict_lookup_progress">Đang tra cứu “%1$s”…</string>
+    <string name="ime_dict_no_sources">Tất cả các nguồn từ điển đều đang tắt. Hãy bật một nguồn trong cài đặt công cụ Từ điển.</string>
     <string name="ime_dict_not_found_empty">Không có mục nào cho “%1$s”. Kiểm tra chính tả hoặc thử dạng cơ bản của từ.</string>
     <string name="ime_dict_play_desc">Phát cách phát âm</string>
     <string name="ime_dict_search_active_hint">Nhập một từ…</string>
@@ -314,7 +347,15 @@
     <string name="ime_glide_word_list_offer">Gõ lướt cần danh sách từ %1$s</string>
     <string name="ime_glide_word_list_offer_dismiss_desc">Bỏ qua</string>
     <string name="ime_grammar_all_filtered_empty">Mọi vấn đề được tìm thấy đều bị ẩn bởi bộ lọc</string>
+    <string name="ime_grammar_ask_ai_desc">Hỏi AI về vấn đề này</string>
     <string name="ime_grammar_category_kind_label">%1$s • %2$s</string>
+    <string name="ime_grammar_deepl_action_desc">Cải thiện văn bản với DeepL Write</string>
+    <string name="ime_grammar_deepl_dismiss_desc">Đóng kết quả của DeepL Write</string>
+    <string name="ime_grammar_deepl_error">DeepL Write không phản hồi</string>
+    <string name="ime_grammar_deepl_replace_action">Thay thế</string>
+    <string name="ime_grammar_deepl_replace_failed_toast">Văn bản trong trường này không thể thay thế được</string>
+    <string name="ime_grammar_deepl_title">DeepL Write</string>
+    <string name="ime_grammar_deepl_unchanged">DeepL Write không có gì để thay đổi</string>
     <string name="ime_grammar_dialect_desc">Chọn phương ngữ</string>
     <string name="ime_grammar_dismiss_desc">Ẩn vấn đề này</string>
     <string name="ime_grammar_empty_hint">Nhập văn bản hoặc mở một trường có văn bản. Các vấn đề sẽ hiển thị ở đây. Quá trình kiểm tra chạy ngoại tuyến.</string>
@@ -346,6 +387,7 @@
     <string name="ime_icons_empty_info">Để thêm gói biểu tượng, hãy mở cài đặt.</string>
     <string name="ime_icons_more_label">Thêm gói biểu tượng</string>
     <string name="ime_icons_pick_info">Nhấn vào một gói biểu tượng để sử dụng trên các phím và công cụ.</string>
+    <string name="ime_image_search_by_photo_desc">Tìm kiếm bằng ảnh</string>
     <string name="ime_image_search_empty">Không có hình ảnh cho “%1$s”</string>
     <string name="ime_image_search_hint">Tìm kiếm hình ảnh</string>
     <string name="ime_image_search_need_key_body">Tìm kiếm hình ảnh cần có khóa API từ Brave Search. Hãy thêm khóa trong phần cài đặt cho công cụ này.</string>
@@ -375,6 +417,8 @@
     <string name="ime_kde_loop">Lặp lại</string>
     <string name="ime_kde_media_empty_body">Hãy khởi chạy trình phát ở đó và nó sẽ xuất hiện ở đây</string>
     <string name="ime_kde_media_empty_title">Không có gì đang phát trên máy tính</string>
+    <string name="ime_kde_media_unsupported_body">KDE Connect của thiết bị này không cho phép điện thoại điều khiển nhạc hoặc video. KDE Connect trên máy Mac không bao giờ hỗ trợ tính năng này</string>
+    <string name="ime_kde_media_unsupported_title">Máy tính này không chia sẻ trình phát của nó</string>
     <string name="ime_kde_not_listening">Một ứng dụng khác trên điện thoại này đang sử dụng cổng KDE Connect. Máy tính vẫn có thể tìm thấy bàn phím này, nhưng hãy nhấn Làm mới ở phía này.</string>
     <string name="ime_kde_notice_clipboard_empty">Không có gì trong khay nhớ tạm để gửi</string>
     <string name="ime_kde_notice_clipboard_sent">Đã gửi bảng tạm</string>
@@ -425,10 +469,12 @@
     <string name="ime_kde_send_empty">Gửi bảng tạm, nội dung bạn đã viết hoặc tệp tin. Những gì máy tính gửi sẽ xuất hiện tại đây và trong thư mục Tải xuống</string>
     <string name="ime_kde_send_field">Văn bản trong trường</string>
     <string name="ime_kde_send_files">Tệp…</string>
+    <string name="ime_kde_send_unsupported">Máy tính này không chấp nhận tệp hoặc văn bản từ điện thoại</string>
     <string name="ime_kde_settings">Cài đặt</string>
     <string name="ime_kde_shuffle">Xáo trộn</string>
     <string name="ime_kde_slides_end">Kết thúc</string>
     <string name="ime_kde_slides_next">Trang trình bày tiếp theo</string>
+    <string name="ime_kde_slides_no_pointer">Máy tính này không có con trỏ cho các slide</string>
     <string name="ime_kde_slides_pointer">Nhấn và kéo để sử dụng con trỏ</string>
     <string name="ime_kde_slides_previous">Trang trình bày trước</string>
     <string name="ime_kde_slides_start">Bắt đầu</string>
@@ -488,11 +534,25 @@
     <string name="ime_language_switch_title">Ngôn ngữ nhập liệu</string>
     <string name="ime_launcher_activities_label">Màn hình</string>
     <string name="ime_launcher_app_info_action">Thông tin ứng dụng</string>
+    <string name="ime_launcher_combo_label">%1$s + %2$s</string>
+    <string name="ime_launcher_combo_open_action">Mở cả hai trong chế độ chia đôi màn hình</string>
+    <string name="ime_launcher_combo_remove_action">Xóa cặp này</string>
+    <string name="ime_launcher_combos_label">Các cặp chia đôi màn hình</string>
     <string name="ime_launcher_empty">Không có ứng dụng nào khớp</string>
+    <string name="ime_launcher_floating_unsupported">Thiết bị này có thể mở nó ở chế độ toàn màn hình</string>
     <string name="ime_launcher_hidden_label">Ẩn khỏi lưới</string>
     <string name="ime_launcher_hide_action">Ẩn ứng dụng khỏi lưới</string>
     <string name="ime_launcher_loading">Đang tải ứng dụng…</string>
+    <string name="ime_launcher_menu_close">Đóng menu</string>
     <string name="ime_launcher_not_exported_label">Không thể mở từ bên ngoài ứng dụng</string>
+    <string name="ime_launcher_open_action">Mở</string>
+    <string name="ime_launcher_open_floating_action">Mở trong cửa sổ nổi</string>
+    <string name="ime_launcher_open_split_action">Mở trong chế độ chia đôi màn hình</string>
+    <string name="ime_launcher_page_action">Màn hình, ẩn và Thông tin ứng dụng…</string>
+    <string name="ime_launcher_page_no_screens_action">Ẩn và thông tin ứng dụng…</string>
+    <string name="ime_launcher_pair_action">Ghép nối trong chế độ chia đôi màn hình với…</string>
+    <string name="ime_launcher_pair_cancel">Hủy</string>
+    <string name="ime_launcher_pair_prompt">Chạm vào ứng dụng để mở bên cạnh %1$s</string>
     <string name="ime_launcher_pin_action">Ghim ứng dụng</string>
     <string name="ime_launcher_pinned_label">Đã ghim</string>
     <string name="ime_launcher_recents_label">Gần đây</string>
@@ -668,9 +728,11 @@
     <string name="ime_sandbox_offer_only">Vuốt chỉ sử dụng từ của bạn?</string>
     <string name="ime_sandbox_offer_prefer">Điều chỉnh vuốt theo từ ngữ của bạn?</string>
     <string name="ime_search_attribution_brave">thông qua Brave</string>
+    <string name="ime_selection_ask_ai">Hỏi AI</string>
     <string name="ime_selection_macro_back_desc">Quay lại các hành động lựa chọn</string>
     <string name="ime_selection_macro_bengali_unavailable_toast">Tiếng Bengal chưa được tải</string>
     <string name="ime_selection_macro_busy_desc">Đang xử lý</string>
+    <string name="ime_selection_macro_deepl_clean_toast">DeepL Write không có gì để thay đổi</string>
     <string name="ime_selection_macro_find_none_toast">Không có kết quả khớp khác</string>
     <string name="ime_selection_macro_grammar_clean_toast">Không có gì để sửa</string>
     <string name="ime_selection_macro_grammar_unavailable_toast">Trình kiểm tra ngữ pháp không khả dụng</string>
@@ -679,6 +741,7 @@
     <string name="ime_selection_macro_nothing_to_undo_toast">Không còn gì để hoàn tác</string>
     <string name="ime_selection_macro_open_in_desc">Mở trong %1$s</string>
     <string name="ime_selection_macro_stop_label">Dừng</string>
+    <string name="ime_selection_quote">Dấu ngoặc kép</string>
     <string name="ime_service_already_in_settings_toast">Bạn đã ở trong phần cài đặt</string>
     <string name="ime_service_autocorrect_off_toast">Tự động sửa lỗi đã tắt</string>
     <string name="ime_service_autocorrect_on_toast">Tự động sửa lỗi đang bật</string>
@@ -709,6 +772,11 @@
     <string name="ime_service_phonetic_english_needs_secondary_toast">Bật tiếng Anh trong phần Ngôn ngữ, %1$s, Cũng gợi ý từ</string>
     <string name="ime_service_phonetic_english_off_toast">Các từ tiếng Anh chỉ được gợi ý</string>
     <string name="ime_service_phonetic_english_on_toast">Từ tiếng Anh vẫn giữ nguyên tiếng Anh</string>
+    <string name="ime_service_photo_search_blocked">Trình tiết kiệm dữ liệu không cho phép tìm kiếm web sử dụng kết nối này</string>
+    <string name="ime_service_photo_search_metered_ask">Kết nối này bị tính phí theo lưu lượng. Để gửi ảnh, hãy nhấn Tìm kiếm lần nữa.</string>
+    <string name="ime_service_photo_search_no_app">Không có ứng dụng nào trên điện thoại này có thể tìm kiếm bằng ảnh</string>
+    <string name="ime_service_photo_search_no_browser">Không có trình duyệt nào trên điện thoại này có thể mở kết quả</string>
+    <string name="ime_service_photo_search_sending">Đang gửi ảnh đến trang web tìm kiếm</string>
     <string name="ime_service_plugins_all_off_notice">Mọi plugin bạn đã cài đặt đều bị tắt. Hãy bật một plugin trong phần Quản lý plugin.</string>
     <string name="ime_service_plugins_off_notice">Các plugin đã bị tắt. Hãy bật chúng trong phần Cài đặt để cài đặt và chạy chúng.</string>
     <string name="ime_service_power_saving_off_toast">Chế độ tiết kiệm pin đã tắt</string>
@@ -789,10 +857,22 @@
     <string name="ime_sound_volume_label">Âm lượng</string>
     <string name="ime_sticker_add_desc">Thêm nhãn dán</string>
     <string name="ime_sticker_add_to_pack_action">Thêm vào %1$s</string>
+    <string name="ime_sticker_info_emoji">Biểu tượng cảm xúc: %1$s</string>
+    <string name="ime_sticker_info_keywords">Từ khóa: %1$s</string>
+    <string name="ime_sticker_info_pack">Gói: %1$s</string>
+    <string name="ime_sticker_info_untitled">Không có tiêu đề</string>
     <string name="ime_sticker_local_search_empty">Không có nhãn dán nào của bạn khớp với “%1$s”</string>
     <string name="ime_sticker_manage_packs_action">Quản lý gói</string>
     <string name="ime_sticker_need_key_body">Công cụ nhãn dán cần khóa API từ Klipy hoặc GIPHY. Cả hai khóa đều miễn phí. Hãy thêm khóa trong phần cài đặt cho công cụ này.</string>
     <string name="ime_sticker_no_packs_empty">Chưa có gói nhãn dán nào. Hãy tạo một gói trong phần cài đặt. Bạn cũng có thể nhấn và giữ một nhãn dán từ Klipy hoặc GIPHY để lưu nó tại đây.</string>
+    <plurals name="ime_sticker_offer_count">
+        <item quantity="one">%1$d nhãn dán</item>
+        <item quantity="other">%1$d nhãn dán</item>
+    </plurals>
+    <string name="ime_sticker_offer_dismiss_desc">Ẩn nhãn dán cho %1$s</string>
+    <string name="ime_sticker_offer_item_desc">Gửi nhãn dán %1$s</string>
+    <string name="ime_sticker_offer_item_untitled_desc">Gửi nhãn dán này</string>
+    <string name="ime_sticker_offer_more">+%1$d</string>
     <string name="ime_sticker_pack_all_label">Tất cả</string>
     <string name="ime_sticker_pack_empty">Gói này trống.</string>
     <string name="ime_sticker_save_new_pack_action">Lưu vào gói mới</string>
@@ -803,8 +883,24 @@
     <string name="ime_suggestion_hold_label">Tùy chọn từ</string>
     <string name="ime_suggestion_never_suggest">Không bao giờ gợi ý \"%1$s\"</string>
     <string name="ime_suggestions_show_desc">Hiển thị thanh gợi ý</string>
+    <string name="ime_symbol_row_delete_confirm_body">Tập hợp này và tất cả các mục của nó sẽ bị xóa. Một chế độ bàn phím hỗ trợ mục này sẽ hiển thị các tập hợp khác của bạn thay vào đó.</string>
+    <string name="ime_symbol_row_delete_confirm_title">Xóa \"%1$s\"?</string>
+    <string name="ime_symbol_row_delete_set">Xóa bộ \"%1$s\"</string>
+    <string name="ime_symbol_row_hide_in_mode">Ẩn hàng trong %1$s</string>
+    <string name="ime_symbol_row_remove">Xóa \"%1$s\"</string>
+    <string name="ime_symbol_row_settings">Cài đặt hàng ký hiệu</string>
     <string name="ime_symbol_set_switch_desc">Chuyển đổi bộ ký hiệu</string>
     <string name="ime_symbols_recents_label">Gần đây</string>
+    <string name="ime_synonyms_close_desc">Đóng từ đồng nghĩa</string>
+    <string name="ime_synonyms_failed">Không thể kết nối với nguồn từ đồng nghĩa. Hãy kiểm tra kết nối và thử lại.</string>
+    <string name="ime_synonyms_from">Từ %1$s</string>
+    <string name="ime_synonyms_loading">Đang tìm từ đồng nghĩa…</string>
+    <string name="ime_synonyms_no_sources">Tất cả các nguồn từ đồng nghĩa đều đang tắt. Hãy bật một nguồn trong phần Nhập liệu, Gợi ý, Nguồn từ đồng nghĩa.</string>
+    <string name="ime_synonyms_not_found">Không tìm thấy từ đồng nghĩa nào cho \"%1$s\".</string>
+    <string name="ime_synonyms_pick_desc">Sử dụng \"%1$s\"</string>
+    <string name="ime_synonyms_retry">Thử lại</string>
+    <string name="ime_synonyms_similar_note">Không có từ đồng nghĩa nào được liệt kê cho từ này. Những từ này có nghĩa tương tự.</string>
+    <string name="ime_synonyms_title">Từ đồng nghĩa với \"%1$s\"</string>
     <string name="ime_textedit_doc_end_desc">Di chuyển đến cuối văn bản</string>
     <string name="ime_textedit_doc_start_desc">Di chuyển đến đầu văn bản</string>
     <string name="ime_textedit_down_desc">Di chuyển xuống</string>
@@ -925,7 +1021,10 @@
     <string name="ime_toolbox_hint_mode">Chế độ %1$s đang bật, vì vậy bàn phím lưu cách sắp xếp này cho chế độ đó. Các ứng dụng khác giữ cách sắp xếp riêng của chúng.</string>
     <string name="ime_trackpad_hint">Kéo để di chuyển con trỏ</string>
     <string name="ime_trackpad_surface_desc">Bàn di chuột. Kéo để di chuyển con trỏ, giữ và kéo để chọn, chạm hai lần để chọn một từ</string>
+    <string name="ime_translate_all_languages_info">Cũng là các ngôn ngữ để tải xuống</string>
+    <string name="ime_translate_all_languages_label">Tất cả ngôn ngữ</string>
     <string name="ime_translate_auto_detect_label">Tự động phát hiện ngôn ngữ</string>
+    <string name="ime_translate_deepl_label">DeepL</string>
     <string name="ime_translate_download_failed_error">Quá trình tải xuống không hoàn tất. Hãy kiểm tra kết nối rồi thử lại.</string>
     <string name="ime_translate_download_of_total_progress">%1$s trên %2$s</string>
     <string name="ime_translate_downloaded_desc">Đã tải xuống</string>
@@ -1063,6 +1162,10 @@
     <string name="ime_voice_status_mic_blocked">Micrô bị chặn. Bật quyền truy cập Micrô trong Cài đặt nhanh, sau đó thử lại.</string>
     <string name="ime_voice_status_no_model">Nhập liệu bằng giọng nói ngoại tuyến chưa có mô hình</string>
     <string name="ime_voice_status_no_server">Máy chủ phiên âm chưa có địa chỉ</string>
+    <plurals name="ime_voice_status_stops_in">
+        <item quantity="one">Dừng sau %d giây. Nhấn để kết thúc ngay.</item>
+        <item quantity="other">Dừng sau %d giây. Nhấn để kết thúc ngay.</item>
+    </plurals>
     <string name="ime_voice_status_transcribing">Đang chuyển đổi giọng nói...</string>
     <string name="ime_voice_stop_desc">Dừng nghe</string>
     <string name="ime_voice_strip_allow_action">Cho phép</string>
@@ -1102,6 +1205,7 @@
     <string name="ime_web_search_need_key_body">Tìm kiếm web cần có khóa API từ Brave Search. Hãy thêm khóa trong phần cài đặt cho công cụ này.</string>
     <string name="ime_web_search_open_desc">Mở trong trình duyệt</string>
     <string name="ime_wiki_back_desc">Quay lại kết quả</string>
+    <string name="ime_wiki_expand_desc">Làm cho bài viết cao hơn</string>
     <string name="ime_wiki_full_error">Ứng dụng không thể tải nội dung của bài viết.</string>
     <string name="ime_wiki_full_progress">Đang tải toàn bộ bài viết…</string>
     <string name="ime_wiki_idle_info">Tìm kiếm chủ đề trên %1$s.wikipedia.org. Đọc tóm tắt, mở liên kết và chèn văn bản hoặc địa chỉ của bài viết.</string>
@@ -1113,8 +1217,12 @@
     <string name="ime_wiki_links_progress">Đang tải liên kết…</string>
     <string name="ime_wiki_no_results_empty">Tìm kiếm không thấy kết quả cho “%1$s”.</string>
     <string name="ime_wiki_no_summary_empty">Bài viết này không có tóm tắt.</string>
+    <string name="ime_wiki_open_browser_desc">Mở bài viết trong trình duyệt</string>
+    <string name="ime_wiki_quote_markdown">\"%1$s\" (từ [Wikipedia: %2$s](%3$s))</string>
+    <string name="ime_wiki_quote_plain">\"%1$s\" (Wikipedia: %2$s, %3$s)</string>
     <string name="ime_wiki_search_active_hint">Tìm kiếm trên Wikipedia. Nhấn enter để tìm kiếm</string>
     <string name="ime_wiki_search_hint">Tìm kiếm trên Wikipedia…</string>
+    <string name="ime_wiki_shrink_desc">Đưa bài viết trở lại chiều cao của bàn phím</string>
     <string name="ime_wiki_tab_full_label">Bài viết đầy đủ</string>
     <string name="ime_wiki_tab_links_label">Liên kết</string>
     <string name="ime_wiki_tab_summary_label">Tóm tắt</string>
@@ -1164,6 +1272,7 @@
     <string name="ime_word_menu_delete">Xóa \"%1$s\"</string>
     <string name="ime_word_menu_edit">Chỉnh sửa…</string>
     <string name="ime_word_menu_search_all">Tìm kiếm tất cả các từ cho \"%1$s\"</string>
+    <string name="ime_word_menu_synonyms">Từ đồng nghĩa với \"%1$s\"</string>
     <string name="ime_word_spell_apply_desc">Sử dụng cách viết này</string>
     <string name="ime_word_spell_cancel_desc">Giữ nguyên cách viết</string>
     <string name="ime_word_spell_hint">Nhập cách viết mới cho \"%1$s\"</string>

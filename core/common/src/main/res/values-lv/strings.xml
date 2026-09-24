@@ -35,6 +35,7 @@
     <string name="common_enable">Ieslēgt</string>
     <string name="common_error_generic">Kaut kas nogāja greizi. Mēģiniet vēlreiz.</string>
     <string name="common_error_network">Nav savienojuma. Pārbaudiet tīklu un mēģiniet vēlreiz.</string>
+    <string name="common_error_no_internet_permission">Šī tastatūras versija nevar izveidot savienojumu ar internetu.</string>
     <string name="common_error_timeout">Pieprasījums aizņēma pārāk daudz laika. Mēģiniet vēlreiz.</string>
     <string name="common_export">Eksportēt</string>
     <string name="common_import">Importēt</string>

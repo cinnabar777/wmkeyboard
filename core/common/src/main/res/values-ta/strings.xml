@@ -35,6 +35,7 @@
     <string name="common_enable">ஆன் செய்யவும்</string>
     <string name="common_error_generic">ஏதோ ஒன்று சரியாக வேலை செய்யவில்லை. மீண்டும் முயற்சிக்கவும்.</string>
     <string name="common_error_network">இணைப்பு இல்லை. உங்கள் நெட்வொர்க்கைச் சரிபார்த்து மீண்டும் முயற்சிக்கவும்.</string>
+    <string name="common_error_no_internet_permission">இந்தக் கீபோர்டு பதிப்பால் இணையத்துடன் இணைக்க முடியாது.</string>
     <string name="common_error_timeout">கோரிக்கை முடிவடைய அதிக நேரம் எடுத்தது. மீண்டும் முயற்சிக்கவும்.</string>
     <string name="common_export">ஏற்றுமதி</string>
     <string name="common_import">இறக்குமதி</string>

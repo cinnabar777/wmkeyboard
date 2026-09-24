@@ -2,6 +2,13 @@
 <!-- Machine translated by Google Play. Do not edit by hand:
      regenerate with tools/i18n/pull-play-translations.py. -->
 <resources>
+    <string name="ime_ai_chat_ask_explain">Eleza kwa urahisi</string>
+    <string name="ime_ai_chat_ask_explain_prompt">Eleza hili kwa maneno rahisi.</string>
+    <string name="ime_ai_chat_ask_hint">Uliza swali kuhusu maandishi, au anza na mojawapo ya haya.</string>
+    <string name="ime_ai_chat_ask_summary">Muhtasari</string>
+    <string name="ime_ai_chat_ask_summary_prompt">Nipe muhtasari mfupi wa hili.</string>
+    <string name="ime_ai_chat_ask_words">Maneno magumu</string>
+    <string name="ime_ai_chat_ask_words_prompt">Eleza maneno na mawazo magumu katika hili.</string>
     <string name="ime_ai_chat_attach_desc">Tuma maandishi ya sehemu hiyo pamoja na ujumbe</string>
     <string name="ime_ai_chat_attach_remove_desc">Usitume maandishi ya sehemu hiyo</string>
     <plurals name="ime_ai_chat_attached_field">
@@ -12,6 +19,8 @@
         <item quantity="one">Ulichokichagua kinaambatana na ujumbe: herufi %1$d</item>
         <item quantity="other">Ulichokichagua kinaambatana na ujumbe: herufi %1$d</item>
     </plurals>
+    <string name="ime_ai_chat_attached_tool">Kuhusu %1$s</string>
+    <string name="ime_ai_chat_attached_tool_selection">Kuhusu kifungu kutoka %1$s</string>
     <plurals name="ime_ai_chat_attachment_sent">
         <item quantity="one">Na herufi %1$d ya matini</item>
         <item quantity="other">Na herufi %1$d za matini</item>
@@ -99,6 +108,10 @@
     <string name="ime_ai_truncated_notice">Muundo umesimama mapema. Ongeza “Urefu wa juu wa majibu” katika mipangilio ya zana.</string>
     <string name="ime_ai_view_changes">Mabadiliko</string>
     <string name="ime_ai_view_result">Matokeo</string>
+    <string name="ime_ask_ai_label_dict">Kamusi: %1$s</string>
+    <string name="ime_ask_ai_label_grammar">Angalia sarufi</string>
+    <string name="ime_ask_ai_label_vocab">Msamiati: %1$s</string>
+    <string name="ime_ask_ai_label_wiki">Wikipedia: %1$s</string>
     <string name="ime_autofill_dismiss_desc">Ficha mapendekezo ya kujaza kiotomatiki</string>
     <string name="ime_calc_degrees_label">digrii</string>
     <string name="ime_calc_insert_action">Ingiza</string>
@@ -127,6 +140,7 @@
     <string name="ime_camera_permission_action">Ruhusu kamera</string>
     <string name="ime_camera_permission_body">Zana ya kamera inahitaji ruhusa ya kutumia kamera. Programu hupiga picha tu unapobonyeza kitufe cha kupiga picha.</string>
     <string name="ime_camera_retake_action">Piga tena</string>
+    <string name="ime_camera_search_action">Tafuta</string>
     <string name="ime_camera_send_action">Tuma</string>
     <string name="ime_camera_shutter_desc">Piga picha</string>
     <string name="ime_camera_starting_progress">Inaanza kamera…</string>
@@ -144,6 +158,10 @@
     <string name="ime_clip_chip_image">Picha iliyonakiliwa</string>
     <string name="ime_clip_chip_item">Kipengee kilichonakiliwa</string>
     <string name="ime_clip_chip_screenshot">Picha ya skrini</string>
+    <plurals name="ime_clip_deleted">
+        <item quantity="one">Klipu imefutwa</item>
+        <item quantity="other">Klipu %1$d zimefutwa</item>
+    </plurals>
     <string name="ime_clip_edit">Hariri</string>
     <string name="ime_clip_edit_placeholder">Andika maandishi ya klipu</string>
     <string name="ime_clip_edit_rich_note">Kuhifadhi mabadiliko kutaondoa umbizo</string>
@@ -162,6 +180,18 @@
     <string name="ime_clip_info_private_detail">Kibodi huficha klipu hii kwenye paneli na kuifuta mapema kuliko klipu nyingine.</string>
     <string name="ime_clip_info_size">Ukubwa</string>
     <string name="ime_clip_info_type">Aina</string>
+    <plurals name="ime_clip_left_days">
+        <item quantity="one">Siku %d imebaki</item>
+        <item quantity="other">Siku %d zimebaki</item>
+    </plurals>
+    <plurals name="ime_clip_left_hours">
+        <item quantity="one">Saa %d imesalia</item>
+        <item quantity="other">Saa %d zimesalia</item>
+    </plurals>
+    <plurals name="ime_clip_left_minutes">
+        <item quantity="one">Dakika %d imebaki</item>
+        <item quantity="other">Dakika %d zimebaki</item>
+    </plurals>
     <string name="ime_clip_number_desc">Klipu %1$d</string>
     <string name="ime_clip_pin">Bandika</string>
     <string name="ime_clip_send_as_sticker">Tuma kama stika</string>
@@ -172,6 +202,7 @@
     <string name="ime_clip_type_rich_text">Maandishi tajiri</string>
     <string name="ime_clip_type_text">Maandishi</string>
     <string name="ime_clip_type_video">Video</string>
+    <string name="ime_clip_undo_delete">Tendua</string>
     <string name="ime_clip_unpin">Ondoa pini</string>
     <string name="ime_clip_video_desc">Video iliyonakiliwa</string>
     <string name="ime_clipboard_empty">Historia ya ubao wa kunakili ni tupu. Maandishi yaliyonakiliwa yataonekana hapa.</string>
@@ -204,10 +235,12 @@
     <string name="ime_dict_add_vocab_action">Ongeza kwenye msamiati</string>
     <string name="ime_dict_antonyms_label">Kinyume</string>
     <string name="ime_dict_error">Programu haiwezi kufikia kamusi. Angalia mtandao wako na ujaribu tena.</string>
+    <string name="ime_dict_from">Kutoka %1$s</string>
     <string name="ime_dict_idle_info">Tafuta neno la Kiingereza. Bonyeza upau wa kutafutia na uandike. Unaweza pia kuweka kishale kwenye neno kabla ya kufungua zana.</string>
     <string name="ime_dict_insert_action">Ingiza</string>
     <string name="ime_dict_lookup_desc">Tafuta neno</string>
     <string name="ime_dict_lookup_progress">Inatafuta “%1$s”…</string>
+    <string name="ime_dict_no_sources">Vyanzo vyote vya kamusi vimezimwa. Washa kimoja katika mipangilio ya zana ya Kamusi.</string>
     <string name="ime_dict_not_found_empty">Hakuna ingizo kwa “%1$s”. Angalia tahajia, au jaribu umbo la msingi la neno.</string>
     <string name="ime_dict_play_desc">Cheza matamshi</string>
     <string name="ime_dict_search_active_hint">Andika neno...</string>
@@ -315,7 +348,15 @@
     <string name="ime_glide_word_list_offer">Kuandika kwa kutelezesha kidole kunahitaji orodha ya maneno ya %1$s</string>
     <string name="ime_glide_word_list_offer_dismiss_desc">Ondoa</string>
     <string name="ime_grammar_all_filtered_empty">Kila suala lililopatikana limefichwa na kichujio</string>
+    <string name="ime_grammar_ask_ai_desc">Uliza AI kuhusu suala hili</string>
     <string name="ime_grammar_category_kind_label">%1$s • %2$s</string>
+    <string name="ime_grammar_deepl_action_desc">Boresha maandishi kwa DeepL Write</string>
+    <string name="ime_grammar_deepl_dismiss_desc">Funga matokeo ya DeepL Write</string>
+    <string name="ime_grammar_deepl_error">DeepL Write haikujibu</string>
+    <string name="ime_grammar_deepl_replace_action">Badilisha</string>
+    <string name="ime_grammar_deepl_replace_failed_toast">Maandishi katika sehemu hii hayawezi kubadilishwa</string>
+    <string name="ime_grammar_deepl_title">DeepL Write</string>
+    <string name="ime_grammar_deepl_unchanged">DeepL Write haina cha kubadilisha</string>
     <string name="ime_grammar_dialect_desc">Chagua lahaja</string>
     <string name="ime_grammar_dismiss_desc">Ficha suala hili</string>
     <string name="ime_grammar_empty_hint">Andika maandishi, au fungua uwanja ulio na maandishi. Masuala yanaonekana hapa. Uchunguzi unafanyika nje ya mtandao.</string>
@@ -347,6 +388,7 @@
     <string name="ime_icons_empty_info">Ili kuongeza vifurushi vya ikoni, fungua mipangilio.</string>
     <string name="ime_icons_more_label">Vifurushi zaidi vya ikoni</string>
     <string name="ime_icons_pick_info">Bonyeza kifurushi cha ikoni ili kukitumia kwenye funguo na zana.</string>
+    <string name="ime_image_search_by_photo_desc">Tafuta kwa picha</string>
     <string name="ime_image_search_empty">Hakuna picha za “%1$s”</string>
     <string name="ime_image_search_hint">Tafuta picha</string>
     <string name="ime_image_search_idle">Andika utafutaji na ubonyeze enter. Bonyeza picha ili kuiingiza. Bonyeza na ushikilie ili kuingiza kiungo chake.</string>
@@ -377,6 +419,8 @@
     <string name="ime_kde_loop">Rudia</string>
     <string name="ime_kde_media_empty_body">Anzisha kicheza media huko na kitaonekana hapa</string>
     <string name="ime_kde_media_empty_title">Hakuna kinachochezwa kwenye kompyuta</string>
+    <string name="ime_kde_media_unsupported_body">KDE Connect yake hairuhusu simu kudhibiti muziki au video. KDE Connect kwenye Mac haiwahi kufanya hivyo</string>
+    <string name="ime_kde_media_unsupported_title">Kompyuta hii haishiriki vichezeshi vyake</string>
     <string name="ime_kde_not_listening">Programu nyingine kwenye simu hii inatumia mlango wa KDE Connect. Kompyuta bado zinaweza kupata kibodi hii, lakini bonyeza Onyesha upya upande huu.</string>
     <string name="ime_kde_notice_clipboard_empty">Hakuna kitu kwenye ubao wa kunakili cha kutuma</string>
     <string name="ime_kde_notice_clipboard_sent">Ubao wa kunakili umetumwa</string>
@@ -427,10 +471,12 @@
     <string name="ime_kde_send_empty">Tuma ubao wa kunakili, ulichoandika, au faili. Kile kompyuta inachotuma kinafika hapa na kwenye Vipakuliwa</string>
     <string name="ime_kde_send_field">Maandishi kwenye sehemu hiyo</string>
     <string name="ime_kde_send_files">Faili…</string>
+    <string name="ime_kde_send_unsupported">Kompyuta hii haikubali faili au maandishi kutoka kwa simu</string>
     <string name="ime_kde_settings">Mipangilio</string>
     <string name="ime_kde_shuffle">Changanya</string>
     <string name="ime_kde_slides_end">Mwisho</string>
     <string name="ime_kde_slides_next">Slaidi inayofuata</string>
+    <string name="ime_kde_slides_no_pointer">Kompyuta hii haina kielekezi cha slaidi</string>
     <string name="ime_kde_slides_pointer">Shikilia na uburute kwa ajili ya kielekezi</string>
     <string name="ime_kde_slides_previous">Slaidi iliyotangulia</string>
     <string name="ime_kde_slides_start">Anza</string>
@@ -490,11 +536,25 @@
     <string name="ime_language_switch_title">Lugha ya kuingiza</string>
     <string name="ime_launcher_activities_label">Skrini</string>
     <string name="ime_launcher_app_info_action">Maelezo ya programu</string>
+    <string name="ime_launcher_combo_label">%1$s + %2$s</string>
+    <string name="ime_launcher_combo_open_action">Fungua zote mbili katika skrini iliyogawanywa</string>
+    <string name="ime_launcher_combo_remove_action">Ondoa jozi hii</string>
+    <string name="ime_launcher_combos_label">Jozi za skrini iliyogawanyika</string>
     <string name="ime_launcher_empty">Hakuna programu zinazolingana</string>
+    <string name="ime_launcher_floating_unsupported">Kifaa hiki kinaweza kuifungua katika skrini nzima</string>
     <string name="ime_launcher_hidden_label">Imefichwa kutoka kwenye gridi</string>
     <string name="ime_launcher_hide_action">Ficha programu kutoka kwenye gridi</string>
     <string name="ime_launcher_loading">Inapakia programu...</string>
+    <string name="ime_launcher_menu_close">Funga menyu</string>
     <string name="ime_launcher_not_exported_label">Haiwezi kufunguliwa kutoka nje ya programu</string>
+    <string name="ime_launcher_open_action">Fungua</string>
+    <string name="ime_launcher_open_floating_action">Fungua kwenye dirisha linaloelea</string>
+    <string name="ime_launcher_open_split_action">Fungua katika skrini iliyogawanywa</string>
+    <string name="ime_launcher_page_action">Skrini, ficha na maelezo ya Programu...</string>
+    <string name="ime_launcher_page_no_screens_action">Ficha na maelezo ya Programu...</string>
+    <string name="ime_launcher_pair_action">Oanisha katika skrini iliyogawanywa na…</string>
+    <string name="ime_launcher_pair_cancel">Ghairi</string>
+    <string name="ime_launcher_pair_prompt">Gusa programu ili ufungue kando ya %1$s</string>
     <string name="ime_launcher_pin_action">Bandika programu</string>
     <string name="ime_launcher_pinned_label">Iliyobandikwa</string>
     <string name="ime_launcher_recents_label">Hivi karibuni</string>
@@ -670,9 +730,11 @@
     <string name="ime_sandbox_offer_only">Telezesha kwa kutumia maneno yako pekee?</string>
     <string name="ime_sandbox_offer_prefer">Kurekebisha kutelezesha kidole kulingana na maneno yako?</string>
     <string name="ime_search_attribution_brave">kupitia Brave</string>
+    <string name="ime_selection_ask_ai">Uliza AI</string>
     <string name="ime_selection_macro_back_desc">Rudi kwenye vitendo vya uteuzi</string>
     <string name="ime_selection_macro_bengali_unavailable_toast">Kibengali hakijapakiwa</string>
     <string name="ime_selection_macro_busy_desc">Inafanya kazi</string>
+    <string name="ime_selection_macro_deepl_clean_toast">DeepL Write haina cha kubadilisha</string>
     <string name="ime_selection_macro_find_none_toast">Hakuna mechi nyingine</string>
     <string name="ime_selection_macro_grammar_clean_toast">Hakuna cha kurekebisha</string>
     <string name="ime_selection_macro_grammar_unavailable_toast">Kikagua sarufi hakipatikani</string>
@@ -681,6 +743,7 @@
     <string name="ime_selection_macro_nothing_to_undo_toast">Hakuna cha kutendua</string>
     <string name="ime_selection_macro_open_in_desc">Fungua katika %1$s</string>
     <string name="ime_selection_macro_stop_label">Simamisha</string>
+    <string name="ime_selection_quote">Nukuu</string>
     <string name="ime_service_already_in_settings_toast">Tayari uko kwenye mipangilio</string>
     <string name="ime_service_autocorrect_off_toast">Usahihishaji otomatiki umezimwa</string>
     <string name="ime_service_autocorrect_on_toast">Usahihishaji otomatiki umewashwa</string>
@@ -711,6 +774,11 @@
     <string name="ime_service_phonetic_english_needs_secondary_toast">Washa Kiingereza chini ya Lugha, %1$s, Pia pendekeza kutoka</string>
     <string name="ime_service_phonetic_english_off_toast">Maneno ya Kiingereza yanapendekezwa tu</string>
     <string name="ime_service_phonetic_english_on_toast">Maneno ya Kiingereza hubaki ya Kiingereza</string>
+    <string name="ime_service_photo_search_blocked">Kiokoa data hakiruhusu utafutaji wa wavuti kutumia muunganisho huu</string>
+    <string name="ime_service_photo_search_metered_ask">Muunganisho huu una kikomo cha data. Ili kutuma picha, bonyeza Tafuta tena.</string>
+    <string name="ime_service_photo_search_no_app">Hakuna programu kwenye simu hii inayoweza kutafuta kwa kutumia picha</string>
+    <string name="ime_service_photo_search_no_browser">Hakuna kivinjari kwenye simu hii kinachoweza kufungua matokeo</string>
+    <string name="ime_service_photo_search_sending">Inatuma picha kwenye tovuti ya utafutaji</string>
     <string name="ime_service_plugins_all_off_notice">Kila programu-jalizi uliyosakinisha imezimwa. Washa moja chini ya Dhibiti programu-jalizi.</string>
     <string name="ime_service_plugins_off_notice">Programu jalizi zimezimwa. Ziwashe kwenye Mipangilio ili usakinishe na kuziendesha.</string>
     <string name="ime_service_power_saving_off_toast">Kuokoa nishati kumezimwa</string>
@@ -791,10 +859,22 @@
     <string name="ime_sound_volume_label">Sauti</string>
     <string name="ime_sticker_add_desc">Ongeza vibandiko</string>
     <string name="ime_sticker_add_to_pack_action">Ongeza kwenye %1$s</string>
+    <string name="ime_sticker_info_emoji">Emoji: %1$s</string>
+    <string name="ime_sticker_info_keywords">Maneno muhimu: %1$s</string>
+    <string name="ime_sticker_info_pack">Kifurushi: %1$s</string>
+    <string name="ime_sticker_info_untitled">Hakuna kichwa</string>
     <string name="ime_sticker_local_search_empty">Hakuna vibandiko vyako vinavyolingana na “%1$s”</string>
     <string name="ime_sticker_manage_packs_action">Dhibiti vifurushi</string>
     <string name="ime_sticker_need_key_body">Zana ya vibandiko inahitaji ufunguo wa API kutoka Klipy au GIPHY. Funguo zote mbili ni bure. Ongeza ufunguo katika mipangilio ya zana hii.</string>
     <string name="ime_sticker_no_packs_empty">Hakuna vifurushi vya vibandiko bado. Tengeneza kifurushi katika mipangilio. Unaweza pia kubonyeza na kushikilia kibandiko kutoka Klipy au GIPHY ili kukihifadhi hapa.</string>
+    <plurals name="ime_sticker_offer_count">
+        <item quantity="one">Kibandiko %1$d</item>
+        <item quantity="other">Vibandiko %1$d</item>
+    </plurals>
+    <string name="ime_sticker_offer_dismiss_desc">Ficha stika za %1$s</string>
+    <string name="ime_sticker_offer_item_desc">Tuma kibandiko %1$s</string>
+    <string name="ime_sticker_offer_item_untitled_desc">Tuma kibandiko hiki</string>
+    <string name="ime_sticker_offer_more">+%1$d</string>
     <string name="ime_sticker_pack_all_label">Zote</string>
     <string name="ime_sticker_pack_empty">Kifurushi hiki ni kitupu.</string>
     <string name="ime_sticker_save_new_pack_action">Hifadhi kwenye kifurushi kipya</string>
@@ -805,8 +885,24 @@
     <string name="ime_suggestion_hold_label">Chaguzi za neno</string>
     <string name="ime_suggestion_never_suggest">Usipendekeze kamwe \"%1$s\"</string>
     <string name="ime_suggestions_show_desc">Onyesha utepe wa mapendekezo</string>
+    <string name="ime_symbol_row_delete_confirm_body">Seti hiyo na viingilio vyake vyote vitafutwa. Hali ya kibodi iliyoitoa itaonyesha seti zako nyingine badala yake.</string>
+    <string name="ime_symbol_row_delete_confirm_title">Kufuta \"%1$s\"?</string>
+    <string name="ime_symbol_row_delete_set">Futa seti ya \"%1$s\"</string>
+    <string name="ime_symbol_row_hide_in_mode">Ficha safu katika %1$s</string>
+    <string name="ime_symbol_row_remove">Ondoa \"%1$s\"</string>
+    <string name="ime_symbol_row_settings">Mipangilio ya safu ya alama</string>
     <string name="ime_symbol_set_switch_desc">Badilisha seti ya alama</string>
     <string name="ime_symbols_recents_label">Zilizotumiwa hivi karibuni</string>
+    <string name="ime_synonyms_close_desc">Visawe vya karibu</string>
+    <string name="ime_synonyms_failed">Imeshindwa kufikia chanzo cha visawe. Angalia muunganisho na ujaribu tena.</string>
+    <string name="ime_synonyms_from">Kutoka %1$s</string>
+    <string name="ime_synonyms_loading">Inatafuta visawe…</string>
+    <string name="ime_synonyms_no_sources">Vyanzo vyote vya visawe vimezimwa. Washa kimoja katika Kuandika, Mapendekezo, Vyanzo vya visawe.</string>
+    <string name="ime_synonyms_not_found">Hakuna visawe vilivyopatikana kwa \"%1$s\".</string>
+    <string name="ime_synonyms_pick_desc">Tumia \"%1$s\"</string>
+    <string name="ime_synonyms_retry">Jaribu tena</string>
+    <string name="ime_synonyms_similar_note">Hakuna visawe vilivyoorodheshwa kwa neno hili. Maneno haya yana maana sawa.</string>
+    <string name="ime_synonyms_title">Visawe vya \"%1$s\"</string>
     <string name="ime_textedit_doc_end_desc">Nenda mwishoni mwa maandishi</string>
     <string name="ime_textedit_doc_start_desc">Nenda mwanzo wa maandishi</string>
     <string name="ime_textedit_down_desc">Sogeza chini</string>
@@ -927,7 +1023,10 @@
     <string name="ime_toolbox_hint_mode">Hali ya %1$s imewashwa, kwa hivyo kibodi huhifadhi mpangilio huu kwa hali hiyo. Programu nyingine huhifadhi zao.</string>
     <string name="ime_trackpad_hint">Buruta ili kusogeza kishale</string>
     <string name="ime_trackpad_surface_desc">Trackpad. Buruta ili kusogeza kishale, shikilia na uburute ili kuchagua, gonga mara mbili ili kuchagua neno</string>
+    <string name="ime_translate_all_languages_info">Pia lugha za kupakua</string>
+    <string name="ime_translate_all_languages_label">Lugha zote</string>
     <string name="ime_translate_auto_detect_label">Tambua lugha</string>
+    <string name="ime_translate_deepl_label">DeepL</string>
     <string name="ime_translate_download_failed_error">Upakuaji haukukamilika. Angalia muunganisho, kisha ujaribu tena.</string>
     <string name="ime_translate_download_of_total_progress">%1$s kati ya %2$s</string>
     <string name="ime_translate_downloaded_desc">Imepakuliwa</string>
@@ -1065,6 +1164,10 @@
     <string name="ime_voice_status_mic_blocked">Maikrofoni imefungwa. Washa ufikiaji wa Maikrofoni katika Mipangilio ya Haraka, kisha ujaribu tena.</string>
     <string name="ime_voice_status_no_model">Kuandika kwa sauti nje ya mtandao bado hakuna modeli</string>
     <string name="ime_voice_status_no_server">Seva ya unukuzi haina anwani bado</string>
+    <plurals name="ime_voice_status_stops_in">
+        <item quantity="one">Itasimama baada ya sekunde %d. Bonyeza ili kumaliza sasa.</item>
+        <item quantity="other">Itasimama baada ya sekunde %d. Bonyeza ili kumaliza sasa.</item>
+    </plurals>
     <string name="ime_voice_status_transcribing">Inanakili…</string>
     <string name="ime_voice_stop_desc">Acha kusikiliza</string>
     <string name="ime_voice_strip_allow_action">Ruhusu</string>
@@ -1104,6 +1207,7 @@
     <string name="ime_web_search_need_key_body">Utafutaji wa wavuti unahitaji ufunguo wa API kutoka Brave Search. Ongeza ufunguo katika mipangilio ya zana hii.</string>
     <string name="ime_web_search_open_desc">Fungua kwenye kivinjari</string>
     <string name="ime_wiki_back_desc">Rudi kwenye matokeo</string>
+    <string name="ime_wiki_expand_desc">Fanya makala kuwa ndefu zaidi</string>
     <string name="ime_wiki_full_error">Programu haiwezi kupakia maandishi ya makala.</string>
     <string name="ime_wiki_full_progress">Inapakia makala kamili…</string>
     <string name="ime_wiki_idle_info">Tafuta mada kwenye %1$s.wikipedia.org. Soma muhtasari, fungua viungo, na uweke maandishi au anwani ya makala.</string>
@@ -1115,8 +1219,12 @@
     <string name="ime_wiki_links_progress">Inapakia viungo...</string>
     <string name="ime_wiki_no_results_empty">Utafutaji haukupata chochote kwa “%1$s”.</string>
     <string name="ime_wiki_no_summary_empty">Makala hii haina muhtasari.</string>
+    <string name="ime_wiki_open_browser_desc">Fungua makala kwenye kivinjari</string>
+    <string name="ime_wiki_quote_markdown">\"%1$s\" (kutoka [Wikipedia: %2$s](%3$s))</string>
+    <string name="ime_wiki_quote_plain">\"%1$s\" (Wikipedia: %2$s, %3$s)</string>
     <string name="ime_wiki_search_active_hint">Tafuta Wikipedia. Bonyeza enter ili kutafuta</string>
     <string name="ime_wiki_search_hint">Tafuta Wikipedia…</string>
+    <string name="ime_wiki_shrink_desc">Fanya makala iwe na urefu wa kibodi tena</string>
     <string name="ime_wiki_tab_full_label">Makala kamili</string>
     <string name="ime_wiki_tab_links_label">Viungo</string>
     <string name="ime_wiki_tab_summary_label">Muhtasari</string>
@@ -1166,6 +1274,7 @@
     <string name="ime_word_menu_delete">Futa \"%1$s\"</string>
     <string name="ime_word_menu_edit">Hariri…</string>
     <string name="ime_word_menu_search_all">Tafuta maneno yote kwa \"%1$s\"</string>
+    <string name="ime_word_menu_synonyms">Visawe vya \"%1$s\"</string>
     <string name="ime_word_spell_apply_desc">Tumia tahajia hii</string>
     <string name="ime_word_spell_cancel_desc">Acha tahajia kama ilivyo</string>
     <string name="ime_word_spell_hint">Andika tahajia mpya ya \"%1$s\"</string>

@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">Kísérleti</string>
     <string name="core_intel_llm_tier_recommended_label">Ajánlott</string>
     <string name="core_intel_llm_tier_untested_label">Nem tesztelt</string>
+    <string name="core_intel_ocr_download_error_http">A GitHub szerver nem küldte el a fájlt. A hibakód: HTTP %1$s.</string>
+    <string name="core_intel_ocr_download_error_interrupted">A kapcsolat megszakadt a letöltés közben. Próbálja újra.</string>
+    <string name="core_intel_ocr_download_error_no_space">Nincs elég tárhely az eszközön. Először körülbelül %1$s MB-ot kell felszabadítania.</string>
+    <string name="core_intel_ocr_pack_error_broken">A letöltött nyelvi adat sérült, így a lapolvasó nem tudta használni. Töltsd le újra.</string>
 </resources>

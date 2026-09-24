@@ -115,6 +115,7 @@
     <string name="core_content_selection_macro_chat_strike">Üstü çizili</string>
     <string name="core_content_selection_macro_colour">Renk</string>
     <string name="core_content_selection_macro_copy">Kopyala</string>
+    <string name="core_content_selection_macro_deepl_write">DeepL Write</string>
     <string name="core_content_selection_macro_digits_latin">Rakamlar</string>
     <string name="core_content_selection_macro_email">E-posta</string>
     <string name="core_content_selection_macro_fancy">Süslü</string>

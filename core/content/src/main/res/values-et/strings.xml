@@ -115,6 +115,7 @@
     <string name="core_content_selection_macro_chat_strike">Läbikriipsutus</string>
     <string name="core_content_selection_macro_colour">Värv</string>
     <string name="core_content_selection_macro_copy">Kopeeri</string>
+    <string name="core_content_selection_macro_deepl_write">DeepL Write</string>
     <string name="core_content_selection_macro_digits_latin">Numbrid</string>
     <string name="core_content_selection_macro_email">E-post</string>
     <string name="core_content_selection_macro_fancy">Uhke</string>

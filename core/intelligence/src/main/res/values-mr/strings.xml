@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">प्रायोगिक</string>
     <string name="core_intel_llm_tier_recommended_label">शिफारस केलेले</string>
     <string name="core_intel_llm_tier_untested_label">अपरिक्षित</string>
+    <string name="core_intel_ocr_download_error_http">GitHub सर्व्हरने फाइल पाठवली नाही. एरर कोड HTTP %1$s आहे.</string>
+    <string name="core_intel_ocr_download_error_interrupted">डाउनलोड दरम्यान कनेक्शन थांबले. पुन्हा प्रयत्न करा.</string>
+    <string name="core_intel_ocr_download_error_no_space">तुमच्या डिव्हाइसवर पुरेशी साठवणूक जागा नाही. तुम्हाला आधी सुमारे %1$s MB मोकळी करावी लागेल.</string>
+    <string name="core_intel_ocr_pack_error_broken">डाउनलोड केलेला भाषेचा डेटा खराब झाला आहे, त्यामुळे स्कॅनर तो वापरू शकला नाही. तो पुन्हा डाउनलोड करा.</string>
 </resources>

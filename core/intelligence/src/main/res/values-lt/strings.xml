@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">Eksperimentinis</string>
     <string name="core_intel_llm_tier_recommended_label">Rekomenduojama</string>
     <string name="core_intel_llm_tier_untested_label">Neišbandyta</string>
+    <string name="core_intel_ocr_download_error_http">„GitHub“ serveris neatsiuntė failo. Klaidos kodas yra HTTP %1$s.</string>
+    <string name="core_intel_ocr_download_error_interrupted">Atsisiuntimo metu ryšys nutrūko. Bandykite dar kartą.</string>
+    <string name="core_intel_ocr_download_error_no_space">Jūsų įrenginyje nepakanka vietos. Pirmiausia turite atlaisvinti apie %1$s MB.</string>
+    <string name="core_intel_ocr_pack_error_broken">Atsisiųsti kalbos duomenys yra sugadinti, todėl skaitytuvas negalėjo jų naudoti. Atsisiųskite juos dar kartą.</string>
 </resources>

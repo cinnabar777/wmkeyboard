@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">Deneysel</string>
     <string name="core_intel_llm_tier_recommended_label">Önerilen</string>
     <string name="core_intel_llm_tier_untested_label">Test edilmemiş</string>
+    <string name="core_intel_ocr_download_error_http">GitHub sunucusu dosyayı göndermedi. Hata kodu: HTTP %1$s.</string>
+    <string name="core_intel_ocr_download_error_interrupted">İndirme sırasında bağlantı kesildi. Tekrar deneyin.</string>
+    <string name="core_intel_ocr_download_error_no_space">Cihazınızda yeterli depolama alanı yok. Önce yaklaşık %1$s MB yer açmanız gerekiyor.</string>
+    <string name="core_intel_ocr_pack_error_broken">İndirilen dil verileri hasarlı, bu yüzden tarayıcı bunları kullanamadı. Lütfen tekrar indirin.</string>
 </resources>

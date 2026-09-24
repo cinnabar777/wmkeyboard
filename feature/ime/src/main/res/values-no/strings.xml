@@ -2,6 +2,13 @@
 <!-- Machine translated by Google Play. Do not edit by hand:
      regenerate with tools/i18n/pull-play-translations.py. -->
 <resources>
+    <string name="ime_ai_chat_ask_explain">Forklar enkelt</string>
+    <string name="ime_ai_chat_ask_explain_prompt">Forklar dette med enkle ord.</string>
+    <string name="ime_ai_chat_ask_hint">Still et spørsmål om teksten, eller start med ett av disse.</string>
+    <string name="ime_ai_chat_ask_summary">Oppsummer</string>
+    <string name="ime_ai_chat_ask_summary_prompt">Gi meg et kort sammendrag av dette.</string>
+    <string name="ime_ai_chat_ask_words">Vanskelige ord</string>
+    <string name="ime_ai_chat_ask_words_prompt">Forklar de vanskelige ordene og ideene i dette.</string>
     <string name="ime_ai_chat_attach_desc">Send teksten i feltet med meldingen</string>
     <string name="ime_ai_chat_attach_remove_desc">Ikke send teksten i feltet</string>
     <plurals name="ime_ai_chat_attached_field">
@@ -12,6 +19,8 @@
         <item quantity="one">Ditt utvalg følger med meldingen: %1$d tegn</item>
         <item quantity="other">Ditt utvalg følger med meldingen: %1$d tegn</item>
     </plurals>
+    <string name="ime_ai_chat_attached_tool">Om %1$s</string>
+    <string name="ime_ai_chat_attached_tool_selection">Om et avsnitt fra %1$s</string>
     <plurals name="ime_ai_chat_attachment_sent">
         <item quantity="one">Med %1$d tegn med tekst</item>
         <item quantity="other">Med %1$d tegn med tekst</item>
@@ -99,6 +108,10 @@
     <string name="ime_ai_truncated_notice">Modellen stoppet for tidlig. Øk «Maksimal svarlengde» i verktøyets innstillinger.</string>
     <string name="ime_ai_view_changes">Endringer</string>
     <string name="ime_ai_view_result">Resultat</string>
+    <string name="ime_ask_ai_label_dict">Ordbok: %1$s</string>
+    <string name="ime_ask_ai_label_grammar">Grammatikkontroll</string>
+    <string name="ime_ask_ai_label_vocab">Ordforråd: %1$s</string>
+    <string name="ime_ask_ai_label_wiki">Wikipedia: %1$s</string>
     <string name="ime_autofill_dismiss_desc">Skjul autofyll-forslagene</string>
     <string name="ime_calc_degrees_label">grader</string>
     <string name="ime_calc_insert_action">Sett inn</string>
@@ -127,6 +140,7 @@
     <string name="ime_camera_permission_action">Tillat kamera</string>
     <string name="ime_camera_permission_body">Kameraverktøyet trenger tillatelse til å bruke kameraet. Appen tar kun bilde når du trykker på utløseren.</string>
     <string name="ime_camera_retake_action">Ta på nytt</string>
+    <string name="ime_camera_search_action">Søk</string>
     <string name="ime_camera_send_action">Send</string>
     <string name="ime_camera_shutter_desc">Ta et bilde</string>
     <string name="ime_camera_starting_progress">Starter kameraet…</string>
@@ -144,6 +158,10 @@
     <string name="ime_clip_chip_image">Kopiert bilde</string>
     <string name="ime_clip_chip_item">Kopiert element</string>
     <string name="ime_clip_chip_screenshot">Skjermbilde</string>
+    <plurals name="ime_clip_deleted">
+        <item quantity="one">Utklipp slettet</item>
+        <item quantity="other">%1$d utklipp slettet</item>
+    </plurals>
     <string name="ime_clip_edit">Rediger</string>
     <string name="ime_clip_edit_placeholder">Skriv inn klippets tekst</string>
     <string name="ime_clip_edit_rich_note">Lagring av en endring fjerner formateringen</string>
@@ -162,6 +180,18 @@
     <string name="ime_clip_info_private_detail">Tastaturet skjuler dette utklippet i panelet og sletter det raskere enn andre utklipp.</string>
     <string name="ime_clip_info_size">Størrelse</string>
     <string name="ime_clip_info_type">Type</string>
+    <plurals name="ime_clip_left_days">
+        <item quantity="one">%d dag igjen</item>
+        <item quantity="other">%d dager igjen</item>
+    </plurals>
+    <plurals name="ime_clip_left_hours">
+        <item quantity="one">%d t igjen</item>
+        <item quantity="other">%d t igjen</item>
+    </plurals>
+    <plurals name="ime_clip_left_minutes">
+        <item quantity="one">%d min igjen</item>
+        <item quantity="other">%d min igjen</item>
+    </plurals>
     <string name="ime_clip_number_desc">Utklipp %1$d</string>
     <string name="ime_clip_pin">Fest</string>
     <string name="ime_clip_send_as_sticker">Send som klistremerke</string>
@@ -172,6 +202,7 @@
     <string name="ime_clip_type_rich_text">Rik tekst</string>
     <string name="ime_clip_type_text">Tekst</string>
     <string name="ime_clip_type_video">Video</string>
+    <string name="ime_clip_undo_delete">Angre</string>
     <string name="ime_clip_unpin">Løsne</string>
     <string name="ime_clip_video_desc">Kopiert video</string>
     <string name="ime_clipboard_no_match">Ingen utklipp samsvarer med “%1$s”.</string>
@@ -203,10 +234,12 @@
     <string name="ime_dict_add_vocab_action">Legg til i ordforråd</string>
     <string name="ime_dict_antonyms_label">Antonymer</string>
     <string name="ime_dict_error">Appen får ikke kontakt med ordboken. Sjekk nettverkstilkoblingen din og prøv igjen.</string>
+    <string name="ime_dict_from">Fra %1$s</string>
     <string name="ime_dict_idle_info">Slå opp et engelsk ord. Trykk på søkefeltet og skriv. Du kan også plassere markøren på et ord før du åpner verktøyet.</string>
     <string name="ime_dict_insert_action">Sett inn</string>
     <string name="ime_dict_lookup_desc">Slå opp ordet</string>
     <string name="ime_dict_lookup_progress">Slår opp «%1$s»…</string>
+    <string name="ime_dict_no_sources">Alle ordbokkilder er slått av. Slå på en i innstillingene for ordbokverktøyet.</string>
     <string name="ime_dict_not_found_empty">Ingen oppføring for «%1$s». Sjekk stavemåten, eller prøv grunnformen av ordet.</string>
     <string name="ime_dict_play_desc">Spill av uttalen</string>
     <string name="ime_dict_search_active_hint">Skriv et ord…</string>
@@ -314,7 +347,15 @@
     <string name="ime_glide_word_list_offer">Sveipeskriving krever en %1$s-ordliste</string>
     <string name="ime_glide_word_list_offer_dismiss_desc">Avvis</string>
     <string name="ime_grammar_all_filtered_empty">Alle funnede problemer er skjult av filteret</string>
+    <string name="ime_grammar_ask_ai_desc">Spør AI om dette problemet</string>
     <string name="ime_grammar_category_kind_label">%1$s • %2$s</string>
+    <string name="ime_grammar_deepl_action_desc">Forbedre teksten med DeepL Write</string>
+    <string name="ime_grammar_deepl_dismiss_desc">Lukk DeepL Write-resultatet</string>
+    <string name="ime_grammar_deepl_error">DeepL Write svarte ikke</string>
+    <string name="ime_grammar_deepl_replace_action">Erstatt</string>
+    <string name="ime_grammar_deepl_replace_failed_toast">Teksten i dette feltet kan ikke erstattes</string>
+    <string name="ime_grammar_deepl_title">DeepL Write</string>
+    <string name="ime_grammar_deepl_unchanged">DeepL Write har ingenting å endre</string>
     <string name="ime_grammar_dialect_desc">Velg dialekt</string>
     <string name="ime_grammar_dismiss_desc">Skjul dette problemet</string>
     <string name="ime_grammar_empty_hint">Skriv tekst, eller åpne et felt som har tekst. Problemene vises her. Kontrollene kjøres frakoblet.</string>
@@ -346,6 +387,7 @@
     <string name="ime_icons_empty_info">For å legge til ikonpakker, åpne innstillingene.</string>
     <string name="ime_icons_more_label">Flere ikonpakker</string>
     <string name="ime_icons_pick_info">Trykk på en ikonpakke for å bruke den på tastene og verktøyene.</string>
+    <string name="ime_image_search_by_photo_desc">Søk med et bilde</string>
     <string name="ime_image_search_empty">Ingen bilder for “%1$s”</string>
     <string name="ime_image_search_hint">Søk etter bilder</string>
     <string name="ime_image_search_need_key_body">Bildesøk krever en API-nøkkel fra Brave Search. Legg til en nøkkel i innstillingene for dette verktøyet.</string>
@@ -375,6 +417,8 @@
     <string name="ime_kde_loop">Gjenta</string>
     <string name="ime_kde_media_empty_body">Start en avspiller der, så dukker den opp her</string>
     <string name="ime_kde_media_empty_title">Ingenting spiller på datamaskinen</string>
+    <string name="ime_kde_media_unsupported_body">KDE Connect lar ikke en telefon kontrollere musikk eller video. KDE Connect på en Mac gjør aldri det</string>
+    <string name="ime_kde_media_unsupported_title">Denne datamaskinen deler ikke sine avspillere</string>
     <string name="ime_kde_not_listening">En annen app på denne telefonen bruker KDE Connect-porten. Datamaskiner kan fortsatt finne dette tastaturet, men trykk på Oppdater på denne siden.</string>
     <string name="ime_kde_notice_clipboard_empty">Ingenting på utklippstavlen å sende</string>
     <string name="ime_kde_notice_clipboard_sent">Utklippstavle sendt</string>
@@ -425,10 +469,12 @@
     <string name="ime_kde_send_empty">Send utklippstavlen, det du skrev, eller filer. Det datamaskinen sender havner her og i Nedlastinger</string>
     <string name="ime_kde_send_field">Tekst i feltet</string>
     <string name="ime_kde_send_files">Filer…</string>
+    <string name="ime_kde_send_unsupported">Denne datamaskinen godtar ikke filer eller tekst fra telefonen</string>
     <string name="ime_kde_settings">Innstillinger</string>
     <string name="ime_kde_shuffle">Stokk om</string>
     <string name="ime_kde_slides_end">Slutt</string>
     <string name="ime_kde_slides_next">Neste lysbilde</string>
+    <string name="ime_kde_slides_no_pointer">Denne datamaskinen har ingen peker for lysbilder</string>
     <string name="ime_kde_slides_pointer">Hold og dra for pekeren</string>
     <string name="ime_kde_slides_previous">Forrige lysbilde</string>
     <string name="ime_kde_slides_start">Start</string>
@@ -488,11 +534,25 @@
     <string name="ime_language_switch_title">Inndataspråk</string>
     <string name="ime_launcher_activities_label">Skjermer</string>
     <string name="ime_launcher_app_info_action">App-info</string>
+    <string name="ime_launcher_combo_label">%1$s + %2$s</string>
+    <string name="ime_launcher_combo_open_action">Åpne begge i delt skjerm</string>
+    <string name="ime_launcher_combo_remove_action">Fjern dette paret</string>
+    <string name="ime_launcher_combos_label">Par for delt skjerm</string>
     <string name="ime_launcher_empty">Ingen apper samsvarer</string>
+    <string name="ime_launcher_floating_unsupported">Denne enheten kan åpne den i fullskjerm</string>
     <string name="ime_launcher_hidden_label">Skjult fra rutenettet</string>
     <string name="ime_launcher_hide_action">Skjul appen fra rutenettet</string>
     <string name="ime_launcher_loading">Laster inn apper…</string>
+    <string name="ime_launcher_menu_close">Lukk meny</string>
     <string name="ime_launcher_not_exported_label">Kan ikke åpnes fra utsiden av appen</string>
+    <string name="ime_launcher_open_action">Åpne</string>
+    <string name="ime_launcher_open_floating_action">Åpne i et flytende vindu</string>
+    <string name="ime_launcher_open_split_action">Åpne i delt skjerm</string>
+    <string name="ime_launcher_page_action">Skjermer, skjul og App-info…</string>
+    <string name="ime_launcher_page_no_screens_action">Skjul og appinfo…</string>
+    <string name="ime_launcher_pair_action">Par i delt skjerm med…</string>
+    <string name="ime_launcher_pair_cancel">Avbryt</string>
+    <string name="ime_launcher_pair_prompt">Trykk på appen som skal åpnes ved siden av %1$s</string>
     <string name="ime_launcher_pin_action">Fest app</string>
     <string name="ime_launcher_pinned_label">Festet</string>
     <string name="ime_launcher_recents_label">Nylige</string>
@@ -668,9 +728,11 @@
     <string name="ime_sandbox_offer_only">Sveip ved å bare bruke ordene dine?</string>
     <string name="ime_sandbox_offer_prefer">Tilpasse sveiping til dine ord?</string>
     <string name="ime_search_attribution_brave">via Brave</string>
+    <string name="ime_selection_ask_ai">Spør AI</string>
     <string name="ime_selection_macro_back_desc">Tilbake til utvalgshandlinger</string>
     <string name="ime_selection_macro_bengali_unavailable_toast">Bengali er ikke lastet inn</string>
     <string name="ime_selection_macro_busy_desc">Jobber</string>
+    <string name="ime_selection_macro_deepl_clean_toast">DeepL Write har ingenting å endre</string>
     <string name="ime_selection_macro_find_none_toast">Ingen andre treff</string>
     <string name="ime_selection_macro_grammar_clean_toast">Ingenting å fikse</string>
     <string name="ime_selection_macro_grammar_unavailable_toast">Grammatikkontrollen er ikke tilgjengelig</string>
@@ -679,6 +741,7 @@
     <string name="ime_selection_macro_nothing_to_undo_toast">Ingenting mer å angre</string>
     <string name="ime_selection_macro_open_in_desc">Åpne i %1$s</string>
     <string name="ime_selection_macro_stop_label">Stopp</string>
+    <string name="ime_selection_quote">Sitat</string>
     <string name="ime_service_already_in_settings_toast">Du er allerede i innstillingene</string>
     <string name="ime_service_autocorrect_off_toast">Autokorrektur er av</string>
     <string name="ime_service_autocorrect_on_toast">Autokorrektur er på</string>
@@ -709,6 +772,11 @@
     <string name="ime_service_phonetic_english_needs_secondary_toast">Slå på engelsk under Språk, %1$s, Foreslå også fra</string>
     <string name="ime_service_phonetic_english_off_toast">Engelske ord blir bare foreslått</string>
     <string name="ime_service_phonetic_english_on_toast">Engelske ord forblir engelske</string>
+    <string name="ime_service_photo_search_blocked">Datasparefunksjonen tillater ikke at websøk bruker denne forbindelsen</string>
+    <string name="ime_service_photo_search_metered_ask">Denne tilkoblingen er begrenset. Trykk på Søk på nytt for å sende bildet.</string>
+    <string name="ime_service_photo_search_no_app">Ingen app på denne telefonen kan søke med et bilde</string>
+    <string name="ime_service_photo_search_no_browser">Ingen nettleser på denne telefonen kan åpne resultatene</string>
+    <string name="ime_service_photo_search_sending">Sender bildet til søkesiden</string>
     <string name="ime_service_plugins_all_off_notice">Alle tilleggene du har installert er slått av. Slå på ett under Administrer tillegg.</string>
     <string name="ime_service_plugins_off_notice">Programtillegg er slått av. Slå dem på i Innstillinger for å installere og kjøre dem.</string>
     <string name="ime_service_power_saving_off_toast">Strømsparing er av</string>
@@ -789,10 +857,22 @@
     <string name="ime_sound_volume_label">Volum</string>
     <string name="ime_sticker_add_desc">Legg til klistremerker</string>
     <string name="ime_sticker_add_to_pack_action">Legg til i %1$s</string>
+    <string name="ime_sticker_info_emoji">Emoji: %1$s</string>
+    <string name="ime_sticker_info_keywords">Nøkkelord: %1$s</string>
+    <string name="ime_sticker_info_pack">Pakke: %1$s</string>
+    <string name="ime_sticker_info_untitled">Ingen tittel</string>
     <string name="ime_sticker_local_search_empty">Ingen av dine klistremerker matcher «%1$s»</string>
     <string name="ime_sticker_manage_packs_action">Administrer pakker</string>
     <string name="ime_sticker_need_key_body">Klistremerkeverktøyet trenger en API-nøkkel fra Klipy eller GIPHY. Begge nøklene er gratis. Legg til en nøkkel i innstillingene for dette verktøyet.</string>
     <string name="ime_sticker_no_packs_empty">Ingen klistremerkepakker ennå. Lag en pakke i innstillingene. Du kan også trykke og holde på et klistremerke fra Klipy eller GIPHY for å lagre det her.</string>
+    <plurals name="ime_sticker_offer_count">
+        <item quantity="one">%1$d klistremerke</item>
+        <item quantity="other">%1$d klistremerker</item>
+    </plurals>
+    <string name="ime_sticker_offer_dismiss_desc">Skjul klistremerker for %1$s</string>
+    <string name="ime_sticker_offer_item_desc">Send klistremerke %1$s</string>
+    <string name="ime_sticker_offer_item_untitled_desc">Send dette klistremerket</string>
+    <string name="ime_sticker_offer_more">+%1$d</string>
     <string name="ime_sticker_pack_all_label">Alle</string>
     <string name="ime_sticker_pack_empty">Denne pakken er tom.</string>
     <string name="ime_sticker_save_new_pack_action">Lagre i en ny pakke</string>
@@ -803,8 +883,24 @@
     <string name="ime_suggestion_hold_label">Ordalternativer</string>
     <string name="ime_suggestion_never_suggest">Aldri foreslå \"%1$s\"</string>
     <string name="ime_suggestions_show_desc">Vis forslagslinjen</string>
+    <string name="ime_symbol_row_delete_confirm_body">Settet og alle oppføringene blir slettet. En tastaturmodus som tilbød det, viser dine andre sett i stedet.</string>
+    <string name="ime_symbol_row_delete_confirm_title">Slette \"%1$s\"?</string>
+    <string name="ime_symbol_row_delete_set">Slett settet \"%1$s\"</string>
+    <string name="ime_symbol_row_hide_in_mode">Skjul raden i %1$s</string>
+    <string name="ime_symbol_row_remove">Fjern \"%1$s\"</string>
+    <string name="ime_symbol_row_settings">Innstillinger for symbolrad</string>
     <string name="ime_symbol_set_switch_desc">Bytt symbolsett</string>
     <string name="ime_symbols_recents_label">Nylige</string>
+    <string name="ime_synonyms_close_desc">Lukk synonymer</string>
+    <string name="ime_synonyms_failed">Kunne ikke nå en synonymkilde. Sjekk tilkoblingen og prøv igjen.</string>
+    <string name="ime_synonyms_from">Fra %1$s</string>
+    <string name="ime_synonyms_loading">Søker etter synonymer…</string>
+    <string name="ime_synonyms_no_sources">Alle synonymkilder er av. Slå på en under Skriving, Forslag, Synonymkilder.</string>
+    <string name="ime_synonyms_not_found">Ingen synonymer funnet for \"%1$s\".</string>
+    <string name="ime_synonyms_pick_desc">Bruk \"%1$s\"</string>
+    <string name="ime_synonyms_retry">Prøv igjen</string>
+    <string name="ime_synonyms_similar_note">Ingen synonymer er oppført for dette ordet. Disse ordene har en lignende betydning.</string>
+    <string name="ime_synonyms_title">Synonymer for \"%1$s\"</string>
     <string name="ime_textedit_doc_end_desc">Gå til slutten av teksten</string>
     <string name="ime_textedit_doc_start_desc">Gå til starten av teksten</string>
     <string name="ime_textedit_down_desc">Flytt ned</string>
@@ -925,7 +1021,10 @@
     <string name="ime_toolbox_hint_mode">%1$s-modus er på, så tastaturet lagrer dette oppsettet for den modusen. Andre apper beholder sitt eget.</string>
     <string name="ime_trackpad_hint">Dra for å flytte markøren</string>
     <string name="ime_trackpad_surface_desc">Styreflate. Dra for å flytte markøren, hold og dra for å velge, trykk to ganger for å velge et ord</string>
+    <string name="ime_translate_all_languages_info">Også språkene som skal lastes ned</string>
+    <string name="ime_translate_all_languages_label">Alle språk</string>
     <string name="ime_translate_auto_detect_label">Oppdag språk</string>
+    <string name="ime_translate_deepl_label">DeepL</string>
     <string name="ime_translate_download_failed_error">Nedlastingen ble ikke fullført. Sjekk tilkoblingen og prøv igjen.</string>
     <string name="ime_translate_download_of_total_progress">%1$s av %2$s</string>
     <string name="ime_translate_downloaded_desc">Nedlastet</string>
@@ -1063,6 +1162,10 @@
     <string name="ime_voice_status_mic_blocked">Mikrofonen er blokkert. Slå på mikrofontilgang i hurtiginnstillingene, og prøv igjen.</string>
     <string name="ime_voice_status_no_model">Frakoblet stemmeskriving har ingen modell ennå</string>
     <string name="ime_voice_status_no_server">Transkripsjonstjeneren har ingen adresse ennå</string>
+    <plurals name="ime_voice_status_stops_in">
+        <item quantity="one">Stopper om %d sekund. Trykk for å avslutte nå.</item>
+        <item quantity="other">Stopper om %d sekunder. Trykk for å avslutte nå.</item>
+    </plurals>
     <string name="ime_voice_status_transcribing">Transkriberer…</string>
     <string name="ime_voice_stop_desc">Stopp lytting</string>
     <string name="ime_voice_strip_allow_action">Tillat</string>
@@ -1102,6 +1205,7 @@
     <string name="ime_web_search_need_key_body">Nettsøk krever en API-nøkkel fra Brave Search. Legg til en nøkkel i innstillingene for dette verktøyet.</string>
     <string name="ime_web_search_open_desc">Åpne i nettleseren</string>
     <string name="ime_wiki_back_desc">Tilbake til resultatene</string>
+    <string name="ime_wiki_expand_desc">Gjør artikkelen høyere</string>
     <string name="ime_wiki_full_error">Appen kan ikke laste inn teksten i artikkelen.</string>
     <string name="ime_wiki_full_progress">Laster inn hele artikkelen…</string>
     <string name="ime_wiki_idle_info">Søk etter et emne på %1$s.wikipedia.org. Les sammendraget, åpne lenkene, og sett inn tekst eller adressen til artikkelen.</string>
@@ -1113,8 +1217,12 @@
     <string name="ime_wiki_links_progress">Laster inn lenker…</string>
     <string name="ime_wiki_no_results_empty">Søket fant ingenting for “%1$s”.</string>
     <string name="ime_wiki_no_summary_empty">Denne artikkelen har ingen oppsummering.</string>
+    <string name="ime_wiki_open_browser_desc">Åpne artikkelen i nettleseren</string>
+    <string name="ime_wiki_quote_markdown">\"%1$s\" (fra [Wikipedia: %2$s](%3$s))</string>
+    <string name="ime_wiki_quote_plain">\"%1$s\" (Wikipedia: %2$s, %3$s)</string>
     <string name="ime_wiki_search_active_hint">Søk på Wikipedia. Trykk enter for å søke</string>
     <string name="ime_wiki_search_hint">Søk i Wikipedia…</string>
+    <string name="ime_wiki_shrink_desc">Gjør artikkelen til tastaturets høyde igjen</string>
     <string name="ime_wiki_tab_full_label">Full artikkel</string>
     <string name="ime_wiki_tab_links_label">Lenker</string>
     <string name="ime_wiki_tab_summary_label">Sammendrag</string>
@@ -1164,6 +1272,7 @@
     <string name="ime_word_menu_delete">Slett \"%1$s\"</string>
     <string name="ime_word_menu_edit">Rediger…</string>
     <string name="ime_word_menu_search_all">Søk i alle ord etter «%1$s»</string>
+    <string name="ime_word_menu_synonyms">Synonymer for \"%1$s\"</string>
     <string name="ime_word_spell_apply_desc">Bruk denne stavemåten</string>
     <string name="ime_word_spell_cancel_desc">La stavemåten være i fred</string>
     <string name="ime_word_spell_hint">Skriv inn en ny stavemåte for \"%1$s\"</string>

@@ -2,6 +2,13 @@
 <!-- Machine translated by Google Play. Do not edit by hand:
      regenerate with tools/i18n/pull-play-translations.py. -->
 <resources>
+    <string name="ime_ai_chat_ask_explain">Обясни просто</string>
+    <string name="ime_ai_chat_ask_explain_prompt">Обясни това с прости думи.</string>
+    <string name="ime_ai_chat_ask_hint">Задайте въпрос относно текста или започнете с един от тези.</string>
+    <string name="ime_ai_chat_ask_summary">Обобщаване</string>
+    <string name="ime_ai_chat_ask_summary_prompt">Дай ми кратко резюме на това.</string>
+    <string name="ime_ai_chat_ask_words">Трудни думи</string>
+    <string name="ime_ai_chat_ask_words_prompt">Обяснете трудните думи и идеи в това.</string>
     <string name="ime_ai_chat_attach_desc">Изпращане на текста от полето със съобщението</string>
     <string name="ime_ai_chat_attach_remove_desc">Не изпращайте текста от полето</string>
     <plurals name="ime_ai_chat_attached_field">
@@ -12,6 +19,8 @@
         <item quantity="one">Вашият избор се придружава от съобщението: %1$d знак</item>
         <item quantity="other">Вашият избор се придружава от съобщението: %1$d знака</item>
     </plurals>
+    <string name="ime_ai_chat_attached_tool">Относно %1$s</string>
+    <string name="ime_ai_chat_attached_tool_selection">Относно откъс от %1$s</string>
     <plurals name="ime_ai_chat_attachment_sent">
         <item quantity="one">С %1$d знак текст</item>
         <item quantity="other">С %1$d знака текст</item>
@@ -99,6 +108,10 @@
     <string name="ime_ai_truncated_notice">Моделът спря преждевременно. Увеличете „Максимална дължина на отговора“ в настройките на инструмента.</string>
     <string name="ime_ai_view_changes">Промени</string>
     <string name="ime_ai_view_result">Резултат</string>
+    <string name="ime_ask_ai_label_dict">Речник: %1$s</string>
+    <string name="ime_ask_ai_label_grammar">Проверка на граматиката</string>
+    <string name="ime_ask_ai_label_vocab">Речник: %1$s</string>
+    <string name="ime_ask_ai_label_wiki">Уикипедия: %1$s</string>
     <string name="ime_autofill_dismiss_desc">Скриване на предложенията за автоматично попълване</string>
     <string name="ime_calc_degrees_label">градуса</string>
     <string name="ime_calc_insert_action">Вмъкване</string>
@@ -127,6 +140,7 @@
     <string name="ime_camera_permission_action">Разрешаване на камерата</string>
     <string name="ime_camera_permission_body">Инструментът за камера се нуждае от разрешение за използване на камерата. Приложението прави снимка само когато натиснете бутона на затвора.</string>
     <string name="ime_camera_retake_action">Повторно заснемане</string>
+    <string name="ime_camera_search_action">Търсене</string>
     <string name="ime_camera_send_action">Изпращане</string>
     <string name="ime_camera_shutter_desc">Направете снимка</string>
     <string name="ime_camera_starting_progress">Стартиране на камерата…</string>
@@ -144,6 +158,10 @@
     <string name="ime_clip_chip_image">Копирано изображение</string>
     <string name="ime_clip_chip_item">Копиран елемент</string>
     <string name="ime_clip_chip_screenshot">Екранна снимка</string>
+    <plurals name="ime_clip_deleted">
+        <item quantity="one">Изтрит клип</item>
+        <item quantity="other">Изтрити са %1$d клипа</item>
+    </plurals>
     <string name="ime_clip_edit">Редактиране</string>
     <string name="ime_clip_edit_placeholder">Въведете текста на клипа</string>
     <string name="ime_clip_edit_rich_note">Запазването на промяна премахва форматирането</string>
@@ -162,6 +180,18 @@
     <string name="ime_clip_info_private_detail">Клавиатурата скрива този клип в панела и го изтрива по-рано от другите клипове.</string>
     <string name="ime_clip_info_size">Размер</string>
     <string name="ime_clip_info_type">Тип</string>
+    <plurals name="ime_clip_left_days">
+        <item quantity="one">Остава %d ден</item>
+        <item quantity="other">Остават %d дни</item>
+    </plurals>
+    <plurals name="ime_clip_left_hours">
+        <item quantity="one">остава %d ч.</item>
+        <item quantity="other">остават %d ч.</item>
+    </plurals>
+    <plurals name="ime_clip_left_minutes">
+        <item quantity="one">остава %d мин</item>
+        <item quantity="other">остават %d мин</item>
+    </plurals>
     <string name="ime_clip_number_desc">Клип %1$d</string>
     <string name="ime_clip_pin">Закачване</string>
     <string name="ime_clip_send_as_sticker">Изпращане като стикер</string>
@@ -172,6 +202,7 @@
     <string name="ime_clip_type_rich_text">Богат текст</string>
     <string name="ime_clip_type_text">Текст</string>
     <string name="ime_clip_type_video">Видео</string>
+    <string name="ime_clip_undo_delete">Отмяна</string>
     <string name="ime_clip_unpin">Откачане</string>
     <string name="ime_clip_video_desc">Копирано видео</string>
     <string name="ime_clipboard_no_match">Няма клипове, съответстващи на „%1$s“.</string>
@@ -203,10 +234,12 @@
     <string name="ime_dict_add_vocab_action">Добавяне към речника</string>
     <string name="ime_dict_antonyms_label">Антоними</string>
     <string name="ime_dict_error">Приложението не може да се свърже с речника. Проверете мрежовата си връзка и опитайте отново.</string>
+    <string name="ime_dict_from">От %1$s</string>
     <string name="ime_dict_idle_info">Потърсете английска дума. Натиснете лентата за търсене и пишете. Можете също да поставите курсора върху дума, преди да отворите инструмента.</string>
     <string name="ime_dict_insert_action">Вмъкване</string>
     <string name="ime_dict_lookup_desc">Търсене на думата</string>
     <string name="ime_dict_lookup_progress">Търсене на „%1$s“…</string>
+    <string name="ime_dict_no_sources">Всички речникови източници са изключени. Включете един от настройките на инструмента за речник.</string>
     <string name="ime_dict_not_found_empty">Няма запис за „%1$s“. Проверете правописа или опитайте основната форма на думата.</string>
     <string name="ime_dict_play_desc">Възпроизвеждане на произношението</string>
     <string name="ime_dict_search_active_hint">Въведете дума…</string>
@@ -314,7 +347,15 @@
     <string name="ime_glide_word_list_offer">Плъзгащото писане изисква списък с думи за %1$s</string>
     <string name="ime_glide_word_list_offer_dismiss_desc">Отхвърляне</string>
     <string name="ime_grammar_all_filtered_empty">Всеки открит проблем е скрит от филтъра</string>
+    <string name="ime_grammar_ask_ai_desc">Попитайте изкуствения интелект за този проблем</string>
     <string name="ime_grammar_category_kind_label">%1$s • %2$s</string>
+    <string name="ime_grammar_deepl_action_desc">Подобряване на текста чрез DeepL Write</string>
+    <string name="ime_grammar_deepl_dismiss_desc">Затваряне на резултата от DeepL Write</string>
+    <string name="ime_grammar_deepl_error">DeepL Write не отговори</string>
+    <string name="ime_grammar_deepl_replace_action">Замяна</string>
+    <string name="ime_grammar_deepl_replace_failed_toast">Текстът в това поле не може да бъде заменен</string>
+    <string name="ime_grammar_deepl_title">DeepL Write</string>
+    <string name="ime_grammar_deepl_unchanged">DeepL Write няма какво да промени</string>
     <string name="ime_grammar_dialect_desc">Изберете диалект</string>
     <string name="ime_grammar_dismiss_desc">Скриване на този проблем</string>
     <string name="ime_grammar_empty_hint">Въведете текст или отворете поле, което съдържа текст. Проблемите се показват тук. Проверките се извършват офлайн.</string>
@@ -346,6 +387,7 @@
     <string name="ime_icons_empty_info">За да добавите пакети с икони, отворете настройките.</string>
     <string name="ime_icons_more_label">Още пакети с икони</string>
     <string name="ime_icons_pick_info">Натиснете пакет с икони, за да го използвате върху клавишите и инструментите.</string>
+    <string name="ime_image_search_by_photo_desc">Търсене със снимка</string>
     <string name="ime_image_search_empty">Няма изображения за „%1$s“</string>
     <string name="ime_image_search_hint">Търсене на изображения</string>
     <string name="ime_image_search_need_key_body">Търсенето на изображения изисква API ключ от Brave Search. Добавете ключ в настройките за този инструмент.</string>
@@ -375,6 +417,8 @@
     <string name="ime_kde_loop">Повторение</string>
     <string name="ime_kde_media_empty_body">Стартирайте плейър там и той ще се появи тук</string>
     <string name="ime_kde_media_empty_title">Нищо не се възпроизвежда на компютъра</string>
+    <string name="ime_kde_media_unsupported_body">Неговият KDE Connect не позволява на телефона да управлява музика или видео. KDE Connect на Mac никога не го прави</string>
+    <string name="ime_kde_media_unsupported_title">Този компютър не споделя своите плейъри</string>
     <string name="ime_kde_not_listening">Друго приложение на този телефон използва порта на KDE Connect. Компютрите все още могат да намерят тази клавиатура, но натиснете „Опресняване“ от тази страна.</string>
     <string name="ime_kde_notice_clipboard_empty">Няма нищо в клипборда за изпращане</string>
     <string name="ime_kde_notice_clipboard_sent">Клипбордът е изпратен</string>
@@ -425,10 +469,12 @@
     <string name="ime_kde_send_empty">Изпратете клипборда, това, което сте написали, или файлове. Това, което компютърът изпраща, попада тук и в „Изтегляния“</string>
     <string name="ime_kde_send_field">Текст в полето</string>
     <string name="ime_kde_send_files">Файлове…</string>
+    <string name="ime_kde_send_unsupported">Този компютър не приема файлове или текст от телефона</string>
     <string name="ime_kde_settings">Настройки</string>
     <string name="ime_kde_shuffle">Разбъркване</string>
     <string name="ime_kde_slides_end">Край</string>
     <string name="ime_kde_slides_next">Следващ слайд</string>
+    <string name="ime_kde_slides_no_pointer">Този компютър няма показалец за слайдове</string>
     <string name="ime_kde_slides_pointer">Задръжте и плъзнете за показалеца</string>
     <string name="ime_kde_slides_previous">Предишен слайд</string>
     <string name="ime_kde_slides_start">Старт</string>
@@ -488,11 +534,25 @@
     <string name="ime_language_switch_title">Език за въвеждане</string>
     <string name="ime_launcher_activities_label">Екрани</string>
     <string name="ime_launcher_app_info_action">Информация за приложението</string>
+    <string name="ime_launcher_combo_label">%1$s + %2$s</string>
+    <string name="ime_launcher_combo_open_action">Отваряне на двете в разделен екран</string>
+    <string name="ime_launcher_combo_remove_action">Премахване на тази двойка</string>
+    <string name="ime_launcher_combos_label">Двойки за разделен екран</string>
     <string name="ime_launcher_empty">Няма съвпадащи приложения</string>
+    <string name="ime_launcher_floating_unsupported">Това устройство може да го отвори на цял екран</string>
     <string name="ime_launcher_hidden_label">Скрито от мрежата</string>
     <string name="ime_launcher_hide_action">Скриване на приложението от мрежата</string>
     <string name="ime_launcher_loading">Зареждане на приложения…</string>
+    <string name="ime_launcher_menu_close">Затваряне на менюто</string>
     <string name="ime_launcher_not_exported_label">Не може да се отваря извън приложението</string>
+    <string name="ime_launcher_open_action">Отваряне</string>
+    <string name="ime_launcher_open_floating_action">Отваряне в плаващ прозорец</string>
+    <string name="ime_launcher_open_split_action">Отваряне в разделен екран</string>
+    <string name="ime_launcher_page_action">Екрани, скриване и информация за приложението…</string>
+    <string name="ime_launcher_page_no_screens_action">Скриване и информация за приложението…</string>
+    <string name="ime_launcher_pair_action">Сдвояване в разделен екран с…</string>
+    <string name="ime_launcher_pair_cancel">Отказ</string>
+    <string name="ime_launcher_pair_prompt">Докоснете приложението, за да го отворите до %1$s</string>
     <string name="ime_launcher_pin_action">Закачи приложението</string>
     <string name="ime_launcher_pinned_label">Закачени</string>
     <string name="ime_launcher_recents_label">Скорошни</string>
@@ -668,9 +728,11 @@
     <string name="ime_sandbox_offer_only">Плъзгане само с вашите думи?</string>
     <string name="ime_sandbox_offer_prefer">Да настроим плъзгането според вашите думи?</string>
     <string name="ime_search_attribution_brave">чрез Brave</string>
+    <string name="ime_selection_ask_ai">Попитай AI</string>
     <string name="ime_selection_macro_back_desc">Назад към действията за избор</string>
     <string name="ime_selection_macro_bengali_unavailable_toast">Бенгалският език не е зареден</string>
     <string name="ime_selection_macro_busy_desc">Работи се</string>
+    <string name="ime_selection_macro_deepl_clean_toast">DeepL Write няма какво да промени</string>
     <string name="ime_selection_macro_find_none_toast">Няма друго съвпадение</string>
     <string name="ime_selection_macro_grammar_clean_toast">Няма нищо за коригиране</string>
     <string name="ime_selection_macro_grammar_unavailable_toast">Проверката на граматиката не е налична</string>
@@ -679,6 +741,7 @@
     <string name="ime_selection_macro_nothing_to_undo_toast">Няма нищо за отмяна</string>
     <string name="ime_selection_macro_open_in_desc">Отваряне в %1$s</string>
     <string name="ime_selection_macro_stop_label">Стоп</string>
+    <string name="ime_selection_quote">Цитат</string>
     <string name="ime_service_already_in_settings_toast">Вече сте в настройките</string>
     <string name="ime_service_autocorrect_off_toast">Автоматичното коригиране е изключено</string>
     <string name="ime_service_autocorrect_on_toast">Автоматичното коригиране е включено</string>
@@ -709,6 +772,11 @@
     <string name="ime_service_phonetic_english_needs_secondary_toast">Включете английски език в „Езици“, %1$s, „Също предлагай от“</string>
     <string name="ime_service_phonetic_english_off_toast">Английските думи се предлагат само</string>
     <string name="ime_service_phonetic_english_on_toast">Английските думи остават английски</string>
+    <string name="ime_service_photo_search_blocked">Функцията за запис на данни (Data saver) не позволява уеб търсения чрез тази връзка</string>
+    <string name="ime_service_photo_search_metered_ask">Тази връзка е с ограничено потребление. За да изпратите снимката, натиснете „Търсене“ отново.</string>
+    <string name="ime_service_photo_search_no_app">На този телефон няма приложение, което да търси чрез снимка</string>
+    <string name="ime_service_photo_search_no_browser">Нито един браузър на този телефон не може да отвори резултатите</string>
+    <string name="ime_service_photo_search_sending">Изпращане на снимката до сайта за търсене</string>
     <string name="ime_service_plugins_all_off_notice">Всички инсталирани от вас приставки са изключени. Включете някоя от „Управление на приставки“.</string>
     <string name="ime_service_plugins_off_notice">Приставките са изключени. Включете ги в настройките, за да ги инсталирате и стартирате.</string>
     <string name="ime_service_power_saving_off_toast">Пестенето на енергия е изключено</string>
@@ -789,10 +857,22 @@
     <string name="ime_sound_volume_label">Сила на звука</string>
     <string name="ime_sticker_add_desc">Добавяне на стикери</string>
     <string name="ime_sticker_add_to_pack_action">Добавяне към %1$s</string>
+    <string name="ime_sticker_info_emoji">Емоджи: %1$s</string>
+    <string name="ime_sticker_info_keywords">Ключови думи: %1$s</string>
+    <string name="ime_sticker_info_pack">Пакет: %1$s</string>
+    <string name="ime_sticker_info_untitled">Без заглавие</string>
     <string name="ime_sticker_local_search_empty">Няма ваши стикери, съответстващи на „%1$s“</string>
     <string name="ime_sticker_manage_packs_action">Управление на пакетите</string>
     <string name="ime_sticker_need_key_body">Инструментът за стикери се нуждае от API ключ от Klipy или GIPHY. И двата ключа са безплатни. Добавете ключ в настройките за този инструмент.</string>
     <string name="ime_sticker_no_packs_empty">Все още няма пакети със стикери. Създайте пакет в настройките. Можете също да натиснете и задържите стикер от Klipy или GIPHY, за да го запазите тук.</string>
+    <plurals name="ime_sticker_offer_count">
+        <item quantity="one">%1$d стикер</item>
+        <item quantity="other">%1$d стикера</item>
+    </plurals>
+    <string name="ime_sticker_offer_dismiss_desc">Скриване на стикерите за %1$s</string>
+    <string name="ime_sticker_offer_item_desc">Изпратете стикер %1$s</string>
+    <string name="ime_sticker_offer_item_untitled_desc">Изпратете този стикер</string>
+    <string name="ime_sticker_offer_more">+%1$d</string>
     <string name="ime_sticker_pack_all_label">Всички</string>
     <string name="ime_sticker_pack_empty">Този пакет е празен.</string>
     <string name="ime_sticker_save_new_pack_action">Запазване в нов пакет</string>
@@ -803,8 +883,24 @@
     <string name="ime_suggestion_hold_label">Опции за думи</string>
     <string name="ime_suggestion_never_suggest">Никога не предлагай \"%1$s\"</string>
     <string name="ime_suggestions_show_desc">Показване на лентата с предложения</string>
+    <string name="ime_symbol_row_delete_confirm_body">Наборът и всички негови записи ще бъдат изтрити. Режимът на клавиатурата, който го предлагаше, ще показва другите ви набори.</string>
+    <string name="ime_symbol_row_delete_confirm_title">Изтриване на „%1$s“?</string>
+    <string name="ime_symbol_row_delete_set">Изтриване на набора „%1$s“</string>
+    <string name="ime_symbol_row_hide_in_mode">Скриване на реда в %1$s</string>
+    <string name="ime_symbol_row_remove">Премахване на \"%1$s\"</string>
+    <string name="ime_symbol_row_settings">Настройки на реда със символи</string>
     <string name="ime_symbol_set_switch_desc">Превключване на набора от символи</string>
     <string name="ime_symbols_recents_label">Скорошни</string>
+    <string name="ime_synonyms_close_desc">Затваряне на синонимите</string>
+    <string name="ime_synonyms_failed">Неуспешно свързване с източник на синоними. Проверете връзката и опитайте отново.</string>
+    <string name="ime_synonyms_from">От %1$s</string>
+    <string name="ime_synonyms_loading">Търсене на синоними…</string>
+    <string name="ime_synonyms_no_sources">Всички източници на синоними са изключени. Включете един от „Писане“, „Предложения“, „Източници на синоними“.</string>
+    <string name="ime_synonyms_not_found">Не са намерени синоними за „%1$s“.</string>
+    <string name="ime_synonyms_pick_desc">Използвайте „%1$s“</string>
+    <string name="ime_synonyms_retry">Опитайте отново</string>
+    <string name="ime_synonyms_similar_note">За тази дума няма посочени синоними. Тези думи имат сходно значение.</string>
+    <string name="ime_synonyms_title">Синоними за \"%1$s\"</string>
     <string name="ime_textedit_doc_end_desc">Преместване в края на текста</string>
     <string name="ime_textedit_doc_start_desc">Преместване в началото на текста</string>
     <string name="ime_textedit_down_desc">Преместване надолу</string>
@@ -925,7 +1021,10 @@
     <string name="ime_toolbox_hint_mode">Режимът %1$s е включен, така че клавиатурата запазва тази подредба за този режим. Другите приложения запазват свои собствени.</string>
     <string name="ime_trackpad_hint">Плъзнете, за да преместите курсора</string>
     <string name="ime_trackpad_surface_desc">Тракпад. Плъзнете, за да преместите курсора, задръжте и плъзнете, за да изберете, докоснете два пъти, за да изберете дума</string>
+    <string name="ime_translate_all_languages_info">Също и езиците за изтегляне</string>
+    <string name="ime_translate_all_languages_label">Всички езици</string>
     <string name="ime_translate_auto_detect_label">Откриване на езика</string>
+    <string name="ime_translate_deepl_label">DeepL</string>
     <string name="ime_translate_download_failed_error">Изтеглянето не завърши. Проверете връзката и опитайте отново.</string>
     <string name="ime_translate_download_of_total_progress">%1$s от %2$s</string>
     <string name="ime_translate_downloaded_desc">Изтеглено</string>
@@ -1063,6 +1162,10 @@
     <string name="ime_voice_status_mic_blocked">Микрофонът е блокиран. Включете достъпа до микрофона в Бързи настройки и опитайте отново.</string>
     <string name="ime_voice_status_no_model">Офлайн гласовото въвеждане все още няма модел</string>
     <string name="ime_voice_status_no_server">Сървърът за транскрипция все още няма адрес</string>
+    <plurals name="ime_voice_status_stops_in">
+        <item quantity="one">Спира след %d секунда. Натиснете, за да завършите сега.</item>
+        <item quantity="other">Спира след %d секунди. Натиснете, за да завършите сега.</item>
+    </plurals>
     <string name="ime_voice_status_transcribing">Транскрибиране…</string>
     <string name="ime_voice_stop_desc">Спиране на слушането</string>
     <string name="ime_voice_strip_allow_action">Разрешаване</string>
@@ -1102,6 +1205,7 @@
     <string name="ime_web_search_need_key_body">Търсенето в мрежата изисква API ключ от Brave Search. Добавете ключ в настройките за този инструмент.</string>
     <string name="ime_web_search_open_desc">Отваряне в браузъра</string>
     <string name="ime_wiki_back_desc">Назад към резултатите</string>
+    <string name="ime_wiki_expand_desc">Увеличете височината на статията</string>
     <string name="ime_wiki_full_error">Приложението не може да зареди текста на статията.</string>
     <string name="ime_wiki_full_progress">Зареждане на пълната статия…</string>
     <string name="ime_wiki_idle_info">Търсете тема в %1$s.wikipedia.org. Прочетете резюмето, отворете връзките и вмъкнете текст или адреса на статията.</string>
@@ -1113,8 +1217,12 @@
     <string name="ime_wiki_links_progress">Зареждане на връзки…</string>
     <string name="ime_wiki_no_results_empty">Търсенето не откри нищо за „%1$s“.</string>
     <string name="ime_wiki_no_summary_empty">Тази статия няма резюме.</string>
+    <string name="ime_wiki_open_browser_desc">Отворете статията в браузъра</string>
+    <string name="ime_wiki_quote_markdown">„%1$s“ (от [Wikipedia: %2$s](%3$s))</string>
+    <string name="ime_wiki_quote_plain">\"%1$s\" (Уикипедия: %2$s, %3$s)</string>
     <string name="ime_wiki_search_active_hint">Търсене в Wikipedia. Натиснете Enter за търсене</string>
     <string name="ime_wiki_search_hint">Търсене в Wikipedia…</string>
+    <string name="ime_wiki_shrink_desc">Направете статията отново с височината на клавиатурата</string>
     <string name="ime_wiki_tab_full_label">Пълна статия</string>
     <string name="ime_wiki_tab_links_label">Връзки</string>
     <string name="ime_wiki_tab_summary_label">Резюме</string>
@@ -1164,6 +1272,7 @@
     <string name="ime_word_menu_delete">Изтриване на \"%1$s\"</string>
     <string name="ime_word_menu_edit">Редактиране…</string>
     <string name="ime_word_menu_search_all">Търсене на всички думи за \"%1$s\"</string>
+    <string name="ime_word_menu_synonyms">Синоними на „%1$s“</string>
     <string name="ime_word_spell_apply_desc">Използвай този правопис</string>
     <string name="ime_word_spell_cancel_desc">Оставете правописа непроменен</string>
     <string name="ime_word_spell_hint">Въведете нов правопис за \"%1$s\"</string>

@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">실험적</string>
     <string name="core_intel_llm_tier_recommended_label">권장</string>
     <string name="core_intel_llm_tier_untested_label">테스트되지 않음</string>
+    <string name="core_intel_ocr_download_error_http">GitHub 서버에서 파일을 보내지 않았습니다. 오류 코드는 HTTP %1$s입니다.</string>
+    <string name="core_intel_ocr_download_error_interrupted">다운로드 중 연결이 끊겼습니다. 다시 시도해 주세요.</string>
+    <string name="core_intel_ocr_download_error_no_space">기기에 저장 공간이 부족합니다. 먼저 약 %1$s MB의 공간을 확보해야 합니다.</string>
+    <string name="core_intel_ocr_pack_error_broken">다운로드한 언어 데이터가 손상되어 스캐너가 사용할 수 없습니다. 다시 다운로드하세요.</string>
 </resources>

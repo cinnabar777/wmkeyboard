@@ -35,6 +35,7 @@
     <string name="common_enable">Vklopi</string>
     <string name="common_error_generic">Nekaj ni delovalo. Poskusite znova.</string>
     <string name="common_error_network">Ni povezave. Preverite omrežje in poskusite znova.</string>
+    <string name="common_error_no_internet_permission">Ta različica tipkovnice se ne more povezati z internetom.</string>
     <string name="common_error_timeout">Zahteva je trajala predolgo. Poskusite znova.</string>
     <string name="common_export">Izvozi</string>
     <string name="common_import">Uvozi</string>

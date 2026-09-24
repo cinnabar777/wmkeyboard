@@ -35,6 +35,7 @@
     <string name="common_enable">开启</string>
     <string name="common_error_generic">出现故障。请重试。</string>
     <string name="common_error_network">无连接。请检查您的网络并重试。</string>
+    <string name="common_error_no_internet_permission">此版本的键盘无法连接到互联网。</string>
     <string name="common_error_timeout">请求耗时过长。请重试。</string>
     <string name="common_export">导出</string>
     <string name="common_import">导入</string>

@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">പരീക്ഷണാത്മകം</string>
     <string name="core_intel_llm_tier_recommended_label">ശുപാർശ ചെയ്യുന്നത്</string>
     <string name="core_intel_llm_tier_untested_label">പരിശോധിക്കാത്തത്</string>
+    <string name="core_intel_ocr_download_error_http">ഗിറ്റ്ഹബ് സെർവർ ഫയൽ അയച്ചില്ല. പിശക് കോഡ് HTTP %1$s ആണ്.</string>
+    <string name="core_intel_ocr_download_error_interrupted">ഡൗൺലോഡ് ചെയ്യുന്നതിനിടെ കണക്ഷൻ തടസ്സപ്പെട്ടു. വീണ്ടും ശ്രമിക്കുക.</string>
+    <string name="core_intel_ocr_download_error_no_space">നിങ്ങളുടെ ഉപകരണത്തിൽ മതിയായ സ്റ്റോറേജ് ഇല്ല. ഏകദേശം %1$s MB ആദ്യം ലഭ്യമാക്കണം.</string>
+    <string name="core_intel_ocr_pack_error_broken">ഡൗൺലോഡ് ചെയ്ത ഭാഷാ ഡാറ്റ കേടായതിനാൽ സ്കാനറിന് അത് ഉപയോഗിക്കാൻ കഴിഞ്ഞില്ല. അത് വീണ്ടും ഡൗൺലോഡ് ചെയ്യുക.</string>
 </resources>

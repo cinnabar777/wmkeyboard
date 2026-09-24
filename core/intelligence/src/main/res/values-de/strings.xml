@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">Experimentell</string>
     <string name="core_intel_llm_tier_recommended_label">Empfohlen</string>
     <string name="core_intel_llm_tier_untested_label">Ungetestet</string>
+    <string name="core_intel_ocr_download_error_http">Der GitHub-Server hat die Datei nicht gesendet. Der Fehlercode ist HTTP %1$s.</string>
+    <string name="core_intel_ocr_download_error_interrupted">Die Verbindung wurde während des Downloads unterbrochen. Versuchen Sie es erneut.</string>
+    <string name="core_intel_ocr_download_error_no_space">Auf Ihrem Gerät ist nicht genügend Speicherplatz vorhanden. Sie müssen zuerst etwa %1$s MB freigeben.</string>
+    <string name="core_intel_ocr_pack_error_broken">Die heruntergeladenen Sprachdaten sind beschädigt, daher konnte der Scanner sie nicht verwenden. Lade sie erneut herunter.</string>
 </resources>

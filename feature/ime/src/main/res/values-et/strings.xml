@@ -2,6 +2,13 @@
 <!-- Machine translated by Google Play. Do not edit by hand:
      regenerate with tools/i18n/pull-play-translations.py. -->
 <resources>
+    <string name="ime_ai_chat_ask_explain">Selgita lihtsalt</string>
+    <string name="ime_ai_chat_ask_explain_prompt">Selgita seda lihtsate sõnadega.</string>
+    <string name="ime_ai_chat_ask_hint">Esitage teksti kohta küsimus või alustage ühega neist.</string>
+    <string name="ime_ai_chat_ask_summary">Tee kokkuvõte</string>
+    <string name="ime_ai_chat_ask_summary_prompt">Tee sellest lühikokkuvõte.</string>
+    <string name="ime_ai_chat_ask_words">Keerulised sõnad</string>
+    <string name="ime_ai_chat_ask_words_prompt">Selgita selles sisalduvaid raskeid sõnu ja ideid.</string>
     <string name="ime_ai_chat_attach_desc">Saada välja tekst koos sõnumiga</string>
     <string name="ime_ai_chat_attach_remove_desc">Ära saada välja teksti</string>
     <plurals name="ime_ai_chat_attached_field">
@@ -12,6 +19,8 @@
         <item quantity="one">Teie valik läheb kaasa sõnumiga: %1$d märk</item>
         <item quantity="other">Teie valik läheb kaasa sõnumiga: %1$d märki</item>
     </plurals>
+    <string name="ime_ai_chat_attached_tool">Teave %1$s kohta</string>
+    <string name="ime_ai_chat_attached_tool_selection">Teave lõigu kohta: %1$s</string>
     <plurals name="ime_ai_chat_attachment_sent">
         <item quantity="one">%1$d tekstimärgiga</item>
         <item quantity="other">%1$d tekstimärgiga</item>
@@ -99,6 +108,10 @@
     <string name="ime_ai_truncated_notice">Mudel peatus varakult. Suurendage tööriista sätetes valikut „Maksimaalne vastuse pikkus“.</string>
     <string name="ime_ai_view_changes">Muudatused</string>
     <string name="ime_ai_view_result">Tulemus</string>
+    <string name="ime_ask_ai_label_dict">Sõnastik: %1$s</string>
+    <string name="ime_ask_ai_label_grammar">Grammatika kontroll</string>
+    <string name="ime_ask_ai_label_vocab">Sõnavara: %1$s</string>
+    <string name="ime_ask_ai_label_wiki">Vikipeedia: %1$s</string>
     <string name="ime_autofill_dismiss_desc">Peida automaatse täitmise soovitused</string>
     <string name="ime_calc_degrees_label">kraadi</string>
     <string name="ime_calc_insert_action">Sisesta</string>
@@ -127,6 +140,7 @@
     <string name="ime_camera_permission_action">Luba kaamera</string>
     <string name="ime_camera_permission_body">Kaameratööriist vajab kaamera kasutamiseks luba. Rakendus teeb foto ainult siis, kui vajutate päästikule.</string>
     <string name="ime_camera_retake_action">Tehke uuesti</string>
+    <string name="ime_camera_search_action">Otsi</string>
     <string name="ime_camera_send_action">Saada</string>
     <string name="ime_camera_shutter_desc">Pildista</string>
     <string name="ime_camera_starting_progress">Käivitan kaamerat…</string>
@@ -144,6 +158,10 @@
     <string name="ime_clip_chip_image">Kopeeritud pilt</string>
     <string name="ime_clip_chip_item">Kopeeritud üksus</string>
     <string name="ime_clip_chip_screenshot">Ekraanipilt</string>
+    <plurals name="ime_clip_deleted">
+        <item quantity="one">Lõige kustutatud</item>
+        <item quantity="other">%1$d lõiget kustutatud</item>
+    </plurals>
     <string name="ime_clip_edit">Muuda</string>
     <string name="ime_clip_edit_placeholder">Sisesta klipi tekst</string>
     <string name="ime_clip_edit_rich_note">Muudatuse salvestamine eemaldab vormingu</string>
@@ -162,6 +180,18 @@
     <string name="ime_clip_info_private_detail">Klaviatuur peidab selle lõike paneelil ja kustutab selle varem kui teised lõiked.</string>
     <string name="ime_clip_info_size">Suurus</string>
     <string name="ime_clip_info_type">Tüüp</string>
+    <plurals name="ime_clip_left_days">
+        <item quantity="one">%d päev jäänud</item>
+        <item quantity="other">%d päeva jäänud</item>
+    </plurals>
+    <plurals name="ime_clip_left_hours">
+        <item quantity="one">%d tund järel</item>
+        <item quantity="other">%d tundi järel</item>
+    </plurals>
+    <plurals name="ime_clip_left_minutes">
+        <item quantity="one">%d min jäänud</item>
+        <item quantity="other">%d min jäänud</item>
+    </plurals>
     <string name="ime_clip_number_desc">Lõik %1$d</string>
     <string name="ime_clip_pin">Kinnita</string>
     <string name="ime_clip_send_as_sticker">Saada kleebisena</string>
@@ -172,6 +202,7 @@
     <string name="ime_clip_type_rich_text">Rikastatud tekst</string>
     <string name="ime_clip_type_text">Tekst</string>
     <string name="ime_clip_type_video">Video</string>
+    <string name="ime_clip_undo_delete">Võta tagasi</string>
     <string name="ime_clip_unpin">Eemalda kinnitus</string>
     <string name="ime_clip_video_desc">Kopeeritud video</string>
     <string name="ime_clipboard_no_match">Ükski lõige ei vasta otsingule „%1$s“.</string>
@@ -203,10 +234,12 @@
     <string name="ime_dict_add_vocab_action">Lisa sõnavarasse</string>
     <string name="ime_dict_antonyms_label">Antonüümid</string>
     <string name="ime_dict_error">Rakendus ei saa sõnastikuga ühendust. Kontrollige võrguühendust ja proovige uuesti.</string>
+    <string name="ime_dict_from">Allikast %1$s</string>
     <string name="ime_dict_idle_info">Otsi ingliskeelset sõna. Vajuta otsinguribale ja kirjuta. Enne tööriista avamist võid kursori ka sõnale asetada.</string>
     <string name="ime_dict_insert_action">Sisesta</string>
     <string name="ime_dict_lookup_desc">Otsi sõna</string>
     <string name="ime_dict_lookup_progress">Otsin „%1$s“…</string>
+    <string name="ime_dict_no_sources">Kõik sõnastikuallikad on välja lülitatud. Lülitage üks sisse sõnastikutööriista seadetes.</string>
     <string name="ime_dict_not_found_empty">Kirje „%1$s” puudub. Kontrollige õigekirja või proovige sõna algvormi.</string>
     <string name="ime_dict_play_desc">Esita hääldus</string>
     <string name="ime_dict_search_active_hint">Sisesta sõna…</string>
@@ -314,7 +347,15 @@
     <string name="ime_glide_word_list_offer">Libistades kirjutamine vajab %1$s sõnaloendit</string>
     <string name="ime_glide_word_list_offer_dismiss_desc">Loobu</string>
     <string name="ime_grammar_all_filtered_empty">Kõik leitud probleemid on filtriga peidetud</string>
+    <string name="ime_grammar_ask_ai_desc">Küsi tehisintellektilt selle probleemi kohta</string>
     <string name="ime_grammar_category_kind_label">%1$s • %2$s</string>
+    <string name="ime_grammar_deepl_action_desc">Parandage teksti DeepL Write\'iga</string>
+    <string name="ime_grammar_deepl_dismiss_desc">Sulge DeepL Write tulemus</string>
+    <string name="ime_grammar_deepl_error">DeepL Write ei vastanud</string>
+    <string name="ime_grammar_deepl_replace_action">Asenda</string>
+    <string name="ime_grammar_deepl_replace_failed_toast">Selle välja teksti ei saa asendada</string>
+    <string name="ime_grammar_deepl_title">DeepL Write</string>
+    <string name="ime_grammar_deepl_unchanged">DeepL Write\'il pole midagi muuta</string>
     <string name="ime_grammar_dialect_desc">Vali murre</string>
     <string name="ime_grammar_dismiss_desc">Peida see probleem</string>
     <string name="ime_grammar_empty_hint">Sisestage tekst või avage väli, mis sisaldab teksti. Probleemid kuvatakse siin. Kontrollimine toimub võrguühenduseta.</string>
@@ -346,6 +387,7 @@
     <string name="ime_icons_empty_info">Ikoonipakkide lisamiseks ava seaded.</string>
     <string name="ime_icons_more_label">Veel ikoonipakette</string>
     <string name="ime_icons_pick_info">Vajutage ikoonipakile, et seda klahvidel ja tööriistadel kasutada.</string>
+    <string name="ime_image_search_by_photo_desc">Otsi fotoga</string>
     <string name="ime_image_search_empty">Päringule „%1$s“ pilte ei leitud</string>
     <string name="ime_image_search_hint">Otsi pilte</string>
     <string name="ime_image_search_need_key_body">Pildiotsing vajab Brave Searchi API-võtit. Lisa selle tööriista jaoks seadetes võti.</string>
@@ -375,6 +417,8 @@
     <string name="ime_kde_loop">Korda</string>
     <string name="ime_kde_media_empty_body">Käivitage seal pleier ja see ilmub siia</string>
     <string name="ime_kde_media_empty_title">Arvutis ei mängi midagi</string>
+    <string name="ime_kde_media_unsupported_body">Selle KDE Connect ei võimalda telefonil muusikat või videot juhtida. Maci KDE Connect ei tee seda kunagi.</string>
+    <string name="ime_kde_media_unsupported_title">See arvuti ei jaga oma mängijaid</string>
     <string name="ime_kde_not_listening">Mõni teine selle telefoni rakendus kasutab KDE Connecti porti. Arvutid leiavad selle klaviatuuri endiselt üles, kuid vajuta siinpool nuppu Värskenda.</string>
     <string name="ime_kde_notice_clipboard_empty">Lõikelaual pole midagi saata</string>
     <string name="ime_kde_notice_clipboard_sent">Lõikepuhver saadetud</string>
@@ -425,10 +469,12 @@
     <string name="ime_kde_send_empty">Saada lõikelaualt, seda, mida kirjutasid, või faile. See, mida arvuti saadab, jõuab siia ja kausta Allalaadimised</string>
     <string name="ime_kde_send_field">Tekst väljal</string>
     <string name="ime_kde_send_files">Failid…</string>
+    <string name="ime_kde_send_unsupported">See arvuti ei aktsepteeri telefonist saadetavaid faile ega teksti</string>
     <string name="ime_kde_settings">Seaded</string>
     <string name="ime_kde_shuffle">Sega</string>
     <string name="ime_kde_slides_end">Lõpp</string>
     <string name="ime_kde_slides_next">Järgmine slaid</string>
+    <string name="ime_kde_slides_no_pointer">Sellel arvutil pole esitluste jaoks osutit</string>
     <string name="ime_kde_slides_pointer">Hoidke ja lohistage osuti jaoks</string>
     <string name="ime_kde_slides_previous">Eelmine slaid</string>
     <string name="ime_kde_slides_start">Alusta</string>
@@ -488,11 +534,25 @@
     <string name="ime_language_switch_title">Sisestuskeel</string>
     <string name="ime_launcher_activities_label">Ekraanid</string>
     <string name="ime_launcher_app_info_action">Rakenduse teave</string>
+    <string name="ime_launcher_combo_label">%1$s + %2$s</string>
+    <string name="ime_launcher_combo_open_action">Ava mõlemad poolitatud ekraanil</string>
+    <string name="ime_launcher_combo_remove_action">Eemalda see paar</string>
+    <string name="ime_launcher_combos_label">Poolitatud ekraani paarid</string>
     <string name="ime_launcher_empty">Ühtegi rakendust ei leitud</string>
+    <string name="ime_launcher_floating_unsupported">See seade võib selle avada täisekraanil</string>
     <string name="ime_launcher_hidden_label">Ruudustikust peidetud</string>
     <string name="ime_launcher_hide_action">Peida rakendus ruudustikust</string>
     <string name="ime_launcher_loading">Rakenduste laadimine…</string>
+    <string name="ime_launcher_menu_close">Sulge menüü</string>
     <string name="ime_launcher_not_exported_label">Väljaspool rakendust avamatu</string>
+    <string name="ime_launcher_open_action">Ava</string>
+    <string name="ime_launcher_open_floating_action">Ava ujuvas aknas</string>
+    <string name="ime_launcher_open_split_action">Ava poolitatud ekraanil</string>
+    <string name="ime_launcher_page_action">Ekraanid, peitmine ja rakenduse teave…</string>
+    <string name="ime_launcher_page_no_screens_action">Peida ja rakenduse teave...</string>
+    <string name="ime_launcher_pair_action">Paarista poolitatud ekraanil rakendusega…</string>
+    <string name="ime_launcher_pair_cancel">Loobu</string>
+    <string name="ime_launcher_pair_prompt">Puudutage rakendust, et avada see kõrvuti rakendusega %1$s</string>
     <string name="ime_launcher_pin_action">Kinnita rakendus</string>
     <string name="ime_launcher_pinned_label">Kinnitatud</string>
     <string name="ime_launcher_recents_label">Hiljutised</string>
@@ -668,9 +728,11 @@
     <string name="ime_sandbox_offer_only">Kas libistada ainult oma sõnu kasutades?</string>
     <string name="ime_sandbox_offer_prefer">Kas kohandada libistamist sinu sõnade järgi?</string>
     <string name="ime_search_attribution_brave">Brave\'i kaudu</string>
+    <string name="ime_selection_ask_ai">Küsi tehisintellektilt</string>
     <string name="ime_selection_macro_back_desc">Tagasi valikutoimingute juurde</string>
     <string name="ime_selection_macro_bengali_unavailable_toast">Bengali keel pole laaditud</string>
     <string name="ime_selection_macro_busy_desc">Töötab</string>
+    <string name="ime_selection_macro_deepl_clean_toast">DeepL Write-il pole midagi muuta</string>
     <string name="ime_selection_macro_find_none_toast">Rohkem vasteid pole</string>
     <string name="ime_selection_macro_grammar_clean_toast">Pole midagi parandada</string>
     <string name="ime_selection_macro_grammar_unavailable_toast">Grammatika kontrollija pole saadaval</string>
@@ -679,6 +741,7 @@
     <string name="ime_selection_macro_nothing_to_undo_toast">Rohkem pole midagi tagasi võtta</string>
     <string name="ime_selection_macro_open_in_desc">Ava rakenduses %1$s</string>
     <string name="ime_selection_macro_stop_label">Peata</string>
+    <string name="ime_selection_quote">Tsitaat</string>
     <string name="ime_service_already_in_settings_toast">Olete juba seadetes</string>
     <string name="ime_service_autocorrect_off_toast">Automaatkorrektuur on väljas</string>
     <string name="ime_service_autocorrect_on_toast">Automaatkorrektuur on sisse lülitatud</string>
@@ -709,6 +772,11 @@
     <string name="ime_service_phonetic_english_needs_secondary_toast">Lülita inglise keel sisse Keelte, %1$s, Soovita ka keelest all</string>
     <string name="ime_service_phonetic_english_off_toast">Ingliskeelseid sõnu ainult soovitatakse</string>
     <string name="ime_service_phonetic_english_on_toast">Ingliskeelsed sõnad jäävad ingliskeelseteks</string>
+    <string name="ime_service_photo_search_blocked">Andmesäästja ei luba veebiotsingutel seda ühendust kasutada</string>
+    <string name="ime_service_photo_search_metered_ask">See ühendus on mõõdetud andmemahuga. Foto saatmiseks vajutage uuesti Otsi.</string>
+    <string name="ime_service_photo_search_no_app">Ühelgi selle telefoni rakendusel ei ole fotoga otsimise võimalust</string>
+    <string name="ime_service_photo_search_no_browser">Ükski selle telefoni brauser ei saa tulemusi avada</string>
+    <string name="ime_service_photo_search_sending">Foto saatmine otsingusaidile</string>
     <string name="ime_service_plugins_all_off_notice">Kõik installitud pistikprogrammid on välja lülitatud. Lülitage mõni neist sisse jaotises „Halda pistikprogramme“.</string>
     <string name="ime_service_plugins_off_notice">Pluginad on välja lülitatud. Nende installimiseks ja käivitamiseks lülitage need seadetes sisse.</string>
     <string name="ime_service_power_saving_off_toast">Energiasääst on välja lülitatud</string>
@@ -789,10 +857,22 @@
     <string name="ime_sound_volume_label">Helitugevus</string>
     <string name="ime_sticker_add_desc">Lisa kleebiseid</string>
     <string name="ime_sticker_add_to_pack_action">Lisa %1$s</string>
+    <string name="ime_sticker_info_emoji">" इमोजी: %1$s"</string>
+    <string name="ime_sticker_info_keywords">Märksõnad: %1$s</string>
+    <string name="ime_sticker_info_pack">Pakk: %1$s</string>
+    <string name="ime_sticker_info_untitled">Pealkirjata</string>
     <string name="ime_sticker_local_search_empty">Ükski sinu kleebis ei vasta otsingule „%1$s“</string>
     <string name="ime_sticker_manage_packs_action">Halda pakke</string>
     <string name="ime_sticker_need_key_body">Kleebiste tööriist vajab API-võtit Klipy või GIPHY teenusest. Mõlemad võtmed on tasuta. Lisage selle tööriista seadetesse võti.</string>
     <string name="ime_sticker_no_packs_empty">Kleebisepakke veel pole. Loo pakk seadetes. Samuti võid siia salvestamiseks vajutada ja hoida all Klipy või GIPHY kleebist.</string>
+    <plurals name="ime_sticker_offer_count">
+        <item quantity="one">%1$d kleebis</item>
+        <item quantity="other">%1$d kleebist</item>
+    </plurals>
+    <string name="ime_sticker_offer_dismiss_desc">Peida kleebised %1$s jaoks</string>
+    <string name="ime_sticker_offer_item_desc">Saada kleebis %1$s</string>
+    <string name="ime_sticker_offer_item_untitled_desc">Saada see kleebis</string>
+    <string name="ime_sticker_offer_more">+%1$d</string>
     <string name="ime_sticker_pack_all_label">Kõik</string>
     <string name="ime_sticker_pack_empty">See pakk on tühi.</string>
     <string name="ime_sticker_save_new_pack_action">Salvesta uude pakki</string>
@@ -803,8 +883,24 @@
     <string name="ime_suggestion_hold_label">Sõnavalikud</string>
     <string name="ime_suggestion_never_suggest">Ära kunagi soovita \"%1$s\"</string>
     <string name="ime_suggestions_show_desc">Kuva soovituste riba</string>
+    <string name="ime_symbol_row_delete_confirm_body">Komplekt ja kõik selle kirjed kustutatakse. Klaviatuurirežiim, mis seda pakkus, näitab selle asemel teie teisi komplekte.</string>
+    <string name="ime_symbol_row_delete_confirm_title">Kustutada \"%1$s\"?</string>
+    <string name="ime_symbol_row_delete_set">Kustuta komplekt \"%1$s\"</string>
+    <string name="ime_symbol_row_hide_in_mode">Peida rida režiimis %1$s</string>
+    <string name="ime_symbol_row_remove">Eemalda \"%1$s\"</string>
+    <string name="ime_symbol_row_settings">Sümbolirea seaded</string>
     <string name="ime_symbol_set_switch_desc">Vaheta sümbolikomplekti</string>
     <string name="ime_symbols_recents_label">Hiljutised</string>
+    <string name="ime_synonyms_close_desc">Sule sünonüümid</string>
+    <string name="ime_synonyms_failed">Sünonüümide allikani ei õnnestunud jõuda. Kontrollige ühendust ja proovige uuesti.</string>
+    <string name="ime_synonyms_from">Allikast %1$s</string>
+    <string name="ime_synonyms_loading">Otsin sünonüüme...</string>
+    <string name="ime_synonyms_no_sources">Kõik sünonüümiallikad on välja lülitatud. Lülita mõni neist sisse jaotises Tippimine, Soovitused, Sünonüümiallikad.</string>
+    <string name="ime_synonyms_not_found">Sünonüüme ei leitud \"%1$s\" jaoks.</string>
+    <string name="ime_synonyms_pick_desc">Kasuta \"%1$s\"</string>
+    <string name="ime_synonyms_retry">Proovi uuesti</string>
+    <string name="ime_synonyms_similar_note">Sellele sõnale pole sünonüüme loetletud. Nendel sõnadel on sarnane tähendus.</string>
+    <string name="ime_synonyms_title">Sõna \"%1$s\" sünonüümid</string>
     <string name="ime_textedit_doc_end_desc">Liigu teksti lõppu</string>
     <string name="ime_textedit_doc_start_desc">Liigu teksti algusesse</string>
     <string name="ime_textedit_down_desc">Liigu alla</string>
@@ -925,7 +1021,10 @@
     <string name="ime_toolbox_hint_mode">%1$s režiim on sisse lülitatud, seega salvestab klaviatuur selle paigutuse selle režiimi jaoks. Teised rakendused säilitavad oma paigutuse.</string>
     <string name="ime_trackpad_hint">Kursori liigutamiseks lohistage</string>
     <string name="ime_trackpad_surface_desc">Puuteplaat. Lohistage kursori liigutamiseks, hoidke ja lohistage valimiseks, topeltpuudutage sõna valimiseks</string>
+    <string name="ime_translate_all_languages_info">Ka keeled allalaadimiseks</string>
+    <string name="ime_translate_all_languages_label">Kõik keeled</string>
     <string name="ime_translate_auto_detect_label">Tuvasta keel</string>
+    <string name="ime_translate_deepl_label">DeepL</string>
     <string name="ime_translate_download_failed_error">Allalaadimine ei lõppenud. Kontrollige ühendust ja proovige uuesti.</string>
     <string name="ime_translate_download_of_total_progress">%1$s / %2$s</string>
     <string name="ime_translate_downloaded_desc">Allalaaditud</string>
@@ -1063,6 +1162,10 @@
     <string name="ime_voice_status_mic_blocked">Mikrofon on blokeeritud. Lülitage kiirseadetes sisse mikrofoni juurdepääs ja proovige uuesti.</string>
     <string name="ime_voice_status_no_model">Võrguühenduseta häälsisestusel pole veel mudelit</string>
     <string name="ime_voice_status_no_server">Transkriptsiooniserveril pole veel aadressi</string>
+    <plurals name="ime_voice_status_stops_in">
+        <item quantity="one">Peatub %d sekundi pärast. Vajutage lõpetamiseks kohe.</item>
+        <item quantity="other">Peatub %d sekundi pärast. Vajutage lõpetamiseks kohe.</item>
+    </plurals>
     <string name="ime_voice_status_transcribing">Transkribeerimine…</string>
     <string name="ime_voice_stop_desc">Lõpeta kuulamine</string>
     <string name="ime_voice_strip_allow_action">Luba</string>
@@ -1101,6 +1204,7 @@
     <string name="ime_web_search_need_key_body">Veebiotsing vajab Brave Searchi API-võtit. Lisa selle tööriista seadetesse võti.</string>
     <string name="ime_web_search_open_desc">Ava brauseris</string>
     <string name="ime_wiki_back_desc">Tagasi tulemuste juurde</string>
+    <string name="ime_wiki_expand_desc">Muuda artikkel kõrgemaks</string>
     <string name="ime_wiki_full_error">Rakendus ei saa artikli teksti laadida.</string>
     <string name="ime_wiki_full_progress">Laadin tervet artiklit…</string>
     <string name="ime_wiki_idle_info">Otsige teemat saidilt %1$s.wikipedia.org. Lugege kokkuvõtet, avage lingid ja sisestage tekst või artikli aadress.</string>
@@ -1112,8 +1216,12 @@
     <string name="ime_wiki_links_progress">Laadin linke…</string>
     <string name="ime_wiki_no_results_empty">Otsing ei leidnud midagi “%1$s” jaoks.</string>
     <string name="ime_wiki_no_summary_empty">Sellel artiklil pole kokkuvõtet.</string>
+    <string name="ime_wiki_open_browser_desc">Ava artikkel brauseris</string>
+    <string name="ime_wiki_quote_markdown">\"%1$s\" (allikas: [Wikipedia: %2$s](%3$s))</string>
+    <string name="ime_wiki_quote_plain">\"%1$s\" (Wikipedia: %2$s, %3$s)</string>
     <string name="ime_wiki_search_active_hint">Otsi Vikipeediast. Otsimiseks vajutage sisestusklahvi</string>
     <string name="ime_wiki_search_hint">Otsi Vikipeediast…</string>
+    <string name="ime_wiki_shrink_desc">Muuda artikkel uuesti klaviatuuri kõrguseks</string>
     <string name="ime_wiki_tab_full_label">Täielik artikkel</string>
     <string name="ime_wiki_tab_links_label">Lingid</string>
     <string name="ime_wiki_tab_summary_label">Kokkuvõte</string>
@@ -1163,6 +1271,7 @@
     <string name="ime_word_menu_delete">Kustuta \"%1$s\"</string>
     <string name="ime_word_menu_edit">Muuda…</string>
     <string name="ime_word_menu_search_all">Otsi kõiki sõnu \"%1$s\" jaoks</string>
+    <string name="ime_word_menu_synonyms">Sünonüümid sõnale \"%1$s\"</string>
     <string name="ime_word_spell_apply_desc">Kasuta seda õigekirja</string>
     <string name="ime_word_spell_cancel_desc">Jäta õigekiri muutmata</string>
     <string name="ime_word_spell_hint">Sisesta uus õigekiri sõnale \"%1$s\"</string>

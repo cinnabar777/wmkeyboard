@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">পরীক্ষামূলক</string>
     <string name="core_intel_llm_tier_recommended_label">প্রস্তাবিত</string>
     <string name="core_intel_llm_tier_untested_label">পরীক্ষা করা হয়নি</string>
+    <string name="core_intel_ocr_download_error_http">GitHub সার্ভার ফাইলটি পাঠায়নি। ত্রুটি কোডটি হলো HTTP %1$s।</string>
+    <string name="core_intel_ocr_download_error_interrupted">ডাউনলোডের সময় সংযোগ বিচ্ছিন্ন হয়েছে। আবার চেষ্টা করুন।</string>
+    <string name="core_intel_ocr_download_error_no_space">আপনার ডিভাইসে পর্যাপ্ত স্টোরেজ নেই। আপনাকে প্রথমে প্রায় %1$s মেগাবাইট জায়গা খালি করতে হবে।</string>
+    <string name="core_intel_ocr_pack_error_broken">ডাউনলোড করা ভাষার ডেটা ক্ষতিগ্রস্ত হয়েছে, তাই স্ক্যানার এটি ব্যবহার করতে পারেনি। এটি আবার ডাউনলোড করুন।</string>
 </resources>

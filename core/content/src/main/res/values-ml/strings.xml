@@ -115,6 +115,7 @@
     <string name="core_content_selection_macro_chat_strike">സ്ട്രൈക്ക്</string>
     <string name="core_content_selection_macro_colour">നിറം</string>
     <string name="core_content_selection_macro_copy">പകർത്തുക</string>
+    <string name="core_content_selection_macro_deepl_write">DeepL റൈറ്റ്</string>
     <string name="core_content_selection_macro_digits_latin">അക്കങ്ങൾ</string>
     <string name="core_content_selection_macro_email">ഇമെയിൽ</string>
     <string name="core_content_selection_macro_fancy">ഫാൻസി</string>

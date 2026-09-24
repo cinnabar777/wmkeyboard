@@ -2,6 +2,13 @@
 <!-- Machine translated by Google Play. Do not edit by hand:
      regenerate with tools/i18n/pull-play-translations.py. -->
 <resources>
+    <string name="ime_ai_chat_ask_explain">Chaza kalula</string>
+    <string name="ime_ai_chat_ask_explain_prompt">Chaza lokhu ngamagama alula.</string>
+    <string name="ime_ai_chat_ask_hint">Buza umbuzo mayelana nombhalo, noma qala ngomunye walena.</string>
+    <string name="ime_ai_chat_ask_summary">Fingqa</string>
+    <string name="ime_ai_chat_ask_summary_prompt">Nginike isifinyezo esifushane salokhu.</string>
+    <string name="ime_ai_chat_ask_words">Amagama anzima</string>
+    <string name="ime_ai_chat_ask_words_prompt">Chaza amagama nezimvo ezinzima kokuqukethwe yilokhu.</string>
     <string name="ime_ai_chat_attach_desc">Thumela umbhalo wenkambu nomyalezo</string>
     <string name="ime_ai_chat_attach_remove_desc">Ungawuthumeli umbhalo wenkambu</string>
     <plurals name="ime_ai_chat_attached_field">
@@ -12,6 +19,8 @@
         <item quantity="one">Okukhethile kuhamba nomyalezo: %1$d uhlamvu</item>
         <item quantity="other">Okukhethile kuhamba nomyalezo: %1$d izinhlamvu</item>
     </plurals>
+    <string name="ime_ai_chat_attached_tool">Mayelana ne-%1$s</string>
+    <string name="ime_ai_chat_attached_tool_selection">Mayelana nesiqephu esivela ku-%1$s</string>
     <plurals name="ime_ai_chat_attachment_sent">
         <item quantity="one">Ngohlamvu olulodwa lombhalo %1$d</item>
         <item quantity="other">Ngezinhlamvu zombhalo %1$d</item>
@@ -99,6 +108,10 @@
     <string name="ime_ai_truncated_notice">Imodeli ime kusenesikhathi. Khulisa “Ubude obukhulu bempendulo” kuzilungiselelo zethuluzi.</string>
     <string name="ime_ai_view_changes">Izinguquko</string>
     <string name="ime_ai_view_result">Umphumela</string>
+    <string name="ime_ask_ai_label_dict">Isichazamazwi: %1$s</string>
+    <string name="ime_ask_ai_label_grammar">Ukuhlola uhlelo lolimi</string>
+    <string name="ime_ask_ai_label_vocab">Silulumagama: %1$s</string>
+    <string name="ime_ask_ai_label_wiki">Wikipedia: %1$s</string>
     <string name="ime_autofill_dismiss_desc">Fihla iziphakamiso zokugcwalisa ngokuzenzakalelayo</string>
     <string name="ime_calc_degrees_label">deg</string>
     <string name="ime_calc_insert_action">Faka</string>
@@ -127,6 +140,7 @@
     <string name="ime_camera_permission_action">Vumela ikhamera</string>
     <string name="ime_camera_permission_body">Ithuluzi lekhamera lidinga imvume yokusebenzisa ikhamera. Uhlelo lokusebenza luthatha isithombe kuphela uma ucindezela inkinobho yokuthatha isithombe.</string>
     <string name="ime_camera_retake_action">Thatha futhi</string>
+    <string name="ime_camera_search_action">Sesha</string>
     <string name="ime_camera_send_action">Thumela</string>
     <string name="ime_camera_shutter_desc">Thatha isithombe</string>
     <string name="ime_camera_starting_progress">Iqala ikhamera...</string>
@@ -144,6 +158,10 @@
     <string name="ime_clip_chip_image">Isithombe esikopishiwe</string>
     <string name="ime_clip_chip_item">Into ekopishiwe</string>
     <string name="ime_clip_chip_screenshot">Isithombe-skrini</string>
+    <plurals name="ime_clip_deleted">
+        <item quantity="one">Isiqeshana sisusiwe</item>
+        <item quantity="other">Iziceshana ezingu-%1$d zisusiwe</item>
+    </plurals>
     <string name="ime_clip_edit">Hlela</string>
     <string name="ime_clip_edit_placeholder">Thayipha umbhalo we-clip</string>
     <string name="ime_clip_edit_rich_note">Ukulondoloza ushintsho kususa ukufometha</string>
@@ -162,6 +180,18 @@
     <string name="ime_clip_info_private_detail">Ikhibhodi ifihla lokhu kunamathiselwe kwipaneli futhi ikususa ngokushesha kunezinye izinto ezilondoloziwe.</string>
     <string name="ime_clip_info_size">Usayizi</string>
     <string name="ime_clip_info_type">Uhlobo</string>
+    <plurals name="ime_clip_left_days">
+        <item quantity="one">Kusele usuku olu-%d</item>
+        <item quantity="other">Kusele izinsuku ezingu-%d</item>
+    </plurals>
+    <plurals name="ime_clip_left_hours">
+        <item quantity="one">%d ihora elisele</item>
+        <item quantity="other">%d amahora asele</item>
+    </plurals>
+    <plurals name="ime_clip_left_minutes">
+        <item quantity="one">%d imizuzu isele</item>
+        <item quantity="other">%d imizuzu isele</item>
+    </plurals>
     <string name="ime_clip_number_desc">Isiqeshana %1$d</string>
     <string name="ime_clip_pin">Phina</string>
     <string name="ime_clip_send_as_sticker">Thumela njengesitikha</string>
@@ -172,6 +202,7 @@
     <string name="ime_clip_type_rich_text">Umbhalo ocebile (Rich text)</string>
     <string name="ime_clip_type_text">Umbhalo</string>
     <string name="ime_clip_type_video">Ividiyo</string>
+    <string name="ime_clip_undo_delete">Buyisela</string>
     <string name="ime_clip_unpin">Khipha ukuphina</string>
     <string name="ime_clip_video_desc">Ividiyo ekopishiwe</string>
     <string name="ime_clipboard_empty">Umlando webhodi lokunamathisela ungenalutho. Umbhalo okopishiwe uzovela lapha.</string>
@@ -204,10 +235,12 @@
     <string name="ime_dict_add_vocab_action">Engeza kusilulumagama</string>
     <string name="ime_dict_antonyms_label">Amagama aphikisayo</string>
     <string name="ime_dict_error">Uhlelo lokusebenza alukwazi ukufinyelela isichazamazwi. Hlola inethiwekhi yakho bese uzama futhi.</string>
+    <string name="ime_dict_from">Kusuka ku-%1$s</string>
     <string name="ime_dict_idle_info">Bheka igama lesiNgisi. Cindezela ibha yokusesha bese uthayipha. Ungakwazi futhi ukubeka isikhombisi egameni ngaphambi kokuvula ithuluzi.</string>
     <string name="ime_dict_insert_action">Faka</string>
     <string name="ime_dict_lookup_desc">Bheka igama</string>
     <string name="ime_dict_lookup_progress">Icinga “%1$s”…</string>
+    <string name="ime_dict_no_sources">Yonke imithombo yesichazamazwi ivaliwe. Vula eyodwa kuzilungiselelo zethuluzi lesichazamazwi.</string>
     <string name="ime_dict_not_found_empty">Akukho okufakiwe kwe-%1$s. Hlola isipelingi, noma uzame uhlobo oluyisisekelo lwegama.</string>
     <string name="ime_dict_play_desc">Dlala indlela yokubiza amagama</string>
     <string name="ime_dict_search_active_hint">Thayipha igama…</string>
@@ -315,7 +348,15 @@
     <string name="ime_glide_word_list_offer">Ukuthayipha ngokuslayida kudinga uhlu lwamagama olungu-%1$s</string>
     <string name="ime_glide_word_list_offer_dismiss_desc">Chitha</string>
     <string name="ime_grammar_all_filtered_empty">Yonke inkinga etholakele ifihliwe yisihlungi</string>
+    <string name="ime_grammar_ask_ai_desc">Buza i-AI ngale nkinga</string>
     <string name="ime_grammar_category_kind_label">%1$s • %2$s</string>
+    <string name="ime_grammar_deepl_action_desc">Thuthukisa umbhalo nge-DeepL Write</string>
+    <string name="ime_grammar_deepl_dismiss_desc">Vala umphumela we-DeepL Write</string>
+    <string name="ime_grammar_deepl_error">I-DeepL Write ayiphendulanga</string>
+    <string name="ime_grammar_deepl_replace_action">Faka esikhundleni</string>
+    <string name="ime_grammar_deepl_replace_failed_toast">Umbhalo okule nsimu awukwazi ukushintshwa</string>
+    <string name="ime_grammar_deepl_title">DeepL Write</string>
+    <string name="ime_grammar_deepl_unchanged">I-DeepL Write ayinayo into okufanele iyishintshe</string>
     <string name="ime_grammar_dialect_desc">Khetha isigodi</string>
     <string name="ime_grammar_dismiss_desc">Fihla le nkinga</string>
     <string name="ime_grammar_empty_hint">Thayipha umbhalo, noma uvule inkambu enombhalo. Izinkinga zivela lapha. Ukuhlola kwenzeka ungaxhunyiwe ku-inthanethi.</string>
@@ -347,6 +388,7 @@
     <string name="ime_icons_empty_info">Ukuze ungeze amaphakethe wezithonjana, vula izilungiselelo.</string>
     <string name="ime_icons_more_label">Amaphakethe ezithonjana engeziwe</string>
     <string name="ime_icons_pick_info">Cindezela iphakethe lezithonjana ukuze ulisebenzise ezinkinobho nasemathuluzini.</string>
+    <string name="ime_image_search_by_photo_desc">Sesha ngesithombe</string>
     <string name="ime_image_search_empty">Azikho izithombe ze-“%1$s”</string>
     <string name="ime_image_search_hint">Sesha izithombe</string>
     <string name="ime_image_search_need_key_body">Ukusesha isithombe kudinga ukhiye we-API ovela ku-Brave Search. Engeza ukhiye kuzilungiselelo zaleli thuluzi.</string>
@@ -376,6 +418,8 @@
     <string name="ime_kde_loop">Phinda</string>
     <string name="ime_kde_media_empty_body">Qala isidlali lapho bese sivela lapha</string>
     <string name="ime_kde_media_empty_title">Akukho okudlalayo kukhompyutha</string>
+    <string name="ime_kde_media_unsupported_body">I-KDE Connect yayo ayivumeli ifoni ukuthi ilawule umculo noma ividiyo. I-KDE Connect ku-Mac ayikaze ikwenze lokho</string>
+    <string name="ime_kde_media_unsupported_title">Le khompyutha ayabelani ngabadlali bayo</string>
     <string name="ime_kde_not_listening">Olunye uhlelo lokusebenza kule foni lusebenzisa imbobo ye-KDE Connect. Amakhompyutha asengayithola le khibhodi, kodwa cindezela Vuselela kulolu hlangothi.</string>
     <string name="ime_kde_notice_clipboard_empty">Akukho okusebhodini lokunamathisela okungathunyelwa</string>
     <string name="ime_kde_notice_clipboard_sent">I-clipboard ithunyelwe</string>
@@ -426,10 +470,12 @@
     <string name="ime_kde_send_empty">Thumela ibhodi lokunamathisela, lokho okubhalile, noma amafayela. Lokho ikhompyutha ekuthumelayo kufika lapha naku-Downloads</string>
     <string name="ime_kde_send_field">Umbhalo okumkhakha</string>
     <string name="ime_kde_send_files">Amafayela…</string>
+    <string name="ime_kde_send_unsupported">Le khompyutha ayiwamukeli amafayela noma umbhalo ovela ocingweni</string>
     <string name="ime_kde_settings">Izilungiselelo</string>
     <string name="ime_kde_shuffle">Shova</string>
     <string name="ime_kde_slides_end">Isiphetho</string>
     <string name="ime_kde_slides_next">Isilayidi esilandelayo</string>
+    <string name="ime_kde_slides_no_pointer">Le khompyutha ayinayo inkomba yamaslayidi</string>
     <string name="ime_kde_slides_pointer">Bamba bese uhudula ukuze uthole isikhombisi</string>
     <string name="ime_kde_slides_previous">Isilayidi esedlule</string>
     <string name="ime_kde_slides_start">Qala</string>
@@ -489,11 +535,25 @@
     <string name="ime_language_switch_title">Ulimi lokufaka</string>
     <string name="ime_launcher_activities_label">Izikrini</string>
     <string name="ime_launcher_app_info_action">Ulwazi lohlelo lokusebenza</string>
+    <string name="ime_launcher_combo_label">%1$s + %2$s</string>
+    <string name="ime_launcher_combo_open_action">Vula kokubili ngesikrini esihlukanisiwe</string>
+    <string name="ime_launcher_combo_remove_action">Susa le mbhangqwana</string>
+    <string name="ime_launcher_combos_label">Izithombe zesikrini esihlukanisiwe</string>
     <string name="ime_launcher_empty">Azikho izinhlelo zokusebenza ezihambisanayo</string>
+    <string name="ime_launcher_floating_unsupported">Le divayisi ingase iyivule esikrinini esigcwele</string>
     <string name="ime_launcher_hidden_label">Ifihliwe kugridi</string>
     <string name="ime_launcher_hide_action">Fihla uhlelo lokusebenza kugridi</string>
     <string name="ime_launcher_loading">Ilayisha izinhlelo zokusebenza...</string>
+    <string name="ime_launcher_menu_close">Vala imenyu</string>
     <string name="ime_launcher_not_exported_label">Ayivuleki ngaphandle kohlelo lokusebenza</string>
+    <string name="ime_launcher_open_action">Vula</string>
+    <string name="ime_launcher_open_floating_action">Vula efasiteleni elintantayo</string>
+    <string name="ime_launcher_open_split_action">Vula esikrinini esihlukanisiwe</string>
+    <string name="ime_launcher_page_action">Izikrini, fihla kanye nolwazi lohlelo lokusebenza...</string>
+    <string name="ime_launcher_page_no_screens_action">Fihla kanye nolwazi lohlelo lokusebenza…</string>
+    <string name="ime_launcher_pair_action">Bhangqa esikrinini esihlukanisiwe nge…</string>
+    <string name="ime_launcher_pair_cancel">Khansela</string>
+    <string name="ime_launcher_pair_prompt">Thepha uhlelo lokusebenza ukuze uvule eceleni kwe-%1$s</string>
     <string name="ime_launcher_pin_action">Phina uhlelo lokusebenza</string>
     <string name="ime_launcher_pinned_label">Phiniwe</string>
     <string name="ime_launcher_recents_label">Okusanda kwenzeka</string>
@@ -669,9 +729,11 @@
     <string name="ime_sandbox_offer_only">Swayipha usebenzisa amagama akho kuphela?</string>
     <string name="ime_sandbox_offer_prefer">Lungisa ukuswayipha kumagama akho?</string>
     <string name="ime_search_attribution_brave">nge-Brave</string>
+    <string name="ime_selection_ask_ai">Buza i-AI</string>
     <string name="ime_selection_macro_back_desc">Buyela ezenzweni zokukhetha</string>
     <string name="ime_selection_macro_bengali_unavailable_toast">Isi-Bengali asilayishiwe</string>
     <string name="ime_selection_macro_busy_desc">Iyasebenza</string>
+    <string name="ime_selection_macro_deepl_clean_toast">I-DeepL Write ayinakho okufanele ikushintshe</string>
     <string name="ime_selection_macro_find_none_toast">Akukho okunye okufanayo</string>
     <string name="ime_selection_macro_grammar_clean_toast">Akukho okudinga ukulungiswa</string>
     <string name="ime_selection_macro_grammar_unavailable_toast">Isihloli solimi asitholakali</string>
@@ -680,6 +742,7 @@
     <string name="ime_selection_macro_nothing_to_undo_toast">Akukho okunye okungahlehliswa</string>
     <string name="ime_selection_macro_open_in_desc">Vula ku-%1$s</string>
     <string name="ime_selection_macro_stop_label">Misa</string>
+    <string name="ime_selection_quote">Quote</string>
     <string name="ime_service_already_in_settings_toast">Usuvele usuzilungiselelweni</string>
     <string name="ime_service_autocorrect_off_toast">Ukulungisa ngokuzenzakalelayo kuvaliwe</string>
     <string name="ime_service_autocorrect_on_toast">Ukulungisa ngokuzenzakalelayo kuvuliwe</string>
@@ -710,6 +773,11 @@
     <string name="ime_service_phonetic_english_needs_secondary_toast">Vula isiNgisi ngaphansi kwezilimi, %1$s, Futhi phakamisa kusuka ku</string>
     <string name="ime_service_phonetic_english_off_toast">Amagama esiNgisi aphakanyiswa kuphela</string>
     <string name="ime_service_phonetic_english_on_toast">Amagama esiNgisi ahlala engesiNgisi</string>
+    <string name="ime_service_photo_search_blocked">Isilondolozi sedatha asivumeli ukusesha kwewebhu ukusebenzisa lokhu kuxhumana</string>
+    <string name="ime_service_photo_search_metered_ask">Lokhu kuxhumana kunesilinganiso. Ukuze uthumele isithombe, cindezela u-Sesha futhi.</string>
+    <string name="ime_service_photo_search_no_app">Alikho uhlelo lokusebenza kule foni olungasesha ngesithombe</string>
+    <string name="ime_service_photo_search_no_browser">Asikho isiphequluli kule foni esingavula imiphumela</string>
+    <string name="ime_service_photo_search_sending">Ithumela isithombe kusayithi lokusesha</string>
     <string name="ime_service_plugins_all_off_notice">Yonke i-plugin oyifakile icishiwe. Vula eyodwa ngaphansi kokuphatha ama-plugin.</string>
     <string name="ime_service_plugins_off_notice">Ama-plugin acishiwe. Avule kuzilungiselelo ukuze uwafake futhi uwasebenzise.</string>
     <string name="ime_service_power_saving_off_toast">Ukonga amandla kucishiwe</string>
@@ -791,10 +859,22 @@
     <string name="ime_sound_volume_label">Ivolumu</string>
     <string name="ime_sticker_add_desc">Engeza izitikha</string>
     <string name="ime_sticker_add_to_pack_action">Engeza ku-%1$s</string>
+    <string name="ime_sticker_info_emoji">I-Emoji: %1$s</string>
+    <string name="ime_sticker_info_keywords">Amagama angukhiye: %1$s</string>
+    <string name="ime_sticker_info_pack">Iphakethe: %1$s</string>
+    <string name="ime_sticker_info_untitled">Ayikho isihloko</string>
     <string name="ime_sticker_local_search_empty">Azikho izitika zakho ezihambisana ne-“%1$s”</string>
     <string name="ime_sticker_manage_packs_action">Phatha amaphakethe</string>
     <string name="ime_sticker_need_key_body">Ithuluzi lezitikha lidinga ukhiye we-API ovela ku-Klipy noma ku-GIPHY. Bobabili okhiye bakhululekile. Engeza ukhiye kuzilungiselelo zaleli thuluzi.</string>
     <string name="ime_sticker_no_packs_empty">Awekho amaphakethe ezitikha okwamanje. Yenza iphakethe kuzilungiselelo. Ungaphinda ucindezele ubambe isitikha kusuka ku-Klipy noma i-GIPHY ukuze usilondoloze lapha.</string>
+    <plurals name="ime_sticker_offer_count">
+        <item quantity="one">isitika esingu-%1$d</item>
+        <item quantity="other">izitika ezingu-%1$d</item>
+    </plurals>
+    <string name="ime_sticker_offer_dismiss_desc">Fihla izitikha ze-%1$s</string>
+    <string name="ime_sticker_offer_item_desc">Thumela isitika %1$s</string>
+    <string name="ime_sticker_offer_item_untitled_desc">Thumela lesi sitika</string>
+    <string name="ime_sticker_offer_more">+%1$d</string>
     <string name="ime_sticker_pack_all_label">Konke</string>
     <string name="ime_sticker_pack_empty">Leli phakethe alinalutho.</string>
     <string name="ime_sticker_save_new_pack_action">Londoloza ephaketheni elisha</string>
@@ -805,8 +885,24 @@
     <string name="ime_suggestion_hold_label">Izinketho zamagama</string>
     <string name="ime_suggestion_never_suggest">Ungalokothi uphakamise \"%1$s\"</string>
     <string name="ime_suggestions_show_desc">Bonisa umugqa wesiphakamiso</string>
+    <string name="ime_symbol_row_delete_confirm_body">Isethi nakho konke okufakiwe kuyo kuzosuswa. Imodi yekhibhodi ebeyinikeza izobonisa ezinye izethi zakho esikhundleni salokho.</string>
+    <string name="ime_symbol_row_delete_confirm_title">Susa u-\"%1$s\"?</string>
+    <string name="ime_symbol_row_delete_set">Susa isethi ethi \"%1$s\"</string>
+    <string name="ime_symbol_row_hide_in_mode">Fihla umugqa ku-%1$s</string>
+    <string name="ime_symbol_row_remove">Susa \"%1$s\"</string>
+    <string name="ime_symbol_row_settings">Izilungiselelo zomugqa wezimpawu</string>
     <string name="ime_symbol_set_switch_desc">Shintsha isethi yezimpawu</string>
     <string name="ime_symbols_recents_label">Okusanda kwenzeka</string>
+    <string name="ime_synonyms_close_desc">Vala izimpawu ezifanayo</string>
+    <string name="ime_synonyms_failed">Ayikwazanga ukufinyelela umthombo wamagama afanayo. Hlola ukuxhumana bese uzama futhi.</string>
+    <string name="ime_synonyms_from">Kusuka ku-%1$s</string>
+    <string name="ime_synonyms_loading">Icinga amagama afanayo…</string>
+    <string name="ime_synonyms_no_sources">Yonke imithombo yezimpawu ezifanayo icishiwe. Vula eyodwa kokuthi Ukuthayipha, Iziphakamiso, Imithombo yezimpawu ezifanayo.</string>
+    <string name="ime_synonyms_not_found">Awutholakali umqondo ofanayo othi \"%1$s\".</string>
+    <string name="ime_synonyms_pick_desc">Sebenzisa \"%1$s\"</string>
+    <string name="ime_synonyms_retry">Zama futhi</string>
+    <string name="ime_synonyms_similar_note">Awekho ama-synonyms afakiwe kuleli gama. Lawa magama anencazelo efanayo.</string>
+    <string name="ime_synonyms_title">Amagama afanayo we-\"%1$s\"</string>
     <string name="ime_textedit_doc_end_desc">Yiya ekupheleni kombhalo</string>
     <string name="ime_textedit_doc_start_desc">Yiya ekuqaleni kombhalo</string>
     <string name="ime_textedit_down_desc">Hambisa phansi</string>
@@ -927,7 +1023,10 @@
     <string name="ime_toolbox_hint_mode">Imodi ye-%1$s ivuliwe, ngakho ikhibhodi ilondoloza lokhu kuhlelwa kwaleyo modi. Ezinye izinhlelo zokusebenza zigcina ezazo.</string>
     <string name="ime_trackpad_hint">Hudula ukuze uhambise isikhombisi</string>
     <string name="ime_trackpad_surface_desc">I-Trackpad. Hudula ukuze uhambise isikhombisi, bamba futhi uhudule ukuze ukhethe, thepha kabili ukuze ukhethe igama</string>
+    <string name="ime_translate_all_languages_info">Futhi izilimi okufanele uzilande</string>
+    <string name="ime_translate_all_languages_label">Zonke izilimi</string>
     <string name="ime_translate_auto_detect_label">Thola ulimi</string>
+    <string name="ime_translate_deepl_label">DeepL</string>
     <string name="ime_translate_download_failed_error">Ukulanda akuphelanga. Hlola uxhumano, bese uzama futhi.</string>
     <string name="ime_translate_download_of_total_progress">%1$s kwezi-%2$s</string>
     <string name="ime_translate_downloaded_desc">Kulandiwe</string>
@@ -1065,6 +1164,10 @@
     <string name="ime_voice_status_mic_blocked">Imakrofoni ivaliwe. Vula ukufinyelela kwemakrofoni kuzilungiselelo ezisheshayo, bese uzama futhi.</string>
     <string name="ime_voice_status_no_model">Ukuthayipha ngezwi okungaxhunyiwe ku-inthanethi akukabi nalo imodeli</string>
     <string name="ime_voice_status_no_server">Iseva yokubhala ayikabi nekheli</string>
+    <plurals name="ime_voice_status_stops_in">
+        <item quantity="one">Izima emuva kwemizuzwana engu-%d. Cindezela ukuze uqede manje.</item>
+        <item quantity="other">Izima emuva kwemizuzwana engu-%d. Cindezela ukuze uqede manje.</item>
+    </plurals>
     <string name="ime_voice_status_transcribing">Iyabhala…</string>
     <string name="ime_voice_stop_desc">Yeka ukulalela</string>
     <string name="ime_voice_strip_allow_action">Vumela</string>
@@ -1103,6 +1206,7 @@
     <string name="ime_web_search_need_key_body">Ukusesha kuwebhu kudinga ukhiye we-API ovela ku-Brave Search. Engeza ukhiye kuzilungiselelo zaleli thuluzi.</string>
     <string name="ime_web_search_open_desc">Vula kusiphequluli</string>
     <string name="ime_wiki_back_desc">Buyela emiphumeleni</string>
+    <string name="ime_wiki_expand_desc">Yenza isihloko sibe side</string>
     <string name="ime_wiki_full_error">Uhlelo lokusebenza alukwazi ukulayisha umbhalo wendatshana.</string>
     <string name="ime_wiki_full_progress">Ilayisha i-athikili ephelele…</string>
     <string name="ime_wiki_idle_info">Sesha isihloko ku-%1$s.wikipedia.org. Funda isifinyezo, vula izixhumanisi, bese ufaka umbhalo noma ikheli le-athikili.</string>
@@ -1114,8 +1218,12 @@
     <string name="ime_wiki_links_progress">Ilayisha izixhumanisi...</string>
     <string name="ime_wiki_no_results_empty">Ukusesha akutholanga lutho lwe-“%1$s”.</string>
     <string name="ime_wiki_no_summary_empty">Lesi sihloko asinasifinyezo.</string>
+    <string name="ime_wiki_open_browser_desc">Vula isihloko esipheqululini</string>
+    <string name="ime_wiki_quote_markdown">\"%1$s\" (kusuka ku-[Wikipedia: %2$s](%3$s))</string>
+    <string name="ime_wiki_quote_plain">\"%1$s\" (Wikipedia: %2$s, %3$s)</string>
     <string name="ime_wiki_search_active_hint">Sesha i-Wikipedia. Cindezela u-enter ukuze useshe</string>
     <string name="ime_wiki_search_hint">Sesha ku-Wikipedia…</string>
+    <string name="ime_wiki_shrink_desc">Yenza isihloko sibe ukuphakama kwekhibhodi futhi</string>
     <string name="ime_wiki_tab_full_label">Isihloko esigcwele</string>
     <string name="ime_wiki_tab_links_label">Izixhumanisi</string>
     <string name="ime_wiki_tab_summary_label">Isifinyezo</string>
@@ -1165,6 +1273,7 @@
     <string name="ime_word_menu_delete">Susa \"%1$s\"</string>
     <string name="ime_word_menu_edit">Hlela…</string>
     <string name="ime_word_menu_search_all">Sesha wonke amagama athi \"%1$s\"</string>
+    <string name="ime_word_menu_synonyms">Amagama afanayo ne-%1$s</string>
     <string name="ime_word_spell_apply_desc">Sebenzisa lokhu kupela</string>
     <string name="ime_word_spell_cancel_desc">Shiya isipelingi njengoba sinjalo</string>
     <string name="ime_word_spell_hint">Thayipha isipelingi esisha se-\"%1$s\"</string>

@@ -2,6 +2,13 @@
 <!-- Machine translated by Google Play. Do not edit by hand:
      regenerate with tools/i18n/pull-play-translations.py. -->
 <resources>
+    <string name="ime_ai_chat_ask_explain">Leg het simpel uit</string>
+    <string name="ime_ai_chat_ask_explain_prompt">Leg dit uit in eenvoudige bewoordingen.</string>
+    <string name="ime_ai_chat_ask_hint">Stel een vraag over de tekst of begin met een van deze opties.</string>
+    <string name="ime_ai_chat_ask_summary">Samenvatten</string>
+    <string name="ime_ai_chat_ask_summary_prompt">Geef me een korte samenvatting hiervan.</string>
+    <string name="ime_ai_chat_ask_words">Moeilijke woorden</string>
+    <string name="ime_ai_chat_ask_words_prompt">Leg de moeilijke woorden en ideeën hierin uit.</string>
     <string name="ime_ai_chat_attach_desc">Verzend de tekst van het veld met het bericht</string>
     <string name="ime_ai_chat_attach_remove_desc">De tekst van het veld niet verzenden</string>
     <plurals name="ime_ai_chat_attached_field">
@@ -12,6 +19,8 @@
         <item quantity="one">Uw selectie gaat mee met het bericht: %1$d teken</item>
         <item quantity="other">Uw selectie gaat mee met het bericht: %1$d tekens</item>
     </plurals>
+    <string name="ime_ai_chat_attached_tool">Over %1$s</string>
+    <string name="ime_ai_chat_attached_tool_selection">Over een passage uit %1$s</string>
     <plurals name="ime_ai_chat_attachment_sent">
         <item quantity="one">Met %1$d teken tekst</item>
         <item quantity="other">Met %1$d tekens tekst</item>
@@ -99,6 +108,10 @@
     <string name="ime_ai_truncated_notice">Het model is voortijdig gestopt. Verhoog de \"Maximale antwoordlengte\" in de instellingen van de tool.</string>
     <string name="ime_ai_view_changes">Wijzigingen</string>
     <string name="ime_ai_view_result">Resultaat</string>
+    <string name="ime_ask_ai_label_dict">Woordenboek: %1$s</string>
+    <string name="ime_ask_ai_label_grammar">Grammaticacontrole</string>
+    <string name="ime_ask_ai_label_vocab">Woordenschat: %1$s</string>
+    <string name="ime_ask_ai_label_wiki">Wikipedia: %1$s</string>
     <string name="ime_autofill_dismiss_desc">Verberg de suggesties voor automatisch aanvullen</string>
     <string name="ime_calc_degrees_label">graden</string>
     <string name="ime_calc_insert_action">Invoegen</string>
@@ -127,6 +140,7 @@
     <string name="ime_camera_permission_action">Camera toestaan</string>
     <string name="ime_camera_permission_body">De cameratool heeft toestemming nodig om de camera te gebruiken. De app maakt alleen een foto wanneer je op de sluiter drukt.</string>
     <string name="ime_camera_retake_action">Opnieuw nemen</string>
+    <string name="ime_camera_search_action">Zoeken</string>
     <string name="ime_camera_send_action">Verzenden</string>
     <string name="ime_camera_shutter_desc">Maak een foto</string>
     <string name="ime_camera_starting_progress">Camera starten…</string>
@@ -144,6 +158,10 @@
     <string name="ime_clip_chip_image">Gekopieerde afbeelding</string>
     <string name="ime_clip_chip_item">Gekopieerd item</string>
     <string name="ime_clip_chip_screenshot">Schermafbeelding</string>
+    <plurals name="ime_clip_deleted">
+        <item quantity="one">Clip verwijderd</item>
+        <item quantity="other">%1$d clips verwijderd</item>
+    </plurals>
     <string name="ime_clip_edit">Bewerken</string>
     <string name="ime_clip_edit_placeholder">Typ de tekst van het fragment</string>
     <string name="ime_clip_edit_rich_note">Het opslaan van een wijziging verwijdert de opmaak</string>
@@ -162,6 +180,18 @@
     <string name="ime_clip_info_private_detail">Het toetsenbord verbergt dit fragment in het paneel en verwijdert het eerder dan andere fragmenten.</string>
     <string name="ime_clip_info_size">Grootte</string>
     <string name="ime_clip_info_type">Type</string>
+    <plurals name="ime_clip_left_days">
+        <item quantity="one">%d dag resterend</item>
+        <item quantity="other">%d dagen resterend</item>
+    </plurals>
+    <plurals name="ime_clip_left_hours">
+        <item quantity="one">%d u resterend</item>
+        <item quantity="other">%d u resterend</item>
+    </plurals>
+    <plurals name="ime_clip_left_minutes">
+        <item quantity="one">%d min resterend</item>
+        <item quantity="other">%d min resterend</item>
+    </plurals>
     <string name="ime_clip_number_desc">Clip %1$d</string>
     <string name="ime_clip_pin">Vastmaken</string>
     <string name="ime_clip_send_as_sticker">Verzenden als sticker</string>
@@ -172,6 +202,7 @@
     <string name="ime_clip_type_rich_text">Rich text</string>
     <string name="ime_clip_type_text">Tekst</string>
     <string name="ime_clip_type_video">Video</string>
+    <string name="ime_clip_undo_delete">Ongedaan maken</string>
     <string name="ime_clip_unpin">Losmaken</string>
     <string name="ime_clip_video_desc">Gekopieerde video</string>
     <string name="ime_clipboard_no_match">Geen clips komen overeen met “%1$s”.</string>
@@ -203,10 +234,12 @@
     <string name="ime_dict_add_vocab_action">Toevoegen aan vocabulaire</string>
     <string name="ime_dict_antonyms_label">Antoniemen</string>
     <string name="ime_dict_error">De app kan het woordenboek niet bereiken. Controleer je netwerk en probeer het opnieuw.</string>
+    <string name="ime_dict_from">Van %1$s</string>
     <string name="ime_dict_idle_info">Zoek een Engels woord op. Druk op de zoekbalk en typ. Je kunt de cursor ook op een woord plaatsen voordat je de tool opent.</string>
     <string name="ime_dict_insert_action">Invoegen</string>
     <string name="ime_dict_lookup_desc">Zoek het woord op</string>
     <string name="ime_dict_lookup_progress">Zoeken naar “%1$s”…</string>
+    <string name="ime_dict_no_sources">Alle woordenboekbronnen zijn uitgeschakeld. Schakel er een in bij de instellingen van het woordenboek.</string>
     <string name="ime_dict_not_found_empty">Geen vermelding voor “%1$s”. Controleer de spelling of probeer de basisvorm van het woord.</string>
     <string name="ime_dict_play_desc">Speel de uitspraak af</string>
     <string name="ime_dict_search_active_hint">Typ een woord…</string>
@@ -314,7 +347,15 @@
     <string name="ime_glide_word_list_offer">Glijdend typen vereist een %1$s woordenlijst</string>
     <string name="ime_glide_word_list_offer_dismiss_desc">Sluiten</string>
     <string name="ime_grammar_all_filtered_empty">Alle gevonden problemen zijn verborgen door het filter</string>
+    <string name="ime_grammar_ask_ai_desc">Vraag AI om hulp bij dit probleem</string>
     <string name="ime_grammar_category_kind_label">%1$s • %2$s</string>
+    <string name="ime_grammar_deepl_action_desc">Verbeter de tekst met DeepL Write</string>
+    <string name="ime_grammar_deepl_dismiss_desc">Sluit het DeepL Write-resultaat</string>
+    <string name="ime_grammar_deepl_error">DeepL Write gaf geen antwoord</string>
+    <string name="ime_grammar_deepl_replace_action">Vervangen</string>
+    <string name="ime_grammar_deepl_replace_failed_toast">De tekst in dit veld kan niet worden vervangen</string>
+    <string name="ime_grammar_deepl_title">DeepL Write</string>
+    <string name="ime_grammar_deepl_unchanged">DeepL Write heeft niets te wijzigen</string>
     <string name="ime_grammar_dialect_desc">Selecteer het dialect</string>
     <string name="ime_grammar_dismiss_desc">Dit probleem verbergen</string>
     <string name="ime_grammar_empty_hint">Typ tekst of open een veld met tekst. De problemen worden hier getoond. De controles worden offline uitgevoerd.</string>
@@ -346,6 +387,7 @@
     <string name="ime_icons_empty_info">Open de instellingen om iconenpakketten toe te voegen.</string>
     <string name="ime_icons_more_label">Meer iconenpakketten</string>
     <string name="ime_icons_pick_info">Druk op een iconenpakket om het op de toetsen en tools te gebruiken.</string>
+    <string name="ime_image_search_by_photo_desc">Zoeken met een foto</string>
     <string name="ime_image_search_empty">Geen afbeeldingen voor “%1$s”</string>
     <string name="ime_image_search_hint">Afbeeldingen zoeken</string>
     <string name="ime_image_search_need_key_body">Voor het zoeken naar afbeeldingen is een API-sleutel van Brave Search nodig. Voeg een sleutel toe in de instellingen voor dit hulpprogramma.</string>
@@ -375,6 +417,8 @@
     <string name="ime_kde_loop">Herhalen</string>
     <string name="ime_kde_media_empty_body">Start daar een speler en deze verschijnt hier</string>
     <string name="ime_kde_media_empty_title">Er wordt niets afgespeeld op de computer</string>
+    <string name="ime_kde_media_unsupported_body">De KDE Connect-versie ondersteunt het besturen van muziek of video vanaf een telefoon niet. KDE Connect op een Mac doet dit nooit.</string>
+    <string name="ime_kde_media_unsupported_title">Deze computer deelt zijn spelers niet</string>
     <string name="ime_kde_not_listening">Een andere app op deze telefoon gebruikt de KDE Connect-poort. Computers kunnen dit toetsenbord nog steeds vinden, maar druk aan deze kant op Vernieuwen.</string>
     <string name="ime_kde_notice_clipboard_empty">Niets op het klembord om te verzenden</string>
     <string name="ime_kde_notice_clipboard_sent">Klembord verzonden</string>
@@ -425,10 +469,12 @@
     <string name="ime_kde_send_empty">Verzend het klembord, wat u heeft geschreven, of bestanden. Wat de computer verzendt komt hier en in Downloads terecht</string>
     <string name="ime_kde_send_field">Tekst in het veld</string>
     <string name="ime_kde_send_files">Bestanden…</string>
+    <string name="ime_kde_send_unsupported">Deze computer accepteert geen bestanden of tekst van de telefoon</string>
     <string name="ime_kde_settings">Instellingen</string>
     <string name="ime_kde_shuffle">Willekeurige volgorde</string>
     <string name="ime_kde_slides_end">Einde</string>
     <string name="ime_kde_slides_next">Volgende dia</string>
+    <string name="ime_kde_slides_no_pointer">Deze computer heeft geen aanwijzer voor dia\'s</string>
     <string name="ime_kde_slides_pointer">Ingedrukt houden en slepen voor de aanwijzer</string>
     <string name="ime_kde_slides_previous">Vorige dia</string>
     <string name="ime_kde_slides_start">Start</string>
@@ -488,11 +534,25 @@
     <string name="ime_language_switch_title">Invoertaal</string>
     <string name="ime_launcher_activities_label">Schermen</string>
     <string name="ime_launcher_app_info_action">App-info</string>
+    <string name="ime_launcher_combo_label">%1$s + %2$s</string>
+    <string name="ime_launcher_combo_open_action">Beide openen in gesplitst scherm</string>
+    <string name="ime_launcher_combo_remove_action">Dit paar verwijderen</string>
+    <string name="ime_launcher_combos_label">Split-screen-paren</string>
     <string name="ime_launcher_empty">Geen overeenkomende apps</string>
+    <string name="ime_launcher_floating_unsupported">Dit apparaat opent het mogelijk op volledig scherm</string>
     <string name="ime_launcher_hidden_label">Verborgen in het raster</string>
     <string name="ime_launcher_hide_action">App verbergen in het raster</string>
     <string name="ime_launcher_loading">Apps laden…</string>
+    <string name="ime_launcher_menu_close">Menu sluiten</string>
     <string name="ime_launcher_not_exported_label">Niet openbaar buiten de app</string>
+    <string name="ime_launcher_open_action">Openen</string>
+    <string name="ime_launcher_open_floating_action">Openen in een zwevend venster</string>
+    <string name="ime_launcher_open_split_action">Openen in gesplitst scherm</string>
+    <string name="ime_launcher_page_action">Schermen, verbergen en App-info…</string>
+    <string name="ime_launcher_page_no_screens_action">Verbergen en app-info…</string>
+    <string name="ime_launcher_pair_action">Koppel in gesplitst scherm met…</string>
+    <string name="ime_launcher_pair_cancel">Annuleren</string>
+    <string name="ime_launcher_pair_prompt">Tik op de app om deze naast %1$s te openen</string>
     <string name="ime_launcher_pin_action">App vastmaken</string>
     <string name="ime_launcher_pinned_label">Vastgezet</string>
     <string name="ime_launcher_recents_label">Recent</string>
@@ -668,9 +728,11 @@
     <string name="ime_sandbox_offer_only">Swipen met alleen je woorden?</string>
     <string name="ime_sandbox_offer_prefer">Swipen afstemmen op jouw woorden?</string>
     <string name="ime_search_attribution_brave">via Brave</string>
+    <string name="ime_selection_ask_ai">Vraag AI</string>
     <string name="ime_selection_macro_back_desc">Terug naar de selectieacties</string>
     <string name="ime_selection_macro_bengali_unavailable_toast">Bengali is niet geladen</string>
     <string name="ime_selection_macro_busy_desc">Bezig</string>
+    <string name="ime_selection_macro_deepl_clean_toast">DeepL Write heeft niets om te wijzigen</string>
     <string name="ime_selection_macro_find_none_toast">Geen andere overeenkomst</string>
     <string name="ime_selection_macro_grammar_clean_toast">Niets om te herstellen</string>
     <string name="ime_selection_macro_grammar_unavailable_toast">De grammaticacontrole is niet beschikbaar</string>
@@ -679,6 +741,7 @@
     <string name="ime_selection_macro_nothing_to_undo_toast">Niets meer om ongedaan te maken</string>
     <string name="ime_selection_macro_open_in_desc">Openen in %1$s</string>
     <string name="ime_selection_macro_stop_label">Stop</string>
+    <string name="ime_selection_quote">Citaat</string>
     <string name="ime_service_already_in_settings_toast">Je bent al in de instellingen</string>
     <string name="ime_service_autocorrect_off_toast">Autocorrectie is uitgeschakeld</string>
     <string name="ime_service_autocorrect_on_toast">Autocorrectie is aan</string>
@@ -709,6 +772,11 @@
     <string name="ime_service_phonetic_english_needs_secondary_toast">Schakel Engels in onder Talen, %1$s, Suggesties van</string>
     <string name="ime_service_phonetic_english_off_toast">Engelse woorden worden alleen gesuggereerd</string>
     <string name="ime_service_phonetic_english_on_toast">Engelse woorden blijven Engels</string>
+    <string name="ime_service_photo_search_blocked">Gegevensbesparing staat niet toe dat webzoekopdrachten deze verbinding gebruiken</string>
+    <string name="ime_service_photo_search_metered_ask">Deze verbinding is gemeten. Druk nogmaals op Zoeken om de foto te verzenden.</string>
+    <string name="ime_service_photo_search_no_app">Geen app op deze telefoon kan zoeken met een foto</string>
+    <string name="ime_service_photo_search_no_browser">Geen browser op deze telefoon kan de resultaten openen</string>
+    <string name="ime_service_photo_search_sending">Foto verzenden naar de zoeksite</string>
     <string name="ime_service_plugins_all_off_notice">Elke geïnstalleerde plug-in is uitgeschakeld. Schakel er een in onder Plug-ins beheren.</string>
     <string name="ime_service_plugins_off_notice">Plugins zijn uitgeschakeld. Schakel ze in via Instellingen om ze te installeren en uit te voeren.</string>
     <string name="ime_service_power_saving_off_toast">Energiebesparing is uitgeschakeld</string>
@@ -789,10 +857,22 @@
     <string name="ime_sound_volume_label">Volume</string>
     <string name="ime_sticker_add_desc">Stickers toevoegen</string>
     <string name="ime_sticker_add_to_pack_action">Toevoegen aan %1$s</string>
+    <string name="ime_sticker_info_emoji">Emoji: %1$s</string>
+    <string name="ime_sticker_info_keywords">Trefwoorden: %1$s</string>
+    <string name="ime_sticker_info_pack">Pakket: %1$s</string>
+    <string name="ime_sticker_info_untitled">Geen titel</string>
     <string name="ime_sticker_local_search_empty">Geen van jouw stickers komt overeen met “%1$s”</string>
     <string name="ime_sticker_manage_packs_action">Pakketten beheren</string>
     <string name="ime_sticker_need_key_body">De stickertool heeft een API-sleutel nodig van Klipy of GIPHY. Beide sleutels zijn gratis. Voeg een sleutel toe in de instellingen voor deze tool.</string>
     <string name="ime_sticker_no_packs_empty">Nog geen stickerpakketten. Maak een pakket in de instellingen. Je kunt ook een sticker van Klipy of GIPHY ingedrukt houden om deze hier op te slaan.</string>
+    <plurals name="ime_sticker_offer_count">
+        <item quantity="one">%1$d sticker</item>
+        <item quantity="other">%1$d stickers</item>
+    </plurals>
+    <string name="ime_sticker_offer_dismiss_desc">Verberg de stickers voor %1$s</string>
+    <string name="ime_sticker_offer_item_desc">Sticker verzenden %1$s</string>
+    <string name="ime_sticker_offer_item_untitled_desc">Stuur deze sticker</string>
+    <string name="ime_sticker_offer_more">+%1$d</string>
     <string name="ime_sticker_pack_all_label">Alles</string>
     <string name="ime_sticker_pack_empty">Dit pakket is leeg.</string>
     <string name="ime_sticker_save_new_pack_action">Opslaan in een nieuw pakket</string>
@@ -803,8 +883,24 @@
     <string name="ime_suggestion_hold_label">Woordopties</string>
     <string name="ime_suggestion_never_suggest">Stel \"%1$s\" nooit voor</string>
     <string name="ime_suggestions_show_desc">Toon de suggestiebalk</string>
+    <string name="ime_symbol_row_delete_confirm_body">De set en al zijn items worden verwijderd. Een toetsenbordmodus die deze aanbood, toont in plaats daarvan je andere sets.</string>
+    <string name="ime_symbol_row_delete_confirm_title">\"%1$s\" verwijderen?</string>
+    <string name="ime_symbol_row_delete_set">Verwijder de set \"%1$s\"</string>
+    <string name="ime_symbol_row_hide_in_mode">Verberg de rij in %1$s</string>
+    <string name="ime_symbol_row_remove">\"%1$s\" verwijderen</string>
+    <string name="ime_symbol_row_settings">Instellingen voor symboolrij</string>
     <string name="ime_symbol_set_switch_desc">Wissel van symboolset</string>
     <string name="ime_symbols_recents_label">Recent</string>
+    <string name="ime_synonyms_close_desc">Synoniemen sluiten</string>
+    <string name="ime_synonyms_failed">Kon geen synoniemenbron bereiken. Controleer de verbinding en probeer het opnieuw.</string>
+    <string name="ime_synonyms_from">Van %1$s</string>
+    <string name="ime_synonyms_loading">Synoniemen opzoeken…</string>
+    <string name="ime_synonyms_no_sources">Alle synoniemenbronnen staan uit. Schakel er een in bij Typen, Suggesties, Synoniemenbronnen.</string>
+    <string name="ime_synonyms_not_found">Geen synoniemen gevonden voor \"%1$s\".</string>
+    <string name="ime_synonyms_pick_desc">Gebruik \"%1$s\"</string>
+    <string name="ime_synonyms_retry">Probeer opnieuw</string>
+    <string name="ime_synonyms_similar_note">Er worden geen synoniemen vermeld voor dit woord. Deze woorden hebben een vergelijkbare betekenis.</string>
+    <string name="ime_synonyms_title">Synoniemen voor \"%1$s\"</string>
     <string name="ime_textedit_doc_end_desc">Naar het einde van de tekst gaan</string>
     <string name="ime_textedit_doc_start_desc">Ga naar het begin van de tekst</string>
     <string name="ime_textedit_down_desc">Omlaag verplaatsen</string>
@@ -925,7 +1021,10 @@
     <string name="ime_toolbox_hint_mode">De %1$s-modus is ingeschakeld, dus het toetsenbord slaat deze indeling op voor die modus. Andere apps behouden hun eigen indeling.</string>
     <string name="ime_trackpad_hint">Sleep om de cursor te verplaatsen</string>
     <string name="ime_trackpad_surface_desc">Trackpad. Sleep om de cursor te verplaatsen, houd vast en sleep om te selecteren, tik twee keer om een woord te selecteren</string>
+    <string name="ime_translate_all_languages_info">Ook de talen die gedownload moeten worden</string>
+    <string name="ime_translate_all_languages_label">Alle talen</string>
     <string name="ime_translate_auto_detect_label">Taal detecteren</string>
+    <string name="ime_translate_deepl_label">DeepL</string>
     <string name="ime_translate_download_failed_error">De download is niet voltooid. Controleer de verbinding en probeer het opnieuw.</string>
     <string name="ime_translate_download_of_total_progress">%1$s van %2$s</string>
     <string name="ime_translate_downloaded_desc">Gedownload</string>
@@ -1063,6 +1162,10 @@
     <string name="ime_voice_status_mic_blocked">De microfoon is geblokkeerd. Schakel microfoontoegang in bij Snelle instellingen en probeer het opnieuw.</string>
     <string name="ime_voice_status_no_model">Offline spraaktypen heeft nog geen model</string>
     <string name="ime_voice_status_no_server">De transcriptieserver heeft nog geen adres</string>
+    <plurals name="ime_voice_status_stops_in">
+        <item quantity="one">Stopt over %d seconde. Druk om nu te stoppen.</item>
+        <item quantity="other">Stopt over %d seconden. Druk om nu te stoppen.</item>
+    </plurals>
     <string name="ime_voice_status_transcribing">Transcriberen…</string>
     <string name="ime_voice_stop_desc">Stoppen met luisteren</string>
     <string name="ime_voice_strip_allow_action">Toestaan</string>
@@ -1102,6 +1205,7 @@
     <string name="ime_web_search_need_key_body">Webzoeken vereist een API-sleutel van Brave Search. Voeg een sleutel toe in de instellingen voor deze tool.</string>
     <string name="ime_web_search_open_desc">Openen in de browser</string>
     <string name="ime_wiki_back_desc">Terug naar de resultaten</string>
+    <string name="ime_wiki_expand_desc">Maak het artikel hoger</string>
     <string name="ime_wiki_full_error">De app kan de tekst van het artikel niet laden.</string>
     <string name="ime_wiki_full_progress">Het volledige artikel laden…</string>
     <string name="ime_wiki_idle_info">Zoek naar een onderwerp op %1$s.wikipedia.org. Lees de samenvatting, open de links en voeg tekst of het adres van het artikel in.</string>
@@ -1113,8 +1217,12 @@
     <string name="ime_wiki_links_progress">Links laden…</string>
     <string name="ime_wiki_no_results_empty">De zoekopdracht vond niets voor “%1$s”.</string>
     <string name="ime_wiki_no_summary_empty">Dit artikel heeft geen samenvatting.</string>
+    <string name="ime_wiki_open_browser_desc">Open het artikel in de browser</string>
+    <string name="ime_wiki_quote_markdown">\"%1$s\" (van [Wikipedia: %2$s](%3$s))</string>
+    <string name="ime_wiki_quote_plain">\"%1$s\" (Wikipedia: %2$s, %3$s)</string>
     <string name="ime_wiki_search_active_hint">Wikipedia doorzoeken. Druk op enter om te zoeken</string>
     <string name="ime_wiki_search_hint">Wikipedia doorzoeken…</string>
+    <string name="ime_wiki_shrink_desc">Maak het artikel weer op de hoogte van het toetsenbord</string>
     <string name="ime_wiki_tab_full_label">Volledig artikel</string>
     <string name="ime_wiki_tab_links_label">Links</string>
     <string name="ime_wiki_tab_summary_label">Samenvatting</string>
@@ -1164,6 +1272,7 @@
     <string name="ime_word_menu_delete">Verwijder \"%1$s\"</string>
     <string name="ime_word_menu_edit">Bewerken…</string>
     <string name="ime_word_menu_search_all">Zoek alle woorden naar \"%1$s\"</string>
+    <string name="ime_word_menu_synonyms">Synoniemen voor \"%1$s\"</string>
     <string name="ime_word_spell_apply_desc">Gebruik deze spelling</string>
     <string name="ime_word_spell_cancel_desc">Laat de spelling ongewijzigd</string>
     <string name="ime_word_spell_hint">Typ een nieuwe spelling voor \"%1$s\"</string>

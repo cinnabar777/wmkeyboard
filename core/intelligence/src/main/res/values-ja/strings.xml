@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">実験的</string>
     <string name="core_intel_llm_tier_recommended_label">推奨</string>
     <string name="core_intel_llm_tier_untested_label">未テスト</string>
+    <string name="core_intel_ocr_download_error_http">GitHubサーバーからファイルが送信されませんでした。エラーコードはHTTP %1$sです。</string>
+    <string name="core_intel_ocr_download_error_interrupted">ダウンロード中に接続が中断されました。もう一度やり直してください。</string>
+    <string name="core_intel_ocr_download_error_no_space">デバイスのストレージ容量が不足しています。まず約%1$s MBの空き容量を確保してください。</string>
+    <string name="core_intel_ocr_pack_error_broken">ダウンロードした言語データが破損しているため、スキャナーで使用できませんでした。再ダウンロードしてください。</string>
 </resources>

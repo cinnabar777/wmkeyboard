@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">Eksperimentalno</string>
     <string name="core_intel_llm_tier_recommended_label">Priporočeno</string>
     <string name="core_intel_llm_tier_untested_label">Nepreizkušeno</string>
+    <string name="core_intel_ocr_download_error_http">Strežnik GitHub ni poslal datoteke. Koda napake je HTTP %1$s.</string>
+    <string name="core_intel_ocr_download_error_interrupted">Povezava je bila med prenosom prekinjena. Poskusite znova.</string>
+    <string name="core_intel_ocr_download_error_no_space">V vaši napravi ni dovolj prostora za shranjevanje. Najprej morate sprostiti približno %1$s MB.</string>
+    <string name="core_intel_ocr_pack_error_broken">Preneseni jezikovni podatki so poškodovani, zato jih optični bralnik ni mogel uporabiti. Prenesite jih znova.</string>
 </resources>

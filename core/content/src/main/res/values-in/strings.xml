@@ -115,6 +115,7 @@
     <string name="core_content_selection_macro_chat_strike">Coret</string>
     <string name="core_content_selection_macro_colour">Warna</string>
     <string name="core_content_selection_macro_copy">Salin</string>
+    <string name="core_content_selection_macro_deepl_write">DeepL Write</string>
     <string name="core_content_selection_macro_digits_latin">Digit</string>
     <string name="core_content_selection_macro_email">Email</string>
     <string name="core_content_selection_macro_fancy">Cantik</string>

@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">Експериментално</string>
     <string name="core_intel_llm_tier_recommended_label">Препоръчително</string>
     <string name="core_intel_llm_tier_untested_label">Нетествано</string>
+    <string name="core_intel_ocr_download_error_http">Сървърът на GitHub не изпрати файла. Кодът на грешката е HTTP %1$s.</string>
+    <string name="core_intel_ocr_download_error_interrupted">Връзката прекъсна по време на изтеглянето. Опитайте отново.</string>
+    <string name="core_intel_ocr_download_error_no_space">Няма достатъчно място на вашето устройство. Първо трябва да освободите около %1$s MB.</string>
+    <string name="core_intel_ocr_pack_error_broken">Изтеглените езикови данни са повредени, така че скенерът не можа да ги използва. Изтеглете ги отново.</string>
 </resources>

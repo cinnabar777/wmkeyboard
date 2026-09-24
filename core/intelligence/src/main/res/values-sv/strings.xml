@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">Experimentell</string>
     <string name="core_intel_llm_tier_recommended_label">Rekommenderas</string>
     <string name="core_intel_llm_tier_untested_label">Otestad</string>
+    <string name="core_intel_ocr_download_error_http">GitHub-servern skickade inte filen. Felkoden är HTTP %1$s.</string>
+    <string name="core_intel_ocr_download_error_interrupted">Anslutningen avbröts under nedladdningen. Försök igen.</string>
+    <string name="core_intel_ocr_download_error_no_space">Det finns inte tillräckligt med lagringsutrymme på din enhet. Du måste frigöra cirka %1$s MB först.</string>
+    <string name="core_intel_ocr_pack_error_broken">Den nedladdade språkdatan är skadad, så skannern kunde inte använda den. Ladda ner den igen.</string>
 </resources>

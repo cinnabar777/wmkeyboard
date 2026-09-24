@@ -115,6 +115,7 @@
     <string name="core_content_selection_macro_chat_strike">删除线</string>
     <string name="core_content_selection_macro_colour">颜色</string>
     <string name="core_content_selection_macro_copy">复制</string>
+    <string name="core_content_selection_macro_deepl_write">DeepL Write</string>
     <string name="core_content_selection_macro_digits_latin">数字</string>
     <string name="core_content_selection_macro_email">电子邮件</string>
     <string name="core_content_selection_macro_fancy">花式</string>

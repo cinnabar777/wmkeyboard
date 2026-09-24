@@ -115,6 +115,7 @@
     <string name="core_content_selection_macro_chat_strike">Tachado</string>
     <string name="core_content_selection_macro_colour">Color</string>
     <string name="core_content_selection_macro_copy">Copiar</string>
+    <string name="core_content_selection_macro_deepl_write">DeepL Write</string>
     <string name="core_content_selection_macro_digits_latin">Dígitos</string>
     <string name="core_content_selection_macro_email">Correo electrónico</string>
     <string name="core_content_selection_macro_fancy">Elegante</string>

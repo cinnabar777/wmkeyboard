@@ -35,6 +35,7 @@
     <string name="common_enable">Activa</string>
     <string name="common_error_generic">Alguna cosa no ha funcionat. Torna-ho a provar.</string>
     <string name="common_error_network">Sense connexió. Comprova la xarxa i torna-ho a provar.</string>
+    <string name="common_error_no_internet_permission">Aquesta compilació del teclat no es pot connectar a Internet.</string>
     <string name="common_error_timeout">La sol·licitud ha trigat massa. Torna-ho a provar.</string>
     <string name="common_export">Exporta</string>
     <string name="common_import">Importa</string>

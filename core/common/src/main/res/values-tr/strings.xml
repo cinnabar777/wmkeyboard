@@ -35,6 +35,7 @@
     <string name="common_enable">Aç</string>
     <string name="common_error_generic">Bir şeyler çalışmadı. Tekrar deneyin.</string>
     <string name="common_error_network">Bağlantı yok. Ağınızı kontrol edin ve tekrar deneyin.</string>
+    <string name="common_error_no_internet_permission">Klavyenin bu yapısı internete bağlanamaz.</string>
     <string name="common_error_timeout">İstek çok uzun sürdü. Tekrar deneyin.</string>
     <string name="common_export">Dışa aktar</string>
     <string name="common_import">İçe aktar</string>

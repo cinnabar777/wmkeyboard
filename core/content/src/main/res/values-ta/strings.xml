@@ -115,6 +115,7 @@
     <string name="core_content_selection_macro_chat_strike">அடித்தல் (Strike)</string>
     <string name="core_content_selection_macro_colour">நிறம்</string>
     <string name="core_content_selection_macro_copy">நகலெடு</string>
+    <string name="core_content_selection_macro_deepl_write">DeepL Write</string>
     <string name="core_content_selection_macro_digits_latin">எண்கள்</string>
     <string name="core_content_selection_macro_email">மின்னஞ்சல்</string>
     <string name="core_content_selection_macro_fancy">அலங்காரமான</string>

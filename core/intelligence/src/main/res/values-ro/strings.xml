@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">Experimental</string>
     <string name="core_intel_llm_tier_recommended_label">Recomandat</string>
     <string name="core_intel_llm_tier_untested_label">Netestat</string>
+    <string name="core_intel_ocr_download_error_http">Serverul GitHub nu a trimis fișierul. Codul de eroare este HTTP %1$s.</string>
+    <string name="core_intel_ocr_download_error_interrupted">Conexiunea s-a întrerupt în timpul descărcării. Încearcă din nou.</string>
+    <string name="core_intel_ocr_download_error_no_space">Nu există suficient spațiu de stocare pe dispozitiv. Trebuie să eliberați mai întâi aproximativ %1$s MB.</string>
+    <string name="core_intel_ocr_pack_error_broken">Datele lingvistice descărcate sunt deteriorate, așa că scanerul nu le-a putut folosi. Descărcați-le din nou.</string>
 </resources>

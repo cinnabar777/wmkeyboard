@@ -35,6 +35,7 @@
     <string name="common_enable">ચાલુ કરો</string>
     <string name="common_error_generic">કંઈક કામ કરતું નથી. ફરી પ્રયાસ કરો.</string>
     <string name="common_error_network">કોઈ કનેક્શન નથી. તમારું નેટવર્ક તપાસો અને ફરી પ્રયાસ કરો.</string>
+    <string name="common_error_no_internet_permission">કીબોર્ડનું આ બિલ્ડ ઇન્ટરનેટ સાથે કનેક્ટ થઈ શકતું નથી.</string>
     <string name="common_error_timeout">વિનંતીમાં ઘણો સમય લાગ્યો. ફરી પ્રયાસ કરો.</string>
     <string name="common_export">નિકાસ કરો</string>
     <string name="common_import">ઈમ્પોર્ટ કરો</string>

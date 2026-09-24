@@ -35,6 +35,7 @@
     <string name="common_enable">চালু করুন</string>
     <string name="common_error_generic">কিছু একটা কাজ করছে না। আবার চেষ্টা করুন।</string>
     <string name="common_error_network">কোনো সংযোগ নেই। আপনার নেটওয়ার্ক পরীক্ষা করুন এবং আবার চেষ্টা করুন।</string>
+    <string name="common_error_no_internet_permission">কীবোর্ডের এই বিল্ডটি ইন্টারনেটের সাথে সংযোগ করতে পারে না।</string>
     <string name="common_error_timeout">অনুরোধটি সম্পন্ন হতে অনেক সময় লেগেছে। আবার চেষ্টা করুন।</string>
     <string name="common_export">এক্সপোর্ট</string>
     <string name="common_import">ইম্পোর্ট</string>

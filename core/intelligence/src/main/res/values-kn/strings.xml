@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">ಪ್ರಾಯೋಗಿಕ</string>
     <string name="core_intel_llm_tier_recommended_label">ಶಿಫಾರಸು ಮಾಡಲಾಗಿದೆ</string>
     <string name="core_intel_llm_tier_untested_label">ಪರೀಕ್ಷಿಸದ</string>
+    <string name="core_intel_ocr_download_error_http">GitHub ಸರ್ವರ್ ಫೈಲ್ ಅನ್ನು ಕಳುಹಿಸಿಲ್ಲ. ದೋಷ ಕೋಡ್ HTTP %1$s ಆಗಿದೆ.</string>
+    <string name="core_intel_ocr_download_error_interrupted">ಡೌನ್‌ಲೋಡ್ ಮಾಡುವಾಗ ಸಂಪರ್ಕ ಕಡಿತಗೊಂಡಿದೆ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
+    <string name="core_intel_ocr_download_error_no_space">ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಸಾಕಷ್ಟು ಸಂಗ್ರಹಣೆ ಇಲ್ಲ. ನೀವು ಮೊದಲು ಸುಮಾರು %1$s MB ಅನ್ನು ಖಾಲಿ ಮಾಡಬೇಕು.</string>
+    <string name="core_intel_ocr_pack_error_broken">ಡೌನ್‌ಲೋಡ್ ಮಾಡಿದ ಭಾಷಾ ಡೇಟಾ ಹಾನಿಗೊಳಗಾಗಿದೆ, ಆದ್ದರಿಂದ ಸ್ಕ್ಯಾನರ್ ಅದನ್ನು ಬಳಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ಅದನ್ನು ಮತ್ತೆ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ.</string>
 </resources>

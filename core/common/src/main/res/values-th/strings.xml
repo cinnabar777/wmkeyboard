@@ -35,6 +35,7 @@
     <string name="common_enable">เปิดใช้งาน</string>
     <string name="common_error_generic">มีบางอย่างผิดพลาด โปรดลองใหม่อีกครั้ง</string>
     <string name="common_error_network">ไม่มีการเชื่อมต่อ โปรดตรวจสอบเครือข่ายของคุณแล้วลองใหม่อีกครั้ง</string>
+    <string name="common_error_no_internet_permission">คีย์บอร์ดรุ่นนี้ไม่สามารถเชื่อมต่ออินเทอร์เน็ตได้</string>
     <string name="common_error_timeout">คำขอนี้ใช้เวลานานเกินไป โปรดลองอีกครั้ง</string>
     <string name="common_export">ส่งออก</string>
     <string name="common_import">นำเข้า</string>

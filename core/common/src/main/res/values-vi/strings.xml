@@ -35,6 +35,7 @@
     <string name="common_enable">Bật</string>
     <string name="common_error_generic">Đã xảy ra lỗi. Vui lòng thử lại.</string>
     <string name="common_error_network">Không có kết nối. Hãy kiểm tra mạng của bạn và thử lại.</string>
+    <string name="common_error_no_internet_permission">Bản dựng này của bàn phím không thể kết nối với internet.</string>
     <string name="common_error_timeout">Yêu cầu mất quá nhiều thời gian. Hãy thử lại.</string>
     <string name="common_export">Xuất</string>
     <string name="common_import">Nhập</string>

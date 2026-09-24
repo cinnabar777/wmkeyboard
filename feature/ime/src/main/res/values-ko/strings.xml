@@ -2,6 +2,13 @@
 <!-- Machine translated by Google Play. Do not edit by hand:
      regenerate with tools/i18n/pull-play-translations.py. -->
 <resources>
+    <string name="ime_ai_chat_ask_explain">간단히 설명</string>
+    <string name="ime_ai_chat_ask_explain_prompt">쉬운 말로 설명해 주세요.</string>
+    <string name="ime_ai_chat_ask_hint">텍스트에 대해 질문하거나 다음 항목 중 하나로 시작해 보세요.</string>
+    <string name="ime_ai_chat_ask_summary">요약</string>
+    <string name="ime_ai_chat_ask_summary_prompt">이 내용에 대한 짧은 요약을 알려줘.</string>
+    <string name="ime_ai_chat_ask_words">어려운 단어</string>
+    <string name="ime_ai_chat_ask_words_prompt">이 내용에 나오는 어려운 단어와 개념을 설명해 줘.</string>
     <string name="ime_ai_chat_attach_desc">필드의 텍스트를 메시지와 함께 전송</string>
     <string name="ime_ai_chat_attach_remove_desc">필드 텍스트를 보내지 않음</string>
     <plurals name="ime_ai_chat_attached_field">
@@ -12,6 +19,8 @@
         <item quantity="one">선택한 내용이 메시지와 함께 전송됩니다: %1$d자</item>
         <item quantity="other">선택한 내용이 메시지와 함께 전송됩니다: %1$d자</item>
     </plurals>
+    <string name="ime_ai_chat_attached_tool">%1$s 정보</string>
+    <string name="ime_ai_chat_attached_tool_selection">%1$s에서 가져온 구절 정보</string>
     <plurals name="ime_ai_chat_attachment_sent">
         <item quantity="one">텍스트 %1$d자 포함</item>
         <item quantity="other">텍스트 %1$d자 포함</item>
@@ -99,6 +108,10 @@
     <string name="ime_ai_truncated_notice">모델이 조기에 중단되었습니다. 도구 설정에서 \"최대 응답 길이\"를 늘리세요.</string>
     <string name="ime_ai_view_changes">변경사항</string>
     <string name="ime_ai_view_result">결과</string>
+    <string name="ime_ask_ai_label_dict">사전: %1$s</string>
+    <string name="ime_ask_ai_label_grammar">문법 검사</string>
+    <string name="ime_ask_ai_label_vocab">어휘: %1$s</string>
+    <string name="ime_ask_ai_label_wiki">위키백과: %1$s</string>
     <string name="ime_autofill_dismiss_desc">자동 완성 제안 숨기기</string>
     <string name="ime_calc_degrees_label">도</string>
     <string name="ime_calc_insert_action">삽입</string>
@@ -127,6 +140,7 @@
     <string name="ime_camera_permission_action">카메라 허용</string>
     <string name="ime_camera_permission_body">카메라 도구를 사용하려면 카메라 권한이 필요합니다. 앱은 셔터를 누를 때만 사진을 촬영합니다.</string>
     <string name="ime_camera_retake_action">다시 찍기</string>
+    <string name="ime_camera_search_action">검색</string>
     <string name="ime_camera_send_action">보내기</string>
     <string name="ime_camera_shutter_desc">사진 촬영</string>
     <string name="ime_camera_starting_progress">카메라 시작 중…</string>
@@ -144,6 +158,10 @@
     <string name="ime_clip_chip_image">복사된 이미지</string>
     <string name="ime_clip_chip_item">복사된 항목</string>
     <string name="ime_clip_chip_screenshot">스크린샷</string>
+    <plurals name="ime_clip_deleted">
+        <item quantity="one">클립 삭제됨</item>
+        <item quantity="other">클립 %1$d개 삭제됨</item>
+    </plurals>
     <string name="ime_clip_edit">편집</string>
     <string name="ime_clip_edit_placeholder">클립 텍스트 입력</string>
     <string name="ime_clip_edit_rich_note">변경 사항을 저장하면 서식이 제거됩니다</string>
@@ -162,6 +180,18 @@
     <string name="ime_clip_info_private_detail">키보드가 이 클립을 패널에서 숨기고 다른 클립보다 더 빨리 삭제합니다.</string>
     <string name="ime_clip_info_size">크기</string>
     <string name="ime_clip_info_type">유형</string>
+    <plurals name="ime_clip_left_days">
+        <item quantity="one">%d일 남음</item>
+        <item quantity="other">%d일 남음</item>
+    </plurals>
+    <plurals name="ime_clip_left_hours">
+        <item quantity="one">%d시간 남음</item>
+        <item quantity="other">%d시간 남음</item>
+    </plurals>
+    <plurals name="ime_clip_left_minutes">
+        <item quantity="one">%d분 남음</item>
+        <item quantity="other">%d분 남음</item>
+    </plurals>
     <string name="ime_clip_number_desc">클립 %1$d</string>
     <string name="ime_clip_pin">고정</string>
     <string name="ime_clip_send_as_sticker">스티커로 보내기</string>
@@ -172,6 +202,7 @@
     <string name="ime_clip_type_rich_text">서식 있는 텍스트</string>
     <string name="ime_clip_type_text">텍스트</string>
     <string name="ime_clip_type_video">동영상</string>
+    <string name="ime_clip_undo_delete">실행 취소</string>
     <string name="ime_clip_unpin">고정 해제</string>
     <string name="ime_clip_video_desc">복사된 동영상</string>
     <string name="ime_clipboard_no_match">“%1$s”와 일치하는 클립이 없습니다.</string>
@@ -203,10 +234,12 @@
     <string name="ime_dict_add_vocab_action">어휘에 추가</string>
     <string name="ime_dict_antonyms_label">반의어</string>
     <string name="ime_dict_error">사전에 연결할 수 없습니다. 네트워크를 확인하고 다시 시도하세요.</string>
+    <string name="ime_dict_from">%1$s에서 가져옴</string>
     <string name="ime_dict_idle_info">영어 단어를 찾아보세요. 검색창을 누르고 입력하세요. 도구를 열기 전에 커서를 단어 위에 둘 수도 있습니다.</string>
     <string name="ime_dict_insert_action">삽입</string>
     <string name="ime_dict_lookup_desc">단어 검색</string>
     <string name="ime_dict_lookup_progress">“%1$s” 검색 중…</string>
+    <string name="ime_dict_no_sources">모든 사전 소스가 꺼져 있습니다. 사전 도구 설정에서 하나를 켜세요.</string>
     <string name="ime_dict_not_found_empty">“%1$s”에 대한 항목이 없습니다. 철자를 확인하거나 단어의 기본 형태를 입력해 보세요.</string>
     <string name="ime_dict_play_desc">발음 재생</string>
     <string name="ime_dict_search_active_hint">단어 입력…</string>
@@ -314,7 +347,15 @@
     <string name="ime_glide_word_list_offer">글라이드 타이핑에는 %1$s 단어 목록이 필요합니다</string>
     <string name="ime_glide_word_list_offer_dismiss_desc">닫기</string>
     <string name="ime_grammar_all_filtered_empty">발견된 모든 문제가 필터에 의해 숨겨졌습니다</string>
+    <string name="ime_grammar_ask_ai_desc">이 문제에 대해 AI에게 질문하기</string>
     <string name="ime_grammar_category_kind_label">%1$s • %2$s</string>
+    <string name="ime_grammar_deepl_action_desc">DeepL Write로 텍스트 개선</string>
+    <string name="ime_grammar_deepl_dismiss_desc">DeepL Write 결과 닫기</string>
+    <string name="ime_grammar_deepl_error">DeepL Write가 응답하지 않았습니다</string>
+    <string name="ime_grammar_deepl_replace_action">바꾸기</string>
+    <string name="ime_grammar_deepl_replace_failed_toast">이 필드의 텍스트는 바꿀 수 없습니다.</string>
+    <string name="ime_grammar_deepl_title">DeepL Write</string>
+    <string name="ime_grammar_deepl_unchanged">DeepL Write에서 변경할 내용이 없습니다</string>
     <string name="ime_grammar_dialect_desc">방언 선택</string>
     <string name="ime_grammar_dismiss_desc">이 문제 숨기기</string>
     <string name="ime_grammar_empty_hint">텍스트를 입력하거나 텍스트가 있는 필드를 여세요. 문제가 여기에 표시됩니다. 검사는 오프라인으로 실행됩니다.</string>
@@ -346,6 +387,7 @@
     <string name="ime_icons_empty_info">아이콘 팩을 추가하려면 설정을 여세요.</string>
     <string name="ime_icons_more_label">더 많은 아이콘 팩</string>
     <string name="ime_icons_pick_info">아이콘 팩을 눌러 키와 도구에 사용하세요.</string>
+    <string name="ime_image_search_by_photo_desc">사진으로 검색</string>
     <string name="ime_image_search_empty">“%1$s”에 대한 이미지가 없습니다</string>
     <string name="ime_image_search_hint">이미지 검색</string>
     <string name="ime_image_search_need_key_body">이미지 검색을 하려면 Brave Search의 API 키가 필요합니다. 이 도구의 설정에서 키를 추가하세요.</string>
@@ -375,6 +417,8 @@
     <string name="ime_kde_loop">반복</string>
     <string name="ime_kde_media_empty_body">플레이어를 시작하면 여기에 표시됩니다</string>
     <string name="ime_kde_media_empty_title">컴퓨터에서 재생 중인 항목이 없습니다</string>
+    <string name="ime_kde_media_unsupported_body">KDE Connect는 휴대폰으로 음악이나 동영상을 제어하는 기능을 지원하지 않습니다. Mac용 KDE Connect도 마찬가지입니다.</string>
+    <string name="ime_kde_media_unsupported_title">이 컴퓨터는 플레이어를 공유하지 않습니다</string>
     <string name="ime_kde_not_listening">이 휴대폰의 다른 앱이 KDE Connect 포트를 사용 중입니다. 컴퓨터에서 이 키보드를 계속 찾을 수 있지만, 이쪽에서 새로고침을 누르세요.</string>
     <string name="ime_kde_notice_clipboard_empty">클립보드에 보낼 내용이 없습니다.</string>
     <string name="ime_kde_notice_clipboard_sent">클립보드 전송됨</string>
@@ -425,10 +469,12 @@
     <string name="ime_kde_send_empty">클립보드, 작성한 내용 또는 파일을 보냅니다. 컴퓨터에서 보낸 내용은 여기에 표시되며 다운로드 폴더에도 저장됩니다.</string>
     <string name="ime_kde_send_field">필드 내 텍스트</string>
     <string name="ime_kde_send_files">파일…</string>
+    <string name="ime_kde_send_unsupported">이 컴퓨터는 휴대폰에서 보내는 파일이나 텍스트를 허용하지 않습니다</string>
     <string name="ime_kde_settings">설정</string>
     <string name="ime_kde_shuffle">섞기</string>
     <string name="ime_kde_slides_end">끝</string>
     <string name="ime_kde_slides_next">다음 슬라이드</string>
+    <string name="ime_kde_slides_no_pointer">이 컴퓨터에는 슬라이드용 포인터가 없습니다.</string>
     <string name="ime_kde_slides_pointer">길게 누르고 드래그하여 포인터 사용</string>
     <string name="ime_kde_slides_previous">이전 슬라이드</string>
     <string name="ime_kde_slides_start">시작</string>
@@ -488,11 +534,25 @@
     <string name="ime_language_switch_title">입력 언어</string>
     <string name="ime_launcher_activities_label">화면</string>
     <string name="ime_launcher_app_info_action">앱 정보</string>
+    <string name="ime_launcher_combo_label">%1$s + %2$s</string>
+    <string name="ime_launcher_combo_open_action">분할 화면으로 둘 다 열기</string>
+    <string name="ime_launcher_combo_remove_action">이 쌍 제거</string>
+    <string name="ime_launcher_combos_label">분할 화면 쌍</string>
     <string name="ime_launcher_empty">일치하는 앱이 없습니다</string>
+    <string name="ime_launcher_floating_unsupported">이 기기에서는 전체 화면으로 열릴 수 있습니다</string>
     <string name="ime_launcher_hidden_label">그리드에서 숨겨짐</string>
     <string name="ime_launcher_hide_action">그리드에서 앱 숨기기</string>
     <string name="ime_launcher_loading">앱 불러오는 중…</string>
+    <string name="ime_launcher_menu_close">메뉴 닫기</string>
     <string name="ime_launcher_not_exported_label">앱 외부에서 열 수 없음</string>
+    <string name="ime_launcher_open_action">열기</string>
+    <string name="ime_launcher_open_floating_action">플로팅 창에서 열기</string>
+    <string name="ime_launcher_open_split_action">분할 화면으로 열기</string>
+    <string name="ime_launcher_page_action">화면, 숨기기 및 앱 정보…</string>
+    <string name="ime_launcher_page_no_screens_action">숨기기 및 앱 정보…</string>
+    <string name="ime_launcher_pair_action">다음 앱과 화면 분할 쌍 만들기…</string>
+    <string name="ime_launcher_pair_cancel">취소</string>
+    <string name="ime_launcher_pair_prompt">%1$s 옆에서 열 앱을 탭하세요</string>
     <string name="ime_launcher_pin_action">앱 고정</string>
     <string name="ime_launcher_pinned_label">고정됨</string>
     <string name="ime_launcher_recents_label">최근 항목</string>
@@ -668,9 +728,11 @@
     <string name="ime_sandbox_offer_only">내 단어만 사용하여 스와이프하시겠습니까?</string>
     <string name="ime_sandbox_offer_prefer">스와이프를 내 단어에 맞게 조정할까요?</string>
     <string name="ime_search_attribution_brave">Brave를 통해</string>
+    <string name="ime_selection_ask_ai">AI에게 질문하기</string>
     <string name="ime_selection_macro_back_desc">선택 작업으로 돌아가기</string>
     <string name="ime_selection_macro_bengali_unavailable_toast">벵골어가 로드되지 않았습니다</string>
     <string name="ime_selection_macro_busy_desc">작업 중</string>
+    <string name="ime_selection_macro_deepl_clean_toast">DeepL Write에서 변경할 내용이 없습니다</string>
     <string name="ime_selection_macro_find_none_toast">일치하는 항목 없음</string>
     <string name="ime_selection_macro_grammar_clean_toast">수정할 내용 없음</string>
     <string name="ime_selection_macro_grammar_unavailable_toast">문법 검사기를 사용할 수 없습니다</string>
@@ -679,6 +741,7 @@
     <string name="ime_selection_macro_nothing_to_undo_toast">취소할 작업이 없습니다</string>
     <string name="ime_selection_macro_open_in_desc">%1$s에서 열기</string>
     <string name="ime_selection_macro_stop_label">중지</string>
+    <string name="ime_selection_quote">인용</string>
     <string name="ime_service_already_in_settings_toast">이미 설정 화면에 있습니다</string>
     <string name="ime_service_autocorrect_off_toast">자동 수정이 꺼졌습니다</string>
     <string name="ime_service_autocorrect_on_toast">자동 수정이 켜졌습니다</string>
@@ -709,6 +772,11 @@
     <string name="ime_service_phonetic_english_needs_secondary_toast">언어, %1$s, 다음에서 추천 설정 아래의 영어를 켜세요</string>
     <string name="ime_service_phonetic_english_off_toast">영어 단어만 제안됩니다</string>
     <string name="ime_service_phonetic_english_on_toast">영어 단어는 영어로 유지됩니다</string>
+    <string name="ime_service_photo_search_blocked">데이터 절약 모드에서 이 연결을 통한 웹 검색을 허용하지 않습니다.</string>
+    <string name="ime_service_photo_search_metered_ask">데이터 요금이 부과되는 연결입니다. 사진을 보내려면 검색을 다시 누르세요.</string>
+    <string name="ime_service_photo_search_no_app">이 휴대폰에는 사진으로 검색할 수 있는 앱이 없습니다</string>
+    <string name="ime_service_photo_search_no_browser">이 휴대폰에는 결과를 열 수 있는 브라우저가 없습니다</string>
+    <string name="ime_service_photo_search_sending">검색 사이트로 사진을 보내는 중</string>
     <string name="ime_service_plugins_all_off_notice">설치된 모든 플러그인이 꺼져 있습니다. 플러그인 관리에서 하나를 켜세요.</string>
     <string name="ime_service_plugins_off_notice">플러그인이 꺼져 있습니다. 설치 및 실행하려면 설정에서 켜세요.</string>
     <string name="ime_service_power_saving_off_toast">절전 모드가 꺼졌습니다</string>
@@ -789,10 +857,22 @@
     <string name="ime_sound_volume_label">볼륨</string>
     <string name="ime_sticker_add_desc">스티커 추가</string>
     <string name="ime_sticker_add_to_pack_action">%1$s에 추가</string>
+    <string name="ime_sticker_info_emoji">이모지: %1$s</string>
+    <string name="ime_sticker_info_keywords">키워드: %1$s</string>
+    <string name="ime_sticker_info_pack">팩: %1$s</string>
+    <string name="ime_sticker_info_untitled">제목 없음</string>
     <string name="ime_sticker_local_search_empty">“%1$s”와 일치하는 스티커가 없습니다</string>
     <string name="ime_sticker_manage_packs_action">팩 관리</string>
     <string name="ime_sticker_need_key_body">스티커 도구를 사용하려면 Klipy 또는 GIPHY의 API 키가 필요합니다. 두 키 모두 무료입니다. 이 도구의 설정에서 키를 추가하세요.</string>
     <string name="ime_sticker_no_packs_empty">아직 스티커 팩이 없습니다. 설정에서 팩을 만드세요. Klipy 또는 GIPHY의 스티커를 길게 눌러 여기에 저장할 수도 있습니다.</string>
+    <plurals name="ime_sticker_offer_count">
+        <item quantity="one">스티커 %1$d개</item>
+        <item quantity="other">스티커 %1$d개</item>
+    </plurals>
+    <string name="ime_sticker_offer_dismiss_desc">%1$s에 대한 스티커 숨기기</string>
+    <string name="ime_sticker_offer_item_desc">스티커 %1$s 보내기</string>
+    <string name="ime_sticker_offer_item_untitled_desc">이 스티커 보내기</string>
+    <string name="ime_sticker_offer_more">+%1$d</string>
     <string name="ime_sticker_pack_all_label">모두</string>
     <string name="ime_sticker_pack_empty">이 팩은 비어 있습니다.</string>
     <string name="ime_sticker_save_new_pack_action">새 팩으로 저장</string>
@@ -803,8 +883,24 @@
     <string name="ime_suggestion_hold_label">단어 옵션</string>
     <string name="ime_suggestion_never_suggest">\"%1$s\" 제안 안 함</string>
     <string name="ime_suggestions_show_desc">제안 바 표시</string>
+    <string name="ime_symbol_row_delete_confirm_body">이 설정 및 모든 항목이 삭제됩니다. 이를 제공하던 키보드 모드는 대신 사용자의 다른 설정을 표시합니다.</string>
+    <string name="ime_symbol_row_delete_confirm_title">\"%1$s\"을(를) 삭제하시겠습니까?</string>
+    <string name="ime_symbol_row_delete_set">\"%1$s\" 세트 삭제</string>
+    <string name="ime_symbol_row_hide_in_mode">%1$s에서 행 숨기기</string>
+    <string name="ime_symbol_row_remove">\"%1$s\" 삭제</string>
+    <string name="ime_symbol_row_settings">기호 행 설정</string>
     <string name="ime_symbol_set_switch_desc">기호 세트 전환</string>
     <string name="ime_symbols_recents_label">최근 항목</string>
+    <string name="ime_synonyms_close_desc">유의어 닫기</string>
+    <string name="ime_synonyms_failed">유의어 소스에 연결할 수 없습니다. 연결 상태를 확인하고 다시 시도하세요.</string>
+    <string name="ime_synonyms_from">%1$s에서 가져오기</string>
+    <string name="ime_synonyms_loading">유의어를 찾는 중입니다…</string>
+    <string name="ime_synonyms_no_sources">모든 유의어 소스가 꺼져 있습니다. 입력, 제안, 유의어 소스에서 하나를 켜세요.</string>
+    <string name="ime_synonyms_not_found">\"%1$s\"에 대한 동의어를 찾을 수 없습니다.</string>
+    <string name="ime_synonyms_pick_desc">\"%1$s\" 사용</string>
+    <string name="ime_synonyms_retry">다시 시도</string>
+    <string name="ime_synonyms_similar_note">이 단어에 나열된 유의어가 없습니다. 다음 단어들은 의미가 비슷합니다.</string>
+    <string name="ime_synonyms_title">\"%1$s\"의 유의어</string>
     <string name="ime_textedit_doc_end_desc">텍스트 끝으로 이동</string>
     <string name="ime_textedit_doc_start_desc">텍스트 시작 부분으로 이동</string>
     <string name="ime_textedit_down_desc">아래로 이동</string>
@@ -925,7 +1021,10 @@
     <string name="ime_toolbox_hint_mode">%1$s 모드가 켜져 있으므로 키보드가 해당 모드에 대한 배열을 저장합니다. 다른 앱은 자체 배열을 유지합니다.</string>
     <string name="ime_trackpad_hint">드래그하여 커서 이동</string>
     <string name="ime_trackpad_surface_desc">트랙패드. 드래그하여 커서 이동, 길게 누르고 드래그하여 선택, 두 번 탭하여 단어 선택</string>
+    <string name="ime_translate_all_languages_info">다운로드할 언어 포함</string>
+    <string name="ime_translate_all_languages_label">모든 언어</string>
     <string name="ime_translate_auto_detect_label">언어 자동 감지</string>
+    <string name="ime_translate_deepl_label">DeepL</string>
     <string name="ime_translate_download_failed_error">다운로드가 완료되지 않았습니다. 연결 상태를 확인하고 다시 시도하세요.</string>
     <string name="ime_translate_download_of_total_progress">%1$s/%2$s</string>
     <string name="ime_translate_downloaded_desc">다운로드됨</string>
@@ -1063,6 +1162,10 @@
     <string name="ime_voice_status_mic_blocked">마이크가 차단되었습니다. 빠른 설정에서 마이크 액세스를 켠 후 다시 시도하세요.</string>
     <string name="ime_voice_status_no_model">오프라인 음성 입력 모델이 아직 없습니다</string>
     <string name="ime_voice_status_no_server">아직 지정된 음성 인식 서버 주소가 없습니다</string>
+    <plurals name="ime_voice_status_stops_in">
+        <item quantity="one">%d초 후 중지됩니다. 지금 완료하려면 누르세요.</item>
+        <item quantity="other">%d초 후 중지됩니다. 지금 완료하려면 누르세요.</item>
+    </plurals>
     <string name="ime_voice_status_transcribing">받아쓰는 중…</string>
     <string name="ime_voice_stop_desc">듣기 중지</string>
     <string name="ime_voice_strip_allow_action">허용</string>
@@ -1101,6 +1204,7 @@
     <string name="ime_web_search_need_key_body">웹 검색을 사용하려면 Brave Search의 API 키가 필요합니다. 이 도구의 설정에서 키를 추가하세요.</string>
     <string name="ime_web_search_open_desc">브라우저에서 열기</string>
     <string name="ime_wiki_back_desc">결과로 돌아가기</string>
+    <string name="ime_wiki_expand_desc">기사 영역을 더 크게 만들기</string>
     <string name="ime_wiki_full_error">앱에서 기사 텍스트를 불러올 수 없습니다.</string>
     <string name="ime_wiki_full_progress">전체 문서 불러오는 중…</string>
     <string name="ime_wiki_idle_info">%1$s.wikipedia.org에서 주제를 검색하세요. 요약을 읽고 링크를 열어 텍스트나 문서 주소를 삽입할 수 있습니다.</string>
@@ -1112,8 +1216,12 @@
     <string name="ime_wiki_links_progress">링크 불러오는 중…</string>
     <string name="ime_wiki_no_results_empty">“%1$s”에 대한 검색 결과가 없습니다.</string>
     <string name="ime_wiki_no_summary_empty">이 문서에는 요약이 없습니다.</string>
+    <string name="ime_wiki_open_browser_desc">브라우저에서 기사 열기</string>
+    <string name="ime_wiki_quote_markdown">\"%1$s\" ([위키백과: %2$s](%3$s)에서 발췌)</string>
+    <string name="ime_wiki_quote_plain">\"%1$s\" (위키백과: %2$s, %3$s)</string>
     <string name="ime_wiki_search_active_hint">위키백과 검색. 검색하려면 Enter 키를 누르세요.</string>
     <string name="ime_wiki_search_hint">위키백과 검색…</string>
+    <string name="ime_wiki_shrink_desc">기사를 다시 키보드 높이로 조정</string>
     <string name="ime_wiki_tab_full_label">전체 문서</string>
     <string name="ime_wiki_tab_links_label">링크</string>
     <string name="ime_wiki_tab_summary_label">요약</string>
@@ -1163,6 +1271,7 @@
     <string name="ime_word_menu_delete">\"%1$s\" 삭제</string>
     <string name="ime_word_menu_edit">편집…</string>
     <string name="ime_word_menu_search_all">\"%1$s\"에 대해 모든 단어 검색</string>
+    <string name="ime_word_menu_synonyms">\"%1$s\"의 유의어</string>
     <string name="ime_word_spell_apply_desc">이 철자 사용</string>
     <string name="ime_word_spell_cancel_desc">맞춤법 수정 무시</string>
     <string name="ime_word_spell_hint">\"%1$s\"에 대한 새 철자 입력</string>

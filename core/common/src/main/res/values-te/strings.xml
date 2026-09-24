@@ -35,6 +35,7 @@
     <string name="common_enable">ఆన్ చేయండి</string>
     <string name="common_error_generic">ఏదో పని చేయలేదు. మళ్ళీ ప్రయత్నించండి.</string>
     <string name="common_error_network">కనెక్షన్ లేదు. మీ నెట్‌వర్క్‌ని తనిఖీ చేసి మళ్లీ ప్రయత్నించండి.</string>
+    <string name="common_error_no_internet_permission">ఈ కీబోర్డ్ బిల్డ్ ఇంటర్నెట్‌కు కనెక్ట్ కాలేదు.</string>
     <string name="common_error_timeout">అభ్యర్థన చాలా సమయం తీసుకుంది. మళ్ళీ ప్రయత్నించండి.</string>
     <string name="common_export">ఎగుమతి</string>
     <string name="common_import">దిగుమతి</string>

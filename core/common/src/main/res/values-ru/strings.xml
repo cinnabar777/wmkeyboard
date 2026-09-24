@@ -35,6 +35,7 @@
     <string name="common_enable">Включить</string>
     <string name="common_error_generic">Что-то пошло не так. Попробуйте еще раз.</string>
     <string name="common_error_network">Нет подключения. Проверьте сеть и попробуйте снова.</string>
+    <string name="common_error_no_internet_permission">Эта сборка клавиатуры не может подключиться к интернету.</string>
     <string name="common_error_timeout">Запрос занял слишком много времени. Попробуйте еще раз.</string>
     <string name="common_export">Экспорт</string>
     <string name="common_import">Импорт</string>

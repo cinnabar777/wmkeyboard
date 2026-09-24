@@ -115,6 +115,7 @@
     <string name="core_content_selection_macro_chat_strike">Precrtano</string>
     <string name="core_content_selection_macro_colour">Boja</string>
     <string name="core_content_selection_macro_copy">Kopiraj</string>
+    <string name="core_content_selection_macro_deepl_write">DeepL Write</string>
     <string name="core_content_selection_macro_digits_latin">Znamenke</string>
     <string name="core_content_selection_macro_email">E-pošta</string>
     <string name="core_content_selection_macro_fancy">Otmjeno</string>

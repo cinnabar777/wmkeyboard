@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">ਪ੍ਰਯੋਗਾਤਮਕ</string>
     <string name="core_intel_llm_tier_recommended_label">ਸਿਫਾਰਸ਼ੀ</string>
     <string name="core_intel_llm_tier_untested_label">ਅਣਪ੍ਰੀਖਿਤ</string>
+    <string name="core_intel_ocr_download_error_http">GitHub ਸਰਵਰ ਨੇ ਫਾਈਲ ਨਹੀਂ ਭੇਜੀ। ਗਲਤੀ ਕੋਡ HTTP %1$s ਹੈ।</string>
+    <string name="core_intel_ocr_download_error_interrupted">ਡਾਊਨਲੋਡ ਦੌਰਾਨ ਕਨੈਕਸ਼ਨ ਰੁਕ ਗਿਆ ਸੀ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
+    <string name="core_intel_ocr_download_error_no_space">ਤੁਹਾਡੀ ਡਿਵਾਈਸ \'ਤੇ ਲੋੜੀਂਦੀ ਸਟੋਰੇਜ ਨਹੀਂ ਹੈ। ਤੁਹਾਨੂੰ ਪਹਿਲਾਂ ਲਗਭਗ %1$s MB ਖਾਲੀ ਕਰਨੀ ਪਵੇਗੀ।</string>
+    <string name="core_intel_ocr_pack_error_broken">ਡਾਊਨਲੋਡ ਕੀਤਾ ਭਾਸ਼ਾ ਡੇਟਾ ਖਰਾਬ ਹੈ, ਇਸ ਲਈ ਸਕੈਨਰ ਇਸਦੀ ਵਰਤੋਂ ਨਹੀਂ ਕਰ ਸਕਿਆ। ਇਸਨੂੰ ਦੁਬਾਰਾ ਡਾਊਨਲੋਡ ਕਰੋ।</string>
 </resources>

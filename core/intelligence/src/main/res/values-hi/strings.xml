@@ -24,4 +24,8 @@
     <string name="core_intel_llm_tier_experimental_label">प्रायोगिक</string>
     <string name="core_intel_llm_tier_recommended_label">अनुशंसित</string>
     <string name="core_intel_llm_tier_untested_label">अपरीक्षित</string>
+    <string name="core_intel_ocr_download_error_http">GitHub सर्वर ने फ़ाइल नहीं भेजी। त्रुटि कोड HTTP %1$s है।</string>
+    <string name="core_intel_ocr_download_error_interrupted">डाउनलोड के दौरान कनेक्शन रुक गया। पुनः प्रयास करें।</string>
+    <string name="core_intel_ocr_download_error_no_space">आपके डिवाइस पर पर्याप्त स्टोरेज नहीं है। आपको पहले लगभग %1$s MB खाली करना होगा।</string>
+    <string name="core_intel_ocr_pack_error_broken">डाउनलोड किया गया भाषा डेटा क्षतिग्रस्त है, इसलिए स्कैनर इसका उपयोग नहीं कर सका। इसे दोबारा डाउनलोड करें।</string>
 </resources>
