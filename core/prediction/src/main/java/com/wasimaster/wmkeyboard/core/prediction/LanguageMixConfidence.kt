@@ -1,5 +1,6 @@
 package com.wasimaster.wmkeyboard.core.prediction
 
+import com.wasimaster.wmkeyboard.core.util.SnapshotFile
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -36,6 +37,7 @@ class LanguageMixConfidence(private val storageFile: File? = null) {
      * to write.
      */
     private var dirty = false
+    private val snapshotFile = storageFile?.let(::SnapshotFile)
 
     init {
         load()
@@ -77,15 +79,22 @@ class LanguageMixConfidence(private val storageFile: File? = null) {
         return MIN_CONFIDENCE + (MAX_CONFIDENCE - MIN_CONFIDENCE) * sqrt(share)
     }
 
-    @Synchronized
     fun save() {
-        val file = storageFile ?: return
-        if (!dirty) return
-        runCatching {
-            file.parentFile?.mkdirs()
-            file.writeText(json.encodeToString(Snapshot(usage)))
-        // Only on success, so a failed write is retried at the next dismissal.
-        }.onSuccess { dirty = false }
+        val file = snapshotFile ?: return
+        val (ticket, snapshot) = synchronized(this) {
+            if (!dirty) return
+            dirty = false
+            file.ticket() to Snapshot(usage.toMap())
+        }
+        // Encoded and written outside the lock, so the store stays usable while
+        // the file goes to disk. A failed write makes the store dirty again, so
+        // the next save retries rather than assuming it landed.
+        if (!file.write(ticket) { json.encodeToString(snapshot) }) markUnsaved()
+    }
+
+    @Synchronized
+    private fun markUnsaved() {
+        dirty = true
     }
 
     /** Wipe all learned mixing habit (mirrors the personal-data reset). */
@@ -95,7 +104,7 @@ class LanguageMixConfidence(private val storageFile: File? = null) {
         // The delete is the write; a later save must not recreate the file.
         // A delete that FAILED leaves the wiped tally on disk, so stay dirty
         // and let the next save overwrite it with the empty snapshot.
-        dirty = storageFile?.delete() == false
+        dirty = snapshotFile?.delete() == false
     }
 
     /**
@@ -105,6 +114,7 @@ class LanguageMixConfidence(private val storageFile: File? = null) {
      */
     @Synchronized
     fun reload() {
+        snapshotFile?.supersede()
         usage.clear()
         load()
         // Memory matches the file again — saving would put back what the

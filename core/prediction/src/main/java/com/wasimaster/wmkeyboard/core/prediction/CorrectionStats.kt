@@ -1,5 +1,6 @@
 package com.wasimaster.wmkeyboard.core.prediction
 
+import com.wasimaster.wmkeyboard.core.util.SnapshotFile
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -66,6 +67,7 @@ class CorrectionStats(private val storageFile: File?) {
     private var reverted = 0
     private var generation = 0L
     private var dirty = false
+    private val snapshotFile = storageFile?.let(::SnapshotFile)
 
     /**
      * Pairs reverted in this process, against the [tick] each was reverted at:
@@ -242,26 +244,34 @@ class CorrectionStats(private val storageFile: File?) {
             .coerceIn(MIN_MULTIPLIER, MAX_MULTIPLIER)
     }
 
-    @Synchronized
     fun save() {
-        val file = storageFile ?: return
-        if (!dirty) return
-        generation++
-        expireStalePairs()
-        val snapshot = Snapshot(
-            pairs = pairs.toMap(),
-            fired = fired,
-            reverted = reverted,
-            generation = generation,
-        )
-        runCatching {
-            file.parentFile?.mkdirs()
-            file.writeText(json.encodeToString(snapshot))
-        }.onSuccess { dirty = false }
+        val file = snapshotFile ?: return
+        val (ticket, snapshot) = synchronized(this) {
+            if (!dirty) return
+            generation++
+            expireStalePairs()
+            dirty = false
+            file.ticket() to Snapshot(
+                pairs = pairs.toMap(),
+                fired = fired,
+                reverted = reverted,
+                generation = generation,
+            )
+        }
+        // Encoded and written outside the lock, so the store stays usable while
+        // the file goes to disk. A failed write makes the store dirty again, so
+        // the next save retries rather than assuming it landed.
+        if (!file.write(ticket) { json.encodeToString(snapshot) }) markUnsaved()
+    }
+
+    @Synchronized
+    private fun markUnsaved() {
+        dirty = true
     }
 
     @Synchronized
     fun reload() {
+        snapshotFile?.supersede()
         pairs.clear()
         fired = 0
         reverted = 0
@@ -275,7 +285,7 @@ class CorrectionStats(private val storageFile: File?) {
         sessionRejected.clear()
         fired = 0
         reverted = 0
-        dirty = storageFile?.delete() == false
+        dirty = snapshotFile?.delete() == false
     }
 
     /** Penalties age out: one revert from months of sessions ago should not

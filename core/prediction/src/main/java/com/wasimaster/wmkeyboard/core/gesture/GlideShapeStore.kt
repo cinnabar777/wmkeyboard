@@ -1,5 +1,6 @@
 package com.wasimaster.wmkeyboard.core.gesture
 
+import com.wasimaster.wmkeyboard.core.util.SnapshotFile
 import com.wasimaster.wmkeyboard.core.prediction.WordKey
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -122,6 +123,7 @@ class GlideShapeStore(private val storageFile: File?) {
     private var tick = 0L
     private val json = Json { ignoreUnknownKeys = true }
     private var dirty = false
+    private val snapshotFile = storageFile?.let(::SnapshotFile)
 
     @Volatile
     private var published: Map<Long, LayoutShapes> = emptyMap()
@@ -246,24 +248,39 @@ class GlideShapeStore(private val storageFile: File?) {
     @Synchronized
     fun isEmpty(): Boolean = layouts.isEmpty()
 
-    @Synchronized
     fun save() {
-        val file = storageFile ?: return
-        if (!dirty) return
-        val stored = layouts.entries.associate { (layoutKey, words) ->
-            java.lang.Long.toHexString(layoutKey) to words.entries.associate { (word, entry) ->
-                word to StoredWord(entry.tick, entry.shapes.map { StoredShape(it.points.toHex(), it.accepted, it.rejected) })
-            }
+        val file = snapshotFile ?: return
+        val (ticket, snapshot) = synchronized(this) {
+            if (!dirty) return
+            dirty = false
+            file.ticket() to Snapshot(
+                VERSION,
+                tick,
+                layouts.entries.associate { (layoutKey, words) ->
+                    java.lang.Long.toHexString(layoutKey) to words.entries.associate { (word, entry) ->
+                        word to StoredWord(
+                            entry.tick,
+                            entry.shapes.map { StoredShape(it.points.toHex(), it.accepted, it.rejected) },
+                        )
+                    }
+                },
+            )
         }
-        runCatching {
-            file.parentFile?.mkdirs()
-            file.writeText(json.encodeToString(Snapshot(VERSION, tick, stored)))
-        }.onSuccess { dirty = false }
+        // Encoded and written outside the lock, so the store stays usable while
+        // the file goes to disk. A failed write makes the store dirty again, so
+        // the next save retries rather than assuming it landed.
+        if (!file.write(ticket) { json.encodeToString(snapshot) }) markUnsaved()
+    }
+
+    @Synchronized
+    private fun markUnsaved() {
+        dirty = true
     }
 
     /** Re-reads the file after the settings app deleted or replaced it. */
     @Synchronized
     fun reload() {
+        snapshotFile?.supersede()
         layouts.clear()
         tick = 0L
         load()
@@ -277,7 +294,7 @@ class GlideShapeStore(private val storageFile: File?) {
         publish()
         // The delete is the write; stay dirty only if it failed, so the next
         // save overwrites the stale file with the empty snapshot.
-        dirty = storageFile?.delete() == false
+        dirty = snapshotFile?.delete() == false
     }
 
     private fun nearest(entry: Entry, drawn: ByteArray): Shape? {

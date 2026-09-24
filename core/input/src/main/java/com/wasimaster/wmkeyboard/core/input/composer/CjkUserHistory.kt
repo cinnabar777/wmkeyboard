@@ -1,5 +1,6 @@
 package com.wasimaster.wmkeyboard.core.input.composer
 
+import com.wasimaster.wmkeyboard.core.util.SnapshotFile
 import java.io.File
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -41,6 +42,7 @@ class CjkUserHistory(private val storageFile: File?) {
     /** Whether anything has changed since the last [save]. */
     @Volatile
     var dirty: Boolean = false
+    private val snapshotFile = storageFile?.let(::SnapshotFile)
         private set
 
     init {
@@ -82,15 +84,26 @@ class CjkUserHistory(private val storageFile: File?) {
         CjkDictionaries.invalidate()
     }
 
-    @Synchronized
     fun save() {
-        val file = storageFile ?: return
-        if (!dirty) return
-        runCatching {
-            file.parentFile?.mkdirs()
-            file.writeText(JSON.encodeToString(Snapshot(picks = picks)))
+        val file = snapshotFile ?: return
+        val (ticket, snapshot) = synchronized(this) {
+            if (!dirty) return
             dirty = false
+            file.ticket() to Snapshot(
+                picks = picks.mapValues { (_, readings) ->
+                    readings.mapValues { (_, words) -> words.toMap() }
+                },
+            )
         }
+        // Encoded and written outside the lock, so the store stays usable while
+        // the file goes to disk. A failed write makes the store dirty again, so
+        // the next save retries rather than assuming it landed.
+        if (!file.write(ticket) { JSON.encodeToString(snapshot) }) markUnsaved()
+    }
+
+    @Synchronized
+    private fun markUnsaved() {
+        dirty = true
     }
 
     @Synchronized

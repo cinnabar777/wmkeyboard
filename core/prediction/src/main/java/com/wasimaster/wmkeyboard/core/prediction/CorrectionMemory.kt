@@ -1,5 +1,6 @@
 package com.wasimaster.wmkeyboard.core.prediction
 
+import com.wasimaster.wmkeyboard.core.util.SnapshotFile
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -60,6 +61,7 @@ class CorrectionMemory(private val storageFile: File?) {
     private val habits = HashMap<String, HashMap<String, Int>>()
     private var generation = 0L
     private var dirty = false
+    private val snapshotFile = storageFile?.let(::SnapshotFile)
     private val json = Json { ignoreUnknownKeys = true }
 
     /** Bumped on every change; the engine's caches key on it. */
@@ -202,25 +204,33 @@ class CorrectionMemory(private val storageFile: File?) {
         counts.mapNotNull { (key, n) -> habitOf(key, n) }
             .sortedWith(compareByDescending<Habit> { it.count }.thenBy { it.kind.ordinal })
 
-    @Synchronized
     fun save() {
-        val file = storageFile ?: return
-        if (!dirty) return
-        generation++
-        expireStalePairs()
-        val snapshot = Snapshot(
-            pairs = pairs.mapValues { it.value.toList() },
-            habits = habits.mapValues { it.value.toMap() },
-            generation = generation,
-        )
-        runCatching {
-            file.parentFile?.mkdirs()
-            file.writeText(json.encodeToString(snapshot))
-        }.onSuccess { dirty = false }
+        val file = snapshotFile ?: return
+        val (ticket, snapshot) = synchronized(this) {
+            if (!dirty) return
+            generation++
+            expireStalePairs()
+            dirty = false
+            file.ticket() to Snapshot(
+                pairs = pairs.mapValues { it.value.toList() },
+                habits = habits.mapValues { it.value.toMap() },
+                generation = generation,
+            )
+        }
+        // Encoded and written outside the lock, so the store stays usable while
+        // the file goes to disk. A failed write makes the store dirty again, so
+        // the next save retries rather than assuming it landed.
+        if (!file.write(ticket) { json.encodeToString(snapshot) }) markUnsaved()
+    }
+
+    @Synchronized
+    private fun markUnsaved() {
+        dirty = true
     }
 
     @Synchronized
     fun reload() {
+        snapshotFile?.supersede()
         pairs.clear()
         habits.clear()
         generation = 0L
@@ -236,7 +246,7 @@ class CorrectionMemory(private val storageFile: File?) {
         version++
         // The delete is the write; stay dirty only if it failed, so the next
         // save overwrites the stale file with the empty snapshot.
-        dirty = storageFile?.delete() == false
+        dirty = snapshotFile?.delete() == false
     }
 
     private fun changed() {

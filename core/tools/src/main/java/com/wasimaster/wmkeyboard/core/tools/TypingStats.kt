@@ -1,5 +1,6 @@
 package com.wasimaster.wmkeyboard.core.tools
 
+import com.wasimaster.wmkeyboard.core.util.SnapshotFile
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -101,6 +102,7 @@ class TypingStats(
     private var totalActiveMs = 0L
     private val hourHistogram = LongArray(HOURS)
     private var dirty = false
+    private val snapshotFile = storageFile?.let(::SnapshotFile)
 
     /** The day the most recent event landed on, so a flush with no clock in
      * hand (from [save]) can attribute the trailing word somewhere sane. */
@@ -204,33 +206,41 @@ class TypingStats(
     fun lifetime(): Totals =
         Totals(totalChars, totalWords, totalBackspaces, totalActiveMs, hourHistogram.toList())
 
-    @Synchronized
     fun save() {
-        val file = storageFile ?: return
-        if (!dirty) return
-        // The trailing word: "hello" then keyboard dismissed is a word.
-        days[lastDayKey]?.let { countPendingWord(it) }
-        prune()
-        val snapshot = Snapshot(
-            days = days.mapValues { (_, acc) ->
-                DayStat(acc.chars, acc.words, acc.backspaces, acc.activeMs)
-            },
-            totalChars = totalChars,
-            totalWords = totalWords,
-            totalBackspaces = totalBackspaces,
-            totalActiveMs = totalActiveMs,
-            hourHistogram = hourHistogram.toList(),
-        )
-        runCatching {
-            file.parentFile?.mkdirs()
-            file.writeText(json.encodeToString(snapshot))
-        }.onSuccess { dirty = false }
+        val file = snapshotFile ?: return
+        val (ticket, snapshot) = synchronized(this) {
+            if (!dirty) return
+            // The trailing word: "hello" then keyboard dismissed is a word.
+            days[lastDayKey]?.let { countPendingWord(it) }
+            prune()
+            dirty = false
+            file.ticket() to Snapshot(
+                days = days.mapValues { (_, acc) ->
+                    DayStat(acc.chars, acc.words, acc.backspaces, acc.activeMs)
+                },
+                totalChars = totalChars,
+                totalWords = totalWords,
+                totalBackspaces = totalBackspaces,
+                totalActiveMs = totalActiveMs,
+                hourHistogram = hourHistogram.toList(),
+            )
+        }
+        // Encoded and written outside the lock, so the store stays usable while
+        // the file goes to disk. A failed write makes the store dirty again, so
+        // the next save retries rather than assuming it landed.
+        if (!file.write(ticket) { json.encodeToString(snapshot) }) markUnsaved()
+    }
+
+    @Synchronized
+    private fun markUnsaved() {
+        dirty = true
     }
 
     /** The settings app edited or deleted the file: drop the in-memory copy
      * for the disk state, otherwise the next save would clobber it. */
     @Synchronized
     fun reload() {
+        snapshotFile?.supersede()
         resetInMemory()
         load()
         dirty = false
@@ -239,7 +249,7 @@ class TypingStats(
     @Synchronized
     fun clear() {
         resetInMemory()
-        dirty = storageFile?.delete() == false
+        dirty = snapshotFile?.delete() == false
     }
 
     private fun resetInMemory() {

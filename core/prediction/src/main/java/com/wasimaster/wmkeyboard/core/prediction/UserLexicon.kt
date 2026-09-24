@@ -1,5 +1,6 @@
 package com.wasimaster.wmkeyboard.core.prediction
 
+import com.wasimaster.wmkeyboard.core.util.SnapshotFile
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -136,6 +137,7 @@ class UserLexicon(private val storageFile: File?) {
      * process can be killed with the user's new words only in memory.
      */
     private var dirty = false
+    private val snapshotFile = storageFile?.let(::SnapshotFile)
 
     /**
      * Bumped whenever the word set changes, so the engine's cached walk
@@ -496,6 +498,7 @@ class UserLexicon(private val storageFile: File?) {
      */
     @Synchronized
     fun reload() {
+        snapshotFile?.supersede()
         words.clear()
         bigrams.clear()
         trigrams.clear()
@@ -743,37 +746,42 @@ class UserLexicon(private val storageFile: File?) {
         // If it failed, the file still holds the data this call was meant to
         // wipe — stay dirty so the next save overwrites it with the empty
         // snapshot, which is what the old unconditional save did.
-        dirty = storageFile?.delete() == false
+        dirty = snapshotFile?.delete() == false
+    }
+
+    fun save() {
+        val file = snapshotFile ?: return
+        val (ticket, snapshot) = synchronized(this) {
+            if (!dirty) return
+            generation++
+            compactIfNeeded()
+            dirty = false
+            file.ticket() to Snapshot(
+                words = words.toMap(),
+                bigrams = bigrams.mapValues { it.value.counts.toMap() },
+                generation = generation,
+                wordGen = wordGen.toMap(),
+                trigrams = trigrams.mapValues { it.value.counts.toMap() },
+                skip1grams = skip1grams.mapValues { it.value.counts.toMap() },
+                skip2grams = skip2grams.mapValues { it.value.counts.toMap() },
+                skipSchema = SKIP_SCHEMA,
+                wordLang = wordLangs.toMap(),
+                wordCase = wordCase.toMap(),
+                caseVotes = caseVotes.toMap(),
+                casePinned = casePinned.toSet(),
+                addedByHand = addedByHand.toSet(),
+                wordBorn = wordBorn.toMap(),
+            )
+        }
+        // Encoded and written outside the lock, so the store stays usable while
+        // the file goes to disk. A failed write makes the store dirty again, so
+        // the next save retries rather than assuming it landed.
+        if (!file.write(ticket) { json.encodeToString(snapshot) }) markUnsaved()
     }
 
     @Synchronized
-    fun save() {
-        val file = storageFile ?: return
-        if (!dirty) return
-        generation++
-        compactIfNeeded()
-        val snapshot = Snapshot(
-            words = words,
-            bigrams = bigrams.mapValues { it.value.counts.toMap() },
-            generation = generation,
-            wordGen = wordGen,
-            trigrams = trigrams.mapValues { it.value.counts.toMap() },
-            skip1grams = skip1grams.mapValues { it.value.counts.toMap() },
-            skip2grams = skip2grams.mapValues { it.value.counts.toMap() },
-            skipSchema = SKIP_SCHEMA,
-            wordLang = wordLangs,
-            wordCase = wordCase,
-            caseVotes = caseVotes,
-            casePinned = casePinned,
-            addedByHand = addedByHand,
-            wordBorn = wordBorn,
-        )
-        runCatching {
-            file.parentFile?.mkdirs()
-            file.writeText(json.encodeToString(snapshot))
-        // Only on success: a write that failed leaves the file behind memory,
-        // and the next dismissal should try again rather than assume it landed.
-        }.onSuccess { dirty = false }
+    private fun markUnsaved() {
+        dirty = true
     }
 
     private fun load() {

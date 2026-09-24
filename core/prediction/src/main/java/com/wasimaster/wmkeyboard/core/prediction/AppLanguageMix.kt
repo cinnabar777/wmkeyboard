@@ -1,5 +1,6 @@
 package com.wasimaster.wmkeyboard.core.prediction
 
+import com.wasimaster.wmkeyboard.core.util.SnapshotFile
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -47,6 +48,7 @@ class AppLanguageMix(private val storageFile: File? = null) {
     private val evidence = HashMap<String, Double>()
     private val json = Json { ignoreUnknownKeys = true }
     private var dirty = false
+    private val snapshotFile = storageFile?.let(::SnapshotFile)
 
     init {
         load()
@@ -103,18 +105,27 @@ class AppLanguageMix(private val storageFile: File? = null) {
     @Synchronized
     fun knows(packageName: String): Boolean = apps.containsKey(packageName)
 
-    @Synchronized
     fun save() {
-        val file = storageFile ?: return
-        if (!dirty) return
-        runCatching {
-            file.parentFile?.mkdirs()
-            file.writeText(json.encodeToString(Snapshot(apps.mapValues { it.value.toMap() }, evidence.toMap())))
-        }.onSuccess { dirty = false }
+        val file = snapshotFile ?: return
+        val (ticket, snapshot) = synchronized(this) {
+            if (!dirty) return
+            dirty = false
+            file.ticket() to Snapshot(apps.mapValues { it.value.toMap() }, evidence.toMap())
+        }
+        // Encoded and written outside the lock, so the store stays usable while
+        // the file goes to disk. A failed write makes the store dirty again, so
+        // the next save retries rather than assuming it landed.
+        if (!file.write(ticket) { json.encodeToString(snapshot) }) markUnsaved()
+    }
+
+    @Synchronized
+    private fun markUnsaved() {
+        dirty = true
     }
 
     @Synchronized
     fun reload() {
+        snapshotFile?.supersede()
         apps.clear()
         evidence.clear()
         load()
@@ -125,7 +136,7 @@ class AppLanguageMix(private val storageFile: File? = null) {
     fun clear() {
         apps.clear()
         evidence.clear()
-        dirty = storageFile?.delete() == false
+        dirty = snapshotFile?.delete() == false
     }
 
     private fun load() {

@@ -1,5 +1,6 @@
 package com.wasimaster.wmkeyboard.core.prediction
 
+import com.wasimaster.wmkeyboard.core.util.SnapshotFile
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -119,6 +120,7 @@ class GlideOutcomes(private val storageFile: File?) {
     private var epoch = 0L
     private val json = Json { ignoreUnknownKeys = true }
     private var dirty = false
+    private val snapshotFile = storageFile?.let(::SnapshotFile)
 
     /**
      * Whether the decoder should read the store at all — the "learn my swipe
@@ -176,26 +178,34 @@ class GlideOutcomes(private val storageFile: File?) {
     @Synchronized
     fun isEmpty(): Boolean = pairs.isEmpty() && undone.isEmpty()
 
-    @Synchronized
     fun save() {
-        val file = storageFile ?: return
-        if (!dirty) return
-        val snapshot = Snapshot(
-            version = VERSION,
-            salt = salt.toHex(),
-            epoch = epoch,
-            pairs = pairs.map { (k, e) -> PairRow(k.rejected, k.chosen, e.strength, e.epoch) },
-            undone = undone.map { (w, e) -> UndoRow(w, e.strength, e.epoch) },
-        )
-        runCatching {
-            file.parentFile?.mkdirs()
-            file.writeText(json.encodeToString(snapshot))
-        }.onSuccess { dirty = false }
+        val file = snapshotFile ?: return
+        val (ticket, snapshot) = synchronized(this) {
+            if (!dirty) return
+            dirty = false
+            file.ticket() to Snapshot(
+                version = VERSION,
+                salt = salt.toHex(),
+                epoch = epoch,
+                pairs = pairs.map { (k, e) -> PairRow(k.rejected, k.chosen, e.strength, e.epoch) },
+                undone = undone.map { (w, e) -> UndoRow(w, e.strength, e.epoch) },
+            )
+        }
+        // Encoded and written outside the lock, so the store stays usable while
+        // the file goes to disk. A failed write makes the store dirty again, so
+        // the next save retries rather than assuming it landed.
+        if (!file.write(ticket) { json.encodeToString(snapshot) }) markUnsaved()
+    }
+
+    @Synchronized
+    private fun markUnsaved() {
+        dirty = true
     }
 
     /** Re-reads the file after the settings app deleted or replaced it. */
     @Synchronized
     fun reload() {
+        snapshotFile?.supersede()
         pairs.clear()
         undone.clear()
         epoch = 0L
@@ -217,7 +227,7 @@ class GlideOutcomes(private val storageFile: File?) {
         publish()
         // The delete is the write; stay dirty only if it failed, so the next
         // save overwrites the stale file with the empty snapshot.
-        dirty = storageFile?.delete() == false
+        dirty = snapshotFile?.delete() == false
     }
 
     /**

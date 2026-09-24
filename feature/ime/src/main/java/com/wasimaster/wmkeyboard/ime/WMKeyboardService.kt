@@ -595,6 +595,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.math.abs
@@ -656,6 +657,39 @@ open class WMKeyboardService : InputMethodService() {
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     private val suggestionDispatcher = Dispatchers.Default.limitedParallelism(1, "wmkb-suggest")
+
+    /**
+     * Where the learning stores are written: one at a time, off the main
+     * thread. Serial so that a store's reload after the settings app edited
+     * its file queues behind a save already under way, rather than racing it.
+     * A view over [Dispatchers.IO], so it costs no thread of its own.
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val persistDispatcher = Dispatchers.IO.limitedParallelism(1, "wmkb-persist")
+
+    /**
+     * Every learning store's save, run on [persistDispatcher]. A store with
+     * nothing new returns at once; one with changes copies its maps under its
+     * own lock and encodes and writes the copy outside it.
+     */
+    private fun saveLearningStores() {
+        userLexicon.save()
+        pendingLearn.save()
+        wordRanks.save()
+        keyOffsets.save()
+        tapOffsets.save()
+        correctionMemory.save()
+        appLanguageMix.save()
+        scriptChoices.save()
+        glideOutcomes.save()
+        glideShapes.save()
+        glideSandbox.save()
+        correctionStats.save()
+        CjkLearning.store?.save()
+        languageMixConfidence.save()
+        emojiUsage.save()
+        typingStats.save()
+    }
 
     private lateinit var lifecycleOwner: KeyboardViewLifecycleOwner
 
@@ -3261,7 +3295,9 @@ open class WMKeyboardService : InputMethodService() {
                 // dictionary): drop the in-memory copy for the disk state,
                 // otherwise the next save here would clobber those edits.
                 if (lexiconVersion != -1 && settings.lexiconVersion != lexiconVersion) {
-                    withContext(Dispatchers.Default) {
+                    // On the save queue, so a hide's save still in flight
+                    // lands before the file is read back rather than after.
+                    withContext(persistDispatcher) {
                         userLexicon.reload()
                         // The Storage screen deletes all the learning files at
                         // once, so the same signal has to drop all the copies:
@@ -3306,7 +3342,7 @@ open class WMKeyboardService : InputMethodService() {
                 if (correctionsVersion != -1 &&
                     settings.suggestionStrip.correctionsVersion != correctionsVersion
                 ) {
-                    withContext(Dispatchers.Default) {
+                    withContext(persistDispatcher) {
                         correctionMemory.reload()
                         tapOffsets.reload()
                     }
@@ -3320,7 +3356,7 @@ open class WMKeyboardService : InputMethodService() {
                 // version so the in-memory copy here does not save the old
                 // numbers straight back over the emptied file.
                 if (statsVersion != -1 && settings.statsVersion != statsVersion) {
-                    withContext(Dispatchers.Default) { typingStats.reload() }
+                    withContext(persistDispatcher) { typingStats.reload() }
                 }
                 statsVersion = settings.statsVersion
                 // Leaving Automatic starts its ladder over (#316). The settings
@@ -5868,22 +5904,11 @@ open class WMKeyboardService : InputMethodService() {
                     ?.takeIf { state.layoutMode == LayoutMode.SECONDARY },
             )
         }
-        userLexicon.save()
-        pendingLearn.save()
-        wordRanks.save()
-        keyOffsets.save()
-        tapOffsets.save()
-        correctionMemory.save()
-        appLanguageMix.save()
-        scriptChoices.save()
-        glideOutcomes.save()
-        glideShapes.save()
-        glideSandbox.save()
-        correctionStats.save()
-        CjkLearning.store?.save()
-        languageMixConfidence.save()
-        emojiUsage.save()
-        typingStats.save()
+        // Off the main thread: the learned-words file alone runs to megabytes,
+        // and encoding it here held the main thread for 100-200 ms on every
+        // hide after typing (CPH2481, measured). Each store snapshots itself
+        // under its own lock, so typing into the next field is safe meanwhile.
+        serviceScope.launch(persistDispatcher) { saveLearningStores() }
         if (_uiState.value.settings.sensorTools.flashlightAutoOff && _uiState.value.torchOn) {
             setTorch(false)
         }
@@ -5931,21 +5956,10 @@ open class WMKeyboardService : InputMethodService() {
         KdeConnectHub.release(KdeConnectHub.Reason.SERVICE)
         finishRevisionOnLeave()
         flushLearningBuffer()
-        userLexicon.save()
-        pendingLearn.save()
-        wordRanks.save()
-        keyOffsets.save()
-        tapOffsets.save()
-        correctionMemory.save()
-        appLanguageMix.save()
-        scriptChoices.save()
-        glideOutcomes.save()
-        glideShapes.save()
-        glideSandbox.save()
-        correctionStats.save()
-        CjkLearning.store?.save()
-        emojiUsage.save()
-        typingStats.save()
+        // Blocking, and on the same queue as the hide's saves: the process is
+        // going, so this waits for a hide's save still in flight and then
+        // writes whatever changed since.
+        runBlocking(persistDispatcher) { saveLearningStores() }
         clipboardStore.save()
         micBlockWatcher.stop()
         voiceEngine.cancel()

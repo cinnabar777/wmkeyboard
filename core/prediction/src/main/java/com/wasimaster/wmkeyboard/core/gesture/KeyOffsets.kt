@@ -1,5 +1,6 @@
 package com.wasimaster.wmkeyboard.core.gesture
 
+import com.wasimaster.wmkeyboard.core.util.SnapshotFile
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -108,6 +109,7 @@ class KeyOffsets(private val storageFile: File?) {
     private var global = Cell(0f, 0f, 0)
     private val json = Json { ignoreUnknownKeys = true }
     private var dirty = false
+    private val snapshotFile = storageFile?.let(::SnapshotFile)
 
     /** The trend as of [trendVersion]: slope per key width from the cells' weighted centre, and that centre. */
     private var trendVersion = -1
@@ -250,22 +252,33 @@ class KeyOffsets(private val storageFile: File?) {
         version++
     }
 
-    @Synchronized
     fun save() {
-        val file = storageFile ?: return
-        if (!dirty) return
-        val stored = cells.map { (id, cell) ->
-            StoredCell(xOf(id), yOf(id), cell.dx, cell.dy, cell.n)
+        val file = snapshotFile ?: return
+        val (ticket, snapshot) = synchronized(this) {
+            if (!dirty) return
+            dirty = false
+            file.ticket() to Snapshot(
+                cells.map { (id, cell) -> StoredCell(xOf(id), yOf(id), cell.dx, cell.dy, cell.n) },
+                global.dx,
+                global.dy,
+                global.n,
+            )
         }
-        runCatching {
-            file.parentFile?.mkdirs()
-            file.writeText(json.encodeToString(Snapshot(stored, global.dx, global.dy, global.n)))
-        }.onSuccess { dirty = false }
+        // Encoded and written outside the lock, so the store stays usable while
+        // the file goes to disk. A failed write makes the store dirty again, so
+        // the next save retries rather than assuming it landed.
+        if (!file.write(ticket) { json.encodeToString(snapshot) }) markUnsaved()
+    }
+
+    @Synchronized
+    private fun markUnsaved() {
+        dirty = true
     }
 
     /** Re-reads the file after the settings app deleted or replaced it. */
     @Synchronized
     fun reload() {
+        snapshotFile?.supersede()
         cells.clear()
         global = Cell(0f, 0f, 0)
         load()
@@ -280,7 +293,7 @@ class KeyOffsets(private val storageFile: File?) {
         version++
         // The delete is the write; stay dirty only if it failed, so the next
         // save overwrites the stale file with the empty snapshot.
-        dirty = storageFile?.delete() == false
+        dirty = snapshotFile?.delete() == false
     }
 
     private fun load() {
