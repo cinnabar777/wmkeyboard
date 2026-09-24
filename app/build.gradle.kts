@@ -885,6 +885,10 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.coil.compose)
+    // Compiled against by src/full's WMFullApplication, which starts
+    // WorkManager on demand. Already in every full APK at runtime (ML Kit's
+    // digital-ink brings it), so this adds nothing to what ships.
+    "fullImplementation"(libs.androidx.work.runtime)
 
     // Play In-App Updates, for Play-channel builds only. Compiled against by
     // src/play/java; src/noplay/java is what every other channel gets, so no
