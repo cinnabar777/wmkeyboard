@@ -116,7 +116,6 @@ import androidx.compose.ui.unit.dp
 import com.wasimaster.wmkeyboard.R
 import com.wasimaster.wmkeyboard.common.R as CommonR
 import com.wasimaster.wmkeyboard.core.icons.IconSlots
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.ui.toolAccentPaint
 import com.wasimaster.wmkeyboard.ime.ui.SlotIcon
 import kotlinx.coroutines.Dispatchers
@@ -576,7 +575,7 @@ private const val RECENT_PICKS_SHOWN = 6
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun SettingsSearchScreen(
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onBack: () -> Unit,
     onOpen: (SettingsSearchEntry) -> Unit,
 ) {
@@ -611,7 +610,7 @@ internal fun SettingsSearchScreen(
     }
     val focusRequester = remember { FocusRequester() }
     val keyboard = LocalSoftwareKeyboardController.current
-    val reduceMotion = settings.reduceMotion
+    val reduceMotion = settings.watch { it.reduceMotion }
     // Only on a fresh search: coming back to results with a query typed, the
     // user wants to read them, not to have the keyboard cover them again. The
     // asking itself is the field's own job — see [focusOncePlaced] — because
@@ -749,7 +748,7 @@ private enum class SearchStage { PICKS, LOADING, EMPTY, RESULTS }
 @Composable
 private fun ResultList(
     results: SearchResults,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     tokens: List<String>,
     reduceMotion: Boolean,
     onOpen: (SettingsSearchEntry) -> Unit,
@@ -835,7 +834,7 @@ private const val SEARCH_SKELETON_ROWS = 6
 @Composable
 private fun RecentPicks(
     recent: List<SettingsSearchEntry>,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     reduceMotion: Boolean,
     onOpen: (SettingsSearchEntry) -> Unit,
     onClear: () -> Unit,
@@ -884,7 +883,7 @@ private fun ResultsHeading(text: String, modifier: Modifier = Modifier) {
 @Composable
 private fun ResultRow(
     entry: SettingsSearchEntry,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     tokens: List<String>,
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
@@ -976,14 +975,14 @@ private const val HIGHLIGHT_MIN_LENGTH = 3
 @Composable
 private fun ResultIcon(
     entry: SettingsSearchEntry,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     modifier: Modifier = Modifier,
 ) {
     val tool = entry.tool
     if (tool != null) {
         // The tile's own wash keeps the raw accent; only the glyph inside is
         // darkened, which is what WmIconTile does for a flat accent too.
-        val paint = toolAccentPaint(tool, settings)
+        val paint = settings.watch { toolAccentPaint(tool, it) }
         val glyph = tileToolPaint(paint)
         WmIconTile(
             accent = paint?.color ?: MaterialTheme.colorScheme.primary,

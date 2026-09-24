@@ -30,7 +30,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.wasimaster.wmkeyboard.R
 import com.wasimaster.wmkeyboard.common.R as CommonR
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.MeteredDecision
 import com.wasimaster.wmkeyboard.core.tools.TranslateClient
 import com.wasimaster.wmkeyboard.core.translate.OfflineModelState
@@ -55,7 +54,7 @@ import kotlinx.coroutines.launch
  * round. Nothing on this screen owns a download; leaving it cancels nothing.
  */
 @Composable
-internal fun TranslateModelManager(settings: KeyboardSettings) {
+internal fun TranslateModelManager(settings: LiveSettings) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val models by OnDeviceTranslator.models.collectAsState()
@@ -114,8 +113,8 @@ internal fun TranslateModelManager(settings: KeyboardSettings) {
             OfflineTranslateLanguages.modelCode(code)?.let { it to name }
         }.distinctBy { it.first }
     }
-    val wanted = remember(settings.enabledLanguages, settings.translateTargetLang) {
-        (listOf(settings.translateTargetLang) + settings.enabledLanguages.map { it.id })
+    val wanted = settings.watch { s ->
+        (listOf(s.translateTargetLang) + s.enabledLanguages.map { it.id })
             .mapNotNull { OfflineTranslateLanguages.modelCode(it) }
             .toSet()
     }

@@ -502,8 +502,17 @@ internal val LocalReduceMotion = compositionLocalOf { false }
  * The folds the user has opened, by "<route>/<key>", and the way to change
  * that. Published by the nav host so [SettingsGroup] can be a fold without
  * every screen handing it a repository.
+ *
+ * Holds the live settings rather than the set itself, so that opening one fold
+ * recomposes that fold's group alone: a new set published through the local
+ * would have reached every group on the screen, and every row in them.
  */
-internal class AdvancedFolds(val open: Set<String>, val toggle: (String, Boolean) -> Unit)
+@Stable
+internal class AdvancedFolds(private val settings: LiveSettings, val toggle: (String, Boolean) -> Unit) {
+    /** Whether the fold [id] is open, subscribing the caller to that answer only. */
+    @Composable
+    fun isOpen(id: String): Boolean = settings.watch { id in it.appUi.advancedOpen }
+}
 
 internal val LocalAdvancedFolds = compositionLocalOf<AdvancedFolds?> { null }
 

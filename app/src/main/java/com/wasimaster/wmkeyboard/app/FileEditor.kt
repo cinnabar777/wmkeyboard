@@ -70,6 +70,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -80,6 +81,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.wasimaster.wmkeyboard.R
 import com.wasimaster.wmkeyboard.common.R as CommonR
+import com.wasimaster.wmkeyboard.core.settings.DeviceForm
 import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.SettingsRepository
 import com.wasimaster.wmkeyboard.core.util.requireInputStream
@@ -137,12 +139,12 @@ class FileEditorActivity : ComponentActivity() {
         }
         val repository = SettingsRepository(applicationContext)
         setContent {
-            val settings by repository.settings
+            val stored = repository.settings
                 .collectAsStateWithLifecycle(null as KeyboardSettings?)
-            settings?.let { loaded ->
-                AppTheme(loaded) {
-                    FileEditorScreen(uri, loaded) { finish() }
-                }
+            val deviceForm = DeviceForm.of(LocalConfiguration.current.smallestScreenWidthDp)
+            val settings = rememberLiveSettings(stored, deviceForm) ?: return@setContent
+            AppTheme(settings) {
+                FileEditorScreen(uri, settings) { finish() }
             }
         }
     }
@@ -196,7 +198,7 @@ private sealed interface FileText {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun FileEditorScreen(uri: Uri, settings: KeyboardSettings, onBack: () -> Unit) {
+private fun FileEditorScreen(uri: Uri, settings: LiveSettings, onBack: () -> Unit) {
     val context = LocalContext.current
     val name = remember(uri) { WMFileTypes.displayName(context, uri) }
     // Read here rather than carried from the import dialog: a file may be two
@@ -233,7 +235,7 @@ private fun LoadedFileEditor(
     uri: Uri,
     name: String,
     initialText: String,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -265,6 +267,7 @@ private fun LoadedFileEditor(
     var keyOrder by remember { mutableStateOf(keyPrefs.order) }
     var hiddenKeys by remember { mutableStateOf(keyPrefs.hidden) }
     val suggestionBar = remember { CodeSuggestionBar() }
+    val reduceMotion = settings.watch { it.reduceMotion }
 
     val text = editor.text
     val lineStarts = remember(text) { lineStartOffsets(text) }
@@ -511,8 +514,8 @@ private fun LoadedFileEditor(
         Column(Modifier.padding(padding).consumeWindowInsets(padding).imePadding().fillMaxSize()) {
             AnimatedVisibility(
                 visible = findOpen,
-                enter = if (settings.reduceMotion) fadeIn(snap()) else expandVertically() + fadeIn(),
-                exit = if (settings.reduceMotion) fadeOut(snap()) else shrinkVertically() + fadeOut(),
+                enter = if (reduceMotion) fadeIn(snap()) else expandVertically() + fadeIn(),
+                exit = if (reduceMotion) fadeOut(snap()) else shrinkVertically() + fadeOut(),
             ) {
                 CodeFindBar(
                     find = find,
@@ -555,7 +558,7 @@ private fun LoadedFileEditor(
                 lineHeight = (textSize * LINE_RATIO).sp,
                 folding = isJson,
                 suggestionBar = suggestionBar,
-                reduceMotion = settings.reduceMotion,
+                reduceMotion = reduceMotion,
                 onCommand = onCommand,
                 focusRequester = editorFocus,
             )

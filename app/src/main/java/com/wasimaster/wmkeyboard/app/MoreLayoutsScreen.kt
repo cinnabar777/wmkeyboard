@@ -71,7 +71,6 @@ import com.wasimaster.wmkeyboard.core.layout.resolveLayoutKeyman
 import com.wasimaster.wmkeyboard.core.layout.resolveLayoutName
 import com.wasimaster.wmkeyboard.core.layout.KeymanBinding
 import com.wasimaster.wmkeyboard.core.script.LanguageRegistry
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.SettingsRepository
 
 /**
@@ -109,7 +108,7 @@ internal fun MoreLayoutsScreen(
     anim: AnimatedVisibilityScope,
     langId: String,
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onBack: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -119,24 +118,28 @@ internal fun MoreLayoutsScreen(
 
     // Resolved once per custom-layout list: every card needs its name and
     // binding, and the search reads the names on every letter typed.
-    val layouts = remember(lang, settings.customLayouts) {
+    val customLayouts = settings.watch { it.customLayouts }
+    val layouts = remember(lang, customLayouts) {
         // From the layout index, not the grids: a language can have a dozen
         // converted layouts of a megabyte each, and this list only names them.
         lang.layoutIds.mapNotNull { id ->
-            resolveLayoutKeyman(settings.customLayouts, id)
-                ?.let { MoreLayout(id, resolveLayoutName(settings.customLayouts, id), it) }
+            resolveLayoutKeyman(customLayouts, id)
+                ?.let { MoreLayout(id, resolveLayoutName(customLayouts, id), it) }
         }
     }
     var query by rememberSaveable { mutableStateOf("") }
     var onlyOn by rememberSaveable { mutableStateOf(false) }
-    val onCount = layouts.count { it.id in settings.enabledLayoutIds }
+    // Which cards are listed under "On", and its count, depend on which layouts
+    // are on; each card reads its own.
+    val onIds = settings.watch { s -> layouts.filter { it.id in s.enabledLayoutIds }.mapTo(HashSet()) { it.id } }
+    val onCount = onIds.size
     // The filter follows the setting: switching the last layout off under
     // "On" would otherwise leave the reader in an empty view they did not ask
     // for, with the chip that caused it still lit.
     val showingOn = onlyOn && onCount > 0
     val needle = query.trim().lowercase()
     val shown = layouts.filter { layout ->
-        (!showingOn || layout.id in settings.enabledLayoutIds) &&
+        (!showingOn || layout.id in onIds) &&
             (needle.isEmpty() || layout.searchKey.contains(needle))
     }
     val searchable = layouts.size > SEARCH_FROM
@@ -196,17 +199,18 @@ internal fun MoreLayoutsScreen(
                 item(key = "intro", span = { GridItemSpan(maxLineSpan) }) { MoreLayoutsIntro() }
             }
             items(shown, key = { it.id }) { layout ->
+                val on = settings.watch { layout.id in it.enabledLayoutIds }
                 LayoutCard(
                     name = layout.name,
                     layoutId = layout.id,
-                    on = layout.id in settings.enabledLayoutIds,
+                    on = on,
                     settings = settings,
                     onToggle = { enable -> toggle(layout.id, enable) },
                     footer = {
                         RulesLine(
                             binding = layout.binding,
                             layoutName = layout.name,
-                            layoutOn = layout.id in settings.enabledLayoutIds,
+                            layoutOn = on,
                             refreshKey = rulesRefresh,
                         )
                     },

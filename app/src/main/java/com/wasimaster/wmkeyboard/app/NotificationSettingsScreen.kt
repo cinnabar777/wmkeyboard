@@ -18,7 +18,6 @@ import com.wasimaster.wmkeyboard.R
 import com.wasimaster.wmkeyboard.core.notify.NotificationKind
 import com.wasimaster.wmkeyboard.core.notify.NotificationSwitches
 import com.wasimaster.wmkeyboard.core.notify.WmNotifications
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.ime.KeyboardControls
 
 /**
@@ -47,8 +46,10 @@ import com.wasimaster.wmkeyboard.ime.KeyboardControls
  * and write through, exactly as the update rows on the About screen do.
  */
 @Composable
-internal fun NotificationSettingsScreen(settings: KeyboardSettings) {
+internal fun NotificationSettingsScreen(settings: LiveSettings) {
     val context = LocalContext.current
+    // Decides whether the KDE Connect row is a row of the group.
+    val kdeOn = settings.watch { it.kdeConnect.enabled }
 
     // Re-read on every resume: the permission and the app-wide switch both
     // live in system settings, and this screen is the obvious place to come
@@ -119,7 +120,7 @@ internal fun NotificationSettingsScreen(settings: KeyboardSettings) {
         }
         // Only while the KDE Connect tool is on: before that nothing can ever
         // post one, and a switch for an event that cannot happen is noise.
-        item(visible = settings.kdeConnect.enabled) {
+        item(visible = kdeOn) {
             ToggleSetting(
                 R.string.kdeconnect_notify_title,
                 stringResource(R.string.kdeconnect_notify_subtitle),
@@ -146,7 +147,7 @@ internal fun NotificationSettingsScreen(settings: KeyboardSettings) {
                 // wait for the keyboard to next read its settings.
                 if (on) {
                     if (!WmNotifications.canPost(context)) ask()
-                    KeyboardControls.post(context, settings.persistentKeyboard)
+                    KeyboardControls.post(context, settings.value.persistentKeyboard)
                 } else {
                     KeyboardControls.clear(context)
                 }

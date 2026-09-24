@@ -102,14 +102,15 @@ import kotlinx.coroutines.withContext
 @Composable
 internal fun OnboardingScreen(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onFinished: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     // A replay is any entry after the wizard was finished once. Frozen at
     // entry: the finish write must not re-brand the run mid-exit.
-    val replay = remember { settings.onboardingDone }
+    val onboardingDone = settings.watch { it.onboardingDone }
+    val replay = remember { onboardingDone }
     // Read once at entry too, so the welcome page doesn't pop in and out of
     // the page list while a replaying user flips the keyboard elsewhere.
     val replayImeReady = remember { imeEnabled(context) && imeSelected(context) }
@@ -118,18 +119,17 @@ internal fun OnboardingScreen(
     // first. Stable across a recreate, which that page's own choice causes.
     val deviceSignals = remember { DeviceLocales.read(context) }
     val askAppLanguage = remember { shouldAskAppLanguage(deviceSignals, AppLanguage.available) }
-    val pages = remember(
-        settings.enabledTools, settings.onboarding, settings.enabledLanguages.size,
-    ) {
+    val pages = settings.watch {
         onboardingPages(
-            persona = settings.onboarding,
-            enabledTools = settings.enabledTools,
-            enabledLanguageCount = settings.enabledLanguages.size,
+            persona = it.onboarding,
+            enabledTools = it.enabledTools,
+            enabledLanguageCount = it.enabledLanguages.size,
             replay = replay,
             imeReady = replayImeReady,
             askAppLanguage = askAppLanguage,
         )
     }
+    val reduceMotion = settings.watch { it.reduceMotion }
     // Which catalog emoji this phone's own font can't draw; null while the
     // scan is still running, and never started when the emoji page is out.
     val missingEmoji = rememberUnrenderableEmoji(OnboardingPage.EMOJI in pages)
@@ -158,7 +158,7 @@ internal fun OnboardingScreen(
     val accent = OnboardingPageAccents.getValue(page)
     val playServices = remember { PlayServices.available }
     val finish: () -> Unit = {
-        finishOnboarding(scope, repository, settings, replay, playServices)
+        finishOnboarding(scope, repository, settings.value, replay, playServices)
         onFinished()
     }
     // Which way the turn went is read off the transition itself
@@ -186,7 +186,7 @@ internal fun OnboardingScreen(
                     pages = pages,
                     index = index,
                     accent = accent,
-                    reduceMotion = settings.reduceMotion,
+                    reduceMotion = reduceMotion,
                     modifier = Modifier.weight(1f),
                     onGoTo = goTo,
                 )
@@ -205,7 +205,7 @@ internal fun OnboardingScreen(
                 targetState = index,
                 transitionSpec = {
                     val forward = targetState >= initialState
-                    if (settings.reduceMotion) {
+                    if (reduceMotion) {
                         slideInHorizontally(tween(0)) togetherWith
                             slideOutHorizontally(tween(0))
                     } else {
@@ -596,9 +596,9 @@ private fun heroSubtitle(page: OnboardingPage): String = when (page) {
  * before the app was ever opened keeps what it was given.
  */
 @Composable
-private fun SeedLanguagesFromDevice(repository: SettingsRepository, settings: KeyboardSettings) {
+private fun SeedLanguagesFromDevice(repository: SettingsRepository, settings: LiveSettings) {
     val context = LocalContext.current
-    val untouched = settings.enabledLayoutIds == BuiltInLayouts.defaultEnabledIds
+    val untouched = settings.watch { it.enabledLayoutIds == BuiltInLayouts.defaultEnabledIds }
     // rememberSaveable, so a rotation mid-wizard can't re-seed over a language
     // the user has since removed on the page below.
     var seeded by rememberSaveable { mutableStateOf(false) }

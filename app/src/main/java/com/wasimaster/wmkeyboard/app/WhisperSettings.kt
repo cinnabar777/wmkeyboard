@@ -54,7 +54,6 @@ import androidx.compose.ui.unit.dp
 import com.wasimaster.wmkeyboard.R
 import com.wasimaster.wmkeyboard.common.R as CommonR
 import com.wasimaster.wmkeyboard.core.script.LanguageDef
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.MeteredDecision
 import com.wasimaster.wmkeyboard.core.settings.SettingsDefaults
 import com.wasimaster.wmkeyboard.core.modules.ModuleState
@@ -93,7 +92,7 @@ private const val WHISPER_METERED_CONFIRM_BYTES = 150_000_000L
  * (gated by the caller).
  */
 @Composable
-internal fun WhisperModelManager(repository: SettingsRepository, settings: KeyboardSettings) {
+internal fun WhisperModelManager(repository: SettingsRepository, settings: LiveSettings) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val filesDir = context.filesDir
@@ -115,7 +114,7 @@ internal fun WhisperModelManager(repository: SettingsRepository, settings: Keybo
         orphanBytes = withContext(Dispatchers.IO) { WhisperStore.orphanBytes(filesDir) }
         // The only model on disk needs no choosing: adopt it as the fallback —
         // covers both "first download just finished" and "the fallback was deleted".
-        if (WhisperStore.selectedModel(filesDir, settings.whisper.modelId) == null) {
+        if (WhisperStore.selectedModel(filesDir, settings.value.whisper.modelId) == null) {
             WhisperStore.soleDownloadedId(filesDir)?.let { repository.setWhisperModelId(it) }
         }
     }
@@ -133,7 +132,7 @@ internal fun WhisperModelManager(repository: SettingsRepository, settings: Keybo
 
     fun requestDownload(model: WhisperModel) {
         val metered = isMeteredNow(context)
-        when (downloadDecisionNow(context, settings)) {
+        when (downloadDecisionNow(context, settings.value)) {
             MeteredDecision.BLOCKED -> meteredBlocked = true
             MeteredDecision.ASK -> meteredPending = model
             // Data saving is not holding this one, so the old size threshold
@@ -148,9 +147,16 @@ internal fun WhisperModelManager(repository: SettingsRepository, settings: Keybo
         }
     }
 
+    // The routing below answers for every language at once, and the routing
+    // card, the model rows and the dialog all read that one answer, so what it
+    // is worked out from is read here.
+    val enabledLanguages = settings.watch { it.enabledLanguages }
+    val fallbackId = settings.watch { it.whisper.modelId }
+    val pinnedByLang = settings.watch { it.whisper.modelByLang }
+
     // Which Whisper languages the user's enabled layouts actually amount to.
-    val enabledCodes = remember(settings.enabledLanguages) {
-        settings.enabledLanguages.mapNotNullTo(LinkedHashSet()) {
+    val enabledCodes = remember(enabledLanguages) {
+        enabledLanguages.mapNotNullTo(LinkedHashSet()) {
             WhisperLanguages.codeForLanguage(it.id)
         }
     }
@@ -160,9 +166,9 @@ internal fun WhisperModelManager(repository: SettingsRepository, settings: Keybo
     }
     // Language id → the model that will actually transcribe it, so both the
     // routing card and the "used for" chips read from one answer.
-    val routing = settings.enabledLanguages.associate { language ->
+    val routing = enabledLanguages.associate { language ->
         language.id to WhisperStore.pickForLanguage(
-            onDisk, language.id, settings.whisper.modelId, settings.whisper.modelByLang,
+            onDisk, language.id, fallbackId, pinnedByLang,
         )
     }
     val suggestions = WhisperCatalog.recommendedFor(enabledCodes) - onDisk.toSet()
@@ -174,10 +180,10 @@ internal fun WhisperModelManager(repository: SettingsRepository, settings: Keybo
             status = states[model.id] ?: DownloadStatus.NotDownloaded,
             downloadBusy = WhisperDownloadManager.isBusy,
             enabledCodes = enabledCodes,
-            usedFor = settings.enabledLanguages
+            usedFor = enabledLanguages
                 .filter { routing[it.id]?.id == model.id }
                 .map { it.englishName },
-            isFallback = model.id == settings.whisper.modelId,
+            isFallback = model.id == fallbackId,
             expanded = expanded[model.id] == true,
             onToggleExpand = { expanded[model.id] = expanded[model.id] != true },
             onDownload = { requestDownload(model) },
@@ -186,7 +192,7 @@ internal fun WhisperModelManager(repository: SettingsRepository, settings: Keybo
                 WhisperDownloadManager.delete(filesDir, model)
                 scope.launch {
                     repository.clearWhisperModelAssignments(model.id)
-                    if (settings.whisper.modelId == model.id) repository.setWhisperModelId("")
+                    if (settings.value.whisper.modelId == model.id) repository.setWhisperModelId("")
                 }
             },
         )
@@ -201,7 +207,7 @@ internal fun WhisperModelManager(repository: SettingsRepository, settings: Keybo
         WhisperModuleBanner(
             module = module,
             onDownload = {
-                when (downloadDecisionNow(context, settings)) {
+                when (downloadDecisionNow(context, settings.value)) {
                     MeteredDecision.ALLOWED -> WhisperEngine.requestModule()
                     MeteredDecision.ASK -> moduleMetered = true
                     MeteredDecision.BLOCKED -> meteredBlocked = true
@@ -221,9 +227,9 @@ internal fun WhisperModelManager(repository: SettingsRepository, settings: Keybo
     }
 
     WhisperRoutingCard(
-        languages = settings.enabledLanguages,
+        languages = enabledLanguages,
         routing = routing,
-        pinned = settings.whisper.modelByLang,
+        pinned = pinnedByLang,
         anyDownloaded = onDisk.isNotEmpty(),
         onEdit = { routingFor = it },
     )
@@ -252,7 +258,7 @@ internal fun WhisperModelManager(repository: SettingsRepository, settings: Keybo
                     subtitle = stringResource(R.string.models_whisper_fallback_subtitle),
                     options = listOf<Pair<String, String>>("" to autoLabel) +
                         onDisk.map { it.id to it.displayName },
-                    selected = settings.whisper.modelId,
+                    selected = settings.watch { it.whisper.modelId },
                     info = stringResource(R.string.models_whisper_fallback_info),
                     default = SettingsDefaults.whisper.modelId,
                     // "" is the automatic pick; everything after it is a model
@@ -309,7 +315,7 @@ internal fun WhisperModelManager(repository: SettingsRepository, settings: Keybo
             language = language,
             downloaded = onDisk,
             resolved = routing[language.id],
-            pinnedId = settings.whisper.modelByLang[language.id],
+            pinnedId = pinnedByLang[language.id],
             onPick = { id ->
                 scope.launch { repository.setWhisperModelForLanguage(language.id, id) }
                 routingFor = null

@@ -52,7 +52,7 @@ import com.wasimaster.wmkeyboard.common.R as CommonR
 @Composable
 internal fun VocabReviewScreen(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onNavigate: (String) -> Unit,
 ) {
     val context = LocalContext.current
@@ -70,10 +70,11 @@ internal fun VocabReviewScreen(
         CaptionText(stringResource(CommonR.string.common_loading), Modifier.padding(16.dp))
         return
     }
+    val dailyGoal = settings.watch { it.vocabulary.dailyGoal }
     if (queue == null) {
         val day = if (ahead) today + 1 else today
         val due = progress.dueWords(day, index.lemmas)
-        val fresh = progress.unseen(index.lemmas).shuffled(java.util.Random(today.toLong())).take(settings.vocabulary.dailyGoal)
+        val fresh = progress.unseen(index.lemmas).shuffled(java.util.Random(today.toLong())).take(dailyGoal)
         queue = (due + fresh).mapNotNull { index.lookup(it) }
         position = 0
     }
@@ -109,10 +110,11 @@ internal fun VocabReviewScreen(
         SettingsGroup(stringResource(if (position > 0) R.string.vocab_review_done_title else R.string.vocab_review_empty_title)) {
             if (position > 0) {
                 item {
+                    val scheduler = settings.watch { it.vocabulary.scheduler }
                     Row(Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
                         for (grade in ReviewGrade.entries) {
                             val n = counts[grade.ordinal]
-                            if (grade == ReviewGrade.HARD && settings.vocabulary.scheduler == VocabScheduler.LEITNER && n == 0) continue
+                            if (grade == ReviewGrade.HARD && scheduler == VocabScheduler.LEITNER && n == 0) continue
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(n.toString(), style = MaterialTheme.typography.titleLarge)
                                 Text(
@@ -140,7 +142,7 @@ internal fun VocabReviewScreen(
     }
 
     val rotation by animateFloatAsState(if (flipped) 180f else 0f, label = "flip")
-    val reduce = settings.reduceMotion
+    val reduce = settings.watch { it.reduceMotion }
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -160,10 +162,10 @@ internal fun VocabReviewScreen(
             if (!flipped) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(current.word, style = MaterialTheme.typography.displaySmall, textAlign = TextAlign.Center)
-                    current.ipaFor(settings.vocabulary.accent)?.let {
+                    current.ipaFor(settings.watch { it.vocabulary.accent })?.let {
                         Text(it, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
-                    IconButton(onClick = { speakVocabWord(context, settings, speaker, current) }) {
+                    IconButton(onClick = { speakVocabWord(context, settings.value, speaker, current) }) {
                         Icon(Icons.AutoMirrored.Outlined.VolumeUp, contentDescription = stringResource(R.string.vocab_word_speak_desc))
                     }
                     Text(
@@ -192,7 +194,8 @@ internal fun VocabReviewScreen(
         }
     }
 
-    val grades = if (settings.vocabulary.scheduler == VocabScheduler.SM2) {
+    val scheduler = settings.watch { it.vocabulary.scheduler }
+    val grades = if (scheduler == VocabScheduler.SM2) {
         listOf(ReviewGrade.AGAIN, ReviewGrade.HARD, ReviewGrade.GOOD, ReviewGrade.EASY)
     } else {
         listOf(ReviewGrade.AGAIN, ReviewGrade.GOOD, ReviewGrade.EASY)
@@ -204,11 +207,11 @@ internal fun VocabReviewScreen(
             }
         } else {
             for (grade in grades) {
-                val preview = progress.preview(current.word, grade, today, settings.vocabulary.scheduler)
+                val preview = progress.preview(current.word, grade, today, scheduler)
                 val days = (preview.dueDay - today).coerceAtLeast(0)
                 val label = stringResource(grade.labelRes()) + "\n" + pluralStringResource(R.plurals.vocab_review_days, days, days)
                 val onGrade = {
-                    grade(progress, current, grade, today, settings) {
+                    grade(progress, current, grade, today, settings.value) {
                         counts[grade.ordinal]++
                         position++
                         flipped = false

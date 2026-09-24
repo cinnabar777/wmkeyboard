@@ -56,7 +56,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.wasimaster.wmkeyboard.R
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.theme.flattenedThemes
 import com.wasimaster.wmkeyboard.core.tools.PhotoColor
 import com.wasimaster.wmkeyboard.core.tools.PhotoFailure
@@ -83,7 +82,7 @@ import com.wasimaster.wmkeyboard.common.R as CommonR
 @Composable
 fun PhotoBrowseScreen(
     anim: AnimatedVisibilityScope? = null,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     themeId: String,
     onOpenPhoto: (PhotoItem) -> Unit,
     onNavigate: (String) -> Unit,
@@ -93,8 +92,7 @@ fun PhotoBrowseScreen(
     val keyboard = LocalSoftwareKeyboardController.current
     val gridState = rememberLazyGridState()
 
-    val sources = remember(settings.photoBackground) { ToolApiKeys.photoSources(settings) }
-    val keys = remember(settings.photoBackground) { ToolApiKeys.photoKeys(settings) }
+    val sources = settings.watch { ToolApiKeys.photoSources(it) }
 
     // Held across a trip into a photo's page, so coming back does not re-search
     // and spend a request the user already paid for.
@@ -118,7 +116,7 @@ fun PhotoBrowseScreen(
         page = nextPage,
         orientation = if (wide) PhotoOrientation.LANDSCAPE else PhotoOrientation.ANY,
         color = colour,
-        safe = settings.photoBackground.safeSearch,
+        safe = settings.value.photoBackground.safeSearch,
         topicId = topic.orEmpty(),
     )
 
@@ -133,7 +131,7 @@ fun PhotoBrowseScreen(
         noticeOnly = null
         endReached = false
         page = 1
-        val result = PhotoSearchClient.mixedPage(activeSources(), queryFor(1), keys)
+        val result = PhotoSearchClient.mixedPage(activeSources(), queryFor(1), ToolApiKeys.photoKeys(settings.value))
         items = result.items
         endReached = !result.hasMore
         if (result.failedOutright) {
@@ -155,7 +153,7 @@ fun PhotoBrowseScreen(
         scope.launch {
             loadingMore = true
             val next = page + 1
-            val result = PhotoSearchClient.mixedPage(activeSources(), queryFor(next), keys)
+            val result = PhotoSearchClient.mixedPage(activeSources(), queryFor(next), ToolApiKeys.photoKeys(settings.value))
             if (result.items.isNotEmpty()) {
                 // Deduped by key: two services can repeat an id, and a repeated
                 // key in a lazy grid is a crash rather than a duplicate tile.
@@ -173,8 +171,10 @@ fun PhotoBrowseScreen(
         title = stringResource(R.string.photo_find_title),
         onBack = { onNavigate(BACK_ROUTE) },
         route = PHOTO_BROWSE_ROUTE,
-        subtitle = themeId.takeIf { it.isNotBlank() }?.let { id ->
-            settings.customThemes.flattenedThemes().find { it.id == id }?.name
+        subtitle = settings.watch { s ->
+            themeId.takeIf { it.isNotBlank() }?.let { id ->
+                s.customThemes.flattenedThemes().find { it.id == id }?.name
+            }
         },
         subtitleInBar = true,
     ) { padding ->

@@ -2,10 +2,8 @@ package com.wasimaster.wmkeyboard.app
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
 import com.wasimaster.wmkeyboard.R
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.activeThemeSpec
 import com.wasimaster.wmkeyboard.core.theme.ThemeSpec
 import com.wasimaster.wmkeyboard.core.theme.themeName
@@ -28,9 +26,9 @@ import com.wasimaster.wmkeyboard.core.theme.themeName
  * follows the system rather than the clock.
  */
 @Composable
-internal fun themePinSubtitle(settings: KeyboardSettings, pinned: (ThemeSpec) -> Any?): String? {
+internal fun themePinSubtitle(settings: LiveSettings, pinned: (ThemeSpec) -> Any?): String? {
     val dark = isSystemInDarkTheme()
-    val spec = remember(settings, dark) { settings.activeThemeSpec(dark) } ?: return null
+    val spec = settings.watch { it.activeThemeSpec(dark) } ?: return null
     if (pinned(spec) == null) return null
     return stringResource(R.string.appearance_theme_pinned_subtitle, themeName(spec))
 }

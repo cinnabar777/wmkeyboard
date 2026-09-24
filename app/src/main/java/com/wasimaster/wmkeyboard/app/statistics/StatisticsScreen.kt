@@ -37,6 +37,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
 import com.wasimaster.wmkeyboard.R
 import com.wasimaster.wmkeyboard.app.CaptionText
+import com.wasimaster.wmkeyboard.app.LiveSettings
 import com.wasimaster.wmkeyboard.app.ChoiceControl
 import com.wasimaster.wmkeyboard.app.SectionHeader
 import com.wasimaster.wmkeyboard.app.SettingsGroup
@@ -77,7 +78,7 @@ import com.wasimaster.wmkeyboard.app.ChoiceDetail
  * its in-memory copy instead of writing the old numbers back.
  */
 @Composable
-internal fun StatisticsScreen(repository: SettingsRepository, settings: KeyboardSettings) {
+internal fun StatisticsScreen(repository: SettingsRepository, settings: LiveSettings) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var confirmDelete by remember { mutableStateOf(false) }
@@ -86,7 +87,7 @@ internal fun StatisticsScreen(repository: SettingsRepository, settings: Keyboard
     var totals by remember { mutableStateOf<TypingStats.Totals?>(null) }
     // statsVersion is the reload signal both here and in the keyboard: the
     // delete below bumps it, and this effect re-reads the emptied file.
-    LaunchedEffect(settings.statsVersion) {
+    LaunchedEffect(settings.watch { it.statsVersion }) {
         val read = withContext(Dispatchers.IO) {
             val stats = TypingStats(File(context.filesDir, TypingStats.FILE_PATH))
             stats.dayEntries() to stats.lifetime()
@@ -95,16 +96,17 @@ internal fun StatisticsScreen(repository: SettingsRepository, settings: Keyboard
         totals = read.second
     }
 
+    val statsOn = settings.watch { it.typingStatsEnabled }
     ToggleSetting(
         R.string.statistics_toggle_title,
         stringResource(R.string.statistics_toggle_subtitle),
-        settings.typingStatsEnabled,
+        statsOn,
         info = stringResource(R.string.statistics_toggle_info),
         default = SettingsDefaults.typingStatsEnabled,
     ) { scope.launch { repository.setTypingStatsEnabled(it) } }
 
     val lifetime = totals
-    if (!settings.typingStatsEnabled) {
+    if (!statsOn) {
         CaptionText(stringResource(R.string.statistics_off_body))
     } else if (lifetime != null && lifetime.chars == 0L) {
         CaptionText(stringResource(R.string.statistics_empty_body))

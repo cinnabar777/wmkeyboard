@@ -297,12 +297,13 @@ internal fun discoverFeatures(
  * screen — which is exactly the thing nobody scrolls to the bottom of.
  */
 @Composable
-internal fun DiscoverPage(repository: SettingsRepository, settings: KeyboardSettings) {
+internal fun DiscoverPage(repository: SettingsRepository, settings: LiveSettings) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val features = remember(settings.onboarding) {
+    val persona = settings.watch { it.onboarding }
+    val features = remember(persona) {
         discoverFeatures(
-            persona = settings.onboarding,
+            persona = persona,
             whisperAvailable = BuildConfig.ENABLE_WHISPER,
             isToolSupported = ::isSupportedTool,
         )
@@ -347,7 +348,7 @@ private const val OTP_FEATURE_ID = "otp"
 @Composable
 private fun DiscoverCard(
     feature: DiscoverFeature,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     modifier: Modifier = Modifier,
     onToggle: (Boolean) -> Unit,
 ) {
@@ -361,7 +362,7 @@ private fun DiscoverCard(
         DiscoverPreview(
             id = feature.id,
             accent = feature.accent,
-            animate = !settings.reduceMotion,
+            animate = !settings.watch { it.reduceMotion },
         )
         Spacer(Modifier.height(8.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -399,7 +400,7 @@ private fun DiscoverCard(
         if (feature.kind == DiscoverKind.TOGGLE) {
             Spacer(Modifier.height(4.dp))
             Switch(
-                checked = feature.isOn(settings),
+                checked = settings.watch { feature.isOn(it) },
                 onCheckedChange = onToggle,
                 modifier = Modifier.align(Alignment.End),
             )

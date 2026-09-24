@@ -41,7 +41,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.wasimaster.wmkeyboard.R
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.ToolbarTool
 import com.wasimaster.wmkeyboard.core.ui.toolAccentColor
 import com.wasimaster.wmkeyboard.core.vocab.VocabIndexCache
@@ -114,12 +113,12 @@ internal fun vocabSlotNow(interval: VocabWordInterval): Int =
  * Owns the gap above itself so that a day with nothing to say costs no space.
  */
 @Composable
-internal fun VocabDailyCard(settings: KeyboardSettings, onNavigate: (String) -> Unit) {
+internal fun VocabDailyCard(settings: LiveSettings, onNavigate: (String) -> Unit) {
     val context = LocalContext.current
-    val interval = settings.vocabulary.wordInterval
+    val interval = settings.watch { it.vocabulary.wordInterval }
     val today = remember(interval) { vocabSlotNow(interval) }
     val cached = remember(today) { VocabDailyCache.peek(today) }
-    val codes = remember(settings) { vocabTranslationCodes(settings) }
+    val codes = settings.watch { vocabTranslationCodes(it) }
     val pick by produceState<DailyPick?>(initialValue = cached, key1 = today) {
         value = withContext(Dispatchers.IO) {
             val filesDir = context.filesDir
@@ -128,7 +127,7 @@ internal fun VocabDailyCard(settings: KeyboardSettings, onNavigate: (String) -> 
                 ?: drawWordOfTheDay(filesDir, today, codes).also { VocabDailyCache.put(today, token, it) }
         }
     }
-    val accent = toolAccentColor(ToolbarTool.VOCABULARY, settings.toolColorOverrides)
+    val accent = toolAccentColor(ToolbarTool.VOCABULARY, settings.watch { it.toolColorOverrides })
     // Nothing is known yet on the very first opening of the process: hold the
     // card's space with a placeholder rather than letting the rows below jump
     // down when the packs finish loading.
@@ -175,13 +174,13 @@ internal fun VocabDailyCard(settings: KeyboardSettings, onNavigate: (String) -> 
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(Modifier.weight(1f))
-                IconButton(onClick = { speakVocabWord(context, settings, speaker, word) }) {
+                IconButton(onClick = { speakVocabWord(context, settings.value, speaker, word) }) {
                     Icon(Icons.AutoMirrored.Outlined.VolumeUp, contentDescription = stringResource(R.string.vocab_word_speak_desc))
                 }
                 VocabDismissButton(putAway)
             }
             Text(word.word, style = MaterialTheme.typography.headlineSmall)
-            val line = listOfNotNull(word.pos.firstOrNull(), word.ipaFor(settings.vocabulary.accent), word.respelling).joinToString("  ·  ")
+            val line = listOfNotNull(word.pos.firstOrNull(), word.ipaFor(settings.watch { it.vocabulary.accent }), word.respelling).joinToString("  ·  ")
             if (line.isNotEmpty()) Text(
                 line,
                 style = MaterialTheme.typography.bodySmall,

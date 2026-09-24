@@ -43,7 +43,6 @@ import com.wasimaster.wmkeyboard.core.icons.IconSlots
 import com.wasimaster.wmkeyboard.ime.ui.IconDefaults
 import com.wasimaster.wmkeyboard.ime.ui.SlotIcon
 import com.wasimaster.wmkeyboard.core.settings.CursorTools
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.isSupportedTool
 import com.wasimaster.wmkeyboard.core.settings.ToolBlocker
 import com.wasimaster.wmkeyboard.core.settings.toolBlocker
@@ -290,7 +289,7 @@ private fun rememberToolSearchIndex(): Map<ToolbarTool, String> {
 @Composable
 internal fun ToolsSettings(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onOpenTool: (ToolbarTool) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -332,14 +331,7 @@ internal fun ToolsSettings(
 
     // Resolved once per screen, not once per row: this list is ~60 rows long,
     // and every one of them recomposes whenever any tool is switched on or off.
-    val paints = remember(
-        settings.coloredToolIcons,
-        settings.toolIconGradients,
-        settings.toolColorOverrides,
-        settings.toolColorEndOverrides,
-    ) {
-        ToolbarTool.entries.associateWith { toolAccentPaint(it, settings) }
-    }
+    val paints = settings.watch { s -> ToolbarTool.entries.associateWith { toolAccentPaint(it, s) } }
     val optionsDesc = stringResource(R.string.tools_has_options_desc)
 
     if (searching) {
@@ -353,8 +345,8 @@ internal fun ToolsSettings(
                     ToolRow(
                         tool = tool,
                         paint = paints[tool],
-                        blocker = toolBlocker(tool, settings),
-                        enabled = tool in settings.enabledTools,
+                        blocker = settings.watch { toolBlocker(tool, it) },
+                        enabled = settings.watch { tool in it.enabledTools },
                         optionsDesc = optionsDesc,
                         onToggle = { on -> scope.launch { repository.setToolEnabled(tool, on) } },
                         onOpen = { onOpenTool(tool) },
@@ -365,29 +357,31 @@ internal fun ToolsSettings(
         return
     }
 
+    val colored = settings.watch { it.coloredToolIcons }
     ToggleSetting(
         title = R.string.tools_colored_icons_title,
         subtitle = stringResource(R.string.tools_colored_icons_subtitle),
-        checked = settings.coloredToolIcons,
+        checked = colored,
         onChange = { scope.launch { repository.setColoredToolIcons(it) } },
         default = SettingsDefaults.coloredToolIcons,
     )
     // Nested under the switch above rather than shown greyed out: with the
     // colours off there is nothing for a gradient to be made of, so the row
     // would be asking about something that cannot happen.
-    if (settings.coloredToolIcons) {
+    if (colored) {
         ToggleSetting(
             title = R.string.tools_gradient_icons_title,
             subtitle = stringResource(R.string.tools_gradient_icons_subtitle),
-            checked = settings.toolIconGradients,
+            checked = settings.watch { it.toolIconGradients },
             info = stringResource(R.string.tools_gradient_icons_info),
             onChange = { scope.launch { repository.setToolIconGradients(it) } },
             default = SettingsDefaults.toolIconGradients,
         )
     }
-    val hasColourOverrides = settings.toolColorOverrides.isNotEmpty() ||
-        settings.toolColorEndOverrides.isNotEmpty()
-    if (settings.coloredToolIcons && hasColourOverrides) {
+    val hasColourOverrides = settings.watch {
+        it.toolColorOverrides.isNotEmpty() || it.toolColorEndOverrides.isNotEmpty()
+    }
+    if (colored && hasColourOverrides) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.End,
@@ -431,8 +425,8 @@ internal fun ToolsSettings(
                         // apologises. The row still opens, because what
                         // unblocks it (a key field, a link to Key layouts) is
                         // inside.
-                        blocker = toolBlocker(tool, settings),
-                        enabled = tool in settings.enabledTools,
+                        blocker = settings.watch { toolBlocker(tool, it) },
+                        enabled = settings.watch { tool in it.enabledTools },
                         optionsDesc = optionsDesc,
                         onToggle = { on -> scope.launch { repository.setToolEnabled(tool, on) } },
                         onOpen = { onOpenTool(tool) },

@@ -161,9 +161,9 @@ internal fun vocabWordRoute(packId: String, word: String): String = "vocab/word/
  * the disk.
  */
 @Composable
-internal fun rememberVocabIndex(revision: Int, settings: KeyboardSettings): VocabIndex? {
+internal fun rememberVocabIndex(revision: Int, settings: LiveSettings): VocabIndex? {
     val context = LocalContext.current
-    val codes = remember(settings) { vocabTranslationCodes(settings) }
+    val codes = settings.watch { vocabTranslationCodes(it) }
     val state = produceState(initialValue = VocabIndexCache.peek(), key1 = revision, key2 = codes) {
         value = VocabIndexCache.get(context.filesDir, codes)
     }
@@ -280,13 +280,17 @@ private fun VocabCardField.titleRes(): Int = when (this) {
 @Composable
 internal fun VocabularyToolSettings(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onNavigate: (String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val v = settings.vocabulary
     val d = SettingsDefaults.vocabulary
+    // What decides which rows the groups hold; each row reads its own value.
+    val nudges = settings.watch { it.vocabulary.nudges }
+    val ttsTunable = settings.watch { it.vocabulary.audioSource != VocabAudioSource.WIKTIONARY }
+    val showsWord = settings.watch { it.vocabulary.wordOfTheDayCard || it.vocabulary.wordOfTheDayChip }
+    val wordChip = settings.watch { it.vocabulary.wordOfTheDayChip }
     val numberFormat = stringResource(R.string.values_number)
     val speedFormat = stringResource(R.string.tooldetail_vocab_speed_value)
     val summary by produceState<Pair<Int, Int>?>(initialValue = null) {
@@ -299,8 +303,8 @@ internal fun VocabularyToolSettings(
 
     // A language added to the keyboard, or picked below, gets its translations
     // fetched here rather than on the next visit to the packs screen.
-    LaunchedEffect(settings.vocabulary.translationLangs, settings.enabledLanguages) {
-        autoFetchVocabTranslations(context, settings)
+    LaunchedEffect(settings.watch { it.vocabulary.translationLangs }, settings.watch { it.enabledLanguages }) {
+        autoFetchVocabTranslations(context, settings.value)
     }
 
     SettingsGroup(stringResource(R.string.tooldetail_vocab_manage_group)) {
@@ -350,21 +354,21 @@ internal fun VocabularyToolSettings(
             ToggleSetting(
                 R.string.tooldetail_vocab_nudges_title,
                 stringResource(R.string.tooldetail_vocab_nudges_subtitle),
-                v.nudges,
+                nudges,
                 default = d.nudges,
             ) {
                 scope.launch { repository.setVocabNudges(it) }
             }
         }
-        item(visible = v.nudges) {
+        item(visible = nudges) {
             ToggleSetting(
                 R.string.tooldetail_vocab_nudge_self_title,
                 stringResource(R.string.tooldetail_vocab_nudge_self_subtitle),
-                v.nudgeOnVocabWord,
+                settings.watch { it.vocabulary.nudgeOnVocabWord },
                 default = d.nudgeOnVocabWord,
             ) { scope.launch { repository.setVocabNudgeOnVocabWord(it) } }
         }
-        item(visible = v.nudges) {
+        item(visible = nudges) {
             ChoiceSetting(
                 R.string.tooldetail_vocab_tap_title,
                 subtitle = stringResource(R.string.tooldetail_vocab_tap_subtitle),
@@ -372,11 +376,11 @@ internal fun VocabularyToolSettings(
                     VocabChipTap.OPEN to stringResource(R.string.tooldetail_vocab_tap_open_label),
                     VocabChipTap.REPLACE to stringResource(R.string.tooldetail_vocab_tap_replace_label),
                 ),
-                selected = v.chipTapAction,
+                selected = settings.watch { it.vocabulary.chipTapAction },
                 default = d.chipTapAction,
             ) { scope.launch { repository.setVocabChipTapAction(it) } }
         }
-        item(visible = v.nudges) {
+        item(visible = nudges) {
             ChoiceSetting(
                 R.string.tooldetail_vocab_scope_title,
                 options = listOf(
@@ -384,11 +388,11 @@ internal fun VocabularyToolSettings(
                     VocabNudgeScope.ALL to stringResource(R.string.tooldetail_vocab_scope_all_label),
                     VocabNudgeScope.LEARNT_ONLY to stringResource(R.string.tooldetail_vocab_scope_learnt_label),
                 ),
-                selected = v.nudgeScope,
+                selected = settings.watch { it.vocabulary.nudgeScope },
                 default = d.nudgeScope,
             ) { scope.launch { repository.setVocabNudgeScope(it) } }
         }
-        item(visible = v.nudges) {
+        item(visible = nudges) {
             ChoiceSetting(
                 R.string.tooldetail_vocab_level_title,
                 subtitle = stringResource(R.string.tooldetail_vocab_level_subtitle),
@@ -397,11 +401,11 @@ internal fun VocabularyToolSettings(
                     VocabNudgeLevel.MEDIUM to stringResource(R.string.tooldetail_vocab_level_medium_label),
                     VocabNudgeLevel.HIGH to stringResource(R.string.tooldetail_vocab_level_high_label),
                 ),
-                selected = v.nudgeLevel,
+                selected = settings.watch { it.vocabulary.nudgeLevel },
                 default = d.nudgeLevel,
             ) { scope.launch { repository.setVocabNudgeLevel(it) } }
         }
-        item(visible = v.nudges) {
+        item(visible = nudges) {
             ChoiceSetting(
                 R.string.tooldetail_vocab_cooldown_title,
                 options = listOf(
@@ -409,18 +413,18 @@ internal fun VocabularyToolSettings(
                     VocabCooldown.ONCE_PER_FIELD to stringResource(R.string.tooldetail_vocab_cooldown_field_label),
                     VocabCooldown.ONCE_PER_DAY to stringResource(R.string.tooldetail_vocab_cooldown_day_label),
                 ),
-                selected = v.cooldown,
+                selected = settings.watch { it.vocabulary.cooldown },
                 default = d.cooldown,
             ) { scope.launch { repository.setVocabCooldown(it) } }
         }
     }
 
-    val resolved = remember(v.cardFields) { VocabCardFields.resolve(v.cardFields) }
     SettingsGroup(
         stringResource(R.string.tooldetail_vocab_card_group),
         foldKey = "vocab_card",
         info = stringResource(R.string.tooldetail_vocab_card_info),
         foldSummary = {
+            val resolved = settings.watch { VocabCardFields.resolve(it.vocabulary.cardFields) }
             // joinToString's lambda is not composable, so resolve the names first.
             val names = VocabCardField.entries
                 .filter { resolved[it] == FieldVisibility.KEYBOARD }
@@ -428,7 +432,7 @@ internal fun VocabularyToolSettings(
             names.joinToString(", ")
         },
         action = {
-            if (v.cardFields.isNotEmpty()) {
+            if (settings.watch { it.vocabulary.cardFields.isNotEmpty() }) {
                 TextButton(onClick = { scope.launch { repository.setVocabCardFields("") } }) {
                     Text(stringResource(CommonR.string.common_reset))
                 }
@@ -444,9 +448,13 @@ internal fun VocabularyToolSettings(
                         FieldVisibility.SETTINGS to stringResource(R.string.tooldetail_vocab_visibility_settings_label),
                         FieldVisibility.KEYBOARD to stringResource(R.string.tooldetail_vocab_visibility_keyboard_label),
                     ),
-                    selected = resolved[field] ?: field.defaultVisibility,
+                    selected = settings.watch { VocabCardFields.resolve(it.vocabulary.cardFields)[field] }
+                        ?: field.defaultVisibility,
                     default = field.defaultVisibility,
-                ) { scope.launch { repository.setVocabCardFields(VocabCardFields.with(v.cardFields, field, it)) } }
+                ) {
+                    val fields = settings.value.vocabulary.cardFields
+                    scope.launch { repository.setVocabCardFields(VocabCardFields.with(fields, field, it)) }
+                }
             }
         }
     }
@@ -466,14 +474,14 @@ internal fun VocabularyToolSettings(
                     VocabRelatedTap.INSERT to stringResource(R.string.tooldetail_vocab_related_insert_label),
                     VocabRelatedTap.DICTIONARY_LOOKUP to stringResource(R.string.tooldetail_vocab_related_lookup_label),
                 ),
-                selected = v.relatedTap,
+                selected = settings.watch { it.vocabulary.relatedTap },
                 default = d.relatedTap,
             ) { scope.launch { repository.setVocabRelatedTap(it) } }
         }
         item {
             var picking by remember { mutableStateOf(false) }
-            val chosen = v.translationLangList
-            val automatic = remember(settings) { vocabTranslationCodes(settings) }
+            val chosen = settings.watch { it.vocabulary.translationLangList }
+            val automatic = settings.watch { vocabTranslationCodes(it) }
             NavRow(
                 R.string.tooldetail_vocab_translations_title,
                 subtitle = when {
@@ -504,7 +512,7 @@ internal fun VocabularyToolSettings(
                     VocabAudioSource.WIKTIONARY to stringResource(R.string.tooldetail_vocab_audio_wiktionary_label),
                     VocabAudioSource.TTS to stringResource(R.string.tooldetail_vocab_audio_tts_label),
                 ),
-                selected = v.audioSource,
+                selected = settings.watch { it.vocabulary.audioSource },
                 default = d.audioSource,
             ) { scope.launch { repository.setVocabAudioSource(it) } }
         }
@@ -516,23 +524,23 @@ internal fun VocabularyToolSettings(
                     VocabAccent.US to stringResource(R.string.tooldetail_vocab_accent_us_label),
                     VocabAccent.UK to stringResource(R.string.tooldetail_vocab_accent_uk_label),
                 ),
-                selected = v.accent,
+                selected = settings.watch { it.vocabulary.accent },
                 default = d.accent,
             ) { scope.launch { repository.setVocabAccent(it) } }
         }
-        item(visible = v.audioSource != VocabAudioSource.WIKTIONARY) {
+        item(visible = ttsTunable) {
             SliderSetting(
                 R.string.tooldetail_vocab_tts_rate_title,
-                value = v.ttsRate,
+                value = settings.watch { it.vocabulary.ttsRate },
                 range = VocabularySettings.MIN_TTS..VocabularySettings.MAX_TTS,
                 display = { speedFormat.format(it) },
                 default = d.ttsRate,
             ) { scope.launch { repository.setVocabTtsRate(it) } }
         }
-        item(visible = v.audioSource != VocabAudioSource.WIKTIONARY) {
+        item(visible = ttsTunable) {
             SliderSetting(
                 R.string.tooldetail_vocab_tts_pitch_title,
-                value = v.ttsPitch,
+                value = settings.watch { it.vocabulary.ttsPitch },
                 range = VocabularySettings.MIN_TTS..VocabularySettings.MAX_TTS,
                 display = { speedFormat.format(it) },
                 default = d.ttsPitch,
@@ -543,7 +551,7 @@ internal fun VocabularyToolSettings(
             WmRow(
                 title = stringResource(R.string.tooldetail_vocab_audio_test_title),
                 icon = SettingsRowIcons[R.string.tooldetail_vocab_audio_test_title],
-                onClick = { speakVocabWord(context, settings, speaker, VocabWord("serendipity")) },
+                onClick = { speakVocabWord(context, settings.value, speaker, VocabWord("serendipity")) },
             )
         }
     }
@@ -559,7 +567,7 @@ internal fun VocabularyToolSettings(
                     VocabScheduler.LEITNER to stringResource(R.string.tooldetail_vocab_scheduler_leitner_label),
                     VocabScheduler.SM2 to stringResource(R.string.tooldetail_vocab_scheduler_sm2_label),
                 ),
-                selected = v.scheduler,
+                selected = settings.watch { it.vocabulary.scheduler },
                 default = d.scheduler,
                 detail = { option ->
                     ChoiceDetail(
@@ -578,7 +586,7 @@ internal fun VocabularyToolSettings(
             SliderSetting(
                 R.string.tooldetail_vocab_goal_title,
                 subtitle = stringResource(R.string.tooldetail_vocab_goal_subtitle),
-                value = v.dailyGoal.toFloat(),
+                value = settings.watch { it.vocabulary.dailyGoal }.toFloat(),
                 range = VocabularySettings.MIN_DAILY_GOAL.toFloat()..VocabularySettings.MAX_DAILY_GOAL.toFloat(),
                 display = { numberFormat.format(it.roundToInt()) },
                 default = d.dailyGoal.toFloat(),
@@ -591,7 +599,7 @@ internal fun VocabularyToolSettings(
             ToggleSetting(
                 R.string.tooldetail_vocab_wotd_card_title,
                 stringResource(R.string.tooldetail_vocab_wotd_card_subtitle),
-                v.wordOfTheDayCard,
+                settings.watch { it.vocabulary.wordOfTheDayCard },
                 default = d.wordOfTheDayCard,
             ) {
                 scope.launch { repository.setVocabWordOfTheDayCard(it) }
@@ -601,7 +609,7 @@ internal fun VocabularyToolSettings(
             ToggleSetting(
                 R.string.tooldetail_vocab_wotd_chip_title,
                 stringResource(R.string.tooldetail_vocab_wotd_chip_subtitle),
-                v.wordOfTheDayChip,
+                wordChip,
                 default = d.wordOfTheDayChip,
             ) {
                 scope.launch { repository.setVocabWordOfTheDayChip(it) }
@@ -609,7 +617,7 @@ internal fun VocabularyToolSettings(
         }
         // How often the word turns over only matters where a word is shown:
         // the card on the settings home, the chip on the keyboard, or both.
-        if (v.wordOfTheDayCard || v.wordOfTheDayChip) item {
+        if (showsWord) item {
             ChoiceSetting(
                 R.string.tooldetail_vocab_wotd_interval_title,
                 subtitle = stringResource(R.string.tooldetail_vocab_wotd_interval_subtitle),
@@ -620,15 +628,15 @@ internal fun VocabularyToolSettings(
                     VocabWordInterval.EVERY_3_HOURS to stringResource(R.string.tooldetail_vocab_wotd_interval_3h_label),
                     VocabWordInterval.HOURLY to stringResource(R.string.tooldetail_vocab_wotd_interval_hour_label),
                 ),
-                selected = v.wordInterval,
+                selected = settings.watch { it.vocabulary.wordInterval },
                 default = d.wordInterval,
             ) { scope.launch { repository.setVocabWordInterval(it) } }
         }
-        item(visible = v.wordOfTheDayChip) {
+        item(visible = wordChip) {
             SliderSetting(
                 R.string.tooldetail_vocab_wotd_chip_times_title,
                 subtitle = stringResource(R.string.tooldetail_vocab_wotd_chip_times_subtitle),
-                value = v.chipTimesPerWord.toFloat(),
+                value = settings.watch { it.vocabulary.chipTimesPerWord }.toFloat(),
                 range = VocabularySettings.MIN_CHIP_TIMES.toFloat()..VocabularySettings.MAX_CHIP_TIMES.toFloat(),
                 display = { numberFormat.format(it.roundToInt()) },
                 default = d.chipTimesPerWord.toFloat(),
@@ -639,19 +647,21 @@ internal fun VocabularyToolSettings(
 
 @Composable
 private fun TranslationLanguagesDialog(
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onDismiss: () -> Unit,
     onChange: (List<String>) -> Unit,
 ) {
     // Sidecar codes only: a keyboard language maps to its code (bn_rom reads
     // bn) so Bangla is one entry, not two, and a pick always matches a file.
+    val keyboardCodes = settings.watch { s -> s.enabledLanguages.flatMap { VocabLanguages.codesFor(it.id) } }
     val offered = remember {
-        (VocabCatalog.entries.flatMap { it.translationCodes } + settings.enabledLanguages.flatMap { VocabLanguages.codesFor(it.id) })
+        (VocabCatalog.entries.flatMap { it.translationCodes } + keyboardCodes)
             .filter { it != "en" }
             .distinct()
             .sortedBy { languageNameFor(it) }
     }
-    var chosen by remember { mutableStateOf(settings.vocabulary.translationLangList.flatMap { VocabLanguages.codesFor(it) }.distinct()) }
+    val initialChosen = settings.watch { s -> s.vocabulary.translationLangList.flatMap { VocabLanguages.codesFor(it) }.distinct() }
+    var chosen by remember { mutableStateOf(initialChosen) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.tooldetail_vocab_translations_title)) },
@@ -717,7 +727,7 @@ private suspend fun readInstalledPacks(context: Context): List<InstalledVocabPac
 @Composable
 internal fun VocabPacksScreen(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onNavigate: (String) -> Unit,
 ) {
     val context = LocalContext.current
@@ -731,12 +741,11 @@ internal fun VocabPacksScreen(
     val states by VocabDownloadManager.states.collectAsState()
     val translationStates by VocabDownloadManager.translationStates.collectAsState()
     val downloadDecision = rememberDownloadDecision(settings)
-    val wantedCodes = remember(settings) { vocabTranslationCodes(settings) }
 
     LaunchedEffect(revision) {
         VocabDownloadManager.refresh(context.filesDir)
         installed = readInstalledPacks(context)
-        autoFetchVocabTranslations(context, settings)
+        autoFetchVocabTranslations(context, settings.value)
     }
     LaunchedEffect(Unit) {
         VocabDownloadManager.completions.collect { revision++ }
@@ -826,7 +835,7 @@ internal fun VocabPacksScreen(
                             TranslationChips(
                                 entry = catalog,
                                 states = translationStates,
-                                wanted = wantedCodes,
+                                wanted = settings.watch { vocabTranslationCodes(it) },
                                 onFetch = { code -> gated { VocabDownloadManager.startTranslations(
                                     context.filesDir,
                                     catalog,
@@ -858,7 +867,7 @@ internal fun VocabPacksScreen(
                         status = states[entry.id],
                         onDownload = {
                             gated {
-                                VocabDownloadManager.start(context.filesDir, entry, wantedCodes)
+                                VocabDownloadManager.start(context.filesDir, entry, vocabTranslationCodes(settings.value))
                                 notifyDownload(
                                     entry.id,
                                     entry.name,
@@ -1041,7 +1050,7 @@ private data class UserVocabList(val file: File, val pack: VocabPack, val learnt
 @Composable
 internal fun VocabListsScreen(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onNavigate: (String) -> Unit,
 ) {
     val context = LocalContext.current
@@ -1049,7 +1058,6 @@ internal fun VocabListsScreen(
     var revision by remember { mutableIntStateOf(0) }
     var lists by remember { mutableStateOf<List<UserVocabList>>(emptyList()) }
     var newName by remember { mutableStateOf<String?>(null) }
-    val langId = remember(settings) { settings.enabledLanguages.firstOrNull { it.id == "en" }?.id ?: "en" }
 
     LaunchedEffect(revision) {
         lists = withContext(Dispatchers.IO) {
@@ -1110,6 +1118,7 @@ internal fun VocabListsScreen(
                 TextButton(
                     enabled = draft.isNotBlank(),
                     onClick = {
+                        val langId = settings.value.enabledLanguages.firstOrNull { it.id == "en" }?.id ?: "en"
                         val meta = VocabPacks.newUserPack(draft, langId)
                         newName = null
                         scope.launch {
@@ -1140,7 +1149,7 @@ internal fun VocabListsScreen(
 internal fun VocabListEditorScreen(
     packId: String,
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onNavigate: (String) -> Unit,
 ) {
     val context = LocalContext.current
@@ -1345,7 +1354,7 @@ internal fun VocabListEditorScreen(
 private fun AddVocabWordSheet(
     initial: VocabWord,
     index: VocabIndex?,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onDismiss: () -> Unit,
     onSave: (VocabWord) -> Unit,
 ) {
@@ -1363,7 +1372,7 @@ private fun AddVocabWordSheet(
     var found by remember { mutableStateOf<VocabWord?>(null) }
     var status by remember { mutableStateOf<String?>(null) }
     var lookingUp by remember { mutableStateOf(false) }
-    val translationCodes = remember(settings) { vocabTranslationCodes(settings) }
+    val translationCodes = settings.watch { vocabTranslationCodes(it) }
     val translationCode = translationCodes.firstOrNull() ?: "bn"
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -1572,7 +1581,7 @@ private fun SheetHeading(text: String) {
 @Composable
 private fun BulkAddDialog(
     index: VocabIndex?,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onDismiss: () -> Unit,
     onAdd: (List<VocabWord>) -> Unit,
 ) {
@@ -1581,7 +1590,7 @@ private fun BulkAddDialog(
     var online by remember { mutableStateOf(false) }
     var progress by remember { mutableStateOf<Pair<Int, Int>?>(null) }
     val words = remember(field.text) { VocabAutofill.parseWordList(field.text) }
-    val translationCodes = remember(settings) { vocabTranslationCodes(settings) }
+    val translationCodes = settings.watch { vocabTranslationCodes(it) }
     AlertDialog(
         onDismissRequest = { if (progress == null) onDismiss() },
         title = { Text(stringResource(R.string.vocab_list_bulk_title)) },
@@ -1655,7 +1664,7 @@ private const val MAX_BULK_ONLINE = 100
 /** Every word of the enabled packs, searchable and filterable, paged for the scrolling screen. */
 @Composable
 internal fun VocabBrowseScreen(
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     packArg: String?,
     onNavigate: (String) -> Unit,
 ) {
@@ -1760,7 +1769,7 @@ private const val PAGE = 60
 internal fun VocabWordScreen(
     packId: String,
     lemma: String,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onNavigate: (String) -> Unit,
 ) {
     val context = LocalContext.current
@@ -1800,7 +1809,7 @@ internal fun VocabWordScreen(
         learnt = state.learnt,
         box = state.box.takeIf { state.seen },
         onRelated = openRelated,
-        onSpeak = { speakVocabWord(context, settings, speaker, word) },
+        onSpeak = { speakVocabWord(context, settings.value, speaker, word) },
         onGetTranslations = { onNavigate(VOCAB_PACKS_ROUTE) },
     )
     lookup?.let { looked ->
@@ -1918,7 +1927,7 @@ internal fun VocabWordScreen(
 @Composable
 private fun VocabLookupSheet(
     word: String,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     index: VocabIndex?,
     onDismiss: () -> Unit,
     onRelated: (String) -> Unit,
@@ -1927,7 +1936,7 @@ private fun VocabLookupSheet(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val speaker = rememberVocabSpeaker()
-    val codes = remember(settings) { vocabTranslationCodes(settings) }
+    val codes = settings.watch { vocabTranslationCodes(it) }
     val result by produceState<VocabAutofill.Result?>(initialValue = null, key1 = word) {
         value = VocabAutofill.resolve(VocabIndex.EMPTY, word, allowOnline = true, translationCodes = codes)
     }
@@ -1953,7 +1962,7 @@ private fun VocabLookupSheet(
                         settings = settings,
                         index = index,
                         onRelated = onRelated,
-                        onSpeak = { speakVocabWord(context, settings, speaker, current.word) },
+                        onSpeak = { speakVocabWord(context, settings.value, speaker, current.word) },
                     )
                     Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.End) {
                         TextButton(
@@ -1994,7 +2003,7 @@ private fun VocabLookupSheet(
 @Composable
 internal fun VocabWordCard(
     word: VocabWord,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     index: VocabIndex?,
     compact: Boolean = false,
     learnt: Boolean = false,
@@ -2005,17 +2014,17 @@ internal fun VocabWordCard(
     /** Where to go when the pack has no translation for the user's languages yet. */
     onGetTranslations: (() -> Unit)? = null,
 ) {
-    val v = settings.vocabulary
-    val fields = remember(v.cardFields) { VocabCardFields.resolve(v.cardFields) }
+    val fields = settings.watch { VocabCardFields.resolve(it.vocabulary.cardFields) }
     val shown: (VocabCardField) -> Boolean = { VocabCardFields.inApp(fields, it) }
-    val enabledIds = remember(settings) { settings.enabledLanguages.map { it.id } }
-    val wantedCodes = remember(settings) { vocabTranslationCodes(settings) }
+    val enabledIds = settings.watch { s -> s.enabledLanguages.map { it.id } }
+    val wantedCodes = settings.watch { vocabTranslationCodes(it) }
+    val accent = settings.watch { it.vocabulary.accent }
 
     Column(
         Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        VocabHero(word, v.accent, index, learnt, box, shown, onSpeak)
+        VocabHero(word, accent, index, learnt, box, shown, onSpeak)
         VocabMeaningSection(if (compact) word.senses.take(2) else word.senses, compact, shown)
         if (compact) return@Column
         VocabRelatedSection(word, index, shown, onRelated)

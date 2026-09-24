@@ -52,6 +52,7 @@ import com.wasimaster.wmkeyboard.app.BannerTone
 import com.wasimaster.wmkeyboard.app.ChoiceDetail
 import com.wasimaster.wmkeyboard.app.ChoiceSetting
 import com.wasimaster.wmkeyboard.app.ExpandableCard
+import com.wasimaster.wmkeyboard.app.LiveSettings
 import com.wasimaster.wmkeyboard.app.NavRow
 import com.wasimaster.wmkeyboard.app.SettingsGroup
 import com.wasimaster.wmkeyboard.app.SliderSetting
@@ -70,7 +71,6 @@ import com.wasimaster.wmkeyboard.core.media.hasNotificationAccess
 import com.wasimaster.wmkeyboard.core.netlog.InternetPermission
 import com.wasimaster.wmkeyboard.core.settings.KdeConnectSettings
 import com.wasimaster.wmkeyboard.core.settings.KdeLinkLifetime
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.SettingsDefaults
 import com.wasimaster.wmkeyboard.core.settings.SettingsRepository
 import com.wasimaster.wmkeyboard.ime.kdeconnect.KdeConnectHub
@@ -91,25 +91,29 @@ object KdeDevices {
 @Composable
 internal fun KdeConnectToolSettings(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onNavigate: (String) -> Unit,
 ) {
-    val kde = settings.kdeConnect
     val defaults = SettingsDefaults.kdeConnect
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val hub by KdeConnectHub.state.collectAsState()
     // The keyboard feeds the hub its settings; this page may be open in a
     // process where the keyboard has not run since the last change.
+    val kde = settings.watch { it.kdeConnect }
     LaunchedEffect(kde) {
         KdeConnectHub.attach(context)
         KdeConnectHub.applySettings(kde)
     }
+    // What decides which rows and groups the page holds; each row reads its own value.
+    val kdeOn = settings.watch { it.kdeConnect.enabled }
+    val remoteTyping = settings.watch { it.kdeConnect.remoteTyping }
+    val exposeMedia = settings.watch { it.kdeConnect.exposeMedia }
     val connected = hub.connected
     val pairedCount = if (hub.running) hub.paired.size else if (KdeConnectHub.hasPairedDevices()) 1 else 0
 
     when {
-        !kde.enabled -> StateBanner(stringResource(R.string.kdeconnect_banner_off))
+        !kdeOn -> StateBanner(stringResource(R.string.kdeconnect_banner_off))
         !DirectBoot.isUserUnlocked(context) -> StateBanner(stringResource(R.string.kdeconnect_banner_locked), tone = BannerTone.WARNING)
         !InternetPermission.granted -> StateBanner(
             stringResource(CommonR.string.common_error_no_internet_permission),
@@ -134,11 +138,11 @@ internal fun KdeConnectToolSettings(
             ToggleSetting(
                 R.string.kdeconnect_enabled_title,
                 stringResource(R.string.kdeconnect_enabled_subtitle),
-                kde.enabled,
+                kdeOn,
                 default = defaults.enabled,
             ) { scope.launch { repository.setKdeEnabled(it) } }
         }
-        item(visible = kde.enabled) {
+        item(visible = kdeOn) {
             NavRow(
                 title = R.string.kdeconnect_devices_title,
                 subtitle = if (pairedCount == 0) {
@@ -148,16 +152,16 @@ internal fun KdeConnectToolSettings(
                 },
             ) { onNavigate(KdeDevices.ROUTE) }
         }
-        item(visible = kde.enabled) {
+        item(visible = kdeOn) {
             TextFieldSetting(
                 label = stringResource(R.string.kdeconnect_name_label),
-                value = kde.deviceName,
+                value = settings.watch { it.kdeConnect.deviceName },
                 hint = stringResource(R.string.kdeconnect_name_hint),
                 default = defaults.deviceName,
             ) { repository.setKdeDeviceName(it) }
         }
     }
-    if (!kde.enabled) return
+    if (!kdeOn) return
 
     SettingsGroup(stringResource(R.string.kdeconnect_group_connection)) {
         item {
@@ -174,7 +178,7 @@ internal fun KdeConnectToolSettings(
                     KdeLinkLifetime.KEYBOARD to stringResource(R.string.kdeconnect_lifetime_keyboard),
                     KdeLinkLifetime.ALWAYS to stringResource(R.string.kdeconnect_lifetime_always),
                 ),
-                selected = kde.lifetime,
+                selected = settings.watch { it.kdeConnect.lifetime },
                 default = defaults.lifetime,
                 detail = { choice -> details[choice]?.let { ChoiceDetail(it) } },
             ) { scope.launch { repository.setKdeLifetime(it) } }
@@ -183,7 +187,7 @@ internal fun KdeConnectToolSettings(
             ToggleSetting(
                 R.string.kdeconnect_auto_connect_title,
                 stringResource(R.string.kdeconnect_auto_connect_subtitle),
-                kde.autoConnect,
+                settings.watch { it.kdeConnect.autoConnect },
                 default = defaults.autoConnect,
             ) { scope.launch { repository.setKdeAutoConnect(it) } }
         }
@@ -194,7 +198,7 @@ internal fun KdeConnectToolSettings(
             ToggleSetting(
                 R.string.kdeconnect_clipboard_receive_title,
                 stringResource(R.string.kdeconnect_clipboard_receive_subtitle),
-                kde.clipboardReceive,
+                settings.watch { it.kdeConnect.clipboardReceive },
                 default = defaults.clipboardReceive,
             ) { scope.launch { repository.setKdeClipboardReceive(it) } }
         }
@@ -202,7 +206,7 @@ internal fun KdeConnectToolSettings(
             ToggleSetting(
                 R.string.kdeconnect_clipboard_send_title,
                 stringResource(R.string.kdeconnect_clipboard_send_subtitle),
-                kde.clipboardSend,
+                settings.watch { it.kdeConnect.clipboardSend },
                 info = stringResource(R.string.kdeconnect_clipboard_send_info),
                 default = defaults.clipboardSend,
             ) { scope.launch { repository.setKdeClipboardSend(it) } }
@@ -214,15 +218,15 @@ internal fun KdeConnectToolSettings(
             ToggleSetting(
                 R.string.kdeconnect_remote_typing_title,
                 stringResource(R.string.kdeconnect_remote_typing_subtitle),
-                kde.remoteTyping,
+                remoteTyping,
                 default = defaults.remoteTyping,
             ) { scope.launch { repository.setKdeRemoteTyping(it) } }
         }
-        item(visible = kde.remoteTyping) {
+        item(visible = remoteTyping) {
             ToggleSetting(
                 R.string.kdeconnect_pipeline_title,
                 stringResource(R.string.kdeconnect_pipeline_subtitle),
-                kde.remoteTypingPipeline,
+                settings.watch { it.kdeConnect.remoteTypingPipeline },
                 info = stringResource(R.string.kdeconnect_pipeline_info),
                 default = defaults.remoteTypingPipeline,
             ) { scope.launch { repository.setKdeRemoteTypingPipeline(it) } }
@@ -234,7 +238,7 @@ internal fun KdeConnectToolSettings(
         item {
             SliderSetting(
                 R.string.kdeconnect_pad_speed_title,
-                value = kde.padSensitivity,
+                value = settings.watch { it.kdeConnect.padSensitivity },
                 range = KdeConnectSettings.PAD_SPEED_RANGE,
                 display = times,
                 default = defaults.padSensitivity,
@@ -244,14 +248,14 @@ internal fun KdeConnectToolSettings(
             ToggleSetting(
                 R.string.kdeconnect_pad_accel_title,
                 stringResource(R.string.kdeconnect_pad_accel_subtitle),
-                kde.padAcceleration,
+                settings.watch { it.kdeConnect.padAcceleration },
                 default = defaults.padAcceleration,
             ) { scope.launch { repository.setKdePadAcceleration(it) } }
         }
         item {
             SliderSetting(
                 R.string.kdeconnect_scroll_speed_title,
-                value = kde.scrollSpeed,
+                value = settings.watch { it.kdeConnect.scrollSpeed },
                 range = KdeConnectSettings.PAD_SPEED_RANGE,
                 display = times,
                 default = defaults.scrollSpeed,
@@ -261,7 +265,7 @@ internal fun KdeConnectToolSettings(
             ToggleSetting(
                 R.string.kdeconnect_natural_scroll_title,
                 stringResource(R.string.kdeconnect_natural_scroll_subtitle),
-                kde.naturalScroll,
+                settings.watch { it.kdeConnect.naturalScroll },
                 default = defaults.naturalScroll,
             ) { scope.launch { repository.setKdeNaturalScroll(it) } }
         }
@@ -269,7 +273,7 @@ internal fun KdeConnectToolSettings(
             ToggleSetting(
                 R.string.kdeconnect_tap_click_title,
                 stringResource(R.string.kdeconnect_tap_click_subtitle),
-                kde.tapToClick,
+                settings.watch { it.kdeConnect.tapToClick },
                 default = defaults.tapToClick,
             ) { scope.launch { repository.setKdeTapToClick(it) } }
         }
@@ -277,7 +281,7 @@ internal fun KdeConnectToolSettings(
             ToggleSetting(
                 R.string.kdeconnect_pad_haptics_title,
                 null,
-                kde.padHaptics,
+                settings.watch { it.kdeConnect.padHaptics },
                 default = defaults.padHaptics,
             ) { scope.launch { repository.setKdePadHaptics(it) } }
         }
@@ -290,7 +294,7 @@ internal fun KdeConnectToolSettings(
             ToggleSetting(
                 R.string.kdeconnect_receive_files_title,
                 stringResource(R.string.kdeconnect_receive_files_subtitle),
-                kde.receiveFiles,
+                settings.watch { it.kdeConnect.receiveFiles },
                 default = defaults.receiveFiles,
             ) { scope.launch { repository.setKdeReceiveFiles(it) } }
         }
@@ -298,7 +302,7 @@ internal fun KdeConnectToolSettings(
             ToggleSetting(
                 R.string.kdeconnect_share_sheet_title,
                 stringResource(R.string.kdeconnect_share_sheet_subtitle),
-                kde.shareSheet,
+                settings.watch { it.kdeConnect.shareSheet },
                 default = defaults.shareSheet,
             ) { scope.launch { repository.setKdeShareSheet(it) } }
         }
@@ -306,7 +310,7 @@ internal fun KdeConnectToolSettings(
             ToggleSetting(
                 R.string.kdeconnect_battery_title,
                 stringResource(R.string.kdeconnect_battery_subtitle),
-                kde.batteryReport,
+                settings.watch { it.kdeConnect.batteryReport },
                 default = defaults.batteryReport,
             ) { scope.launch { repository.setKdeBatteryReport(it) } }
         }
@@ -314,11 +318,11 @@ internal fun KdeConnectToolSettings(
             ToggleSetting(
                 R.string.kdeconnect_media_title,
                 stringResource(R.string.kdeconnect_media_subtitle),
-                kde.exposeMedia,
+                exposeMedia,
                 default = defaults.exposeMedia,
             ) { scope.launch { repository.setKdeExposeMedia(it) } }
         }
-        item(visible = kde.exposeMedia) {
+        item(visible = exposeMedia) {
             NavRow(
                 title = R.string.kdeconnect_media_access_title,
                 subtitle = stringResource(
@@ -341,11 +345,11 @@ internal fun KdeConnectToolSettings(
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-internal fun KdeDevicesScreen(repository: SettingsRepository, settings: KeyboardSettings) {
-    val kde = settings.kdeConnect
+internal fun KdeDevicesScreen(repository: SettingsRepository, settings: LiveSettings) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val hub by KdeConnectHub.state.collectAsState()
+    val kde = settings.watch { it.kdeConnect }
     LaunchedEffect(kde) {
         KdeConnectHub.attach(context)
         KdeConnectHub.applySettings(kde)
@@ -356,7 +360,7 @@ internal fun KdeDevicesScreen(repository: SettingsRepository, settings: Keyboard
         KdeConnectHub.setBrowsing(KdeConnectHub.Reason.SETTINGS, true)
         onDispose { KdeConnectHub.release(KdeConnectHub.Reason.SETTINGS) }
     }
-    if (!kde.enabled) {
+    if (!settings.watch { it.kdeConnect.enabled }) {
         StateBanner(stringResource(R.string.kdeconnect_devices_off), action = stringResource(R.string.kdeconnect_enabled_title)) {
             scope.launch { repository.setKdeEnabled(true) }
         }
@@ -418,6 +422,8 @@ internal fun KdeDevicesScreen(repository: SettingsRepository, settings: Keyboard
         }
     }
 
+    // Decides which rows the group holds; the add row reuses its size.
+    val hosts = settings.watch { it.kdeConnect.hosts.sorted() }
     SettingsGroup(stringResource(R.string.kdeconnect_hosts_title), info = stringResource(R.string.kdeconnect_hosts_info)) {
         item {
             var draft by remember { mutableStateOf("") }
@@ -431,7 +437,7 @@ internal fun KdeDevicesScreen(repository: SettingsRepository, settings: Keyboard
                 )
                 Spacer(Modifier.width(8.dp))
                 Button(
-                    enabled = draft.isNotBlank() && kde.hosts.size < KdeConnectSettings.MAX_HOSTS,
+                    enabled = draft.isNotBlank() && hosts.size < KdeConnectSettings.MAX_HOSTS,
                     onClick = {
                         val host = draft.trim()
                         draft = ""
@@ -441,7 +447,7 @@ internal fun KdeDevicesScreen(repository: SettingsRepository, settings: Keyboard
                 ) { Text(stringResource(R.string.kdeconnect_hosts_add)) }
             }
         }
-        for (host in kde.hosts.sorted()) {
+        for (host in hosts) {
             item {
                 Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(host, Modifier.weight(1f), fontFamily = FontFamily.Monospace)

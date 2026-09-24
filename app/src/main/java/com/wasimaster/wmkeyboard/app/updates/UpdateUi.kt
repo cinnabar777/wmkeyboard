@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.wasimaster.wmkeyboard.BuildConfig
 import com.wasimaster.wmkeyboard.R
+import com.wasimaster.wmkeyboard.app.LiveSettings
 import com.wasimaster.wmkeyboard.app.MeteredBlockedDialog
 import com.wasimaster.wmkeyboard.app.MeteredDownloadDialog
 import com.wasimaster.wmkeyboard.app.NavRow
@@ -45,7 +46,6 @@ import com.wasimaster.wmkeyboard.app.downloadDecisionNow
 import com.wasimaster.wmkeyboard.app.isMeteredNow
 import com.wasimaster.wmkeyboard.app.rememberDisclosedSpecialAccess
 import com.wasimaster.wmkeyboard.common.R as CommonR
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.MeteredDecision
 
 /**
@@ -58,7 +58,7 @@ import com.wasimaster.wmkeyboard.core.settings.MeteredDecision
  * page.
  */
 @Composable
-internal fun UpdateCard(settings: KeyboardSettings, modifier: Modifier = Modifier) {
+internal fun UpdateCard(settings: LiveSettings, modifier: Modifier = Modifier) {
     val updater = LocalAppUpdater.current
     val state by updater.state.collectAsStateWithLifecycle()
     val switching by updater.switchingToAllLanguages.collectAsStateWithLifecycle()
@@ -135,7 +135,7 @@ internal fun UpdatedCard(modifier: Modifier = Modifier) {
  * screen would open on whichever screen the user happened not to be on.
  */
 @Composable
-internal fun UpdatePromptDialog(settings: KeyboardSettings) {
+internal fun UpdatePromptDialog(settings: LiveSettings) {
     val updater = LocalAppUpdater.current
     val state by updater.state.collectAsStateWithLifecycle()
     val notes by updater.releaseNotes.collectAsStateWithLifecycle()
@@ -186,7 +186,7 @@ internal fun UpdatePromptDialog(settings: KeyboardSettings) {
 private fun AvailableCard(
     state: UpdateState.Available,
     updater: AppUpdater,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     modifier: Modifier = Modifier,
 ) {
     val notes by updater.releaseNotes.collectAsStateWithLifecycle()
@@ -355,7 +355,7 @@ private fun UpdateCardFrame(
 internal fun rememberUpdateDownloadRequest(
     updater: AppUpdater,
     sizeBytes: Long,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
 ): () -> Unit {
     val context = LocalContext.current
     var blocked by remember { mutableStateOf(false) }
@@ -376,7 +376,7 @@ internal fun rememberUpdateDownloadRequest(
         if (!updater.ownsDownload) {
             updater.start()
         } else {
-            when (downloadDecisionNow(context, settings)) {
+            when (downloadDecisionNow(context, settings.value)) {
                 MeteredDecision.BLOCKED -> blocked = true
                 MeteredDecision.ASK -> confirming = true
                 MeteredDecision.ALLOWED ->
@@ -432,7 +432,7 @@ private fun UpdateState.Downloading.progressText(): String? {
  * lying about what pressing it does.
  */
 @Composable
-internal fun UpdateSettings(settings: KeyboardSettings) {
+internal fun UpdateSettings(settings: LiveSettings) {
     val updater = LocalAppUpdater.current
     val state by updater.state.collectAsStateWithLifecycle()
     val switching by updater.switchingToAllLanguages.collectAsStateWithLifecycle()
@@ -480,7 +480,7 @@ internal fun UpdateSettings(settings: KeyboardSettings) {
 }
 
 @Composable
-private fun UpdateRow(state: UpdateState, updater: AppUpdater, settings: KeyboardSettings) {
+private fun UpdateRow(state: UpdateState, updater: AppUpdater, settings: LiveSettings) {
     val context = LocalContext.current
     when (state) {
         is UpdateState.Available -> AvailableRow(state, updater, settings, context)
@@ -516,7 +516,7 @@ private fun UpdateRow(state: UpdateState, updater: AppUpdater, settings: Keyboar
 private fun AvailableRow(
     state: UpdateState.Available,
     updater: AppUpdater,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     context: Context,
 ) {
     val download = rememberUpdateDownloadRequest(updater, state.sizeBytes, settings)
@@ -657,7 +657,7 @@ internal fun UpdateFailure?.subtitle(): Int = when (this) {
  * restarts the keyboard. [extraLanguages] is how many the other build adds.
  */
 @Composable
-internal fun AllLanguagesRow(settings: KeyboardSettings, extraLanguages: Int, englishName: String) {
+internal fun AllLanguagesRow(settings: LiveSettings, extraLanguages: Int, englishName: String) {
     val updater = LocalAppUpdater.current
     val uriHandler = LocalUriHandler.current
     if (!updater.canSwitchToAllLanguages) {

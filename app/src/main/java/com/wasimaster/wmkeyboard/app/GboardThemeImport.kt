@@ -47,7 +47,6 @@ import com.wasimaster.wmkeyboard.R
 import com.wasimaster.wmkeyboard.common.R as CommonR
 import com.wasimaster.wmkeyboard.core.netlog.NetLog
 import com.wasimaster.wmkeyboard.core.netlog.NetSource
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.MeteredDecision
 import com.wasimaster.wmkeyboard.core.settings.SettingsRepository
 import com.wasimaster.wmkeyboard.core.theme.GboardConverted
@@ -327,7 +326,7 @@ private sealed interface RboardPackLoad {
 @Composable
 internal fun RboardThemesScreen(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -388,7 +387,7 @@ internal fun RboardThemesScreen(
     }
 
     LaunchedEffect(Unit) {
-        when (downloadDecisionNow(context, settings)) {
+        when (downloadDecisionNow(context, settings.value)) {
             MeteredDecision.ALLOWED -> fetchIndex()
             MeteredDecision.ASK -> askMetered = true
             MeteredDecision.BLOCKED -> blockedMetered = true

@@ -46,9 +46,9 @@ internal fun downloadDecisionNow(
 
 /** [downloadDecisionNow] as a callback, for screens that ask on a button press. */
 @Composable
-internal fun rememberDownloadDecision(settings: KeyboardSettings): () -> MeteredDecision {
+internal fun rememberDownloadDecision(settings: LiveSettings): () -> MeteredDecision {
     val context = LocalContext.current
-    return remember(settings.dataSaver) { { downloadDecisionNow(context, settings) } }
+    return remember(settings) { { downloadDecisionNow(context, settings.value) } }
 }
 
 /**

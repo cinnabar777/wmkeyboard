@@ -55,7 +55,7 @@ import kotlinx.coroutines.delay
  * fold here would be hiding the very prompts it is asking the user to try.
  */
 @Composable
-internal fun TryPage(settings: KeyboardSettings) {
+internal fun TryPage(settings: LiveSettings) {
     val context = LocalContext.current
     // Reachable with the keyboard still not set up (Skip exists, and a replay
     // may start after the keyboard was disabled elsewhere); the field would
@@ -95,7 +95,7 @@ internal fun TryPage(settings: KeyboardSettings) {
     )
     AnimatedVisibility(
         visible = text.text.isNotBlank(),
-        enter = onboardingRevealEnter(settings.reduceMotion),
+        enter = onboardingRevealEnter(settings.watch { it.reduceMotion }),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -116,7 +116,7 @@ internal fun TryPage(settings: KeyboardSettings) {
         }
     }
     OnboardingSectionTitle(stringResource(R.string.onboarding_try_hints_title))
-    for ((icon, textRes) in tryHints(settings)) {
+    for ((icon, textRes) in settings.watch { tryHints(it) }) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier

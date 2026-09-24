@@ -442,22 +442,17 @@ private suspend fun setFancyTextOn(repository: SettingsRepository, settings: Key
 @Composable
 internal fun RowsSettings(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onNavigate: (String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    // Resolved before the group: its builder is a plain lambda, and the drag
-    // list takes a plain (T) -> String.
-    val order = barRowsListed(settings.barOrder, settings)
-    val rowNames = order.associateWith { stringResource(barRowTitle(it, settings)) }
-    val rowStatus = order.associateWith { row -> barRowStatus(row, settings)?.let { stringResource(it) } }
     // Every entry moves, the keys included (issue #83): a row dragged above
     // the Keyboard entry sits over the keys, one dragged below it sits under.
     SettingsGroup(
         stringResource(R.string.rows_row_order_title),
         info = stringResource(R.string.rows_row_order_caption),
         action = {
-            if (settings.barOrder != DefaultBarOrder) {
+            if (settings.watch { it.barOrder != DefaultBarOrder }) {
                 TextButton(onClick = { scope.launch { repository.setBarOrder(DefaultBarOrder) } }) {
                     Text(stringResource(CommonR.string.common_reset))
                 }
@@ -465,12 +460,17 @@ internal fun RowsSettings(
         },
     ) {
         item {
+            // Resolved before the list: the drag list takes a plain
+            // (T) -> String.
+            val order = settings.watch { barRowsListed(it.barOrder, it) }
+            val titles = settings.watch { s -> order.associateWith { barRowTitle(it, s) } }
+            val rowNames = order.associateWith { stringResource(titles.getValue(it)) }
             ReorderableColumn(
                 order,
                 label = { rowNames[it].orEmpty() },
                 onReorder = { next ->
                     scope.launch {
-                        repository.setBarOrder(barOrderMerged(next, settings.barOrder))
+                        repository.setBarOrder(barOrderMerged(next, settings.value.barOrder))
                     }
                 },
                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -478,9 +478,9 @@ internal fun RowsSettings(
             ) { row ->
                 BarRowCard(
                     title = rowNames[row].orEmpty(),
-                    status = rowStatus[row],
+                    status = settings.watch { barRowStatus(row, it) }?.let { stringResource(it) },
                     row = row,
-                    shown = barRowShown(row, settings),
+                    shown = settings.watch { barRowShown(row, it) },
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -491,9 +491,9 @@ internal fun RowsSettings(
             ToggleSetting(
                 R.string.rows_fancy_title,
                 stringResource(R.string.rows_fancy_subtitle),
-                fancyTextOn(settings),
+                settings.watch { fancyTextOn(it) },
                 info = stringResource(R.string.rows_fancy_info),
-            ) { on -> scope.launch { setFancyTextOn(repository, settings, on) } }
+            ) { on -> scope.launch { setFancyTextOn(repository, settings.value, on) } }
         }
     }
     SettingsGroup(stringResource(R.string.rows_dictionary_bar_title)) {
@@ -501,7 +501,7 @@ internal fun RowsSettings(
             ToggleSetting(
                 R.string.rows_dictionary_bar_title,
                 stringResource(R.string.rows_dictionary_bar_subtitle),
-                settings.rows.dictionaryBarEnabled,
+                settings.watch { it.rows.dictionaryBarEnabled },
                 info = stringResource(R.string.rows_dictionary_bar_info),
                 default = SettingsDefaults.rows.dictionaryBarEnabled,
             ) { scope.launch { repository.setDictionaryBarEnabled(it) } }
@@ -514,7 +514,7 @@ internal fun RowsSettings(
             ToggleNavRow(
                 R.string.rows_symbol_row_title,
                 stringResource(R.string.rows_symbol_row_subtitle),
-                settings.symbolRowEnabled,
+                settings.watch { it.symbolRowEnabled },
                 route = "rows/symbol",
                 info = stringResource(R.string.rows_symbol_row_info),
                 default = SettingsDefaults.symbolRowEnabled,
@@ -532,28 +532,32 @@ internal fun RowsSettings(
 @Composable
 internal fun SymbolRowSettings(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onNavigate: (String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
+    // What decides which rows the groups hold; each row reads its own value.
+    val symbolRowOn = settings.watch { it.symbolRowEnabled }
+    val stacked = settings.watch { it.rows.symbolRowLines > 1 }
+    val customSets = settings.watch { it.customSymbolSets }
     SettingsGroup {
         item {
             ToggleSetting(
                 R.string.rows_symbol_row_title,
                 stringResource(R.string.rows_symbol_row_subtitle),
-                settings.symbolRowEnabled,
+                symbolRowOn,
                 info = stringResource(R.string.rows_symbol_row_info),
                 switchKey = landingKey("switch"),
                 default = SettingsDefaults.symbolRowEnabled,
             ) { scope.launch { repository.setSymbolRowEnabled(it) } }
         }
-        if (settings.symbolRowEnabled) {
+        if (symbolRowOn) {
             item {
                 val dpFormat = stringResource(R.string.typing_value_dp)
                 SliderSetting(
                     R.string.rows_symbol_row_height_title,
                     subtitle = stringResource(R.string.rows_symbol_row_height_subtitle),
-                    value = settings.rows.symbolRowHeightDp.toFloat(),
+                    value = settings.watch { it.rows.symbolRowHeightDp }.toFloat(),
                     range = SymbolRowHeightRange.first.toFloat()..SymbolRowHeightRange.last.toFloat(),
                     display = { dpFormat.format(it.roundToInt()) },
                     info = stringResource(R.string.rows_symbol_row_height_info),
@@ -564,7 +568,7 @@ internal fun SymbolRowSettings(
                 StepperSetting(
                     R.string.rows_symbol_row_lines_title,
                     subtitle = stringResource(R.string.rows_symbol_row_lines_subtitle),
-                    value = settings.rows.symbolRowLines,
+                    value = settings.watch { it.rows.symbolRowLines },
                     range = SymbolRowLinesSteps,
                     display = { it.toString() },
                     info = stringResource(R.string.rows_symbol_row_lines_info),
@@ -572,7 +576,7 @@ internal fun SymbolRowSettings(
                 ) { scope.launch { repository.setSymbolRowLines(it) } }
             }
             // Only a stack has a way to scroll; one line scrolls the one way.
-            item(visible = settings.rows.symbolRowLines > 1) {
+            item(visible = stacked) {
                 ChoiceSetting(
                     R.string.rows_symbol_row_scroll_title,
                     subtitle = stringResource(R.string.rows_symbol_row_scroll_subtitle),
@@ -582,7 +586,7 @@ internal fun SymbolRowSettings(
                         SymbolRowScroll.SEPARATE to
                             stringResource(R.string.rows_symbol_row_scroll_separate_label),
                     ),
-                    selected = settings.rows.symbolRowScroll,
+                    selected = settings.watch { it.rows.symbolRowScroll },
                     default = SettingsDefaults.rows.symbolRowScroll,
                     detail = { scroll ->
                         ChoiceDetail(
@@ -603,11 +607,11 @@ internal fun SymbolRowSettings(
         stringResource(R.string.rows_symbol_sets_title),
         info = stringResource(R.string.rows_symbol_sets_caption),
     ) {
-        val allSets = resolveSymbolSets(settings.customSymbolSets)
+        val allSets = resolveSymbolSets(customSets)
         for (set in allSets) {
             item {
-                val enabled = set.id in settings.symbolRowSetIds
-                val edited = settings.customSymbolSets.any { it.id == set.id }
+                val enabled = settings.watch { set.id in it.symbolRowSetIds }
+                val edited = settings.watch { s -> s.customSymbolSets.any { it.id == set.id } }
                 val builtIn = BuiltInSymbolSets.byId(set.id) != null
                 // A shipped set the user has not renamed draws its translated
                 // name; anything the user named draws that name as typed.
@@ -630,10 +634,11 @@ internal fun SymbolRowSettings(
                         Checkbox(
                             checked = enabled,
                             onCheckedChange = { on ->
+                                val setIds = settings.value.symbolRowSetIds
                                 val next = if (on) {
-                                    settings.symbolRowSetIds + set.id
+                                    setIds + set.id
                                 } else {
-                                    settings.symbolRowSetIds - set.id
+                                    setIds - set.id
                                 }
                                 // At least one set stays enabled — an empty row
                                 // would have nothing to show.
@@ -677,12 +682,12 @@ internal fun SymbolRowSettings(
 @Composable
 internal fun SymbolSetEditor(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     setId: String,
     onDone: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    val override = settings.customSymbolSets.firstOrNull { it.id == setId }
+    val override = settings.watch { s -> s.customSymbolSets.firstOrNull { it.id == setId } }
     val builtIn = BuiltInSymbolSets.byId(setId)
     val existing = override ?: builtIn
     var name by remember(setId) { mutableStateOf(existing?.name.orEmpty()) }
@@ -787,8 +792,9 @@ internal fun SymbolSetEditor(
                         ),
                     )
                     // A new set should show up in the row right away.
-                    if (setId !in settings.symbolRowSetIds) {
-                        repository.setSymbolRowSetIds(settings.symbolRowSetIds + setId)
+                    val setIds = settings.value.symbolRowSetIds
+                    if (setId !in setIds) {
+                        repository.setSymbolRowSetIds(setIds + setId)
                     }
                 }
                 onDone()
@@ -906,8 +912,8 @@ internal fun modeEditTitle(settings: KeyboardSettings, modeId: String): String? 
  * The list row draws the same one, so the two ends of the flight match.
  */
 @Composable
-internal fun modeEditIcon(settings: KeyboardSettings, modeId: String): (@Composable () -> Unit)? {
-    val mode = settings.keyboardModes.find { it.id == modeId } ?: return null
+internal fun modeEditIcon(settings: LiveSettings, modeId: String): (@Composable () -> Unit)? {
+    val mode = settings.watch { s -> s.keyboardModes.find { it.id == modeId } } ?: return null
     return { Icon(ModeIcons.icon(mode.icon), contentDescription = null) }
 }
 
@@ -1317,10 +1323,13 @@ private fun ToolChips(
 @Composable
 internal fun ModesSettings(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onNavigate: (String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
+    // What decides which rows the groups hold; each row reads its own value.
+    val modesOn = settings.watch { it.modesEnabled }
+    val modeIds = settings.watch { s -> s.keyboardModes.map { it.id } }
     val deleteModeDesc = stringResource(R.string.modes_delete_action)
     // A mode is a screenful of bindings and overrides that took real effort to
     // set up, and the delete button sits on the row you tap to open it. Both
@@ -1331,7 +1340,7 @@ internal fun ModesSettings(
             ToggleSetting(
                 R.string.modes_enabled_title,
                 stringResource(R.string.modes_enabled_subtitle),
-                settings.modesEnabled,
+                modesOn,
                 info = stringResource(R.string.modes_intro_body) + "\n\n" +
                     stringResource(R.string.modes_enabled_info),
                 default = SettingsDefaults.modesEnabled,
@@ -1341,14 +1350,14 @@ internal fun ModesSettings(
     // The rest of the screen is what modes do, so it is only worth drawing
     // while they are on. The list itself stays: switching the feature off
     // keeps every mode, and hiding them would read as having deleted them.
-    if (!settings.modesEnabled) {
+    if (!modesOn) {
         StateBanner(
             stringResource(R.string.modes_disabled_body),
             action = stringResource(CommonR.string.common_enable),
         ) { scope.launch { repository.setModesEnabled(true) } }
     }
     SettingsGroup {
-        if (!settings.modesEnabled) return@SettingsGroup
+        if (!modesOn) return@SettingsGroup
         item {
             ChoiceSetting(
                 R.string.modes_manual_duration_title,
@@ -1359,7 +1368,7 @@ internal fun ModesSettings(
                     ManualModeDuration.UNTIL_CHANGED to
                         stringResource(R.string.modes_manual_duration_changed_label),
                 ),
-                selected = settings.rows.manualModeDuration,
+                selected = settings.watch { it.rows.manualModeDuration },
                 info = stringResource(R.string.modes_manual_duration_info),
                 default = SettingsDefaults.rows.manualModeDuration,
                 detail = { duration ->
@@ -1377,8 +1386,10 @@ internal fun ModesSettings(
         }
     }
     SettingsGroup(stringResource(R.string.modes_group_title)) {
-        for (mode in settings.keyboardModes) {
+        for (modeId in modeIds) {
             item {
+                val mode = settings.watch { s -> s.keyboardModes.firstOrNull { it.id == modeId } }
+                    ?: return@item
                 // The switch is the mode's own on/off (#152): off, it stays in
                 // the list with everything it holds, and the keyboard simply
                 // never sees it. Deleting used to be the only way to silence
@@ -1430,12 +1441,12 @@ internal fun ModesSettings(
         onNavigate(modeEditRoute("mode_custom_${System.currentTimeMillis()}"))
     }
     SettingsGroup(stringResource(R.string.modes_rearrange_group_title)) {
-        if (!settings.modesEnabled) return@SettingsGroup
+        if (!modesOn) return@SettingsGroup
         item {
             ToggleSetting(
                 R.string.modes_drag_edits_title,
                 stringResource(R.string.modes_drag_edits_subtitle),
-                settings.modeToolOrderEdits,
+                settings.watch { it.modeToolOrderEdits },
                 info = stringResource(R.string.modes_drag_edits_info) + "\n\n" +
                     stringResource(R.string.modes_tool_order_body),
                 default = SettingsDefaults.modeToolOrderEdits,
@@ -1466,7 +1477,7 @@ internal fun ModesSettings(
 @Composable
 internal fun ModeEditor(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     modeId: String,
     onDeleted: () -> Unit = {},
 ) {
@@ -1475,8 +1486,12 @@ internal fun ModeEditor(
     // which is no place for stringResource().
     val newModeName = stringResource(R.string.modes_new_default_name)
     val unnamedModeName = stringResource(R.string.modes_unnamed_name)
-    val mode = settings.keyboardModes.firstOrNull { it.id == modeId }
-        ?: KeyboardMode(modeId, newModeName)
+    // The mode as stored, or a fresh one for an id nothing has saved yet. Rows
+    // read their own field of it with `settings.watch { modeIn(it).x }`, and a
+    // write starts from [current], the mode as it is at the moment of the write.
+    fun modeIn(s: KeyboardSettings): KeyboardMode =
+        s.keyboardModes.firstOrNull { it.id == modeId } ?: KeyboardMode(modeId, newModeName)
+    fun current(): KeyboardMode = modeIn(settings.value)
     // A brand-new mode is only persisted on its first edit — backing out of
     // an untouched editor leaves nothing behind.
     val save: (KeyboardMode) -> Unit = { scope.launch { repository.upsertKeyboardMode(it) } }
@@ -1493,44 +1508,55 @@ internal fun ModeEditor(
             ToggleSetting(
                 R.string.modes_use_title,
                 stringResource(R.string.modes_use_subtitle),
-                mode.enabled,
+                settings.watch { modeIn(it).enabled },
                 info = stringResource(R.string.modes_use_info),
-            ) { save(mode.copy(enabled = it)) }
+            ) { save(current().copy(enabled = it)) }
         }
         item {
             TextFieldSetting(
                 label = stringResource(R.string.modes_name_label),
-                value = mode.name,
+                value = settings.watch { modeIn(it).name },
                 hint = stringResource(R.string.modes_name_hint),
             ) {
                 repository.upsertKeyboardMode(
-                    mode.copy(name = it.trim().ifEmpty { unnamedModeName }),
+                    current().copy(name = it.trim().ifEmpty { unnamedModeName }),
                 )
             }
         }
         item {
             var pickerOpen by remember { mutableStateOf(false) }
+            val icon = settings.watch { modeIn(it).icon }
             WmRow(
                 title = stringResource(R.string.modes_icon_title),
                 subtitle = stringResource(R.string.modes_icon_subtitle),
                 leading = {
-                    Icon(ModeIcons.icon(mode.icon), contentDescription = null)
+                    Icon(ModeIcons.icon(icon), contentDescription = null)
                 },
                 onClick = { pickerOpen = true },
             )
             if (pickerOpen) {
                 ModeIconPickerDialog(
-                    selected = mode.icon,
+                    selected = icon,
                     onPick = { id ->
                         pickerOpen = false
-                        save(mode.copy(icon = id))
+                        save(current().copy(icon = id))
                     },
                     onDismiss = { pickerOpen = false },
                 )
             }
         }
     }
-    val themeOverrideNote = stringResource(R.string.modes_theme_override_body).takeIf { mode.themeId != null }
+    // What decides which rows the groups hold and what their "?" says; each
+    // row reads its own field of the mode.
+    val hasThemeOverride = settings.watch { modeIn(it).themeId != null }
+    val pinned = settings.watch { modeIn(it).toolbarTools }
+    val order = settings.watch { modeIn(it).toolboxOrder }
+    val symbolRowPossible = settings.watch { modeIn(it).symbolRowEnabled != false }
+    val modeSets = settings.watch { s -> modeIn(s).let { m -> m.symbolSetIds.takeIf { m.symbolRowEnabled != false } } }
+    val hints = settings.watch { modeIn(it).hints }
+    val apps = settings.watch { modeIn(it).apps }
+    val hasFieldKinds = settings.watch { modeIn(it).fieldKinds.isNotEmpty() }
+    val themeOverrideNote = stringResource(R.string.modes_theme_override_body).takeIf { hasThemeOverride }
     SettingsGroup(
         stringResource(R.string.modes_changes_group_title),
         info = listOfNotNull(
@@ -1549,9 +1575,9 @@ internal fun ModeEditor(
                     EmojiBarMode.BUTTON to stringResource(R.string.modes_emoji_row_button_label),
                     EmojiBarMode.ALWAYS to stringResource(R.string.modes_emoji_row_row_label),
                 ),
-                selected = mode.emojiBarMode,
+                selected = settings.watch { modeIn(it).emojiBarMode },
                 detail = { barMode -> ChoiceDetail(stringResource(modeEmojiRowDescRes(barMode))) },
-            ) { save(mode.copy(emojiBarMode = it)) }
+            ) { save(current().copy(emojiBarMode = it)) }
         }
         item {
             ChoiceSetting(
@@ -1561,9 +1587,9 @@ internal fun ModeEditor(
                     true to stringResource(CommonR.string.common_on),
                     false to stringResource(CommonR.string.common_off),
                 ),
-                selected = mode.symbolRowEnabled,
+                selected = settings.watch { modeIn(it).symbolRowEnabled },
                 detail = inheritDetail(),
-            ) { save(mode.copy(symbolRowEnabled = it)) }
+            ) { save(current().copy(symbolRowEnabled = it)) }
         }
         // Typing behaviour. A mode dressed the keyboard but never changed what
         // it did to the text, so Coding mode still corrected identifiers into
@@ -1576,9 +1602,9 @@ internal fun ModeEditor(
                 title = R.string.modes_autocorrect_title,
                 subtitle = stringResource(R.string.modes_active_subtitle),
                 options = listOf(null to inherit, true to on, false to off),
-                selected = mode.autocorrect,
+                selected = settings.watch { modeIn(it).autocorrect },
                 detail = inheritDetail(),
-            ) { save(mode.copy(autocorrect = it)) }
+            ) { save(current().copy(autocorrect = it)) }
         }
         item {
             val inherit = stringResource(R.string.modes_inherit_label)
@@ -1587,9 +1613,9 @@ internal fun ModeEditor(
             ChoiceSetting(
                 title = R.string.modes_autocapitalize_title,
                 options = listOf(null to inherit, true to on, false to off),
-                selected = mode.autoCapitalize,
+                selected = settings.watch { modeIn(it).autoCapitalize },
                 detail = inheritDetail(),
-            ) { save(mode.copy(autoCapitalize = it)) }
+            ) { save(current().copy(autoCapitalize = it)) }
         }
         item {
             val inherit = stringResource(R.string.modes_inherit_label)
@@ -1598,9 +1624,9 @@ internal fun ModeEditor(
             ChoiceSetting(
                 title = R.string.modes_suggestions_title,
                 options = listOf(null to inherit, true to on, false to off),
-                selected = mode.suggestions,
+                selected = settings.watch { modeIn(it).suggestions },
                 detail = inheritDetail(),
-            ) { save(mode.copy(suggestions = it)) }
+            ) { save(current().copy(suggestions = it)) }
         }
         // The spaces nobody pressed for, as one question: a field either wants
         // them or it does not, and which of the three put the space there is
@@ -1614,38 +1640,41 @@ internal fun ModeEditor(
                 subtitle = stringResource(R.string.modes_autospace_subtitle),
                 info = stringResource(R.string.modes_autospace_info),
                 options = listOf(null to inherit, true to on, false to off),
-                selected = mode.autoSpace,
+                selected = settings.watch { modeIn(it).autoSpace },
                 detail = inheritDetail(),
-            ) { save(mode.copy(autoSpace = it)) }
+            ) { save(current().copy(autoSpace = it)) }
         }
         // Only the layouts the user actually has switched on: a mode naming one
         // they have since removed would pin the keyboard to something that
         // cannot be drawn, which applyMode also guards against at read time.
         item {
+            val enabledIds = settings.watch { it.enabledLayoutIds }
+            val customLayouts = settings.watch { it.customLayouts }
             val layoutOptions = listOf(
                 null to stringResource(R.string.modes_inherit_label),
-            ) + settings.enabledLayoutIds.map { id ->
-                id to resolveLayout(settings.customLayouts, id).name
+            ) + enabledIds.map { id ->
+                id to resolveLayout(customLayouts, id).name
             }
             ChoiceSetting(
                 title = R.string.modes_layout_title,
                 subtitle = stringResource(R.string.modes_layout_subtitle),
                 options = layoutOptions,
-                selected = mode.layoutId?.takeIf { it in settings.enabledLayoutIds },
+                selected = settings.watch { modeIn(it).layoutId }?.takeIf { it in enabledIds },
                 info = stringResource(R.string.modes_layout_info),
                 detail = inheritDetail(),
-            ) { save(mode.copy(layoutId = it)) }
+            ) { save(current().copy(layoutId = it)) }
         }
         item {
             var themePickerOpen by remember { mutableStateOf(false) }
+            val themeId = settings.watch { modeIn(it).themeId }
             WmRow(
                 title = stringResource(R.string.modes_theme_title),
                 icon = SettingsRowIcons[R.string.modes_theme_title],
-                subtitle = mode.themeId?.let { themeDisplayName(settings, it) }
+                subtitle = themeId?.let { themeDisplayName(settings, it) }
                     ?: stringResource(R.string.modes_theme_inherit_subtitle),
                 trailing = {
-                    if (mode.themeId != null) {
-                        TextButton(onClick = { save(mode.copy(themeId = null)) }) {
+                    if (themeId != null) {
+                        TextButton(onClick = { save(current().copy(themeId = null)) }) {
                             Text(stringResource(CommonR.string.common_clear))
                         }
                     }
@@ -1655,10 +1684,10 @@ internal fun ModeEditor(
             if (themePickerOpen) {
                 ModeThemePickerDialog(
                     settings = settings,
-                    selectedId = mode.themeId,
+                    selectedId = themeId,
                     onPick = { id ->
                         themePickerOpen = false
-                        save(mode.copy(themeId = id))
+                        save(current().copy(themeId = id))
                     },
                     onDismiss = { themePickerOpen = false },
                 )
@@ -1668,15 +1697,16 @@ internal fun ModeEditor(
             ToggleSetting(
                 R.string.modes_pinned_tools_title,
                 stringResource(R.string.modes_pinned_tools_subtitle),
-                mode.toolbarTools != null,
+                pinned != null,
             ) { on ->
+                val mode = current()
                 save(
                     mode.copy(
                         // Appending starts from nothing (the user's own pins
                         // are already there); replacing starts from a copy of
                         // the current toolbar to edit down.
                         toolbarTools = if (on) {
-                            if (mode.toolbarToolsAppend) emptyList() else settings.toolbarTools
+                            if (mode.toolbarToolsAppend) emptyList() else settings.value.toolbarTools
                         } else {
                             null
                         },
@@ -1684,12 +1714,12 @@ internal fun ModeEditor(
                 )
             }
         }
-        val pinned = mode.toolbarTools
         if (pinned != null) {
             item {
+                val appends = settings.watch { modeIn(it).toolbarToolsAppend }
                 ChoiceSetting(
                     title = R.string.modes_pinned_behaviour_title,
-                    subtitle = if (mode.toolbarToolsAppend) {
+                    subtitle = if (appends) {
                         stringResource(R.string.modes_pinned_behaviour_append_subtitle)
                     } else {
                         stringResource(R.string.modes_pinned_behaviour_replace_subtitle)
@@ -1698,7 +1728,7 @@ internal fun ModeEditor(
                         true to stringResource(R.string.modes_pinned_behaviour_append_label),
                         false to stringResource(R.string.modes_pinned_behaviour_replace_label),
                     ),
-                    selected = mode.toolbarToolsAppend,
+                    selected = appends,
                     detail = { append ->
                         ChoiceDetail(
                             stringResource(
@@ -1716,23 +1746,25 @@ internal fun ModeEditor(
                     // Switching to append: the copied-in global pins would
                     // duplicate what is already on the toolbar, so drop them.
                     save(
-                        mode.copy(
+                        current().copy(
                             toolbarToolsAppend = append,
-                            toolbarTools = if (append) pinned - settings.toolbarTools.toSet() else pinned,
+                            toolbarTools = if (append) pinned - settings.value.toolbarTools.toSet() else pinned,
                         ),
                     )
                 }
             }
             item {
                 ToolChips(
-                    tools = ToolbarTool.entries.filter {
-                        it in settings.enabledTools && isSupportedTool(it) &&
-                            isUsableTool(it, settings)
+                    tools = settings.watch { s ->
+                        ToolbarTool.entries.filter {
+                            it in s.enabledTools && isSupportedTool(it) &&
+                                isUsableTool(it, s)
+                        }
                     },
                     selected = pinned,
                 ) { tool ->
                     save(
-                        mode.copy(
+                        current().copy(
                             toolbarTools = if (tool in pinned) pinned - tool else pinned + tool,
                         ),
                     )
@@ -1748,7 +1780,7 @@ internal fun ModeEditor(
                 ReorderableColumn(
                     pinned,
                     label = { toolNames[it].orEmpty() },
-                    onReorder = { save(mode.copy(toolbarTools = it)) },
+                    onReorder = { save(current().copy(toolbarTools = it)) },
                     modifier = Modifier.padding(horizontal = 16.dp),
                 )
             }
@@ -1757,23 +1789,24 @@ internal fun ModeEditor(
             ToggleSetting(
                 R.string.modes_toolbox_order_title,
                 stringResource(R.string.modes_toolbox_order_subtitle),
-                mode.toolboxOrder != null,
+                order != null,
             ) { on ->
-                save(mode.copy(toolboxOrder = if (on) emptyList() else null))
+                save(current().copy(toolboxOrder = if (on) emptyList() else null))
             }
         }
-        val order = mode.toolboxOrder
         if (order != null) {
             item {
                 ToolChips(
-                    tools = settings.toolboxOrder.filter {
-                        it in settings.enabledTools && isSupportedTool(it) &&
-                            isUsableTool(it, settings)
+                    tools = settings.watch { s ->
+                        s.toolboxOrder.filter {
+                            it in s.enabledTools && isSupportedTool(it) &&
+                                isUsableTool(it, s)
+                        }
                     },
                     selected = order,
                 ) { tool ->
                     save(
-                        mode.copy(
+                        current().copy(
                             toolboxOrder = if (tool in order) order - tool else order + tool,
                         ),
                     )
@@ -1787,23 +1820,23 @@ internal fun ModeEditor(
                 ReorderableColumn(
                     order,
                     label = { toolNames[it].orEmpty() },
-                    onReorder = { save(mode.copy(toolboxOrder = it)) },
+                    onReorder = { save(current().copy(toolboxOrder = it)) },
                     modifier = Modifier.padding(horizontal = 16.dp),
                 )
             }
         }
         // A mode that switches the symbol row off has no row for its own sets
         // to appear on. Inherit and "on" both leave one that may be drawn.
-        if (mode.symbolRowEnabled != false) item {
+        if (symbolRowPossible) item {
             ToggleSetting(
                 R.string.modes_symbol_sets_title,
                 stringResource(R.string.modes_symbol_sets_subtitle),
-                mode.symbolSetIds != null,
+                settings.watch { modeIn(it).symbolSetIds != null },
             ) { on ->
                 save(
-                    mode.copy(
+                    current().copy(
                         symbolSetIds = if (on) {
-                            settings.symbolRowSetIds.ifEmpty { BuiltInSymbolSets.defaultEnabledIds }
+                            settings.value.symbolRowSetIds.ifEmpty { BuiltInSymbolSets.defaultEnabledIds }
                         } else {
                             null
                         },
@@ -1811,14 +1844,13 @@ internal fun ModeEditor(
                 )
             }
         }
-        val modeSets = mode.symbolSetIds.takeIf { mode.symbolRowEnabled != false }
         if (modeSets != null) {
             item {
                 FlowRow(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
-                    for (set in resolveSymbolSets(settings.customSymbolSets)) {
+                    for (set in resolveSymbolSets(settings.watch { it.customSymbolSets })) {
                         // A shipped set that still carries its shipped name is
                         // drawn from resources; a renamed one keeps the name
                         // the user typed.
@@ -1829,7 +1861,7 @@ internal fun ModeEditor(
                             onClick = {
                                 val next =
                                     if (set.id in modeSets) modeSets - set.id else modeSets + set.id
-                                if (next.isNotEmpty()) save(mode.copy(symbolSetIds = next))
+                                if (next.isNotEmpty()) save(current().copy(symbolSetIds = next))
                             },
                             label = { Text(setLabel, maxLines = 1) },
                         )
@@ -1838,7 +1870,7 @@ internal fun ModeEditor(
             }
             item {
                 val setNames = mutableMapOf<String, String>()
-                for (set in resolveSymbolSets(settings.customSymbolSets)) {
+                for (set in resolveSymbolSets(settings.watch { it.customSymbolSets })) {
                     setNames[set.id] = BuiltInSymbolSets.nameRes(set)
                         ?.let { stringResource(it) } ?: set.name
                 }
@@ -1846,16 +1878,16 @@ internal fun ModeEditor(
                 ReorderableColumn(
                     modeSets,
                     label = setName,
-                    onReorder = { save(mode.copy(symbolSetIds = it)) },
+                    onReorder = { save(current().copy(symbolSetIds = it)) },
                     modifier = Modifier.padding(horizontal = 16.dp),
                 )
             }
         }
     }
     // Two of the three conditions set: "both"; all three: "all".
-    val conditions = listOf(mode.apps, mode.fieldKinds, mode.hints).count { it.isNotEmpty() }
+    val conditions = listOf(apps.isNotEmpty(), hasFieldKinds, hints.isNotEmpty()).count { it }
     val bothMatchNote = when {
-        conditions == 2 && mode.hints.isEmpty() ->
+        conditions == 2 && hints.isEmpty() ->
             stringResource(R.string.modes_auto_both_match_body)
         conditions >= 2 -> stringResource(R.string.modes_auto_all_match_body)
         else -> null
@@ -1866,6 +1898,7 @@ internal fun ModeEditor(
             .joinToString("\n\n"),
     ) {
         item {
+            val fieldKinds = settings.watch { modeIn(it).fieldKinds }
             ControlSetting(R.string.modes_field_types_title) {
                 FlowRow(
                     modifier = Modifier.padding(top = 8.dp),
@@ -1873,8 +1906,9 @@ internal fun ModeEditor(
                 ) {
                     for (field in ModeField.entries) {
                         FilterChip(
-                            selected = field in mode.fieldKinds,
+                            selected = field in fieldKinds,
                             onClick = {
+                                val mode = current()
                                 save(
                                     mode.copy(
                                         fieldKinds =
@@ -1898,12 +1932,15 @@ internal fun ModeEditor(
                 icon = SettingsRowIcons[R.string.modes_field_hints_title],
             )
         }
-        for (hint in mode.hints) {
+        for (hint in hints) {
             item {
                 WmRow(
                     title = hint,
                     trailing = {
-                        IconButton(onClick = { save(mode.copy(hints = mode.hints - hint)) }) {
+                        IconButton(onClick = {
+                            val mode = current()
+                            save(mode.copy(hints = mode.hints - hint))
+                        }) {
                             Icon(
                                 Icons.Outlined.Delete,
                                 contentDescription = stringResource(R.string.modes_hint_remove_desc),
@@ -1925,13 +1962,14 @@ internal fun ModeEditor(
                 HintEditorDialog(
                     onAdd = { hint ->
                         editorOpen = false
+                        val mode = current()
                         if (hint !in mode.hints) save(mode.copy(hints = mode.hints + hint))
                     },
                     onDismiss = { editorOpen = false },
                 )
             }
         }
-        for (pkg in mode.apps) {
+        for (pkg in apps) {
             item {
                 val context = LocalContext.current
                 val label = remember(pkg) {
@@ -1947,7 +1985,10 @@ internal fun ModeEditor(
                         { Text(pkg) }
                     } else null,
                     trailing = {
-                        IconButton(onClick = { save(mode.copy(apps = mode.apps - pkg)) }) {
+                        IconButton(onClick = {
+                            val mode = current()
+                            save(mode.copy(apps = mode.apps - pkg))
+                        }) {
                             Icon(
                                 Icons.Outlined.Delete,
                                 contentDescription = stringResource(R.string.modes_app_remove_desc),
@@ -1961,7 +2002,7 @@ internal fun ModeEditor(
             var pickerOpen by remember { mutableStateOf(false) }
             WmRow(
                 title = stringResource(R.string.modes_add_app_title),
-                subtitle = if (mode.fieldKinds.isEmpty()) {
+                subtitle = if (!hasFieldKinds) {
                         stringResource(R.string.modes_add_app_subtitle_any)
                     } else {
                         stringResource(R.string.modes_add_app_subtitle_fields)
@@ -1971,9 +2012,10 @@ internal fun ModeEditor(
             )
             if (pickerOpen) {
                 AppPickerDialog(
-                    exclude = mode.apps,
+                    exclude = apps,
                     onPick = { pkg ->
                         pickerOpen = false
+                        val mode = current()
                         save(mode.copy(apps = mode.apps + pkg))
                     },
                     onDismiss = { pickerOpen = false },
@@ -2023,7 +2065,7 @@ internal fun ModeEditor(
     if (confirmDelete) {
         AlertDialog(
             onDismissRequest = { confirmDelete = false },
-            title = { Text(stringResource(R.string.modes_delete_confirm_title, mode.name)) },
+            title = { Text(stringResource(R.string.modes_delete_confirm_title, settings.watch { modeIn(it).name })) },
             text = { Text(stringResource(R.string.modes_delete_confirm_body)) },
             confirmButton = {
                 TextButton(onClick = {

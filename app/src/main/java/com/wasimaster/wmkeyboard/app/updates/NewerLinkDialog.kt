@@ -18,10 +18,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.wasimaster.wmkeyboard.BuildConfig
 import com.wasimaster.wmkeyboard.R
+import com.wasimaster.wmkeyboard.app.LiveSettings
 import com.wasimaster.wmkeyboard.app.SpecialAccess
 import com.wasimaster.wmkeyboard.app.rememberDisclosedSpecialAccess
 import com.wasimaster.wmkeyboard.common.R as CommonR
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.support.Support
 
 /**
@@ -43,7 +43,7 @@ import com.wasimaster.wmkeyboard.core.support.Support
  * On F-Droid, where the app checks only when asked, the dialog asks first.
  */
 @Composable
-internal fun NewerLinkDialog(link: MissingLink, settings: KeyboardSettings, onDismiss: () -> Unit) {
+internal fun NewerLinkDialog(link: MissingLink, settings: LiveSettings, onDismiss: () -> Unit) {
     val updater = LocalAppUpdater.current
     val state by updater.state.collectAsStateWithLifecycle()
     val uriHandler = LocalUriHandler.current

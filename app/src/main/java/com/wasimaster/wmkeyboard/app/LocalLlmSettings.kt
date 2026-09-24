@@ -57,7 +57,6 @@ import com.wasimaster.wmkeyboard.core.localllm.LocalLlmDownloadManager.FailReaso
 import com.wasimaster.wmkeyboard.core.localllm.LocalLlmModel
 import com.wasimaster.wmkeyboard.core.localllm.LocalLlmStore
 import com.wasimaster.wmkeyboard.core.localllm.ModelTier
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.MeteredDecision
 import com.wasimaster.wmkeyboard.core.settings.LocalLlmBackend
 import com.wasimaster.wmkeyboard.core.settings.SettingsRepository
@@ -77,7 +76,7 @@ private const val METERED_CONFIRM_BYTES = 500_000_000L
  * in-flight download.
  */
 @Composable
-internal fun LocalLlmModelManager(repository: SettingsRepository, settings: KeyboardSettings) {
+internal fun LocalLlmModelManager(repository: SettingsRepository, settings: LiveSettings) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val uriHandler = LocalUriHandler.current
@@ -97,7 +96,7 @@ internal fun LocalLlmModelManager(repository: SettingsRepository, settings: Keyb
         orphanBytes = withContext(Dispatchers.IO) { LocalLlmStore.orphanBytes(filesDir) }
         // The only model on disk needs no selection step: adopt it — covers
         // both "first download just finished" and "selection was deleted".
-        if (LocalLlmStore.selectedModelFile(filesDir, settings.ai.localModelId) == null) {
+        if (LocalLlmStore.selectedModelFile(filesDir, settings.value.ai.localModelId) == null) {
             LocalLlmStore.soleDownloadedId(filesDir)?.let { repository.setAiLocalModelId(it) }
         }
     }
@@ -111,7 +110,7 @@ internal fun LocalLlmModelManager(repository: SettingsRepository, settings: Keyb
     }
 
     fun startDownload(model: LocalLlmModel) {
-        LocalLlmDownloadManager.start(filesDir, model, settings.ai.hfToken)
+        LocalLlmDownloadManager.start(filesDir, model, settings.value.ai.hfToken)
         notifyDownload(
             model.id,
             context.getString(R.string.notify_download_ai_model, model.displayName),
@@ -121,7 +120,7 @@ internal fun LocalLlmModelManager(repository: SettingsRepository, settings: Keyb
 
     fun requestDownload(model: LocalLlmModel) {
         val metered = isMeteredNow(context)
-        when (downloadDecisionNow(context, settings)) {
+        when (downloadDecisionNow(context, settings.value)) {
             MeteredDecision.BLOCKED -> meteredBlocked = true
             MeteredDecision.ASK -> meteredPending = model
             // Not held by data saving, so the old size threshold still stands:
@@ -139,7 +138,7 @@ internal fun LocalLlmModelManager(repository: SettingsRepository, settings: Keyb
         item {
             ApiKeyField(
                 label = stringResource(R.string.models_llm_token_label),
-                value = settings.ai.hfToken,
+                value = settings.watch { it.ai.hfToken },
                 builtInAvailable = false,
                 emptyHint = stringResource(R.string.models_llm_token_hint),
             ) { repository.setHfToken(it) }
@@ -153,6 +152,9 @@ internal fun LocalLlmModelManager(repository: SettingsRepository, settings: Keyb
         }
     }
 
+    // Which model is in use decides the order the rows below are listed in;
+    // each row reads its own value.
+    val selectedId = settings.watch { it.ai.localModelId }
     // On disk (ready to use) vs still on Hugging Face — two questions the
     // one mixed list used to answer badly. Anything mid-download counts as
     // "available" so its progress bar stays with the thing being fetched.
@@ -161,7 +163,7 @@ internal fun LocalLlmModelManager(repository: SettingsRepository, settings: Keyb
     }
     // Selected model to the very top of its section — it's the one answer
     // "which model am I using?" needs, and scrolling for it is silly.
-    val yours = onDisk.sortedByDescending { it.id == settings.ai.localModelId }
+    val yours = onDisk.sortedByDescending { it.id == selectedId }
     val available = LocalLlmCatalog.models - onDisk.toSet()
 
     @Composable
@@ -169,8 +171,8 @@ internal fun LocalLlmModelManager(repository: SettingsRepository, settings: Keyb
         CatalogModelRow(
             model = model,
             status = states[model.id] ?: DownloadStatus.NotDownloaded,
-            selected = settings.ai.localModelId == model.id,
-            hasToken = settings.ai.hfToken.isNotBlank(),
+            selected = settings.watch { it.ai.localModelId == model.id },
+            hasToken = settings.watch { it.ai.hfToken.isNotBlank() },
             downloadBusy = LocalLlmDownloadManager.isBusy,
             tooBigForRam = model.minRamMb > totalRamMb,
             onDownload = { requestDownload(model) },
@@ -178,7 +180,7 @@ internal fun LocalLlmModelManager(repository: SettingsRepository, settings: Keyb
             onSelect = { scope.launch { repository.setAiLocalModelId(model.id) } },
             onDelete = {
                 LocalLlmDownloadManager.delete(filesDir, model)
-                if (settings.ai.localModelId == model.id) {
+                if (settings.value.ai.localModelId == model.id) {
                     scope.launch { repository.setAiLocalModelId("") }
                 }
             },
@@ -201,18 +203,18 @@ internal fun LocalLlmModelManager(repository: SettingsRepository, settings: Keyb
     SettingsGroup {
         for (model in yours) item { catalogRow(model) }
         for (file in customModels.sortedByDescending {
-            settings.ai.localModelId == LocalLlmStore.CUSTOM_PREFIX + it.name
+            selectedId == LocalLlmStore.CUSTOM_PREFIX + it.name
         }) {
             item {
                 val id = LocalLlmStore.CUSTOM_PREFIX + file.name
                 CustomModelRow(
                     file = file,
-                    selected = settings.ai.localModelId == id,
+                    selected = settings.watch { it.ai.localModelId == id },
                     onSelect = { scope.launch { repository.setAiLocalModelId(id) } },
                     onDelete = {
                         LocalLlmStore.deleteCustom(filesDir, file.name)
                         customModels = LocalLlmStore.customModels(filesDir)
-                        if (settings.ai.localModelId == id) {
+                        if (settings.value.ai.localModelId == id) {
                             scope.launch { repository.setAiLocalModelId("") }
                         }
                     },
@@ -251,13 +253,14 @@ internal fun LocalLlmModelManager(repository: SettingsRepository, settings: Keyb
     CaptionText(stringResource(R.string.models_llm_import_info))
 
     SectionHeader(stringResource(R.string.models_llm_compute_title))
+    val selectedBackend = settings.watch { it.ai.localBackend }
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.padding(horizontal = 16.dp),
     ) {
         for (backend in LocalLlmBackend.entries) {
             FilterChip(
-                selected = settings.ai.localBackend == backend,
+                selected = selectedBackend == backend,
                 onClick = { scope.launch { repository.setAiLocalBackend(backend) } },
                 label = { Text(stringResource(backend.labelRes)) },
             )

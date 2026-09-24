@@ -126,7 +126,7 @@ import com.wasimaster.wmkeyboard.core.ui.toolAccentColor
 import com.wasimaster.wmkeyboard.core.ui.toolAccentPaint
 import androidx.compose.ui.platform.LocalConfiguration
 import com.wasimaster.wmkeyboard.core.settings.DeviceForm
-import com.wasimaster.wmkeyboard.core.settings.applyDeviceForm
+import com.wasimaster.wmkeyboard.core.settings.IconSettings
 import com.wasimaster.wmkeyboard.core.settings.isTelevision
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -306,9 +306,7 @@ class MainActivity : FragmentActivity() {
         // stays closed.
         missingLink.value = if (savedInstanceState != null) MissingLink.restore(savedInstanceState) else nav?.missing
         setContent {
-            // Null until DataStore's first emission: rendering nothing for a
-            // frame beats flashing onboarding at users who finished it.
-            val settings by repository.settings
+            val stored = repository.settings
                 .collectAsStateWithLifecycle(null as KeyboardSettings?)
             // Same wait for the asset layouts, or the language screens compose
             // against a half-loaded shipped set and never hear that it filled
@@ -320,6 +318,11 @@ class MainActivity : FragmentActivity() {
             // the keyboard drew the row, and the one tap that fixed the display
             // would write the value it already had and look like a dead switch.
             val deviceForm = DeviceForm.of(LocalConfiguration.current.smallestScreenWidthDp)
+            // Null until DataStore's first emission: rendering nothing for a
+            // frame beats flashing onboarding at users who finished it. Held,
+            // not read: nothing up here recomposes on a settings write, only
+            // the rows that show what the write changed (see LiveSettings).
+            val settings = rememberLiveSettings(stored, deviceForm) ?: return@setContent
             val pending by pendingNav.collectAsStateWithLifecycle()
             // Play In-App Updates, bound to this activity's lifecycle and its
             // result launcher. In a non-Play build this is a stub that reports
@@ -328,30 +331,28 @@ class MainActivity : FragmentActivity() {
             // on About are far apart in the tree and must not disagree about
             // the same download.
             val updater = rememberAppUpdater()
-            settings?.applyDeviceForm(deviceForm)?.let { loaded ->
-                AppTheme(loaded) {
-                    CompositionLocalProvider(
-                        LocalAppUpdater provides updater,
-                        LocalAppLock provides appLock,
-                    ) {
-                        SettingsNavHost(
-                            repository = repository,
-                            settings = loaded,
-                            pending = pending,
-                            onPendingHandled = { pendingNav.value = null },
-                        )
-                        // Here rather than beside the card on the home screen,
-                        // which is the one screen the user may not be on when
-                        // the offer arrives.
-                        val missing by missingLink.collectAsStateWithLifecycle()
-                        val link = missing
-                        if (link != null) {
-                            // Holds the update offer itself, so the ordinary
-                            // prompt waits rather than stacking a second dialog.
-                            NewerLinkDialog(link, loaded) { missingLink.value = null }
-                        } else {
-                            UpdatePromptDialog(loaded)
-                        }
+            AppTheme(settings) {
+                CompositionLocalProvider(
+                    LocalAppUpdater provides updater,
+                    LocalAppLock provides appLock,
+                ) {
+                    SettingsNavHost(
+                        repository = repository,
+                        settings = settings,
+                        pending = pending,
+                        onPendingHandled = { pendingNav.value = null },
+                    )
+                    // Here rather than beside the card on the home screen,
+                    // which is the one screen the user may not be on when
+                    // the offer arrives.
+                    val missing by missingLink.collectAsStateWithLifecycle()
+                    val link = missing
+                    if (link != null) {
+                        // Holds the update offer itself, so the ordinary
+                        // prompt waits rather than stacking a second dialog.
+                        NewerLinkDialog(link, settings) { missingLink.value = null }
+                    } else {
+                        UpdatePromptDialog(settings)
                     }
                 }
             }
@@ -486,15 +487,37 @@ internal data class PendingNav(
 )
 
 @Composable
-internal fun AppTheme(settings: KeyboardSettings, content: @Composable () -> Unit) {
+internal fun AppTheme(settings: KeyboardSettings, content: @Composable () -> Unit) =
+    AppTheme(settings.themeMode, settings.dynamicColor, settings.icons, content)
+
+/**
+ * [AppTheme] for the settings activity, which holds its settings live: only a
+ * write to one of the three things the theme is made of reaches it.
+ */
+@Composable
+internal fun AppTheme(settings: LiveSettings, content: @Composable () -> Unit) =
+    AppTheme(
+        settings.watch { it.themeMode },
+        settings.watch { it.dynamicColor },
+        settings.watch { it.icons },
+        content,
+    )
+
+@Composable
+private fun AppTheme(
+    themeMode: ThemeMode,
+    dynamicColor: Boolean,
+    icons: IconSettings,
+    content: @Composable () -> Unit,
+) {
     val context = LocalContext.current
     val systemDark = isSystemInDarkTheme()
-    val dark = when (settings.themeMode) {
+    val dark = when (themeMode) {
         ThemeMode.SYSTEM -> systemDark
         ThemeMode.LIGHT -> false
         ThemeMode.DARK, ThemeMode.AMOLED -> true
     }
-    val supportsDynamic = settings.dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+    val supportsDynamic = dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
     // Remembered, and not only to save the forty resource reads a dynamic
     // scheme costs. MaterialTheme hands the scheme down through a *static*
     // composition local, and ColorScheme compares by instance — so a freshly
@@ -503,7 +526,7 @@ internal fun AppTheme(settings: KeyboardSettings, content: @Composable () -> Uni
     // Settings re-emits the settings object and lands here, so that was the
     // whole app re-composing behind each toggle.
     val configuration = LocalConfiguration.current
-    val scheme = remember(dark, supportsDynamic, settings.themeMode, context, configuration) {
+    val scheme = remember(dark, supportsDynamic, themeMode, context, configuration) {
         val base = when {
             supportsDynamic && dark -> dynamicDarkColorScheme(context)
             supportsDynamic -> dynamicLightColorScheme(context)
@@ -514,12 +537,12 @@ internal fun AppTheme(settings: KeyboardSettings, content: @Composable () -> Uni
         // Monet scheme too: the tones it swaps in are dark enough that their
         // hue is below the threshold the eye resolves, so a wallpaper-coloured
         // scheme keeps its character everywhere the user can actually see it.
-        if (settings.themeMode == ThemeMode.AMOLED) base.amoled() else base
+        if (themeMode == ThemeMode.AMOLED) base.amoled() else base
     }
     // Every settings surface draws tool icons, so the user's icon set is
     // provided here rather than per screen — the Tools list and the keyboard
     // must not disagree about what a tool looks like.
-    val iconSet by rememberIconSet(settings.icons)
+    val iconSet by rememberIconSet(icons)
     // The type scale is the app's, not Material's — see [WmTypography]. It is
     // scoped to this theme, so it dresses the settings app and the screens the
     // core modules contribute to it, and leaves the keyboard itself alone.
@@ -540,7 +563,7 @@ internal fun AppTheme(settings: KeyboardSettings, content: @Composable () -> Uni
 @Composable
 private fun SettingsNavHost(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     pending: PendingNav? = null,
     onPendingHandled: () -> Unit = {},
 ) {
@@ -571,8 +594,8 @@ private fun SettingsNavHost(
     // its own key and asks here to change it, so no screen threads the
     // repository through for the sake of one chevron.
     val foldScope = rememberCoroutineScope()
-    val folds = remember(settings.appUi.advancedOpen) {
-        AdvancedFolds(settings.appUi.advancedOpen) { key, open ->
+    val folds = remember(settings) {
+        AdvancedFolds(settings) { key, open ->
             foldScope.launch { repository.setAdvancedFoldOpen(key, open) }
         }
     }
@@ -583,7 +606,7 @@ private fun SettingsNavHost(
     // up without being handed anything.
     // Wide enough for the home list and a screen out of it to sit side by side,
     // and past onboarding, which owns the whole window while it runs.
-    val twoPane = rememberWideWindow() && settings.onboardingDone
+    val twoPane = rememberWideWindow() && settings.watch { it.onboardingDone }
     // Which home row the screen in the detail pane came from, so the list can
     // show where the user is. Held rather than derived from the back stack: the
     // stack's top is the *current* screen, which three steps into Tools is a
@@ -602,7 +625,7 @@ private fun SettingsNavHost(
     // flew from is still on screen beside it), but keep the layout: the window
     // changes width on a fold or a rotation, and that must not rebuild the
     // screens.
-    val layoutWanted = settings.appUi.screenTransitions && !settings.reduceMotion
+    val layoutWanted = settings.watch { it.appUi.screenTransitions && !it.reduceMotion }
     // Decided once per activity. The screens cannot be moved into or out of
     // the layout while composed (Compose crashes measuring a node taken out of
     // a lookahead scope, in LookaheadDelegate.getAlignmentLinesOwner), and
@@ -617,6 +640,7 @@ private fun SettingsNavHost(
         if (layoutWanted != layoutShown) context.findActivity()?.recreate()
     }
     val screens: @Composable (SharedTransitionScope?) -> Unit = { shared ->
+        val reduceMotion = settings.watch { it.reduceMotion }
         CompositionLocalProvider(
             LocalSharedTransition provides if (twoPane) null else shared,
             LocalSettingsCrumbTrail provides crumbs,
@@ -625,12 +649,12 @@ private fun SettingsNavHost(
             // Published here rather than threaded through, so that the small
             // motions deep in a row can be still without every row being
             // handed the settings.
-            LocalReduceMotion provides settings.reduceMotion,
+            LocalReduceMotion provides reduceMotion,
             // "Icons in settings", animated once here for every row and
             // heading, so the screen the switch is on sees its tiles leave.
             LocalIconReveal provides rememberIconReveal(
-                shown = settings.appUi.rowIcons,
-                still = settings.reduceMotion,
+                shown = settings.watch { it.appUi.rowIcons },
+                still = reduceMotion,
             ),
         ) {
             if (twoPane) {
@@ -740,7 +764,7 @@ private val ListPaneWidth = 360.dp
 private fun SettingsNavGraph(
     navController: NavHostController,
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     pending: PendingNav?,
     onPendingHandled: () -> Unit,
 ) {
@@ -758,7 +782,7 @@ private fun SettingsNavGraph(
     // keyboard's own "open settings" (tool long-press, a panel's link). Cleared
     // once handled, so returning to this screen doesn't navigate again.
     LaunchedEffect(pending) {
-        if (pending == null || !settings.onboardingDone) return@LaunchedEffect
+        if (pending == null || !settings.value.onboardingDone) return@LaunchedEffect
         when {
             !pending.route.isNullOrEmpty() -> {
                 // Armed before the navigation, exactly as a search result arms
@@ -781,7 +805,7 @@ private fun SettingsNavGraph(
     // Both surfaces are opaque, so nothing fades — a fade over a full-width
     // slide only makes the overlap look muddy. Collapsed to an instant cut when
     // the user has asked for reduced motion.
-    val navMs = if (settings.reduceMotion) 0 else NavTransitionMs
+    val navMs = if (settings.watch { it.reduceMotion }) 0 else NavTransitionMs
     val spec = tween<androidx.compose.ui.unit.IntOffset>(
         durationMillis = navMs,
         easing = NavTransitionEasing,
@@ -789,15 +813,13 @@ private fun SettingsNavGraph(
     val parallax = 3
     // Frozen at first composition: completing onboarding navigates away
     // explicitly, it must not yank the graph out from under the NavHost.
-    val startDestination = remember { if (settings.onboardingDone) "home" else "onboarding" }
+    val onboardingDone = settings.watch { it.onboardingDone }
+    val startDestination = remember { if (onboardingDone) "home" else "onboarding" }
     // The graph below is built once, not once per settings write. NavHost
-    // keeps its graph in `remember(route, startDestination, builder)`, and the
-    // builder read `settings` directly, so every write was a new lambda and a
-    // fresh `createGraph` over every destination here — on the main thread,
-    // in the frame that answers the tap. Read through a State instead, the
-    // builder captures only that State and stays the same instance, while each
-    // destination still recomposes when the settings it reads change.
-    val settingsState = rememberUpdatedState(settings)
+    // keeps its graph in `remember(route, startDestination, builder)`, so the
+    // builder must not capture anything a write replaces: it captures the
+    // live holder, which is the same instance for the life of the activity,
+    // and every destination reads what it shows through that.
     NavHost(
         navController = navController,
         startDestination = startDestination,
@@ -806,10 +828,6 @@ private fun SettingsNavGraph(
         popEnterTransition = { slideInHorizontally(spec) { -it / parallax } },
         popExitTransition = { slideOutHorizontally(spec) { it } },
     ) {
-        // Shadows the parameter on purpose: every read below goes through the
-        // State, at the moment a destination composes.
-        @Suppress("NAME_SHADOWING")
-        val settings by settingsState
         composable("onboarding") {
             OnboardingScreen(
                 repository = repository,
@@ -1498,7 +1516,7 @@ private fun SettingsNavGraph(
             PluginIdeScreen(
                 draftId = entry.arguments?.getString("draftId").orEmpty(),
                 onBack = { navController.popBackStack() },
-                reduceMotion = settings.reduceMotion,
+                reduceMotion = settings.watch { it.reduceMotion },
             )
         }
         // The optional `add` argument carries a repository URL from a
@@ -1814,7 +1832,7 @@ private fun SettingsNavGraph(
                 // bare is the same object the Tools row drew, so it can fly
                 // from it. It stays through the collapse — it is the only
                 // thing naming which tool this is.
-                val paint = toolAccentPaint(tool, settings)
+                val paint = settings.watch { toolAccentPaint(tool, it) }
                 SettingsScreen(
                     stringResource(toolTitle(tool)),
                     { navController.popBackStack() },
@@ -1829,7 +1847,7 @@ private fun SettingsNavGraph(
                     // The heading wears the tool's colour whether or not the
                     // colourful icons are on: it is the only thing naming which
                     // tool this page is.
-                    accent = toolAccentColor(tool, settings.toolColorOverrides),
+                    accent = toolAccentColor(tool, settings.watch { it.toolColorOverrides }),
                     iconTile = false,
                     iconInBar = true,
                 ) {
@@ -2079,7 +2097,7 @@ private fun SettingsNavGraph(
             // mode the Add button has not saved yet has neither, and keeps the
             // generic heading.
             SettingsScreen(
-                modeEditTitle(settings, modeId)
+                settings.watch { modeEditTitle(it, modeId) }
                     ?: stringResource(R.string.home_screen_mode_edit_title),
                 { navController.popBackStack() },
                 route = modeEditRoute(modeId),
@@ -2097,7 +2115,7 @@ private fun SettingsNavGraph(
             ) {
                 AboutSettings(
                     settings = settings,
-                    persona = settings.onboarding,
+                    persona = settings.watch { it.onboarding },
                     onOpenLicenses = { navController.navigate("licenses") },
                     onOpenLicenseText = { navController.navigate("license_text/$it") },
                     onOpenDebugLog = { navController.navigate("debug_log") },
@@ -2189,7 +2207,7 @@ private fun SettingsNavGraph(
 
 @Composable
 private fun HomeScreen(
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onNavigate: (String) -> Unit,
     /**
      * The destination's own animation scope, or null in the list pane of the
@@ -2216,7 +2234,7 @@ private fun HomeScreen(
             Toast.makeText(context, birthdayToast, Toast.LENGTH_LONG).show()
             // Confetti is unsolicited ambient motion, so reduce motion turns it
             // off and keeps the card and the toast, which hold still.
-            if (!settings.reduceMotion) confetti = true
+            if (!settings.value.reduceMotion) confetti = true
         }
     }
     // The one screen whose heading is the app's own name rather than a place
@@ -2275,7 +2293,7 @@ private fun HomeScreen(
             // The word of the day, when the vocabulary tool is on and asked for
             // it. The card owns its own gap and padding: put away for the day,
             // it takes no room at all.
-            if (ToolbarTool.VOCABULARY in settings.enabledTools && settings.vocabulary.wordOfTheDayCard) {
+            if (settings.watch { ToolbarTool.VOCABULARY in it.enabledTools && it.vocabulary.wordOfTheDayCard }) {
                 VocabDailyCard(settings, onNavigate)
             }
             // One list drives this screen and the search index's root entries,
@@ -2798,7 +2816,7 @@ internal fun SettingsGroup(
     val folds = LocalAdvancedFolds.current
     val foldId = foldKey?.let { "${LocalScreenRoute.current.orEmpty()}/$it" }
     val highlighted = SettingsHighlight.target != 0 || SettingsHighlight.targetItems.isNotEmpty()
-    val open = foldId == null || highlighted || (folds?.open?.contains(foldId) ?: false)
+    val open = foldId == null || highlighted || (folds?.isOpen(foldId) ?: false)
     // A named group is a scroll target in its own right. Some things the user
     // arrives at from search — or from an addon's Use button — are a whole
     // section rather than one row: "Icon pack", "Your packs", "Installed

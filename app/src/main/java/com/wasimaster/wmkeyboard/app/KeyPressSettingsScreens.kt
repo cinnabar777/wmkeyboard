@@ -57,7 +57,7 @@ import com.wasimaster.wmkeyboard.core.settings.KeySoundStyle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import com.wasimaster.wmkeyboard.core.settings.DEFAULT_LONG_PRESS_LETTERS
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
+import com.wasimaster.wmkeyboard.core.settings.KeySoundSettings
 import com.wasimaster.wmkeyboard.core.settings.LongPressLetterActions
 import com.wasimaster.wmkeyboard.core.theme.popupOnKeyOrNull
 import com.wasimaster.wmkeyboard.core.settings.SettingsRepository
@@ -80,7 +80,7 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun KeySoundGroup(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onNavigate: (String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -89,27 +89,21 @@ internal fun KeySoundGroup(
     // here and captured. The format also puts the number through the locale,
     // which is what gives Bengali or Arabic digits.
     val percentFormat = stringResource(R.string.typing_value_percent)
-    // Custom and Pack read their id from different fields, and a preview that
-    // passes neither plays the system click instead of the sound being previewed
-    // — which reads as the chosen sound not working at all. Resolved once here
-    // so every preview on this screen sounds what the keyboard will.
-    val soundId = when (settings.sound.style) {
-        KeySoundStyle.PACK -> settings.sound.packId
-        else -> settings.sound.customId
-    }
+    // Which rows the group holds depends on the style, so it is read here; the
+    // rows read their own values below.
+    val soundStyle = settings.watch { it.sound.style }
     SettingsGroup(stringResource(R.string.hardware_sound_group_title)) {
         item {
             ToggleSetting(
                 R.string.hardware_sound_key_title,
                 stringResource(R.string.hardware_sound_key_subtitle),
-                settings.sound.enabled,
+                settings.watch { it.sound.enabled },
                 default = SettingsDefaults.sound.enabled,
             ) {
                 scope.launch { repository.setKeySound(it) }
                 if (it) {
-                    KeySoundPlayer.preview(
-                        context, settings.sound.style, settings.sound.volume, soundId,
-                    )
+                    val sound = settings.value.sound
+                    KeySoundPlayer.preview(context, sound.style, sound.volume, sound.previewId())
                 }
             }
         }
@@ -139,6 +133,7 @@ internal fun KeySoundGroup(
                 val packStore = remember { SoundPackStore.get(context) }
                 val packRevision by packStore.revision.collectAsStateWithLifecycle()
                 val installedPacks = remember(packRevision) { packStore.packs() }
+                val selectedStyle = settings.watch { it.sound.style }
                 // Chips rather than a segmented row. Six equal segments across a
                 // phone leave ~55dp of label each, which truncated "Chime" to
                 // "Chim" and "Custom" to "Custo"; a segmented row set to scroll is
@@ -155,8 +150,9 @@ internal fun KeySoundGroup(
                 ) {
                     for (style in KeySoundStyle.entries) {
                         FilterChip(
-                            selected = settings.sound.style == style,
+                            selected = selectedStyle == style,
                             onClick = {
+                                val sound = settings.value.sound
                                 scope.launch {
                                     when (style) {
                                         KeySoundStyle.CUSTOM -> {
@@ -168,7 +164,7 @@ internal fun KeySoundGroup(
                                             // where a sound is imported, so a
                                             // disabled chip would hide its own
                                             // remedy.
-                                            val id = settings.sound.customId
+                                            val id = sound.customId
                                                 .takeIf { id -> installedSounds.any { it.id == id } }
                                                 ?: installedSounds.firstOrNull()?.id
                                             if (id == null) {
@@ -176,7 +172,7 @@ internal fun KeySoundGroup(
                                             } else {
                                                 repository.setKeySoundCustomId(id)
                                                 KeySoundPlayer.preview(
-                                                    context, style, settings.sound.volume, id,
+                                                    context, style, sound.volume, id,
                                                 )
                                             }
                                         }
@@ -185,7 +181,7 @@ internal fun KeySoundGroup(
                                             // previews, since a pack that recorded
                                             // the key coming back up is only half
                                             // itself on the way down.
-                                            val id = settings.sound.packId
+                                            val id = sound.packId
                                                 .takeIf { id -> installedPacks.any { it.id == id } }
                                                 ?: installedPacks.firstOrNull()?.id
                                             if (id == null) {
@@ -193,7 +189,7 @@ internal fun KeySoundGroup(
                                             } else {
                                                 repository.setKeySoundPackId(id)
                                                 KeySoundPlayer.previewStroke(
-                                                    context, style, settings.sound.volume, id,
+                                                    context, style, sound.volume, id,
                                                 )
                                             }
                                         }
@@ -202,7 +198,7 @@ internal fun KeySoundGroup(
                                             // Sound the freshly picked style so the
                                             // user hears the choice immediately.
                                             KeySoundPlayer.preview(
-                                                context, style, settings.sound.volume,
+                                                context, style, sound.volume,
                                             )
                                         }
                                     }
@@ -238,10 +234,10 @@ internal fun KeySoundGroup(
         // Only under Custom. The sound library and its import button are what
         // Custom *means*; showing them under Click is offering a choice that
         // has no effect until the style changes too.
-        if (settings.sound.style == KeySoundStyle.CUSTOM) {
+        if (soundStyle == KeySoundStyle.CUSTOM) {
             item { InstalledSoundSection(repository, settings, onNavigate) }
         }
-        if (settings.sound.style == KeySoundStyle.PACK) {
+        if (soundStyle == KeySoundStyle.PACK) {
             item { InstalledSoundPackSection(repository, settings, onNavigate) }
             item { KeyReleaseSoundToggle(repository, settings) }
         }
@@ -249,19 +245,34 @@ internal fun KeySoundGroup(
             SliderSetting(
                 R.string.hardware_sound_volume_title,
                 subtitle = stringResource(R.string.hardware_sound_volume_subtitle),
-                value = settings.sound.volume,
+                value = settings.watch { it.sound.volume },
                 range = 0.05f..1f,
                 display = { percentFormat.format((it * 100).roundToInt()) },
                 default = SettingsDefaults.sound.volume,
                 // Debounced inside the player, so dragging previews smoothly.
                 // The store waits for the finger to lift; the sound does not.
-                preview = { KeySoundPlayer.preview(context, settings.sound.style, it, soundId) },
+                preview = {
+                    val sound = settings.value.sound
+                    KeySoundPlayer.preview(context, sound.style, it, sound.previewId())
+                },
             ) {
                 scope.launch { repository.setKeySoundVolume(it) }
             }
         }
     }
 }
+
+/**
+ * The sound a preview of these settings should play. Custom and Pack read their
+ * id from different fields, and a preview that passes neither plays the system
+ * click instead of the sound being previewed — which reads as the chosen sound
+ * not working at all.
+ */
+private fun KeySoundSettings.previewId(): String = when (style) {
+    KeySoundStyle.PACK -> packId
+    else -> customId
+}
+
 /**
  * The installed key sounds — whatever came from an addon repository, plus
  * anything imported here — and the import button.
@@ -272,7 +283,7 @@ internal fun KeySoundGroup(
 @Composable
 private fun InstalledSoundSection(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onNavigate: (String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -300,7 +311,7 @@ private fun InstalledSoundSection(
                 is SoundImportResult.Imported -> {
                     repository.setKeySoundCustomId(result.sound.id)
                     KeySoundPlayer.preview(
-                        context, KeySoundStyle.CUSTOM, settings.sound.volume, result.sound.id,
+                        context, KeySoundStyle.CUSTOM, settings.value.sound.volume, result.sound.id,
                     )
                 }
                 is SoundImportResult.NotASound -> message = context.getString(result.messageRes)
@@ -332,13 +343,13 @@ private fun InstalledSoundSection(
         )
     }
 
+    val selectedId = settings.watch { s -> s.sound.customId.takeIf { s.sound.style == KeySoundStyle.CUSTOM } }
     Column(modifier = Modifier.padding(vertical = 4.dp)) {
         if (sounds.isEmpty()) {
             CaptionText(stringResource(R.string.hardware_sound_empty))
         }
         for (sound in sounds) {
-            val selected = settings.sound.style == KeySoundStyle.CUSTOM &&
-                settings.sound.customId == sound.id
+            val selected = selectedId == sound.id
             HighlightableItem(sound.id) {
                 WmRow(
                     title = sound.name,
@@ -376,7 +387,7 @@ private fun InstalledSoundSection(
                     onClick = {
                         scope.launch { repository.setKeySoundCustomId(sound.id) }
                         KeySoundPlayer.preview(
-                            context, KeySoundStyle.CUSTOM, settings.sound.volume, sound.id,
+                            context, KeySoundStyle.CUSTOM, settings.value.sound.volume, sound.id,
                         )
                     },
                 )
@@ -440,7 +451,7 @@ internal fun describeSoundPackImport(context: Context, result: SoundPackImportRe
 @Composable
 private fun InstalledSoundPackSection(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onNavigate: (String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -467,7 +478,7 @@ private fun InstalledSoundPackSection(
                 // Nothing is said on success here: the pack that was just
                 // selected plays itself, which says it better.
                 KeySoundPlayer.previewStroke(
-                    context, KeySoundStyle.PACK, settings.sound.volume, result.pack.id,
+                    context, KeySoundStyle.PACK, settings.value.sound.volume, result.pack.id,
                 )
             } else {
                 message = describeSoundPackImport(context, result)
@@ -487,13 +498,13 @@ private fun InstalledSoundPackSection(
         )
     }
 
+    val selectedId = settings.watch { s -> s.sound.packId.takeIf { s.sound.style == KeySoundStyle.PACK } }
     Column(modifier = Modifier.padding(vertical = 4.dp)) {
         if (packs.isEmpty()) {
             CaptionText(stringResource(R.string.hardware_sound_pack_empty))
         }
         for (pack in packs) {
-            val selected = settings.sound.style == KeySoundStyle.PACK &&
-                settings.sound.packId == pack.id
+            val selected = selectedId == pack.id
             HighlightableItem(pack.id) {
                 WmRow(
                     title = pack.name,
@@ -563,7 +574,7 @@ private fun InstalledSoundPackSection(
                         // that recorded the switch returning is being judged on
                         // both halves, and half of it is a different pack.
                         KeySoundPlayer.previewStroke(
-                            context, KeySoundStyle.PACK, settings.sound.volume, pack.id,
+                            context, KeySoundStyle.PACK, settings.value.sound.volume, pack.id,
                         )
                     },
                 )
@@ -588,13 +599,13 @@ private fun InstalledSoundPackSection(
 @Composable
 private fun KeyReleaseSoundToggle(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val store = remember { SoundPackStore.get(context) }
     val revision by store.revision.collectAsStateWithLifecycle()
-    val packId = settings.sound.packId
+    val packId = settings.watch { it.sound.packId }
     val hasRelease = remember(revision, packId) {
         store.resolve(packId)?.let { store.pack(it)?.hasRelease } == true
     }
@@ -602,31 +613,33 @@ private fun KeyReleaseSoundToggle(
     ToggleSetting(
         R.string.hardware_sound_pack_release_title,
         stringResource(R.string.hardware_sound_pack_release_subtitle),
-        settings.sound.playRelease,
+        settings.watch { it.sound.playRelease },
         default = SettingsDefaults.sound.playRelease,
     ) { on ->
         scope.launch { repository.setKeySoundPlayRelease(on) }
         // Turning it on previews the whole keystroke, which is the only way to
         // hear what the switch just bought; turning it off previews the press
         // alone, so the difference is the thing demonstrated either way.
+        val volume = settings.value.sound.volume
         if (on) {
-            KeySoundPlayer.previewStroke(
-                context, KeySoundStyle.PACK, settings.sound.volume, packId,
-            )
+            KeySoundPlayer.previewStroke(context, KeySoundStyle.PACK, volume, packId)
         } else {
-            KeySoundPlayer.preview(context, KeySoundStyle.PACK, settings.sound.volume, packId)
+            KeySoundPlayer.preview(context, KeySoundStyle.PACK, volume, packId)
         }
     }
 }
 @Composable
 internal fun KeyPressSettings(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onNavigate: (String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    // Lets the SYSTEM_* preview fire through the real platform key haptic.
+    // What decides which rows the groups hold; each row reads its own value.
+    val swipeDelete = settings.watch { it.backspaceSwipeDelete }
+    val swipeUnit = settings.watch { it.textEditing.backspaceSwipeUnit }
+    val holdDeletesWords = settings.watch { it.textEditing.deleteHoldDeletesWords }
     SettingsGroup {
         item {
             NavRow(
@@ -667,12 +680,12 @@ internal fun KeyPressSettings(
             ToggleSetting(
                 R.string.typing_backspace_swipe_title,
                 stringResource(R.string.typing_backspace_swipe_subtitle),
-                settings.backspaceSwipeDelete,
+                swipeDelete,
                 info = stringResource(R.string.typing_backspace_swipe_info),
                 default = SettingsDefaults.backspaceSwipeDelete,
             ) { scope.launch { repository.setBackspaceSwipeDelete(it) } }
         }
-        if (settings.backspaceSwipeDelete) {
+        if (swipeDelete) {
             item {
                 ChoiceSetting(
                     R.string.typing_backspace_unit_title,
@@ -684,7 +697,7 @@ internal fun KeyPressSettings(
                         BackspaceSwipeUnit.CHARACTER to
                             stringResource(R.string.typing_backspace_unit_character),
                     ),
-                    selected = settings.textEditing.backspaceSwipeUnit,
+                    selected = swipeUnit,
                     default = SettingsDefaults.textEditing.backspaceSwipeUnit,
                     detail = { unit ->
                         ChoiceDetail(
@@ -703,17 +716,17 @@ internal fun KeyPressSettings(
                 ToggleSetting(
                     R.string.typing_backspace_preview_title,
                     stringResource(R.string.typing_backspace_preview_subtitle),
-                    settings.textEditing.backspaceSwipePreview,
+                    settings.watch { it.textEditing.backspaceSwipePreview },
                     info = stringResource(R.string.typing_backspace_preview_info),
                     default = SettingsDefaults.textEditing.backspaceSwipePreview,
                 ) { scope.launch { repository.setBackspaceSwipePreview(it) } }
             }
-            if (settings.textEditing.backspaceSwipeUnit == BackspaceSwipeUnit.WORD) {
+            if (swipeUnit == BackspaceSwipeUnit.WORD) {
                 item {
                     SliderSetting(
                         R.string.typing_backspace_step_title,
                         subtitle = stringResource(R.string.typing_backspace_step_subtitle),
-                        value = settings.textEditing.backspaceWordStepDp.toFloat(),
+                        value = settings.watch { it.textEditing.backspaceWordStepDp }.toFloat(),
                         range = 32f..120f,
                         display = { context.getString(R.string.typing_value_dp, it.toInt()) },
                         info = stringResource(R.string.typing_backspace_step_info),
@@ -725,7 +738,7 @@ internal fun KeyPressSettings(
                     SliderSetting(
                         R.string.typing_backspace_char_step_title,
                         subtitle = stringResource(R.string.typing_backspace_char_step_subtitle),
-                        value = settings.textEditing.backspaceCharStepDp.toFloat(),
+                        value = settings.watch { it.textEditing.backspaceCharStepDp }.toFloat(),
                         range = 8f..48f,
                         display = { context.getString(R.string.typing_value_dp, it.toInt()) },
                         info = stringResource(R.string.typing_backspace_char_step_info),
@@ -738,7 +751,7 @@ internal fun KeyPressSettings(
             ToggleSetting(
                 R.string.typing_forward_delete_swipe_title,
                 stringResource(R.string.typing_forward_delete_swipe_subtitle),
-                settings.textEditing.forwardDeleteSwipe,
+                settings.watch { it.textEditing.forwardDeleteSwipe },
                 info = stringResource(R.string.typing_forward_delete_swipe_info),
                 default = SettingsDefaults.textEditing.forwardDeleteSwipe,
             ) { scope.launch { repository.setForwardDeleteSwipe(it) } }
@@ -754,7 +767,7 @@ internal fun KeyPressSettings(
             SliderSetting(
                 R.string.keypress_alternates_size_title,
                 subtitle = stringResource(R.string.keypress_alternates_size_subtitle),
-                value = settings.popup.alternatesFontScale,
+                value = settings.watch { it.popup.alternatesFontScale },
                 range = 0.7f..3.2f,
                 display = { context.getString(R.string.keypress_value_multiplier, it) },
                 info = stringResource(R.string.keypress_alternates_size_info),
@@ -765,7 +778,7 @@ internal fun KeyPressSettings(
             SliderSetting(
                 R.string.keypress_alternates_padding_title,
                 subtitle = stringResource(R.string.keypress_alternates_padding_subtitle),
-                value = settings.popup.alternatesPaddingDp.toFloat(),
+                value = settings.watch { it.popup.alternatesPaddingDp }.toFloat(),
                 range = 0f..32f,
                 display = { context.getString(R.string.keypress_value_dp, it.toInt()) },
                 info = stringResource(R.string.keypress_alternates_padding_info),
@@ -776,7 +789,7 @@ internal fun KeyPressSettings(
             StepperSetting(
                 R.string.keypress_alternates_columns_title,
                 subtitle = stringResource(R.string.keypress_alternates_columns_subtitle),
-                value = settings.popup.alternatesColumns,
+                value = settings.watch { it.popup.alternatesColumns },
                 range = AlternatesColumnsSteps,
                 // 0 is not a column count but the automatic wrap, so it steps in
                 // from 3 rather than 1 and reads as a word instead of a number.
@@ -795,7 +808,7 @@ internal fun KeyPressSettings(
             ToggleSetting(
                 R.string.keypress_alternates_nearest_title,
                 stringResource(R.string.keypress_alternates_nearest_subtitle),
-                settings.popup.alternatesNearestFirst,
+                settings.watch { it.popup.alternatesNearestFirst },
                 info = stringResource(R.string.keypress_alternates_nearest_info),
                 default = SettingsDefaults.popup.alternatesNearestFirst,
             ) { scope.launch { repository.setAlternatesNearestFirst(it) } }
@@ -804,7 +817,7 @@ internal fun KeyPressSettings(
             ToggleSetting(
                 R.string.keypress_alternates_hold_title,
                 stringResource(R.string.keypress_alternates_hold_subtitle),
-                settings.popup.alternatesHoldToSelect,
+                settings.watch { it.popup.alternatesHoldToSelect },
                 info = stringResource(R.string.keypress_alternates_hold_info),
                 default = SettingsDefaults.popup.alternatesHoldToSelect,
             ) { scope.launch { repository.setAlternatesHoldToSelect(it) } }
@@ -816,7 +829,7 @@ internal fun KeyPressSettings(
             SliderSetting(
                 R.string.keypress_long_press_delay_title,
                 subtitle = stringResource(R.string.keypress_long_press_delay_subtitle),
-                value = settings.longPressDelayMs.toFloat(),
+                value = settings.watch { it.longPressDelayMs }.toFloat(),
                 range = 100f..800f,
                 display = { context.getString(R.string.keypress_value_ms, it.toInt()) },
                 info = stringResource(R.string.keypress_long_press_delay_info),
@@ -827,7 +840,7 @@ internal fun KeyPressSettings(
             SliderSetting(
                 R.string.keypress_repeat_start_title,
                 subtitle = stringResource(R.string.keypress_repeat_start_subtitle),
-                value = settings.keyRepeat.startDelayMs.toFloat(),
+                value = settings.watch { it.keyRepeat.startDelayMs }.toFloat(),
                 range = 150f..800f,
                 display = { context.getString(R.string.keypress_value_ms, it.toInt()) },
                 info = stringResource(R.string.keypress_repeat_start_info),
@@ -838,7 +851,7 @@ internal fun KeyPressSettings(
             SliderSetting(
                 R.string.keypress_delete_repeat_title,
                 subtitle = stringResource(R.string.keypress_delete_repeat_subtitle),
-                value = settings.keyRepeat.deleteMs.toFloat(),
+                value = settings.watch { it.keyRepeat.deleteMs }.toFloat(),
                 range = 20f..200f,
                 display = { context.getString(R.string.keypress_value_ms, it.toInt()) },
                 info = stringResource(R.string.keypress_delete_repeat_info),
@@ -849,16 +862,16 @@ internal fun KeyPressSettings(
             ToggleSetting(
                 R.string.keypress_hold_words_title,
                 stringResource(R.string.keypress_hold_words_subtitle),
-                settings.textEditing.deleteHoldDeletesWords,
+                holdDeletesWords,
                 info = stringResource(R.string.keypress_hold_words_info),
                 default = SettingsDefaults.textEditing.deleteHoldDeletesWords,
             ) { scope.launch { repository.setDeleteHoldDeletesWords(it) } }
         }
-        item(visible = settings.textEditing.deleteHoldDeletesWords) {
+        item(visible = holdDeletesWords) {
             SliderSetting(
                 R.string.keypress_word_delete_repeat_title,
                 subtitle = stringResource(R.string.keypress_word_delete_repeat_subtitle),
-                value = settings.keyRepeat.wordDeleteMs.toFloat(),
+                value = settings.watch { it.keyRepeat.wordDeleteMs }.toFloat(),
                 range = 60f..500f,
                 display = { context.getString(R.string.keypress_value_ms, it.toInt()) },
                 info = stringResource(R.string.keypress_word_delete_repeat_info),
@@ -869,7 +882,7 @@ internal fun KeyPressSettings(
             SliderSetting(
                 R.string.keypress_space_repeat_title,
                 subtitle = stringResource(R.string.keypress_space_repeat_subtitle),
-                value = settings.keyRepeat.spaceMs.toFloat(),
+                value = settings.watch { it.keyRepeat.spaceMs }.toFloat(),
                 range = 20f..200f,
                 display = { context.getString(R.string.keypress_value_ms, it.toInt()) },
                 info = stringResource(R.string.keypress_space_repeat_info),
@@ -880,7 +893,7 @@ internal fun KeyPressSettings(
             SliderSetting(
                 R.string.keypress_custom_repeat_title,
                 subtitle = stringResource(R.string.keypress_custom_repeat_subtitle),
-                value = settings.keyRepeat.customKeyMs.toFloat(),
+                value = settings.watch { it.keyRepeat.customKeyMs }.toFloat(),
                 range = 20f..200f,
                 display = { context.getString(R.string.keypress_value_ms, it.toInt()) },
                 info = stringResource(R.string.keypress_custom_repeat_info),
@@ -891,7 +904,7 @@ internal fun KeyPressSettings(
             SliderSetting(
                 R.string.keypress_caps_lock_title,
                 subtitle = stringResource(R.string.keypress_caps_lock_subtitle),
-                value = settings.layoutBehavior.shiftCapsLockMs.toFloat(),
+                value = settings.watch { it.layoutBehavior.shiftCapsLockMs }.toFloat(),
                 range = ShiftCapsLockMsRange.first.toFloat()..ShiftCapsLockMsRange.last.toFloat(),
                 display = { context.getString(R.string.keypress_value_ms, it.toInt()) },
                 info = stringResource(R.string.keypress_caps_lock_info),
@@ -905,26 +918,29 @@ internal fun KeyPressSettings(
 @Composable
 internal fun KeyPressHapticsSettings(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onNavigate: (String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val view = LocalView.current
+    // What decides which rows the group holds; each row reads its own value.
+    val hapticsOn = settings.watch { it.haptics.enabled }
+    val hapticStyle = settings.watch { it.haptics.style }
+    val soundOn = settings.watch { it.sound.enabled }
     SettingsGroup(stringResource(R.string.keypress_haptics_group_title)) {
         item {
             ToggleSetting(
                 R.string.keypress_haptics_title,
                 stringResource(R.string.keypress_haptics_subtitle),
-                settings.haptics.enabled,
+                hapticsOn,
                 info = stringResource(R.string.keypress_haptics_info),
                 default = SettingsDefaults.haptics.enabled,
             ) {
                 scope.launch { repository.setHapticFeedback(it) }
                 if (it) {
-                    HapticPlayer.preview(
-                        context, settings.haptics.style, settings.haptics.amplitude, settings.haptics.strengthMs,
-                    )
+                    val haptics = settings.value.haptics
+                    HapticPlayer.preview(context, haptics.style, haptics.amplitude, haptics.strengthMs)
                 }
             }
         }
@@ -943,13 +959,14 @@ internal fun KeyPressHapticsSettings(
                 ) {
                     HapticStyle.entries.forEach { style ->
                         FilterChip(
-                            selected = settings.haptics.style == style,
+                            selected = hapticStyle == style,
                             onClick = {
                                 scope.launch { repository.setHapticStyle(style) }
                                 // Fire the motor with the freshly picked style so the
                                 // user feels the choice immediately.
+                                val haptics = settings.value.haptics
                                 HapticPlayer.preview(
-                                    context, style, settings.haptics.amplitude, settings.haptics.strengthMs, view,
+                                    context, style, haptics.amplitude, haptics.strengthMs, view,
                                 )
                             },
                             label = { Text(stringResource(style.labelRes), maxLines = 1) },
@@ -958,28 +975,29 @@ internal fun KeyPressHapticsSettings(
                 }
             }
         }
-        item(visible = settings.haptics.style == HapticStyle.CUSTOM) {
+        item(visible = hapticStyle == HapticStyle.CUSTOM) {
             SliderSetting(
                 R.string.keypress_haptic_strength_title,
                 subtitle = stringResource(R.string.keypress_haptic_strength_subtitle),
-                value = settings.haptics.strengthMs.toFloat(),
+                value = settings.watch { it.haptics.strengthMs }.toFloat(),
                 range = 5f..60f,
                 display = { context.getString(R.string.keypress_value_ms, it.roundToInt()) },
                 info = stringResource(R.string.keypress_haptic_strength_info),
                 default = SettingsDefaults.haptics.strengthMs.toFloat(),
                 // Debounced inside the player, so dragging previews smoothly.
                 preview = {
-                    HapticPlayer.preview(context, settings.haptics.style, settings.haptics.amplitude, it.toInt(), view)
+                    val haptics = settings.value.haptics
+                    HapticPlayer.preview(context, haptics.style, haptics.amplitude, it.toInt(), view)
                 },
             ) {
                 scope.launch { repository.setHapticStrengthMs(it.toInt()) }
             }
         }
-        item(visible = settings.haptics.style == HapticStyle.CUSTOM || settings.haptics.style == HapticStyle.SHARP) {
+        item(visible = hapticStyle == HapticStyle.CUSTOM || hapticStyle == HapticStyle.SHARP) {
             SliderSetting(
                 R.string.keypress_haptic_intensity_title,
                 subtitle = stringResource(R.string.keypress_haptic_intensity_subtitle),
-                value = settings.haptics.amplitude.toFloat(),
+                value = settings.watch { it.haptics.amplitude }.toFloat(),
                 range = 1f..255f,
                 display = {
                     context.getString(R.string.keypress_value_percent, it.roundToInt() * 100 / 255)
@@ -988,7 +1006,8 @@ internal fun KeyPressHapticsSettings(
                 default = SettingsDefaults.haptics.amplitude.toFloat(),
                 // Debounced inside the player, so dragging previews smoothly.
                 preview = {
-                    HapticPlayer.preview(context, settings.haptics.style, it.toInt(), settings.haptics.strengthMs, view)
+                    val haptics = settings.value.haptics
+                    HapticPlayer.preview(context, haptics.style, it.toInt(), haptics.strengthMs, view)
                 },
             ) {
                 scope.launch { repository.setHapticAmplitude(it.toInt()) }
@@ -998,7 +1017,7 @@ internal fun KeyPressHapticsSettings(
             ToggleSetting(
                 R.string.keypress_long_press_haptics_title,
                 stringResource(R.string.keypress_long_press_haptics_subtitle),
-                settings.haptics.onLongPress,
+                settings.watch { it.haptics.onLongPress },
                 info = stringResource(R.string.keypress_long_press_haptics_info),
                 default = SettingsDefaults.haptics.onLongPress,
             ) { scope.launch { repository.setHapticOnLongPress(it) } }
@@ -1007,54 +1026,54 @@ internal fun KeyPressHapticsSettings(
             ToggleSetting(
                 R.string.keypress_long_press_release_title,
                 stringResource(R.string.keypress_long_press_release_subtitle),
-                settings.haptics.onLongPressRelease,
+                settings.watch { it.haptics.onLongPressRelease },
                 info = stringResource(R.string.keypress_long_press_release_info),
                 default = SettingsDefaults.haptics.onLongPressRelease,
             ) { scope.launch { repository.setHapticOnLongPressRelease(it) } }
         }
         // Per-event gates: only meaningful while the master switch above is on,
         // so they fold away when it is off.
-        item(visible = settings.haptics.enabled) {
+        item(visible = hapticsOn) {
             ToggleSetting(
                 R.string.keypress_vibrate_space_title,
                 stringResource(R.string.keypress_vibrate_space_subtitle),
-                settings.feedback.vibrateOnSpace,
+                settings.watch { it.feedback.vibrateOnSpace },
                 info = stringResource(R.string.keypress_vibrate_space_info),
                 default = SettingsDefaults.feedback.vibrateOnSpace,
             ) { scope.launch { repository.setVibrateOnSpace(it) } }
         }
-        item(visible = settings.haptics.enabled) {
+        item(visible = hapticsOn) {
             ToggleSetting(
                 R.string.keypress_vibrate_delete_swipe_title,
                 stringResource(R.string.keypress_vibrate_delete_swipe_subtitle),
-                settings.feedback.vibrateOnDeleteSwipe,
+                settings.watch { it.feedback.vibrateOnDeleteSwipe },
                 info = stringResource(R.string.keypress_vibrate_delete_swipe_info),
                 default = SettingsDefaults.feedback.vibrateOnDeleteSwipe,
             ) { scope.launch { repository.setVibrateOnDeleteSwipe(it) } }
         }
-        item(visible = settings.haptics.enabled) {
+        item(visible = hapticsOn) {
             ToggleSetting(
                 R.string.keypress_vibrate_repeat_title,
                 stringResource(R.string.keypress_vibrate_repeat_subtitle),
-                settings.feedback.vibrateOnRepeat,
+                settings.watch { it.feedback.vibrateOnRepeat },
                 info = stringResource(R.string.keypress_vibrate_repeat_info),
                 default = SettingsDefaults.feedback.vibrateOnRepeat,
             ) { scope.launch { repository.setVibrateOnRepeat(it) } }
         }
-        item(visible = settings.haptics.enabled) {
+        item(visible = hapticsOn) {
             ToggleSetting(
                 R.string.keypress_system_touch_title,
                 stringResource(R.string.keypress_system_touch_subtitle),
-                settings.feedback.respectSystemTouchFeedback,
+                settings.watch { it.feedback.respectSystemTouchFeedback },
                 info = stringResource(R.string.keypress_system_touch_info),
                 default = SettingsDefaults.feedback.respectSystemTouchFeedback,
             ) { scope.launch { repository.setRespectSystemTouchFeedback(it) } }
         }
-        item(visible = settings.haptics.enabled) {
+        item(visible = hapticsOn) {
             ToggleSetting(
                 R.string.keypress_dnd_mute_title,
                 stringResource(R.string.keypress_dnd_mute_subtitle),
-                settings.feedback.hapticsRespectDnd,
+                settings.watch { it.feedback.hapticsRespectDnd },
                 info = stringResource(R.string.keypress_dnd_mute_info),
                 default = SettingsDefaults.feedback.hapticsRespectDnd,
             ) { scope.launch { repository.setHapticsRespectDnd(it) } }
@@ -1063,11 +1082,11 @@ internal fun KeyPressHapticsSettings(
         // sound switch, which is where it was drawn from until this was fixed.
         // It sat under the haptics master, so it was both shown while it could
         // not be heard and hidden while it could.
-        if (settings.sound.enabled) item {
+        if (soundOn) item {
             ToggleSetting(
                 R.string.keypress_sound_repeat_title,
                 stringResource(R.string.keypress_sound_repeat_subtitle),
-                settings.feedback.soundOnRepeat,
+                settings.watch { it.feedback.soundOnRepeat },
                 info = stringResource(R.string.keypress_sound_repeat_info),
                 default = SettingsDefaults.feedback.soundOnRepeat,
             ) { scope.launch { repository.setSoundOnRepeat(it) } }
@@ -1079,15 +1098,18 @@ internal fun KeyPressHapticsSettings(
 @Composable
 internal fun KeyPressPopupSettings(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     var popupShapePickerOpen by rememberSaveable { mutableStateOf(false) }
+    // What decides which rows the group holds; each row reads its own value.
+    val popupOn = settings.watch { it.popup.enabled }
+    val onKey = settings.watch { it.popup.onKey }
     if (popupShapePickerOpen) {
         KeyShapePickerDialog(
-            selected = settings.popup.shape,
-            radiusDp = settings.popup.cornerRadiusDp,
+            selected = settings.watch { it.popup.shape },
+            radiusDp = settings.watch { it.popup.cornerRadiusDp },
             onPick = { kind ->
                 scope.launch { repository.setKeyPopupShape(kind) }
                 popupShapePickerOpen = false
@@ -1101,36 +1123,36 @@ internal fun KeyPressPopupSettings(
             ToggleSetting(
                 R.string.keypress_popup_title,
                 stringResource(R.string.keypress_popup_subtitle),
-                settings.popup.enabled,
+                popupOn,
                 info = stringResource(R.string.keypress_popup_info),
                 default = SettingsDefaults.popup.enabled,
             ) { scope.launch { repository.setKeyPopup(it) } }
         }
-        item(visible = settings.popup.enabled) {
+        item(visible = popupOn) {
             ToggleSetting(
                 R.string.keypress_popup_numeric_title,
                 stringResource(R.string.keypress_popup_numeric_subtitle),
-                settings.popup.inNumericFields,
+                settings.watch { it.popup.inNumericFields },
                 info = stringResource(R.string.keypress_popup_numeric_info),
                 default = SettingsDefaults.popup.inNumericFields,
             ) { scope.launch { repository.setKeyPopupInNumericFields(it) } }
         }
-        item(visible = settings.popup.enabled) {
+        item(visible = popupOn) {
             SliderSetting(
                 R.string.keypress_popup_min_duration_title,
                 subtitle = stringResource(R.string.keypress_popup_min_duration_subtitle),
-                value = settings.popup.minDurationMs.toFloat(),
+                value = settings.watch { it.popup.minDurationMs }.toFloat(),
                 range = 0f..300f,
                 display = { context.getString(R.string.keypress_value_ms, it.toInt()) },
                 info = stringResource(R.string.keypress_popup_min_duration_info),
                 default = SettingsDefaults.popup.minDurationMs.toFloat(),
             ) { scope.launch { repository.setKeyPopupMinDurationMs(it.toInt()) } }
         }
-        item(visible = settings.popup.enabled) {
+        item(visible = popupOn) {
             SliderSetting(
                 R.string.keypress_popup_max_duration_title,
                 subtitle = stringResource(R.string.keypress_popup_max_duration_subtitle),
-                value = settings.popup.maxDurationMs.toFloat(),
+                value = settings.watch { it.popup.maxDurationMs }.toFloat(),
                 range = 400f..2000f,
                 display = { context.getString(R.string.keypress_value_ms, it.toInt()) },
                 info = stringResource(R.string.keypress_popup_max_duration_info),
@@ -1141,14 +1163,14 @@ internal fun KeyPressPopupSettings(
         // the switch at the top of the group is off. The font size below is
         // not among them: the flick popup and the spacebar language tooltip
         // read it too.
-        if (settings.popup.enabled) item {
+        if (popupOn) item {
             // A theme may name the placement itself; the row then says so
             // rather than flipping a switch the board no longer reads (#88).
             val pinned = themePinSubtitle(settings) { popupOnKeyOrNull(it.popupPlacement) }
             ToggleSetting(
                 R.string.keypress_popup_on_key_title,
                 pinned ?: stringResource(R.string.keypress_popup_on_key_subtitle),
-                settings.popup.onKey,
+                onKey,
                 info = stringResource(R.string.keypress_popup_on_key_info),
                 enabled = pinned == null,
                 default = SettingsDefaults.popup.onKey,
@@ -1158,24 +1180,24 @@ internal fun KeyPressPopupSettings(
             SliderSetting(
                 R.string.keypress_popup_font_size_title,
                 subtitle = stringResource(R.string.keypress_popup_font_size_subtitle),
-                value = settings.popup.fontScale,
+                value = settings.watch { it.popup.fontScale },
                 range = 0.7f..1.6f,
                 display = { context.getString(R.string.keypress_value_multiplier, it) },
                 info = stringResource(R.string.keypress_popup_font_size_info),
                 default = SettingsDefaults.popup.fontScale,
             ) { scope.launch { repository.setPopupFontScale(it) } }
         }
-        if (settings.popup.enabled) item {
+        if (popupOn) item {
             // Pinned when the theme sizes the style the board is drawing —
             // its own placement where it names one, else this switch's.
             val pinned = themePinSubtitle(settings) { spec ->
-                val onKey = popupOnKeyOrNull(spec.popupPlacement) ?: settings.popup.onKey
-                if (onKey) spec.popupHeightDp else spec.popupFloatingHeightDp
+                val drawnOnKey = popupOnKeyOrNull(spec.popupPlacement) ?: onKey
+                if (drawnOnKey) spec.popupHeightDp else spec.popupFloatingHeightDp
             }
             SliderSetting(
                 R.string.keypress_popup_height_title,
                 subtitle = pinned ?: stringResource(R.string.keypress_popup_height_subtitle),
-                value = settings.popup.heightDp.toFloat(),
+                value = settings.watch { it.popup.heightDp }.toFloat(),
                 range = 32f..160f,
                 display = { context.getString(R.string.keypress_value_dp, it.toInt()) },
                 info = stringResource(R.string.keypress_popup_height_info),
@@ -1183,28 +1205,28 @@ internal fun KeyPressPopupSettings(
                 // The default of the style the slider is showing: the on-key
                 // one was handed to the floating bubble too, so a reset while
                 // floating set it to 110 dp.
-                default = SettingsDefaults.popup.heightFor(settings.popup.onKey).toFloat(),
+                default = SettingsDefaults.popup.heightFor(onKey).toFloat(),
             ) { scope.launch { repository.setKeyPopupHeightDp(it.toInt()) } }
         }
         // Only the floating bubble is placed by these. The on-key one grows out
         // of the key it covers, so there is no distance to set: its height is
         // what carries it past the finger, and that slider is above.
-        item(visible = settings.popup.enabled && !settings.popup.onKey) {
+        item(visible = popupOn && !onKey) {
             SliderSetting(
                 R.string.keypress_popup_offset_y_title,
                 subtitle = stringResource(R.string.keypress_popup_offset_y_subtitle),
-                value = settings.popup.floatingOffsetYDp.toFloat(),
+                value = settings.watch { it.popup.floatingOffsetYDp }.toFloat(),
                 range = 0f..96f,
                 display = { context.getString(R.string.keypress_value_dp, it.toInt()) },
                 info = stringResource(R.string.keypress_popup_offset_y_info),
                 default = SettingsDefaults.popup.floatingOffsetYDp.toFloat(),
             ) { scope.launch { repository.setKeyPopupFloatingOffsetYDp(it.toInt()) } }
         }
-        item(visible = settings.popup.enabled && !settings.popup.onKey) {
+        item(visible = popupOn && !onKey) {
             SliderSetting(
                 R.string.keypress_popup_offset_x_title,
                 subtitle = stringResource(R.string.keypress_popup_offset_x_subtitle),
-                value = settings.popup.floatingOffsetXDp.toFloat(),
+                value = settings.watch { it.popup.floatingOffsetXDp }.toFloat(),
                 range = -64f..64f,
                 display = { context.getString(R.string.keypress_value_dp, it.toInt()) },
                 info = stringResource(R.string.keypress_popup_offset_x_info),
@@ -1218,7 +1240,7 @@ internal fun KeyPressPopupSettings(
             NavRow(
                 R.string.keypress_popup_shape_title,
                 subtitle = stringResource(R.string.keypress_popup_shape_subtitle),
-                value = keyShapeName(settings.popup.shape),
+                value = keyShapeName(settings.watch { it.popup.shape }),
                 onClick = { popupShapePickerOpen = true },
             )
         }
@@ -1226,7 +1248,7 @@ internal fun KeyPressPopupSettings(
             SliderSetting(
                 R.string.keypress_popup_radius_title,
                 subtitle = stringResource(R.string.keypress_popup_radius_subtitle),
-                value = settings.popup.cornerRadiusDp.toFloat(),
+                value = settings.watch { it.popup.cornerRadiusDp }.toFloat(),
                 range = 0f..40f,
                 display = { context.getString(R.string.keypress_value_dp, it.toInt()) },
                 info = stringResource(R.string.keypress_popup_radius_info),
@@ -1238,20 +1260,20 @@ internal fun KeyPressPopupSettings(
         // popup colour. Seeded from the settings app's own surface, which is
         // only where the wheel opens — the keyboard's palette cannot be read
         // here without repainting this screen in it.
-        if (settings.popup.enabled) item {
+        if (popupOn) item {
             ColorSetting(
                 R.string.keypress_popup_background_title,
                 subtitle = stringResource(R.string.keypress_popup_background_subtitle),
-                color = settings.popup.backgroundColor,
+                color = settings.watch { it.popup.backgroundColor },
                 fallback = MaterialTheme.colorScheme.surfaceVariant.argbLong(),
                 info = stringResource(R.string.keypress_popup_background_info),
             ) { scope.launch { repository.setKeyPopupBackgroundColor(it) } }
         }
-        if (settings.popup.enabled) item {
+        if (popupOn) item {
             ColorSetting(
                 R.string.keypress_popup_text_color_title,
                 subtitle = stringResource(R.string.keypress_popup_text_color_subtitle),
-                color = settings.popup.textColor,
+                color = settings.watch { it.popup.textColor },
                 fallback = MaterialTheme.colorScheme.onSurfaceVariant.argbLong(),
                 info = stringResource(R.string.keypress_popup_text_color_info),
             ) { scope.launch { repository.setKeyPopupTextColor(it) } }
@@ -1262,15 +1284,17 @@ internal fun KeyPressPopupSettings(
 @Composable
 internal fun KeyPressShortcutsSettings(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
 ) {
     val scope = rememberCoroutineScope()
+    // Decides which rows the group holds; the rows read everything else.
+    val holdActions = settings.watch { it.longPressLetterActions }
     SettingsGroup(stringResource(R.string.keypress_shortcuts_group_title)) {
         item {
             ToggleSetting(
                 R.string.keypress_long_press_hints_title,
                 stringResource(R.string.keypress_long_press_hints_subtitle),
-                settings.longPressHints,
+                settings.watch { it.longPressHints },
                 info = stringResource(R.string.keypress_long_press_hints_info),
                 default = SettingsDefaults.longPressHints,
             ) { scope.launch { repository.setLongPressHints(it) } }
@@ -1279,7 +1303,7 @@ internal fun KeyPressShortcutsSettings(
             ToggleSetting(
                 R.string.keypress_all_accents_title,
                 stringResource(R.string.keypress_all_accents_subtitle),
-                settings.layoutBehavior.showAllPopupKeys,
+                settings.watch { it.layoutBehavior.showAllPopupKeys },
                 info = stringResource(R.string.keypress_all_accents_info),
                 default = SettingsDefaults.layoutBehavior.showAllPopupKeys,
             ) { scope.launch { repository.setShowAllPopupKeys(it) } }
@@ -1290,7 +1314,7 @@ internal fun KeyPressShortcutsSettings(
             ToggleSetting(
                 R.string.keypress_shifted_popup_title,
                 stringResource(R.string.keypress_shifted_popup_subtitle),
-                settings.layoutBehavior.shiftedPopupKeys,
+                settings.watch { it.layoutBehavior.shiftedPopupKeys },
                 info = stringResource(R.string.keypress_shifted_popup_info),
                 default = SettingsDefaults.layoutBehavior.shiftedPopupKeys,
             ) { scope.launch { repository.setShiftedPopupKeys(it) } }
@@ -1299,7 +1323,7 @@ internal fun KeyPressShortcutsSettings(
             ToggleSetting(
                 R.string.keypress_symbols_numpad_title,
                 stringResource(R.string.keypress_symbols_numpad_subtitle),
-                settings.layoutBehavior.symbolsLongPressNumpad,
+                settings.watch { it.layoutBehavior.symbolsLongPressNumpad },
                 info = stringResource(R.string.keypress_symbols_numpad_info),
                 default = SettingsDefaults.layoutBehavior.symbolsLongPressNumpad,
             ) { scope.launch { repository.setSymbolsLongPressNumpad(it) } }
@@ -1308,7 +1332,7 @@ internal fun KeyPressShortcutsSettings(
             ToggleSetting(
                 R.string.keypress_enter_emoji_title,
                 stringResource(R.string.keypress_enter_emoji_subtitle),
-                settings.layoutBehavior.enterLongPressEmoji,
+                settings.watch { it.layoutBehavior.enterLongPressEmoji },
                 info = stringResource(R.string.keypress_enter_emoji_info),
                 default = SettingsDefaults.layoutBehavior.enterLongPressEmoji,
             ) { scope.launch { repository.setEnterLongPressEmoji(it) } }
@@ -1316,9 +1340,10 @@ internal fun KeyPressShortcutsSettings(
         item {
             // A44: the $ key's long-press currency glyphs, space-separated. Blank
             // restores the built-in set. Mirrors the layout editor's alternates field.
-            var currencyText by remember(settings.layoutBehavior.currencyKeys) {
+            val currencyKeys = settings.watch { it.layoutBehavior.currencyKeys }
+            var currencyText by remember(currencyKeys) {
                 mutableStateOf(
-                    settings.layoutBehavior.currencyKeys
+                    currencyKeys
                         .ifEmpty { DefaultCurrencyKeys }
                         .joinToString(" "),
                 )
@@ -1344,13 +1369,13 @@ internal fun KeyPressShortcutsSettings(
             ToggleSetting(
                 R.string.keypress_ctrl_raw_title,
                 stringResource(R.string.keypress_ctrl_raw_subtitle),
-                settings.rawClipboardShortcuts,
+                settings.watch { it.rawClipboardShortcuts },
                 info = stringResource(R.string.keypress_ctrl_raw_info),
                 default = SettingsDefaults.rawClipboardShortcuts,
             ) { scope.launch { repository.setRawClipboardShortcuts(it) } }
         }
         item {
-            val actions = settings.longPressLetterActions
+            val actions = holdActions
             MultiChoiceSetting(
                 R.string.keypress_hold_actions_title,
                 subtitle = stringResource(R.string.keypress_hold_actions_subtitle),
@@ -1367,7 +1392,6 @@ internal fun KeyPressShortcutsSettings(
                 }
             }
         }
-        val holdActions = settings.longPressLetterActions
         val anyHoldAction = holdActions.selectAll || holdActions.copy || holdActions.paste ||
             holdActions.cut || holdActions.undo || holdActions.redo
         if (anyHoldAction) {

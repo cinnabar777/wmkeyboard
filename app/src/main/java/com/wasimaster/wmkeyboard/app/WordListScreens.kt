@@ -56,7 +56,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import com.wasimaster.wmkeyboard.core.script.LanguageRegistry
 import com.wasimaster.wmkeyboard.core.layout.language
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.SettingsRepository
 import com.wasimaster.wmkeyboard.core.emoji.EmojiDictCatalog
 import com.wasimaster.wmkeyboard.core.emoji.EmojiDictStore
@@ -85,7 +84,7 @@ private operator fun CustomDictionaries.Written.plus(other: CustomDictionaries.W
 @Composable
 internal fun CustomDictionarySettings(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onNavigate: (String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -108,7 +107,7 @@ internal fun CustomDictionarySettings(
             // language off took its lists out of the one screen that manages
             // them, while the files stayed on disk and in Storage.
             val ids = LinkedHashSet<String>()
-            settings.enabledLanguages.mapTo(ids) { it.id }
+            settings.value.enabledLanguages.mapTo(ids) { it.id }
             ids.addAll(CustomDictionaries.languagesWithLists(context.filesDir))
             ids.associateWith { langId ->
                 // allLists, not lists: a switched-off list still has to be
@@ -285,7 +284,7 @@ internal fun CustomDictionarySettings(
     // that still has lists on disk. Those used to disappear from this screen
     // entirely while their files stayed, so the only way to reach a list again
     // was to work out which language it belonged to and re-enable that.
-    val enabledIds = settings.enabledLanguages.map { it.id }
+    val enabledIds = settings.watch { s -> s.enabledLanguages.map { it.id } }
     val strandedIds = lists.keys.filter { it !in enabledIds && lists[it]?.isNotEmpty() == true }
     val offHeader = stringResource(R.string.customdict_language_off_header)
     // Languages with a list, plus one the user just asked for; the rest sit
@@ -299,6 +298,8 @@ internal fun CustomDictionarySettings(
         val entries = lists[langId].orEmpty()
         val languageOff = langId in strandedIds
         val header = languageLabel(langId)
+        // Decides whether the empty-lists warning is a row of the group.
+        val shipped = settings.watch { it.suggestionStrip.shippedDictionaryEnabledFor(langId) }
         SettingsGroup(if (languageOff) offHeader.format(header) else header) {
             for (entry in entries) {
                 item {
@@ -386,7 +387,6 @@ internal fun CustomDictionarySettings(
                 // with no words at all, and a row that can do that is not worth
                 // offering next to an empty group (#28).
                 if (entries.isNotEmpty()) {
-                    val shipped = settings.suggestionStrip.shippedDictionaryEnabledFor(langId)
                     item {
                         ToggleSetting(
                             R.string.customdict_only_my_lists_title,
@@ -672,7 +672,7 @@ private data class EmojiPackEntry(val file: java.io.File, val emoji: Int)
 @Composable
 internal fun EmojiKeywordSettings(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onNavigate: (String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -687,8 +687,9 @@ internal fun EmojiKeywordSettings(
     // can arrive for a language that isn't enabled — an addon repository
     // installs by langId, and languages get turned off again. Those groups
     // still have to appear or the pack would be uninstallable from here.
-    val languageIds = remember(settings.enabledLanguages, packs.keys) {
-        (settings.enabledLanguages.map { it.id } + packs.keys).distinct()
+    val enabledIds = settings.watch { s -> s.enabledLanguages.map { it.id } }
+    val languageIds = remember(enabledIds, packs.keys) {
+        (enabledIds + packs.keys).distinct()
     }
 
     // Counting emoji means parsing every pack, so it never runs on the main
@@ -700,7 +701,7 @@ internal fun EmojiKeywordSettings(
             // installs by langId, and languages get turned off again. Those
             // groups still have to appear or the pack is unreachable.
             val ids = (
-                settings.enabledLanguages.map { it.id } +
+                settings.value.enabledLanguages.map { it.id } +
                     EmojiKeywordPacks.languages(context.filesDir) +
                     EmojiDictStore.downloadedLanguageIds(context.filesDir)
                 ).distinct()
@@ -801,7 +802,7 @@ internal fun EmojiKeywordSettings(
     // the line demonstrates the feature instead of demonstrating three scripts
     // they may not read.
     val packExamples = EmojiSearchExamples
-        .pick(EmojiSearchExamples.money, settings.enabledLanguages.map { it.id }, limit = 3)
+        .pick(EmojiSearchExamples.money, enabledIds, limit = 3)
         .joinToString(", ")
     Text(
         stringResource(R.string.customdict_emoji_info, packExamples),
@@ -815,14 +816,14 @@ internal fun EmojiKeywordSettings(
             // fetched at all, and it returns before this one is read. Greyed
             // rather than hidden: that switch is on another screen, so a row
             // that vanished would leave nothing to explain itself.
-            val autoDownloads = settings.autoDownloadLanguageData
+            val autoDownloads = settings.watch { it.autoDownloadLanguageData }
             ToggleSetting(
                 R.string.customdict_emoji_auto_download_title,
                 stringResource(
                     if (autoDownloads) R.string.customdict_emoji_auto_download_subtitle
                     else R.string.customdict_emoji_auto_download_blocked,
                 ),
-                settings.emoji.autoDownloadKeywords,
+                settings.watch { it.emoji.autoDownloadKeywords },
                 info = stringResource(R.string.customdict_emoji_auto_download_info),
                 enabled = autoDownloads,
                 default = SettingsDefaults.emoji.autoDownloadKeywords,

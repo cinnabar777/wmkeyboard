@@ -14,9 +14,9 @@ import com.wasimaster.wmkeyboard.R
 import com.wasimaster.wmkeyboard.common.R as CommonR
 import android.os.Build
 import com.wasimaster.wmkeyboard.core.script.LanguageRegistry
+import com.wasimaster.wmkeyboard.core.layout.LayoutSpec
 import com.wasimaster.wmkeyboard.core.layout.language
 import com.wasimaster.wmkeyboard.core.layout.resolveLayout
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.SettingsRepository
 import kotlinx.coroutines.launch
 import androidx.compose.material.icons.outlined.Edit
@@ -46,7 +46,7 @@ private const val LANGUAGES_ANCHOR = "languages"
 @Composable
 internal fun LanguageSettings(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onNavigate: (String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -62,12 +62,17 @@ internal fun LanguageSettings(
     // layout, not just each language, so AZERTY and QWERTY keep distinct slots.
     var reordering by rememberSaveable { mutableStateOf(false) }
     val switchOrderItem = stringResource(R.string.langemoji_lang_switch_order_item_label)
-    val layoutLabel: (String) -> String = {
-        val layout = resolveLayout(settings.customLayouts, it)
+    val layoutLabel: (List<LayoutSpec>, String) -> String = { customLayouts, id ->
+        val layout = resolveLayout(customLayouts, id)
         val language = layout.language().displayName
         // A layout named after its own language would say it twice.
         if (layout.name == language) language else switchOrderItem.format(language, layout.name)
     }
+    // What decides which rows the groups hold; each row reads its own value.
+    val canReorder = settings.watch { it.enabledLayoutIds.size > 1 }
+    val languages = settings.watch { it.enabledLanguages }
+    val appLayoutsSaved = settings.watch { it.perAppLanguage.layoutByPackage.isNotEmpty() }
+    val osSwitcher = settings.watch { it.osLanguageSwitcher }
     // The two states of the list are one card stack growing or shrinking into
     // the other, not a swap between frames: the heading is identical in both,
     // so all the eye follows is the rows changing shape under it.
@@ -83,7 +88,7 @@ internal fun LanguageSettings(
     SettingsGroup(
         stringResource(R.string.langemoji_lang_your_languages_title),
         info = stringResource(R.string.langemoji_lang_intro_body),
-        action = if (settings.enabledLayoutIds.size > 1) {
+        action = if (canReorder) {
             {
             IconButton(onClick = { reordering = !reordering }) {
                 Icon(
@@ -95,9 +100,10 @@ internal fun LanguageSettings(
         } else null,
     ) {
         item(visible = editing) {
+            val customLayouts = settings.watch { it.customLayouts }
             ReorderableColumn(
-                settings.enabledLayoutIds,
-                label = layoutLabel,
+                settings.watch { it.enabledLayoutIds },
+                label = { layoutLabel(customLayouts, it) },
                 onReorder = { scope.launch { repository.setEnabledLayoutIds(it) } },
                 modifier = Modifier.padding(horizontal = 16.dp),
                 // The same pencil is the way out of the list: a language
@@ -108,18 +114,20 @@ internal fun LanguageSettings(
                 // refuses the last row, so the keyboard always has a layout.
                 onDelete = { layoutId ->
                     scope.launch {
-                        val next = settings.enabledLayoutIds - layoutId
+                        val next = settings.value.enabledLayoutIds - layoutId
                         if (next.isNotEmpty()) repository.setEnabledLayoutIds(next)
                     }
                 },
             )
         }
-        for (language in settings.enabledLanguages) {
+        for (language in languages) {
             if (editing) break
             item {
-                val names = settings.enabledLayoutIds
-                    .filter { resolveLayout(settings.customLayouts, it).language().id == language.id }
-                    .joinToString { resolveLayout(settings.customLayouts, it).name }
+                val names = settings.watch { s ->
+                    s.enabledLayoutIds
+                        .filter { resolveLayout(s.customLayouts, it).language().id == language.id }
+                        .joinToString { resolveLayout(s.customLayouts, it).name }
+                }
                 ScrollAnchor(language.id == returnTo) {
                     NavRow(
                         language.displayName,
@@ -153,7 +161,7 @@ internal fun LanguageSettings(
             ToggleSetting(
                 R.string.langemoji_lang_auto_download_title,
                 stringResource(R.string.langemoji_lang_auto_download_subtitle),
-                settings.autoDownloadLanguageData,
+                settings.watch { it.autoDownloadLanguageData },
                 info = stringResource(R.string.langemoji_lang_auto_download_info),
                 default = SettingsDefaults.autoDownloadLanguageData,
             ) { scope.launch { repository.setAutoDownloadLanguageData(it) } }
@@ -173,20 +181,21 @@ internal fun LanguageSettings(
             ToggleSetting(
                 R.string.langemoji_lang_autopair_title,
                 stringResource(R.string.langemoji_lang_autopair_subtitle),
-                settings.autoPairRomanized,
+                settings.watch { it.autoPairRomanized },
                 info = stringResource(R.string.langemoji_lang_autopair_info),
                 default = SettingsDefaults.autoPairRomanized,
             ) { scope.launch { repository.setAutoPairRomanized(it) } }
         }
         serverItems(repository, settings, endpoints = listOf(ServiceEndpoint.KEYMAN_API, ServiceEndpoint.KEYMAN_DOWNLOADS), repos = listOf(ServiceRepo.DATA))
-        if (settings.perAppLanguage.layoutByPackage.isNotEmpty()) {
+        if (appLayoutsSaved) {
             item {
+                val savedCount = settings.watch { it.perAppLanguage.layoutByPackage.size }
                 ActionRow(
                     title = R.string.langemoji_lang_forget_apps_title,
                     subtitle = pluralStringResource(
                         R.plurals.langemoji_lang_forget_apps_subtitle,
-                        settings.perAppLanguage.layoutByPackage.size,
-                        settings.perAppLanguage.layoutByPackage.size,
+                        savedCount,
+                        savedCount,
                     ),
                     action = stringResource(CommonR.string.common_clear),
                     confirm = stringResource(R.string.langemoji_lang_forget_apps_confirm),
@@ -200,7 +209,7 @@ internal fun LanguageSettings(
             ToggleSetting(
                 R.string.langemoji_lang_per_app_toggle_title,
                 stringResource(R.string.langemoji_lang_per_app_toggle_subtitle),
-                settings.perAppLanguage.enabled,
+                settings.watch { it.perAppLanguage.enabled },
                 info = stringResource(R.string.langemoji_lang_per_app_toggle_info),
                 default = SettingsDefaults.perAppLanguage.enabled,
             ) { scope.launch { repository.setRememberLayoutPerApp(it) } }
@@ -211,21 +220,21 @@ internal fun LanguageSettings(
             ToggleSetting(
                 R.string.langemoji_lang_os_switcher_title,
                 stringResource(R.string.langemoji_lang_os_switcher_subtitle),
-                settings.osLanguageSwitcher,
+                osSwitcher,
                 info = stringResource(R.string.langemoji_lang_os_switcher_info),
                 default = SettingsDefaults.osLanguageSwitcher,
             ) { scope.launch { repository.setOsLanguageSwitcher(it) } }
         }
-        item(visible = settings.osLanguageSwitcher) {
+        item(visible = osSwitcher) {
             ToggleSetting(
                 R.string.langemoji_lang_app_name_first_title,
                 stringResource(R.string.langemoji_lang_app_name_first_subtitle),
-                settings.subtypeAppNameFirst,
+                settings.watch { it.subtypeAppNameFirst },
                 info = stringResource(R.string.langemoji_lang_app_name_first_info),
                 default = SettingsDefaults.subtypeAppNameFirst,
             ) { scope.launch { repository.setSubtypeAppNameFirst(it) } }
         }
-        item(visible = settings.osLanguageSwitcher) {
+        item(visible = osSwitcher) {
             NavRow(
                 R.string.langemoji_lang_subtype_enabler_title,
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {

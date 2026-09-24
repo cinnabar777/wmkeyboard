@@ -8,7 +8,6 @@ import com.wasimaster.wmkeyboard.R
 import com.wasimaster.wmkeyboard.common.R as CommonR
 import com.wasimaster.wmkeyboard.core.accessibility.KeyboardPassthrough
 import com.wasimaster.wmkeyboard.core.settings.ColorVisionFilter
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.ScreenReaderMode
 import com.wasimaster.wmkeyboard.core.settings.SettingsDefaults
 import com.wasimaster.wmkeyboard.core.settings.SettingsRepository
@@ -27,7 +26,7 @@ private const val READABLE_FONT = "Atkinson Hyperlegible"
 @Composable
 internal fun AccessibilitySettings(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onOpenFonts: () -> Unit,
     onOpenLayout: () -> Unit,
     onOpenKeyPress: () -> Unit,
@@ -36,6 +35,8 @@ internal fun AccessibilitySettings(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val readableFontId = KeyboardFonts.googleId(READABLE_FONT)
+    // What decides which rows the group holds; each row reads its own value.
+    val screenReader = settings.watch { it.accessibility.screenReader }
 
     SettingsGroup(stringResource(R.string.accessibility_vision_title)) {
         item {
@@ -54,7 +55,7 @@ internal fun AccessibilitySettings(
                     ColorVisionFilter.GRAYSCALE to
                         stringResource(R.string.accessibility_color_vision_grey),
                 ),
-                selected = settings.accessibility.colorVision,
+                selected = settings.watch { it.accessibility.colorVision },
                 default = SettingsDefaults.accessibility.colorVision,
                 detail = { filter -> ChoiceDetail(stringResource(colorVisionDescRes(filter))) },
             ) { scope.launch { repository.setColorVisionFilter(it) } }
@@ -63,7 +64,7 @@ internal fun AccessibilitySettings(
             ToggleSetting(
                 R.string.accessibility_high_contrast_title,
                 stringResource(R.string.accessibility_high_contrast_subtitle),
-                settings.accessibility.highContrast,
+                settings.watch { it.accessibility.highContrast },
                 info = stringResource(R.string.accessibility_high_contrast_info),
                 default = SettingsDefaults.accessibility.highContrast,
             ) { scope.launch { repository.setHighContrastKeys(it) } }
@@ -72,7 +73,7 @@ internal fun AccessibilitySettings(
             ToggleSetting(
                 R.string.accessibility_key_outlines_title,
                 stringResource(R.string.accessibility_key_outlines_subtitle),
-                settings.accessibility.keyOutlines,
+                settings.watch { it.accessibility.keyOutlines },
                 info = stringResource(R.string.accessibility_key_outlines_info),
                 default = SettingsDefaults.accessibility.keyOutlines,
             ) { scope.launch { repository.setKeyOutlines(it) } }
@@ -85,7 +86,7 @@ internal fun AccessibilitySettings(
             ToggleSetting(
                 R.string.accessibility_bold_labels_title,
                 pinned ?: stringResource(R.string.accessibility_bold_labels_subtitle),
-                settings.accessibility.boldLabels,
+                settings.watch { it.accessibility.boldLabels },
                 info = stringResource(R.string.accessibility_bold_labels_info),
                 enabled = pinned == null,
                 default = SettingsDefaults.accessibility.boldLabels,
@@ -95,7 +96,7 @@ internal fun AccessibilitySettings(
             ToggleSetting(
                 R.string.accessibility_readable_font_title,
                 stringResource(R.string.accessibility_readable_font_subtitle, READABLE_FONT),
-                settings.keyFontId == readableFontId,
+                settings.watch { it.keyFontId == readableFontId },
                 info = stringResource(R.string.accessibility_readable_font_info, READABLE_FONT),
                 default = SettingsDefaults.keyFontId == readableFontId,
             ) { on ->
@@ -108,7 +109,7 @@ internal fun AccessibilitySettings(
             NavRow(
                 R.string.accessibility_text_size_title,
                 stringResource(R.string.accessibility_text_size_subtitle),
-                "${(settings.fontScale * 100).toInt()}%",
+                "${(settings.watch { it.fontScale } * 100).toInt()}%",
                 onClick = onOpenAppearance,
             )
         }
@@ -116,7 +117,11 @@ internal fun AccessibilitySettings(
             NavRow(
                 R.string.accessibility_keyboard_font_title,
                 stringResource(R.string.accessibility_keyboard_font_subtitle),
-                KeyboardFonts.displayName(context, settings.keyFontId, settings.customFontName),
+                KeyboardFonts.displayName(
+                    context,
+                    settings.watch { it.keyFontId },
+                    settings.watch { it.customFontName },
+                ),
                 onClick = onOpenFonts,
             )
         }
@@ -127,7 +132,7 @@ internal fun AccessibilitySettings(
             ToggleSetting(
                 R.string.accessibility_reduce_motion_title,
                 stringResource(R.string.accessibility_reduce_motion_subtitle),
-                settings.reduceMotion,
+                settings.watch { it.reduceMotion },
                 info = stringResource(R.string.accessibility_reduce_motion_info),
                 default = SettingsDefaults.reduceMotion,
             ) { scope.launch { repository.setReduceMotion(it) } }
@@ -139,7 +144,7 @@ internal fun AccessibilitySettings(
             ToggleSetting(
                 R.string.accessibility_row_icons_title,
                 stringResource(R.string.accessibility_row_icons_subtitle),
-                settings.appUi.rowIcons,
+                settings.watch { it.appUi.rowIcons },
                 info = stringResource(R.string.accessibility_row_icons_info),
                 default = SettingsDefaults.appUi.rowIcons,
             ) { scope.launch { repository.setSettingsRowIcons(it) } }
@@ -148,7 +153,7 @@ internal fun AccessibilitySettings(
             ToggleSetting(
                 R.string.accessibility_screen_transitions_title,
                 stringResource(R.string.accessibility_screen_transitions_subtitle),
-                settings.appUi.screenTransitions,
+                settings.watch { it.appUi.screenTransitions },
                 info = stringResource(R.string.accessibility_screen_transitions_info),
                 default = SettingsDefaults.appUi.screenTransitions,
             ) { scope.launch { repository.setSettingsScreenTransitions(it) } }
@@ -170,12 +175,12 @@ internal fun AccessibilitySettings(
                     ScreenReaderMode.PASSTHROUGH to
                         stringResource(R.string.accessibility_talkback_mode_gestures),
                 ),
-                selected = settings.accessibility.screenReader,
+                selected = screenReader,
                 default = SettingsDefaults.accessibility.screenReader,
                 detail = { mode -> ChoiceDetail(stringResource(screenReaderDescRes(mode))) },
             ) { scope.launch { repository.setScreenReaderMode(it) } }
         }
-        item(visible = settings.accessibility.screenReader == ScreenReaderMode.PASSTHROUGH) {
+        item(visible = screenReader == ScreenReaderMode.PASSTHROUGH) {
             val granted = rememberGrantState(KeyboardPassthrough::isServiceEnabled)
             // Disclosure before the accessibility screen: Play scrutinises
             // this API harder than any permission, and the system's own
@@ -200,7 +205,7 @@ internal fun AccessibilitySettings(
         }
     }
 
-    when (settings.accessibility.screenReader) {
+    when (screenReader) {
         ScreenReaderMode.EXPLORE ->
             CaptionText(stringResource(R.string.accessibility_explore_caption))
         ScreenReaderMode.PASSTHROUGH ->
@@ -211,14 +216,15 @@ internal fun AccessibilitySettings(
     SettingsGroup(stringResource(R.string.accessibility_touch_title)) {
         item {
             val offLabel = stringResource(CommonR.string.common_off)
+            val debounceMs = settings.watch { it.accessibility.keyDebounceMs }
             SliderSetting(
                 title = R.string.accessibility_debounce_title,
-                subtitle = if (settings.accessibility.keyDebounceMs == 0) {
+                subtitle = if (debounceMs == 0) {
                     stringResource(R.string.accessibility_debounce_subtitle_off)
                 } else {
                     stringResource(R.string.accessibility_debounce_subtitle_on)
                 },
-                value = settings.accessibility.keyDebounceMs.toFloat(),
+                value = debounceMs.toFloat(),
                 range = 0f..500f,
                 display = { if (it.toInt() == 0) offLabel else "${it.toInt()} ms" },
                 info = stringResource(R.string.accessibility_debounce_info),
@@ -229,7 +235,7 @@ internal fun AccessibilitySettings(
             NavRow(
                 R.string.accessibility_long_press_title,
                 stringResource(R.string.accessibility_long_press_subtitle),
-                "${settings.longPressDelayMs} ms",
+                "${settings.watch { it.longPressDelayMs }} ms",
                 onClick = onOpenKeyPress,
             )
         }

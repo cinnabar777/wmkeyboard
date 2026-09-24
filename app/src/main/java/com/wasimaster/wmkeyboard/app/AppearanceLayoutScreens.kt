@@ -40,7 +40,6 @@ import com.wasimaster.wmkeyboard.core.settings.KeyboardAlignment
 import com.wasimaster.wmkeyboard.core.script.NumeralCommitScope
 import com.wasimaster.wmkeyboard.core.settings.DefaultToolbarTools
 import com.wasimaster.wmkeyboard.core.settings.KeyFontScaleRange
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.OneHandedMode
 import com.wasimaster.wmkeyboard.core.settings.OneHandedSide
 import com.wasimaster.wmkeyboard.core.settings.ScreenVariant
@@ -104,7 +103,7 @@ private fun ResetPinnedToolsSetting(repository: SettingsRepository, scope: Corou
 @Composable
 internal fun AppearanceSettings(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onOpenThemes: () -> Unit,
     onOpenFonts: () -> Unit,
     onOpenIcons: () -> Unit,
@@ -116,13 +115,23 @@ internal fun AppearanceSettings(
     // which is what gives Bengali or Arabic digits.
     val dpFormat = stringResource(R.string.typing_value_dp)
     val multiplierFormat = stringResource(R.string.keypress_value_multiplier)
+    // What decides which rows the groups hold; each row reads its own value.
+    val appearanceMoved = settings.watch { s ->
+        val d = SettingsDefaults
+        s.keyCornerRadiusDp != d.keyCornerRadiusDp ||
+            s.fontScale != d.fontScale ||
+            s.layoutBehavior.hintFontScale != d.layoutBehavior.hintFontScale ||
+            s.layoutBehavior.hintOffsetDp != d.layoutBehavior.hintOffsetDp
+    }
     // Turning the toolbar off is guarded — it hides suggestions and every tool.
     SettingsGroup(stringResource(R.string.appearance_style_section_title)) {
         item {
-            val selected = com.wasimaster.wmkeyboard.core.theme.findThemeSpec(
-                settings.keyboardThemeId,
-                settings.customThemes,
-            )
+            val selected = settings.watch {
+                com.wasimaster.wmkeyboard.core.theme.findThemeSpec(
+                    it.keyboardThemeId,
+                    it.customThemes,
+                )
+            }
             NavRow(
                 R.string.appearance_themes_title,
                 stringResource(R.string.appearance_themes_subtitle),
@@ -141,16 +150,16 @@ internal fun AppearanceSettings(
                 stringResource(R.string.appearance_font_subtitle),
                 value = KeyboardFonts.genericDisplayName(
                     LocalContext.current,
-                    settings.keyFontId,
-                    settings.customFontName,
+                    settings.watch { it.keyFontId },
+                    settings.watch { it.customFontName },
                 ),
                 route = "fonts",
                 onClick = onOpenFonts,
             )
         }
         item {
-            val active = settings.icons.activePackId
-            val changed = settings.icons.overrides.size
+            val active = settings.watch { it.icons.activePackId }
+            val changed = settings.watch { it.icons.overrides.size }
             val defaultLabel = stringResource(CommonR.string.common_default)
             NavRow(
                 R.string.appearance_icons_title,
@@ -176,7 +185,7 @@ internal fun AppearanceSettings(
             SliderSetting(
                 R.string.appearance_key_corner_radius_title,
                 subtitle = stringResource(R.string.appearance_key_corner_radius_subtitle),
-                value = settings.keyCornerRadiusDp.toFloat(),
+                value = settings.watch { it.keyCornerRadiusDp }.toFloat(),
                 range = 0f..28f,
                 display = { dpFormat.format(it.toInt()) },
                 info = stringResource(R.string.appearance_key_corner_radius_info),
@@ -191,7 +200,7 @@ internal fun AppearanceSettings(
             SliderSetting(
                 R.string.appearance_key_label_size_title,
                 subtitle = pinned ?: stringResource(R.string.appearance_key_label_size_subtitle),
-                value = settings.fontScale,
+                value = settings.watch { it.fontScale },
                 range = KeyFontScaleRange,
                 display = { multiplierFormat.format(it) },
                 info = stringResource(R.string.appearance_key_label_size_info),
@@ -204,7 +213,7 @@ internal fun AppearanceSettings(
             SliderSetting(
                 R.string.appearance_key_hint_size_title,
                 subtitle = pinned ?: stringResource(R.string.appearance_key_hint_size_subtitle),
-                value = settings.layoutBehavior.hintFontScale,
+                value = settings.watch { it.layoutBehavior.hintFontScale },
                 range = 0.5f..2.0f,
                 display = { multiplierFormat.format(it) },
                 info = stringResource(R.string.appearance_key_hint_size_info),
@@ -216,7 +225,7 @@ internal fun AppearanceSettings(
             SliderSetting(
                 R.string.appearance_key_hint_offset_title,
                 subtitle = stringResource(R.string.appearance_key_hint_offset_subtitle),
-                value = settings.layoutBehavior.hintOffsetDp.toFloat(),
+                value = settings.watch { it.layoutBehavior.hintOffsetDp }.toFloat(),
                 range = 0f..16f,
                 display = { dpFormat.format(it.roundToInt()) },
                 info = stringResource(R.string.appearance_key_hint_offset_info),
@@ -226,11 +235,6 @@ internal fun AppearanceSettings(
         // Drawn only once something has actually moved. Theme, font and icons
         // are excluded: they lead to their own screens and are not what "reset
         // the sliders" means. The toolbar and toolbox pages reset themselves.
-        val d = SettingsDefaults
-        val appearanceMoved = settings.keyCornerRadiusDp != d.keyCornerRadiusDp ||
-            settings.fontScale != d.fontScale ||
-            settings.layoutBehavior.hintFontScale != d.layoutBehavior.hintFontScale ||
-            settings.layoutBehavior.hintOffsetDp != d.layoutBehavior.hintOffsetDp
         item(visible = appearanceMoved) {
             ActionRow(
                 title = R.string.appearance_reset_title,
@@ -268,7 +272,7 @@ internal fun AppearanceSettings(
 @Suppress("UnusedParameter")
 internal fun AppearanceToolbarSettings(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onNavigate: (String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -277,10 +281,27 @@ internal fun AppearanceToolbarSettings(
     val percentFormat = stringResource(R.string.typing_value_percent)
     var confirmDisableToolbar by remember { mutableStateOf(false) }
     var toolShapePickerOpen by rememberSaveable { mutableStateOf(false) }
+    // What decides which rows the group holds; each row reads its own value.
+    val toolbarOn = settings.watch { it.toolbarBehavior.enabled }
+    val placement = settings.watch { it.toolbarBehavior.placement }
+    val labelsOn = settings.watch { it.toolbarLabels }
+    val toolCircleOn = settings.watch { it.toolCircleRadiusDp > 0 }
+    val toolbarMoved = settings.watch { s ->
+        val d = SettingsDefaults
+        s.toolbarBehavior != d.toolbarBehavior ||
+            s.toolbarHeightDp != d.toolbarHeightDp ||
+            s.toolbarLabels != d.toolbarLabels ||
+            s.toolbarLabelSize != d.toolbarLabelSize ||
+            s.suggestionStrip.textScale != d.suggestionStrip.textScale ||
+            s.suggestionStrip.chipPadding != d.suggestionStrip.chipPadding ||
+            s.suggestionStrip.primaryColor != d.suggestionStrip.primaryColor ||
+            s.toolCircleRadiusDp != d.toolCircleRadiusDp ||
+            s.toolShape != d.toolShape
+    }
     if (toolShapePickerOpen) {
         KeyShapePickerDialog(
-            selected = settings.toolShape,
-            radiusDp = settings.toolCircleRadiusDp,
+            selected = settings.watch { it.toolShape },
+            radiusDp = settings.watch { it.toolCircleRadiusDp },
             onPick = { kind ->
                 scope.launch { repository.setToolShape(kind) }
                 toolShapePickerOpen = false
@@ -312,7 +333,7 @@ internal fun AppearanceToolbarSettings(
             ToggleSetting(
                 R.string.appearance_toolbar_show_title,
                 stringResource(R.string.appearance_toolbar_show_subtitle),
-                settings.toolbarBehavior.enabled,
+                toolbarOn,
                 info = stringResource(R.string.appearance_toolbar_show_info),
                 default = SettingsDefaults.toolbarBehavior.enabled,
             ) { on ->
@@ -323,7 +344,7 @@ internal fun AppearanceToolbarSettings(
         }
         // Where the tools live: sharing the suggestion strip, or on a row of
         // their own so they are in reach whatever the strip is showing.
-        if (settings.toolbarBehavior.enabled) {
+        if (toolbarOn) {
             item {
                 ChoiceSetting(
                     title = R.string.appearance_toolbar_placement_title,
@@ -337,7 +358,7 @@ internal fun AppearanceToolbarSettings(
                         ToolbarPlacement.ALWAYS_ROW to
                             stringResource(R.string.appearance_toolbar_placement_always_label),
                     ),
-                    selected = settings.toolbarBehavior.placement,
+                    selected = placement,
                     detail = { placement -> ChoiceDetail(stringResource(toolbarPlacementDescRes(placement))) },
                     onChange = { scope.launch { repository.setToolbarPlacement(it) } },
                     default = SettingsDefaults.toolbarBehavior.placement,
@@ -345,11 +366,11 @@ internal fun AppearanceToolbarSettings(
             }
             // Only under Always: with A button the strip's arrow is the way
             // into the tools row, so the strip cannot go (#302).
-            if (settings.toolbarBehavior.placement == ToolbarPlacement.ALWAYS_ROW) item {
+            if (placement == ToolbarPlacement.ALWAYS_ROW) item {
                 ToggleSetting(
                     R.string.appearance_toolbar_show_strip_title,
                     stringResource(R.string.appearance_toolbar_show_strip_subtitle),
-                    settings.toolbarBehavior.showStrip,
+                    settings.watch { it.toolbarBehavior.showStrip },
                     info = stringResource(R.string.appearance_toolbar_show_strip_info),
                     default = SettingsDefaults.toolbarBehavior.showStrip,
                 ) { scope.launch { repository.setToolbarShowStrip(it) } }
@@ -358,7 +379,7 @@ internal fun AppearanceToolbarSettings(
                 ToggleSetting(
                     R.string.appearance_toolbar_swipe_down_title,
                     stringResource(R.string.appearance_toolbar_swipe_down_subtitle),
-                    settings.toolbarBehavior.swipeDownHide,
+                    settings.watch { it.toolbarBehavior.swipeDownHide },
                     info = stringResource(R.string.appearance_toolbar_swipe_down_info),
                     default = SettingsDefaults.toolbarBehavior.swipeDownHide,
                 ) { scope.launch { repository.setToolbarSwipeDownHide(it) } }
@@ -370,7 +391,7 @@ internal fun AppearanceToolbarSettings(
                 ToggleSetting(
                     R.string.appearance_toolbar_drag_title,
                     stringResource(R.string.appearance_toolbar_drag_subtitle),
-                    settings.toolbarBehavior.dragToRearrange,
+                    settings.watch { it.toolbarBehavior.dragToRearrange },
                     info = stringResource(R.string.appearance_toolbar_drag_info),
                     default = SettingsDefaults.toolbarBehavior.dragToRearrange,
                 ) { scope.launch { repository.setToolbarDragToRearrange(it) } }
@@ -380,27 +401,29 @@ internal fun AppearanceToolbarSettings(
             ToggleSetting(
                 R.string.appearance_toolbar_hardware_only_title,
                 stringResource(R.string.appearance_toolbar_hardware_only_subtitle),
-                settings.toolbarBehavior.onlyWithHardwareKeyboard,
+                settings.watch { it.toolbarBehavior.onlyWithHardwareKeyboard },
                 info = stringResource(R.string.appearance_toolbar_hardware_only_info),
                 default = SettingsDefaults.toolbarBehavior.onlyWithHardwareKeyboard,
             ) { scope.launch { repository.setToolbarOnlyWithHardwareKeyboard(it) } }
         }
         // Nothing here reaches the board while the toolbar is switched off:
         // the row and the top bar are both gated on it before these are read.
-        if (settings.toolbarBehavior.enabled) item {
+        if (toolbarOn) item {
             ToggleSetting(
                 R.string.appearance_toolbar_rtl_title,
                 stringResource(R.string.appearance_toolbar_rtl_subtitle),
-                settings.toolbarBehavior.reverseForRtl,
+                settings.watch { it.toolbarBehavior.reverseForRtl },
                 info = stringResource(R.string.appearance_toolbar_rtl_info),
                 default = SettingsDefaults.toolbarBehavior.reverseForRtl,
             ) { scope.launch { repository.setReverseToolbarForRtl(it) } }
         }
-        if (settings.toolbarBehavior.enabled) item {
-            val fit = when {
-                settings.toolbarBehavior.scrollable -> ToolbarFit.SCROLL
-                settings.toolbarBehavior.greedy -> ToolbarFit.SPREAD
-                else -> ToolbarFit.FIXED
+        if (toolbarOn) item {
+            val fit = settings.watch {
+                when {
+                    it.toolbarBehavior.scrollable -> ToolbarFit.SCROLL
+                    it.toolbarBehavior.greedy -> ToolbarFit.SPREAD
+                    else -> ToolbarFit.FIXED
+                }
             }
             ChoiceSetting(
                 R.string.appearance_toolbar_fit_title,
@@ -425,7 +448,7 @@ internal fun AppearanceToolbarSettings(
             SliderSetting(
                 R.string.appearance_toolbar_padding_top_title,
                 subtitle = stringResource(R.string.appearance_toolbar_padding_top_subtitle),
-                value = settings.toolbarBehavior.paddingTopDp.toFloat(),
+                value = settings.watch { it.toolbarBehavior.paddingTopDp }.toFloat(),
                 range = 0f..24f,
                 display = { dpFormat.format(it.roundToInt()) },
                 info = stringResource(R.string.appearance_toolbar_padding_top_info),
@@ -436,7 +459,7 @@ internal fun AppearanceToolbarSettings(
             SliderSetting(
                 R.string.appearance_toolbar_padding_bottom_title,
                 subtitle = stringResource(R.string.appearance_toolbar_padding_bottom_subtitle),
-                value = settings.toolbarBehavior.paddingBottomDp.toFloat(),
+                value = settings.watch { it.toolbarBehavior.paddingBottomDp }.toFloat(),
                 range = 0f..24f,
                 display = { dpFormat.format(it.roundToInt()) },
                 info = stringResource(R.string.appearance_toolbar_padding_bottom_info),
@@ -447,27 +470,27 @@ internal fun AppearanceToolbarSettings(
             ToggleSetting(
                 R.string.appearance_toolbar_lock_title,
                 stringResource(R.string.appearance_toolbar_lock_subtitle),
-                settings.toolbarBehavior.hideWhenLocked,
+                settings.watch { it.toolbarBehavior.hideWhenLocked },
                 info = stringResource(R.string.appearance_toolbar_lock_info),
                 default = SettingsDefaults.toolbarBehavior.hideWhenLocked,
             ) { scope.launch { repository.setToolbarHideWhenLocked(it) } }
         }
-        if (settings.toolbarBehavior.enabled) item {
+        if (toolbarOn) item {
             ToggleSetting(
                 R.string.appearance_toolbar_labels_title,
                 stringResource(R.string.appearance_toolbar_labels_subtitle),
-                settings.toolbarLabels,
+                labelsOn,
                 info = stringResource(R.string.appearance_toolbar_labels_info),
                 default = SettingsDefaults.toolbarLabels,
             ) { scope.launch { repository.setToolbarLabels(it) } }
         }
         // The toolbox reads this as its own fallback, but it has a slider of
         // its own further down, so nothing is stranded by hiding the pair.
-        item(visible = settings.toolbarBehavior.enabled && settings.toolbarLabels) {
+        item(visible = toolbarOn && labelsOn) {
             SliderSetting(
                 R.string.appearance_toolbar_label_size_title,
                 subtitle = stringResource(R.string.appearance_toolbar_label_size_subtitle),
-                value = settings.toolbarLabelSize.toFloat(),
+                value = settings.watch { it.toolbarLabelSize }.toFloat(),
                 range = 7f..14f,
                 display = { spFormat.format(it.roundToInt()) },
                 default = SettingsDefaults.toolbarLabelSize.toFloat(),
@@ -477,7 +500,7 @@ internal fun AppearanceToolbarSettings(
             SliderSetting(
                 R.string.appearance_suggestion_text_size_title,
                 subtitle = stringResource(R.string.appearance_suggestion_text_size_subtitle),
-                value = settings.suggestionStrip.textScale,
+                value = settings.watch { it.suggestionStrip.textScale },
                 range = 0.8f..1.6f,
                 display = { percentFormat.format((it * 100).roundToInt()) },
                 info = stringResource(R.string.appearance_suggestion_text_size_info),
@@ -488,7 +511,7 @@ internal fun AppearanceToolbarSettings(
             SliderSetting(
                 R.string.appearance_suggestion_spacing_title,
                 subtitle = stringResource(R.string.appearance_suggestion_spacing_subtitle),
-                value = settings.suggestionStrip.chipPadding.toFloat(),
+                value = settings.watch { it.suggestionStrip.chipPadding }.toFloat(),
                 range = 0f..24f,
                 display = { dpFormat.format(it.roundToInt()) },
                 info = stringResource(R.string.appearance_suggestion_spacing_info),
@@ -502,7 +525,7 @@ internal fun AppearanceToolbarSettings(
             ColorSetting(
                 R.string.appearance_suggestion_primary_color_title,
                 subtitle = stringResource(R.string.appearance_suggestion_primary_color_subtitle),
-                color = settings.suggestionStrip.primaryColor,
+                color = settings.watch { it.suggestionStrip.primaryColor },
                 fallback = MaterialTheme.colorScheme.onSurface.argbLong(),
                 info = stringResource(R.string.appearance_suggestion_primary_color_info),
             ) { scope.launch { repository.setSuggestionPrimaryColor(it) } }
@@ -515,7 +538,7 @@ internal fun AppearanceToolbarSettings(
             SliderSetting(
                 R.string.appearance_tool_circle_title,
                 subtitle = stringResource(R.string.appearance_tool_circle_subtitle),
-                value = settings.toolCircleRadiusDp.toFloat(),
+                value = settings.watch { it.toolCircleRadiusDp }.toFloat(),
                 range = 0f..20f,
                 display = { if (it.toInt() == 0) offLabel else dpFormat.format(it.toInt()) },
                 info = stringResource(R.string.appearance_tool_circle_info),
@@ -524,22 +547,22 @@ internal fun AppearanceToolbarSettings(
         }
         // The same shapes the keys and the popups use. It draws nothing while
         // the radius above is at 0, which is the setting for "no background".
-        item(visible = settings.toolCircleRadiusDp > 0) {
+        item(visible = toolCircleOn) {
             NavRow(
                 R.string.appearance_tool_shape_title,
                 subtitle = stringResource(R.string.appearance_tool_shape_subtitle),
-                value = keyShapeName(settings.toolShape),
+                value = keyShapeName(settings.watch { it.toolShape }),
                 onClick = { toolShapePickerOpen = true },
             )
         }
         // Only the wide tools honour it — panel headers and grids keep the
         // fixed circle — and every wide one is drawn by the toolbar.
-        if (settings.toolbarBehavior.enabled) item {
+        if (toolbarOn) item {
             val pinned = themePinSubtitle(settings) { it.toolWidthDp }
             SliderSetting(
                 R.string.appearance_tool_width_title,
                 subtitle = pinned ?: stringResource(R.string.appearance_tool_width_subtitle),
-                value = settings.toolbarBehavior.toolWidthDp.toFloat(),
+                value = settings.watch { it.toolbarBehavior.toolWidthDp }.toFloat(),
                 range = 38f..64f,
                 display = { dpFormat.format(it.roundToInt()) },
                 info = stringResource(R.string.appearance_tool_width_info),
@@ -549,16 +572,6 @@ internal fun AppearanceToolbarSettings(
         }
         // Drawn only once something has actually moved, like the group reset on
         // Layout & size. Which tools are pinned is not a slider and stays.
-        val d = SettingsDefaults
-        val toolbarMoved = settings.toolbarBehavior != d.toolbarBehavior ||
-            settings.toolbarHeightDp != d.toolbarHeightDp ||
-            settings.toolbarLabels != d.toolbarLabels ||
-            settings.toolbarLabelSize != d.toolbarLabelSize ||
-            settings.suggestionStrip.textScale != d.suggestionStrip.textScale ||
-            settings.suggestionStrip.chipPadding != d.suggestionStrip.chipPadding ||
-            settings.suggestionStrip.primaryColor != d.suggestionStrip.primaryColor ||
-            settings.toolCircleRadiusDp != d.toolCircleRadiusDp ||
-            settings.toolShape != d.toolShape
         item(visible = toolbarMoved) {
             ActionRow(
                 title = R.string.appearance_toolbar_reset_title,
@@ -573,15 +586,23 @@ internal fun AppearanceToolbarSettings(
 @Composable
 internal fun AppearanceToolboxSettings(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
 ) {
     val scope = rememberCoroutineScope()
     val spFormat = stringResource(R.string.values_sp)
+    // What decides which rows the group holds; each row reads its own value.
+    val orderMoved = settings.watch { it.toolboxOrder != SettingsDefaults.toolboxOrder }
+    val toolboxLayout = settings.watch { it.toolbox.layout }
+    val paginate = settings.watch { it.toolbox.paginate }
+    val toolboxMoved = settings.watch { s ->
+        val d = SettingsDefaults
+        s.toolbox != d.toolbox || s.toolboxColumns != d.toolboxColumns
+    }
     SettingsGroup(stringResource(R.string.appearance_toolbox_section_title)) {
         // The grid's own order. "Reset pinned tools" restored the bar and
         // nothing restored the grid, so a bad drag session there had no way
         // back. Drawn only once the order has actually been changed.
-        item(visible = settings.toolboxOrder != SettingsDefaults.toolboxOrder) {
+        item(visible = orderMoved) {
             ActionRow(
                 title = R.string.appearance_reset_toolbox_order_title,
                 subtitle = stringResource(R.string.appearance_reset_toolbox_order_subtitle),
@@ -599,18 +620,18 @@ internal fun AppearanceToolboxSettings(
                     ToolboxLayout.PILLS to
                         stringResource(R.string.appearance_toolbox_layout_pills_label),
                 ),
-                selected = settings.toolbox.layout,
+                selected = toolboxLayout,
                 info = stringResource(R.string.appearance_toolbox_layout_info),
                 default = SettingsDefaults.toolbox.layout,
             ) { scope.launch { repository.setToolboxLayout(it) } }
         }
-        if (settings.toolbox.layout == ToolboxLayout.ICONS) {
+        if (toolboxLayout == ToolboxLayout.ICONS) {
             item {
                 val perRow = stringResource(R.string.appearance_slider_per_row_value)
                 SliderSetting(
                     R.string.appearance_toolbox_columns_title,
                     subtitle = stringResource(R.string.appearance_toolbox_columns_subtitle),
-                    value = settings.toolboxColumns.toFloat(),
+                    value = settings.watch { it.toolboxColumns }.toFloat(),
                     range = 3f..6f,
                     display = { perRow.format(it.roundToInt()) },
                     info = stringResource(R.string.appearance_toolbox_columns_info),
@@ -623,7 +644,7 @@ internal fun AppearanceToolboxSettings(
                 SliderSetting(
                     R.string.appearance_toolbox_pill_columns_title,
                     subtitle = stringResource(R.string.appearance_toolbox_pill_columns_subtitle),
-                    value = settings.toolbox.pillColumns.toFloat(),
+                    value = settings.watch { it.toolbox.pillColumns }.toFloat(),
                     range = 1f..3f,
                     display = { perRow.format(it.roundToInt()) },
                     info = stringResource(R.string.appearance_toolbox_pill_columns_info),
@@ -634,7 +655,7 @@ internal fun AppearanceToolboxSettings(
                 ToggleSetting(
                     R.string.appearance_toolbox_pill_filled_title,
                     stringResource(R.string.appearance_toolbox_pill_filled_subtitle),
-                    settings.toolbox.pillFilled,
+                    settings.watch { it.toolbox.pillFilled },
                     info = stringResource(R.string.appearance_toolbox_pill_filled_info),
                     default = SettingsDefaults.toolbox.pillFilled,
                 ) { scope.launch { repository.setToolboxPillFilled(it) } }
@@ -644,17 +665,17 @@ internal fun AppearanceToolboxSettings(
             ToggleSetting(
                 R.string.appearance_toolbox_paginate_title,
                 stringResource(R.string.appearance_toolbox_paginate_subtitle),
-                settings.toolbox.paginate,
+                paginate,
                 info = stringResource(R.string.appearance_toolbox_paginate_info),
                 default = SettingsDefaults.toolbox.paginate,
             ) { scope.launch { repository.setToolboxPaginate(it) } }
         }
-        item(visible = settings.toolbox.paginate) {
+        item(visible = paginate) {
             val perPage = stringResource(R.string.appearance_slider_per_page_value)
             SliderSetting(
                 R.string.appearance_toolbox_page_size_title,
                 subtitle = stringResource(R.string.appearance_toolbox_page_size_subtitle),
-                value = settings.toolbox.pageSize.toFloat(),
+                value = settings.watch { it.toolbox.pageSize }.toFloat(),
                 range = ToolboxPageSizeRange.first.toFloat()..ToolboxPageSizeRange.last.toFloat(),
                 display = { perPage.format(it.roundToInt()) },
                 info = stringResource(R.string.appearance_toolbox_page_size_info),
@@ -666,7 +687,7 @@ internal fun AppearanceToolboxSettings(
             SliderSetting(
                 R.string.appearance_toolbox_label_size_title,
                 subtitle = stringResource(R.string.appearance_toolbox_label_size_subtitle),
-                value = settings.toolbox.labelSizeSp.toFloat(),
+                value = settings.watch { it.toolbox.labelSizeSp }.toFloat(),
                 // 0 is the "follow the toolbar" end of the slider rather than a
                 // size, which is why the readout reads as a word there.
                 range = 0f..16f,
@@ -679,8 +700,6 @@ internal fun AppearanceToolboxSettings(
         }
         // Drawn only once something has actually moved, like the group reset on
         // Layout & size. The order of the tools has its own reset above.
-        val d = SettingsDefaults
-        val toolboxMoved = settings.toolbox != d.toolbox || settings.toolboxColumns != d.toolboxColumns
         item(visible = toolboxMoved) {
             ActionRow(
                 title = R.string.appearance_toolbox_reset_title,
@@ -696,7 +715,7 @@ internal fun AppearanceToolboxSettings(
 @Composable
 internal fun LayoutSettings(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onNavigate: (String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -704,13 +723,16 @@ internal fun LayoutSettings(
     // here and captured. The format also puts the number through the locale,
     // which is what gives Bengali or Arabic digits.
     val dpFormat = stringResource(R.string.typing_value_dp)
+    // What decides which rows the groups hold; each row reads its own value.
+    val numberRow = settings.watch { it.numberRow }
+    val symbolsReturn = settings.watch { it.layoutBehavior.symbolsReturnToLetters }
     // The keyboard's shape as the rows below set it, pinned so it stays in
     // view while they change (#43).
     RegisterPinned {
         MiniKeyboardPreview(
-            numberRow = settings.numberRow,
-            globeAsEmoji = settings.globeAsEmoji,
-            showGlobeKey = settings.showGlobeKey,
+            numberRow = settings.watch { it.numberRow },
+            globeAsEmoji = settings.watch { it.globeAsEmoji },
+            showGlobeKey = settings.watch { it.showGlobeKey },
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
         )
     }
@@ -725,12 +747,14 @@ internal fun LayoutSettings(
     // listing it here would show the same name twice. Secondary layouts are
     // left out too: they cannot be switched on, and are reached from a key or
     // the Secondary layout tool.
-    val customs = settings.customLayouts
-        .filter {
-            !it.secondary &&
-                !isShippedLayoutId(it.id)
-        }
-        .sortedBy { it.name.lowercase() }
+    val customs = settings.watch { s ->
+        s.customLayouts
+            .filter {
+                !it.secondary &&
+                    !isShippedLayoutId(it.id)
+            }
+            .sortedBy { it.name.lowercase() }
+    }
     // Turning a layout on is gated on it validating; switching one off never is,
     // or a layout broken while enabled would be impossible to put away.
     val enableGate = rememberLayoutEnableGate(settings)
@@ -747,14 +771,15 @@ internal fun LayoutSettings(
                             R.string.langemoji_lang_custom_layout_subtitle,
                             baseModeTitle(layout),
                         ),
-                        layout.id in settings.enabledLayoutIds,
+                        settings.watch { layout.id in it.enabledLayoutIds },
                         default = layout.id in SettingsDefaults.enabledLayoutIds,
                     ) { enable ->
                         fun write() {
                             scope.launch {
+                                val enabledIds = settings.value.enabledLayoutIds
                                 val next =
-                                    if (enable) settings.enabledLayoutIds + layout.id
-                                    else settings.enabledLayoutIds - layout.id
+                                    if (enable) enabledIds + layout.id
+                                    else enabledIds - layout.id
                                 if (next.isNotEmpty()) {
                                     repository.setEnabledLayoutIds(next.distinct())
                                 }
@@ -786,36 +811,36 @@ internal fun LayoutSettings(
             ToggleSetting(
                 R.string.layout_number_row_title,
                 stringResource(R.string.layout_number_row_subtitle),
-                settings.numberRow,
+                numberRow,
                 info = stringResource(R.string.layout_number_row_info),
                 default = SettingsDefaults.numberRow,
             ) { scope.launch { repository.setNumberRow(it) } }
         }
-        item(visible = settings.numberRow) {
+        item(visible = numberRow) {
             SliderSetting(
                 R.string.layout_number_row_height_title,
                 subtitle = stringResource(R.string.layout_number_row_height_subtitle),
-                value = settings.numberRowHeightDp.toFloat(),
+                value = settings.watch { it.numberRowHeightDp }.toFloat(),
                 range = 32f..100f,
                 display = { dpFormat.format(it.toInt()) },
                 info = stringResource(R.string.layout_number_row_height_info),
                 default = SettingsDefaults.numberRowHeightDp.toFloat(),
             ) { scope.launch { repository.setNumberRowHeightDp(it.toInt()) } }
         }
-        item(visible = settings.numberRow) {
+        item(visible = numberRow) {
             ToggleSetting(
                 R.string.layout_number_row_shift_symbols_title,
                 stringResource(R.string.layout_number_row_shift_symbols_subtitle),
-                settings.layoutBehavior.numberRowShiftSymbols,
+                settings.watch { it.layoutBehavior.numberRowShiftSymbols },
                 info = stringResource(R.string.layout_number_row_shift_symbols_info),
                 default = SettingsDefaults.layoutBehavior.numberRowShiftSymbols,
             ) { scope.launch { repository.setNumberRowShiftSymbols(it) } }
         }
-        item(visible = settings.numberRow) {
+        item(visible = numberRow) {
             ToggleSetting(
                 R.string.layout_number_row_in_symbols_title,
                 stringResource(R.string.layout_number_row_in_symbols_subtitle),
-                settings.layoutBehavior.numberRowInSymbols,
+                settings.watch { it.layoutBehavior.numberRowInSymbols },
                 info = stringResource(R.string.layout_number_row_in_symbols_info),
                 default = SettingsDefaults.layoutBehavior.numberRowInSymbols,
             ) { scope.launch { repository.setNumberRowInSymbols(it) } }
@@ -827,18 +852,19 @@ internal fun LayoutSettings(
             ToggleSetting(
                 R.string.layout_symbols_return_title,
                 stringResource(R.string.layout_symbols_return_subtitle),
-                settings.layoutBehavior.symbolsReturnToLetters,
+                symbolsReturn,
                 info = stringResource(R.string.layout_symbols_return_info),
                 default = SettingsDefaults.layoutBehavior.symbolsReturnToLetters,
             ) { scope.launch { repository.setSymbolsReturnToLetters(it) } }
         }
-        item(visible = settings.layoutBehavior.symbolsReturnToLetters) {
+        item(visible = symbolsReturn) {
             // Saves as it is typed, like the currency keys field; blank
             // restores the default set. Seeded once rather than re-read on
             // every keystroke: the repository drops spaces and duplicates,
             // and feeding that back would move the caret while typing.
+            val storedReturnChars = settings.watch { it.layoutBehavior.symbolsReturnCharSet() }
             var returnChars by remember {
-                mutableStateOf(settings.layoutBehavior.symbolsReturnCharSet())
+                mutableStateOf(storedReturnChars)
             }
             ControlSetting(
                 R.string.layout_symbols_return_chars_title,
@@ -867,7 +893,7 @@ internal fun LayoutSettings(
                 subtitle = stringResource(R.string.layout_numeral_scope_subtitle),
                 info = stringResource(R.string.layout_numeral_scope_info),
                 options = NumeralCommitScope.entries.map { it to stringResource(it.labelRes) },
-                selected = settings.layoutBehavior.numeralCommitScope,
+                selected = settings.watch { it.layoutBehavior.numeralCommitScope },
                 default = SettingsDefaults.layoutBehavior.numeralCommitScope,
                 detail = { numeralScope -> ChoiceDetail(stringResource(numeralScopeDescRes(numeralScope))) },
             ) { scope.launch { repository.setNumeralCommitScope(it) } }
@@ -902,7 +928,7 @@ internal fun LayoutSettings(
             ToggleSetting(
                 R.string.layout_comma_emoji_title,
                 stringResource(R.string.layout_comma_emoji_subtitle),
-                settings.commaAsEmoji,
+                settings.watch { it.commaAsEmoji },
                 info = stringResource(R.string.layout_comma_emoji_info),
                 default = SettingsDefaults.commaAsEmoji,
             ) { scope.launch { repository.setCommaAsEmoji(it) } }
@@ -914,7 +940,7 @@ internal fun LayoutSettings(
             ToggleSetting(
                 R.string.keypress_enter_emoji_title,
                 stringResource(R.string.keypress_enter_emoji_subtitle),
-                settings.layoutBehavior.enterLongPressEmoji,
+                settings.watch { it.layoutBehavior.enterLongPressEmoji },
                 info = stringResource(R.string.keypress_enter_emoji_info),
                 default = SettingsDefaults.layoutBehavior.enterLongPressEmoji,
             ) { scope.launch { repository.setEnterLongPressEmoji(it) } }
@@ -923,7 +949,7 @@ internal fun LayoutSettings(
             ToggleSetting(
                 R.string.layout_show_globe_title,
                 stringResource(R.string.layout_show_globe_subtitle),
-                settings.showGlobeKey,
+                settings.watch { it.showGlobeKey },
                 info = stringResource(R.string.layout_show_globe_info),
                 default = SettingsDefaults.showGlobeKey,
             ) { scope.launch { repository.setShowGlobeKey(it) } }
@@ -934,7 +960,7 @@ internal fun LayoutSettings(
             ToggleSetting(
                 R.string.layout_globe_recent_title,
                 stringResource(R.string.layout_globe_recent_subtitle),
-                settings.globeRecentOrder,
+                settings.watch { it.globeRecentOrder },
                 info = stringResource(R.string.layout_globe_recent_info),
                 default = SettingsDefaults.globeRecentOrder,
             ) { scope.launch { repository.setGlobeRecentOrder(it) } }
@@ -942,16 +968,17 @@ internal fun LayoutSettings(
         item {
             val offLabel = stringResource(CommonR.string.common_off)
             val msFormat = stringResource(R.string.typing_value_milliseconds)
+            val globeShown = settings.watch { it.showGlobeKey }
             SliderSetting(
                 R.string.layout_globe_guard_title,
                 subtitle = stringResource(
-                    if (settings.showGlobeKey) {
+                    if (globeShown) {
                         R.string.layout_globe_guard_subtitle
                     } else {
                         R.string.layout_globe_hidden_subtitle
                     },
                 ),
-                value = settings.layoutBehavior.globeTypingGuardMs.toFloat(),
+                value = settings.watch { it.layoutBehavior.globeTypingGuardMs }.toFloat(),
                 range = GlobeTypingGuardMsRange.first.toFloat()..GlobeTypingGuardMsRange.last.toFloat(),
                 // Steps of 50 ms: finer than that is not a difference a thumb
                 // can tell, and a readout that only moves in round numbers
@@ -961,7 +988,7 @@ internal fun LayoutSettings(
                     if (ms == 0) offLabel else msFormat.format(ms)
                 },
                 info = stringResource(R.string.layout_globe_guard_info),
-                enabled = settings.showGlobeKey,
+                enabled = globeShown,
                 default = SettingsDefaults.layoutBehavior.globeTypingGuardMs.toFloat(),
             ) { scope.launch { repository.setGlobeTypingGuardMs((it / 50f).roundToInt() * 50) } }
         }
@@ -969,50 +996,53 @@ internal fun LayoutSettings(
         // anything to change. Greyed out rather than removed, so turning the key
         // back on does not make two rows appear under the finger.
         item {
+            val globeShown = settings.watch { it.showGlobeKey }
             ToggleSetting(
                 R.string.layout_globe_emoji_title,
                 stringResource(
-                    if (settings.showGlobeKey) {
+                    if (globeShown) {
                         R.string.layout_globe_emoji_subtitle
                     } else {
                         R.string.layout_globe_hidden_subtitle
                     },
                 ),
-                settings.globeAsEmoji,
+                settings.watch { it.globeAsEmoji },
                 info = stringResource(R.string.layout_globe_emoji_info),
-                enabled = settings.showGlobeKey,
+                enabled = globeShown,
                 default = SettingsDefaults.globeAsEmoji,
             ) { scope.launch { repository.setGlobeAsEmoji(it) } }
         }
         item {
+            val globeShown = settings.watch { it.showGlobeKey }
             ToggleSetting(
                 R.string.layout_swap_comma_globe_title,
                 stringResource(
-                    if (settings.showGlobeKey) {
+                    if (globeShown) {
                         R.string.layout_swap_comma_globe_subtitle
                     } else {
                         R.string.layout_globe_hidden_subtitle
                     },
                 ),
-                settings.swapCommaAndGlobe,
+                settings.watch { it.swapCommaAndGlobe },
                 info = stringResource(R.string.layout_swap_comma_globe_info),
-                enabled = settings.showGlobeKey,
+                enabled = globeShown,
                 default = SettingsDefaults.swapCommaAndGlobe,
             ) { scope.launch { repository.setSwapCommaAndGlobe(it) } }
         }
         item {
+            val globeShown = settings.watch { it.showGlobeKey }
             ToggleSetting(
                 R.string.layout_globe_in_one_place_title,
                 stringResource(
-                    if (settings.showGlobeKey) {
+                    if (globeShown) {
                         R.string.layout_globe_in_one_place_subtitle
                     } else {
                         R.string.layout_globe_hidden_subtitle
                     },
                 ),
-                settings.layoutBehavior.globeInOnePlace,
+                settings.watch { it.layoutBehavior.globeInOnePlace },
                 info = stringResource(R.string.layout_globe_in_one_place_info),
-                enabled = settings.showGlobeKey,
+                enabled = globeShown,
                 default = SettingsDefaults.layoutBehavior.globeInOnePlace,
             ) { scope.launch { repository.setGlobeInOnePlace(it) } }
         }
@@ -1022,7 +1052,7 @@ internal fun LayoutSettings(
 @Composable
 internal fun LayoutSizeSettings(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
 ) {
     val scope = rememberCoroutineScope()
     val dpFormat = stringResource(R.string.typing_value_dp)
@@ -1032,13 +1062,44 @@ internal fun LayoutSizeSettings(
     // What the keyboard uses while bottom padding is unset (#343). Read off
     // this screen's own insets, which carry the same kind of navigation bar.
     val autoBottomPadding = autoBottomPaddingDp(gestureBarAtBottom())
+    // What decides which rows the groups hold; each row reads its own value.
+    val cornersRound = settings.watch {
+        it.layoutBehavior.boardCornerTopDp > 0 || it.layoutBehavior.boardCornerBottomDp > 0
+    }
+    val narrowed = settings.watch { it.keyboardWidthPercent < 100 }
+    val sizingMoved = settings.watch { s ->
+        s.keyHeightDp != SettingsDefaults.keyHeightDp ||
+            s.numberRowHeightDp != SettingsDefaults.numberRowHeightDp ||
+            s.bottomPaddingDp != null ||
+            s.keyboardWidthPercent != SettingsDefaults.keyboardWidthPercent ||
+            s.keyboardAlignment != SettingsDefaults.keyboardAlignment ||
+            s.keyGapScale != SettingsDefaults.keyGapScale ||
+            s.keyCornerRadiusDp != SettingsDefaults.keyCornerRadiusDp ||
+            s.layoutBehavior.sidePadLeftScale !=
+            SettingsDefaults.layoutBehavior.sidePadLeftScale ||
+            s.layoutBehavior.sidePadRightScale !=
+            SettingsDefaults.layoutBehavior.sidePadRightScale ||
+            s.layoutBehavior.bottomRowHeightDp !=
+            SettingsDefaults.layoutBehavior.bottomRowHeightDp
+    }
+    // Only the expanded screen shape draws its rows, so only its values
+    // decide which of them are there.
+    val shapeNumberRow = settings.watch { s ->
+        expandedVariant?.let { s.sizingValuesFor(it).numberRow } ?: s.numberRow
+    }
+    val shapeNarrowed = settings.watch { s ->
+        (expandedVariant?.let { s.sizingValuesFor(it).keyboardWidthPercent } ?: s.keyboardWidthPercent) < 100
+    }
+    val shapeOverridden = settings.watch { s ->
+        expandedVariant?.let { s.sizingOverrides[it] }?.let { !it.isEmpty } == true
+    }
     SettingsGroup(stringResource(R.string.layout_size_position_title)) {
         item {
             val pinned = themePinSubtitle(settings) { it.keyHeightDp }
             SliderSetting(
                 R.string.layout_key_height_title,
                 subtitle = pinned ?: stringResource(R.string.layout_key_height_subtitle),
-                value = settings.keyHeightDp.toFloat(),
+                value = settings.watch { it.keyHeightDp }.toFloat(),
                 range = 32f..100f,
                 display = { dpFormat.format(it.toInt()) },
                 info = stringResource(R.string.layout_key_height_info),
@@ -1051,7 +1112,7 @@ internal fun LayoutSizeSettings(
             SliderSetting(
                 R.string.layout_bottom_row_height_title,
                 subtitle = stringResource(R.string.layout_bottom_row_height_subtitle),
-                value = settings.layoutBehavior.bottomRowHeightDp.toFloat(),
+                value = settings.watch { it.layoutBehavior.bottomRowHeightDp }.toFloat(),
                 range = 0f..BottomRowHeightRange.last.toFloat(),
                 display = { if (it < 1f) followKeys else dpFormat.format(it.toInt()) },
                 info = stringResource(R.string.layout_bottom_row_height_info),
@@ -1065,7 +1126,7 @@ internal fun LayoutSizeSettings(
             SliderSetting(
                 R.string.layout_side_padding_left_title,
                 subtitle = pinned ?: stringResource(R.string.layout_side_padding_left_subtitle),
-                value = settings.layoutBehavior.sidePadLeftScale,
+                value = settings.watch { it.layoutBehavior.sidePadLeftScale },
                 range = SidePadScaleRange.start..SidePadScaleRange.endInclusive,
                 display = { percentFormat.format((it * 100).toInt()) },
                 info = stringResource(R.string.layout_side_padding_left_info),
@@ -1078,7 +1139,7 @@ internal fun LayoutSizeSettings(
             SliderSetting(
                 R.string.layout_side_padding_right_title,
                 subtitle = pinned ?: stringResource(R.string.layout_side_padding_right_subtitle),
-                value = settings.layoutBehavior.sidePadRightScale,
+                value = settings.watch { it.layoutBehavior.sidePadRightScale },
                 range = SidePadScaleRange.start..SidePadScaleRange.endInclusive,
                 display = { percentFormat.format((it * 100).toInt()) },
                 info = stringResource(R.string.layout_side_padding_right_info),
@@ -1091,7 +1152,7 @@ internal fun LayoutSizeSettings(
             SliderSetting(
                 R.string.layout_key_spacing_title,
                 subtitle = pinned ?: stringResource(R.string.layout_key_spacing_subtitle),
-                value = settings.keyGapScale,
+                value = settings.watch { it.keyGapScale },
                 range = 0f..2f,
                 display = { percentFormat.format((it * 100).toInt()) },
                 info = stringResource(R.string.layout_key_spacing_info),
@@ -1100,16 +1161,17 @@ internal fun LayoutSizeSettings(
             ) { scope.launch { repository.setKeyGapScale(it) } }
         }
         item {
+            val bottomPadding = settings.watch { it.bottomPaddingDp }
             SliderSetting(
                 R.string.layout_bottom_padding_title,
                 subtitle = stringResource(R.string.layout_bottom_padding_subtitle),
-                value = (settings.bottomPaddingDp ?: autoBottomPadding).toFloat(),
+                value = (bottomPadding ?: autoBottomPadding).toFloat(),
                 range = 0f..SettingsRepository.MAX_BOTTOM_PADDING_DP.toFloat(),
                 display = { dpFormat.format(it.toInt()) },
                 info = stringResource(R.string.layout_bottom_padding_info),
                 default = autoBottomPadding.toFloat(),
                 // Back to automatic, not to the number it shows here.
-                onReset = if (settings.bottomPaddingDp != null) {
+                onReset = if (bottomPadding != null) {
                     { scope.launch { repository.resetBottomPaddingDp() } }
                 } else {
                     null
@@ -1121,7 +1183,7 @@ internal fun LayoutSizeSettings(
             SliderSetting(
                 R.string.layout_board_corner_top_title,
                 subtitle = stringResource(R.string.layout_board_corner_top_subtitle),
-                value = settings.layoutBehavior.boardCornerTopDp.toFloat(),
+                value = settings.watch { it.layoutBehavior.boardCornerTopDp }.toFloat(),
                 range = BoardCornerRadiusRange.first.toFloat()..BoardCornerRadiusRange.last.toFloat(),
                 display = { if (it.roundToInt() == 0) square else dpFormat.format(it.roundToInt()) },
                 info = stringResource(R.string.layout_board_corner_info),
@@ -1133,7 +1195,7 @@ internal fun LayoutSizeSettings(
             SliderSetting(
                 R.string.layout_board_corner_bottom_title,
                 subtitle = stringResource(R.string.layout_board_corner_bottom_subtitle),
-                value = settings.layoutBehavior.boardCornerBottomDp.toFloat(),
+                value = settings.watch { it.layoutBehavior.boardCornerBottomDp }.toFloat(),
                 range = BoardCornerRadiusRange.first.toFloat()..BoardCornerRadiusRange.last.toFloat(),
                 display = { if (it.roundToInt() == 0) square else dpFormat.format(it.roundToInt()) },
                 info = stringResource(R.string.layout_board_corner_info),
@@ -1141,13 +1203,13 @@ internal fun LayoutSizeSettings(
             ) { scope.launch { repository.setBoardCornerBottomDp(it.roundToInt()) } }
         }
         // Which corners only matters once one of the two is round.
-        if (settings.layoutBehavior.boardCornerTopDp > 0 || settings.layoutBehavior.boardCornerBottomDp > 0) {
+        if (cornersRound) {
             item {
                 MultiChoiceSetting(
                     R.string.layout_board_corners_title,
                     subtitle = stringResource(R.string.layout_board_corners_subtitle),
                     options = BoardCorner.entries.map { it to stringResource(it.labelRes) },
-                    selected = settings.layoutBehavior.boardCorners,
+                    selected = settings.watch { it.layoutBehavior.boardCorners },
                     default = SettingsDefaults.layoutBehavior.boardCorners,
                 ) { scope.launch { repository.setBoardCorners(it) } }
             }
@@ -1156,40 +1218,27 @@ internal fun LayoutSizeSettings(
             SliderSetting(
                 R.string.layout_keyboard_width_title,
                 subtitle = stringResource(R.string.layout_keyboard_width_subtitle),
-                value = settings.keyboardWidthPercent.toFloat(),
+                value = settings.watch { it.keyboardWidthPercent }.toFloat(),
                 range = 50f..100f,
                 display = { percentFormat.format(it.toInt()) },
                 info = stringResource(R.string.layout_keyboard_width_info),
                 default = SettingsDefaults.keyboardWidthPercent.toFloat(),
             ) { scope.launch { repository.setKeyboardWidthPercent(it.toInt()) } }
         }
-        item(visible = settings.keyboardWidthPercent < 100) {
+        item(visible = narrowed) {
             ChoiceSetting(
                 title = R.string.layout_keyboard_position_title,
                 info = stringResource(R.string.layout_keyboard_position_info),
                 options = KeyboardAlignment.entries.map { alignment ->
                     alignment to stringResource(layoutAlignmentLabelRes(alignment))
                 },
-                selected = settings.keyboardAlignment,
+                selected = settings.watch { it.keyboardAlignment },
                 default = SettingsDefaults.keyboardAlignment,
             ) { scope.launch { repository.setKeyboardAlignment(it) } }
         }
         // Drawn only once something in the group has actually moved, like the
         // per-row reset controls: on an untouched screen it would be a button
         // that does nothing.
-        val sizingMoved = settings.keyHeightDp != SettingsDefaults.keyHeightDp ||
-            settings.numberRowHeightDp != SettingsDefaults.numberRowHeightDp ||
-            settings.bottomPaddingDp != null ||
-            settings.keyboardWidthPercent != SettingsDefaults.keyboardWidthPercent ||
-            settings.keyboardAlignment != SettingsDefaults.keyboardAlignment ||
-            settings.keyGapScale != SettingsDefaults.keyGapScale ||
-            settings.keyCornerRadiusDp != SettingsDefaults.keyCornerRadiusDp ||
-            settings.layoutBehavior.sidePadLeftScale !=
-            SettingsDefaults.layoutBehavior.sidePadLeftScale ||
-            settings.layoutBehavior.sidePadRightScale !=
-            SettingsDefaults.layoutBehavior.sidePadRightScale ||
-            settings.layoutBehavior.bottomRowHeightDp !=
-            SettingsDefaults.layoutBehavior.bottomRowHeightDp
         item(visible = sizingMoved) {
             ActionRow(
                 title = R.string.layout_reset_sizing_title,
@@ -1204,18 +1253,21 @@ internal fun LayoutSizeSettings(
         info = stringResource(R.string.layout_per_screen_caption),
     ) {
         for (variant in ScreenVariant.entries.filter { it.isOverride }) {
-            val override = settings.sizingOverrides[variant]
-            val values = settings.sizingValuesFor(variant)
             item {
+                val followsPortrait = settings.watch { s ->
+                    s.sizingOverrides[variant].let { it == null || it.isEmpty }
+                }
                 NavRow(
                     stringResource(variant.labelRes),
-                    if (override == null || override.isEmpty) {
+                    if (followsPortrait) {
                         stringResource(R.string.layout_variant_follows_portrait_label)
                     } else {
                         stringResource(
                             R.string.layout_variant_summary,
-                            values.keyHeightDp ?: settings.keyHeightDp,
-                            values.keyboardWidthPercent ?: settings.keyboardWidthPercent,
+                            settings.watch { it.sizingValuesFor(variant).keyHeightDp ?: it.keyHeightDp },
+                            settings.watch {
+                                it.sizingValuesFor(variant).keyboardWidthPercent ?: it.keyboardWidthPercent
+                            },
                         )
                     },
                     icon = SettingsRowIcons[variant.labelRes],
@@ -1229,7 +1281,7 @@ internal fun LayoutSizeSettings(
                     SliderSetting(
                         R.string.layout_keyboard_scale_title,
                         subtitle = stringResource(R.string.layout_keyboard_scale_subtitle),
-                        value = values.keyboardScale ?: 1f,
+                        value = settings.watch { it.sizingValuesFor(variant).keyboardScale } ?: 1f,
                         range = 0.5f..1.5f,
                         display = { percentFormat.format((it * 100).toInt()) },
                     ) { scope.launch { repository.setVariantKeyboardScale(variant, it) } }
@@ -1237,7 +1289,8 @@ internal fun LayoutSizeSettings(
                 item {
                     SliderSetting(
                         R.string.layout_key_height_title,
-                        value = (values.keyHeightDp ?: settings.keyHeightDp).toFloat(),
+                        value = settings.watch { it.sizingValuesFor(variant).keyHeightDp ?: it.keyHeightDp }
+                            .toFloat(),
                         range = 32f..100f,
                         display = { dpFormat.format(it.toInt()) },
                     ) { scope.launch { repository.setVariantKeyHeightDp(variant, it.toInt()) } }
@@ -1246,10 +1299,12 @@ internal fun LayoutSizeSettings(
                 // and that override is what decides whether the row is drawn
                 // on this screen shape — so it, not the global switch, is what
                 // makes the height mean something here.
-                item(visible = values.numberRow ?: settings.numberRow) {
+                item(visible = shapeNumberRow) {
                     SliderSetting(
                         R.string.layout_number_row_height_title,
-                        value = (values.numberRowHeightDp ?: settings.numberRowHeightDp).toFloat(),
+                        value = settings.watch {
+                            it.sizingValuesFor(variant).numberRowHeightDp ?: it.numberRowHeightDp
+                        }.toFloat(),
                         range = 32f..100f,
                         display = { dpFormat.format(it.toInt()) },
                     ) {
@@ -1261,8 +1316,10 @@ internal fun LayoutSizeSettings(
                 item {
                     SliderSetting(
                         R.string.layout_bottom_padding_title,
-                        value = (values.bottomPaddingDp ?: settings.bottomPaddingDp ?: autoBottomPadding)
-                            .toFloat(),
+                        value = (
+                            settings.watch { it.sizingValuesFor(variant).bottomPaddingDp ?: it.bottomPaddingDp }
+                                ?: autoBottomPadding
+                            ).toFloat(),
                         range = 0f..SettingsRepository.MAX_BOTTOM_PADDING_DP.toFloat(),
                         display = { dpFormat.format(it.toInt()) },
                     ) { scope.launch { repository.setVariantBottomPaddingDp(variant, it.toInt()) } }
@@ -1270,7 +1327,9 @@ internal fun LayoutSizeSettings(
                 item {
                     SliderSetting(
                         R.string.layout_keyboard_width_title,
-                        value = (values.keyboardWidthPercent ?: settings.keyboardWidthPercent).toFloat(),
+                        value = settings.watch {
+                            it.sizingValuesFor(variant).keyboardWidthPercent ?: it.keyboardWidthPercent
+                        }.toFloat(),
                         range = 50f..100f,
                         display = { percentFormat.format(it.toInt()) },
                     ) { scope.launch { repository.setVariantWidthPercent(variant, it.toInt()) } }
@@ -1278,7 +1337,7 @@ internal fun LayoutSizeSettings(
                 item {
                     SliderSetting(
                         R.string.layout_font_size_title,
-                        value = values.fontScale ?: settings.fontScale,
+                        value = settings.watch { it.sizingValuesFor(variant).fontScale ?: it.fontScale },
                         range = KeyFontScaleRange,
                         display = { multiplierFormat.format(it) },
                     ) { scope.launch { repository.setVariantFontScale(variant, it) } }
@@ -1286,7 +1345,7 @@ internal fun LayoutSizeSettings(
                 item {
                     SliderSetting(
                         R.string.layout_key_spacing_title,
-                        value = values.keyGapScale ?: settings.keyGapScale,
+                        value = settings.watch { it.sizingValuesFor(variant).keyGapScale ?: it.keyGapScale },
                         range = 0f..2f,
                         display = { percentFormat.format((it * 100).toInt()) },
                     ) { scope.launch { repository.setVariantKeyGapScale(variant, it) } }
@@ -1294,7 +1353,9 @@ internal fun LayoutSizeSettings(
                 item {
                     SliderSetting(
                         R.string.layout_side_padding_left_title,
-                        value = values.sidePadLeftScale ?: settings.layoutBehavior.sidePadLeftScale,
+                        value = settings.watch {
+                            it.sizingValuesFor(variant).sidePadLeftScale ?: it.layoutBehavior.sidePadLeftScale
+                        },
                         range = SidePadScaleRange,
                         display = { percentFormat.format((it * 100).toInt()) },
                     ) { scope.launch { repository.setVariantSidePadLeftScale(variant, it) } }
@@ -1302,8 +1363,9 @@ internal fun LayoutSizeSettings(
                 item {
                     SliderSetting(
                         R.string.layout_side_padding_right_title,
-                        value = values.sidePadRightScale
-                            ?: settings.layoutBehavior.sidePadRightScale,
+                        value = settings.watch {
+                            it.sizingValuesFor(variant).sidePadRightScale ?: it.layoutBehavior.sidePadRightScale
+                        },
                         range = SidePadScaleRange,
                         display = { percentFormat.format((it * 100).toInt()) },
                     ) { scope.launch { repository.setVariantSidePadRightScale(variant, it) } }
@@ -1312,10 +1374,10 @@ internal fun LayoutSizeSettings(
                     val followKeys = stringResource(R.string.layout_bottom_row_follow_keys_label)
                     SliderSetting(
                         R.string.layout_bottom_row_height_title,
-                        value = (
-                            values.bottomRowHeightDp
-                                ?: settings.layoutBehavior.bottomRowHeightDp
-                            ).toFloat(),
+                        value = settings.watch {
+                            it.sizingValuesFor(variant).bottomRowHeightDp
+                                ?: it.layoutBehavior.bottomRowHeightDp
+                        }.toFloat(),
                         range = 0f..BottomRowHeightRange.last.toFloat(),
                         display = {
                             if (it.toInt() == 0) followKeys else dpFormat.format(it.toInt())
@@ -1331,19 +1393,21 @@ internal fun LayoutSizeSettings(
                     ToggleSetting(
                         R.string.layout_number_row_title,
                         null,
-                        values.numberRow ?: settings.numberRow,
+                        shapeNumberRow,
                     ) { scope.launch { repository.setVariantNumberRow(variant, it) } }
                 }
-                item(visible = (values.keyboardWidthPercent ?: settings.keyboardWidthPercent) < 100) {
+                item(visible = shapeNarrowed) {
                     ChoiceSetting(
                         title = R.string.layout_keyboard_position_title,
                         options = KeyboardAlignment.entries.map { alignment ->
                             alignment to stringResource(layoutAlignmentLabelRes(alignment))
                         },
-                        selected = values.keyboardAlignment ?: settings.keyboardAlignment,
+                        selected = settings.watch {
+                            it.sizingValuesFor(variant).keyboardAlignment ?: it.keyboardAlignment
+                        },
                     ) { scope.launch { repository.setVariantAlignment(variant, it) } }
                 }
-                if (override != null && !override.isEmpty) {
+                if (shapeOverridden) {
                     item {
                         NavRow(
                             R.string.layout_follow_portrait_title,
@@ -1363,11 +1427,15 @@ internal fun LayoutSizeSettings(
 @Composable
 internal fun LayoutOneHandedSettings(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
 ) {
     val scope = rememberCoroutineScope()
     val dpFormat = stringResource(R.string.typing_value_dp)
     val percentFormat = stringResource(R.string.typing_value_percent)
+    // What decides which rows the group holds; each row reads its own value.
+    val oneHanded = settings.watch { it.oneHandedMode != OneHandedMode.OFF }
+    val split = settings.watch { it.splitKeyboard }
+    val floating = settings.watch { it.floatingKeyboard }
     SettingsGroup(
         stringResource(R.string.layout_one_handed_group_title),
         info = stringResource(R.string.layout_one_handed_caption),
@@ -1379,7 +1447,7 @@ internal fun LayoutOneHandedSettings(
                 options = OneHandedMode.entries.map { mode ->
                     mode to stringResource(layoutOneHandedModeLabelRes(mode))
                 },
-                selected = settings.oneHandedMode,
+                selected = settings.watch { it.oneHandedMode },
                 default = SettingsDefaults.oneHandedMode,
             ) { scope.launch { repository.setOneHandedMode(it) } }
         }
@@ -1388,8 +1456,6 @@ internal fun LayoutOneHandedSettings(
             true to R.string.layout_orientation_landscape_label,
         )
         for ((landscape, orientationRes) in orientations) {
-            val profile = settings.oneHanded.forLandscape(landscape)
-            val oneHanded = settings.oneHandedMode != OneHandedMode.OFF
             if (oneHanded) item {
                 val orientationLabel = stringResource(orientationRes)
                 SliderSetting(
@@ -1398,7 +1464,7 @@ internal fun LayoutOneHandedSettings(
                         R.string.layout_one_handed_width_subtitle,
                         orientationLabel,
                     ),
-                    value = profile.widthPercent.toFloat(),
+                    value = settings.watch { it.oneHanded.forLandscape(landscape).widthPercent }.toFloat(),
                     range = SettingsRepository.ONE_HANDED_WIDTH_MIN.toFloat()..
                         SettingsRepository.ONE_HANDED_WIDTH_MAX.toFloat(),
                     display = { percentFormat.format(it.toInt()) },
@@ -1415,7 +1481,7 @@ internal fun LayoutOneHandedSettings(
                         stringResource(orientationRes),
                     ),
                     subtitle = stringResource(R.string.layout_one_handed_height_subtitle),
-                    value = profile.heightScale.toFloat(),
+                    value = settings.watch { it.oneHanded.forLandscape(landscape).heightScale }.toFloat(),
                     range = SettingsRepository.ONE_HANDED_HEIGHT_SCALE_MIN.toFloat()..
                         SettingsRepository.ONE_HANDED_HEIGHT_SCALE_MAX.toFloat(),
                     display = { percentFormat.format(it.toInt()) },
@@ -1440,7 +1506,7 @@ internal fun LayoutOneHandedSettings(
                     options = OneHandedSide.entries.map { side ->
                         side to stringResource(layoutOneHandedSideLabelRes(side))
                     },
-                    selected = profile.side,
+                    selected = settings.watch { it.oneHanded.forLandscape(landscape).side },
                     default = SettingsDefaults.oneHanded.forLandscape(landscape).side,
                 ) { scope.launch { repository.setOneHandedSide(landscape, it) } }
             }
@@ -1449,25 +1515,25 @@ internal fun LayoutOneHandedSettings(
             ToggleSetting(
                 R.string.layout_split_title,
                 stringResource(R.string.layout_split_subtitle),
-                settings.splitKeyboard,
+                split,
                 info = stringResource(R.string.layout_split_info),
                 default = SettingsDefaults.splitKeyboard,
             ) { scope.launch { repository.setSplitKeyboard(it) } }
         }
-        item(visible = settings.splitKeyboard) {
+        item(visible = split) {
             ToggleSetting(
                 R.string.layout_split_large_only_title,
                 stringResource(R.string.layout_split_large_only_subtitle),
-                settings.layoutBehavior.splitOnlyOnLargeScreens,
+                settings.watch { it.layoutBehavior.splitOnlyOnLargeScreens },
                 info = stringResource(R.string.layout_split_large_only_info),
                 default = SettingsDefaults.layoutBehavior.splitOnlyOnLargeScreens,
             ) { scope.launch { repository.setSplitOnlyOnLargeScreens(it) } }
         }
-        item(visible = settings.splitKeyboard) {
+        item(visible = split) {
             SliderSetting(
                 R.string.layout_split_gap_title,
                 subtitle = stringResource(R.string.layout_split_gap_subtitle),
-                value = settings.splitGapPercent.toFloat(),
+                value = settings.watch { it.splitGapPercent }.toFloat(),
                 range = 5f..40f,
                 display = { percentFormat.format(it.toInt()) },
                 info = stringResource(R.string.layout_split_gap_info),
@@ -1478,38 +1544,40 @@ internal fun LayoutOneHandedSettings(
             ToggleSetting(
                 R.string.layout_floating_title,
                 stringResource(R.string.layout_floating_subtitle),
-                settings.floatingKeyboard,
+                floating,
                 info = stringResource(R.string.layout_floating_info),
                 default = SettingsDefaults.floatingKeyboard,
             ) { scope.launch { repository.setFloatingKeyboard(it) } }
         }
-        item(visible = settings.floatingKeyboard) {
+        item(visible = floating) {
             SliderSetting(
                 R.string.layout_floating_width_title,
                 subtitle = stringResource(R.string.layout_floating_width_subtitle),
-                value = settings.floatingWidthDp.toFloat(),
+                value = settings.watch { it.floatingWidthDp }.toFloat(),
                 range = 240f..500f,
                 display = { dpFormat.format(it.toInt()) },
                 info = stringResource(R.string.layout_floating_width_info),
                 default = SettingsDefaults.floatingWidthDp.toFloat(),
             ) { scope.launch { repository.setFloatingWidthDp(it.toInt()) } }
         }
-        item(visible = settings.floatingKeyboard) {
+        item(visible = floating) {
             SliderSetting(
                 R.string.layout_floating_height_title,
                 subtitle = stringResource(R.string.layout_floating_height_subtitle),
-                value = settings.floatingHeightScale,
+                value = settings.watch { it.floatingHeightScale },
                 range = 0.6f..1.6f,
                 display = { percentFormat.format((it * 100).toInt()) },
                 info = stringResource(R.string.layout_floating_height_info),
                 default = SettingsDefaults.floatingHeightScale,
             ) { scope.launch { repository.setFloatingHeightScale(it) } }
         }
-        item(visible = settings.floatingKeyboard) {
-            val movedFloating = settings.floatingWidthDp != SettingsDefaults.floatingWidthDp ||
-                settings.floatingHeightScale != SettingsDefaults.floatingHeightScale ||
-                settings.floatingXFraction != SettingsDefaults.floatingXFraction ||
-                settings.floatingYFraction != SettingsDefaults.floatingYFraction
+        item(visible = floating) {
+            val movedFloating = settings.watch { s ->
+                s.floatingWidthDp != SettingsDefaults.floatingWidthDp ||
+                    s.floatingHeightScale != SettingsDefaults.floatingHeightScale ||
+                    s.floatingXFraction != SettingsDefaults.floatingXFraction ||
+                    s.floatingYFraction != SettingsDefaults.floatingYFraction
+            }
             if (movedFloating) {
                 ActionRow(
                     title = R.string.layout_floating_reset_title,
@@ -1522,7 +1590,7 @@ internal fun LayoutOneHandedSettings(
             ToggleSetting(
                 R.string.layout_persistent_title,
                 stringResource(R.string.layout_persistent_subtitle),
-                settings.persistentKeyboard,
+                settings.watch { it.persistentKeyboard },
                 info = stringResource(R.string.layout_persistent_info),
                 default = SettingsDefaults.persistentKeyboard,
             ) { scope.launch { repository.setPersistentKeyboard(it) } }

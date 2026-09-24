@@ -108,6 +108,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.State
@@ -441,7 +442,7 @@ internal fun ForeignLanguageDialog(
 @Composable
 internal fun KeyLayoutsScreen(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onNavigate: (String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -568,13 +569,16 @@ internal fun KeyLayoutsScreen(
     // switched on, in shipped order, then the user's own grids. Not the whole
     // catalogue — that is over sixteen hundred layouts, and the JSON ones are
     // only parsed when something asks for them (see AssetLayouts).
-    val layouts = settings.enabledLayoutIds
+    // What decides which rows the groups hold; each row reads its own state.
+    val enabledIds = settings.watch { it.enabledLayoutIds }
+    val customLayouts = settings.watch { it.customLayouts }
+    val layouts = enabledIds
         .filter(::isShippedLayoutId)
         .distinct()
         .sortedBy(::shippedLayoutRank)
-        .mapNotNull { findLayout(settings.customLayouts, it) } +
-        settings.customLayouts.filter { !isShippedLayoutId(it.id) }
-    val customIds = settings.customLayouts.map { it.id }.toSet()
+        .mapNotNull { findLayout(customLayouts, it) } +
+        customLayouts.filter { !isShippedLayoutId(it.id) }
+    val customIds = customLayouts.map { it.id }.toSet()
     // "Shipped" is both the compiled built-ins and the JSON asset layouts.
     // Testing only BuiltInLayouts put every asset layout in neither group — an
     // enabled Français BÉPO was invisible here — and made an *edit* of one look
@@ -747,7 +751,7 @@ internal fun KeyLayoutsScreen(
                 ScrollAnchor(layout.id == returnTo) {
                     LayoutRow(
                         layout = layout,
-                        enabled = layout.id in settings.enabledLayoutIds,
+                        enabled = settings.watch { layout.id in it.enabledLayoutIds },
                         onEdit = { openEditor(layout.id) },
                         onExport = {
                             pendingExport = layout
@@ -821,7 +825,7 @@ internal fun KeyLayoutsScreen(
     }
 
     val builtIns = layouts.filter {
-        it.id in shippedIds && it.id in settings.enabledLayoutIds
+        it.id in shippedIds && it.id in enabledIds
     }
     if (builtIns.isNotEmpty()) {
         SettingsGroup(stringResource(R.string.layout_editor_built_in_title)) {
@@ -830,7 +834,7 @@ internal fun KeyLayoutsScreen(
                     ScrollAnchor(layout.id == returnTo) {
                         LayoutRow(
                             layout = layout,
-                            enabled = layout.id in settings.enabledLayoutIds,
+                            enabled = settings.watch { layout.id in it.enabledLayoutIds },
                             onEdit = { openEditor(layout.id) },
                             onExport = {
                                 pendingExport = layout
@@ -1227,7 +1231,7 @@ internal fun baseModeTitle(layout: LayoutSpec): String =
  */
 @Composable
 internal fun rememberLayoutEnableGate(
-    settings: KeyboardSettings,
+    settings: LiveSettings,
 ): (String, () -> Unit) -> Unit {
     val resources = LocalContext.current.resources
     var blocked by remember { mutableStateOf<Pair<String, List<LayoutMessage>>?>(null) }
@@ -1259,7 +1263,7 @@ internal fun rememberLayoutEnableGate(
     }
 
     return { layoutId, enable ->
-        val spec = resolveLayout(settings.customLayouts, layoutId)
+        val spec = resolveLayout(settings.value.customLayouts, layoutId)
         val reasons = validateLayout(spec)
             .filter { it.severity == LayoutSeverity.BLOCKING }
             .map { it.text }
@@ -1336,11 +1340,33 @@ private const val ActualSizePreviewShare = 0.55f
  */
 internal const val UndoDepth = 30
 
+/** What a row reads for the instant between its layout being deleted and the editor closing. */
+private val GoneLayout = LayoutSpec(id = "", name = "")
+
+/**
+ * The layout the key layout editor has open, read a field at a time.
+ *
+ * Every edit rewrites the stored layout, so read as one object it was new on
+ * every write and every row of the editor recomposed to find its own field
+ * unchanged. Through [watch] a row recomposes when what it draws changes and
+ * not otherwise.
+ */
+@Stable
+private class OpenLayout(private val settings: LiveSettings, val id: String) {
+    /** The layout as stored now, for a write or an undo step; null once deleted. */
+    fun now(): LayoutSpec? = findLayout(settings.value.customLayouts, id)
+
+    /** [pick] of the layout, recomposing the caller only when that changes. */
+    @Composable
+    fun <R> watch(pick: (LayoutSpec) -> R): R =
+        settings.watch { pick(findLayout(it.customLayouts, id) ?: GoneLayout) }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun KeyLayoutEditorScreen(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     layoutId: String,
     /**
      * The tab to open on: a typing layer's key or a panel's `layerKey`, from a
@@ -1351,8 +1377,11 @@ internal fun KeyLayoutEditorScreen(
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val layout = findLayout(settings.customLayouts, layoutId)
-    if (layout == null) {
+    // Only whether the layout is there is read here. What decides the screen's
+    // structure is read below, a piece at a time, and every row reads its own
+    // field of the layout through [edited].
+    val found = settings.watch { findLayout(it.customLayouts, layoutId) != null }
+    if (!found) {
         Text(
             stringResource(R.string.layout_editor_missing_layout_message),
             modifier = Modifier.padding(16.dp),
@@ -1363,7 +1392,8 @@ internal fun KeyLayoutEditorScreen(
 
     // A secondary layout (issue #62) is one grid: no language, no layer chips,
     // no tablet widening, and it is never "on" — a key or the toolbar shows it.
-    val secondary = layout.secondary
+    val edited = remember(settings, layoutId) { OpenLayout(settings, layoutId) }
+    val secondary = edited.watch { it.secondary }
     var layer by rememberSaveable(layoutId) {
         mutableStateOf(LayoutLayer.entries.firstOrNull { it.key == initialLayer } ?: LayoutLayer.LETTERS)
     }
@@ -1416,7 +1446,8 @@ internal fun KeyLayoutEditorScreen(
     }
 
     fun push() {
-        undo = (undo + layout).takeLast(UndoDepth)
+        val current = edited.now() ?: return
+        undo = (undo + current).takeLast(UndoDepth)
         redo = emptyList()
     }
 
@@ -1499,33 +1530,34 @@ internal fun KeyLayoutEditorScreen(
     // caption below already says it is.
     val panelKind = panelTab
     val sharedPanelGrid = panelKind?.let { resolvePanelLayout(it, customPanels).grid }
-    val panelGrid = panelKind?.let { layout.panelLayer(it) ?: sharedPanelGrid }
+    // What the grid, its row tools and the captions around it are drawn from;
+    // each row of the groups below reads its own field instead.
+    val ownPanelGrid = edited.watch { spec -> panelKind?.let { spec.panelLayer(it) } }
+    val panelGrid = panelKind?.let { ownPanelGrid ?: sharedPanelGrid }
+    val appearance = edited.watch { it.appearance }
+    val layoutThemeId = edited.watch { it.themeId }
+    val keyHeightDp = settings.watch { it.keyHeightDp }
     val panelPreviewPair = if (panelKind != null && panelGrid != null) {
-        remember(panelKind, panelGrid, layout.appearance, settings.keyHeightDp, actualSize, layout.themeId) {
+        remember(panelKind, panelGrid, appearance, keyHeightDp, actualSize, layoutThemeId) {
             // The panel's own theme, else the layout's: what the board draws.
-            panelPreview(panelKind, panelGrid, layout.appearance, settings, actualSize, panelGrid.themeId ?: layout.themeId)
+            panelPreview(panelKind, panelGrid, appearance, keyHeightDp, actualSize, panelGrid.themeId ?: layoutThemeId)
         }
     } else {
         null
     }
 
-    val inheritable = layout.layer(layer) != null || BuiltInLayouts.default.layer(layer) != null
-    val compiled = if (inheritable) {
-        layout.compile(layer)
-    } else {
-        KeyboardLayout(name = "$layoutId/${layer.key}", rows = emptyList())
+    val hasOwnLayer = edited.watch { it.layer(layer) != null }
+    val compiled = edited.watch { spec ->
+        val inheritable = spec.layer(layer) != null || BuiltInLayouts.default.layer(layer) != null
+        if (inheritable) {
+            spec.compile(layer)
+        } else {
+            KeyboardLayout(name = "$layoutId/${layer.key}", rows = emptyList())
+        }
     }
     val rows = compiled.rows
     val rowHeights = compiled.rowHeights
     val selectedKey = selection?.let { rows.getOrNull(it.row)?.getOrNull(it.col) }
-    // Whether the tablet expansion would actually do anything here, so its
-    // toggle can say so. Asked of the letters layer on the widest form — the
-    // gate is a property of the layout, not of whichever layer is on screen —
-    // and only to word a subtitle, never to gate the toggle: a layout that the
-    // transform declines today should still keep the author's answer on file.
-    val tabletExpandApplies = remember(layout) {
-        tabletGridWidth(layout.compile(LayoutLayer.LETTERS), DeviceForm.LARGE_TABLET) != null
-    }
 
     // The grid is pinned under the bar, so the one line saying its keys can be
     // pressed goes first in the body, directly under it. It used to sit below
@@ -1534,7 +1566,7 @@ internal fun KeyLayoutEditorScreen(
     // learn it was anything but a picture (issue #139).
     CaptionText(stringResource(R.string.layout_editor_drag_caption))
 
-    SectionHeaderPublic(layout.name)
+    SectionHeaderPublic(edited.watch { it.name })
 
     // A layout's identity: its name, the language it counts as, and the
     // composer it types through. All three were reachable only by hand-editing
@@ -1571,20 +1603,21 @@ internal fun KeyLayoutEditorScreen(
             WmRow(
                 title = stringResource(R.string.layout_editor_name_title),
                 icon = SettingsRowIcons[R.string.layout_editor_name_title],
-                subtitle = layout.name,
+                subtitle = edited.watch { it.name },
                 onClick = { renaming = true },
             )
         }
         item {
             // Issue #61: a theme of the layout's own, the same override a
             // keyboard mode carries and the same picker, customs included.
+            val themeId = edited.watch { it.themeId }
             WmRow(
                 title = stringResource(R.string.layout_editor_theme_title),
                 icon = SettingsRowIcons[R.string.layout_editor_theme_title],
-                subtitle = layout.themeId?.let { themeDisplayName(settings, it) }
+                subtitle = themeId?.let { themeDisplayName(settings, it) }
                     ?: stringResource(R.string.layout_editor_theme_inherit_subtitle),
                 trailing = {
-                    if (layout.themeId != null) {
+                    if (themeId != null) {
                         TextButton(onClick = { edit { it.copy(themeId = null) } }) {
                             Text(clearLabel)
                         }
@@ -1599,7 +1632,7 @@ internal fun KeyLayoutEditorScreen(
             WmRow(
                 title = stringResource(R.string.layout_editor_language_title),
                 icon = SettingsRowIcons[R.string.layout_editor_language_title],
-                subtitle = layout.langId.takeIf { it.isNotBlank() }
+                subtitle = edited.watch { it.langId }.takeIf { it.isNotBlank() }
                     ?.let { LanguageRegistry.byId(it).displayName }
                     ?: stringResource(R.string.layout_editor_language_unset),
                 onClick = { languagePickerOpen = true },
@@ -1615,7 +1648,7 @@ internal fun KeyLayoutEditorScreen(
                 subtitle = stringResource(R.string.layout_editor_composer_subtitle),
                 options = listOf<Pair<ComposerType?, String>>(null to inheritLabel) +
                     ComposerType.entries.map { it to composerLabel(it) },
-                selected = layout.composer,
+                selected = edited.watch { it.composer },
                 info = stringResource(R.string.layout_editor_composer_info),
                 detail = { type -> ChoiceDetail(stringResource(composerDescRes(type))) },
             ) { chosen -> edit { it.copy(composer = chosen) } }
@@ -1624,7 +1657,7 @@ internal fun KeyLayoutEditorScreen(
 
     if (renaming) {
         LayoutNameDialog(
-            initial = layout.name,
+            initial = edited.watch { it.name },
             onDismiss = { renaming = false },
             onConfirm = { typed ->
                 renaming = false
@@ -1633,14 +1666,14 @@ internal fun KeyLayoutEditorScreen(
         )
     }
 
-    if (layout.themeId != null || layout.layer(layer)?.themeId != null) {
+    if (edited.watch { it.themeId != null || it.layer(layer)?.themeId != null }) {
         CaptionText(stringResource(R.string.layout_editor_theme_override_body))
     }
 
     if (themePickerOpen) {
         ModeThemePickerDialog(
             settings = settings,
-            selectedId = layout.themeId,
+            selectedId = layoutThemeId,
             title = stringResource(R.string.layout_editor_theme_picker_title),
             onPick = { id ->
                 themePickerOpen = false
@@ -1653,7 +1686,7 @@ internal fun KeyLayoutEditorScreen(
     if (layerThemePickerOpen) {
         ModeThemePickerDialog(
             settings = settings,
-            selectedId = layout.layer(layer)?.themeId,
+            selectedId = edited.watch { it.layer(layer)?.themeId },
             title = stringResource(R.string.layout_editor_layer_theme_picker_title),
             onPick = { id ->
                 layerThemePickerOpen = false
@@ -1667,7 +1700,7 @@ internal fun KeyLayoutEditorScreen(
         // The same picker the foreign-layout import uses: it searches the whole
         // registry, which is what re-languaging a duplicate needs.
         ForeignLanguageDialog(
-            selected = layout.langId,
+            selected = edited.watch { it.langId },
             onDismiss = { languagePickerOpen = false },
             onPick = { id ->
                 languagePickerOpen = false
@@ -1683,10 +1716,10 @@ internal fun KeyLayoutEditorScreen(
         // display face — and left wide otherwise, because that branch of the
         // picker offers *nothing* for a script with no curated list.
         ThemeFontPickerDialog(
-            current = layout.appearance?.fontId,
+            current = appearance?.fontId,
             title = stringResource(R.string.layout_editor_font_title),
             defaultLabel = stringResource(R.string.layout_editor_font_inherit),
-            script = layout.script().id.takeIf { KeyboardFonts.scriptFontChoices(it) != null },
+            script = edited.watch { it.script().id }.takeIf { KeyboardFonts.scriptFontChoices(it) != null },
             onDismiss = { fontPickerOpen = false },
             onPick = { id ->
                 fontPickerOpen = false
@@ -1697,7 +1730,7 @@ internal fun KeyLayoutEditorScreen(
 
     if (!secondary) {
         LayerChips(
-            layout = layout,
+            edited = edited,
             selected = layer,
             selectedPanel = panelTab,
             onSelect = { layer = it; panelTab = null; selection = null },
@@ -1706,7 +1739,7 @@ internal fun KeyLayoutEditorScreen(
     }
 
     if (panelKind != null) {
-        if (layout.panelLayer(panelKind) == null) {
+        if (ownPanelGrid == null) {
             CaptionText(
                 stringResource(
                     R.string.layout_editor_panel_inherited_caption,
@@ -1714,7 +1747,7 @@ internal fun KeyLayoutEditorScreen(
                 ),
             )
         }
-    } else if (layout.layer(layer) == null) {
+    } else if (!hasOwnLayer) {
         if (layer == LayoutLayer.FN) {
             // Nothing ships an Fn layer, so there is no built-in to inherit and
             // the grid above is a stand-in. Offer the template instead.
@@ -1750,7 +1783,7 @@ internal fun KeyLayoutEditorScreen(
             onClick = {
                 val previous = undo.last()
                 undo = undo.dropLast(1)
-                redo = redo + layout
+                redo = redo + listOfNotNull(edited.now())
                 stepPushed = false
                 save(previous)
             },
@@ -1765,7 +1798,7 @@ internal fun KeyLayoutEditorScreen(
             onClick = {
                 val next = redo.last()
                 redo = redo.dropLast(1)
-                undo = undo + layout
+                undo = undo + listOfNotNull(edited.now())
                 stepPushed = false
                 save(next)
             },
@@ -1873,7 +1906,7 @@ internal fun KeyLayoutEditorScreen(
             jsonRoute = "keymap_json/$layoutId",
             onNavigate = onNavigate,
             settings = settings,
-            reset = layout.panelLayer(panelKind)?.let {
+            reset = ownPanelGrid?.let {
                 ResetRow(
                     R.string.layout_editor_reset_panel_title,
                     stringResource(R.string.layout_editor_reset_panel_subtitle, panelName),
@@ -2036,14 +2069,14 @@ internal fun KeyLayoutEditorScreen(
             ToggleSetting(
                 R.string.layout_editor_persist_title,
                 stringResource(R.string.layout_editor_persist_subtitle),
-                layout.layer(layer)?.persistent ?: false,
+                edited.watch { it.layer(layer)?.persistent ?: false },
                 info = stringResource(R.string.layout_editor_persist_info),
             ) { on -> editLayer { it.copy(persistent = on) } }
         }
         // Issue #61 again, one layer down: a symbols page in its own colours.
         // Not on a secondary layout, whose one grid is the layout.
         item(visible = !secondary) {
-            val layerThemeId = layout.layer(layer)?.themeId
+            val layerThemeId = edited.watch { it.layer(layer)?.themeId }
             WmRow(
                 title = stringResource(
                     R.string.layout_editor_layer_theme_title,
@@ -2068,11 +2101,12 @@ internal fun KeyLayoutEditorScreen(
             // keys are punctuation had no way to stay put while the letters grew.
             // Null here follows the layout's, which is what almost every layer
             // wants and what the caption says.
+            val layerFontScale = edited.watch { it.layer(layer)?.fontScale }
             LayoutFontScaleRow(
-                scale = layout.layer(layer)?.fontScale,
+                scale = layerFontScale,
                 title = stringResource(
                     R.string.layout_editor_layer_font_scale_label,
-                    layout.layer(layer)?.fontScale ?: 1f,
+                    layerFontScale ?: 1f,
                 ),
                 autoTitle = stringResource(R.string.layout_editor_layer_font_scale_auto_label),
                 hint = stringResource(
@@ -2088,21 +2122,24 @@ internal fun KeyLayoutEditorScreen(
             // are labelled with words, or drawn in a script the global font does
             // not suit, needs type of its own, and neither the theme nor the
             // global settings can hold an answer for one layout.
+            val fontId = edited.watch { it.appearance?.fontId }
+            val customFontName = settings.watch { it.customFontName }
             WmRow(
                 title = stringResource(R.string.layout_editor_font_title),
                 icon = SettingsRowIcons[R.string.layout_editor_font_title],
-                subtitle = layout.appearance?.fontId?.let {
-                    KeyboardFonts.displayName(context, it, settings.customFontName)
+                subtitle = fontId?.let {
+                    KeyboardFonts.displayName(context, it, customFontName)
                 } ?: stringResource(R.string.layout_editor_font_inherit),
                 onClick = { fontPickerOpen = true },
             )
         }
         item {
+            val fontScale = edited.watch { it.appearance?.fontScale }
             LayoutFontScaleRow(
-                scale = layout.appearance?.fontScale,
+                scale = fontScale,
                 title = stringResource(
                     R.string.layout_editor_font_scale_label,
-                    layout.appearance?.fontScale ?: 1f,
+                    fontScale ?: 1f,
                 ),
                 autoTitle = stringResource(R.string.layout_editor_font_scale_auto_label),
                 hint = stringResource(R.string.layout_editor_font_scale_hint),
@@ -2115,6 +2152,15 @@ internal fun KeyLayoutEditorScreen(
             // Layout-wide, like the JSON row below it, rather than layer-scoped
             // like everything above — and `edit`, not `editCoalesced`, because
             // one deliberate flip deserves one undo step.
+            //
+            // Whether the tablet expansion would actually do anything here, so its
+            // toggle can say so. Asked of the letters layer on the widest form — the
+            // gate is a property of the layout, not of whichever layer is on screen —
+            // and only to word a subtitle, never to gate the toggle: a layout that the
+            // transform declines today should still keep the author's answer on file.
+            val tabletExpandApplies = edited.watch {
+                tabletGridWidth(it.compile(LayoutLayer.LETTERS), DeviceForm.LARGE_TABLET) != null
+            }
             ToggleSetting(
                 R.string.layout_editor_tablet_expand_title,
                 stringResource(
@@ -2124,7 +2170,7 @@ internal fun KeyLayoutEditorScreen(
                         R.string.layout_editor_tablet_expand_subtitle_na
                     },
                 ),
-                layout.tabletExpand,
+                edited.watch { it.tabletExpand },
             ) { on -> edit { it.copy(tabletExpand = on) } }
         }
         item {
@@ -2149,13 +2195,14 @@ internal fun KeyLayoutEditorScreen(
                 // the tab draws is the letters. See the note on `baseLayerOf`.
                 enabled = rows.isNotEmpty(),
                 onClick = {
+                    val current = edited.now() ?: return@WmRow
                     val text = LayerFile.encode(
                         layerKey = layer.key,
                         // The layer as it is drawn: this layout's own grid, or
                         // the built-in one it still inherits. Copying an
                         // inherited layer is the whole of use case 3 in the
                         // issue, where a layout modifies the letters alone.
-                        spec = baseLayerOf(layout),
+                        spec = baseLayerOf(current),
                         appVersion = BuildConfig.VERSION_CODE,
                         appVersionName = BuildConfig.VERSION_NAME,
                     )
@@ -2217,7 +2264,7 @@ internal fun KeyLayoutEditorScreen(
                 },
             )
         }
-        if (layout.layer(layer) != null) {
+        if (hasOwnLayer) {
             item {
                 WmRow(
                     title = stringResource(R.string.layout_editor_reset_layer_title),
@@ -2243,9 +2290,12 @@ internal fun KeyLayoutEditorScreen(
     // Not on an unauthored Fn layer: there is no grid there to sit above, and
     // the first edit would author an empty one.
     val extraRows = panelKind == null && !secondary && layer.isCycled &&
-        (layer != LayoutLayer.FN || layout.layer(layer) != null)
+        (layer != LayoutLayer.FN || hasOwnLayer)
     if (extraRows) {
-        val layerSpec = layout.layer(layer)
+        val numberRow = edited.watch { it.layer(layer)?.numberRow }
+        val fillRow = edited.watch { it.layer(layer)?.fillRow }
+        val numberRowOn = settings.watch { it.numberRow }
+        val numberRowInSymbols = settings.watch { it.layoutBehavior.numberRowInSymbols }
         // Putting a row back to the standard one also drops the layer copy the
         // first edit made, when nothing else in it differs from what it
         // inherits, so the layer follows the built-in grid again.
@@ -2263,18 +2313,18 @@ internal fun KeyLayoutEditorScreen(
             }
         }
         val shownHere = (layer != LayoutLayer.SYMBOLS && layer != LayoutLayer.SYMBOLS_SHIFTED) ||
-            settings.layoutBehavior.numberRowInSymbols
+            numberRowInSymbols
         ExtraRowEditor(
             title = stringResource(R.string.layout_editor_number_row_title),
             caption = stringResource(
                 when {
-                    !settings.numberRow -> R.string.layout_editor_number_row_off_caption
+                    !numberRowOn -> R.string.layout_editor_number_row_off_caption
                     !shownHere -> R.string.layout_editor_number_row_hidden_caption
                     else -> R.string.layout_editor_number_row_caption
                 },
             ),
-            row = layerSpec?.numberRow ?: BuiltInLayouts.defaultNumberRow(layer),
-            authored = layerSpec?.numberRow != null,
+            row = numberRow ?: BuiltInLayouts.defaultNumberRow(layer),
+            authored = numberRow != null,
             layout = compiled,
             settings = settings,
             selectionKey = "number/$layoutId/${layer.key}",
@@ -2287,20 +2337,20 @@ internal fun KeyLayoutEditorScreen(
                 }
             },
             onReset = { resetExtraRow { it.copy(numberRow = null) } },
-            secondaryLayouts = secondaryLayouts(settings.customLayouts),
+            secondaryLayouts = secondaryLayouts(settings.watch { it.customLayouts }),
         )
         if (layer == LayoutLayer.SYMBOLS && leadsWithDigitRow(rows)) {
             ExtraRowEditor(
                 title = stringResource(R.string.layout_editor_fill_row_title),
                 caption = stringResource(
-                    if (settings.numberRow) {
+                    if (numberRowOn) {
                         R.string.layout_editor_fill_row_caption
                     } else {
                         R.string.layout_editor_fill_row_off_caption
                     },
                 ),
-                row = layerSpec?.fillRow ?: BuiltInLayouts.SYMBOLS_FILL_ROW,
-                authored = layerSpec?.fillRow != null,
+                row = fillRow ?: BuiltInLayouts.SYMBOLS_FILL_ROW,
+                authored = fillRow != null,
                 layout = compiled,
                 settings = settings,
                 selectionKey = "fill/$layoutId",
@@ -2311,12 +2361,12 @@ internal fun KeyLayoutEditorScreen(
                     editLayerCoalesced { it.copy(fillRow = transform(it.fillRow ?: BuiltInLayouts.SYMBOLS_FILL_ROW)) }
                 },
                 onReset = { resetExtraRow { it.copy(fillRow = null) } },
-                secondaryLayouts = secondaryLayouts(settings.customLayouts),
+                secondaryLayouts = secondaryLayouts(settings.watch { it.customLayouts }),
             )
         }
     }
 
-    val findings = validateLayout(layout)
+    val findings = edited.watch { validateLayout(it) }
     if (findings.isNotEmpty()) {
         SettingsGroup(stringResource(R.string.layout_editor_problems_title)) {
             for (finding in findings) {
@@ -2338,11 +2388,12 @@ internal fun KeyLayoutEditorScreen(
     // "this does not affect typing yet" line was a lie in exactly the case where
     // it mattered — the keyboard follows every keystroke made here, and only the
     // repair pass at the point of use keeps a half-built grid typeable.
+    val live = settings.watch { layoutId in it.enabledLayoutIds }
     CaptionText(
         stringResource(
             when {
                 secondary -> R.string.layout_editor_secondary_caption
-                layoutId in settings.enabledLayoutIds -> R.string.layout_editor_live_caption
+                live -> R.string.layout_editor_live_caption
                 else -> R.string.layout_editor_not_live_caption
             },
         ),
@@ -2437,8 +2488,8 @@ internal fun KeyLayoutEditorScreen(
                 sheetOpen = false
             },
             onDismiss = { sheetOpen = false },
-            secondaryLayouts = secondaryLayouts(settings.customLayouts),
-            kanaPad = !secondary && layout.language().id == "ja",
+            secondaryLayouts = secondaryLayouts(settings.watch { it.customLayouts }),
+            kanaPad = !secondary && edited.watch { it.language().id == "ja" },
         )
     }
 }
@@ -2466,7 +2517,7 @@ private fun ExtraRowEditor(
     row: List<Key>,
     authored: Boolean,
     layout: KeyboardLayout,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     selectionKey: String,
     edit: ((List<Key>) -> List<Key>) -> Unit,
     editCoalesced: ((List<Key>) -> List<Key>) -> Unit,
@@ -2698,7 +2749,7 @@ internal fun RowActionBar(
 /** Layer tabs. The pencil marks a layer this layout has actually authored. */
 @Composable
 private fun LayerChips(
-    layout: LayoutSpec,
+    edited: OpenLayout,
     selected: LayoutLayer,
     onSelect: (LayoutLayer) -> Unit,
     /** The panel tab on screen, or null while a typing layer is; see issue #63. */
@@ -2713,7 +2764,7 @@ private fun LayerChips(
             LayerChip(
                 title = stringResource(layerTitleRes(layer)),
                 selected = selectedPanel == null && layer == selected,
-                authored = layout.layer(layer) != null,
+                authored = edited.watch { it.layer(layer) != null },
                 onClick = { onSelect(layer) },
             )
         }
@@ -2723,7 +2774,7 @@ private fun LayerChips(
             LayerChip(
                 title = stringResource(panelTitleRes(kind)),
                 selected = kind == selectedPanel,
-                authored = layout.panelLayer(kind) != null,
+                authored = edited.watch { it.panelLayer(kind) != null },
                 onClick = { onSelectPanel(kind) },
             )
         }
@@ -2788,7 +2839,7 @@ internal fun layerTitleRes(layer: LayoutLayer): Int = when (layer) {
 @Composable
 internal fun EditorGrid(
     layout: KeyboardLayout,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     selection: KeyRef?,
     showShift: Boolean,
     actualSize: Boolean,
@@ -2931,7 +2982,7 @@ internal fun EditorGrid(
         // …and in the theme the grid asks for (issue #61), so a layer given
         // its own colours is edited in them.
         KeyboardThemeProvider(
-            settings.applyLayoutTheme(layout.themeId),
+            settings.watch { it.applyLayoutTheme(layout.themeId) },
             layoutFontId = layout.appearance?.fontId,
         ) {
             val kb = LocalKbTheme.current
@@ -2981,10 +3032,11 @@ internal fun EditorGrid(
                         // the user's real setting, or a clamp of it. Clamped first and
                         // scaled second, so a row set to twice the height still draws
                         // twice as tall as its neighbours in the clamped preview.
+                        val keyHeightDp = settings.watch { it.keyHeightDp }
                         val baseHeightDp = if (actualSize) {
-                            settings.keyHeightDp
+                            keyHeightDp
                         } else {
-                            settings.keyHeightDp.coerceIn(38, 56)
+                            keyHeightDp.coerceIn(38, 56)
                         }
                         fun heightOf(r: Int) = rowHeightsDp?.getOrNull(r) ?: rowScaledKeyHeight(
                             baseHeightDp,
@@ -5464,12 +5516,14 @@ internal fun KeyActionPickerDialog(
 @Composable
 internal fun KeyLayoutJsonScreen(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     layoutId: String,
     onDone: () -> Unit,
 ) {
     val title = stringResource(R.string.home_screen_layout_json_title)
-    val layout = findLayout(settings.customLayouts, layoutId)
+    // The whole layout: whether it is there decides the screen, and the editor
+    // opens on its text.
+    val layout = settings.watch { findLayout(it.customLayouts, layoutId) }
     if (layout == null) {
         MissingJsonDocument(title, stringResource(R.string.layout_editor_missing_layout_message), onDone)
         return

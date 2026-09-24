@@ -47,7 +47,6 @@ import com.wasimaster.wmkeyboard.core.settings.AiProvider
 import com.wasimaster.wmkeyboard.core.tools.AiClient
 import com.wasimaster.wmkeyboard.core.tools.AiPrompts
 import com.wasimaster.wmkeyboard.BuildConfig
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.SettingsRepository
 import kotlinx.coroutines.launch
 import androidx.compose.material.icons.outlined.Check
@@ -57,7 +56,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 @Composable
 internal fun AiToolSettings(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onNavigate: (String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -65,15 +64,19 @@ internal fun AiToolSettings(
     // here and captured. The format also puts the number through the locale,
     // which is what gives Bengali or Arabic digits.
     val numberFormat = stringResource(R.string.values_number)
+    // What decides which groups and rows the screen holds; each row reads its
+    // own value.
+    val aiProvider = settings.watch { it.ai.provider }
+    val diffView = settings.watch { it.ai.diffView }
     // What the chosen provider needs, and where the text goes, both ride on
     // the heading's "?" rather than as paragraphs between the controls.
-    val setupNote = when (settings.ai.provider) {
+    val setupNote = when (aiProvider) {
         AiProvider.OLLAMA, AiProvider.LM_STUDIO -> stringResource(R.string.toolai_ai_local_server_info)
         AiProvider.OPENAI_COMPATIBLE -> stringResource(R.string.toolai_ai_compatible_info)
         else -> null
     }
     val privacyNote = stringResource(
-        if (settings.ai.provider == AiProvider.ON_DEVICE) R.string.toolai_ai_on_device_info
+        if (aiProvider == AiProvider.ON_DEVICE) R.string.toolai_ai_on_device_info
         else R.string.toolai_ai_cloud_info,
     )
     SectionHeader(
@@ -94,20 +97,20 @@ internal fun AiToolSettings(
         }
         for (provider in providers) {
             FilterChip(
-                selected = settings.ai.provider == provider,
+                selected = aiProvider == provider,
                 onClick = { scope.launch { repository.setAiProvider(provider) } },
                 label = { Text(stringResource(provider.labelRes), maxLines = 1) },
             )
         }
     }
-    when (settings.ai.provider) {
+    when (aiProvider) {
         AiProvider.ANTHROPIC -> SettingsGroup(
             stringResource(R.string.toolai_ai_anthropic_group_title),
         ) {
             item {
                 ApiKeyField(
                     label = stringResource(R.string.toolai_ai_anthropic_key_label),
-                    value = settings.ai.anthropicKey,
+                    value = settings.watch { it.ai.anthropicKey },
                     builtInAvailable = false,
                     emptyHint = stringResource(R.string.toolai_ai_anthropic_key_hint),
                 ) { repository.setAiAnthropicKey(it) }
@@ -115,7 +118,7 @@ internal fun AiToolSettings(
             item {
                 TextFieldSetting(
                     label = stringResource(R.string.toolai_ai_model_label),
-                    value = settings.ai.anthropicModel,
+                    value = settings.watch { it.ai.anthropicModel },
                     hint = stringResource(
                         R.string.toolai_ai_model_hint,
                         AiClient.DefaultModels.ANTHROPIC,
@@ -130,7 +133,7 @@ internal fun AiToolSettings(
             item {
                 ApiKeyField(
                     label = stringResource(R.string.toolai_ai_openai_key_label),
-                    value = settings.ai.openAiKey,
+                    value = settings.watch { it.ai.openAiKey },
                     builtInAvailable = false,
                     emptyHint = stringResource(R.string.toolai_ai_openai_key_hint),
                 ) { repository.setAiOpenAiKey(it) }
@@ -138,7 +141,7 @@ internal fun AiToolSettings(
             item {
                 TextFieldSetting(
                     label = stringResource(R.string.toolai_ai_model_label),
-                    value = settings.ai.openAiModel,
+                    value = settings.watch { it.ai.openAiModel },
                     hint = stringResource(
                         R.string.toolai_ai_model_hint,
                         AiClient.DefaultModels.OPENAI,
@@ -153,7 +156,7 @@ internal fun AiToolSettings(
             item {
                 ApiKeyField(
                     label = stringResource(R.string.toolai_ai_gemini_key_label),
-                    value = settings.ai.geminiKey,
+                    value = settings.watch { it.ai.geminiKey },
                     builtInAvailable = false,
                     emptyHint = stringResource(R.string.toolai_ai_gemini_key_hint),
                 ) { repository.setAiGeminiKey(it) }
@@ -161,7 +164,7 @@ internal fun AiToolSettings(
             item {
                 TextFieldSetting(
                     label = stringResource(R.string.toolai_ai_model_label),
-                    value = settings.ai.geminiModel,
+                    value = settings.watch { it.ai.geminiModel },
                     hint = stringResource(
                         R.string.toolai_ai_model_hint,
                         AiClient.DefaultModels.GEMINI,
@@ -176,7 +179,7 @@ internal fun AiToolSettings(
             item {
                 TextFieldSetting(
                     label = stringResource(R.string.toolai_ai_server_address_label),
-                    value = settings.ai.ollamaUrl,
+                    value = settings.watch { it.ai.ollamaUrl },
                     hint = stringResource(R.string.toolai_ai_ollama_url_hint),
                     default = SettingsDefaults.ai.ollamaUrl,
                 ) { repository.setAiOllamaUrl(it) }
@@ -184,7 +187,7 @@ internal fun AiToolSettings(
             item {
                 TextFieldSetting(
                     label = stringResource(R.string.toolai_ai_model_label),
-                    value = settings.ai.ollamaModel,
+                    value = settings.watch { it.ai.ollamaModel },
                     hint = stringResource(
                         R.string.toolai_ai_model_hint,
                         AiClient.DefaultModels.OLLAMA,
@@ -199,7 +202,7 @@ internal fun AiToolSettings(
             item {
                 TextFieldSetting(
                     label = stringResource(R.string.toolai_ai_server_address_label),
-                    value = settings.ai.lmStudioUrl,
+                    value = settings.watch { it.ai.lmStudioUrl },
                     hint = stringResource(R.string.toolai_ai_lm_studio_url_hint),
                     default = SettingsDefaults.ai.lmStudioUrl,
                 ) { repository.setAiLmStudioUrl(it) }
@@ -207,7 +210,7 @@ internal fun AiToolSettings(
             item {
                 TextFieldSetting(
                     label = stringResource(R.string.toolai_ai_model_label),
-                    value = settings.ai.lmStudioModel,
+                    value = settings.watch { it.ai.lmStudioModel },
                     hint = stringResource(R.string.toolai_ai_lm_studio_model_hint),
                     default = SettingsDefaults.ai.lmStudioModel,
                 ) { repository.setAiLmStudioModel(it) }
@@ -219,7 +222,7 @@ internal fun AiToolSettings(
             item {
                 ApiKeyField(
                     label = stringResource(R.string.toolai_ai_xai_key_label),
-                    value = settings.ai.xaiKey,
+                    value = settings.watch { it.ai.xaiKey },
                     builtInAvailable = false,
                     emptyHint = stringResource(R.string.toolai_ai_xai_key_hint),
                 ) { repository.setAiXaiKey(it) }
@@ -227,7 +230,7 @@ internal fun AiToolSettings(
             item {
                 TextFieldSetting(
                     label = stringResource(R.string.toolai_ai_model_label),
-                    value = settings.ai.xaiModel,
+                    value = settings.watch { it.ai.xaiModel },
                     hint = stringResource(
                         R.string.toolai_ai_model_hint,
                         AiClient.DefaultModels.XAI,
@@ -242,7 +245,7 @@ internal fun AiToolSettings(
             item {
                 ApiKeyField(
                     label = stringResource(R.string.toolai_ai_deepseek_key_label),
-                    value = settings.ai.deepSeekKey,
+                    value = settings.watch { it.ai.deepSeekKey },
                     builtInAvailable = false,
                     emptyHint = stringResource(R.string.toolai_ai_deepseek_key_hint),
                 ) { repository.setAiDeepSeekKey(it) }
@@ -250,7 +253,7 @@ internal fun AiToolSettings(
             item {
                 TextFieldSetting(
                     label = stringResource(R.string.toolai_ai_model_label),
-                    value = settings.ai.deepSeekModel,
+                    value = settings.watch { it.ai.deepSeekModel },
                     hint = stringResource(
                         R.string.toolai_ai_model_hint,
                         AiClient.DefaultModels.DEEPSEEK,
@@ -265,7 +268,7 @@ internal fun AiToolSettings(
             item {
                 TextFieldSetting(
                     label = stringResource(R.string.toolai_ai_compatible_url_label),
-                    value = settings.ai.compatibleUrl,
+                    value = settings.watch { it.ai.compatibleUrl },
                     hint = stringResource(R.string.toolai_ai_compatible_url_hint),
                     default = SettingsDefaults.ai.compatibleUrl,
                 ) { repository.setAiCompatibleUrl(it) }
@@ -275,7 +278,7 @@ internal fun AiToolSettings(
                 // service the app knows nothing about.
                 TextFieldSetting(
                     label = stringResource(R.string.toolai_ai_model_label),
-                    value = settings.ai.compatibleModel,
+                    value = settings.watch { it.ai.compatibleModel },
                     hint = stringResource(R.string.toolai_ai_compatible_model_hint),
                     default = SettingsDefaults.ai.compatibleModel,
                 ) { repository.setAiCompatibleModel(it) }
@@ -283,7 +286,7 @@ internal fun AiToolSettings(
             item {
                 ApiKeyField(
                     label = stringResource(R.string.toolai_ai_compatible_key_label),
-                    value = settings.ai.compatibleKey,
+                    value = settings.watch { it.ai.compatibleKey },
                     builtInAvailable = false,
                     emptyHint = stringResource(R.string.toolai_ai_compatible_key_hint),
                 ) { repository.setAiCompatibleKey(it) }
@@ -300,12 +303,12 @@ internal fun AiToolSettings(
         ),
     )
     SettingsGroup(stringResource(R.string.toolai_ai_output_title)) {
-        if (settings.ai.provider != AiProvider.ON_DEVICE) {
+        if (aiProvider != AiProvider.ON_DEVICE) {
             item {
                 TokenPresetSetting(
                     title = R.string.toolai_ai_max_tokens_title,
                     subtitle = stringResource(R.string.toolai_ai_max_tokens_subtitle),
-                    value = settings.ai.maxTokens,
+                    value = settings.watch { it.ai.maxTokens },
                     presets = MaxTokenPresets,
                     unlimitedLabel = stringResource(R.string.toolai_ai_max_tokens_provider_label),
                     numberFormat = numberFormat,
@@ -316,7 +319,7 @@ internal fun AiToolSettings(
                 TokenPresetSetting(
                     title = R.string.toolai_ai_local_context_title,
                     subtitle = stringResource(R.string.toolai_ai_local_context_subtitle),
-                    value = settings.ai.localContextTokens,
+                    value = settings.watch { it.ai.localContextTokens },
                     presets = LocalContextPresets,
                     unlimitedLabel = stringResource(R.string.toolai_ai_local_context_model_label),
                     numberFormat = numberFormat,
@@ -326,7 +329,7 @@ internal fun AiToolSettings(
         item {
             TextFieldSetting(
                 label = stringResource(R.string.toolai_ai_translate_to_label),
-                value = settings.ai.translateTo,
+                value = settings.watch { it.ai.translateTo },
                 hint = stringResource(R.string.toolai_ai_translate_to_hint),
                 default = SettingsDefaults.ai.translateTo,
             ) { repository.setAiTranslateTo(it) }
@@ -335,7 +338,7 @@ internal fun AiToolSettings(
             ToggleSetting(
                 R.string.toolai_ai_show_thinking_title,
                 stringResource(R.string.toolai_ai_show_thinking_subtitle),
-                settings.ai.showThinking,
+                settings.watch { it.ai.showThinking },
                 default = SettingsDefaults.ai.showThinking,
             ) { scope.launch { repository.setAiShowThinking(it) } }
         }
@@ -343,7 +346,7 @@ internal fun AiToolSettings(
             ToggleSetting(
                 R.string.toolai_ai_model_picker_title,
                 stringResource(R.string.toolai_ai_model_picker_subtitle),
-                settings.ai.panelModelPicker,
+                settings.watch { it.ai.panelModelPicker },
                 default = SettingsDefaults.ai.panelModelPicker,
             ) { scope.launch { repository.setAiPanelModelPicker(it) } }
         }
@@ -351,15 +354,15 @@ internal fun AiToolSettings(
             ToggleSetting(
                 R.string.toolai_ai_diff_title,
                 stringResource(R.string.toolai_ai_diff_subtitle),
-                settings.ai.diffView,
+                diffView,
                 default = SettingsDefaults.ai.diffView,
             ) { scope.launch { repository.setAiDiffView(it) } }
         }
-        item(visible = settings.ai.diffView) {
+        item(visible = diffView) {
             ToggleSetting(
                 R.string.toolai_ai_diff_first_title,
                 stringResource(R.string.toolai_ai_diff_first_subtitle),
-                settings.ai.diffOpensFirst,
+                settings.watch { it.ai.diffOpensFirst },
                 default = SettingsDefaults.ai.diffOpensFirst,
             ) { scope.launch { repository.setAiDiffOpensFirst(it) } }
         }
@@ -379,22 +382,24 @@ internal fun AiToolSettings(
             ToggleSetting(
                 R.string.toolai_chat_enter_sends_title,
                 stringResource(R.string.toolai_chat_enter_sends_subtitle),
-                settings.ai.chatEnterSends,
+                settings.watch { it.ai.chatEnterSends },
                 default = SettingsDefaults.ai.chatEnterSends,
             ) { scope.launch { repository.setAiChatEnterSends(it) } }
         }
     }
     SettingsGroup(stringResource(R.string.toolai_ai_actions_group_title)) {
         item {
-            val visible = visibleAiActions(
-                settings.ai.customActions,
-                settings.ai.actionOrder,
-                settings.ai.hiddenActions,
-            )
+            val visibleCount = settings.watch {
+                visibleAiActions(
+                    it.ai.customActions,
+                    it.ai.actionOrder,
+                    it.ai.hiddenActions,
+                ).size
+            }
             NavRow(
                 title = R.string.toolai_ai_actions_title,
                 subtitle = stringResource(R.string.toolai_ai_actions_subtitle),
-                value = numberFormat.format(visible.size),
+                value = numberFormat.format(visibleCount),
                 onClick = { onNavigate("ai_actions") },
             )
         }
@@ -484,13 +489,13 @@ internal fun aiActionEditRoute(actionId: String): String = "ai_action_edit/$acti
 @Composable
 internal fun AiActionsSettings(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onNavigate: (String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    val ordered = orderedAiActions(settings.ai.customActions, settings.ai.actionOrder)
-    val hidden = settings.ai.hiddenActions.toSet()
-    val visibleCount = ordered.count { it.id !in hidden }
+    // Which rows the group holds, and in what order; each row reads whether
+    // its own action is hidden.
+    val ordered = settings.watch { orderedAiActions(it.ai.customActions, it.ai.actionOrder) }
 
     // ReorderSetting takes a plain (T) -> String, which cannot resolve a string
     // resource, so the shipped names are looked up here first.
@@ -522,7 +527,7 @@ internal fun AiActionsSettings(
         for (action in ordered) {
             if (reordering) break
             item {
-                val on = action.id !in hidden
+                val on = settings.watch { action.id !in it.ai.hiddenActions }
                 WmRow(
                     title = names[action.id].orEmpty(),
                     supporting = {
@@ -536,6 +541,10 @@ internal fun AiActionsSettings(
                         Checkbox(
                             checked = on,
                             onCheckedChange = { checked ->
+                                val ai = settings.value.ai
+                                val hidden = ai.hiddenActions.toSet()
+                                val visibleCount = orderedAiActions(ai.customActions, ai.actionOrder)
+                                    .count { it.id !in hidden }
                                 // The panel needs at least one button, or it is
                                 // an empty box with no way back to a full one.
                                 if (checked || visibleCount > 1) {
@@ -586,12 +595,12 @@ private fun aiActionSummary(spec: AiActionSpec): String = when {
 @Composable
 internal fun AiActionEditor(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     actionId: String,
     onDone: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    val override = settings.ai.customActions.firstOrNull { it.id == actionId }
+    val override = settings.watch { s -> s.ai.customActions.firstOrNull { it.id == actionId } }
     val builtIn = BuiltInAiActions.byId(actionId)
     val existing = override ?: builtIn
     val defaultName = stringResource(R.string.toolai_ai_action_default_name)
@@ -746,13 +755,14 @@ internal fun AiActionEditor(
         // this previews the instruction path rather than the stored-prompt one.
         SettingsGroup(stringResource(R.string.toolai_ai_action_preview_title)) {
             item {
+                val translateTo = settings.watch { it.ai.translateTo }
                 Text(
                     if (askEachRun) {
                         AiPrompts.customPrompt(
-                            AiPrompts.resolvedTask(draft(), settings.ai.translateTo),
+                            AiPrompts.resolvedTask(draft(), translateTo),
                         )
                     } else {
-                        AiPrompts.systemPrompt(draft(), settings.ai.translateTo)
+                        AiPrompts.systemPrompt(draft(), translateTo)
                     },
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,

@@ -72,7 +72,6 @@ import com.wasimaster.wmkeyboard.core.layout.rowScaledKeyHeight
 import com.wasimaster.wmkeyboard.core.layout.secondaryLayouts
 import com.wasimaster.wmkeyboard.core.layout.spanRowWidths
 import com.wasimaster.wmkeyboard.core.layout.validatePanelLayout
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.SettingsRepository
 import com.wasimaster.wmkeyboard.core.settings.TextEditAction
 import com.wasimaster.wmkeyboard.ime.ui.KbTheme
@@ -207,7 +206,7 @@ internal fun PanelLayoutsGroup(custom: List<PanelLayoutSpec>, onNavigate: (Strin
 @Composable
 internal fun PanelLayoutEditorScreen(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     kind: PanelKind,
     onNavigate: (String) -> Unit,
 ) {
@@ -261,8 +260,9 @@ internal fun PanelLayoutEditorScreen(
     fun editGridCoalesced(transform: (LayerSpec) -> LayerSpec) =
         editCoalesced { it.copy(grid = transform(it.grid)) }
 
-    val (compiled, previewHeightsDp) = remember(spec, settings.keyHeightDp, actualSize) {
-        panelPreview(kind, spec.grid, spec.appearance, settings, actualSize, themeId = spec.grid.themeId)
+    val keyHeightDp = settings.watch { it.keyHeightDp }
+    val (compiled, previewHeightsDp) = remember(spec, keyHeightDp, actualSize) {
+        panelPreview(kind, spec.grid, spec.appearance, keyHeightDp, actualSize, themeId = spec.grid.themeId)
     }
 
     SectionHeaderPublic(
@@ -413,7 +413,7 @@ internal fun panelPreview(
     kind: PanelKind,
     grid: LayerSpec,
     appearance: LayoutAppearance?,
-    settings: KeyboardSettings,
+    keyHeightDp: Int,
     actualSize: Boolean,
     themeId: String? = null,
 ): Pair<KeyboardLayout, List<Int>> {
@@ -429,7 +429,7 @@ internal fun panelPreview(
         ).takeUnless { it.isEmpty },
         themeId = themeId,
     )
-    val baseHeightDp = if (actualSize) settings.keyHeightDp else settings.keyHeightDp.coerceIn(38, 56)
+    val baseHeightDp = if (actualSize) keyHeightDp else keyHeightDp.coerceIn(38, 56)
     val heights = if (rows.isEmpty()) {
         emptyList()
     } else {
@@ -475,7 +475,7 @@ internal fun PanelEditorBody(
     onNavigate: (String) -> Unit,
     reset: ResetRow?,
     /** For the theme row: the picker lists this user's themes. */
-    settings: KeyboardSettings,
+    settings: LiveSettings,
 ) {
     val context = LocalContext.current
     val rows = grid.rows
@@ -711,7 +711,7 @@ internal fun PanelEditorBody(
             fieldKinds = fieldKindsFor(kind).takeIf { it.isNotEmpty() },
             // An "open a layout" key on a panel names a secondary layout the
             // same way one on a typing grid does.
-            secondaryLayouts = secondaryLayouts(settings.customLayouts),
+            secondaryLayouts = secondaryLayouts(settings.watch { it.customLayouts }),
         )
     }
 }
@@ -840,7 +840,7 @@ internal fun FieldKindPickerDialog(
 @Composable
 internal fun PanelLayoutJsonScreen(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     kind: PanelKind,
     onDone: () -> Unit,
 ) {

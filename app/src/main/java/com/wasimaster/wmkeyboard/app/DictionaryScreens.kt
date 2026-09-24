@@ -64,7 +64,6 @@ import com.wasimaster.wmkeyboard.core.settings.BlacklistScope
 import com.wasimaster.wmkeyboard.core.settings.SettingsDefaults
 import com.wasimaster.wmkeyboard.core.settings.DictionarySort
 import com.wasimaster.wmkeyboard.core.settings.DictionarySortKey
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.LEARNED_CORRECTIONS_FILE
 import com.wasimaster.wmkeyboard.core.settings.SettingsRepository
 import com.wasimaster.wmkeyboard.core.settings.sortDictionaryWords
@@ -103,7 +102,7 @@ private fun ShowMoreWordsRow(remaining: Int, onClick: () -> Unit) {
  * own in-memory copy) reloads from disk instead of clobbering the edit.
  */
 @Composable
-internal fun DictionarySettings(repository: SettingsRepository, settings: KeyboardSettings) {
+internal fun DictionarySettings(repository: SettingsRepository, settings: LiveSettings) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val file = remember { java.io.File(context.filesDir, "learning/user_lexicon.json") }
@@ -283,7 +282,7 @@ internal fun DictionarySettings(repository: SettingsRepository, settings: Keyboa
     // The list's order (#194): a key, and under it a button that names the
     // direction and reverses it. The direction is not a second press on the
     // key, so the current order is always written out on the screen.
-    val sort = settings.appUi.dictionarySort
+    val sort = settings.watch { it.appUi.dictionarySort }
     if (words.size > 1) {
         ChoiceControl(
             options = listOf(
@@ -750,13 +749,15 @@ private data class BlacklistEntry(val word: String, val languageId: String?)
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-internal fun BlacklistSettings(repository: SettingsRepository, settings: KeyboardSettings) {
+internal fun BlacklistSettings(repository: SettingsRepository, settings: LiveSettings) {
     val scope = rememberCoroutineScope()
-    val sources = settings.suggestionSources
-    val entries = remember(sources.blacklist, sources.blacklistByLanguage) {
+    // The lists decide which rows the groups hold; the scope row reads its own value.
+    val blacklist = settings.watch { it.suggestionSources.blacklist }
+    val blacklistByLanguage = settings.watch { it.suggestionSources.blacklistByLanguage }
+    val entries = remember(blacklist, blacklistByLanguage) {
         buildList {
-            for (word in sources.blacklist) add(BlacklistEntry(word, null))
-            for ((language, words) in sources.blacklistByLanguage) {
+            for (word in blacklist) add(BlacklistEntry(word, null))
+            for ((language, words) in blacklistByLanguage) {
                 for (word in words) add(BlacklistEntry(word, language))
             }
         }.sortedWith(compareBy({ it.word }, { it.languageId.orEmpty() }))
@@ -776,7 +777,7 @@ internal fun BlacklistSettings(repository: SettingsRepository, settings: Keyboar
                     BlacklistScope.CURRENT_LANGUAGE to
                         stringResource(R.string.backup_blacklist_scope_current_label),
                 ),
-                selected = sources.blacklistScope,
+                selected = settings.watch { it.suggestionSources.blacklistScope },
                 default = SettingsDefaults.suggestionSources.blacklistScope,
                 detail = { scope ->
                     ChoiceDetail(
@@ -909,7 +910,7 @@ internal fun BlacklistSettings(repository: SettingsRepository, settings: Keyboar
                             onClick = { language = null },
                             label = { Text(stringResource(R.string.backup_blacklist_all_languages_label)) },
                         )
-                        for (lang in settings.enabledLanguages) {
+                        for (lang in settings.watch { it.enabledLanguages }) {
                             FilterChip(
                                 selected = language == lang.id,
                                 onClick = { language = lang.id },
@@ -952,11 +953,9 @@ internal fun BlacklistSettings(repository: SettingsRepository, settings: Keyboar
  * they can type back over to pin a digit their numbers always have.
  */
 @Composable
-internal fun PhoneFormatSettings(repository: SettingsRepository, settings: KeyboardSettings) {
+internal fun PhoneFormatSettings(repository: SettingsRepository, settings: LiveSettings) {
     val scope = rememberCoroutineScope()
-    val formats = remember(settings.clipboard.phoneFormats) {
-        settings.clipboard.phoneFormats.sorted()
-    }
+    val formats = settings.watch { it.clipboard.phoneFormats.sorted() }
     val masks = remember(formats) { PhoneFormats.parseAll(formats) }
     var showAdd by remember { mutableStateOf(false) }
     var sample by remember { mutableStateOf("") }
@@ -1097,7 +1096,7 @@ private fun phoneMaskFrom(raw: String): String? {
  * it is still waiting to settle.
  */
 @Composable
-internal fun LearnedCorrectionsSettings(repository: SettingsRepository, settings: KeyboardSettings) {
+internal fun LearnedCorrectionsSettings(repository: SettingsRepository, settings: LiveSettings) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val file = remember { java.io.File(context.filesDir, LEARNED_CORRECTIONS_FILE) }
@@ -1105,7 +1104,7 @@ internal fun LearnedCorrectionsSettings(repository: SettingsRepository, settings
     var habits by remember { mutableStateOf<List<CorrectionMemory.Habit>>(emptyList()) }
     var loaded by remember { mutableStateOf(false) }
     // Re-read whenever the keyboard or this screen changes the file.
-    LaunchedEffect(settings.suggestionStrip.correctionsVersion) {
+    LaunchedEffect(settings.watch { it.suggestionStrip.correctionsVersion }) {
         val memory = withContext(Dispatchers.IO) { CorrectionMemory(file) }
         pairs = memory.pairs()
         habits = memory.habitSummary()

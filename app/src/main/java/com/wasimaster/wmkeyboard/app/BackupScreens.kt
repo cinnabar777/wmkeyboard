@@ -417,9 +417,10 @@ private fun syncErrorText(context: Context, reason: String, auto: AutoBackupSett
 @Composable
 private fun BackupStatusCard(
     repository: SettingsRepository,
-    auto: AutoBackupSettings,
+    settings: LiveSettings,
     onMessage: (String) -> Unit,
 ) {
+    val auto = settings.watch { it.autoBackup }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var backingUp by remember { mutableStateOf(false) }
@@ -592,13 +593,18 @@ private val SECTION_ROWS = listOf(
 
 /**
  * The same thirteen switches for the three lists that pick sections: the
- * export, the automatic backup and sync. [secrets] adds the API-key switch
- * under Settings where the list has one.
+ * export, the automatic backup and sync. [sections] picks the list's sections
+ * out of the settings, which each row reads for itself. [secrets] adds the
+ * API-key switch under Settings where the list has one, shown while
+ * [settingsIncluded] (Settings is among the sections, read by the caller since
+ * it decides the rows).
  */
 private fun SettingsGroupScope.sectionRows(
-    sections: Set<ConfigBackup.Section>,
+    settings: LiveSettings,
+    sections: (KeyboardSettings) -> Set<ConfigBackup.Section>,
     defaults: Set<String>,
-    secrets: Pair<Boolean, (Boolean) -> Unit>?,
+    secrets: Pair<(KeyboardSettings) -> Boolean, (Boolean) -> Unit>?,
+    settingsIncluded: Boolean = false,
     secretsEnabled: Boolean = true,
     @StringRes secretsSubtitle: Int = R.string.backup_include_secrets_subtitle,
     onToggle: (ConfigBackup.Section, Boolean) -> Unit,
@@ -608,17 +614,17 @@ private fun SettingsGroupScope.sectionRows(
             ToggleSetting(
                 sectionLabelRes(row.section),
                 stringResource(row.subtitle),
-                row.section in sections,
+                settings.watch { row.section in sections(it) },
                 info = row.info?.let { stringResource(it) },
                 default = row.section.id in defaults,
             ) { onToggle(row.section, it) }
         }
         if (row.section == ConfigBackup.Section.SETTINGS && secrets != null) {
-            item(visible = ConfigBackup.Section.SETTINGS in sections) {
+            item(visible = settingsIncluded) {
                 ToggleSetting(
                     R.string.backup_include_secrets_title,
                     stringResource(secretsSubtitle),
-                    secrets.first,
+                    settings.watch { secrets.first(it) },
                     info = stringResource(R.string.backup_include_secrets_info),
                     enabled = secretsEnabled,
                     default = false,
@@ -682,14 +688,11 @@ private fun rememberKeysSwitch(encrypted: Boolean, onSet: (Boolean) -> Unit): (B
 @Composable
 internal fun BackupSettings(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onNavigate: (String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val auto = settings.autoBackup
-    val exportSections = auto.exportSectionSet
-    val includeSecrets = auto.includeSecrets
 
     var message by remember { mutableStateOf<String?>(null) }
     var confirmImport by remember { mutableStateOf<PendingImport?>(null) }
@@ -698,6 +701,8 @@ internal fun BackupSettings(
         ActivityResultContracts.CreateDocument(ConfigBackup.MIME_TYPE),
     ) { uri ->
         if (uri == null) return@rememberLauncherForActivityResult
+        val exportSections = settings.value.autoBackup.exportSectionSet
+        val includeSecrets = settings.value.autoBackup.includeSecrets
         scope.launch {
             val ok = runCancellable {
                 val text = repository.exportConfig(
@@ -753,19 +758,24 @@ internal fun BackupSettings(
         exportLauncher.launch("wmkeyboard-backup-$stamp.${ConfigBackup.FILE_EXTENSION}")
     }
 
-    BackupStatusCard(repository, auto) { message = it }
+    BackupStatusCard(repository, settings) { message = it }
 
-    LocationsGroup(repository, auto) { message = it }
+    LocationsGroup(repository, settings.watch { it.autoBackup }) { message = it }
 
     SettingsGroup {
         item {
+            // The interval and the count kept, or null while it is off.
+            val schedule = settings.watch { s ->
+                s.autoBackup.takeIf { it.enabled && it.backupTargets.isNotEmpty() }?.let { it.intervalHours to it.keep }
+            }
             NavRow(
                 R.string.backup_auto_group_title,
-                subtitle = if (auto.enabled && auto.backupTargets.isNotEmpty()) {
+                subtitle = if (schedule != null) {
+                    val (intervalHours, keep) = schedule
                     stringResource(
                         R.string.backup_hub_auto_summary,
-                        backupIntervalLabel(context, auto.intervalHours),
-                        context.resources.getQuantityString(R.plurals.backup_auto_keep_value, auto.keep, auto.keep),
+                        backupIntervalLabel(context, intervalHours),
+                        context.resources.getQuantityString(R.plurals.backup_auto_keep_value, keep, keep),
                     )
                 } else {
                     stringResource(R.string.backup_hub_backup_off)
@@ -774,13 +784,15 @@ internal fun BackupSettings(
             ) { onNavigate("backup/auto") }
         }
         item {
+            val syncOn = settings.watch { it.autoBackup.sync.enabled }
+            val syncMode = settings.watch { it.autoBackup.sync.mode }
             NavRow(
                 R.string.backup_sync_title,
                 subtitle = stringResource(
-                    if (!auto.sync.enabled) {
+                    if (!syncOn) {
                         R.string.backup_sync_nav_subtitle
                     } else {
-                        when (auto.sync.mode) {
+                        when (syncMode) {
                             SyncMode.SOON -> R.string.backup_sync_mode_soon
                             SyncMode.SCHEDULE -> R.string.backup_sync_mode_schedule
                             SyncMode.MANUAL -> R.string.backup_sync_mode_manual
@@ -801,7 +813,7 @@ internal fun BackupSettings(
                 title = stringResource(R.string.backup_files_export_title),
                 subtitle = stringResource(R.string.backup_files_export_subtitle),
                 icon = Icons.Outlined.FileUpload,
-                enabled = exportSections.isNotEmpty(),
+                enabled = settings.watch { it.autoBackup.exportSectionSet.isNotEmpty() },
                 onClick = exportGuarded,
             )
         }
@@ -810,7 +822,7 @@ internal fun BackupSettings(
                 R.string.backup_files_contents_title,
                 subtitle = stringResource(
                     R.string.backup_include_nav_subtitle,
-                    exportSections.size,
+                    settings.watch { it.autoBackup.exportSectionSet.size },
                     ConfigBackup.Section.entries.size,
                 ),
                 route = "backup/contents",
@@ -980,17 +992,24 @@ internal fun BackupSettings(
  * as the list of locations.
  */
 @Composable
-internal fun BackupAutoSettings(repository: SettingsRepository, settings: KeyboardSettings) {
+internal fun BackupAutoSettings(repository: SettingsRepository, settings: LiveSettings) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val auto = settings.autoBackup
-    val active = auto.backupTargets
-    val configured = active.isNotEmpty()
-    val encrypted = auto.encrypt && auto.passphrase.isNotEmpty()
+    // What decides which rows and groups the screen holds; each row reads its
+    // own value.
+    val autoOn = settings.watch { it.autoBackup.enabled }
+    val configured = settings.watch { it.autoBackup.backupTargets.isNotEmpty() }
+    val overNetwork = settings.watch { s -> s.autoBackup.backupTargets.any { it.type.needsNetwork } }
+    val locations = settings.watch { it.autoBackup.locations }
+    val encryptOn = settings.watch { it.autoBackup.encrypt }
+    val encrypted = settings.watch { it.autoBackup.encrypt && it.autoBackup.passphrase.isNotEmpty() }
+    val settingsIncluded = settings.watch { ConfigBackup.Section.SETTINGS in it.autoBackup.sectionSet }
     val setKeys = rememberKeysSwitch(encrypted) { on -> scope.launch { repository.setBackupIncludeSecrets(on) } }
-    val personal = ConfigBackup.Section.DICTIONARY.id in auto.sections ||
-        ConfigBackup.Section.CLIPBOARD.id in auto.sections ||
-        ConfigBackup.Section.SWIPE.id in auto.sections
+    val personal = settings.watch { s ->
+        ConfigBackup.Section.DICTIONARY.id in s.autoBackup.sections ||
+            ConfigBackup.Section.CLIPBOARD.id in s.autoBackup.sections ||
+            ConfigBackup.Section.SWIPE.id in s.autoBackup.sections
+    }
 
     fun resync() = scope.launch { AutoBackupScheduler.sync(context, repository.settings.first().autoBackup) }
 
@@ -1001,11 +1020,11 @@ internal fun BackupAutoSettings(repository: SettingsRepository, settings: Keyboa
                 stringResource(
                     when {
                         configured -> R.string.backup_auto_enabled_subtitle
-                        auto.locations.isEmpty() -> R.string.backup_auto_needs_location
+                        locations.isEmpty() -> R.string.backup_auto_needs_location
                         else -> R.string.backup_auto_needs_target
                     },
                 ),
-                auto.enabled && configured,
+                autoOn && configured,
                 enabled = configured,
                 default = SettingsDefaults.autoBackup.enabled && configured,
             ) { on ->
@@ -1015,11 +1034,11 @@ internal fun BackupAutoSettings(repository: SettingsRepository, settings: Keyboa
                 }
             }
         }
-        item(visible = auto.enabled && configured) {
+        item(visible = autoOn && configured) {
             // The ladder by index, so every stop is a value somebody would pick.
             SliderSetting(
                 R.string.backup_auto_interval_title,
-                value = intervalSliderIndex(auto.intervalHours).toFloat(),
+                value = intervalSliderIndex(settings.watch { it.autoBackup.intervalHours }).toFloat(),
                 range = 0f..(AutoBackupIntervals.size - 1).toFloat(),
                 display = { backupIntervalLabel(context, intervalAt(it)) },
                 default = intervalSliderIndex(SettingsDefaults.autoBackup.intervalHours).toFloat(),
@@ -1030,11 +1049,11 @@ internal fun BackupAutoSettings(repository: SettingsRepository, settings: Keyboa
                 }
             }
         }
-        item(visible = auto.enabled && configured) {
+        item(visible = autoOn && configured) {
             SliderSetting(
                 R.string.backup_auto_keep_title,
                 subtitle = stringResource(R.string.backup_auto_keep_subtitle),
-                value = auto.keep.toFloat(),
+                value = settings.watch { it.autoBackup.keep }.toFloat(),
                 range = AutoBackupKeepRange.first.toFloat()..AutoBackupKeepRange.last.toFloat(),
                 display = { kept ->
                     context.resources.getQuantityString(
@@ -1046,11 +1065,11 @@ internal fun BackupAutoSettings(repository: SettingsRepository, settings: Keyboa
                 default = SettingsDefaults.autoBackup.keep.toFloat(),
             ) { kept -> scope.launch { repository.setAutoBackupKeep(kept.roundToInt()) } }
         }
-        item(visible = auto.enabled && configured) {
+        item(visible = autoOn && configured) {
             ToggleSetting(
                 R.string.backup_auto_charging_title,
                 stringResource(R.string.backup_auto_charging_subtitle),
-                auto.requireCharging,
+                settings.watch { it.autoBackup.requireCharging },
                 info = stringResource(R.string.backup_auto_charging_info),
                 default = SettingsDefaults.autoBackup.requireCharging,
             ) { on ->
@@ -1062,11 +1081,11 @@ internal fun BackupAutoSettings(repository: SettingsRepository, settings: Keyboa
         }
         // A folder is storage on this device: a network condition there would
         // only ever delay a backup that costs nothing.
-        item(visible = auto.enabled && configured && active.any { it.type.needsNetwork }) {
+        item(visible = autoOn && configured && overNetwork) {
             ToggleSetting(
                 R.string.backup_auto_unmetered_title,
                 stringResource(R.string.backup_auto_unmetered_subtitle),
-                auto.requireUnmetered,
+                settings.watch { it.autoBackup.requireUnmetered },
                 info = stringResource(R.string.backup_auto_unmetered_info),
                 default = SettingsDefaults.autoBackup.requireUnmetered,
             ) { on ->
@@ -1082,10 +1101,10 @@ internal fun BackupAutoSettings(repository: SettingsRepository, settings: Keyboa
         stringResource(R.string.backup_auto_targets_title),
         info = stringResource(R.string.backup_auto_targets_info),
     ) {
-        if (auto.locations.isEmpty()) {
+        if (locations.isEmpty()) {
             item { WmRow(title = stringResource(R.string.backup_auto_targets_none)) }
         }
-        for (location in auto.locations) {
+        for (location in locations) {
             item {
                 LocationCheckRow(location, location.backup) { on ->
                     scope.launch {
@@ -1105,15 +1124,15 @@ internal fun BackupAutoSettings(repository: SettingsRepository, settings: Keyboa
             ToggleSetting(
                 R.string.backup_auto_encrypt_title,
                 stringResource(R.string.backup_auto_encrypt_subtitle),
-                auto.encrypt,
+                encryptOn,
                 info = stringResource(R.string.backup_auto_encrypt_info),
                 default = SettingsDefaults.autoBackup.encrypt,
             ) { on -> scope.launch { repository.setAutoBackupEncrypt(on) } }
         }
-        item(visible = auto.encrypt) {
+        item(visible = encryptOn) {
             StoredTextField(
                 label = stringResource(R.string.backup_auto_passphrase_label),
-                value = auto.passphrase,
+                value = settings.watch { it.autoBackup.passphrase },
                 supporting = "",
                 password = true,
             ) { entered -> scope.launch { repository.setAutoBackupPassphrase(entered) } }
@@ -1128,9 +1147,11 @@ internal fun BackupAutoSettings(repository: SettingsRepository, settings: Keyboa
 
     SettingsGroup(stringResource(R.string.backup_auto_contents_title)) {
         sectionRows(
-            sections = auto.sectionSet,
+            settings = settings,
+            sections = { it.autoBackup.sectionSet },
             defaults = AutoBackupSettings.DEFAULT_SECTIONS,
-            secrets = auto.backupIncludeSecrets to setKeys,
+            secrets = { s: KeyboardSettings -> s.autoBackup.backupIncludeSecrets } to setKeys,
+            settingsIncluded = settingsIncluded,
             secretsSubtitle = if (encrypted) {
                 R.string.backup_include_secrets_subtitle
             } else {
@@ -1152,14 +1173,14 @@ internal fun BackupAutoSettings(repository: SettingsRepository, settings: Keyboa
  * what stays on one device sit behind the "What syncs" heading.
  */
 @Composable
-internal fun BackupSyncSettings(repository: SettingsRepository, settings: KeyboardSettings) {
+internal fun BackupSyncSettings(repository: SettingsRepository, settings: LiveSettings) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val auto = settings.autoBackup
-    val sync = auto.sync
-    val active = auto.activeLocations
-    val targets = sync.targets(auto.locations)
-    val encrypted = auto.encrypt && auto.passphrase.isNotEmpty()
+    // What decides which rows the groups hold; each row reads its own value.
+    val syncOn = settings.watch { it.autoBackup.sync.enabled }
+    val syncMode = settings.watch { it.autoBackup.sync.mode }
+    val locations = settings.watch { it.autoBackup.locations }
+    val encrypted = settings.watch { it.autoBackup.encrypt && it.autoBackup.passphrase.isNotEmpty() }
     var message by remember { mutableStateOf<String?>(null) }
     var syncing by remember { mutableStateOf(false) }
     val setKeys = rememberKeysSwitch(encrypted) { on -> scope.launch { repository.setSyncIncludeSecrets(on) } }
@@ -1175,20 +1196,25 @@ internal fun BackupSyncSettings(repository: SettingsRepository, settings: Keyboa
 
     SettingsGroup {
         item {
+            val hasActive = settings.watch { it.autoBackup.activeLocations.isNotEmpty() }
+            val hasTargets = settings.watch { s -> s.autoBackup.sync.targets(s.autoBackup.locations).isNotEmpty() }
             ToggleSetting(
                 R.string.backup_sync_enabled_title,
                 stringResource(
                     when {
-                        active.isEmpty() -> R.string.backup_auto_needs_location
-                        sync.enabled && targets.isEmpty() -> R.string.backup_sync_needs_target
+                        !hasActive -> R.string.backup_auto_needs_location
+                        syncOn && !hasTargets -> R.string.backup_sync_needs_target
                         else -> R.string.backup_sync_enabled_subtitle
                     },
                 ),
-                sync.enabled && active.isNotEmpty(),
+                syncOn && hasActive,
                 info = stringResource(R.string.backup_sync_first_note),
-                enabled = active.isNotEmpty(),
+                enabled = hasActive,
                 default = SettingsDefaults.autoBackup.sync.enabled,
             ) { on ->
+                val auto = settings.value.autoBackup
+                val active = auto.activeLocations
+                val targets = auto.sync.targets(auto.locations)
                 scope.launch {
                     // Turned on with nothing ticked: tick the first usable
                     // location, the focused default, rather than switch on a
@@ -1201,7 +1227,7 @@ internal fun BackupSyncSettings(repository: SettingsRepository, settings: Keyboa
                 }
             }
         }
-        item(visible = sync.enabled) {
+        item(visible = syncOn) {
             ChoiceSetting(
                 R.string.backup_sync_mode_title,
                 options = listOf(
@@ -1209,7 +1235,7 @@ internal fun BackupSyncSettings(repository: SettingsRepository, settings: Keyboa
                     SyncMode.SCHEDULE to stringResource(R.string.backup_sync_mode_schedule),
                     SyncMode.MANUAL to stringResource(R.string.backup_sync_mode_manual),
                 ),
-                selected = sync.mode,
+                selected = syncMode,
                 default = SettingsDefaults.autoBackup.sync.mode,
                 detail = { mode ->
                     ChoiceDetail(
@@ -1224,22 +1250,23 @@ internal fun BackupSyncSettings(repository: SettingsRepository, settings: Keyboa
                 },
             ) { mode -> scope.launch { repository.setSyncMode(mode) } }
         }
-        item(visible = sync.enabled && sync.mode == SyncMode.SCHEDULE) {
+        item(visible = syncOn && syncMode == SyncMode.SCHEDULE) {
             SliderSetting(
                 R.string.backup_sync_interval_title,
-                value = intervalSliderIndex(sync.intervalHours).toFloat(),
+                value = intervalSliderIndex(settings.watch { it.autoBackup.sync.intervalHours }).toFloat(),
                 range = 0f..(AutoBackupIntervals.size - 1).toFloat(),
                 display = { backupIntervalLabel(context, intervalAt(it)) },
                 default = intervalSliderIndex(SettingsDefaults.autoBackup.sync.intervalHours).toFloat(),
             ) { index -> scope.launch { repository.setSyncIntervalHours(intervalAt(index)) } }
         }
-        item(visible = sync.enabled) {
+        item(visible = syncOn) {
+            val keysProtected = settings.watch { it.autoBackup.encrypt && it.autoBackup.passphrase.isNotEmpty() }
             ToggleSetting(
                 R.string.backup_sync_secrets_title,
                 stringResource(
-                    if (encrypted) R.string.backup_sync_secrets_subtitle else R.string.backup_sync_secrets_unprotected,
+                    if (keysProtected) R.string.backup_sync_secrets_subtitle else R.string.backup_sync_secrets_unprotected,
                 ),
-                sync.includeSecrets,
+                settings.watch { it.autoBackup.sync.includeSecrets },
                 default = SettingsDefaults.autoBackup.sync.includeSecrets,
             ) { on -> setKeys(on) }
         }
@@ -1249,12 +1276,12 @@ internal fun BackupSyncSettings(repository: SettingsRepository, settings: Keyboa
         stringResource(R.string.backup_sync_targets_title),
         info = stringResource(R.string.backup_sync_targets_info),
     ) {
-        if (auto.locations.isEmpty()) {
+        if (locations.isEmpty()) {
             item { WmRow(title = stringResource(R.string.backup_auto_targets_none)) }
         }
-        for (location in auto.locations) {
+        for (location in locations) {
             item {
-                LocationCheckRow(location, location.id in sync.locationIds) { on ->
+                LocationCheckRow(location, settings.watch { location.id in it.autoBackup.sync.locationIds }) { on ->
                     scope.launch { repository.setSyncLocation(location.id, on) }
                 }
             }
@@ -1266,7 +1293,8 @@ internal fun BackupSyncSettings(repository: SettingsRepository, settings: Keyboa
         info = stringResource(R.string.backup_sync_local_note),
     ) {
         sectionRows(
-            sections = sync.sectionSet,
+            settings = settings,
+            sections = { it.autoBackup.sync.sectionSet },
             defaults = SyncSettings.DEFAULT_SECTIONS,
             secrets = null,
         ) { section, on ->
@@ -1277,13 +1305,13 @@ internal fun BackupSyncSettings(repository: SettingsRepository, settings: Keyboa
         }
     }
 
-    val syncsSettings = ConfigBackup.Section.SETTINGS in sync.sectionSet
     SettingsGroup(
         stringResource(R.string.backup_sync_keep_local_title),
         info = stringResource(R.string.backup_sync_keep_local_info),
     ) {
         for (group in SyncKeys.LocalGroup.entries) {
             item {
+                val syncsSettings = settings.watch { ConfigBackup.Section.SETTINGS in it.autoBackup.sync.sectionSet }
                 ToggleSetting(
                     when (group) {
                         SyncKeys.LocalGroup.TOOLBAR -> R.string.backup_sync_keep_toolbar_title
@@ -1296,7 +1324,7 @@ internal fun BackupSyncSettings(repository: SettingsRepository, settings: Keyboa
                             else -> R.string.backup_sync_keep_layouts_subtitle
                         },
                     ),
-                    group in sync.keepLocalGroups,
+                    settings.watch { group in it.autoBackup.sync.keepLocalGroups },
                     enabled = syncsSettings,
                     default = false,
                 ) { on ->
@@ -1313,8 +1341,11 @@ internal fun BackupSyncSettings(repository: SettingsRepository, settings: Keyboa
 
     SettingsGroup {
         item {
+            val canSync = settings.watch { s ->
+                s.autoBackup.sync.enabled && s.autoBackup.sync.targets(s.autoBackup.locations).isNotEmpty()
+            }
             FilledTonalButton(
-                enabled = sync.enabled && targets.isNotEmpty() && !syncing,
+                enabled = canSync && !syncing,
                 onClick = { runNow() },
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             ) {
@@ -1326,12 +1357,15 @@ internal fun BackupSyncSettings(repository: SettingsRepository, settings: Keyboa
             }
         }
     }
-    val syncError = sync.lastError.takeIf { it.isNotEmpty() }?.let { syncErrorText(context, it, auto) }
+    val syncError = settings.watch { s ->
+        s.autoBackup.sync.lastError.takeIf { it.isNotEmpty() }?.let { syncErrorText(context, it, s.autoBackup) }
+    }
+    val lastSyncAtMs = settings.watch { it.autoBackup.sync.lastRunAtMs }
     StateBanner(
-        syncError ?: if (sync.lastRunAtMs > 0L) {
+        syncError ?: if (lastSyncAtMs > 0L) {
             stringResource(
                 R.string.backup_hub_last_sync,
-                DateUtils.getRelativeTimeSpanString(sync.lastRunAtMs).toString(),
+                DateUtils.getRelativeTimeSpanString(lastSyncAtMs).toString(),
             )
         } else {
             stringResource(R.string.backup_hub_never_synced)
@@ -1354,14 +1388,18 @@ internal fun BackupSyncSettings(repository: SettingsRepository, settings: Keyboa
 
 /** What the one-off "Export to a file" puts in. The automatic backup and sync have their own lists. */
 @Composable
-internal fun BackupContentsSettings(repository: SettingsRepository, settings: KeyboardSettings) {
+internal fun BackupContentsSettings(repository: SettingsRepository, settings: LiveSettings) {
     val scope = rememberCoroutineScope()
-    val auto = settings.autoBackup
+    // Decides whether the key switch is among the rows.
+    val settingsIncluded = settings.watch { ConfigBackup.Section.SETTINGS in it.autoBackup.exportSectionSet }
     SettingsGroup {
         sectionRows(
-            sections = auto.exportSectionSet,
+            settings = settings,
+            sections = { it.autoBackup.exportSectionSet },
             defaults = AutoBackupSettings.DEFAULT_SECTIONS,
-            secrets = auto.includeSecrets to { on -> scope.launch { repository.setAutoBackupIncludeSecrets(on) } },
+            secrets = { s: KeyboardSettings -> s.autoBackup.includeSecrets } to
+                { on -> scope.launch { repository.setAutoBackupIncludeSecrets(on) } },
+            settingsIncluded = settingsIncluded,
         ) { section, on ->
             scope.launch {
                 val current = repository.settings.first().autoBackup.exportSectionSet

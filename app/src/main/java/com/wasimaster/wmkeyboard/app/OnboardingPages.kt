@@ -100,7 +100,6 @@ import com.wasimaster.wmkeyboard.core.script.LanguageRegistry
 import com.wasimaster.wmkeyboard.core.settings.DefaultToolOrder
 import com.wasimaster.wmkeyboard.core.settings.EmojiFontChoice
 import com.wasimaster.wmkeyboard.core.settings.EmojiSkinTone
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.RecommendedTools
 import com.wasimaster.wmkeyboard.core.settings.SettingsRepository
 import com.wasimaster.wmkeyboard.core.settings.ThemeMode
@@ -214,32 +213,37 @@ private fun AppLanguageRow(title: String, subtitle: String?, selected: Boolean, 
 }
 
 @Composable
-internal fun LanguagesPage(repository: SettingsRepository, settings: KeyboardSettings) {
+internal fun LanguagesPage(repository: SettingsRepository, settings: LiveSettings) {
     val scope = rememberCoroutineScope()
+    // What decides which rows the page holds; each switch reads its own value.
+    val enabledLanguages = settings.watch { it.enabledLanguages }
+    val enabledLayoutIds = settings.watch { it.enabledLayoutIds }
+    val customLayouts = settings.watch { it.customLayouts }
     // The enabled set, grouped by language (deduped, in switch order); toggling
     // a layout off is how you drop one during setup, and the search below adds
     // any of the rest.
-    for (language in settings.enabledLanguages) {
+    for (language in enabledLanguages) {
         Text(
             language.displayName,
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.padding(start = 16.dp, top = 12.dp, bottom = 4.dp),
         )
-        val layoutIds = settings.enabledLayoutIds.filter {
-            resolveLayout(settings.customLayouts, it).language().id == language.id
+        val layoutIds = enabledLayoutIds.filter {
+            resolveLayout(customLayouts, it).language().id == language.id
         }
         for (layoutId in layoutIds) {
             ListItem(
-                headlineContent = { Text(resolveLayout(settings.customLayouts, layoutId).name) },
+                headlineContent = { Text(resolveLayout(customLayouts, layoutId).name) },
                 trailingContent = {
                     Switch(
-                        checked = layoutId in settings.enabledLayoutIds,
+                        checked = layoutId in enabledLayoutIds,
                         onCheckedChange = { enable ->
+                            val current = settings.value.enabledLayoutIds
                             scope.launch {
                                 val next =
-                                    if (enable) settings.enabledLayoutIds + layoutId
-                                    else settings.enabledLayoutIds - layoutId
+                                    if (enable) current + layoutId
+                                    else current - layoutId
                                 if (next.isNotEmpty()) {
                                     repository.setEnabledLayoutIds(next.distinct())
                                 }
@@ -278,13 +282,13 @@ private const val ONBOARDING_SUGGESTION_LIMIT = 4
  * suggestion sources stay in Settings → Languages, which has room for them.
  */
 @Composable
-private fun AddLanguageSection(repository: SettingsRepository, settings: KeyboardSettings) {
+private fun AddLanguageSection(repository: SettingsRepository, settings: LiveSettings) {
     val scope = rememberCoroutineScope()
     var query by rememberSaveable { mutableStateOf("") }
     // The language whose layout-picker dialog is open, by id — the id rather
     // than the LanguageDef so the open dialog survives rotation.
     var layoutChoice by rememberSaveable { mutableStateOf<String?>(null) }
-    val enabledLangIds = settings.enabledLanguages.mapTo(HashSet()) { it.id }
+    val enabledLangIds = settings.watch { s -> s.enabledLanguages.mapTo(HashSet()) { it.id } }
     val q = query.trim().lowercase()
     val matches = searchLanguages(q).filter { it.id !in enabledLangIds }
     val suggested = rememberSuggestedLanguages(settings, limit = ONBOARDING_SUGGESTION_LIMIT)
@@ -302,7 +306,7 @@ private fun AddLanguageSection(repository: SettingsRepository, settings: Keyboar
         if (language.layoutIds.size > 1) {
             layoutChoice = language.id
         } else {
-            addLanguage(scope, repository, settings, language)
+            addLanguage(scope, repository, settings.value, language)
             fetchData(language)
             query = ""
         }
@@ -310,17 +314,19 @@ private fun AddLanguageSection(repository: SettingsRepository, settings: Keyboar
 
     layoutChoice?.let { langId ->
         val language = LanguageRegistry.byId(langId)
+        val customLayouts = settings.watch { it.customLayouts }
         LayoutPickerDialog(
             language = language,
-            layoutName = { resolveLayout(settings.customLayouts, it).name },
-            layoutSpec = { resolveLayout(settings.customLayouts, it) },
+            layoutName = { resolveLayout(customLayouts, it).name },
+            layoutSpec = { resolveLayout(customLayouts, it) },
             onConfirm = { chosen ->
                 layoutChoice = null
                 query = ""
                 fetchData(language)
+                val enabled = settings.value.enabledLayoutIds
                 scope.launch {
                     repository.setEnabledLayoutIds(
-                        (settings.enabledLayoutIds + chosen).distinct(),
+                        (enabled + chosen).distinct(),
                     )
                 }
             },
@@ -523,9 +529,12 @@ private fun LayoutPickerDialog(
  * spent a screen asking anyway.
  */
 @Composable
-internal fun LookPage(repository: SettingsRepository, settings: KeyboardSettings) {
+internal fun LookPage(repository: SettingsRepository, settings: LiveSettings) {
     val scope = rememberCoroutineScope()
-    ThemeModeChoice(settings.themeMode) { mode ->
+    // Decides what the page holds below the mode row.
+    val themeMode = settings.watch { it.themeMode }
+    ThemeModeChoice(themeMode) { mode ->
+        val selectedId = settings.value.keyboardThemeId
         scope.launch {
             repository.setThemeMode(mode)
             // A fixed mode has one keyboard theme, so the light/dark pair has
@@ -536,8 +545,8 @@ internal fun LookPage(repository: SettingsRepository, settings: KeyboardSettings
             // Leaving a dark keyboard selected under "Light" would be a
             // choice the user can no longer see, so it goes back to the
             // default, which follows the mode.
-            val stillShown = settings.keyboardThemeId == DEFAULT_THEME_ID ||
-                themesForMode(mode).any { it.id == settings.keyboardThemeId }
+            val stillShown = selectedId == DEFAULT_THEME_ID ||
+                themesForMode(mode).any { it.id == selectedId }
             if (!stillShown) repository.setKeyboardThemeId(DEFAULT_THEME_ID)
         }
     }
@@ -547,17 +556,17 @@ internal fun LookPage(repository: SettingsRepository, settings: KeyboardSettings
         color = MaterialTheme.colorScheme.primary,
         modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp),
     )
-    if (settings.themeMode == ThemeMode.SYSTEM) {
+    if (themeMode == ThemeMode.SYSTEM) {
         AutoThemeChooser(repository, settings)
         return
     }
     // Only the themes that match the choice above. Someone who has just asked
     // for a light keyboard has no use for eleven dark ones, and a shorter list
     // is a choice rather than a catalogue. The full set stays in Appearance.
-    val themes = remember(settings.themeMode) { themesForMode(settings.themeMode) }
+    val themes = remember(themeMode) { themesForMode(themeMode) }
     ThemeChoiceList(
         themes = themes,
-        selectedId = settings.keyboardThemeId,
+        selectedId = settings.watch { it.keyboardThemeId },
         onSelect = { id -> scope.launch { repository.setKeyboardThemeId(id) } },
     )
 }
@@ -577,16 +586,19 @@ internal fun LookPage(repository: SettingsRepository, settings: KeyboardSettings
  * selected is the theme on screen.
  */
 @Composable
-private fun AutoThemeChooser(repository: SettingsRepository, settings: KeyboardSettings) {
+private fun AutoThemeChooser(repository: SettingsRepository, settings: LiveSettings) {
     val scope = rememberCoroutineScope()
     val systemDark = isSystemInDarkTheme()
     var darkTab by rememberSaveable { mutableStateOf(systemDark) }
-    val auto = settings.autoTheme
     // Before the pair is on there is one selected theme, not two. Show it in
     // the half it belongs to and leave the other on the default, so turning
     // the pair on keeps what was already showing.
-    val lightId = if (auto.enabled) auto.lightThemeId else settings.keyboardThemeId.inHalf(false)
-    val darkId = if (auto.enabled) auto.darkThemeId else settings.keyboardThemeId.inHalf(true)
+    val lightId = settings.watch { s ->
+        if (s.autoTheme.enabled) s.autoTheme.lightThemeId else s.keyboardThemeId.inHalf(false)
+    }
+    val darkId = settings.watch { s ->
+        if (s.autoTheme.enabled) s.autoTheme.darkThemeId else s.keyboardThemeId.inHalf(true)
+    }
     TabRow(
         selectedTabIndex = if (darkTab) 1 else 0,
         modifier = Modifier.padding(horizontal = 16.dp),
@@ -866,7 +878,7 @@ private fun OnboardingThemeCard(
 @Composable
 internal fun EmojiPage(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     missing: List<String>,
     ownEmojiSet: Boolean,
 ) {
@@ -890,7 +902,7 @@ internal fun EmojiPage(
             EmojiSkinTone.MEDIUM_DARK to "✋🏾",
             EmojiSkinTone.DARK to "✋🏿",
         ),
-        selected = settings.emoji.defaultSkinTone,
+        selected = settings.watch { it.emoji.defaultSkinTone },
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
     ) { tone -> scope.launch { repository.setEmojiDefaultSkinTone(tone) } }
     Text(
@@ -946,24 +958,26 @@ internal fun EmojiPage(
             )
         }
     }
+    val emojiFont = settings.watch { it.emojiFont }
+    val installedEmojiFont = settings.watch { it.emojiFontInstalled.installedId }
     ChoiceControl(
         options = fontOptions,
         // A font imported and then deleted leaves the setting pointing at
         // nothing; show that as the system set, which is what is drawn anyway.
-        selected = settings.emojiFont.takeIf { choice ->
+        selected = emojiFont.takeIf { choice ->
             fontOptions.any { it.first == choice }
         } ?: EmojiFontChoice.SYSTEM,
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
     ) { choice -> scope.launch { repository.setEmojiFont(choice) } }
     EmojiFontPreviewRow(
-        choice = settings.emojiFont,
-        installedId = settings.emojiFontInstalled.installedId,
+        choice = emojiFont,
+        installedId = installedEmojiFont,
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
     )
     // The way out of the whole problem, on the one page where the problem has
     // just been demonstrated: fetch a current emoji font and select it.
     EmojiFontDownloadRow(
-        installedId = settings.emojiFontInstalled.installedId,
+        installedId = installedEmojiFont,
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
         onInstalled = { fontId -> scope.launch { repository.setInstalledEmojiFont(fontId) } },
     )
@@ -975,7 +989,7 @@ internal fun EmojiPage(
             },
             trailingContent = {
                 Switch(
-                    checked = settings.emoji.hideUnrenderable,
+                    checked = settings.watch { it.emoji.hideUnrenderable },
                     onCheckedChange = { scope.launch { repository.setHideUnrenderableEmoji(it) } },
                 )
             },
@@ -999,7 +1013,7 @@ internal fun EmojiPage(
 }
 
 @Composable
-internal fun FeedbackPage(repository: SettingsRepository, settings: KeyboardSettings) {
+internal fun FeedbackPage(repository: SettingsRepository, settings: LiveSettings) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     // The system haptic styles are played through a real view, so hand the
@@ -1011,17 +1025,18 @@ internal fun FeedbackPage(repository: SettingsRepository, settings: KeyboardSett
         supportingContent = { Text(stringResource(R.string.onboarding_haptics_subtitle)) },
         trailingContent = {
             Switch(
-                checked = settings.haptics.enabled,
+                checked = settings.watch { it.haptics.enabled },
                 onCheckedChange = { enable ->
                     scope.launch { repository.setHapticFeedback(enable) }
                     // Fired straight from the click rather than after the
                     // DataStore write lands, or the switch feels dead.
                     if (enable) {
+                        val haptics = settings.value.haptics
                         HapticPlayer.preview(
                             context,
-                            settings.haptics.style,
-                            settings.haptics.amplitude,
-                            settings.haptics.strengthMs,
+                            haptics.style,
+                            haptics.amplitude,
+                            haptics.strengthMs,
                             view,
                         )
                     }
@@ -1034,18 +1049,19 @@ internal fun FeedbackPage(repository: SettingsRepository, settings: KeyboardSett
         supportingContent = { Text(stringResource(R.string.onboarding_key_sound_subtitle)) },
         trailingContent = {
             Switch(
-                checked = settings.sound.enabled,
+                checked = settings.watch { it.sound.enabled },
                 onCheckedChange = { enable ->
                     scope.launch { repository.setKeySound(enable) }
                     // Same bargain as the haptics switch above: turning it on
                     // plays the sound it just turned on, so nobody has to leave
                     // setup and type somewhere to find out what they chose.
                     if (enable) {
+                        val sound = settings.value.sound
                         KeySoundPlayer.previewStroke(
                             context,
-                            settings.sound.style,
-                            settings.sound.volume,
-                            settings.sound.customId,
+                            sound.style,
+                            sound.volume,
+                            sound.customId,
                         )
                     }
                 },
@@ -1057,7 +1073,7 @@ internal fun FeedbackPage(repository: SettingsRepository, settings: KeyboardSett
         supportingContent = { Text(stringResource(R.string.onboarding_key_popup_subtitle)) },
         trailingContent = {
             Switch(
-                checked = settings.popup.enabled,
+                checked = settings.watch { it.popup.enabled },
                 onCheckedChange = { scope.launch { repository.setKeyPopup(it) } },
             )
         },
@@ -1065,15 +1081,13 @@ internal fun FeedbackPage(repository: SettingsRepository, settings: KeyboardSett
 }
 
 @Composable
-internal fun GesturesPage(repository: SettingsRepository, settings: KeyboardSettings) {
+internal fun GesturesPage(repository: SettingsRepository, settings: LiveSettings) {
     val scope = rememberCoroutineScope()
     // The badge follows the persona answer rather than being baked into one
     // row's title, so the recommendation is honest: it always marks a choice
     // that matches what the quiz actually set.
-    val recommended = recommendedSpacebarChoice(settings.onboarding)
+    val recommended = settings.watch { recommendedSpacebarChoice(it.onboarding) }
     for (choice in SpacebarChoice.entries) {
-        val selected = settings.spaceShortSwipe == choice.short &&
-            settings.spaceLongSwipe == choice.long
         ListItem(
             headlineContent = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1101,7 +1115,12 @@ internal fun GesturesPage(repository: SettingsRepository, settings: KeyboardSett
                 }
             },
             supportingContent = { Text(stringResource(choice.subtitleRes)) },
-            leadingContent = { RadioButton(selected = selected, onClick = null) },
+            leadingContent = {
+                val selected = settings.watch {
+                    it.spaceShortSwipe == choice.short && it.spaceLongSwipe == choice.long
+                }
+                RadioButton(selected = selected, onClick = null)
+            },
             modifier = Modifier.clickable {
                 scope.launch {
                     repository.setSpaceShortSwipe(choice.short)
@@ -1117,24 +1136,24 @@ internal fun GesturesPage(repository: SettingsRepository, settings: KeyboardSett
     PreviewedSwitch(
         title = stringResource(R.string.onboarding_emoji_key_title),
         subtitle = stringResource(R.string.onboarding_emoji_key_subtitle),
-        checked = settings.globeAsEmoji,
+        checked = settings.watch { it.globeAsEmoji },
         onCheckedChange = { scope.launch { repository.setGlobeAsEmoji(it) } },
     ) {
         MiniKeyboardPreview(
-            numberRow = settings.numberRow,
-            globeAsEmoji = settings.globeAsEmoji,
+            numberRow = settings.watch { it.numberRow },
+            globeAsEmoji = settings.watch { it.globeAsEmoji },
             highlight = MiniKeyHighlight.GLOBE,
         )
     }
     PreviewedSwitch(
         title = stringResource(R.string.onboarding_number_row_title),
         subtitle = stringResource(R.string.onboarding_number_row_subtitle),
-        checked = settings.numberRow,
+        checked = settings.watch { it.numberRow },
         onCheckedChange = { scope.launch { repository.setNumberRow(it) } },
     ) {
         MiniKeyboardPreview(
-            numberRow = settings.numberRow,
-            globeAsEmoji = settings.globeAsEmoji,
+            numberRow = settings.watch { it.numberRow },
+            globeAsEmoji = settings.watch { it.globeAsEmoji },
             highlight = MiniKeyHighlight.NUMBER_ROW,
         )
     }
@@ -1165,9 +1184,13 @@ private fun PreviewedSwitch(
  * switched on; every option lives in the tool's settings too.
  */
 @Composable
-internal fun ToolSetupPage(repository: SettingsRepository, settings: KeyboardSettings) {
+internal fun ToolSetupPage(repository: SettingsRepository, settings: LiveSettings) {
     val scope = rememberCoroutineScope()
-    if (ToolbarTool.CALENDAR in settings.enabledTools) {
+    // Which sections the page holds; each row reads its own value.
+    val calendarOn = settings.watch { ToolbarTool.CALENDAR in it.enabledTools }
+    val weatherOn = settings.watch { ToolbarTool.WEATHER in it.enabledTools }
+    val compassOn = settings.watch { ToolbarTool.COMPASS in it.enabledTools }
+    if (calendarOn) {
         OnboardingSectionTitle(stringResource(toolTitle(ToolbarTool.CALENDAR)))
         // The two rows below are additions, not replacements, and reading them
         // as a calendar *picker* is the obvious mistake. So the Gregorian
@@ -1196,23 +1219,23 @@ internal fun ToolSetupPage(repository: SettingsRepository, settings: KeyboardSet
         AltCalendarSetting(
             title = stringResource(R.string.onboarding_calendar_first_title),
             subtitle = stringResource(R.string.onboarding_calendar_first_subtitle),
-            selected = settings.calendarTool.altOne,
+            selected = settings.watch { it.calendarTool.altOne },
             icon = Icons.Outlined.EditCalendar,
             onChange = { scope.launch { repository.setCalendarAltOne(it) } },
         )
         AltCalendarSetting(
             title = stringResource(R.string.onboarding_calendar_second_title),
             subtitle = stringResource(R.string.onboarding_calendar_second_subtitle),
-            selected = settings.calendarTool.altTwo,
+            selected = settings.watch { it.calendarTool.altTwo },
             icon = Icons.Outlined.EventRepeat,
             onChange = { scope.launch { repository.setCalendarAltTwo(it) } },
         )
         WeekendSetting(
-            selected = settings.calendarTool.weekend,
+            selected = settings.watch { it.calendarTool.weekend },
             onChange = { scope.launch { repository.setCalendarWeekend(it) } },
         )
     }
-    if (ToolbarTool.WEATHER in settings.enabledTools) {
+    if (weatherOn) {
         OnboardingSectionTitle(stringResource(toolTitle(ToolbarTool.WEATHER)))
         // The tool is dead without a place, so the same search-or-coordinates
         // editor the settings screen uses is right here rather than a pointer
@@ -1226,13 +1249,13 @@ internal fun ToolSetupPage(repository: SettingsRepository, settings: KeyboardSet
             },
             trailingContent = {
                 Switch(
-                    checked = settings.weather.fahrenheit,
+                    checked = settings.watch { it.weather.fahrenheit },
                     onCheckedChange = { scope.launch { repository.setWeatherFahrenheit(it) } },
                 )
             },
         )
     }
-    if (ToolbarTool.COMPASS in settings.enabledTools) {
+    if (compassOn) {
         OnboardingSectionTitle(stringResource(toolTitle(ToolbarTool.COMPASS)))
         ListItem(
             leadingContent = { OnboardingRowIcon(Icons.Outlined.Mosque) },
@@ -1242,17 +1265,18 @@ internal fun ToolSetupPage(repository: SettingsRepository, settings: KeyboardSet
             },
             trailingContent = {
                 Switch(
-                    checked = settings.sensorTools.compassQibla,
+                    checked = settings.watch { it.sensorTools.compassQibla },
                     onCheckedChange = { scope.launch { repository.setCompassShowQibla(it) } },
                 )
             },
         )
         // Grows out of the switch that asked for it — a location editor
         // appearing in one frame reads as the page having jumped.
+        val reduceMotion = settings.watch { it.reduceMotion }
         AnimatedVisibility(
-            visible = settings.sensorTools.compassQibla,
-            enter = onboardingRevealEnter(settings.reduceMotion),
-            exit = onboardingRevealExit(settings.reduceMotion),
+            visible = settings.watch { it.sensorTools.compassQibla },
+            enter = onboardingRevealEnter(reduceMotion),
+            exit = onboardingRevealExit(reduceMotion),
         ) {
             Column {
                 Text(
@@ -1263,7 +1287,7 @@ internal fun ToolSetupPage(repository: SettingsRepository, settings: KeyboardSet
                 )
                 // Same place, so only offer the editor here when the weather
                 // section above isn't already showing one.
-                if (ToolbarTool.WEATHER !in settings.enabledTools) {
+                if (!weatherOn) {
                     WeatherLocationSetting(repository, settings)
                 }
             }
@@ -1318,15 +1342,16 @@ private fun ToolPresetButton(
 @Composable
 internal fun ToolsPage(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     seeded: Boolean,
     onSeeded: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val playServices = remember { PlayServices.available }
     // The set this persona would have started with, whatever page landed it.
-    val starter = remember(settings.onboarding, playServices) {
-        starterTools(settings.onboarding, playServices, ::isSupportedTool).orEmpty()
+    val persona = settings.watch { it.onboarding }
+    val starter = remember(persona, playServices) {
+        starterTools(persona, playServices, ::isSupportedTool).orEmpty()
     }
     // First visit swaps the enable-everything default for the persona's
     // starter set — but only over an untouched default, so a user who
@@ -1336,7 +1361,7 @@ internal fun ToolsPage(
     LaunchedEffect(Unit) {
         if (!seeded) {
             onSeeded()
-            if (settings.enabledTools.toSet() == ToolbarTool.entries.toSet()) {
+            if (settings.value.enabledTools.toSet() == ToolbarTool.entries.toSet()) {
                 repository.setEnabledTools(starter.ifEmpty { RecommendedTools })
             }
         }
@@ -1375,7 +1400,7 @@ internal fun ToolsPage(
             supportingContent = { Text(stringResource(toolDescription(tool))) },
             trailingContent = {
                 Switch(
-                    checked = tool in settings.enabledTools,
+                    checked = settings.watch { tool in it.enabledTools },
                     onCheckedChange = { scope.launch { repository.setToolEnabled(tool, it) } },
                 )
             },

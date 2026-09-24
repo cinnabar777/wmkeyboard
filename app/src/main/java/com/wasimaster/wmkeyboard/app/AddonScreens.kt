@@ -124,7 +124,6 @@ import com.wasimaster.wmkeyboard.core.addons.resolve
 import com.wasimaster.wmkeyboard.core.endpoints.ServiceRepo
 import com.wasimaster.wmkeyboard.core.plugins.PluginStore
 import com.wasimaster.wmkeyboard.core.settings.DeviceNetworkState
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.SettingsRepository
 import com.wasimaster.wmkeyboard.core.settings.stopsBackgroundWork
 import com.wasimaster.wmkeyboard.core.script.LanguageRegistry
@@ -406,7 +405,7 @@ internal fun AddonsScreen(
     typeFilter: AddonType? = null,
     /** For the F-Droid build's repository server fields; the list works without them. */
     repository: SettingsRepository? = null,
-    settings: KeyboardSettings? = null,
+    settings: LiveSettings? = null,
     onNavigate: (String) -> Unit,
 ) {
     val context = LocalContext.current

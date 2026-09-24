@@ -47,7 +47,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import com.wasimaster.wmkeyboard.core.script.LanguageRegistry
 import com.wasimaster.wmkeyboard.core.script.ScriptId
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.SettingsRepository
 import com.wasimaster.wmkeyboard.core.fonts.FontFile
 import com.wasimaster.wmkeyboard.core.fonts.FontImportResult
@@ -91,14 +90,15 @@ private data class FontMessage(
 @Suppress("UnusedParameter")
 internal fun FontSettings(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onNavigate: (String) -> Unit,
 ) {
     val context = LocalContext.current
     AddonStoreGroup(AddonType.Font, onNavigate)
     // One row per script, the font it draws with as the value; the full list
-    // of faces for a script lives on its own page.
-    val enabledScripts = settings.enabledLanguages.mapTo(mutableSetOf()) { it.script }
+    // of faces for a script lives on its own page. Which scripts get a row is
+    // read here; each row reads its own font.
+    val enabledScripts = settings.watch { s -> s.enabledLanguages.mapTo(mutableSetOf()) { it.script } }
     SettingsGroup(
         stringResource(R.string.fonts_pick_group_title),
         info = stringResource(R.string.fonts_info),
@@ -106,7 +106,11 @@ internal fun FontSettings(
         item {
             NavRow(
                 R.string.fonts_english_header,
-                value = KeyboardFonts.displayName(context, settings.keyFontId, settings.customFontName),
+                value = KeyboardFonts.displayName(
+                    context,
+                    settings.watch { it.keyFontId },
+                    settings.watch { it.customFontName },
+                ),
                 route = "fonts/${ScriptId.LATIN.name}",
             ) { onNavigate("fonts/${ScriptId.LATIN.name}") }
         }
@@ -119,8 +123,8 @@ internal fun FontSettings(
                     icon = SettingsRowIcons[R.string.fonts_script_header],
                     value = KeyboardFonts.displayName(
                         context,
-                        settings.scriptFontIds[script] ?: KeyboardFonts.DEFAULT_ID,
-                        settings.customScriptFontNames[script].orEmpty(),
+                        settings.watch { it.scriptFontIds[script] } ?: KeyboardFonts.DEFAULT_ID,
+                        settings.watch { it.customScriptFontNames[script] }.orEmpty(),
                     ),
                     route = "fonts/$script",
                 ) { onNavigate("fonts/$script") }
@@ -136,7 +140,7 @@ internal fun FontSettings(
  * Cyrillic and Greek share the English list.
  */
 @Composable
-internal fun FontPickerScreen(repository: SettingsRepository, settings: KeyboardSettings, scriptArg: String) {
+internal fun FontPickerScreen(repository: SettingsRepository, settings: LiveSettings, scriptArg: String) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val fontStore = remember { FontStore.get(context) }
@@ -212,11 +216,11 @@ internal fun FontPickerScreen(repository: SettingsRepository, settings: Keyboard
         FontPickerSection(
             header = stringResource(R.string.fonts_english_header),
             sample = "The quick brown fox jumps over the lazy dog",
-            selectedId = settings.keyFontId,
+            selectedId = settings.watch { it.keyFontId },
             googleNames = KeyboardFonts.googleFonts,
             customId = KeyboardFonts.CUSTOM_ID,
             customFile = KeyboardFonts.customFontFile(context),
-            customName = settings.customFontName,
+            customName = settings.watch { it.customFontName },
             onSelect = { id -> scope.launch { repository.setKeyFontId(id) } },
             onImport = { uri -> importIntoLibrary(uri) { repository.setKeyFontId(it) } },
             installedFonts = installedFonts,
@@ -245,12 +249,12 @@ internal fun FontPickerScreen(repository: SettingsRepository, settings: Keyboard
         FontPickerSection(
             header = stringResource(R.string.fonts_script_header, scriptName),
             sample = choices.sample,
-            selectedId = settings.scriptFontIds[script] ?: KeyboardFonts.DEFAULT_ID,
+            selectedId = settings.watch { it.scriptFontIds[script] } ?: KeyboardFonts.DEFAULT_ID,
             googleNames = choices.fonts,
             defaultLabel = stringResource(R.string.fonts_default_noto_label),
             customId = customId,
             customFile = KeyboardFonts.customScriptFontFile(context, choices.script),
-            customName = settings.customScriptFontNames[script].orEmpty(),
+            customName = settings.watch { it.customScriptFontNames[script] }.orEmpty(),
             onSelect = { id -> scope.launch { repository.setScriptFontId(script, id) } },
             onImport = onImportFont,
             installedFonts = installedFonts,

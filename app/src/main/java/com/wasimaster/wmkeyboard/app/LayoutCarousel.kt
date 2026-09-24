@@ -63,7 +63,6 @@ import androidx.compose.ui.unit.constrainHeight
 import androidx.compose.ui.unit.dp
 import com.wasimaster.wmkeyboard.R
 import com.wasimaster.wmkeyboard.core.layout.resolveLayout
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 
 /**
  * A language's layouts as a row of cards, each one the keyboard itself drawn
@@ -89,7 +88,7 @@ import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 @Composable
 internal fun LayoutCarousel(
     layoutIds: List<String>,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onToggle: (layoutId: String, enable: Boolean) -> Boolean,
     moreCount: Int = 0,
     onMore: () -> Unit = {},
@@ -112,8 +111,8 @@ internal fun LayoutCarousel(
         // before it showing so the row reads as having a start somewhere to
         // the left. Only where the state is fresh: coming back to the screen
         // restores wherever the user left the row.
-        val firstOn = remember(layoutIds) {
-            layoutIds.indexOfFirst { it in settings.enabledLayoutIds }.coerceAtLeast(0)
+        val firstOn = settings.watch { s ->
+            layoutIds.indexOfFirst { it in s.enabledLayoutIds }.coerceAtLeast(0)
         }
         val listState = rememberLazyListState(
             initialFirstVisibleItemIndex = (firstOn - 1).coerceAtLeast(0),
@@ -150,9 +149,10 @@ internal fun LayoutCarousel(
                 },
         ) {
             items(layoutIds, key = { it }) { layoutId ->
-                val on = layoutId in settings.enabledLayoutIds
-                val name = remember(settings.customLayouts, layoutId) {
-                    resolveLayout(settings.customLayouts, layoutId).name
+                val on = settings.watch { layoutId in it.enabledLayoutIds }
+                val customLayouts = settings.watch { it.customLayouts }
+                val name = remember(customLayouts, layoutId) {
+                    resolveLayout(customLayouts, layoutId).name
                 }
                 LayoutCard(
                     name = name,
@@ -199,7 +199,7 @@ internal fun LayoutCard(
     name: String,
     layoutId: String,
     on: Boolean,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onToggle: (Boolean) -> Boolean,
     modifier: Modifier = Modifier,
     boardHeight: MutableIntState? = null,
@@ -251,7 +251,7 @@ internal fun LayoutCard(
                 .padding(CardInset),
         ) {
             LayoutKeyboardPreview(
-                settings = settings,
+                settings = settings.watch { it },
                 layoutId = layoutId,
                 modifier = Modifier
                     .fillMaxWidth()

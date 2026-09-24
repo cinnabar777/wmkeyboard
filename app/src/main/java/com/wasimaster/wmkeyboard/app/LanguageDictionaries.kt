@@ -51,7 +51,6 @@ import com.wasimaster.wmkeyboard.core.emoji.EmojiDictDownloadManager
 import com.wasimaster.wmkeyboard.core.emoji.EmojiKeywordPacks
 import com.wasimaster.wmkeyboard.core.script.LanguageDef
 import com.wasimaster.wmkeyboard.core.script.LanguageRegistry
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.MeteredDecision
 import com.wasimaster.wmkeyboard.core.settings.SettingsRepository
 import com.wasimaster.wmkeyboard.core.settings.keywordsEnabledFor
@@ -80,7 +79,7 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun DictionariesGroup(
     lang: LanguageDef,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     repository: SettingsRepository,
     scope: CoroutineScope,
     onNavigate: (String) -> Unit,
@@ -119,7 +118,8 @@ internal fun DictionariesGroup(
         EmojiKeywordPacks.packs(filesDir, langId).isNotEmpty()
     }
 
-    val size = settings.appUi.defaultWordlistSize
+    // Sizes the Download all on the heading, so it is read here.
+    val size = settings.watch { it.appUi.defaultWordlistSize }
     // Only what is neither on the device nor on its way: a second press, or a
     // press while one row is already downloading, must not fetch it twice.
     val missing = LanguageData(
@@ -174,7 +174,7 @@ internal fun DictionariesGroup(
                     entry = wordEntry,
                     alternatives = wordlists.size > 1,
                     status = wordStatus,
-                    checked = settings.suggestionStrip.shippedDictionaryEnabledFor(langId),
+                    checked = settings.watch { it.suggestionStrip.shippedDictionaryEnabledFor(langId) },
                     onChecked = { scope.launch { repository.setShippedDictionaryEnabled(langId, it) } },
                     onDownload = {
                         dialogIsResize = false
@@ -194,7 +194,7 @@ internal fun DictionariesGroup(
                     status = emojiStatus,
                     available = emojiEntry != null,
                     imported = emojiImported,
-                    checked = settings.emoji.keywordsEnabledFor(langId),
+                    checked = settings.watch { it.emoji.keywordsEnabledFor(langId) },
                     onChecked = { scope.launch { repository.setEmojiKeywordsEnabled(langId, it) } },
                 )
             }
@@ -205,7 +205,7 @@ internal fun DictionariesGroup(
                     langId = langId,
                     approxBytes = pairsEntry.approxGzBytes,
                     status = pairStatus,
-                    checked = settings.suggestionStrip.wordPairsEnabledFor(langId),
+                    checked = settings.watch { it.suggestionStrip.wordPairsEnabledFor(langId) },
                     onChecked = { scope.launch { repository.setWordPairsEnabled(langId, it) } },
                 )
             }

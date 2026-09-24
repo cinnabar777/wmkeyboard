@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -39,6 +40,7 @@ import com.wasimaster.wmkeyboard.core.addons.ImportLink
 import com.wasimaster.wmkeyboard.core.addons.LinkImport
 import com.wasimaster.wmkeyboard.core.addons.SignalStickerDownloads
 import com.wasimaster.wmkeyboard.core.layout.AssetLayouts
+import com.wasimaster.wmkeyboard.core.settings.DeviceForm
 import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.MeteredDecision
 import com.wasimaster.wmkeyboard.core.settings.SettingsRepository
@@ -83,12 +85,12 @@ class ImportLinkActivity : ComponentActivity() {
         // the same way one opened from a file manager does.
         AssetLayouts.load(applicationContext.assets)
         setContent {
-            val settings by repository.settings
+            val stored = repository.settings
                 .collectAsStateWithLifecycle(null as KeyboardSettings?)
-            settings?.let { loaded ->
-                AppTheme(loaded) {
-                    ImportLinkFlow(repository, loaded, shared) { finish() }
-                }
+            val deviceForm = DeviceForm.of(LocalConfiguration.current.smallestScreenWidthDp)
+            val settings = rememberLiveSettings(stored, deviceForm) ?: return@setContent
+            AppTheme(settings) {
+                ImportLinkFlow(repository, settings, shared) { finish() }
             }
         }
     }
@@ -136,7 +138,7 @@ private sealed interface LinkStage {
 @Composable
 internal fun ImportLinkFlow(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     shared: String,
     onClose: () -> Unit,
 ) {
@@ -236,7 +238,7 @@ internal fun ImportLinkFlow(
 
     /** The one gate every request goes through: data saving, then the fetch. */
     fun start(run: () -> Unit) {
-        when (downloadDecisionNow(context, settings)) {
+        when (downloadDecisionNow(context, settings.value)) {
             MeteredDecision.ALLOWED -> run()
             MeteredDecision.ASK -> askMetered = true
             MeteredDecision.BLOCKED -> blockedMetered = true

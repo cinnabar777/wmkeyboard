@@ -59,7 +59,6 @@ import com.wasimaster.wmkeyboard.common.R as CommonR
 import com.wasimaster.wmkeyboard.core.emoji.EmojiCatalog
 import com.wasimaster.wmkeyboard.core.emoji.EmojiEntry
 import com.wasimaster.wmkeyboard.core.emoji.EmojiOrder
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.SettingsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -107,17 +106,11 @@ internal fun emojiCategoryLabel(category: String): String =
 @Composable
 internal fun EmojiCategorySettings(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onNavigate: (String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val catalog = rememberEmojiCatalog()
-    val emoji = settings.emoji
-    // Every category, including the hidden ones: this is the screen that
-    // un-hides them, so filtering them out here would strand them.
-    val categories = remember(catalog, emoji.categoryOrder) {
-        EmojiOrder.merge(emoji.categoryOrder, EmojiOrder.catalogCategories(catalog))
-    }
     // Counted off the catalog, not off the stored order, so the subtitle says
     // how many emoji the category has rather than how many were arranged.
     val counts = remember(catalog) {
@@ -126,18 +119,26 @@ internal fun EmojiCategorySettings(
             .groupingBy { it.category }
             .eachCount()
     }
-    val samples = remember(catalog, emoji.categoryEmojiOrder) {
-        categories.associateWith { category ->
-            EmojiOrder.emoji(catalog, category, emoji.categoryEmojiOrder[category].orEmpty())
-                .take(3)
-                .joinToString("")
-        }
-    }
     SettingsGroup(
         stringResource(R.string.langemoji_emoji_categories_order_title),
         info = stringResource(R.string.langemoji_emoji_categories_info),
     ) {
         item {
+            val categoryOrder = settings.watch { it.emoji.categoryOrder }
+            val categoryEmojiOrder = settings.watch { it.emoji.categoryEmojiOrder }
+            val hiddenCategories = settings.watch { it.emoji.hiddenCategories }
+            // Every category, including the hidden ones: this is the screen that
+            // un-hides them, so filtering them out here would strand them.
+            val categories = remember(catalog, categoryOrder) {
+                EmojiOrder.merge(categoryOrder, EmojiOrder.catalogCategories(catalog))
+            }
+            val samples = remember(catalog, categoryEmojiOrder) {
+                categories.associateWith { category ->
+                    EmojiOrder.emoji(catalog, category, categoryEmojiOrder[category].orEmpty())
+                        .take(3)
+                        .joinToString("")
+                }
+            }
             ReorderableColumn(
                 items = categories,
                 label = { emojiCategoryLabel(it) },
@@ -148,11 +149,11 @@ internal fun EmojiCategorySettings(
                     category = category,
                     sample = samples[category].orEmpty(),
                     count = counts[category] ?: 0,
-                    hidden = category in emoji.hiddenCategories,
+                    hidden = category in hiddenCategories,
                     // The last visible tab cannot be hidden: the panel pages by
                     // category, so a panel with none is one with nothing to
                     // page and no way back to the keys.
-                    canHide = categories.count { it !in emoji.hiddenCategories } > 1,
+                    canHide = categories.count { it !in hiddenCategories } > 1,
                     onOpen = { onNavigate(emojiOrderRoute(category)) },
                     onVisibility = { visible ->
                         scope.launch { repository.setEmojiCategoryVisible(category, visible) }
@@ -166,9 +167,11 @@ internal fun EmojiCategorySettings(
                 subtitle = stringResource(R.string.langemoji_emoji_categories_reset_subtitle),
                 action = stringResource(CommonR.string.common_reset),
                 confirm = stringResource(R.string.langemoji_emoji_categories_reset_confirm),
-                enabled = emoji.categoryOrder.isNotEmpty() ||
-                    emoji.hiddenCategories.isNotEmpty() ||
-                    emoji.categoryEmojiOrder.isNotEmpty(),
+                enabled = settings.watch { s ->
+                    s.emoji.categoryOrder.isNotEmpty() ||
+                        s.emoji.hiddenCategories.isNotEmpty() ||
+                        s.emoji.categoryEmojiOrder.isNotEmpty()
+                },
             ) { scope.launch { repository.resetEmojiOrder() } }
         }
     }
@@ -259,13 +262,13 @@ private fun RowScope.EmojiCategoryRowBody(
 internal fun EmojiOrderScreen(
     anim: AnimatedVisibilityScope,
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     category: String,
     onBack: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val catalog = rememberEmojiCatalog()
-    val stored = settings.emoji.categoryEmojiOrder[category].orEmpty()
+    val stored = settings.watch { it.emoji.categoryEmojiOrder[category].orEmpty() }
     val emoji = remember(catalog, category, stored) {
         EmojiOrder.emoji(catalog, category, stored)
     }

@@ -40,7 +40,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import coil3.compose.AsyncImage
 import com.wasimaster.wmkeyboard.R
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.SettingsRepository
 import com.wasimaster.wmkeyboard.core.settings.softenedForPhoto
 import com.wasimaster.wmkeyboard.core.theme.Readability
@@ -76,7 +75,7 @@ import androidx.compose.material.icons.outlined.StayCurrentPortrait
 fun PhotoDetailScreen(
     anim: AnimatedVisibilityScope? = null,
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     photo: PhotoItem,
     themeId: String,
     slot: BackgroundSlot,
@@ -89,7 +88,7 @@ fun PhotoDetailScreen(
 
     // The id can name a variant. The member spec drives the preview; writes
     // and the undo snapshot go through the family entry that stores it.
-    val themeFamily = settings.customThemes.findThemeFamily(themeId)
+    val themeFamily = settings.watch { it.customThemes.findThemeFamily(themeId) }
     val theme = themeFamily?.selfAndVariants()?.find { it.id == themeId }
     var chosenSlot by remember { mutableStateOf(slot) }
     var applied by remember { mutableStateOf(false) }
@@ -104,13 +103,14 @@ fun PhotoDetailScreen(
     // Applying a photo makes the board see-through so the photo shows. The
     // preview has to do the same, or a theme with an opaque board previews as
     // a flat colour and the photo appears to do nothing.
+    val keyOpacity = settings.watch { it.photoBackground.keyOpacity }
     val previewTheme = remember(theme, applied) {
         if (theme == null || applied) {
             theme
         } else {
             theme.copy(
                 boardBackground = theme.boardBackground.withAlphaFraction(0f),
-                keyBackground = theme.keyBackground.softenedForPhoto(settings.photoBackground.keyOpacity),
+                keyBackground = theme.keyBackground.softenedForPhoto(keyOpacity),
             )
         }
     }
@@ -214,8 +214,8 @@ fun PhotoDetailScreen(
                 onClick = {
                     scope.launch {
                         undoSpec = themeFamily
-                        val key = ToolApiKeys.unsplash(settings)
-                        val pexels = ToolApiKeys.pexels(settings)
+                        val key = ToolApiKeys.unsplash(settings.value)
+                        val pexels = ToolApiKeys.pexels(settings.value)
                         val apiKey = if (photo.source.name == "UNSPLASH") key else pexels
                         val slots = when (chosenSlot) {
                             BackgroundSlot.PORTRAIT -> listOf(false)
@@ -280,7 +280,7 @@ fun PhotoDetailScreen(
                     icon = Icons.Outlined.Palette,
                     onClick = {
                         scope.launch {
-                            val current = settings.customThemes.findThemeFamily(themeId)
+                            val current = settings.value.customThemes.findThemeFamily(themeId)
                             if (current != null) {
                                 // Kept so the whole-theme rewrite below stays
                                 // undoable: reseeding replaces every colour.
@@ -304,7 +304,7 @@ fun PhotoDetailScreen(
             enabled = !saved && !busy,
             onClick = {
                 scope.launch {
-                    val apiKey = ToolApiKeys.unsplash(settings)
+                    val apiKey = ToolApiKeys.unsplash(settings.value)
                     saved = PhotoBackgroundManager.saveToLibrary(context, photo, apiKey)
                 }
             },

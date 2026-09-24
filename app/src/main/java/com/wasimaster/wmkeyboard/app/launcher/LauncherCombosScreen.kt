@@ -41,11 +41,11 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.wasimaster.wmkeyboard.R
 import com.wasimaster.wmkeyboard.app.CaptionText
+import com.wasimaster.wmkeyboard.app.LiveSettings
 import com.wasimaster.wmkeyboard.app.SettingsGroup
 import com.wasimaster.wmkeyboard.app.StateBanner
 import com.wasimaster.wmkeyboard.app.WmRow
 import com.wasimaster.wmkeyboard.common.R as CommonR
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.LauncherSplitCombo
 import com.wasimaster.wmkeyboard.core.settings.SettingsRepository
 import com.wasimaster.wmkeyboard.ime.AppLaunchModes
@@ -70,10 +70,10 @@ object LauncherCombos {
  * only manages them.
  */
 @Composable
-internal fun LauncherCombosScreen(repository: SettingsRepository, settings: KeyboardSettings) {
+internal fun LauncherCombosScreen(repository: SettingsRepository, settings: LiveSettings) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val combos = settings.launcher.combos
+    val combos = settings.watch { it.launcher.combos }
     val packages = combos.flatMap { listOf(it.first, it.second) }.toSet()
     val labels by produceState(emptyMap<String, String>(), packages) {
         value = withContext(Dispatchers.IO) {

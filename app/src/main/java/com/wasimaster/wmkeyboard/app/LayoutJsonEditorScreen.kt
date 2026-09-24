@@ -75,7 +75,7 @@ import com.wasimaster.wmkeyboard.common.R as CommonR
 import com.wasimaster.wmkeyboard.core.layout.LayoutMessage
 import com.wasimaster.wmkeyboard.core.layout.json.JsonDocEntry
 import com.wasimaster.wmkeyboard.core.layout.json.LayoutJsonRoot
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
+import com.wasimaster.wmkeyboard.core.settings.SettingsDefaults
 import java.text.NumberFormat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -138,13 +138,23 @@ internal fun LayoutJsonEditorScreen(
     title: String,
     documentKey: String,
     root: LayoutJsonRoot,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     initialText: () -> String,
     onApply: suspend (String) -> JsonApplyOutcome,
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current
-    val values = remember(settings.customLayouts, settings.customThemes) { AppJsonValues(context, settings) }
+    // The value hints read these three fields and nothing else. Selected on
+    // their own, a write to any other setting neither rebuilds the hints nor
+    // recomposes the editor.
+    val hintSource = settings.watch {
+        SettingsDefaults.copy(
+            customLayouts = it.customLayouts,
+            customThemes = it.customThemes,
+            customFontName = it.customFontName,
+        )
+    }
+    val values = remember(hintSource) { AppJsonValues(context, hintSource) }
     val language = remember(root, values) { LayoutJsonLanguage(root, values) }
     val editor = rememberCodeEditorState(documentKey, keepHistory = true) { initialText() }
     val colors = rememberCodeColors()
@@ -356,13 +366,14 @@ internal fun LayoutJsonEditorScreen(
         },
         snackbarHost = { SnackbarHost(snackbar) },
     ) { padding ->
+        val reduceMotion = settings.watch { it.reduceMotion }
         // The window no longer resizes for the keyboard on Android 15, so the content
         // stops at the top of the keyboard itself; the plugin editor explains why.
         Column(Modifier.padding(padding).consumeWindowInsets(padding).imePadding().fillMaxSize()) {
             AnimatedVisibility(
                 visible = findOpen,
-                enter = if (settings.reduceMotion) fadeIn(snap()) else expandVertically() + fadeIn(),
-                exit = if (settings.reduceMotion) fadeOut(snap()) else shrinkVertically() + fadeOut(),
+                enter = if (reduceMotion) fadeIn(snap()) else expandVertically() + fadeIn(),
+                exit = if (reduceMotion) fadeOut(snap()) else shrinkVertically() + fadeOut(),
             ) {
                 CodeFindBar(
                     find = find,
@@ -410,7 +421,7 @@ internal fun LayoutJsonEditorScreen(
                 },
                 folding = true,
                 suggestionBar = suggestionBar,
-                reduceMotion = settings.reduceMotion,
+                reduceMotion = reduceMotion,
                 onCommand = onCommand,
                 focusRequester = editorFocus,
             )

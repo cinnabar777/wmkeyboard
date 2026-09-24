@@ -32,7 +32,6 @@ import com.wasimaster.wmkeyboard.app.updates.AllLanguagesRow
 import com.wasimaster.wmkeyboard.app.updates.KeepEnglishOnlyRow
 import com.wasimaster.wmkeyboard.app.updates.UpdateSettings
 import com.wasimaster.wmkeyboard.app.updates.languageSwitchCanBeDropped
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.OnboardingSettings
 import com.wasimaster.wmkeyboard.core.settings.PersonaDepth
 import com.wasimaster.wmkeyboard.core.settings.PersonaLanguages
@@ -658,7 +657,7 @@ private fun AppLanguageSetting() {
 
 @Composable
 internal fun AboutSettings(
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     persona: OnboardingSettings,
     onOpenLicenses: () -> Unit,
     onOpenLicenseText: (String) -> Unit,

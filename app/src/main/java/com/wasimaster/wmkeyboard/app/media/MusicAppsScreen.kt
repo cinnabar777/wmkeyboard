@@ -39,13 +39,13 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.wasimaster.wmkeyboard.R
 import com.wasimaster.wmkeyboard.app.CaptionText
+import com.wasimaster.wmkeyboard.app.LiveSettings
 import com.wasimaster.wmkeyboard.app.SettingsGroup
 import com.wasimaster.wmkeyboard.app.SettingsRowIcons
 import com.wasimaster.wmkeyboard.app.StateBanner
 import com.wasimaster.wmkeyboard.app.WmRow
 import com.wasimaster.wmkeyboard.common.R as CommonR
 import com.wasimaster.wmkeyboard.core.settings.DefaultMusicApps
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.SettingsRepository
 import com.wasimaster.wmkeyboard.core.settings.ToolbarTool
 import kotlinx.coroutines.Dispatchers
@@ -138,10 +138,11 @@ object MusicApps {
  * browser service, or a package with an unrecognisable name, gets found.
  */
 @Composable
-internal fun MusicAppsScreen(repository: SettingsRepository, settings: KeyboardSettings) {
+internal fun MusicAppsScreen(repository: SettingsRepository, settings: LiveSettings) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val ticked = settings.mediaControl.musicApps
+    // Also decides which rows the groups below hold, so it is read here.
+    val ticked = settings.watch { it.mediaControl.musicApps }
     // Loaded once per screen, against the ticks as they were on entry: a list
     // that re-sorted itself under the thumb on every toggle would move the row
     // being tapped. New ticks still show — the group below filters on the live
@@ -158,8 +159,8 @@ internal fun MusicAppsScreen(repository: SettingsRepository, settings: KeyboardS
     // the media tool switched on as well. A banner rather than fifty greyed
     // ticks: the ticks are still worth reading and still worth editing ahead
     // of turning the feature on, they simply do nothing yet.
-    val mediaToolOn = ToolbarTool.MEDIA_CONTROL in settings.enabledTools
-    if (!settings.mediaControl.pinWhilePlaying || !mediaToolOn) {
+    val mediaToolOn = settings.watch { ToolbarTool.MEDIA_CONTROL in it.enabledTools }
+    if (!settings.watch { it.mediaControl.pinWhilePlaying } || !mediaToolOn) {
         StateBanner(
             stringResource(R.string.musicapps_off_body),
             action = stringResource(CommonR.string.common_enable),

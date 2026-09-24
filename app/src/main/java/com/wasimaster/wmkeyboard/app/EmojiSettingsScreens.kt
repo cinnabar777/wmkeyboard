@@ -47,7 +47,6 @@ import com.wasimaster.wmkeyboard.core.settings.EmojiTabMode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import com.wasimaster.wmkeyboard.core.layout.PanelKind
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.SettingsRepository
 import kotlin.math.roundToInt
 import com.wasimaster.wmkeyboard.core.emoji.EmojiSearchExamples
@@ -59,7 +58,7 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun EmojiSettings(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onNavigate: (String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -67,16 +66,15 @@ internal fun EmojiSettings(
     // here and captured. The format also puts the number through the locale,
     // which is what gives Bengali or Arabic digits.
     val numberFormat = stringResource(R.string.values_number)
-    // Examples in the user's own languages: "type জন্মদিন" only reads as proof
-    // the feature works to someone who reads Bengali.
-    val languageIds = settings.enabledLanguages.map { it.id }
-    val birthdayWord = EmojiSearchExamples.one(EmojiSearchExamples.birthday, languageIds)
+    // What decides which rows the groups hold; each row reads its own value.
+    val predictionOn = settings.watch { it.emojiPrediction }
+    val barMode = settings.watch { it.emojiBarMode }
     SettingsGroup(stringResource(R.string.langemoji_emoji_access_title)) {
         item {
             ToggleSetting(
                 R.string.langemoji_emoji_toolbar_title,
                 stringResource(R.string.langemoji_emoji_toolbar_subtitle),
-                settings.emojiToolbar,
+                settings.watch { it.emojiToolbar },
                 info = stringResource(R.string.langemoji_emoji_toolbar_info),
                 default = SettingsDefaults.emojiToolbar,
             ) { scope.launch { repository.setEmojiToolbar(it) } }
@@ -85,7 +83,7 @@ internal fun EmojiSettings(
             ToggleSetting(
                 R.string.langemoji_emoji_full_bleed_title,
                 stringResource(R.string.langemoji_emoji_full_bleed_subtitle),
-                settings.emojiFullBleed,
+                settings.watch { it.emojiFullBleed },
                 info = stringResource(R.string.langemoji_emoji_full_bleed_info),
                 default = SettingsDefaults.emojiFullBleed,
             ) { scope.launch { repository.setEmojiFullBleed(it) } }
@@ -113,15 +111,20 @@ internal fun EmojiSettings(
     }
     SettingsGroup(stringResource(R.string.langemoji_emoji_suggestions_title)) {
         item {
+            // Examples in the user's own languages: "type জন্মদিন" only reads as proof
+            // the feature works to someone who reads Bengali.
+            val birthdayWord = settings.watch { s ->
+                EmojiSearchExamples.one(EmojiSearchExamples.birthday, s.enabledLanguages.map { it.id })
+            }
             ToggleSetting(
                 R.string.langemoji_emoji_prediction_title,
                 stringResource(R.string.langemoji_emoji_prediction_subtitle),
-                settings.emojiPrediction,
+                predictionOn,
                 info = stringResource(R.string.langemoji_emoji_prediction_info, birthdayWord),
                 default = SettingsDefaults.emojiPrediction,
             ) { scope.launch { repository.setEmojiPrediction(it) } }
         }
-        item(visible = settings.emojiPrediction) {
+        item(visible = predictionOn) {
             ChoiceSetting(
                 title = R.string.langemoji_emoji_insert_mode_title,
                 subtitle = stringResource(R.string.langemoji_emoji_insert_mode_subtitle),
@@ -132,7 +135,7 @@ internal fun EmojiSettings(
                     EmojiInsertMode.APPEND to
                         stringResource(R.string.langemoji_emoji_insert_append_label),
                 ),
-                selected = settings.emojiInsertMode,
+                selected = settings.watch { it.emojiInsertMode },
                 default = SettingsDefaults.emojiInsertMode,
                 detail = { mode -> ChoiceDetail(stringResource(emojiInsertDescRes(mode))) },
             ) { scope.launch { repository.setEmojiInsertMode(it) } }
@@ -151,12 +154,12 @@ internal fun EmojiSettings(
                     EmojiBarMode.ALWAYS to
                         stringResource(R.string.langemoji_emoji_bar_always_label),
                 ),
-                selected = settings.emojiBarMode,
+                selected = barMode,
                 default = SettingsDefaults.emojiBarMode,
                 detail = { mode -> ChoiceDetail(stringResource(emojiBarModeDescRes(mode))) },
             ) { scope.launch { repository.setEmojiBarMode(it) } }
         }
-        item(visible = settings.emojiBarMode != EmojiBarMode.OFF) {
+        item(visible = barMode != EmojiBarMode.OFF) {
             ChoiceSetting(
                 title = R.string.langemoji_emoji_bar_content_title,
                 subtitle = stringResource(R.string.langemoji_emoji_bar_content_subtitle),
@@ -168,27 +171,27 @@ internal fun EmojiSettings(
                     EmojiBarContent.FAVOURITES to
                         stringResource(R.string.langemoji_emoji_favourites_label),
                 ),
-                selected = settings.emojiBarContent,
+                selected = settings.watch { it.emojiBarContent },
                 default = SettingsDefaults.emojiBarContent,
                 detail = { content -> ChoiceDetail(stringResource(emojiBarContentDescRes(content))) },
             ) { scope.launch { repository.setEmojiBarContent(it) } }
         }
-        item(visible = settings.emojiBarMode != EmojiBarMode.OFF) {
+        item(visible = barMode != EmojiBarMode.OFF) {
             SliderSetting(
                 title = R.string.langemoji_emoji_bar_count_title,
                 subtitle = stringResource(R.string.langemoji_emoji_bar_count_subtitle),
-                value = settings.emoji.barCount.toFloat(),
+                value = settings.watch { it.emoji.barCount }.toFloat(),
                 range = EmojiBarCountRange.first.toFloat()..EmojiBarCountRange.last.toFloat(),
                 display = { numberFormat.format(it.roundToInt()) },
                 info = stringResource(R.string.langemoji_emoji_bar_count_info),
                 default = SettingsDefaults.emoji.barCount.toFloat(),
             ) { scope.launch { repository.setEmojiBarCount(it.roundToInt()) } }
         }
-        item(visible = settings.emojiBarMode != EmojiBarMode.OFF) {
+        item(visible = barMode != EmojiBarMode.OFF) {
             ToggleSetting(
                 R.string.langemoji_emoji_bar_scroll_title,
                 stringResource(R.string.langemoji_emoji_bar_scroll_subtitle),
-                settings.emoji.barScrollable,
+                settings.watch { it.emoji.barScrollable },
                 info = stringResource(R.string.langemoji_emoji_bar_scroll_info),
                 default = SettingsDefaults.emoji.barScrollable,
             ) { scope.launch { repository.setEmojiBarScrollable(it) } }
@@ -196,7 +199,7 @@ internal fun EmojiSettings(
     }
     // Where the row sits among the bars is decided on Rows & bars; a row
     // that opens it beats a sentence saying so.
-    if (settings.emojiBarMode == EmojiBarMode.ALWAYS) {
+    if (barMode == EmojiBarMode.ALWAYS) {
         SettingsGroup {
             item {
                 NavRow(
@@ -223,7 +226,7 @@ internal fun EmojiSettings(
                     EmojiSkinTone.MEDIUM_DARK to "✋🏾",
                     EmojiSkinTone.DARK to "✋🏿",
                 ),
-                selected = settings.emoji.defaultSkinTone,
+                selected = settings.watch { it.emoji.defaultSkinTone },
                 default = SettingsDefaults.emoji.defaultSkinTone,
             ) { scope.launch { repository.setEmojiDefaultSkinTone(it) } }
         }
@@ -231,7 +234,7 @@ internal fun EmojiSettings(
             ToggleSetting(
                 R.string.langemoji_emoji_tone_override_title,
                 stringResource(R.string.langemoji_emoji_tone_override_subtitle),
-                settings.emoji.toneOverrideByLastUsed,
+                settings.watch { it.emoji.toneOverrideByLastUsed },
                 info = stringResource(R.string.langemoji_emoji_tone_override_info),
                 default = SettingsDefaults.emoji.toneOverrideByLastUsed,
             ) { scope.launch { repository.setEmojiToneOverrideByLastUsed(it) } }
@@ -240,6 +243,8 @@ internal fun EmojiSettings(
     SettingsGroup(stringResource(R.string.langemoji_emoji_style_title)) {
         item {
             val context = LocalContext.current
+            val emojiFont = settings.watch { it.emojiFont }
+            val installedId = settings.watch { it.emojiFontInstalled.installedId }
             // Bumped after an import so the preview re-resolves the (same-named) file.
             var fontRefresh by remember { mutableIntStateOf(0) }
             // Where the Emoji font addon's Use button lands: the title resource
@@ -259,7 +264,7 @@ internal fun EmojiSettings(
                     // is the standing choice, so a phone that lost Play
                     // services still shows what it is set to and can move off.
                     if (PlayServices.hasFontProvider(context) ||
-                        settings.emojiFont == EmojiFontChoice.NOTO
+                        emojiFont == EmojiFontChoice.NOTO
                     ) {
                         add(
                             EmojiFontChoice.NOTO to
@@ -272,13 +277,13 @@ internal fun EmojiSettings(
                     )
                     add(EmojiFontChoice.CUSTOM to stringResource(CommonR.string.common_custom))
                 },
-                selected = settings.emojiFont,
+                selected = emojiFont,
                 default = SettingsDefaults.emojiFont,
                 detail = { choice -> ChoiceDetail(stringResource(emojiFontDescRes(choice))) },
             ) { scope.launch { repository.setEmojiFont(it) } }
             EmojiFontPreviewRow(
-                choice = settings.emojiFont,
-                installedId = settings.emojiFontInstalled.installedId,
+                choice = emojiFont,
+                installedId = installedId,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
                 refresh = fontRefresh,
             )
@@ -286,16 +291,16 @@ internal fun EmojiSettings(
             // "Google" above can only ask the system font provider, which
             // serves the build it has rather than the newest one.
             EmojiFontDownloadRow(
-                installedId = settings.emojiFontInstalled.installedId,
+                installedId = installedId,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             ) { fontId ->
                 scope.launch { repository.setInstalledEmojiFont(fontId) }
                 fontRefresh++
             }
-            if (settings.emojiFont == EmojiFontChoice.INSTALLED) {
+            if (emojiFont == EmojiFontChoice.INSTALLED) {
                 InstalledEmojiFontList(repository, settings)
             }
-            if (settings.emojiFont == EmojiFontChoice.CUSTOM) {
+            if (emojiFont == EmojiFontChoice.CUSTOM) {
                 val importEmojiFont = rememberLauncherForActivityResult(
                     ActivityResultContracts.OpenDocument(),
                 ) { uri ->
@@ -336,14 +341,14 @@ internal fun EmojiSettings(
             // The phone is always the one to blame here: an emoji the chosen
             // font is missing is drawn in the phone's own emoji font instead,
             // so the only emoji that stay blank are the ones neither has.
-            val ownFont = settings.emojiFont != EmojiFontChoice.SYSTEM
+            val ownFont = settings.watch { it.emojiFont != EmojiFontChoice.SYSTEM }
             val hideInfo = stringResource(R.string.langemoji_emoji_hide_unrenderable_info)
             val ownFontInfo =
                 stringResource(R.string.langemoji_emoji_hide_unrenderable_own_font_info)
             ToggleSetting(
                 R.string.langemoji_emoji_hide_unrenderable_title,
                 stringResource(R.string.langemoji_emoji_hide_unrenderable_subtitle),
-                settings.emoji.hideUnrenderable,
+                settings.watch { it.emoji.hideUnrenderable },
                 info = if (ownFont) "$hideInfo\n\n$ownFontInfo" else hideInfo,
                 default = SettingsDefaults.emoji.hideUnrenderable,
             ) { scope.launch { repository.setHideUnrenderableEmoji(it) } }
@@ -354,11 +359,13 @@ internal fun EmojiSettings(
 @Composable
 internal fun EmojiPanelSettings(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onNavigate: (String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val numberFormat = stringResource(R.string.values_number)
+    // Decides which rows the group holds; the rows read everything else.
+    val tabMode = settings.watch { it.emojiTabMode }
     SettingsGroup(
         stringResource(R.string.langemoji_emoji_panel_title),
         info = stringResource(R.string.langemoji_emoji_tip_body),
@@ -367,7 +374,7 @@ internal fun EmojiPanelSettings(
             SliderSetting(
                 title = R.string.langemoji_emoji_grid_size_title,
                 subtitle = stringResource(R.string.langemoji_emoji_grid_size_subtitle),
-                value = settings.emoji.gridCellSize.toFloat(),
+                value = settings.watch { it.emoji.gridCellSize }.toFloat(),
                 range = EmojiGridCellSizeRange.first.toFloat()..
                     EmojiGridCellSizeRange.last.toFloat(),
                 display = { numberFormat.format(it.roundToInt()) },
@@ -379,7 +386,7 @@ internal fun EmojiPanelSettings(
             SliderSetting(
                 title = R.string.langemoji_emoji_size_title,
                 subtitle = stringResource(R.string.langemoji_emoji_size_subtitle),
-                value = settings.emoji.gridEmojiSize.toFloat(),
+                value = settings.watch { it.emoji.gridEmojiSize }.toFloat(),
                 range = EmojiGridEmojiSizeRange.first.toFloat()..
                     EmojiGridEmojiSizeRange.last.toFloat(),
                 display = { numberFormat.format(it.roundToInt()) },
@@ -391,7 +398,7 @@ internal fun EmojiPanelSettings(
             SliderSetting(
                 title = R.string.langemoji_emoji_recents_title,
                 subtitle = stringResource(R.string.langemoji_emoji_recents_subtitle),
-                value = settings.emoji.recentsLimit.toFloat(),
+                value = settings.watch { it.emoji.recentsLimit }.toFloat(),
                 range = EmojiRecentsRange.first.toFloat()..EmojiRecentsRange.last.toFloat(),
                 display = { numberFormat.format(it.roundToInt()) },
                 info = stringResource(R.string.langemoji_emoji_recents_info),
@@ -411,7 +418,7 @@ internal fun EmojiPanelSettings(
             ToggleSetting(
                 R.string.langemoji_emoji_close_after_insert_title,
                 stringResource(R.string.langemoji_emoji_close_after_insert_subtitle),
-                settings.emoji.closeAfterInsert,
+                settings.watch { it.emoji.closeAfterInsert },
                 info = stringResource(R.string.langemoji_emoji_close_after_insert_info),
                 default = SettingsDefaults.emoji.closeAfterInsert,
             ) { scope.launch { repository.setEmojiCloseAfterInsert(it) } }
@@ -426,18 +433,18 @@ internal fun EmojiPanelSettings(
                     EmojiTabMode.MOST_USED to
                         stringResource(R.string.langemoji_emoji_most_used_label),
                 ),
-                selected = settings.emojiTabMode,
+                selected = tabMode,
                 default = SettingsDefaults.emojiTabMode,
                 detail = { mode -> ChoiceDetail(stringResource(emojiTabModeDescRes(mode))) },
             ) { scope.launch { repository.setEmojiTabMode(it) } }
         }
         // The button is drawn on the recents tab only: the most-used tab is
         // counted rather than remembered, so there is nothing there to clear.
-        if (settings.emojiTabMode == EmojiTabMode.RECENTS) item {
+        if (tabMode == EmojiTabMode.RECENTS) item {
             ToggleSetting(
                 R.string.langemoji_emoji_clear_recents_title,
                 stringResource(R.string.langemoji_emoji_clear_recents_subtitle),
-                settings.emojiClearRecentsButton,
+                settings.watch { it.emojiClearRecentsButton },
                 info = stringResource(R.string.langemoji_emoji_clear_recents_info),
                 default = SettingsDefaults.emojiClearRecentsButton,
             ) { scope.launch { repository.setEmojiClearRecentsButton(it) } }
@@ -446,7 +453,7 @@ internal fun EmojiPanelSettings(
             ToggleSetting(
                 R.string.langemoji_emoji_kaomoji_title,
                 stringResource(R.string.langemoji_emoji_kaomoji_subtitle),
-                settings.emoji.kaomojiTabs,
+                settings.watch { it.emoji.kaomojiTabs },
                 info = stringResource(R.string.langemoji_emoji_kaomoji_info),
                 default = SettingsDefaults.emoji.kaomojiTabs,
             ) { scope.launch { repository.setEmojiKaomojiTabs(it) } }
@@ -455,7 +462,7 @@ internal fun EmojiPanelSettings(
             ToggleSetting(
                 R.string.langemoji_emoji_long_press_name_title,
                 stringResource(R.string.langemoji_emoji_long_press_name_subtitle),
-                settings.emojiLongPressName,
+                settings.watch { it.emojiLongPressName },
                 info = stringResource(R.string.langemoji_emoji_long_press_name_info),
                 default = SettingsDefaults.emojiLongPressName,
             ) { scope.launch { repository.setEmojiLongPressName(it) } }
@@ -464,7 +471,7 @@ internal fun EmojiPanelSettings(
             ToggleSetting(
                 R.string.langemoji_emoji_animated_title,
                 stringResource(R.string.langemoji_emoji_animated_subtitle),
-                settings.emoji.animated,
+                settings.watch { it.emoji.animated },
                 info = stringResource(R.string.langemoji_emoji_animated_info),
                 default = SettingsDefaults.emoji.animated,
             ) { scope.launch { repository.setAnimatedEmoji(it) } }
@@ -474,7 +481,7 @@ internal fun EmojiPanelSettings(
             ToggleSetting(
                 R.string.langemoji_emoji_sticker_title,
                 stringResource(R.string.langemoji_emoji_sticker_subtitle),
-                settings.emoji.sendAsSticker,
+                settings.watch { it.emoji.sendAsSticker },
                 info = stringResource(R.string.langemoji_emoji_sticker_info),
                 default = SettingsDefaults.emoji.sendAsSticker,
             ) { scope.launch { repository.setSendEmojiAsSticker(it) } }
@@ -503,7 +510,7 @@ internal fun EmojiPanelSettings(
  * font is not a choice anyone makes on purpose.
  */
 @Composable
-private fun InstalledEmojiFontList(repository: SettingsRepository, settings: KeyboardSettings) {
+private fun InstalledEmojiFontList(repository: SettingsRepository, settings: LiveSettings) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val store = remember { FontStore.get(context) }
@@ -514,8 +521,9 @@ private fun InstalledEmojiFontList(repository: SettingsRepository, settings: Key
         CaptionText(stringResource(R.string.langemoji_emoji_fonts_empty))
         return
     }
+    val installedId = settings.watch { it.emojiFontInstalled.installedId }
     for (font in fonts) {
-        val selected = settings.emojiFontInstalled.installedId == font.id
+        val selected = installedId == font.id
         WmRow(
             title = font.name,
             supporting = font.author.takeIf { it.isNotBlank() }?.let { { Text(it) } },

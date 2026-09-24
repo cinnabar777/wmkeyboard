@@ -41,7 +41,6 @@ import com.wasimaster.wmkeyboard.R
 import com.wasimaster.wmkeyboard.app.lock.AppLockTargets
 import com.wasimaster.wmkeyboard.core.aihistory.AiHistoryEntry
 import com.wasimaster.wmkeyboard.core.aihistory.AiHistoryStore
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.SettingsDefaults
 import com.wasimaster.wmkeyboard.core.settings.SettingsRepository
 import com.wasimaster.wmkeyboard.ime.aichat.AiChatController
@@ -66,7 +65,7 @@ import com.wasimaster.wmkeyboard.common.R as CommonR
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-internal fun AiHistoryScreen(repository: SettingsRepository, settings: KeyboardSettings) {
+internal fun AiHistoryScreen(repository: SettingsRepository, settings: LiveSettings) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var revision by remember { mutableIntStateOf(0) }
@@ -102,7 +101,9 @@ internal fun AiHistoryScreen(repository: SettingsRepository, settings: KeyboardS
         }
     }
 
-    if (!settings.ai.historyEnabled) {
+    // Decides what the screen and its group hold; each row reads its own value.
+    val historyOn = settings.watch { it.ai.historyEnabled }
+    if (!historyOn) {
         CaptionText(stringResource(R.string.toolai_ai_history_off_body))
     }
     SettingsGroup {
@@ -110,7 +111,7 @@ internal fun AiHistoryScreen(repository: SettingsRepository, settings: KeyboardS
             ToggleSetting(
                 R.string.toolai_ai_history_title,
                 stringResource(R.string.toolai_ai_history_subtitle),
-                settings.ai.historyEnabled,
+                historyOn,
                 default = SettingsDefaults.ai.historyEnabled,
             ) { on ->
                 scope.launch {
@@ -124,11 +125,11 @@ internal fun AiHistoryScreen(repository: SettingsRepository, settings: KeyboardS
                 }
             }
         }
-        item(visible = settings.ai.historyEnabled) {
+        item(visible = historyOn) {
             SliderSetting(
                 R.string.toolai_ai_history_max_title,
                 subtitle = stringResource(R.string.toolai_ai_history_max_subtitle),
-                value = settings.ai.historyMax.toFloat(),
+                value = settings.watch { it.ai.historyMax }.toFloat(),
                 range = AiHistoryStore.MIN_MAX_ITEMS.toFloat()..
                     AiHistoryStore.MAX_ITEMS_CEILING.toFloat(),
                 display = { it.toInt().toString() },
@@ -153,7 +154,7 @@ internal fun AiHistoryScreen(repository: SettingsRepository, settings: KeyboardS
             SliderSetting(
                 R.string.toolai_continue_context_title,
                 subtitle = stringResource(R.string.toolai_continue_context_subtitle),
-                value = settings.ai.beforeCursorChars.toFloat(),
+                value = settings.watch { it.ai.beforeCursorChars }.toFloat(),
                 range = 500f..32_000f,
                 display = { charsFormat.format((it / 500f).roundToInt() * 500) },
                 info = stringResource(R.string.toolai_continue_context_info),
@@ -174,7 +175,7 @@ internal fun AiHistoryScreen(repository: SettingsRepository, settings: KeyboardS
             ToggleSetting(
                 R.string.toolai_keep_chats_title,
                 stringResource(R.string.toolai_keep_chats_subtitle),
-                settings.ai.keepChats,
+                settings.watch { it.ai.keepChats },
                 info = stringResource(R.string.toolai_keep_chats_info),
                 default = SettingsDefaults.ai.keepChats,
             ) { on ->
@@ -242,7 +243,7 @@ internal fun AiHistoryScreen(repository: SettingsRepository, settings: KeyboardS
     }
 
     val body = when {
-        entries.isEmpty() && settings.ai.historyEnabled -> HistoryBody.Empty
+        entries.isEmpty() && historyOn -> HistoryBody.Empty
         shown.isEmpty() && entries.isNotEmpty() -> HistoryBody.NoMatch
         else -> HistoryBody.Rows(shown)
     }

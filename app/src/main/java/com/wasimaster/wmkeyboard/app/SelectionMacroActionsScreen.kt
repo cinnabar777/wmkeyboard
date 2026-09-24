@@ -37,7 +37,6 @@ import com.wasimaster.wmkeyboard.common.R as CommonR
 import com.wasimaster.wmkeyboard.core.selection.MacroCategory
 import com.wasimaster.wmkeyboard.core.selection.SelectionMacro
 import com.wasimaster.wmkeyboard.core.selection.SelectionMacros
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.SettingsRepository
 import com.wasimaster.wmkeyboard.core.settings.effectiveTimeZones
 import com.wasimaster.wmkeyboard.core.tools.orderedAiActions
@@ -71,11 +70,10 @@ private val MacroGroups: List<Pair<MacroCategory, List<SelectionMacro>>> =
 @Composable
 internal fun SelectionMacroActionsScreen(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onNavigate: (String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    val prefs = settings.selectionMacros
     var query by rememberSaveable { mutableStateOf("") }
     val index = rememberMacroSearchIndex()
     val matches = remember(query, index) {
@@ -86,7 +84,7 @@ internal fun SelectionMacroActionsScreen(
     @Composable
     fun row(macro: SelectionMacro) = MacroRow(
         macro = macro,
-        on = macro in prefs.macros,
+        on = settings.watch { macro in it.selectionMacros.macros },
         optionsRoute = macroOptionsRoute(macro),
         optionsDesc = optionsDesc,
         onToggle = { on -> scope.launch { repository.setSelectionMacroEnabled(macro, on) } },
@@ -124,7 +122,11 @@ internal fun SelectionMacroActionsScreen(
     // The order the bar draws: only what is on, and never Undo, which is
     // pinned first whatever this says. Anything switched on later joins at
     // the end, where a new chip is easiest to notice.
-    val onRow = prefs.order.filter { it in prefs.macros && it != SelectionMacro.UNDO && it !in SelectionMacros.ladderOnly }
+    // It also decides which rows the group holds, so it is read here.
+    val onRow = settings.watch { s ->
+        val prefs = s.selectionMacros
+        prefs.order.filter { it in prefs.macros && it != SelectionMacro.UNDO && it !in SelectionMacros.ladderOnly }
+    }
     val names = SelectionMacro.entries.associateWith { stringResource(it.labelRes) }
     var reordering by rememberSaveable { mutableStateOf(false) }
     SettingsGroup(
@@ -149,7 +151,8 @@ internal fun SelectionMacroActionsScreen(
                     onRow,
                     label = { names.getValue(it) },
                     onReorder = { moved ->
-                        scope.launch { repository.setSelectionMacroOrder(moved + prefs.order.filter { it !in moved }) }
+                        val order = settings.value.selectionMacros.order
+                        scope.launch { repository.setSelectionMacroOrder(moved + order.filter { it !in moved }) }
                     },
                     modifier = Modifier.padding(horizontal = 16.dp),
                 )
@@ -293,31 +296,35 @@ internal fun macroDescription(macro: SelectionMacro): Int = when (macro) {
 @Composable
 internal fun SelectionMacroAiScreen(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onNavigate: (String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    val actions = orderedAiActions(settings.ai.customActions, settings.ai.actionOrder).filter { !it.askEachRun }
-    val picked = settings.selectionMacros.aiDirectActions.toSet()
+    // Decides which rows the group holds; each row reads whether it is picked.
+    val actions = settings.watch { s ->
+        orderedAiActions(s.ai.customActions, s.ai.actionOrder).filter { !it.askEachRun }
+    }
     SettingsGroup(
         stringResource(R.string.selection_macros_ai_title),
         info = stringResource(R.string.selection_macros_ai_info),
     ) {
         for (action in actions) {
             item {
-                val on = action.id in picked
+                val on = settings.watch { action.id in it.selectionMacros.aiDirectActions }
                 WmRow(
                     title = aiActionName(action),
                     leading = {
                         Checkbox(
                             checked = on,
                             onCheckedChange = { checked ->
+                                val picked = settings.value.selectionMacros.aiDirectActions.toSet()
                                 val next = actions.map { it.id }.filter { it in picked && it != action.id || (checked && it == action.id) }
                                 scope.launch { repository.setSelectionMacroAiActions(next) }
                             },
                         )
                     },
                     onClick = {
+                        val picked = settings.value.selectionMacros.aiDirectActions.toSet()
                         val next = actions.map { it.id }.filter { it in picked && it != action.id || (!on && it == action.id) }
                         scope.launch { repository.setSelectionMacroAiActions(next) }
                     },
@@ -340,12 +347,14 @@ internal fun SelectionMacroAiScreen(
 @Composable
 internal fun SelectionMacroZonesScreen(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
 ) {
     val scope = rememberCoroutineScope()
     val locale = Locale.getDefault()
     val deviceZone = TimeZone.getDefault().id
-    val zones = settings.selectionMacros.effectiveTimeZones(deviceZone)
+    val zones = settings.watch { it.selectionMacros.effectiveTimeZones(deviceZone) }
+    // Decides whether the default-zones caption is a row of the group.
+    val defaultZones = settings.watch { it.selectionMacros.timeZones.isEmpty() }
     val labels = remember(zones, locale) { zones.associateWith { zoneLabel(it, locale) } }
     SettingsGroup(
         stringResource(R.string.selection_macros_zones_title),
@@ -361,7 +370,7 @@ internal fun SelectionMacroZonesScreen(
                 modifier = Modifier.padding(horizontal = 16.dp),
             )
         }
-        if (settings.selectionMacros.timeZones.isEmpty()) {
+        if (defaultZones) {
             item { CaptionText(stringResource(R.string.selection_macros_zones_default_caption)) }
         }
     }

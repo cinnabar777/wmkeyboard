@@ -81,7 +81,7 @@ import com.wasimaster.wmkeyboard.core.ui.rememberScrollRailState
 @Composable
 internal fun IconsScreen(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onNavigate: (String) -> Unit,
 ) {
     val context = LocalContext.current
@@ -200,7 +200,7 @@ internal fun IconsScreen(
             PackRow(
                 name = stringResource(R.string.plugins_icons_pack_builtin_name),
                 supporting = stringResource(R.string.plugins_icons_pack_builtin_supporting),
-                selected = settings.icons.activePackId.isEmpty(),
+                selected = settings.watch { it.icons.activePackId.isEmpty() },
                 onClick = { scope.launch { repository.setIconPack("") } },
             )
         }
@@ -225,7 +225,7 @@ internal fun IconsScreen(
                     PackRow(
                         name = pack.name,
                         supporting = countText + authorText + versionText,
-                        selected = settings.icons.activePackId == pack.id,
+                        selected = settings.watch { it.icons.activePackId == pack.id },
                         onClick = { scope.launch { repository.setIconPack(pack.id) } },
                         trailing = {
                             Row {
@@ -292,7 +292,7 @@ internal fun IconsScreen(
                             }
                         },
                         supporting = {
-                            CaptionText(describeSource(context, settings, slot, store))
+                            CaptionText(settings.watch { describeSource(context, it, slot, store) })
                         },
                         onClick = { picking = slot },
                     )
@@ -319,7 +319,7 @@ internal fun IconsScreen(
                 // Dropping the override alone would leave the file behind, so
                 // it would keep turning up in exports of a pack they thought
                 // they had reverted.
-                if (settings.icons.overrides[slot.id] ==
+                if (settings.value.icons.overrides[slot.id] ==
                     IconOverrides.packSource(IconPackStore.MINE_ID)
                 ) {
                     store.removeIcon(IconPackStore.MINE_ID, slot.id)
@@ -489,7 +489,7 @@ private fun PackRow(
 @Composable
 private fun IconPickerDialog(
     slot: IconSlot,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onPickBuiltin: (String) -> Unit,
     onImportSvg: () -> Unit,
     onReset: () -> Unit,
@@ -497,7 +497,7 @@ private fun IconPickerDialog(
 ) {
     val context = LocalContext.current
     var query by remember { mutableStateOf("") }
-    val selected = settings.icons.overrides[slot.id]?.removePrefix(IconOverrides.BUILTIN_PREFIX)
+    val selected = settings.watch { it.icons.overrides[slot.id]?.removePrefix(IconOverrides.BUILTIN_PREFIX) }
     val shown = remember(query) {
         val needle = query.trim()
         if (needle.isEmpty()) BuiltinIcons.names

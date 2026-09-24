@@ -86,7 +86,6 @@ import com.wasimaster.wmkeyboard.core.tools.ToolHttp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import com.wasimaster.wmkeyboard.BuildConfig
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.SettingsRepository
 import com.wasimaster.wmkeyboard.core.snippets.MultiExpand
 import com.wasimaster.wmkeyboard.core.snippets.MultiExpandMode
@@ -146,7 +145,7 @@ internal fun snippetEditRoute(snippetId: Long): String = "expander/edit/$snippet
 @Composable
 internal fun SnippetSettings(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     onNavigate: (String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -432,7 +431,7 @@ internal fun SnippetSettings(
                     MultiExpandMode.INSERT_FIRST to
                         stringResource(R.string.expander_multi_expand_insert_label),
                 ),
-                selected = settings.suggestionStrip.snippetMultiExpand,
+                selected = settings.watch { it.suggestionStrip.snippetMultiExpand },
                 default = SettingsDefaults.suggestionStrip.snippetMultiExpand,
                 detail = { mode ->
                     ChoiceDetail(
@@ -1445,7 +1444,7 @@ private enum class SnippetTriggerMode { WORD, PATTERN }
  */
 @Composable
 internal fun SnippetEditor(
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     snippetId: Long,
     initialFolderId: Long = 0,
     onDone: () -> Unit,
@@ -1498,7 +1497,7 @@ internal fun SnippetEditor(
 @Composable
 @Suppress("LongMethod")
 private fun SnippetEditorForm(
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     initial: Snippet?,
     all: List<Snippet>,
     folders: List<SnippetFolder>,
@@ -1713,7 +1712,7 @@ private fun SnippetEditorForm(
                             MultiExpand.DEFAULT to stringResource(
                                 R.string.rows_snippet_multi_expand_default_label,
                                 stringResource(
-                                    multiExpandLabel(settings.suggestionStrip.snippetMultiExpand),
+                                    multiExpandLabel(settings.watch { it.suggestionStrip.snippetMultiExpand }),
                                 ),
                             ),
                             MultiExpand.CHIPS_ONLY to

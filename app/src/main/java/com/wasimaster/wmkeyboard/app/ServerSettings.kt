@@ -25,7 +25,6 @@ import com.wasimaster.wmkeyboard.core.endpoints.ServiceEndpoints
 import com.wasimaster.wmkeyboard.core.endpoints.ServiceGroup
 import com.wasimaster.wmkeyboard.core.endpoints.ServiceRepo
 import com.wasimaster.wmkeyboard.core.settings.AiProvider
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.SettingsDefaults
 import com.wasimaster.wmkeyboard.core.settings.SettingsRepository
 import kotlinx.coroutines.launch
@@ -45,7 +44,7 @@ import kotlinx.coroutines.launch
  * nothing links to it.
  */
 @Composable
-internal fun ServersSettingsScreen(repository: SettingsRepository, settings: KeyboardSettings) {
+internal fun ServersSettingsScreen(repository: SettingsRepository, settings: LiveSettings) {
     if (!BuildConfig.ENABLE_FDROID) {
         StateBanner(stringResource(R.string.servers_other_edition))
     }
@@ -71,7 +70,7 @@ internal fun ServersSettingsScreen(repository: SettingsRepository, settings: Key
  */
 internal fun SettingsGroupScope.serverItems(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     endpoints: List<ServiceEndpoint> = emptyList(),
     repos: List<ServiceRepo> = emptyList(),
 ) {
@@ -84,7 +83,7 @@ internal fun SettingsGroupScope.serverItems(
 @Composable
 internal fun ServerFieldsGroup(
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
     endpoints: List<ServiceEndpoint> = emptyList(),
     repos: List<ServiceRepo> = emptyList(),
 ) {
@@ -105,13 +104,13 @@ internal fun ServerFieldsGroup(
 private fun SettingsGroupScope.selfHostedItems(
     group: ServiceGroup,
     repository: SettingsRepository,
-    settings: KeyboardSettings,
+    settings: LiveSettings,
 ) {
     when (group) {
         ServiceGroup.TRANSLATE -> item {
             TextFieldSetting(
                 label = stringResource(R.string.tooldetail_translate_instance_label),
-                value = settings.selfHosted.libreTranslateUrl,
+                value = settings.watch { it.selfHosted.libreTranslateUrl },
                 hint = stringResource(R.string.tooldetail_translate_instance_hint),
                 default = SettingsDefaults.selfHosted.libreTranslateUrl,
             ) { repository.setLibreTranslateUrl(it) }
@@ -119,7 +118,7 @@ private fun SettingsGroupScope.selfHostedItems(
         ServiceGroup.SEARCH -> item {
             TextFieldSetting(
                 label = stringResource(R.string.tooldetail_search_instance_label),
-                value = settings.selfHosted.searxUrl,
+                value = settings.watch { it.selfHosted.searxUrl },
                 hint = stringResource(R.string.tooldetail_search_instance_hint),
                 default = SettingsDefaults.selfHosted.searxUrl,
             ) { repository.setSearxUrl(it) }
@@ -127,7 +126,7 @@ private fun SettingsGroupScope.selfHostedItems(
         ServiceGroup.MEDIA -> item {
             TextFieldSetting(
                 label = stringResource(R.string.tooldetail_media_wiki_label),
-                value = settings.selfHosted.commonsUrl,
+                value = settings.watch { it.selfHosted.commonsUrl },
                 hint = stringResource(R.string.tooldetail_media_wiki_hint),
                 default = SettingsDefaults.selfHosted.commonsUrl,
             ) { repository.setCommonsUrl(it) }
@@ -136,7 +135,7 @@ private fun SettingsGroupScope.selfHostedItems(
             item {
                 TextFieldSetting(
                     label = stringResource(AiProvider.OLLAMA.labelRes),
-                    value = settings.ai.ollamaUrl,
+                    value = settings.watch { it.ai.ollamaUrl },
                     hint = stringResource(R.string.toolai_ai_server_address_label),
                     default = SettingsDefaults.ai.ollamaUrl,
                 ) { repository.setAiOllamaUrl(it) }
@@ -144,7 +143,7 @@ private fun SettingsGroupScope.selfHostedItems(
             item {
                 TextFieldSetting(
                     label = stringResource(AiProvider.LM_STUDIO.labelRes),
-                    value = settings.ai.lmStudioUrl,
+                    value = settings.watch { it.ai.lmStudioUrl },
                     hint = stringResource(R.string.toolai_ai_server_address_label),
                     default = SettingsDefaults.ai.lmStudioUrl,
                 ) { repository.setAiLmStudioUrl(it) }
@@ -152,7 +151,7 @@ private fun SettingsGroupScope.selfHostedItems(
             item {
                 TextFieldSetting(
                     label = stringResource(AiProvider.OPENAI_COMPATIBLE.labelRes),
-                    value = settings.ai.compatibleUrl,
+                    value = settings.watch { it.ai.compatibleUrl },
                     hint = stringResource(R.string.toolai_ai_compatible_url_label),
                     default = SettingsDefaults.ai.compatibleUrl,
                 ) { repository.setAiCompatibleUrl(it) }
@@ -164,8 +163,8 @@ private fun SettingsGroupScope.selfHostedItems(
 
 /** One service's address. Empty means the service's own server, which the hint names. */
 @Composable
-private fun EndpointField(endpoint: ServiceEndpoint, repository: SettingsRepository, settings: KeyboardSettings) {
-    val stored = settings.selfHosted.endpoints[endpoint.id].orEmpty()
+private fun EndpointField(endpoint: ServiceEndpoint, repository: SettingsRepository, settings: LiveSettings) {
+    val stored = settings.watch { it.selfHosted.endpoints[endpoint.id].orEmpty() }
     val usable = stored.isBlank() || ServiceEndpoints.isUsableBase(stored.trim().trimEnd('/'))
     val hint = when {
         !usable -> stringResource(R.string.servers_endpoint_invalid, endpoint.default)
@@ -189,9 +188,9 @@ private fun EndpointField(endpoint: ServiceEndpoint, repository: SettingsReposit
  * forge, a pasted link, a reset. [revision] is that signal.
  */
 @Composable
-private fun RepoLocationRows(repo: ServiceRepo, repository: SettingsRepository, settings: KeyboardSettings) {
+private fun RepoLocationRows(repo: ServiceRepo, repository: SettingsRepository, settings: LiveSettings) {
     val scope = rememberCoroutineScope()
-    val stored = settings.selfHosted.repos[repo.id]
+    val stored = settings.watch { it.selfHosted.repos[repo.id] }
     val shown = stored ?: repo.default
     var revision by remember { mutableIntStateOf(0) }
 
