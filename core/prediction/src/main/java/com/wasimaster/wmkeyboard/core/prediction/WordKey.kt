@@ -29,9 +29,12 @@ import java.text.Normalizer
  * Applying it on both sides of every store is what makes it safe — a store
  * written through here and read through here cannot disagree with itself.
  *
- * Cost is a quick-check per word: a table lookup per character that exits on
- * the first ASCII one, and no allocation at all unless a word really is
- * mis-composed.
+ * Cost is one pass over the characters. A word made only of characters below
+ * U+0300 returns at once: nothing there composes with anything, which is the
+ * same boundary ICU's own NFC quick check starts from. Everything else goes
+ * through [Normalizer.isNormalized], which on Android is ICU's and allocates
+ * on every call — measured at about a third of a megabyte per twenty
+ * keystrokes when it ran for every n-gram lookup, Latin words included.
  */
 object WordKey {
 
@@ -47,10 +50,15 @@ object WordKey {
      */
     fun surface(word: String): String = normalize(word)
 
-    private fun normalize(word: String): String =
-        if (Normalizer.isNormalized(word, Normalizer.Form.NFC)) {
+    private fun normalize(word: String): String {
+        if (word.all { it < FIRST_COMPOSING }) return word
+        return if (Normalizer.isNormalized(word, Normalizer.Form.NFC)) {
             word
         } else {
             Normalizer.normalize(word, Normalizer.Form.NFC)
         }
+    }
+
+    /** The combining grave accent: the first code point NFC can do anything with. */
+    private const val FIRST_COMPOSING = '̀'
 }
