@@ -70,6 +70,8 @@ class ConversionStripGateTest {
         seedState(service, state)
         service.onKey(Key(label = "n"))
         service.onKey(Key(label = "i"))
+        // Decoded off the main thread; the strip fills when that comes back.
+        settle { service.uiState.value.suggestions.isNotEmpty() }
         return service.uiState.value.suggestions
     }
 
@@ -102,6 +104,7 @@ class ConversionStripGateTest {
         seedState(service, pinyinState(suggestions = true, fieldNoSuggestions = true, secureField = true))
         service.onKey(Key(label = "n"))
         service.onKey(Key(label = "i"))
+        settle { service.uiState.value.suggestions.isNotEmpty() }
 
         assertEquals(listOf("你"), service.uiState.value.suggestions)
         // The buffer is the reading, not the characters: nothing has been
@@ -122,8 +125,38 @@ class ConversionStripGateTest {
         seedState(service, pinyinState(suggestions = true, fieldNoSuggestions = true))
         service.onKey(Key(label = "n"))
         service.onKey(Key(label = "i"))
+        // Nothing to wait for but the decode itself: an empty table has no answer.
+        settle { false }
 
         assertEquals(emptyList<String>(), service.uiState.value.suggestions)
         assertEquals("pinyin", service.uiState.value.conversionPackOffer)
+    }
+
+    /**
+     * The strip is decoded off the main thread, so it can still show the list
+     * for the buffer as it was a keystroke ago. A tap on it commits by
+     * position, and a position from an old list points into the new one at
+     * something else — the tap has to fall back to the candidate's text.
+     */
+    @Test
+    fun `a tap on a strip a keystroke behind commits the candidate tapped`() {
+        PinyinSyllables.valid = setOf("ni", "hao")
+        CjkDictionaries.pinyin = ConversionDictionary.parse(sequenceOf("ni\t你\t100", "hao\t好\t100", "nihao\t你好\t200"))
+        val editor = RecordingEditor()
+        val service = GlideKeyboard(editor)
+        plantPersonalStores(service)
+        seedState(service, pinyinState(suggestions = true, fieldNoSuggestions = false))
+        for (c in "nihao") service.onKey(Key(label = c.toString()))
+        settle { "你好" in service.uiState.value.suggestions }
+
+        // 你 tapped at a position that, in this buffer's own ranking, holds
+        // 你好 — the whole reading. Taken by position, the tap would eat all
+        // five letters for a character that spells two of them.
+        val staleIndex = service.uiState.value.suggestions.indexOf("你好")
+        service.onCandidateTapped("你", staleIndex)
+
+        assertEquals("你", editor.typed)
+        // "hao" is still being composed behind it.
+        assertTrue(editor.text.toString(), editor.text.length > 1)
     }
 }

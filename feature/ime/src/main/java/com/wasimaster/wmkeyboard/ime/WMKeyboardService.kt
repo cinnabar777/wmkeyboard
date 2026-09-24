@@ -15216,25 +15216,38 @@ open class WMKeyboardService : InputMethodService() {
         suggestionJob?.cancel()
         commitResolution = null
         val typed = composing.toString()
-        val cands = state.composer.candidates(typed)
-        // The grid is a widening of the same ranking, so it only costs
-        // anything while it is actually open.
-        val expanded = if (state.panel == PanelMode.CANDIDATES) {
-            state.composer.candidates(typed, CANDIDATE_GRID_LIMIT)
-        } else {
-            emptyList()
+        val composer = state.composer
+        val gridOpen = state.panel == PanelMode.CANDIDATES
+        refreshConversionPackOffer(state, typed)
+        // The lattice decode runs off the main thread, with no debounce: the
+        // candidates are how this language is typed at all, so they must not
+        // wait. A key typed meanwhile cancels the job, and one still queued
+        // never runs. What the space bar and a candidate tap commit is decided
+        // against the buffer as it stands then, not against this list, so a
+        // strip a keystroke behind can be shown but never committed from
+        // (see [onCandidateTapped]). The composers keep their last decode, so
+        // the space that follows this reads it back rather than decoding again.
+        suggestionJob = serviceScope.launch {
+            val (cands, expanded) = withContext(suggestionDispatcher) {
+                // The grid is a widening of the same ranking, so it only costs
+                // anything while it is actually open.
+                composer.candidates(typed) to
+                    if (gridOpen) composer.candidates(typed, CANDIDATE_GRID_LIMIT) else emptyList()
+            }
+            // Committed or replaced while this ran: the list is for text that
+            // is no longer being composed.
+            if (composing.toString() != typed || _uiState.value.composer !== composer) return@launch
+            _uiState.update {
+                it.copy(
+                    suggestions = cands,
+                    autocorrectWord = null,
+                    expandedCandidates = expanded,
+                    emojiSuggestions = emptyList(),
+                    punctuationSuggestions = emptyList(),
+                    inlineEmoji = false,
+                )
+            }
         }
-        _uiState.update {
-            it.copy(
-                suggestions = cands,
-                autocorrectWord = null,
-                expandedCandidates = expanded,
-                emojiSuggestions = emptyList(),
-                punctuationSuggestions = emptyList(),
-                inlineEmoji = false,
-            )
-        }
-        refreshConversionPackOffer(_uiState.value, typed)
     }
 
     /**
@@ -15811,11 +15824,18 @@ open class WMKeyboardService : InputMethodService() {
      */
     fun onCandidateTapped(candidate: String, index: Int) {
         val ic = currentInputConnection ?: return
-        if (!_uiState.value.composer.isConversion) {
+        val composer = _uiState.value.composer
+        if (!composer.isConversion) {
             onSuggestionTapped(candidate)
             return
         }
-        commitConversionPrefix(ic, candidate, index)
+        // The strip is filled off the main thread and can be a keystroke
+        // behind the buffer. A position is only good for the list it came
+        // from, so it is trusted while the buffer's own ranking still has this
+        // candidate there, and the tap falls back to matching by text when it
+        // does not.
+        val current = composer.candidates(composing.toString(), CANDIDATE_GRID_LIMIT).getOrNull(index)
+        commitConversionPrefix(ic, candidate, if (current == candidate) index else -1)
     }
 
     /** The candidate strip's chevron: opens the overflow grid, or closes it. */
