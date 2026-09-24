@@ -42,8 +42,8 @@ class CjkUserHistory(private val storageFile: File?) {
     /** Whether anything has changed since the last [save]. */
     @Volatile
     var dirty: Boolean = false
-    private val snapshotFile = storageFile?.let(::SnapshotFile)
         private set
+    private val snapshotFile = storageFile?.let(::SnapshotFile)
 
     init {
         load()
