@@ -105,6 +105,42 @@ jobs:
           path: app/build/outputs/apk/${{ env.VARIANT_DIR }}/debug/*.apk
           retention-days: 7
 
+  # ART never compiles a method of 10,000 dex instructions or more, and runs
+  # one with a frame over 3 KB in its slow interpreter until the JIT gets to
+  # it. Nothing else notices either: the keyboard just types slower. Reads the
+  # dex of a `fast` build (release-mode d8, no R8, so the names are readable).
+  # English only, because the dex is the same in both language flavours.
+  dex-limits:
+    name: Dex method limits
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          build-scan-publish: true
+          build-scan-terms-of-use-url: "https://gradle.com/terms-of-service"
+          build-scan-terms-of-use-agree: "yes"
+
+      - name: Check method sizes
+        run: ./gradlew :app:checkDexMethodsFullEnFast --stacktrace
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dex-methods
+          path: app/build/reports/dex-methods/
+          retention-days: 7
+
   # Accuracy floors move when a dictionary or a ranking weight changes, which
   # is a review conversation and not a merge blocker. Reported, never gating.
   eval:
