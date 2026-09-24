@@ -18596,19 +18596,23 @@ open class WMKeyboardService : InputMethodService() {
         val state = _uiState.value
         val kde = state.settings.kdeConnect
         KdeConnectHub.attach(this)
-        KdeConnectHub.applySettings(kde)
         val panelOpen = keyboardVisible && state.panel == PanelMode.KDE_CONNECT
         fun hold(reason: KdeConnectHub.Reason, on: Boolean) =
             if (on) KdeConnectHub.hold(reason) else KdeConnectHub.release(reason)
-        hold(KdeConnectHub.Reason.SERVICE, kde.enabled)
-        hold(KdeConnectHub.Reason.KEYBOARD, kde.enabled && keyboardVisible)
-        hold(KdeConnectHub.Reason.PANEL, kde.enabled && panelOpen)
-        // The list of nearby devices is up when nothing is paired yet, or when
-        // the user opened it: only then are strangers on the network linked.
-        KdeConnectHub.setBrowsing(
-            KdeConnectHub.Reason.PANEL,
-            kde.enabled && panelOpen && (state.kde.showDevices || !KdeConnectHub.hasPairedDevices()),
-        )
+        // One reconcile for the lot, not one per change: this runs on every
+        // show and hide.
+        KdeConnectHub.batch {
+            KdeConnectHub.applySettings(kde)
+            hold(KdeConnectHub.Reason.SERVICE, kde.enabled)
+            hold(KdeConnectHub.Reason.KEYBOARD, kde.enabled && keyboardVisible)
+            hold(KdeConnectHub.Reason.PANEL, kde.enabled && panelOpen)
+            // The list of nearby devices is up when nothing is paired yet, or when
+            // the user opened it: only then are strangers on the network linked.
+            KdeConnectHub.setBrowsing(
+                KdeConnectHub.Reason.PANEL,
+                kde.enabled && panelOpen && (state.kde.showDevices || !KdeConnectHub.hasPairedDevices()),
+            )
+        }
         // A computer may type only into a keyboard that is on screen, over a
         // device that is unlocked.
         KdeConnectHub.engine?.setKeyboardShown(kde.enabled && keyboardVisible && !state.deviceLocked)

@@ -92,6 +92,7 @@ object KdeDeviceIds {
 object KdeDeviceNames {
     const val MAX_LENGTH = 32
     private val FORBIDDEN = Regex("[\"',;:.!?()\\[\\]<>]")
+    private val WHITESPACE = Regex("\\s+")
 
     /**
      * A name every client will show as written: the forbidden punctuation
@@ -99,7 +100,7 @@ object KdeDeviceNames {
      * reject, but a name that sanitises to nothing invalidates the whole
      * identity packet, so callers must fall back to something non-blank.
      */
-    fun sanitize(raw: String): String = cut(raw.replace(FORBIDDEN, "").replace(Regex("\\s+"), " ").trim(), MAX_LENGTH)
+    fun sanitize(raw: String): String = cut(raw.replace(FORBIDDEN, "").replace(WHITESPACE, " ").trim(), MAX_LENGTH)
 
     /**
      * [base] with the app's name after it, so a phone that also runs the KDE

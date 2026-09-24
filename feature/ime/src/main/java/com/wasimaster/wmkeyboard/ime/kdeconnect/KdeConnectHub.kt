@@ -106,8 +106,34 @@ object KdeConnectHub {
     private var collectors: List<Job> = emptyList()
     private var wired = false
 
+    /** Open [batch] calls; while above zero, [reconcile] only notes that it is owed. */
+    private var batchDepth = 0
+    private var reconcileOwed = false
+
+    /** What [syncShareAlias] last set the alias to, so an unchanged answer costs no binder call. */
+    private var shareAliasState: Int? = null
+
     /** Whether the keyboard is on screen: decides between showing something in the panel and posting a notification. */
     private val keyboardUp: Boolean get() = Reason.KEYBOARD in reasons
+
+    /**
+     * Runs [block] and reconciles once at the end, however many holds,
+     * releases and settings it changed. The keyboard's sync touches four of
+     * them on every show and hide, and each one alone reconciles — with a
+     * package-manager call and a config rebuild each time — on the main thread.
+     */
+    fun batch(block: () -> Unit) {
+        batchDepth++
+        try {
+            block()
+        } finally {
+            batchDepth--
+            if (batchDepth == 0 && reconcileOwed) {
+                reconcileOwed = false
+                reconcile()
+            }
+        }
+    }
 
     fun attach(context: Context) {
         if (app == null) app = context.applicationContext
@@ -225,6 +251,10 @@ object KdeConnectHub {
     }
 
     private fun reconcile() {
+        if (batchDepth > 0) {
+            reconcileOwed = true
+            return
+        }
         val context = app ?: return
         val browsing = browsers.isNotEmpty()
         if (!wanted()) {
@@ -456,10 +486,13 @@ object KdeConnectHub {
         val component = ComponentName(context.packageName, SHARE_ALIAS)
         val pm = context.packageManager
         val desired = if (want) PackageManager.COMPONENT_ENABLED_STATE_ENABLED else PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
+        if (shareAliasState == desired) return
         runCatching {
             if (pm.getComponentEnabledSetting(component) != desired) {
                 pm.setComponentEnabledSetting(component, desired, PackageManager.DONT_KILL_APP)
             }
+            // Only this process moves the alias, so once set it stays set.
+            shareAliasState = desired
         }
     }
 
