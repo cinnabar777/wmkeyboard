@@ -7,9 +7,25 @@
     there would list a spell checker in Android's system settings that can
     never return a result.
 -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <application>
+    <!-- WMFullApplication starts WorkManager on first use (ML Kit's ink model
+         downloads), so its androidx.startup initializer is taken out of every
+         process start, the keyboard's included. -->
+    <application
+        android:name="com.wasimaster.wmkeyboard.app.WMFullApplication"
+        tools:replace="android:name">
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+        </provider>
         <service
             android:name="com.wasimaster.wmkeyboard.spell.HarperSpellCheckerService"
             android:exported="true"

@@ -31,7 +31,7 @@ import com.wasimaster.wmkeyboard.core.settings.sync.SyncWatcher
  * including the keyboard's, where startup latency is what the user feels as the
  * keyboard being slow to appear.
  */
-class WMApplication : Application() {
+open class WMApplication : Application() {
 
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(base)
