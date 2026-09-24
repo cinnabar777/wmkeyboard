@@ -80,5 +80,23 @@ fun toolBlocker(tool: ToolbarTool, settings: KeyboardSettings): ToolBlocker? = w
  * that take a whole set (the hardware shortcuts, the smart suggestions, the
  * tool picker) rather than filtering tool by tool.
  */
-fun usableTools(settings: KeyboardSettings): Set<ToolbarTool> =
-    settings.enabledTools.filterTo(mutableSetOf()) { isUsableTool(it, settings) }
+fun usableTools(settings: KeyboardSettings): Set<ToolbarTool> {
+    usableToolsMemo?.takeIf { it.settings === settings }?.let { return it.tools }
+    val tools: Set<ToolbarTool> = settings.enabledTools.filterTo(mutableSetOf()) { isUsableTool(it, settings) }
+    usableToolsMemo = UsableToolsMemo(settings, tools)
+    return tools
+}
+
+/**
+ * The last answer of [usableTools], for the settings it was worked out from.
+ *
+ * The keyboard asks on every keystroke — the composition does, for the
+ * selection bar's Ask AI button, and so does the smart-suggestion pass — and
+ * the answer is a pure function of one [KeyboardSettings] instance, which only
+ * changes when a preference is written. Keyed on identity: an equal copy is
+ * not worth the comparison, and a stale hit is impossible.
+ */
+private class UsableToolsMemo(val settings: KeyboardSettings, val tools: Set<ToolbarTool>)
+
+@Volatile
+private var usableToolsMemo: UsableToolsMemo? = null
