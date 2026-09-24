@@ -2757,6 +2757,18 @@ internal fun ToolDetailSettings(
                 }
             }
         }
+        ToolbarTool.LEARN_FROM_TEXT -> {
+            SettingsGroup(stringResource(R.string.tooldetail_learn_from_text_group)) {
+                item {
+                    ToggleSetting(
+                        R.string.tooldetail_learn_from_text_synthetic_gestures_title,
+                        stringResource(R.string.tooldetail_learn_from_text_synthetic_gestures_subtitle),
+                        settings.suggestionStrip.learnFromTextSyntheticGestures,
+                        default = SettingsDefaults.suggestionStrip.learnFromTextSyntheticGestures,
+                    ) { scope.launch { repository.setLearnFromTextSyntheticGestures(it) } }
+                }
+            }
+        }
         ToolbarTool.TYPING_TEST -> TypingTestToolSettings(repository, settings)
         ToolbarTool.AI -> AiToolSettings(repository, settings, onNavigate)
         ToolbarTool.VOCABULARY -> VocabularyToolSettings(repository, settings, onNavigate)
