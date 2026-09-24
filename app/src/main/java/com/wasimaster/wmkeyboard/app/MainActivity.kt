@@ -107,6 +107,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -789,6 +790,14 @@ private fun SettingsNavGraph(
     // Frozen at first composition: completing onboarding navigates away
     // explicitly, it must not yank the graph out from under the NavHost.
     val startDestination = remember { if (settings.onboardingDone) "home" else "onboarding" }
+    // The graph below is built once, not once per settings write. NavHost
+    // keeps its graph in `remember(route, startDestination, builder)`, and the
+    // builder read `settings` directly, so every write was a new lambda and a
+    // fresh `createGraph` over every destination here — on the main thread,
+    // in the frame that answers the tap. Read through a State instead, the
+    // builder captures only that State and stays the same instance, while each
+    // destination still recomposes when the settings it reads change.
+    val settingsState = rememberUpdatedState(settings)
     NavHost(
         navController = navController,
         startDestination = startDestination,
@@ -797,6 +806,10 @@ private fun SettingsNavGraph(
         popEnterTransition = { slideInHorizontally(spec) { -it / parallax } },
         popExitTransition = { slideOutHorizontally(spec) { it } },
     ) {
+        // Shadows the parameter on purpose: every read below goes through the
+        // State, at the moment a destination composes.
+        @Suppress("NAME_SHADOWING")
+        val settings by settingsState
         composable("onboarding") {
             OnboardingScreen(
                 repository = repository,
