@@ -2952,13 +2952,14 @@ class SuggestionEngine(
         touch: List<TouchPoint?>? = null,
         timingMultiplier: Double = 1.0,
         previousWord: String? = null,
+        keys: KeySets? = null,
     ): CorrectionDecision {
         val lower = word.lowercase()
         if (lower.length < 3) return NO_CORRECTION
         // An all-caps word is a deliberate acronym or shout, not a typo of a
         // lowercase word — don't "correct" it away when the user asked us not to.
         if (skipAllCapsAutocorrect && isAllCaps(word)) return NO_CORRECTION
-        val ordinary = decideOrdinary(word, lower, touch, timingMultiplier)
+        val ordinary = decideOrdinary(word, lower, touch, timingMultiplier, keys)
         return withTaughtFix(word, lower, previousWord, ordinary)
     }
 
@@ -3355,11 +3356,12 @@ class SuggestionEngine(
         lower: String,
         touch: List<TouchPoint?>?,
         timingMultiplier: Double,
+        keys: KeySets? = null,
     ): CorrectionDecision {
         // A shadowed spelling is protected by neither the lists nor the
         // lexicon. The lexicon learned it only because a list vouched for it.
         val known = inDictionaries(lower) || userLexicon.isEstablished(lower, learnedWordMinCount)
-        if (known && !accentShadowed(lower, touch) && !typoShadowed(lower, touch)) {
+        if (known && !accentShadowed(lower, touch) && !typoShadowed(lower, touch, keys)) {
             return NO_CORRECTION
         }
         if (knownCompound(lower)) return NO_CORRECTION
@@ -3376,7 +3378,7 @@ class SuggestionEngine(
         // judged: a rank-20 word must never fire as a correction, nor may it
         // appear as the runner-up that tightens (or loosens) the gate.
         val shaped = rankedFor(
-            lower, FuzzyBeamSearch.AUTOCORRECT_K / 2, touch,
+            lower, FuzzyBeamSearch.AUTOCORRECT_K / 2, touch, keys,
         ).take(FuzzyBeamSearch.AUTOCORRECT_K).filter { c ->
             // Silent replacement only trusts classic one-edit shapes: a single
             // edit within one character of the typed length, or the

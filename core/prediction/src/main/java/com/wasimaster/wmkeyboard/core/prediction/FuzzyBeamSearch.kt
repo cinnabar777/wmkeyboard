@@ -38,7 +38,13 @@ class FuzzyBeamSearch {
      * tap position for each composing character (null where unknown —
      * hardware keys, pasted text, re-armed words).
      */
-    class TouchScoring(val model: KeyTouchModel, val points: List<TouchPoint?>)
+    class TouchScoring(val model: KeyTouchModel, val points: List<TouchPoint?>) {
+        val bestLogLikelihoods: DoubleArray = DoubleArray(points.size) { i ->
+            val p = points[i]
+            val best = p?.let { model.bestKey(it) }
+            if (p != null && best != null) model.logLikelihood(p, best) else Double.NEGATIVE_INFINITY
+        }
+    }
 
     class ScoredCandidate(
         val word: String,
@@ -410,8 +416,9 @@ class FuzzyBeamSearch {
     private fun matchCost(touch: TouchScoring?, pos: Int, expected: Char): Double {
         val p = touch?.points?.getOrNull(pos) ?: return 0.0
         if (!touch.model.knows(expected)) return 0.0
-        val best = touch.model.bestKey(p) ?: return 0.0
-        val gap = touch.model.logLikelihood(p, best) - touch.model.logLikelihood(p, expected)
+        val bestScore = touch.bestLogLikelihoods.getOrElse(pos) { Double.NEGATIVE_INFINITY }
+        if (bestScore == Double.NEGATIVE_INFINITY) return 0.0
+        val gap = bestScore - touch.model.logLikelihood(p, expected)
         return gap.coerceIn(0.0, MATCH_CAP)
     }
 

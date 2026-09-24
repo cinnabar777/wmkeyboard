@@ -64,6 +64,7 @@ internal enum class MatchField(val percent: Int, val correctsSpelling: Boolean) 
 internal class SearchText(val field: MatchField, raw: String) {
     val text: String = normalizeForSearch(raw)
     val words: List<String> = text.split(' ').filter { it.isNotEmpty() }
+    val stemmedWords: List<String> = words.map { stem(it) }
 
     /**
      * The words run together. It is what lets "2d" find "2-D cursor touchpad"
@@ -276,12 +277,14 @@ private fun SearchText.tier(token: String, spellCorrect: Boolean = true): Int {
     if (text == token) return TIER_FIELD_EXACT
     if (text.startsWith(token)) return TIER_FIELD_PREFIX
     var best = 0
-    for (word in words) {
+    val tokenStemmed = stem(token)
+    for (i in words.indices) {
+        val word = words[i]
         if (word == token) return TIER_WORD_EXACT
         // Both rules run: "themes" starts with "theme" and is its plural, and
         // the plural is the better reason.
         if (word.startsWith(token)) best = max(best, TIER_WORD_PREFIX)
-        if (stem(word) == stem(token)) best = max(best, TIER_WORD_STEM)
+        if (stemmedWords[i] == tokenStemmed) best = max(best, TIER_WORD_STEM)
     }
     if (best > 0) return best
     if (token.length >= CONTAINS_MIN_LENGTH && text.contains(token)) return TIER_CONTAINS

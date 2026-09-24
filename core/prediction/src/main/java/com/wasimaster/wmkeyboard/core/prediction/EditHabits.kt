@@ -28,20 +28,48 @@ class EditHabits internal constructor(
     private val spaceSlips: Map<Char, Double>,
 ) {
 
+    private val subKeys: IntArray = subs.keys.toIntArray().apply { sort() }
+    private val subValues: DoubleArray = DoubleArray(subKeys.size) { subs[subKeys[it]] ?: 0.0 }
+
+    private val insertKeys: CharArray = inserts.keys.toCharArray().apply { sort() }
+    private val insertValues: DoubleArray = DoubleArray(insertKeys.size) { inserts[insertKeys[it]] ?: 0.0 }
+
+    private val deleteKeys: CharArray = deletes.keys.toCharArray().apply { sort() }
+    private val deleteValues: DoubleArray = DoubleArray(deleteKeys.size) { deletes[deleteKeys[it]] ?: 0.0 }
+
+    private val spaceSlipKeys: CharArray = spaceSlips.keys.toCharArray().apply { sort() }
+    private val spaceSlipValues: DoubleArray = DoubleArray(spaceSlipKeys.size) { spaceSlips[spaceSlipKeys[it]] ?: 0.0 }
+
     val isEmpty: Boolean
-        get() = subs.isEmpty() && inserts.isEmpty() && deletes.isEmpty() && spaceSlips.isEmpty()
+        get() = subKeys.isEmpty() && insertKeys.isEmpty() && deleteKeys.isEmpty() && spaceSlipKeys.isEmpty()
 
     /** Shrink for reading [typed] as a slip for [intended]; 0 when unknown. */
-    fun substitution(typed: Char, intended: Char): Double = subs[pack(typed, intended)] ?: 0.0
+    fun substitution(typed: Char, intended: Char): Double {
+        if (subKeys.isEmpty()) return 0.0
+        val idx = subKeys.binarySearch(pack(typed, intended))
+        return if (idx >= 0) subValues[idx] else 0.0
+    }
 
     /** Shrink for a missing [intended] character. */
-    fun insertion(intended: Char): Double = inserts[intended] ?: 0.0
+    fun insertion(intended: Char): Double {
+        if (insertKeys.isEmpty()) return 0.0
+        val idx = insertKeys.binarySearch(intended)
+        return if (idx >= 0) insertValues[idx] else 0.0
+    }
 
     /** Shrink for a stray [typed] character. */
-    fun deletion(typed: Char): Double = deletes[typed] ?: 0.0
+    fun deletion(typed: Char): Double {
+        if (deleteKeys.isEmpty()) return 0.0
+        val idx = deleteKeys.binarySearch(typed)
+        return if (idx >= 0) deleteValues[idx] else 0.0
+    }
 
     /** Shrink for [typed] standing where a space was meant. */
-    fun spaceSlip(typed: Char): Double = spaceSlips[typed] ?: 0.0
+    fun spaceSlip(typed: Char): Double {
+        if (spaceSlipKeys.isEmpty()) return 0.0
+        val idx = spaceSlipKeys.binarySearch(typed)
+        return if (idx >= 0) spaceSlipValues[idx] else 0.0
+    }
 
     override fun equals(other: Any?): Boolean =
         other is EditHabits && other.subs == subs && other.inserts == inserts &&

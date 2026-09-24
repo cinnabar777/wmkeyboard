@@ -44,6 +44,17 @@ class MappedTrie private constructor(
     private val isWordOff: Int,
 ) : WordSource, TrieWalker {
 
+    private val cachedCount: Int = minOf(nodeCount, CACHE_NODES)
+    private val childStartCache: IntArray = IntArray(cachedCount)
+    private val childCountCache: IntArray = IntArray(cachedCount)
+
+    init {
+        for (i in 0 until cachedCount) {
+            childStartCache[i] = computeChildStart(i)
+            childCountCache[i] = computeChildCount(i)
+        }
+    }
+
     /**
      * Where [node]'s edges begin. In a counted file this is the nearest stored
      * running total plus the child counts of the nodes between — at most
@@ -54,7 +65,7 @@ class MappedTrie private constructor(
      * rather than asking for `childStart(node + 1)`, which would walk the
      * counts a second time.
      */
-    private fun childStart(node: Int): Int {
+    private fun computeChildStart(node: Int): Int {
         if (checkpointOff < 0) return buf.getInt(childStartOff + node * 4)
         var total = buf.getInt(checkpointOff + (node shr PackedTrieCodec.CHECKPOINT_SHIFT) * 4)
         var counted = node and (PackedTrieCodec.CHECKPOINT_STRIDE - 1).inv()
@@ -65,13 +76,19 @@ class MappedTrie private constructor(
         return total
     }
 
+    private fun childStart(node: Int): Int =
+        if (node < cachedCount) childStartCache[node] else computeChildStart(node)
+
     /** How many children [node] has. */
-    private fun childCount(node: Int): Int =
+    private fun computeChildCount(node: Int): Int =
         if (checkpointOff < 0) {
             buf.getInt(childStartOff + (node + 1) * 4) - buf.getInt(childStartOff + node * 4)
         } else {
             buf.get(childStartOff + node).toInt() and 0xFF
         }
+
+    private fun childCount(node: Int): Int =
+        if (node < cachedCount) childCountCache[node] else computeChildCount(node)
 
     private fun edgeLabel(edge: Int): Char = when (symbols) {
         null -> buf.getChar(edgeLabelOff + edge * 2)
@@ -205,6 +222,7 @@ class MappedTrie private constructor(
          * `NO_LABEL`, so a damaged file cannot forge either.
          */
         private const val UNUSED_SYMBOL = '\uFFFF'
+        private const val CACHE_NODES = 2048
 
         /**
          * Maps [file] read-only and validates its header. Returns null (and

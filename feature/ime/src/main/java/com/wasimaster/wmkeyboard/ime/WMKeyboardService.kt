@@ -15459,7 +15459,7 @@ open class WMKeyboardService : InputMethodService() {
                     )
                     state.settings.correction.enabled && state.allowsTypingIntelligence -> {
                         val decision = engine.decideCorrection(
-                            typed, touch = touchFrame, timingMultiplier = timingMultiplier,
+                            typed, touch = touchFrame, timingMultiplier = timingMultiplier, keys = keyFrame,
                         )
                         CommitResolution(
                             typed = typed,

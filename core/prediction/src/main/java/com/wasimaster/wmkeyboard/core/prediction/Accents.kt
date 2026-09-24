@@ -59,7 +59,8 @@ object Accents {
     }
 
     /** Whether [label] is [typed] with an accent the typist left off. */
-    fun isAccentOf(label: Char, typed: Char): Boolean = label != typed && bare(label) == typed
+    fun isAccentOf(label: Char, typed: Char): Boolean =
+        label != typed && label.code >= LATIN_START && bare(label) == typed
 
     private fun build(start: Int, end: Int): CharArray = CharArray(end - start + 1) { i ->
         val c = (start + i).toChar()

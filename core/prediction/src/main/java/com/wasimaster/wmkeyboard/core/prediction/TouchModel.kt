@@ -10,13 +10,16 @@ package com.wasimaster.wmkeyboard.core.prediction
  * live layout and per-keystroke tap positions; when either is missing the
  * engine falls back to the discrete [KeyProximity] adjacency weights.
  */
-class TouchPoint(val x: Float, val y: Float)
+data class TouchPoint(val x: Float, val y: Float)
 
 /**
  * Per-key 2D Gaussian likelihood. [centers] maps each committed character to
  * its key center in key-width units.
  */
 class KeyTouchModel(private val centers: Map<Char, TouchPoint>) {
+
+    private val keysArray: CharArray = centers.keys.toCharArray()
+    private val centersArray: Array<TouchPoint> = Array(keysArray.size) { centers[keysArray[it]]!! }
 
     fun knows(ch: Char): Boolean = centers.containsKey(ch)
 
@@ -38,13 +41,14 @@ class KeyTouchModel(private val centers: Map<Char, TouchPoint>) {
     fun bestKey(p: TouchPoint): Char? {
         var best: Char? = null
         var bestScore = Double.NEGATIVE_INFINITY
-        for ((ch, center) in centers) {
+        for (i in keysArray.indices) {
+            val center = centersArray[i]
             val dx = (p.x - center.x).toDouble()
             val dy = (p.y - center.y).toDouble()
             val score = -(dx * dx + dy * dy)
             if (score > bestScore) {
                 bestScore = score
-                best = ch
+                best = keysArray[i]
             }
         }
         return best

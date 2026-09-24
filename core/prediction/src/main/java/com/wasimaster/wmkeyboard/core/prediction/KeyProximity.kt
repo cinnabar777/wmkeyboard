@@ -51,7 +51,39 @@ class KeyProximity private constructor(rows: List<String>) {
         }
     }
 
-    fun areAdjacent(a: Char, b: Char): Boolean = neighbors[a]?.contains(b) == true
+    // Fast ASCII tables for 0 allocations and O(1) bitwise operations.
+    private val asciiAdjacency = LongArray(128 * 2).also { bits ->
+        for ((key, adj) in neighbors) {
+            val a = key.code
+            if (a < 128) {
+                for (ch in adj) {
+                    val b = ch.code
+                    if (b < 128) {
+                        val idx = (a shl 1) or (b ushr 6)
+                        bits[idx] = bits[idx] or (1L shl (b and 63))
+                    }
+                }
+            }
+        }
+    }
+
+    private val asciiHands = ByteArray(128) { UNKNOWN.toByte() }.also { table ->
+        for ((key, hand) in hands) {
+            val c = key.code
+            if (c < 128) table[c] = hand.toByte()
+        }
+    }
+
+    fun areAdjacent(a: Char, b: Char): Boolean {
+        val ac = a.code
+        val bc = b.code
+        return if (ac < 128 && bc < 128) {
+            val idx = (ac shl 1) or (bc ushr 6)
+            (asciiAdjacency[idx] and (1L shl (bc and 63))) != 0L
+        } else {
+            neighbors[a]?.contains(b) == true
+        }
+    }
 
     /**
      * Which hand reaches [c]: [LEFT], [RIGHT], or [UNKNOWN] for a character
@@ -64,7 +96,10 @@ class KeyProximity private constructor(rows: List<String>) {
      * QWERTY, QWERTZ, AZERTY and Dvorak all come out as the split a touch
      * typist actually uses.
      */
-    fun handOf(c: Char): Int = hands[c] ?: UNKNOWN
+    fun handOf(c: Char): Int {
+        val code = c.code
+        return if (code < 128) asciiHands[code].toInt() else hands[c] ?: UNKNOWN
+    }
 
     /**
      * Whether [a] and [b] are typed by the same hand.
