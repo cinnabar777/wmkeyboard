@@ -1264,20 +1264,11 @@ fun KeyboardScreen(
         // Resolved off the main thread, so the first frame or two after a cold
         // start draw the built-in icons and a pack swaps in behind them.
         val iconSet by rememberIconSet(bodyState.settings.icons)
+        // Only what changes with the state is provided here: this runs on
+        // every keystroke, and each call builds the provider map afresh. The
+        // rest is provided once, around [KeyboardScreenFrame] below.
         CompositionLocalProvider(
             LocalIconSet provides iconSet,
-            LocalKeyPreviewState provides keyPreview,
-            LocalKeyPressFeedback provides remember(onKeyPressed) {
-                { onKeyPressed(KeySoundRole.DEFAULT) }
-            },
-            LocalHapticFeedback provides onHaptic,
-            LocalKeySound provides remember(onKeySound) {
-                { onKeySound(KeySoundRole.DEFAULT, KeySoundPhase.PRESS) }
-            },
-            LocalKeyRoleFeedback provides onKeyPressed,
-            LocalKeyRoleSound provides onKeySound,
-            LocalClipboardKeyAction provides onClipboardKey,
-            LocalAlternatesGate provides remember { AlternatesGate() },
             // Where the caret sits in the keyboard's own focused field, for the
             // nine panels that draw one (#161).
             LocalCaptureCaret provides CaptureCaretHandle(
@@ -1287,28 +1278,9 @@ fun KeyboardScreen(
                 onSelect = capture.onSelect,
                 onSelectionAction = capture.onSelectionAction,
             ),
-            // Text selection over the tools' text and the keyboard's own
-            // fields (#352): the one selection up, and what its bar calls.
-            LocalSelectionOverlay provides remember { SelectionOverlayState() },
             LocalSelectionTools provides selectionTools(bodyState, capture.onAiChat),
-            LocalOctopusPick provides onOctopusPick,
-            LocalPossessiveFlick provides onPossessiveFlick,
             LocalOctopusWords provides rememberUpdatedState(bodyState.octopus),
-            LocalOctopusOccupancy provides remember { OctopusOccupancy() },
             LocalTransliterationPreview provides rememberTransliterationPreview(bodyState),
-            LocalSelectionHold provides toolHold.onSelectionHold,
-            LocalCanDelete provides canDelete,
-            LocalCanDeleteField provides canDeleteField,
-            LocalCanForwardDelete provides canForwardDelete,
-            LocalDeleteSwipe provides deleteSwipe,
-            LocalCursorMoveVertical provides onCursorMoveVertical,
-            LocalCaretDrag provides toolHold.caretMagnifier.onDrag,
-            LocalHideKeyboard provides onHideKeyboard,
-            LocalLanguageSwitchEcho provides languageSwitchEcho,
-            LocalTouchExploration provides rememberTouchExploration(),
-            LocalPassthroughService provides
-                KeyboardPassthrough.serviceConnected.collectAsState().value,
-            LocalPanelFocus provides panelFocus,
             // Whether a D-pad ring can land on the toolbar and the strip. The
             // keys read the same setting through the grid itself; these two
             // surfaces are too far from it to be handed a parameter.
@@ -1478,29 +1450,67 @@ fun KeyboardScreen(
         }
     }
 
-    KeyboardScreenFrame(
-        stateHolder = stateHolder,
-        keyPreview = keyPreview,
-        languageSwitchEcho = languageSwitchEcho,
-        panelFocus = panelFocus,
-        body = movableBody,
-        onKey = onKey,
-        onText = onText,
-        onLayoutSelect = onLayoutSelect,
-        onToolTap = onToolTap,
-        onVoiceToggle = onVoiceToggle,
-        onVoiceUndo = onVoiceUndo,
-        onVoicePermissionRequest = onVoicePermissionRequest,
-        onOpenVoiceSettings = onOpenVoiceSettings,
-        onVoiceRailKey = onVoiceRailKey,
-        onOneHanded = onOneHanded,
-        onOneHandedSide = onOneHandedSide,
-        onFloatingChange = onFloatingChange,
-        onFloatingMoved = onFloatingMoved,
-        onSizingAction = onSizingAction,
-        onFloatingBounds = onFloatingBounds,
-        onWindowHeadroom = onWindowHeadroom,
-    )
+    // The locals that never change with the state, provided once for the
+    // whole keyboard. [body] travels between the frame's slots as movable
+    // content and resolves them from wherever it lands, all of which are
+    // inside this.
+    CompositionLocalProvider(
+        LocalKeyPreviewState provides keyPreview,
+        LocalKeyPressFeedback provides remember(onKeyPressed) {
+            { onKeyPressed(KeySoundRole.DEFAULT) }
+        },
+        LocalHapticFeedback provides onHaptic,
+        LocalKeySound provides remember(onKeySound) {
+            { onKeySound(KeySoundRole.DEFAULT, KeySoundPhase.PRESS) }
+        },
+        LocalKeyRoleFeedback provides onKeyPressed,
+        LocalKeyRoleSound provides onKeySound,
+        LocalClipboardKeyAction provides onClipboardKey,
+        LocalAlternatesGate provides remember { AlternatesGate() },
+        // Text selection over the tools' text and the keyboard's own
+        // fields (#352): the one selection up, and what its bar calls.
+        LocalSelectionOverlay provides remember { SelectionOverlayState() },
+        LocalOctopusPick provides onOctopusPick,
+        LocalPossessiveFlick provides onPossessiveFlick,
+        LocalOctopusOccupancy provides remember { OctopusOccupancy() },
+        LocalSelectionHold provides toolHold.onSelectionHold,
+        LocalCanDelete provides canDelete,
+        LocalCanDeleteField provides canDeleteField,
+        LocalCanForwardDelete provides canForwardDelete,
+        LocalDeleteSwipe provides deleteSwipe,
+        LocalCursorMoveVertical provides onCursorMoveVertical,
+        LocalCaretDrag provides toolHold.caretMagnifier.onDrag,
+        LocalHideKeyboard provides onHideKeyboard,
+        LocalLanguageSwitchEcho provides languageSwitchEcho,
+        LocalTouchExploration provides rememberTouchExploration(),
+        LocalPassthroughService provides
+            KeyboardPassthrough.serviceConnected.collectAsState().value,
+        LocalPanelFocus provides panelFocus,
+    ) {
+        KeyboardScreenFrame(
+            stateHolder = stateHolder,
+            keyPreview = keyPreview,
+            languageSwitchEcho = languageSwitchEcho,
+            panelFocus = panelFocus,
+            body = movableBody,
+            onKey = onKey,
+            onText = onText,
+            onLayoutSelect = onLayoutSelect,
+            onToolTap = onToolTap,
+            onVoiceToggle = onVoiceToggle,
+            onVoiceUndo = onVoiceUndo,
+            onVoicePermissionRequest = onVoicePermissionRequest,
+            onOpenVoiceSettings = onOpenVoiceSettings,
+            onVoiceRailKey = onVoiceRailKey,
+            onOneHanded = onOneHanded,
+            onOneHandedSide = onOneHandedSide,
+            onFloatingChange = onFloatingChange,
+            onFloatingMoved = onFloatingMoved,
+            onSizingAction = onSizingAction,
+            onFloatingBounds = onFloatingBounds,
+            onWindowHeadroom = onWindowHeadroom,
+        )
+    }
 }
 
 /**
