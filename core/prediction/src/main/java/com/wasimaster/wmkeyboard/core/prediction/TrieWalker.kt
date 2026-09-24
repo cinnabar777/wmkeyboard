@@ -71,4 +71,11 @@ class ChildBuffer(initial: Int = 32) {
         labels = labels.copyOf(capacity)
         nodes = nodes.copyOf(capacity)
     }
+
+    fun find(target: Char, count: Int): Int {
+        for (i in 0 until count) {
+            if (labels[i] == target) return nodes[i]
+        }
+        return -1
+    }
 }

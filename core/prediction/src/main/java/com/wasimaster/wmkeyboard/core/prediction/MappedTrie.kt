@@ -47,11 +47,15 @@ class MappedTrie private constructor(
     private val cachedCount: Int = minOf(nodeCount, CACHE_NODES)
     private val childStartCache: IntArray = IntArray(cachedCount)
     private val childCountCache: IntArray = IntArray(cachedCount)
+    private val maxSubtreeCache: IntArray = IntArray(cachedCount)
+    private val isWordCache: BooleanArray = BooleanArray(cachedCount)
 
     init {
         for (i in 0 until cachedCount) {
             childStartCache[i] = computeChildStart(i)
             childCountCache[i] = computeChildCount(i)
+            maxSubtreeCache[i] = computeMaxSubtree(i)
+            isWordCache[i] = computeIsWord(i)
         }
     }
 
@@ -105,11 +109,17 @@ class MappedTrie private constructor(
     private fun freq(node: Int): Int =
         FrequencyCodec.decode(buf.getShort(freqOff + node * 2).toInt() and 0xFFFF)
 
-    override fun maxSubtree(node: Int): Int =
+    private fun computeMaxSubtree(node: Int): Int =
         FrequencyCodec.decode(buf.getShort(maxSubtreeOff + node * 2).toInt() and 0xFFFF)
 
-    override fun isWord(node: Int): Boolean =
+    override fun maxSubtree(node: Int): Int =
+        if (node < cachedCount) maxSubtreeCache[node] else computeMaxSubtree(node)
+
+    private fun computeIsWord(node: Int): Boolean =
         buf.get(isWordOff + (node ushr 3)).toInt() shr (node and 7) and 1 == 1
+
+    override fun isWord(node: Int): Boolean =
+        if (node < cachedCount) isWordCache[node] else computeIsWord(node)
 
     override fun walkers(): List<TrieWalker> = listOf(this)
 

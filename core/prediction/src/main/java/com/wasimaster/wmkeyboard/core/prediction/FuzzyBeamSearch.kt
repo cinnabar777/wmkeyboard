@@ -89,8 +89,12 @@ class FuzzyBeamSearch {
 
         // Heaviest source first: its emissions raise the floor early, letting
         // lighter sources terminate after a handful of expansions.
-        val ordered = sources.sortedByDescending {
-            it.logWeight + ln1p(it.walker.maxSubtree(it.walker.root))
+        val ordered = if (sources.size <= 1) {
+            sources
+        } else {
+            sources.sortedByDescending {
+                it.logWeight + ln1p(it.walker.maxSubtree(it.walker.root))
+            }
         }
         for (src in ordered) {
             val rootBound = src.logWeight + ln1p(src.walker.maxSubtree(src.walker.root))
@@ -146,7 +150,7 @@ class FuzzyBeamSearch {
                     val score = src.logWeight + ln1p(walker.frequency(node)) - cost
                     if (score > floor - EPS || results.size < k) {
                         emit(ws.materialize(s), score, editSpend, edits, comp, accents, src.tier, results)
-                        if (results.size >= k) floor = kthBest(results, k)
+                        if (results.size >= k) floor = kthBest(results, k, ws)
                     }
                 }
                 // Completion: descend at no cost on a clean prefix — the bound
@@ -180,7 +184,7 @@ class FuzzyBeamSearch {
                 // Exact match of the next typed char. With touch evidence, an
                 // off-center tap makes even the "match" slightly expensive —
                 // which is exactly what lets the neighbouring key's word win.
-                val matched = walker.child(node, expected)
+                val matched = ws.children.find(expected, count)
                 if (matched >= 0) {
                     pushIfViable(
                         ws, src, walker, floor,
@@ -361,7 +365,7 @@ class FuzzyBeamSearch {
                     keySet == null && keys?.at(pos + 1) == null &&
                     editSpend + transposeCost <= MAX_EDIT_COST
                 ) {
-                    val first = walker.child(node, typed[pos + 1])
+                    val first = ws.children.find(typed[pos + 1], count)
                     if (first >= 0) {
                         val second = walker.child(first, typed[pos])
                         if (second >= 0) {
@@ -482,13 +486,15 @@ class FuzzyBeamSearch {
         }
     }
 
-    private fun kthBest(results: HashMap<String, ScoredCandidate>, k: Int): Double {
-        if (results.size < k) return Double.NEGATIVE_INFINITY
-        val scores = DoubleArray(results.size)
+    private fun kthBest(results: HashMap<String, ScoredCandidate>, k: Int, ws: BeamWorkspace): Double {
+        val count = results.size
+        if (count < k) return Double.NEGATIVE_INFINITY
+        if (ws.scoreBuf.size < count) ws.scoreBuf = DoubleArray(maxOf(count, ws.scoreBuf.size * 2))
+        val buf = ws.scoreBuf
         var i = 0
-        for (c in results.values) scores[i++] = c.score
-        scores.sort()
-        return scores[scores.size - k]
+        for (c in results.values) buf[i++] = c.score
+        buf.sort(0, count)
+        return buf[count - k]
     }
 
     companion object {
@@ -627,6 +633,7 @@ class BeamWorkspace(initialCapacity: Int = 256) {
     var heapSize = 0; private set
 
     val children = ChildBuffer()
+    var scoreBuf = DoubleArray(64)
     private val sb = StringBuilder(24)
 
     fun reset() {

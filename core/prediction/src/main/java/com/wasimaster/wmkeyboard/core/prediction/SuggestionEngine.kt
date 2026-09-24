@@ -1272,7 +1272,13 @@ class SuggestionEngine(
         // field the mix says is Banglish, it is the English-tagged habits
         // that crowd, and the Banglish ones that belong.
         val active = detectedLanguageId()
-        if (active.isEmpty()) return ranked
+        if (active.isEmpty() || ranked.isEmpty()) return ranked
+        val anyNeedDamp = ranked.any { c ->
+            c.dictScore == Double.NEGATIVE_INFINITY &&
+                c.userScore != Double.NEGATIVE_INFINITY &&
+                userLexicon.languageOf(c.word).let { it != null && it != active }
+        }
+        if (!anyNeedDamp) return ranked
         var changed = false
         val damped = ranked.map { c ->
             val pureUser = c.dictScore == Double.NEGATIVE_INFINITY &&
@@ -1543,8 +1549,6 @@ class SuggestionEngine(
         }
 
         /** Learned words get a large boost so personalization wins quickly. */
-        /** Completions scanned per source when building the next-letter map. */
-        private const val NEXT_LETTER_SCAN = 24
         private const val USER_WORD_WEIGHT = 500
 
         /**
@@ -2185,34 +2189,50 @@ class SuggestionEngine(
 
     /**
      * A distribution over the character most likely to be typed next, given the
-     * word-so-far [prefix]. Each dictionary word that starts with [prefix]
-     * contributes its frequency to the single letter that would extend the
-     * prefix by one; the personal lexicon counts extra so learned habits bias
-     * the keyboard. Values are normalised to 0..1 with the top letter at 1.0.
+     * word-so-far [prefix]. Each edge leaving [prefix]'s node scores the
+     * frequency of the best word under it (the stored maxSubtree), so a letter
+     * weighs what its likeliest word does, not the sum of every word it leads
+     * to; the personal lexicon counts extra so learned habits bias the
+     * keyboard. Values are normalised to 0..1 with the top letter at 1.0.
      * Empty when the prefix is blank or completes to nothing.
      *
-     * Deliberately cheap and approximate — it feeds smart key-hit detection,
-     * which only nudges boundary taps, so an imperfect distribution is fine.
+     * Deliberately cheap and approximate — one descent and one edge read per
+     * source, no completion walk — because it runs every keystroke and feeds
+     * smart key-hit detection, which only nudges boundary taps.
      */
     fun nextLetterWeights(prefix: String): Map<Char, Float> {
         if (prefix.isEmpty()) return emptyMap()
         val lower = prefix.lowercase()
-        val at = lower.length
         val tally = HashMap<Char, Double>()
-        fun fold(weight: Double, complete: (String, Int) -> List<Suggestion>) {
-            for (s in complete(lower, NEXT_LETTER_SCAN)) {
-                // Only genuine extensions; a completion equal to the prefix (the
-                // word itself) predicts no next letter.
-                if (s.word.length <= at) continue
-                val ch = s.word[at].lowercaseChar()
-                if (!ch.isLetter()) continue
-                tally.merge(ch, s.frequency.toDouble() * weight, Double::plus)
+        val buf = ChildBuffer()
+        fun fold(weight: Double, walkers: List<TrieWalker>) {
+            for (walker in walkers) {
+                var node = walker.root
+                var found = true
+                for (i in 0 until lower.length) {
+                    node = walker.child(node, lower[i])
+                    if (node < 0) {
+                        found = false
+                        break
+                    }
+                }
+                if (!found) continue
+                val count = walker.childrenInto(node, buf)
+                for (i in 0 until count) {
+                    val ch = buf.labels[i].lowercaseChar()
+                    if (!ch.isLetter()) continue
+                    val childNode = buf.nodes[i]
+                    val freq = walker.maxSubtree(childNode)
+                    if (freq > 0) {
+                        tally.merge(ch, freq.toDouble() * weight, Double::plus)
+                    }
+                }
             }
         }
-        fold(1.0, activeDictionary::complete)
-        fold(USER_WORD_WEIGHT.toDouble(), userLexicon::complete)
-        fold(USER_WORD_WEIGHT.toDouble(), systemDictionary::complete)
-        fold(CUSTOM_WORD_WEIGHT.toDouble(), customDictionary::complete)
+        fold(1.0, activeDictionary.walkers())
+        fold(USER_WORD_WEIGHT.toDouble(), userLexicon.walkers())
+        fold(USER_WORD_WEIGHT.toDouble(), systemDictionary.walkers())
+        fold(CUSTOM_WORD_WEIGHT.toDouble(), customDictionary.walkers())
         val max = tally.values.maxOrNull() ?: return emptyMap()
         if (max <= 0.0) return emptyMap()
         return tally.mapValues { (it.value / max).toFloat() }
