@@ -602,6 +602,8 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 import java.util.Calendar
 import java.util.EnumMap
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import com.wasimaster.wmkeyboard.common.R as CommonR
 import com.wasimaster.wmkeyboard.voice.R as VoiceR
@@ -1577,6 +1579,25 @@ open class WMKeyboardService : InputMethodService() {
      */
     @Volatile
     private var commitResolution: CommitResolution? = null
+
+    /**
+     * Where the Latin autocorrect half of [commitResolution] is worked out:
+     * one at a time, beside the strip's own lane rather than behind it, so a
+     * keystroke's answer is not queued behind a strip pass that is still
+     * walking. See [resolveCommitAhead].
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val resolutionDispatcher = Dispatchers.Default.limitedParallelism(1, "wmkb-resolve")
+    private var resolutionJob: Job? = null
+
+    /** The word [resolutionJob] is resolving, and whether it has got that far. */
+    private class PendingResolution(val typed: String) {
+        @Volatile var started = false
+        val done = CountDownLatch(1)
+    }
+
+    @Volatile
+    private var pendingResolution: PendingResolution? = null
 
     private class CommitResolution(
         val typed: String,
@@ -11310,6 +11331,11 @@ open class WMKeyboardService : InputMethodService() {
         // mismatch means the job hasn't caught up), else compute synchronously.
         // Either way the result is fresh — the commit never uses a stale strip.
         val pre = commitResolution?.takeIf { it.typed == typed }
+            ?: if (autocorrect && !gluedToWord && apostrophized == null && latinResolution(state, typed)) {
+                awaitCommitResolution(typed)
+            } else {
+                null
+            }
         var corrected: String? = null
         // A candidate that came close to being applied without getting there.
         // Published as a chip below, once the word is actually in the field.
@@ -11472,6 +11498,8 @@ open class WMKeyboardService : InputMethodService() {
             )
         }
         composing = StringBuilder()
+        // Whatever was resolving belonged to the word just committed.
+        pendingResolution = null
         // Refill the strip in the same frame the word commits. Blanking it
         // and waiting for the async refresh left it empty for a frame or
         // two after every space, which read as a flicker.
@@ -15253,6 +15281,71 @@ open class WMKeyboardService : InputMethodService() {
     /** The packs already named once, so the chip asks and then stays out of the way. */
     private val conversionPackNoticed = mutableSetOf<String>()
 
+    /**
+     * Whether a space would run [SuggestionEngine.decideCorrection] on [typed]:
+     * a plain Latin board with autocorrect on. The same order of cases as the
+     * precompute in [refreshSuggestions] and the commit in [commitComposing].
+     */
+    private fun latinResolution(state: KeyboardUiState, typed: String): Boolean =
+        typed.isNotEmpty() && state.composer.phoneticLanguage == null && !state.layouts.ambiguousKeys &&
+            state.settings.correction.enabled && state.allowsTypingIntelligence
+
+    /**
+     * Starts working out what a space would make of [typed], now.
+     *
+     * It used to ride the strip pass, which waits out a debounce of up to
+     * [MAX_SUGGESTION_DEBOUNCE_MS] first. A space typed inside that window —
+     * which is most of them, typing at speed — found no answer and ran the
+     * whole correction walk again on the main thread, between the keystroke
+     * and its frame. Started here instead, the answer is usually in by the
+     * time the space lands, and when it is still being worked out
+     * [awaitCommitResolution] waits for it rather than starting over.
+     *
+     * One lane, and a job still queued when the next key cancels it never
+     * runs, so a burst costs one walk at a time however fast it is typed.
+     */
+    private fun resolveCommitAhead(engine: SuggestionEngine, typed: String) {
+        resolutionJob?.cancel()
+        // Read now, while they still describe this word.
+        val touch = composingTouchFrame()
+        val keys = composingKeyFrame()
+        val timing = timingMultiplier()
+        val pending = PendingResolution(typed)
+        pendingResolution = pending
+        resolutionJob = serviceScope.launch(resolutionDispatcher) {
+            pending.started = true
+            try {
+                val decision = engine.decideCorrection(typed, touch = touch, timingMultiplier = timing, keys = keys)
+                // Withdrawn meanwhile — a word blocked mid-walk, say — lands nothing.
+                if (pendingResolution !== pending) return@launch
+                commitResolution = CommitResolution(
+                    typed = typed,
+                    isPhonetic = false,
+                    phoneticTop = null,
+                    correction = decision.apply?.takeIf { it != typed },
+                    offer = decision.offer?.takeIf { it != typed },
+                    certainty = decision.certainty,
+                    complexity = decision.complexity,
+                )
+            } finally {
+                pending.done.countDown()
+            }
+        }
+    }
+
+    /**
+     * The resolution [resolveCommitAhead] is still working out for [typed],
+     * waited for; null when nothing is working on this word, so the caller
+     * resolves it itself. Waiting costs the main thread no more than the rest
+     * of a walk that is already under way, where resolving afresh would cost
+     * the whole of one. Capped, so a stalled worker cannot hold up a commit.
+     */
+    private fun awaitCommitResolution(typed: String): CommitResolution? {
+        val pending = pendingResolution?.takeIf { it.typed == typed && it.started } ?: return null
+        pending.done.await(COMMIT_RESOLUTION_WAIT_MS, TimeUnit.MILLISECONDS)
+        return commitResolution?.takeIf { it.typed == typed }
+    }
+
     private fun refreshSuggestions() {
         val state = _uiState.value
         if (emailFieldForceActive(state)) {
@@ -15335,6 +15428,13 @@ open class WMKeyboardService : InputMethodService() {
         if (typed.isEmpty() && caret != null && !state.composer.isTransliterating) {
             publishCaretWordSuggestions(engine, caret)
             return
+        }
+
+        if (latinResolution(state, typed)) {
+            resolveCommitAhead(engine, typed)
+        } else {
+            resolutionJob?.cancel()
+            pendingResolution = null
         }
 
         suggestionJob?.cancel()
@@ -15483,20 +15583,9 @@ open class WMKeyboardService : InputMethodService() {
                         correction = null,
                         ambiguousTop = words.firstOrNull(),
                     )
-                    state.settings.correction.enabled && state.allowsTypingIntelligence -> {
-                        val decision = engine.decideCorrection(
-                            typed, touch = touchFrame, timingMultiplier = timingMultiplier, keys = keyFrame,
-                        )
-                        CommitResolution(
-                            typed = typed,
-                            isPhonetic = false,
-                            phoneticTop = null,
-                            correction = decision.apply?.takeIf { it != typed },
-                            offer = decision.offer?.takeIf { it != typed },
-                            certainty = decision.certainty,
-                            complexity = decision.complexity,
-                        )
-                    }
+                    // Worked out by [resolveCommitAhead] as the key landed,
+                    // without this pass's debounce; left as it stands.
+                    latinResolution(state, typed) -> commitResolution
                     else -> null
                 }
                 ensureActive()
@@ -28483,6 +28572,9 @@ open class WMKeyboardService : InputMethodService() {
         ) {
             commitResolution = null
         }
+        // A correction still being worked out predates the engine knowing.
+        resolutionJob?.cancel()
+        pendingResolution = null
         if (blocked(_uiState.value.correctionOffer) || blocked(pendingCorrectionOffer)) {
             clearCorrectionOffer()
         }
@@ -32094,6 +32186,9 @@ open class WMKeyboardService : InputMethodService() {
          * at all, which is what made #313 possible.
          */
         private const val MAX_SUGGESTION_DEBOUNCE_MS = 120L
+
+        /** Longest a commit waits on a correction already being worked out; see awaitCommitResolution. */
+        private const val COMMIT_RESOLUTION_WAIT_MS = 100L
 
         /** Inline emoji search is a local index lookup — no network wait. */
         private const val EMOJI_SEARCH_DEBOUNCE_MS = 24L
