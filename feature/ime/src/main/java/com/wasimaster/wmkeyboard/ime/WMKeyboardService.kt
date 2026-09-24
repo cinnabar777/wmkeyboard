@@ -26399,7 +26399,7 @@ open class WMKeyboardService : InputMethodService() {
                 repeat(count) { userLexicon.learnSkip1gram(skip.first, skip.second) }
             }
             for ((skip2, count) in plan.skip2Counts) {
-                repeat(count) { userLexicon.learnSkip2gram(skip2.first, skip2.second, skip2.third) }
+                repeat(count) { userLexicon.learnSkip2gram(skip2.first, skip2.second) }
             }
             pairCount = plan.pairs.size
         }
