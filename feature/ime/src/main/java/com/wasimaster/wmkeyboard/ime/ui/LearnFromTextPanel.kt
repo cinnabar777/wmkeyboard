@@ -237,7 +237,7 @@ private fun EditBody(ui: LearnFromTextUi) {
             query = ui.editText,
             placeholder = stringResource(R.string.ime_learn_edit_hint),
             active = true,
-            textColor = kb.suggestionText,
+            textColor = kb.chipText,
             placeholderColor = kb.secondaryText,
             fontSize = 14.sp,
             modifier = Modifier.weight(1f),
