@@ -65,7 +65,7 @@ data class LearnFromTextCallbacks(
 )
 
 /** The panel's height while its spelling editor shares the window with the key rows. */
-private val LearnEditHeight = 96.dp
+private val LearnEditHeight = 132.dp
 
 /**
  * Learn from text (#174): the words in the field, or the selection, that the
