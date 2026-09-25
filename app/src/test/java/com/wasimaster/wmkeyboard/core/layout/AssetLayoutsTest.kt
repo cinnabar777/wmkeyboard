@@ -226,6 +226,25 @@ class AssetLayoutsTest {
     }
 
     @Test
+    fun `the polish qwerty layout prioritises polish diacritics on long-press`() {
+        val file = layoutFiles.first { it.name == "pl_qwerty.${LayoutFile.FILE_EXTENSION}" }
+        val keys = LayoutFile.decode(file.readText())!!.layout
+            .layers.getValue(LayoutLayer.LETTERS.key).rows.flatten()
+            .associateBy { it.label }
+
+        assertEquals("ą", keys["a"]?.longPress?.firstOrNull())
+        assertEquals("ć", keys["c"]?.longPress?.firstOrNull())
+        assertEquals("ę", keys["e"]?.longPress?.firstOrNull())
+        assertEquals("ł", keys["l"]?.longPress?.firstOrNull())
+        assertEquals("ń", keys["n"]?.longPress?.firstOrNull())
+        assertEquals("ó", keys["o"]?.longPress?.firstOrNull())
+        assertEquals("ś", keys["s"]?.longPress?.firstOrNull())
+        assertEquals("ż", keys["z"]?.longPress?.firstOrNull())
+        assertTrue("z should also offer ź", keys["z"]?.longPress?.contains("ź") == true)
+        assertTrue("u should not offer ó", keys["u"]?.longPress?.contains("ó") != true)
+    }
+
+    @Test
     fun `asset layout ids are unique and never shadow a built-in`() {
         val builtInIds = BuiltInLayouts.all.mapTo(HashSet()) { it.id }
         val seen = mutableSetOf<String>()
