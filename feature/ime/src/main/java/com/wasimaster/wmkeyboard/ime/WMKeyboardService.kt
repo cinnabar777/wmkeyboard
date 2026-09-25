@@ -8500,8 +8500,15 @@ open class WMKeyboardService : InputMethodService() {
         if (_uiState.value.settings.textEditing.recapitalizeSelectionWithShift &&
             !_uiState.value.shiftSelectsText
         ) {
+            val target = _uiState.value.captureTarget()
+            val caret = _uiState.value.captureCaretText()
             val spell = _uiState.value.wordSpell
-            if (spell != null) {
+            if (target != null && caret != null && caret.hasSelection) {
+                caret.recased(::nextCaseForm)?.let { next ->
+                    captureWrite(target, caret, next)
+                    return
+                }
+            } else if (spell != null) {
                 // The spelling bar's own selection, never one standing in the
                 // app behind it (#204).
                 spell.recased(::nextCaseForm)?.let { next ->
