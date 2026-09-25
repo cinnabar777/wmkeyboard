@@ -69,7 +69,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -2002,7 +2007,12 @@ private fun DockedKeyboardFrame(
                 // adjustable in Settings → Appearance. Both are the board's own
                 // room, so the card takes them inside itself and runs down to
                 // the screen's edge.
+                // The window runs under a camera cutout (issue #370), so the
+                // board is painted to the screen's edge; the keys stay clear of
+                // the cutout's strip, sideways only — a phone held upright has
+                // it above the window, not beside the keys.
                 val bottomRoom = Modifier
+                    .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Horizontal))
                     .navigationBarsPadding()
                     .padding(bottom = bottomPaddingDp(state.settings).dp)
                 Row(
@@ -9712,6 +9722,23 @@ internal fun fitToolPanelHeight(wanted: Dp, floor: Dp, screenHeight: Dp, around:
 private const val ToolPanelMaxScreenShare = 0.8f
 
 /**
+ * A phone held sideways: wide, and too short for a tool panel that stacks its
+ * parts. Such a panel lays them side by side instead (issue #370) — Translate's
+ * text beside its result, the calculator's functions beside its keypad —
+ * because [fitToolPanelHeight] leaves it a strip a line or two tall once the
+ * key rows are paid for, and a stack in that strip showed only its top part.
+ */
+@Composable
+internal fun shortLandscape(): Boolean {
+    val configuration = LocalConfiguration.current
+    return configuration.orientation == Configuration.ORIENTATION_LANDSCAPE &&
+        configuration.screenHeightDp < ShortLandscapeMaxHeightDp
+}
+
+/** Below this a sideways screen counts as [shortLandscape]; a tablet sideways stays above it. */
+private const val ShortLandscapeMaxHeightDp = 480
+
+/**
  * Whether a keyboard-owned field draws a suggestion strip of its own (#161).
  *
  * Asked of the *setting* rather than of whether any words are up, for the same
@@ -10604,17 +10631,12 @@ private fun KeyboardBody(
                     onQueryTap = onMediaQueryTap,
                     onOpenRoute = onOpenRoute,
                 )
-                PanelMode.TRANSLATE -> FullBleedTool(
-                    state, stringResource(R.string.ime_tool_translate),
+                PanelMode.TRANSLATE -> TranslateTool(
+                    state = state,
+                    callbacks = translateCallbacks,
                     onClose = { onPanelChange(PanelMode.TRANSLATE) },
-                    compact = state.mediaSearchActive,
-                    // Translations run long, and the text being translated is a
-                    // box of several lines in the panel itself rather than the
-                    // header's one-line search bar: room for both over the keys.
-                    compactHeight = TranslateCompactHeight,
-                ) {
-                    TranslatePanel(state = state, callbacks = translateCallbacks, onQueryTap = onMediaQueryTap)
-                }
+                    onQueryTap = onMediaQueryTap,
+                )
                 PanelMode.GRAMMAR -> if (BuildConfig.ENABLE_GRAMMAR) {
                     GrammarPanel(state = state, callbacks = grammarCallbacks)
                 } else {

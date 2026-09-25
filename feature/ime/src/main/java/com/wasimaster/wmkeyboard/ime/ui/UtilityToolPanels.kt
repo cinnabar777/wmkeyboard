@@ -389,36 +389,12 @@ internal fun CalculatorPanel(
                 }
             }
         }
-        // Scientific row. Ring indices mirror the CHIPS publisher above:
-        // C, the tokens, then the trig-unit toggle.
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState())
-                .padding(vertical = 3.dp),
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
-        ) {
-            ToolPanelChip("C", modifier = Modifier.focusRing(focusedChip == 0)) {
-                callbacks.onCalcEdit("")
-            }
-            sciTokens.forEachIndexed { index, token ->
-                ToolPanelChip(
-                    token.trimEnd('(', ' '),
-                    modifier = Modifier.focusRing(focusedChip == index + 1),
-                ) { append(token) }
-            }
-            // Tapping the chip flips the trig unit and persists it — the same
-            // switch the tool's settings page carries, within reach of `sin(`.
-            val trigUnit = if (degrees) {
-                stringResource(R.string.ime_calc_degrees_label)
-            } else {
-                stringResource(R.string.ime_calc_radians_label)
-            }
-            ToolPanelChip(
-                trigUnit,
-                selected = true,
-                modifier = Modifier.focusRing(focusedChip == sciTokens.size + 1),
-            ) { callbacks.onCalcToggleDegrees() }
+        // Tapping the unit chip flips the trig unit and persists it — the
+        // same switch the tool's settings page carries, within reach of `sin(`.
+        val trigUnit = if (degrees) {
+            stringResource(R.string.ime_calc_degrees_label)
+        } else {
+            stringResource(R.string.ime_calc_radians_label)
         }
         // Keypad. Desk-calculator order by default; the phone layout puts
         // 1 2 3 on top to match the numpad's dialer order (issue #294).
@@ -430,29 +406,104 @@ internal fun CalculatorPanel(
             listOf(if (phone) "7" else "1", if (phone) "8" else "2", if (phone) "9" else "3", "−", ")"),
             listOf("0", ".", "%", "+", "="),
         )
-        Column(Modifier.weight(1f)) {
-            for (row in rows) {
-                Row(Modifier.weight(1f)) {
-                    for (label in row) {
-                        KeypadButton(
-                            label,
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxHeight(),
-                            accent = label == "=",
-                        ) {
-                            when (label) {
-                                "⌫" -> callbacks.onCalcEdit(expression.dropLast(1))
-                                "=" -> result?.onSuccess { callbacks.onCalcEdit(it) }
-                                else -> append(label)
+        val keypad = @Composable { modifier: Modifier ->
+            Column(modifier) {
+                for (row in rows) {
+                    Row(Modifier.weight(1f)) {
+                        for (label in row) {
+                            KeypadButton(
+                                label,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight(),
+                                accent = label == "=",
+                            ) {
+                                when (label) {
+                                    "⌫" -> callbacks.onCalcEdit(expression.dropLast(1))
+                                    "=" -> result?.onSuccess { callbacks.onCalcEdit(it) }
+                                    else -> append(label)
+                                }
                             }
                         }
                     }
                 }
             }
         }
+        if (shortLandscape()) {
+            // Sideways the panel is wide and short, and a row of chips over
+            // the keypad cost it a row it could not spare (issue #370): the
+            // functions go beside the keypad instead, as keys in rows of
+            // their own. Ring indices as in the chip row: C, the tokens, then
+            // the trig-unit toggle.
+            val functions = listOf("C") + sciTokens + trigUnit
+            Row(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(top = 3.dp),
+            ) {
+                Column(Modifier.weight(CalcFunctionsWeight)) {
+                    functions.chunked(CalcFunctionColumns).forEachIndexed { rowIndex, row ->
+                        Row(Modifier.weight(1f)) {
+                            row.forEachIndexed { column, label ->
+                                val index = rowIndex * CalcFunctionColumns + column
+                                KeypadButton(
+                                    label.trimEnd('(', ' '),
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .fillMaxHeight()
+                                        .focusRing(focusedChip == index),
+                                ) {
+                                    when (index) {
+                                        0 -> callbacks.onCalcEdit("")
+                                        functions.lastIndex -> callbacks.onCalcToggleDegrees()
+                                        else -> append(label)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                keypad(Modifier.weight(1f))
+            }
+        } else {
+            // Scientific row. Ring indices mirror the CHIPS publisher above:
+            // C, the tokens, then the trig-unit toggle.
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState())
+                    .padding(vertical = 3.dp),
+                horizontalArrangement = Arrangement.spacedBy(5.dp),
+            ) {
+                ToolPanelChip("C", modifier = Modifier.focusRing(focusedChip == 0)) {
+                    callbacks.onCalcEdit("")
+                }
+                sciTokens.forEachIndexed { index, token ->
+                    ToolPanelChip(
+                        token.trimEnd('(', ' '),
+                        modifier = Modifier.focusRing(focusedChip == index + 1),
+                    ) { append(token) }
+                }
+                ToolPanelChip(
+                    trigUnit,
+                    selected = true,
+                    modifier = Modifier.focusRing(focusedChip == sciTokens.size + 1),
+                ) { callbacks.onCalcToggleDegrees() }
+            }
+            keypad(Modifier.weight(1f))
+        }
     }
 }
+
+/**
+ * Sideways, the calculator's functions sit beside its keypad in rows of this
+ * many — C, eleven functions and the trig unit make four rows, the keypad's
+ * own four.
+ */
+private const val CalcFunctionColumns = 4
+
+/** The functions' share of the row beside the keypad, whose share is 1. */
+private const val CalcFunctionsWeight = 0.8f
 
 // ---- shared converter scaffolding ----
 

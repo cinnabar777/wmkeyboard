@@ -4179,6 +4179,7 @@ open class WMKeyboardService : InputMethodService() {
                 ServiceKeyboardContent()
             }
         }
+        drawUnderCutout()
         // Measured through a frame that hands it one height per traversal;
         // see [StableMeasureFrame] for why a keystroke used to lay out the
         // whole window.
@@ -4193,6 +4194,29 @@ open class WMKeyboardService : InputMethodService() {
                 ),
             )
         }
+    }
+
+    /**
+     * Lets the IME window run under a display cutout (issue #370).
+     *
+     * The platform's default keeps a window out of a cutout that is not inside
+     * a system bar, which is every punch-hole camera on a phone held sideways:
+     * the window started a cutout's width in from the screen's edge and the
+     * app showed through the strip beside the keys. The board paints the strip
+     * now and the key rows are padded clear of it (see DockedKeyboardFrame).
+     */
+    private fun drawUnderCutout() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) return
+        val imeWindow = window?.window ?: return
+        val mode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+        } else {
+            WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+        }
+        val attributes = imeWindow.attributes
+        if (attributes.layoutInDisplayCutoutMode == mode) return
+        attributes.layoutInDisplayCutoutMode = mode
+        imeWindow.attributes = attributes
     }
 
     /**

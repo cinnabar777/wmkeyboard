@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -32,6 +33,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -115,6 +117,75 @@ private val TranslateEngine.icon: ImageVector
     }
 
 /**
+ * Which of the header's menus is open, shared by the panel's two halves: on a
+ * short landscape screen the language chips sit in the tool's header and the
+ * text in the body, and the ring's RESULTS region is the open menu's rows.
+ */
+@Stable
+private class TranslateMenus {
+    private var openMenu by mutableStateOf<TranslateMenu?>(null)
+
+    /** "All languages" opens the rest of one menu, once: the next menu starts short again. */
+    var showAll by mutableStateOf(false)
+
+    var open: TranslateMenu?
+        get() = openMenu
+        set(value) {
+            if (value != openMenu) showAll = false
+            openMenu = value
+        }
+}
+
+/**
+ * The Translate tool: [TranslatePanel] in its [FullBleedTool] chrome.
+ *
+ * Upright, the panel stacks its text, its language chips, the result and its
+ * actions. On a [shortLandscape] screen, where the panel over the keys is a
+ * strip a line or two tall, that stack showed the text box and nothing under
+ * it (issue #370), so the chips and actions move up into the header, which
+ * has the width for them, and the text and its translation sit side by side.
+ */
+@Composable
+internal fun TranslateTool(
+    state: KeyboardUiState,
+    callbacks: TranslateCallbacks,
+    onClose: () -> Unit,
+    /** Starts typing into the text box: the media-search key reroute. */
+    onQueryTap: () -> Unit,
+) {
+    val menus = remember { TranslateMenus() }
+    val sideBySide = shortLandscape()
+    FullBleedTool(
+        state,
+        title = if (sideBySide) "" else stringResource(R.string.ime_tool_translate),
+        onClose = onClose,
+        compact = state.mediaSearchActive,
+        // Translations run long, and the text being translated is a box of
+        // several lines in the panel itself rather than the header's one-line
+        // search bar: room for both over the keys.
+        compactHeight = TranslateCompactHeight,
+        headerActions = if (sideBySide) {
+            {
+                TranslateLanguageRow(state, callbacks, menus, Modifier.weight(1f))
+                TranslateActionRow(
+                    state,
+                    callbacks,
+                    Modifier.padding(start = 8.dp),
+                    actionModifier = Modifier.widthIn(min = TranslateHeaderActionMinWidth),
+                )
+            }
+        } else {
+            null
+        },
+    ) {
+        TranslatePanel(state, callbacks, onQueryTap, menus, sideBySide)
+    }
+}
+
+/** How narrow Replace and Insert may get when they share the header with the chips. */
+private val TranslateHeaderActionMinWidth = 96.dp
+
+/**
  * Translation window: the query types into the panel's own search bar
  * (media-search key rerouting — the focused field is never read) and the
  * result follows live. Insert types the translation at the cursor; Replace
@@ -126,30 +197,108 @@ private val TranslateEngine.icon: ImageVector
  * an on-device engine to choose. When that engine needs a model it does not
  * have, the result area becomes the offer to download it, and the action row
  * becomes the button.
+ *
+ * [sideBySide] leaves the chips and the actions to the tool's header and puts
+ * the text beside the result; see [TranslateTool].
  */
 @Composable
-internal fun TranslatePanel(
+private fun TranslatePanel(
     state: KeyboardUiState,
     callbacks: TranslateCallbacks,
-    /** Starts typing into the text box: the media-search key reroute. */
     onQueryTap: () -> Unit,
+    menus: TranslateMenus,
+    sideBySide: Boolean,
+) {
+    PanelFocusTarget(
+        panel = PanelMode.TRANSLATE,
+        region = FocusRegion.SEARCH,
+        count = 1,
+        columns = 1,
+        onActivate = { onQueryTap() },
+    )
+    val queryFocused = state.focusedIndex(FocusRegion.SEARCH) == 0
+    // The panel is its own translation window: the text types into the box
+    // at its top (field text is never read). The FullBleedTool wrapper
+    // collapses the panel while typing — the keys sit right below and the
+    // live result still fits above them.
+    if (sideBySide) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            TranslateQueryBox(
+                state = state,
+                focused = queryFocused,
+                onQueryTap = onQueryTap,
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight(),
+            )
+            TranslateResult(
+                state,
+                Modifier
+                    .weight(1f)
+                    .fillMaxHeight(),
+            )
+        }
+        return
+    }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 8.dp),
+    ) {
+        TranslateQueryBox(
+            state = state,
+            focused = queryFocused,
+            onQueryTap = onQueryTap,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        TranslateLanguageRow(state, callbacks, menus)
+        TranslateResult(
+            state,
+            Modifier
+                .weight(1f)
+                .fillMaxWidth(),
+        )
+        TranslateActionRow(
+            state,
+            callbacks,
+            Modifier
+                .fillMaxWidth()
+                .padding(bottom = 4.dp),
+            actionModifier = Modifier.weight(1f),
+        )
+    }
+}
+
+/** Whether the on-device engine is short of something, so the result area offers the download. */
+private fun TranslateUi.offersDownload(): Boolean = missingModels.isNotEmpty() || moduleMissing
+
+/**
+ * The language chips — from, swap, to, and the engine — with their menus, and
+ * the ring's CHIPS and RESULTS regions that walk them.
+ */
+@Composable
+private fun TranslateLanguageRow(
+    state: KeyboardUiState,
+    callbacks: TranslateCallbacks,
+    menus: TranslateMenus,
+    modifier: Modifier = Modifier,
 ) {
     val kb = LocalKbTheme.current
     val translate = state.translate
     val target = state.settings.translateTargetLang
     val engine = if (OnDeviceTranslator.AVAILABLE) state.settings.translate.engine else TranslateEngine.ONLINE
-    var menu by remember { mutableStateOf<TranslateMenu?>(null) }
-    // "All languages" opens the rest of one menu, once: the next menu starts
-    // short again, which is the point of the short list.
-    var showAll by remember(menu) { mutableStateOf(false) }
-    val offerDownload = translate.missingModels.isNotEmpty() || translate.moduleMissing
-
-    val rows = menu?.let { translateMenuRows(it, translate, target, engine, state.settings, showAll) }.orEmpty()
+    val menu = menus.open
+    val rows = menu?.let { translateMenuRows(it, translate, target, engine, state.settings, menus.showAll) }.orEmpty()
     val pick: (TranslateMenu, String) -> Unit = { which, key ->
         if (key == ALL_LANGUAGES_KEY) {
-            showAll = true
+            menus.showAll = true
         } else {
-            menu = null
+            menus.open = null
             when (which) {
                 TranslateMenu.SOURCE -> callbacks.onSource(key)
                 TranslateMenu.TARGET -> callbacks.onTarget(key)
@@ -161,7 +310,7 @@ internal fun TranslatePanel(
 
     // The ring's regions. CHIPS is the header, in reading order; RESULTS is
     // the open menu's rows (zero rows closed, so Tab skips it); ACTIONS is
-    // Replace/Insert, or the one download button while that is the offer.
+    // Replace/Insert (see [TranslateActionRow]).
     // Known v1 gap: Esc while a menu Popup is open closes the whole panel
     // (the open flag is composable-local, invisible to the service); Enter
     // on the CHIPS region reopens it cheaply.
@@ -173,19 +322,12 @@ internal fun TranslatePanel(
     }
     PanelFocusTarget(
         panel = PanelMode.TRANSLATE,
-        region = FocusRegion.SEARCH,
-        count = 1,
-        columns = 1,
-        onActivate = { onQueryTap() },
-    )
-    PanelFocusTarget(
-        panel = PanelMode.TRANSLATE,
         region = FocusRegion.CHIPS,
         count = headerChips.size,
         columns = headerChips.size,
         onActivate = { index ->
             val opens = headerChips.getOrNull(index)
-            if (opens != null) menu = opens else callbacks.onSwap()
+            if (opens != null) menus.open = opens else callbacks.onSwap()
         },
     )
     PanelFocusTarget(
@@ -194,11 +336,140 @@ internal fun TranslatePanel(
         count = rows.size,
         columns = 1,
         onActivate = { index ->
-            val open = menu
+            val open = menus.open
             val row = rows.getOrNull(index)
             if (open != null && row != null && !row.dimmed) pick(open, row.key)
         },
     )
+
+    val focusedChip = state.focusedIndex(FocusRegion.CHIPS)
+    val focusedRow = state.focusedIndex(FocusRegion.RESULTS)
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+        Box(modifier = Modifier.weight(1f, fill = false)) {
+            TranslateChip(
+                label = sourceLabel(translate),
+                strong = translate.sourceOverride.isNotBlank(),
+                focused = focusedChip == headerChips.indexOf(TranslateMenu.SOURCE),
+                description = stringResource(R.string.ime_translate_select_source_desc),
+            ) { menus.open = TranslateMenu.SOURCE }
+            if (menu == TranslateMenu.SOURCE) {
+                TranslateMenuPopup(rows, focusedRow, { pick(TranslateMenu.SOURCE, it) }) { menus.open = null }
+            }
+        }
+        val canSwap = translate.translated.isNotEmpty() &&
+            TranslateClient.pickerCode(translate.detectedSource)
+                ?.equals(target, ignoreCase = true) == false
+        Icon(
+            Icons.Outlined.SwapHoriz,
+            contentDescription = stringResource(R.string.ime_translate_swap_desc),
+            tint = if (canSwap) kb.toolbarIcon else kb.secondaryText.copy(alpha = 0.4f),
+            modifier = Modifier
+                .padding(horizontal = 2.dp)
+                .clip(kb.chipShape())
+                .focusRing(focusedChip == 1, kb.chipShape())
+                .clickable(enabled = canSwap) { callbacks.onSwap() }
+                .padding(4.dp)
+                .size(18.dp),
+        )
+        Box(modifier = Modifier.weight(1f, fill = false)) {
+            TranslateChip(
+                label = TranslateClient.languageName(target),
+                strong = true,
+                focused = focusedChip == headerChips.indexOf(TranslateMenu.TARGET),
+                description = stringResource(R.string.ime_translate_select_language_desc),
+            ) { menus.open = TranslateMenu.TARGET }
+            if (menu == TranslateMenu.TARGET) {
+                TranslateMenuPopup(rows, focusedRow, { pick(TranslateMenu.TARGET, it) }) { menus.open = null }
+            }
+        }
+        Spacer(Modifier.weight(1f))
+        // Says which service answered only when it is the one the user
+        // brought (#331): DeepL falls back to the usual service for a
+        // language it does not have, and that switch should not be silent.
+        if (translate.viaDeepL && translate.translated.isNotEmpty()) {
+            Text(
+                stringResource(R.string.ime_translate_deepl_label),
+                color = kb.secondaryText,
+                fontSize = 11.sp,
+                maxLines = 1,
+                modifier = Modifier.padding(end = 6.dp),
+            )
+        }
+        if (translate.translating) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .padding(end = 6.dp)
+                    .size(14.dp),
+                strokeWidth = 2.dp,
+                color = kb.accent,
+            )
+        }
+        if (OnDeviceTranslator.AVAILABLE) {
+            Box {
+                TranslateChip(
+                    label = stringResource(engine.labelRes),
+                    strong = false,
+                    focused = focusedChip == headerChips.indexOf(TranslateMenu.ENGINE),
+                    description = stringResource(R.string.ime_translate_select_engine_desc),
+                    // On Automatic the icon answers "which one was it this
+                    // time?", which is the only thing the mode leaves open.
+                    icon = when {
+                        engine != TranslateEngine.AUTO || translate.translated.isEmpty() -> engine.icon
+                        translate.onDevice -> TranslateEngine.ON_DEVICE.icon
+                        else -> TranslateEngine.ONLINE.icon
+                    },
+                ) { menus.open = TranslateMenu.ENGINE }
+                if (menu == TranslateMenu.ENGINE) {
+                    TranslateMenuPopup(rows, focusedRow, { pick(TranslateMenu.ENGINE, it) }) { menus.open = null }
+                }
+            }
+        }
+    }
+}
+
+/** The translation, the error in its place, or the offer of the models it needs. */
+@Composable
+private fun TranslateResult(state: KeyboardUiState, modifier: Modifier) {
+    val kb = LocalKbTheme.current
+    val translate = state.translate
+    if (translate.offersDownload()) {
+        TranslateDownloadOffer(translate = translate, modifier = modifier)
+        return
+    }
+    Text(
+        text = when {
+            translate.error != null -> translate.error
+            translate.translated.isNotEmpty() -> translate.translated
+            translate.translating -> stringResource(R.string.ime_translate_progress)
+            else -> stringResource(R.string.ime_translate_idle)
+        },
+        color = when {
+            translate.error != null -> kb.accent
+            translate.translated.isEmpty() -> kb.secondaryText
+            else -> kb.suggestionText
+        },
+        fontSize = if (state.mediaSearchActive) 14.sp else 16.sp,
+        modifier = modifier
+            .padding(vertical = 4.dp)
+            .verticalScroll(rememberScrollState()),
+    )
+}
+
+/**
+ * Replace and Insert, or the one download button while that is the offer,
+ * with the ring's ACTIONS region over them. [actionModifier] sizes each button:
+ * a share of the row under the result, a minimum width in the header.
+ */
+@Composable
+private fun TranslateActionRow(
+    state: KeyboardUiState,
+    callbacks: TranslateCallbacks,
+    modifier: Modifier,
+    actionModifier: Modifier,
+) {
+    val kb = LocalKbTheme.current
+    val translate = state.translate
+    val offerDownload = translate.offersDownload()
     PanelFocusTarget(
         panel = PanelMode.TRANSLATE,
         region = FocusRegion.ACTIONS,
@@ -213,177 +484,42 @@ internal fun TranslatePanel(
             }
         },
     )
-
-    val focusedChip = state.focusedIndex(FocusRegion.CHIPS)
-    val focusedRow = state.focusedIndex(FocusRegion.RESULTS)
-    // The panel is its own translation window: the text types into the box
-    // at its top (field text is never read). The FullBleedTool wrapper
-    // collapses the panel while typing — the keys sit right below and the
-    // live result still fits above them.
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 8.dp),
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        TranslateQueryBox(
-            state = state,
-            focused = state.focusedIndex(FocusRegion.SEARCH) == 0,
-            onQueryTap = onQueryTap,
-        )
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(modifier = Modifier.weight(1f, fill = false)) {
-                TranslateChip(
-                    label = sourceLabel(translate),
-                    strong = translate.sourceOverride.isNotBlank(),
-                    focused = focusedChip == headerChips.indexOf(TranslateMenu.SOURCE),
-                    description = stringResource(R.string.ime_translate_select_source_desc),
-                ) { menu = TranslateMenu.SOURCE }
-                if (menu == TranslateMenu.SOURCE) {
-                    TranslateMenuPopup(rows, focusedRow, { pick(TranslateMenu.SOURCE, it) }) { menu = null }
-                }
-            }
-            val canSwap = translate.translated.isNotEmpty() &&
-                TranslateClient.pickerCode(translate.detectedSource)
-                    ?.equals(target, ignoreCase = true) == false
-            Icon(
-                Icons.Outlined.SwapHoriz,
-                contentDescription = stringResource(R.string.ime_translate_swap_desc),
-                tint = if (canSwap) kb.toolbarIcon else kb.secondaryText.copy(alpha = 0.4f),
-                modifier = Modifier
-                    .padding(horizontal = 2.dp)
-                    .clip(kb.chipShape())
-                    .focusRing(focusedChip == 1, kb.chipShape())
-                    .clickable(enabled = canSwap) { callbacks.onSwap() }
-                    .padding(4.dp)
-                    .size(18.dp),
-            )
-            Box(modifier = Modifier.weight(1f, fill = false)) {
-                TranslateChip(
-                    label = TranslateClient.languageName(target),
-                    strong = true,
-                    focused = focusedChip == headerChips.indexOf(TranslateMenu.TARGET),
-                    description = stringResource(R.string.ime_translate_select_language_desc),
-                ) { menu = TranslateMenu.TARGET }
-                if (menu == TranslateMenu.TARGET) {
-                    TranslateMenuPopup(rows, focusedRow, { pick(TranslateMenu.TARGET, it) }) { menu = null }
-                }
-            }
-            Spacer(Modifier.weight(1f))
-            // Says which service answered only when it is the one the user
-            // brought (#331): DeepL falls back to the usual service for a
-            // language it does not have, and that switch should not be silent.
-            if (translate.viaDeepL && translate.translated.isNotEmpty()) {
-                Text(
-                    stringResource(R.string.ime_translate_deepl_label),
-                    color = kb.secondaryText,
-                    fontSize = 11.sp,
-                    maxLines = 1,
-                    modifier = Modifier.padding(end = 6.dp),
-                )
-            }
-            if (translate.translating) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .padding(end = 6.dp)
-                        .size(14.dp),
-                    strokeWidth = 2.dp,
-                    color = kb.accent,
-                )
-            }
-            if (OnDeviceTranslator.AVAILABLE) {
-                Box {
-                    TranslateChip(
-                        label = stringResource(engine.labelRes),
-                        strong = false,
-                        focused = focusedChip == headerChips.indexOf(TranslateMenu.ENGINE),
-                        description = stringResource(R.string.ime_translate_select_engine_desc),
-                        // On Automatic the icon answers "which one was it this
-                        // time?", which is the only thing the mode leaves open.
-                        icon = when {
-                            engine != TranslateEngine.AUTO || translate.translated.isEmpty() -> engine.icon
-                            translate.onDevice -> TranslateEngine.ON_DEVICE.icon
-                            else -> TranslateEngine.ONLINE.icon
-                        },
-                    ) { menu = TranslateMenu.ENGINE }
-                    if (menu == TranslateMenu.ENGINE) {
-                        TranslateMenuPopup(rows, focusedRow, { pick(TranslateMenu.ENGINE, it) }) { menu = null }
-                    }
-                }
-            }
-        }
+        val focusedAction = state.focusedIndex(FocusRegion.ACTIONS)
         if (offerDownload) {
-            TranslateDownloadOffer(
-                translate = translate,
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-            )
+            val downloading = translate.missingModels.any { translate.models[it] is OfflineModelState.Downloading }
+            // Play cancels a module by session and the panel holds none,
+            // so while the module is on its way the button only reports.
+            val moduleComing = translate.moduleMissing && translate.module is TranslateModuleState.Installing
+            TranslateAction(
+                label = stringResource(
+                    when {
+                        moduleComing -> R.string.ime_translate_module_installing_action
+                        downloading -> CommonR.string.common_cancel
+                        translate.meteredAsk -> R.string.ime_metered_allow_action
+                        else -> CommonR.string.common_download
+                    },
+                ),
+                icon = if (downloading || moduleComing) null else Icons.Outlined.Download,
+                enabled = !moduleComing,
+                modifier = actionModifier.focusRing(focusedAction == 0, kb.chipShape()),
+            ) { callbacks.onDownload() }
         } else {
-            Text(
-                text = when {
-                    translate.error != null -> translate.error
-                    translate.translated.isNotEmpty() -> translate.translated
-                    translate.translating -> stringResource(R.string.ime_translate_progress)
-                    else -> stringResource(R.string.ime_translate_idle)
-                },
-                color = when {
-                    translate.error != null -> kb.accent
-                    translate.translated.isEmpty() -> kb.secondaryText
-                    else -> kb.suggestionText
-                },
-                fontSize = if (state.mediaSearchActive) 14.sp else 16.sp,
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp)
-                    .verticalScroll(rememberScrollState()),
-            )
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 4.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            val focusedAction = state.focusedIndex(FocusRegion.ACTIONS)
-            if (offerDownload) {
-                val downloading = translate.missingModels.any { translate.models[it] is OfflineModelState.Downloading }
-                // Play cancels a module by session and the panel holds none,
-                // so while the module is on its way the button only reports.
-                val moduleComing = translate.moduleMissing && translate.module is TranslateModuleState.Installing
-                TranslateAction(
-                    label = stringResource(
-                        when {
-                            moduleComing -> R.string.ime_translate_module_installing_action
-                            downloading -> CommonR.string.common_cancel
-                            translate.meteredAsk -> R.string.ime_metered_allow_action
-                            else -> CommonR.string.common_download
-                        },
-                    ),
-                    icon = if (downloading || moduleComing) null else Icons.Outlined.Download,
-                    enabled = !moduleComing,
-                    modifier = Modifier
-                        .weight(1f)
-                        .focusRing(focusedAction == 0, kb.chipShape()),
-                ) { callbacks.onDownload() }
-            } else {
-                TranslateAction(
-                    label = stringResource(R.string.ime_translate_replace_action),
-                    icon = Icons.Outlined.SwapVert,
-                    enabled = translate.translated.isNotEmpty(),
-                    modifier = Modifier
-                        .weight(1f)
-                        .focusRing(focusedAction == 0, kb.chipShape()),
-                ) { callbacks.onReplace() }
-                TranslateAction(
-                    label = stringResource(R.string.ime_insert_action),
-                    icon = null,
-                    enabled = translate.translated.isNotEmpty(),
-                    modifier = Modifier
-                        .weight(1f)
-                        .focusRing(focusedAction == 1, kb.chipShape()),
-                ) { callbacks.onInsert() }
-            }
+            TranslateAction(
+                label = stringResource(R.string.ime_translate_replace_action),
+                icon = Icons.Outlined.SwapVert,
+                enabled = translate.translated.isNotEmpty(),
+                modifier = actionModifier.focusRing(focusedAction == 0, kb.chipShape()),
+            ) { callbacks.onReplace() }
+            TranslateAction(
+                label = stringResource(R.string.ime_insert_action),
+                icon = null,
+                enabled = translate.translated.isNotEmpty(),
+                modifier = actionModifier.focusRing(focusedAction == 1, kb.chipShape()),
+            ) { callbacks.onInsert() }
         }
     }
 }
@@ -395,13 +531,17 @@ internal fun TranslatePanel(
  * gives it the keys.
  */
 @Composable
-private fun TranslateQueryBox(state: KeyboardUiState, focused: Boolean, onQueryTap: () -> Unit) {
+private fun TranslateQueryBox(
+    state: KeyboardUiState,
+    focused: Boolean,
+    onQueryTap: () -> Unit,
+    modifier: Modifier,
+) {
     val kb = LocalKbTheme.current
     val shape = kb.cardShape()
     val hint = stringResource(R.string.ime_translate_hint)
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = modifier
             .padding(top = 2.dp, bottom = 6.dp)
             .clip(shape)
             .background(kb.chip)
