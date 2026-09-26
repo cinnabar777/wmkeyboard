@@ -315,7 +315,7 @@ class GlideBeam(private val tuning: Tuning = Tuning()) {
          * free pass over words they have not. Zero switches learned shapes
          * off.
          */
-        val learnedShapeGain: Double = 0.15,
+        val learnedShapeGain: Double = 0.35,
         /**
          * How much the whole stroke's *shape* counts, once its size and position
          * are taken out of it.
@@ -571,6 +571,33 @@ class GlideBeam(private val tuning: Tuning = Tuning()) {
             val rootBound = src.logWeight + ln1p(src.walker.maxSubtree(src.walker.root))
             if (rootBound < floor - EPS) continue
             floor = searchOne(src, keys, ws, k, results, floor, ahead, budget)
+        }
+
+        // Inject learned words whose saved shape matches the drawn stroke,
+        // provided their start and end keys match the gesture's start/end anchors.
+        if (shapes != null && tuning.learnedShapeGain > 0.0) {
+            normalise(ws.pathX, ws.pathY, ws.drawnShapeX, ws.drawnShapeY)
+            quantise(ws.drawnShapeX, ws.drawnShapeY, ws.drawnShape8)
+            val nearWords = shapes.wordsNear(ws.drawnShape8, radius = 0.20f, limit = limit)
+            val maxScore = results.values.maxOfOrNull { it.score } ?: 0.0
+            val injectedBaseScore = maxScore - 0.2
+            for (word in nearWords) {
+                if (results.containsKey(word) || word.length < MIN_WORD_LENGTH) continue
+                val firstCp = word.codePointAt(0)
+                val startK = keys.keyIndex(firstCp)
+                if (startK >= 0 && startK < keys.keyCount && !ws.startKey[startK]) continue
+
+                var lastCp = 0
+                var at = 0
+                while (at < word.length) {
+                    lastCp = word.codePointAt(at)
+                    at += Character.charCount(lastCp)
+                }
+                val endK = keys.keyIndex(lastCp)
+                if (endK >= 0 && endK < keys.keyCount && !ws.endKey[endK]) continue
+
+                results[word] = Candidate(word, injectedBaseScore, 0.0, FuzzyBeamSearch.Tier.DICTIONARY)
+            }
         }
 
         val ranked = results.values.sortedWith(

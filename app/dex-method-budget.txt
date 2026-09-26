@@ -46,4 +46,4 @@ com.wasimaster.wmkeyboard.ime.ui.KeyboardScreenKt.KeyboardScreen$lambda$139$1  4
 com.wasimaster.wmkeyboard.ime.KeyboardUiState.<init>  3200  4096  # generated: one register per field
 com.wasimaster.wmkeyboard.ime.KeyboardUiState.copy  900  3456  # generated: one register per field
 com.wasimaster.wmkeyboard.core.settings.KeyboardSettings.<init>  6100  4160  # generated: one register per field
-com.wasimaster.wmkeyboard.core.settings.KeyboardSettings.copy  1200  4224  # generated: one register per field
+com.wasimaster.wmkeyboard.core.settings.KeyboardSettings.copy  1300  4224  # generated: one register per field
