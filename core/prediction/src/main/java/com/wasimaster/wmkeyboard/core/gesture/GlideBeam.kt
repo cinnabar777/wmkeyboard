@@ -316,7 +316,7 @@ class GlideBeam(private val tuning: Tuning = Tuning()) {
          * off.
          */
         val learnedShapeGain: Double = 0.35,
-        val shapeSeeding: Boolean = false,
+        val shapeSeeding: Boolean = true,
         /**
          * How much the whole stroke's *shape* counts, once its size and position
          * are taken out of it.
@@ -577,13 +577,14 @@ class GlideBeam(private val tuning: Tuning = Tuning()) {
         // Inject learned words whose saved shape matches the drawn stroke,
         // even if trie pruning or anchor mismatch filtered them from results.
         if (shapes != null && tuning.shapeSeeding && tuning.learnedShapeGain > 0.0) {
-            normalise(ws.pathX, ws.pathY, ws.drawnShapeX, ws.drawnShapeY)
-            quantise(ws.drawnShapeX, ws.drawnShapeY, ws.drawnShape8)
-            val nearWords = shapes.wordsNear(ws.drawnShape8, radius = 0.35f, limit = limit)
+            quantise(ws.pathX, ws.pathY, ws.drawnShape8)
+            val nearWords = shapes.wordsNear(ws.drawnShape8, radius = 0.50f, limit = limit)
+            val minScore = results.values.minOfOrNull { it.score } ?: 0.0
             for (word in nearWords) {
                 if (results.containsKey(word)) continue
-                val baseScore = results.values.maxOfOrNull { it.score } ?: 0.0
-                results[word] = Candidate(word, baseScore, 0.0, FuzzyBeamSearch.Tier.DICTIONARY)
+                // Give seeded candidates a baseline score equal to minScore - 0.5 so they are evaluated
+                // and rescored via the shape channel rather than dominating beam search.
+                results[word] = Candidate(word, minScore - 0.5, 0.0, FuzzyBeamSearch.Tier.DICTIONARY)
             }
         }
 
@@ -624,9 +625,8 @@ class GlideBeam(private val tuning: Tuning = Tuning()) {
     fun sampleShape(path: List<GesturePoint>, keyWidth: Float, ws: GlideWorkspace): ByteArray? {
         if (path.size < MIN_SAMPLES || keyWidth <= 0f) return null
         if (!resample(path, keyWidth, ws)) return null
-        normalise(ws.pathX, ws.pathY, ws.drawnShapeX, ws.drawnShapeY)
         val out = ByteArray(2 * GlideWorkspace.SAMPLE_POINTS)
-        quantise(ws.drawnShapeX, ws.drawnShapeY, out)
+        quantise(ws.pathX, ws.pathY, out)
         return out
     }
 
@@ -1725,7 +1725,7 @@ class GlideBeam(private val tuning: Tuning = Tuning()) {
         if (weight <= 0.0 || ranked.isEmpty()) return ranked
         normalise(ws.pathX, ws.pathY, ws.drawnShapeX, ws.drawnShapeY)
         val learned = shapes?.takeIf { tuning.learnedShapeGain > 0.0 }
-        if (learned != null) quantise(ws.drawnShapeX, ws.drawnShapeY, ws.drawnShape8)
+        if (learned != null) quantise(ws.pathX, ws.pathY, ws.drawnShape8)
 
         val rescored = ArrayList<Candidate>(ranked.size)
         for (candidate in ranked) {

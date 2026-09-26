@@ -5933,7 +5933,7 @@ data class GestureSettings(
      * word next learns a new way. Range [GlideShapesPerWordRange].
      */
     val shapesPerWord: Int = GlideShapeStore.DEFAULT_SHAPES_PER_WORD,
-    val shapeSeeding: Boolean = false,
+    val shapeSeeding: Boolean = true,
     /**
      * Offer the full search as a chip on the suggestion strip whenever the
      * caret lands inside a word a swipe wrote and whose path is still kept
