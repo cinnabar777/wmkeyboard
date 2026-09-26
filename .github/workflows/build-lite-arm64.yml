@@ -36,23 +36,21 @@ jobs:
           build-scan-terms-of-use-url: "https://gradle.com/terms-of-service"
           build-scan-terms-of-use-agree: "yes"
 
-      - name: Generate debug signing key
+      - name: Generate debug keystore
         run: |
-          keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          keytool -genkey -v -keystore release.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
 
-      - name: Assemble lite release APK
-        run: |
-          ./gradlew :app:assembleLiteEnRelease --stacktrace
-
-      - name: Sign APK with debug key
-        run: |
-          for apk in app/build/outputs/apk/liteEn/release/*arm64*.apk; do
-            jarsigner -keystore debug.keystore -storepass android -keypass android "$apk" androiddebugkey
-          done
+      - name: Assemble signed lite release APK (~12MB)
+        env:
+          RELEASE_STORE_FILE: release.keystore
+          RELEASE_STORE_PASSWORD: android
+          RELEASE_KEY_ALIAS: androiddebugkey
+          RELEASE_KEY_PASSWORD: android
+        run: ./gradlew :app:assembleLiteEnRelease --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: wmkb-lite-arm64-v8-release-debugsigned
+          name: wmkb-lite-arm64-v8-release-signed
           path: app/build/outputs/apk/liteEn/release/*arm64*.apk
           retention-days: 7
