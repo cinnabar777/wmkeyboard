@@ -316,7 +316,6 @@ class GlideBeam(private val tuning: Tuning = Tuning()) {
          * off.
          */
         val learnedShapeGain: Double = 0.35,
-        val shapeSeeding: Boolean = false,
         /**
          * How much the whole stroke's *shape* counts, once its size and position
          * are taken out of it.
@@ -576,7 +575,7 @@ class GlideBeam(private val tuning: Tuning = Tuning()) {
 
         // Inject learned words whose saved shape matches the drawn stroke,
         // even if trie pruning or anchor mismatch filtered them from results.
-        if (shapes != null && tuning.shapeSeeding && tuning.learnedShapeGain > 0.0) {
+        if (shapes != null && tuning.learnedShapeGain > 0.0) {
             normalise(ws.pathX, ws.pathY, ws.drawnShapeX, ws.drawnShapeY)
             quantise(ws.drawnShapeX, ws.drawnShapeY, ws.drawnShape8)
             val nearWords = shapes.wordsNear(ws.drawnShape8, radius = 0.35f, limit = limit)
