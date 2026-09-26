@@ -5933,6 +5933,7 @@ data class GestureSettings(
      * word next learns a new way. Range [GlideShapesPerWordRange].
      */
     val shapesPerWord: Int = GlideShapeStore.DEFAULT_SHAPES_PER_WORD,
+    val shapeSeeding: Boolean = false,
     /**
      * Offer the full search as a chip on the suggestion strip whenever the
      * caret lands inside a word a swipe wrote and whose path is still kept
@@ -5977,6 +5978,7 @@ fun GestureSettings.glideTuning(): GlideBeam.Tuning = GlideBeam.Tuning.DEFAULT.c
     loopRadius = loopRadius,
     wiggleExtent = if (wiggleDouble) wiggleExtent else 0f,
     wiggleWeight = if (wiggleDouble) wiggleWeight else 0f,
+    shapeSeeding = shapeSeeding,
 )
 
 /**
@@ -7469,6 +7471,7 @@ class SettingsRepository(private val context: Context) {
             stringPreferencesKey("gesture_commit_color_scope")
         private val GESTURE_LEARN_SWIPE_STYLE = booleanPreferencesKey("gesture_learn_swipe_style")
         private val GESTURE_SHAPES_PER_WORD = intPreferencesKey("gesture_shapes_per_word")
+        private val GESTURE_SHAPE_SEEDING = booleanPreferencesKey("gesture_shape_seeding")
         private val GESTURE_SEARCH_ALL_CHIP = booleanPreferencesKey("gesture_search_all_chip")
         private val GESTURE_SWIPE_STYLE_VERSION = intPreferencesKey("gesture_swipe_style_version")
         // Legacy boolean, read only to migrate into SPACE_LONG_SWIPE.
@@ -8953,7 +8956,8 @@ class SettingsRepository(private val context: Context) {
             wiggleExtent = p[GESTURE_WIGGLE_EXTENT] ?: defaults.gesture.wiggleExtent,
             wiggleWeight = p[GESTURE_WIGGLE_WEIGHT] ?: defaults.gesture.wiggleWeight,
             learnSwipeStyle = p[GESTURE_LEARN_SWIPE_STYLE] ?: defaults.gesture.learnSwipeStyle,
-            shapesPerWord = (p[GESTURE_SHAPES_PER_WORD] ?: defaults.gesture.shapesPerWord)
+            shapesPerWord = (p[GESTURE_SHAPES_PER_WORD] ?: defaults.gesture.shapesPerWord),
+            shapeSeeding = (p[GESTURE_SHAPE_SEEDING] ?: defaults.gesture.shapeSeeding),
                 .coerceIn(GlideShapesPerWordRange),
             searchAllChip = p[GESTURE_SEARCH_ALL_CHIP] ?: defaults.gesture.searchAllChip,
             swipeStyleVersion = p[GESTURE_SWIPE_STYLE_VERSION] ?: defaults.gesture.swipeStyleVersion,
@@ -13825,6 +13829,9 @@ class SettingsRepository(private val context: Context) {
     /** @see GestureSettings.shapesPerWord */
     suspend fun setGestureShapesPerWord(value: Int) =
         editPrefs { it[GESTURE_SHAPES_PER_WORD] = value.coerceIn(GlideShapesPerWordRange) }
+
+    suspend fun setGestureShapeSeeding(value: Boolean) =
+        editPrefs { it[GESTURE_SHAPE_SEEDING] = value }
 
     suspend fun setGestureSearchAllChip(value: Boolean) =
         editPrefs { it[GESTURE_SEARCH_ALL_CHIP] = value }

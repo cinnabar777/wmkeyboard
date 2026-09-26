@@ -1904,6 +1904,14 @@ internal fun TypingGesturesSettings(
                     default = SettingsDefaults.gesture.shapesPerWord.toFloat(),
                 ) { scope.launch { repository.setGestureShapesPerWord(it.roundToInt()) } }
             }
+            item(visible = learnSwipeStyle) {
+                ToggleSetting(
+                    title = "Seed candidates from learned shapes",
+                    subtitle = "Allows imprecise or off-target gestures to suggest learned words",
+                    value = settings.watch { it.gesture.shapeSeeding },
+                    default = SettingsDefaults.gesture.shapeSeeding,
+                ) { scope.launch { repository.setGestureShapeSeeding(it) } }
+            }
         }
     }
     SettingsGroup(stringResource(R.string.typing_group_glide_trail_title)) {

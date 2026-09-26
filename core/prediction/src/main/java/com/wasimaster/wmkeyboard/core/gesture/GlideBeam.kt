@@ -316,6 +316,7 @@ class GlideBeam(private val tuning: Tuning = Tuning()) {
          * off.
          */
         val learnedShapeGain: Double = 0.35,
+        val shapeSeeding: Boolean = false,
         /**
          * How much the whole stroke's *shape* counts, once its size and position
          * are taken out of it.
@@ -577,7 +578,7 @@ class GlideBeam(private val tuning: Tuning = Tuning()) {
         // applying soft anchor key weighting so near-adjacent off-target gestures
         // (e.g. "can" starting near 'v') are injected with a light distance penalty
         // that learned outcome lifts can overcome, while distant key collisions are penalised.
-        if (shapes != null && tuning.learnedShapeGain > 0.0) {
+        if (shapes != null && tuning.shapeSeeding && tuning.learnedShapeGain > 0.0) {
             normalise(ws.pathX, ws.pathY, ws.drawnShapeX, ws.drawnShapeY)
             quantise(ws.drawnShapeX, ws.drawnShapeY, ws.drawnShape8)
             val nearWords = shapes.wordsNear(ws.drawnShape8, radius = 0.25f, limit = limit)
