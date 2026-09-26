@@ -35,12 +35,12 @@ jobs:
           build-scan-terms-of-use-url: "https://gradle.com/terms-of-service"
           build-scan-terms-of-use-agree: "yes"
 
-      - name: Assemble lite fast APK
-        run: ./gradlew :app:assembleLiteIntlFast --stacktrace
+      - name: Assemble lite fast APK (English ~12MB)
+        run: ./gradlew :app:assembleLiteEnFast --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: wmkb-lite-arm64-v8-fast
-          path: app/build/outputs/apk/liteIntl/fast/*.apk
+          path: app/build/outputs/apk/liteEn/fast/*.apk
           retention-days: 7
