@@ -315,7 +315,7 @@ class GlideBeam(private val tuning: Tuning = Tuning()) {
          * free pass over words they have not. Zero switches learned shapes
          * off.
          */
-        val learnedShapeGain: Double = 0.15,
+        val learnedShapeGain: Double = 0.35,
         /**
          * How much the whole stroke's *shape* counts, once its size and position
          * are taken out of it.
@@ -346,7 +346,7 @@ class GlideBeam(private val tuning: Tuning = Tuning()) {
          * is that a *tight* anchor costs accuracy: whatever an anchor is for, it
          * is not for being strict.
          */
-        val startRadius: Float = 1.6f,
+        val startRadius: Float = 1.8f,
         /** How far the stroke's *last* sample may sit from the word's last key,
          * in key widths. See [startRadius]. */
         val endRadius: Float = 1.6f,

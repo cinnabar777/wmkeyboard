@@ -339,7 +339,7 @@ class GlideOutcomes(private val storageFile: File?) {
         const val MAX_UNDONE = 128
 
         /** Nats per unit of strength on the word the user chose, when the word it beat is in the pool. */
-        const val CHOSEN_NATS = 0.15
+        const val CHOSEN_NATS = 0.35
 
         /** Nats per unit on the word the user passed over, when the word they took is in the pool. */
         const val REJECTED_NATS = 0.04
@@ -348,10 +348,9 @@ class GlideOutcomes(private val storageFile: File?) {
         const val UNDONE_NATS = 0.10
 
         /**
-         * The most a word is ever lifted: [SuggestionEngine.AMBIGUOUS_MARGIN],
-         * so a fully learned preference is worth exactly one close call.
+         * The most a word is ever lifted.
          */
-        const val MAX_LIFT_NATS = SuggestionEngine.AMBIGUOUS_MARGIN
+        const val MAX_LIFT_NATS = 1.2
 
         /** The most a word is ever sunk. */
         const val MAX_DROP_NATS = 0.4
