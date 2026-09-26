@@ -1908,7 +1908,7 @@ internal fun TypingGesturesSettings(
                 ToggleSetting(
                     title = "Seed candidates from learned shapes",
                     subtitle = "Allows imprecise or off-target gestures to suggest learned words",
-                    value = settings.watch { it.gesture.shapeSeeding },
+                    checked = settings.watch { it.gesture.shapeSeeding },
                     default = SettingsDefaults.gesture.shapeSeeding,
                 ) { scope.launch { repository.setGestureShapeSeeding(it) } }
             }
