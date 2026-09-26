@@ -17,7 +17,7 @@ env:
 
 jobs:
   build:
-    name: Build arm64 v8 lite fast APK
+    name: Build arm64 v8 lite release APK
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -36,12 +36,23 @@ jobs:
           build-scan-terms-of-use-url: "https://gradle.com/terms-of-service"
           build-scan-terms-of-use-agree: "yes"
 
-      - name: Assemble lite fast APK (arm64 split ~12MB)
-        run: ./gradlew :app:assembleLiteEnFast --stacktrace
+      - name: Generate debug signing key
+        run: |
+          keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+
+      - name: Assemble lite release APK
+        run: |
+          ./gradlew :app:assembleLiteEnRelease --stacktrace
+
+      - name: Sign APK with debug key
+        run: |
+          for apk in app/build/outputs/apk/liteEn/release/*arm64*.apk; do
+            jarsigner -keystore debug.keystore -storepass android -keypass android "$apk" androiddebugkey
+          done
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: wmkb-lite-arm64-v8-fast
-          path: app/build/outputs/apk/liteEn/fast/*arm64*.apk
+          name: wmkb-lite-arm64-v8-release-debugsigned
+          path: app/build/outputs/apk/liteEn/release/*arm64*.apk
           retention-days: 7
