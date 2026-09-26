@@ -352,7 +352,7 @@ class GlideBeam(private val tuning: Tuning = Tuning()) {
         val endRadius: Float = 1.6f,
         /** How close the stroke must pass to a key for that key's subtree to be
          * worth walking at all, in key widths. */
-        val nearRadius: Float = 2.0f,
+        val nearRadius: Float = 1.5f,
         /**
          * How many of a dictionary's commonest words a stroke may decode to,
          * or 0 for all of them.
