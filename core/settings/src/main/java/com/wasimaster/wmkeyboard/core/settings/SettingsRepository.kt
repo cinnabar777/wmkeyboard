@@ -8956,9 +8956,9 @@ class SettingsRepository(private val context: Context) {
             wiggleExtent = p[GESTURE_WIGGLE_EXTENT] ?: defaults.gesture.wiggleExtent,
             wiggleWeight = p[GESTURE_WIGGLE_WEIGHT] ?: defaults.gesture.wiggleWeight,
             learnSwipeStyle = p[GESTURE_LEARN_SWIPE_STYLE] ?: defaults.gesture.learnSwipeStyle,
-            shapesPerWord = (p[GESTURE_SHAPES_PER_WORD] ?: defaults.gesture.shapesPerWord),
-            shapeSeeding = (p[GESTURE_SHAPE_SEEDING] ?: defaults.gesture.shapeSeeding),
+            shapesPerWord = (p[GESTURE_SHAPES_PER_WORD] ?: defaults.gesture.shapesPerWord)
                 .coerceIn(GlideShapesPerWordRange),
+            shapeSeeding = p[GESTURE_SHAPE_SEEDING] ?: defaults.gesture.shapeSeeding,
             searchAllChip = p[GESTURE_SEARCH_ALL_CHIP] ?: defaults.gesture.searchAllChip,
             swipeStyleVersion = p[GESTURE_SWIPE_STYLE_VERSION] ?: defaults.gesture.swipeStyleVersion,
         )
