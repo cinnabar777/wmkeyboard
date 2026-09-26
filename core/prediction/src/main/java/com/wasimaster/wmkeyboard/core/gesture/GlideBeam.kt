@@ -346,13 +346,13 @@ class GlideBeam(private val tuning: Tuning = Tuning()) {
          * is that a *tight* anchor costs accuracy: whatever an anchor is for, it
          * is not for being strict.
          */
-        val startRadius: Float = 1.8f,
+        val startRadius: Float = 2.2f,
         /** How far the stroke's *last* sample may sit from the word's last key,
          * in key widths. See [startRadius]. */
         val endRadius: Float = 1.6f,
         /** How close the stroke must pass to a key for that key's subtree to be
          * worth walking at all, in key widths. */
-        val nearRadius: Float = 1.5f,
+        val nearRadius: Float = 2.0f,
         /**
          * How many of a dictionary's commonest words a stroke may decode to,
          * or 0 for all of them.
