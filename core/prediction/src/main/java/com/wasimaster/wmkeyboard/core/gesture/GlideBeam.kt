@@ -575,51 +575,15 @@ class GlideBeam(private val tuning: Tuning = Tuning()) {
         }
 
         // Inject learned words whose saved shape matches the drawn stroke,
-        // applying soft anchor key weighting so near-adjacent off-target gestures
-        // (e.g. "can" starting near 'v') are injected with a light distance penalty
-        // that learned outcome lifts can overcome, while distant key collisions are penalised.
+        // even if trie pruning or anchor mismatch filtered them from results.
         if (shapes != null && tuning.shapeSeeding && tuning.learnedShapeGain > 0.0) {
             normalise(ws.pathX, ws.pathY, ws.drawnShapeX, ws.drawnShapeY)
             quantise(ws.drawnShapeX, ws.drawnShapeY, ws.drawnShape8)
-            val nearWords = shapes.wordsNear(ws.drawnShape8, radius = 0.25f, limit = limit)
-            val maxScore = results.values.maxOfOrNull { it.score } ?: 0.0
-
-            val startPx = ws.pathX[0]
-            val startPy = ws.pathY[0]
-            val endPx = ws.pathX[GlideWorkspace.SAMPLE_POINTS - 1]
-            val endPy = ws.pathY[GlideWorkspace.SAMPLE_POINTS - 1]
-
+            val nearWords = shapes.wordsNear(ws.drawnShape8, radius = 0.35f, limit = limit)
             for (word in nearWords) {
-                if (word.length < MIN_WORD_LENGTH) continue
-
-                val firstCp = word.codePointAt(0)
-                val startK = keys.keyIndex(firstCp)
-                val startDistSq = if (startK in 0 until keys.keyCount) {
-                    val dx = startPx - keys.keyX[startK]
-                    val dy = startPy - keys.keyY[startK]
-                    dx * dx + dy * dy
-                } else 1.0f
-
-                var lastCp = 0
-                var at = 0
-                while (at < word.length) {
-                    lastCp = word.codePointAt(at)
-                    at += Character.charCount(lastCp)
-                }
-                val endK = keys.keyIndex(lastCp)
-                val endDistSq = if (endK in 0 until keys.keyCount) {
-                    val dx = endPx - keys.keyX[endK]
-                    val dy = endPy - keys.keyY[endK]
-                    dx * dx + dy * dy
-                } else 1.0f
-
-                val anchorPenalty = (startDistSq + endDistSq) * tuning.invTwoSigmaSq * tuning.shapeWeight
-                val score = maxScore - anchorPenalty
-
-                val existing = results[word]
-                if (existing == null || score > existing.score) {
-                    results[word] = Candidate(word, score, anchorPenalty, FuzzyBeamSearch.Tier.DICTIONARY)
-                }
+                if (results.containsKey(word)) continue
+                val baseScore = results.values.maxOfOrNull { it.score } ?: 0.0
+                results[word] = Candidate(word, baseScore, 0.0, FuzzyBeamSearch.Tier.DICTIONARY)
             }
         }
 
