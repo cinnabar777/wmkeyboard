@@ -12,6 +12,7 @@ concurrency:
 env:
   WMKB_ENABLE_PLAY_STORE: "false"
   WMKB_ENABLE_GMS: "false"
+  WMKB_SPLIT_APKS: "true"
   GRADLE_OPTS: -Dorg.gradle.jvmargs=-Xmx4g -Dorg.gradle.daemon=false
 
 jobs:
@@ -35,12 +36,12 @@ jobs:
           build-scan-terms-of-use-url: "https://gradle.com/terms-of-service"
           build-scan-terms-of-use-agree: "yes"
 
-      - name: Assemble lite fast APK
-        run: ./gradlew :app:assembleLiteIntlFast --stacktrace
+      - name: Assemble lite fast APK (arm64 split ~12MB)
+        run: ./gradlew :app:assembleLiteEnFast --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: wmkb-lite-arm64-v8-fast
-          path: app/build/outputs/apk/liteIntl/fast/*.apk
+          path: app/build/outputs/apk/liteEn/fast/*arm64*.apk
           retention-days: 7
