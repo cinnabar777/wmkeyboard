@@ -574,15 +574,29 @@ class GlideBeam(private val tuning: Tuning = Tuning()) {
         }
 
         // Inject learned words whose saved shape matches the drawn stroke,
-        // even if trie pruning or anchor mismatch filtered them from results.
+        // provided their start and end keys match the gesture's start/end anchors.
         if (shapes != null && tuning.learnedShapeGain > 0.0) {
             normalise(ws.pathX, ws.pathY, ws.drawnShapeX, ws.drawnShapeY)
             quantise(ws.drawnShapeX, ws.drawnShapeY, ws.drawnShape8)
-            val nearWords = shapes.wordsNear(ws.drawnShape8, radius = 0.35f, limit = limit)
+            val nearWords = shapes.wordsNear(ws.drawnShape8, radius = 0.20f, limit = limit)
+            val maxScore = results.values.maxOfOrNull { it.score } ?: 0.0
+            val injectedBaseScore = maxScore - 0.2
             for (word in nearWords) {
-                if (results.containsKey(word)) continue
-                val baseScore = results.values.maxOfOrNull { it.score } ?: 0.0
-                results[word] = Candidate(word, baseScore, 0.0, FuzzyBeamSearch.Tier.DICTIONARY)
+                if (results.containsKey(word) || word.length < MIN_WORD_LENGTH) continue
+                val firstCp = word.codePointAt(0)
+                val startK = keys.keyIndex(firstCp)
+                if (startK >= 0 && startK < keys.keyCount && !ws.startKey[startK]) continue
+
+                var lastCp = 0
+                var at = 0
+                while (at < word.length) {
+                    lastCp = word.codePointAt(at)
+                    at += Character.charCount(lastCp)
+                }
+                val endK = keys.keyIndex(lastCp)
+                if (endK >= 0 && endK < keys.keyCount && !ws.endKey[endK]) continue
+
+                results[word] = Candidate(word, injectedBaseScore, 0.0, FuzzyBeamSearch.Tier.DICTIONARY)
             }
         }
 
