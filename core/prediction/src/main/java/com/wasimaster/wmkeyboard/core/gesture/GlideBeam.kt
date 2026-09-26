@@ -346,7 +346,7 @@ class GlideBeam(private val tuning: Tuning = Tuning()) {
          * is that a *tight* anchor costs accuracy: whatever an anchor is for, it
          * is not for being strict.
          */
-        val startRadius: Float = 2.2f,
+        val startRadius: Float = 1.6f,
         /** How far the stroke's *last* sample may sit from the word's last key,
          * in key widths. See [startRadius]. */
         val endRadius: Float = 1.6f,
@@ -571,6 +571,19 @@ class GlideBeam(private val tuning: Tuning = Tuning()) {
             val rootBound = src.logWeight + ln1p(src.walker.maxSubtree(src.walker.root))
             if (rootBound < floor - EPS) continue
             floor = searchOne(src, keys, ws, k, results, floor, ahead, budget)
+        }
+
+        // Inject learned words whose saved shape matches the drawn stroke,
+        // even if trie pruning or anchor mismatch filtered them from results.
+        if (shapes != null && tuning.learnedShapeGain > 0.0) {
+            normalise(ws.pathX, ws.pathY, ws.drawnShapeX, ws.drawnShapeY)
+            quantise(ws.drawnShapeX, ws.drawnShapeY, ws.drawnShape8)
+            val nearWords = shapes.wordsNear(ws.drawnShape8, radius = 0.35f, limit = limit)
+            for (word in nearWords) {
+                if (results.containsKey(word)) continue
+                val baseScore = results.values.maxOfOrNull { it.score } ?: 0.0
+                results[word] = Candidate(word, baseScore, 0.0, FuzzyBeamSearch.Tier.DICTIONARY)
+            }
         }
 
         val ranked = results.values.sortedWith(
