@@ -684,7 +684,31 @@ open class WMKeyboardService : InputMethodService() {
         serviceScope.launch(persistDispatcher) { clipboardStore.save() }
     }
 
+    private fun learningBufferFile(pkg: String?): File? {
+        val safePkg = pkg?.replace(Regex("[^a-zA-Z0-9._-]"), "_") ?: "default"
+        return File(filesDir, "learning_buffer_$safePkg.json")
+    }
+
+    private fun saveLearningBufferSnapshot(pkg: String? = currentPackage) {
+        val file = learningBufferFile(pkg) ?: return
+        if (learningBuffer.isEmpty()) {
+            file.delete()
+        } else {
+            learningBuffer.saveSnapshot(file, pkg)
+        }
+    }
+
+    private fun loadLearningBufferSnapshot(pkg: String?) {
+        val file = learningBufferFile(pkg) ?: return
+        if (file.exists()) {
+            learningBuffer.loadSnapshot(file)
+        } else {
+            learningBuffer.clear()
+        }
+    }
+
     private fun saveLearningStores() {
+        saveLearningBufferSnapshot(currentPackage)
         userLexicon.save()
         pendingLearn.save()
         wordRanks.save()
@@ -5084,7 +5108,13 @@ open class WMKeyboardService : InputMethodService() {
         // per-app memory reads a different id in the next app, which the pending
         // one would otherwise outrank for as long as the write took to land.
         if (pkg != null && pkg != currentPackage) pendingLayoutId = null
-        if (pkg != null) currentPackage = pkg
+        if (pkg != null && pkg != currentPackage) {
+            saveLearningBufferSnapshot(currentPackage)
+            currentPackage = pkg
+            loadLearningBufferSnapshot(pkg)
+        } else if (pkg != null) {
+            currentPackage = pkg
+        }
         refreshPerAppContext()
         currentFieldHint = info?.hintText?.toString()?.takeIf { it.isNotBlank() }
         // Whether a code chip may show here, when the user has asked for code
@@ -13185,6 +13215,20 @@ open class WMKeyboardService : InputMethodService() {
                         keys = keys,
                     )
                 }
+                if (previousKnown) {
+                    previous?.let { prev ->
+                        userLexicon.learnBigram(prev, cleaned)
+                        if (beforePreviousKnown) {
+                            beforePrevious?.let { userLexicon.learnTrigram(it, prev, cleaned) }
+                        }
+                    }
+                }
+                if (beforePreviousKnown) {
+                    beforePrevious?.let { userLexicon.learnSkip1gram(it, cleaned) }
+                }
+                if (threeBackKnown) {
+                    threeBack?.let { userLexicon.learnSkip2gram(it, cleaned) }
+                }
             } else if (!byHand && !blacklisted && state.composer.isPlausibleWord(cleaned)) {
                 // Nothing recognises this word. It goes into the waiting room
                 // instead of the dictionary, and only earns its way in once
@@ -13339,59 +13383,33 @@ open class WMKeyboardService : InputMethodService() {
             }
             return window
         }
-        var prevWord: String? = null
-        var prevWord2: String? = null
-        var prevWord3: String? = null
-
         for (entry in entries) {
             // Blacklisted since the commit: the user has just taken this word
             // out of their dictionary, and the queue must not put it back (#48).
             if (settings.suggestionSources.blacklisted(entry.word, languageId)) continue
-            val word = entry.word
-            val known = isKnownWord(word)
-
             if (entry.known) {
                 // Recognised when it was typed, and it has to still be
                 // recognised now: a language switched off while the word sat
                 // here would otherwise walk an unknown word into the lexicon
                 // past the sighting gate that exists to stop exactly that.
-                if (known) {
+                if (isKnownWord(entry.word)) {
                     learnSettledWord(entry, settings)
                     teachRevision(entry, ::window)
                     observeTaps(entry.typed, entry.word, entry.taps, entry.keys, entry.origin)
                     learnGlideShape(entry)
                 }
-            } else if (known) {
-                // Was unknown at commit time but learned in the meantime.
-            } else {
-                // Graded by how deliberate the commit was, the same way
-                // [UserLexicon.learnWord] grades its own counts.
-                val seen = pendingLearn.sight(entry.word, entry.langId, weight = entry.weight)
-                if (seen >= threshold) {
-                    promoteLearned(entry.word, entry.langId, seen, entry.caseTrusted)
-                    learnGlideShape(entry)
-                }
+                continue
             }
-
-            // Learn N-grams for settled words across the final corrected sequence
-            if (known || isKnownWord(word)) {
-                prevWord?.let { p ->
-                    userLexicon.learnBigram(p, word)
-                    prevWord2?.let { p2 ->
-                        userLexicon.learnTrigram(p2, p, word)
-                        userLexicon.learnSkip1gram(p2, word)
-                    }
-                    prevWord3?.let { p3 ->
-                        userLexicon.learnSkip2gram(p3, word)
-                    }
-                }
-                prevWord3 = prevWord2
-                prevWord2 = prevWord
-                prevWord = word
-            } else {
-                prevWord3 = null
-                prevWord2 = null
-                prevWord = null
+            // The word may have been learned, imported or added by hand while
+            // it sat in the buffer; there is nothing left to count.
+            if (isKnownWord(entry.word)) continue
+            // Graded by how deliberate the commit was, the same way
+            // [UserLexicon.learnWord] grades its own counts: a candidate the
+            // user reached up and tapped says more than one that went past.
+            val seen = pendingLearn.sight(entry.word, entry.langId, weight = entry.weight)
+            if (seen >= threshold) {
+                promoteLearned(entry.word, entry.langId, seen, entry.caseTrusted)
+                learnGlideShape(entry)
             }
         }
     }
@@ -13510,6 +13528,9 @@ open class WMKeyboardService : InputMethodService() {
         // So is any stroke still waiting to be told what it meant: the answer
         // would have to have been in this text (issue #213).
         undoneGlide = null
+
+        // Update the active package's LearningBuffer snapshot file
+        saveLearningBufferSnapshot(currentPackage)
 
         // Persist learning stores to disk when new items have been settled.
         if (drainedLearning.isNotEmpty() || drainedCorrections.isNotEmpty()) {
@@ -16479,9 +16500,6 @@ open class WMKeyboardService : InputMethodService() {
     /** The user took [chosen] in place of [rejected], the word a stroke was read as (issue #52). */
     private fun noteGlidePreference(rejected: String, chosen: String) {
         if (swipeStyleLearning) glideOutcomes.observeAlternative(rejected, chosen)
-        learningBuffer.drop(rejected)
-        pushRecentWord(chosen)
-        previousWord = chosen
     }
 
     /** The user backspaced [word] the moment a glide committed it. */
@@ -17796,10 +17814,7 @@ open class WMKeyboardService : InputMethodService() {
             val (hand, shape) = withContext(Dispatchers.Default) {
                 learnGlideStroke(points, keys, keyWidthPx, word, drawn)
             }
-            if (shape != null) {
-                val targetWord = chosen ?: word
-                learningBuffer.attachGlide(targetWord, shape)
-            }
+            if (shape != null) learningBuffer.attachGlide(word, shape)
             val stroke = GlideStroke(points, keys, keyWidthPx, shape)
             lastGestureStroke = stroke
             // The path itself rides the same entry the readings went into, so
@@ -18276,10 +18291,7 @@ open class WMKeyboardService : InputMethodService() {
                 val (hand, shape) = withContext(Dispatchers.Default) {
                     learnGlideStroke(segment, keys, keyWidthPx, word, reading.guesses[leader])
                 }
-                if (shape != null) {
-                    val targetWord = picked ?: word
-                    learningBuffer.attachGlide(targetWord, shape)
-                }
+                if (shape != null) learningBuffer.attachGlide(word, shape)
                 val stroke = GlideStroke(segment, keys, keyWidthPx, shape)
                 lastGestureStroke = stroke
                 // Each word teaches; only the last is on the undo's reach.
@@ -27693,13 +27705,8 @@ open class WMKeyboardService : InputMethodService() {
                 sendEditorKey(KeyEvent.KEYCODE_MOVE_END, selecting, ctrl = true)
             // Like copy, it ends the panel's select mode: the selection is gone.
             TextEditAction.CUT -> {
-                flushLearningBuffer(verifyCorrections = false)
                 ic.performContextMenuAction(android.R.id.cut)
                 _uiState.update { it.copy(textEditSelecting = false) }
-            }
-            TextEditAction.COPY -> {
-                flushLearningBuffer(verifyCorrections = false)
-                ic.performContextMenuAction(android.R.id.copy)
             }
         }
     }
