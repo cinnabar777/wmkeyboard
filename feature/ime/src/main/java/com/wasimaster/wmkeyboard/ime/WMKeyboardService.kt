@@ -4933,8 +4933,24 @@ open class WMKeyboardService : InputMethodService() {
         reshowPinned()
     }
 
+    private var deferredFlushJob: Job? = null
+
+    private fun scheduleDeferredFlush() {
+        deferredFlushJob?.cancel()
+        deferredFlushJob = serviceScope.launch {
+            delay(120_000L) // 2-minute proofreading window
+            flushLearningBuffer()
+        }
+    }
+
+    private fun cancelDeferredFlush() {
+        deferredFlushJob?.cancel()
+        deferredFlushJob = null
+    }
+
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
         super.onStartInputView(info, restarting)
+        cancelDeferredFlush()
         // The keyboard is up, by the system's hand or ours; a hide that
         // suspended pinning has run its course.
         pinSuspended = false
@@ -5946,7 +5962,7 @@ open class WMKeyboardService : InputMethodService() {
         clearLearnOffer()
         clearCorrectionOffer()
         finishRevisionOnLeave()
-        flushLearningBuffer()
+        scheduleDeferredFlush()
         // Where the user was, for the keyboard that comes back — which is
         // usually a new process, this one having been stopped in the meantime
         // (issue #227). Read after the closes above, so nothing that did not
@@ -13185,20 +13201,6 @@ open class WMKeyboardService : InputMethodService() {
                         keys = keys,
                     )
                 }
-                if (previousKnown) {
-                    previous?.let { prev ->
-                        userLexicon.learnBigram(prev, cleaned)
-                        if (beforePreviousKnown) {
-                            beforePrevious?.let { userLexicon.learnTrigram(it, prev, cleaned) }
-                        }
-                    }
-                }
-                if (beforePreviousKnown) {
-                    beforePrevious?.let { userLexicon.learnSkip1gram(it, cleaned) }
-                }
-                if (threeBackKnown) {
-                    threeBack?.let { userLexicon.learnSkip2gram(it, cleaned) }
-                }
             } else if (!byHand && !blacklisted && state.composer.isPlausibleWord(cleaned)) {
                 // Nothing recognises this word. It goes into the waiting room
                 // instead of the dictionary, and only earns its way in once
@@ -13353,33 +13355,59 @@ open class WMKeyboardService : InputMethodService() {
             }
             return window
         }
+        var prevWord: String? = null
+        var prevWord2: String? = null
+        var prevWord3: String? = null
+
         for (entry in entries) {
             // Blacklisted since the commit: the user has just taken this word
             // out of their dictionary, and the queue must not put it back (#48).
             if (settings.suggestionSources.blacklisted(entry.word, languageId)) continue
+            val word = entry.word
+            val known = isKnownWord(word)
+
             if (entry.known) {
                 // Recognised when it was typed, and it has to still be
                 // recognised now: a language switched off while the word sat
                 // here would otherwise walk an unknown word into the lexicon
                 // past the sighting gate that exists to stop exactly that.
-                if (isKnownWord(entry.word)) {
+                if (known) {
                     learnSettledWord(entry, settings)
                     teachRevision(entry, ::window)
                     observeTaps(entry.typed, entry.word, entry.taps, entry.keys, entry.origin)
                     learnGlideShape(entry)
                 }
-                continue
+            } else if (known) {
+                // Was unknown at commit time but learned in the meantime.
+            } else {
+                // Graded by how deliberate the commit was, the same way
+                // [UserLexicon.learnWord] grades its own counts.
+                val seen = pendingLearn.sight(entry.word, entry.langId, weight = entry.weight)
+                if (seen >= threshold) {
+                    promoteLearned(entry.word, entry.langId, seen, entry.caseTrusted)
+                    learnGlideShape(entry)
+                }
             }
-            // The word may have been learned, imported or added by hand while
-            // it sat in the buffer; there is nothing left to count.
-            if (isKnownWord(entry.word)) continue
-            // Graded by how deliberate the commit was, the same way
-            // [UserLexicon.learnWord] grades its own counts: a candidate the
-            // user reached up and tapped says more than one that went past.
-            val seen = pendingLearn.sight(entry.word, entry.langId, weight = entry.weight)
-            if (seen >= threshold) {
-                promoteLearned(entry.word, entry.langId, seen, entry.caseTrusted)
-                learnGlideShape(entry)
+
+            // Learn N-grams for settled words across the final corrected sequence
+            if (known || isKnownWord(word)) {
+                prevWord?.let { p ->
+                    userLexicon.learnBigram(p, word)
+                    prevWord2?.let { p2 ->
+                        userLexicon.learnTrigram(p2, p, word)
+                        userLexicon.learnSkip1gram(p2, word)
+                    }
+                    prevWord3?.let { p3 ->
+                        userLexicon.learnSkip2gram(p3, word)
+                    }
+                }
+                prevWord3 = prevWord2
+                prevWord2 = prevWord
+                prevWord = word
+            } else {
+                prevWord3 = null
+                prevWord2 = null
+                prevWord = null
             }
         }
     }
@@ -27674,8 +27702,13 @@ open class WMKeyboardService : InputMethodService() {
                 sendEditorKey(KeyEvent.KEYCODE_MOVE_END, selecting, ctrl = true)
             // Like copy, it ends the panel's select mode: the selection is gone.
             TextEditAction.CUT -> {
+                flushLearningBuffer(verifyCorrections = false)
                 ic.performContextMenuAction(android.R.id.cut)
                 _uiState.update { it.copy(textEditSelecting = false) }
+            }
+            TextEditAction.COPY -> {
+                flushLearningBuffer(verifyCorrections = false)
+                ic.performContextMenuAction(android.R.id.copy)
             }
         }
     }
