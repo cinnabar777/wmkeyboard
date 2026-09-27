@@ -13513,14 +13513,21 @@ open class WMKeyboardService : InputMethodService() {
      * needed a read simply go unjudged.
      */
     private fun flushLearningBuffer(verifyCorrections: Boolean = true) {
-        settleLearned(learningBuffer.drain(), verify = verifyCorrections)
-        judgeCorrections(correctionWatch.drain(), verify = verifyCorrections)
+        val drainedLearning = learningBuffer.drain()
+        val drainedCorrections = correctionWatch.drain()
+        settleLearned(drainedLearning, verify = verifyCorrections)
+        judgeCorrections(drainedCorrections, verify = verifyCorrections)
         // The readings are about words in this text, and this text is finished.
         glideReadings.clear()
         resumedWord = null
         // So is any stroke still waiting to be told what it meant: the answer
         // would have to have been in this text (issue #213).
         undoneGlide = null
+
+        // Persist learning stores to disk when new items have been settled.
+        if (drainedLearning.isNotEmpty() || drainedCorrections.isNotEmpty()) {
+            serviceScope.launch(persistDispatcher) { saveLearningStores() }
+        }
     }
 
     /**
