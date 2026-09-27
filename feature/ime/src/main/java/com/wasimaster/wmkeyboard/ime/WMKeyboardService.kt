@@ -4908,10 +4908,13 @@ open class WMKeyboardService : InputMethodService() {
             pendingAutoSpace = false
             pendingPunctuationSpace = false
             pendingWordSpace = false
-            // Schedule a deferred flush (2-minute proofreading window) rather than an
-            // immediate flush when switching fields/apps, allowing the user to return
-            // to edit or proofread recent text without losing buffered learning items.
-            scheduleDeferredFlush()
+            // The last field's text is behind us and nobody is going back to
+            // edit it, so the unknown words still waiting in it have settled.
+            // This is also how a message field that was *sent* gets counted
+            // when the app restarts input instead of clearing the text. No
+            // correction verification: the editor answering reads is this new
+            // field, and its text says nothing about the old one's.
+            flushLearningBuffer(verifyCorrections = false)
             // A different field is a different run of typing, and the blocks an
             // undo puts on a correction are scoped to the run that earned them.
             // What should outlive it is in the persisted pair counts by now.
@@ -4930,24 +4933,8 @@ open class WMKeyboardService : InputMethodService() {
         reshowPinned()
     }
 
-    private var deferredFlushJob: Job? = null
-
-    private fun scheduleDeferredFlush() {
-        deferredFlushJob?.cancel()
-        deferredFlushJob = serviceScope.launch {
-            delay(120_000L) // 2-minute proofreading window
-            flushLearningBuffer()
-        }
-    }
-
-    private fun cancelDeferredFlush() {
-        deferredFlushJob?.cancel()
-        deferredFlushJob = null
-    }
-
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
         super.onStartInputView(info, restarting)
-        cancelDeferredFlush()
         // The keyboard is up, by the system's hand or ours; a hide that
         // suspended pinning has run its course.
         pinSuspended = false
@@ -5959,7 +5946,7 @@ open class WMKeyboardService : InputMethodService() {
         clearLearnOffer()
         clearCorrectionOffer()
         finishRevisionOnLeave()
-        scheduleDeferredFlush()
+        flushLearningBuffer()
         // Where the user was, for the keyboard that comes back — which is
         // usually a new process, this one having been stopped in the meantime
         // (issue #227). Read after the closes above, so nothing that did not
