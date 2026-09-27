@@ -16460,6 +16460,9 @@ open class WMKeyboardService : InputMethodService() {
     /** The user took [chosen] in place of [rejected], the word a stroke was read as (issue #52). */
     private fun noteGlidePreference(rejected: String, chosen: String) {
         if (swipeStyleLearning) glideOutcomes.observeAlternative(rejected, chosen)
+        learningBuffer.drop(rejected)
+        pushRecentWord(chosen)
+        previousWord = chosen
     }
 
     /** The user backspaced [word] the moment a glide committed it. */
