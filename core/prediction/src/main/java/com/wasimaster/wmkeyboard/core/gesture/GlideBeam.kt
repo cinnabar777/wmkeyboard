@@ -579,12 +579,12 @@ class GlideBeam(private val tuning: Tuning = Tuning()) {
         if (shapes != null && tuning.shapeSeeding && tuning.learnedShapeGain > 0.0) {
             quantise(ws.pathX, ws.pathY, ws.drawnShape8)
             val nearWords = shapes.wordsNear(ws.drawnShape8, radius = 0.50f, limit = limit)
-            val minScore = results.values.minOfOrNull { it.score } ?: 0.0
+            val maxScore = results.values.maxOfOrNull { it.score } ?: 0.0
             for (word in nearWords) {
                 if (results.containsKey(word)) continue
-                // Give seeded candidates a baseline score equal to minScore - 0.5 so they are evaluated
-                // and rescored via the shape channel rather than dominating beam search.
-                results[word] = Candidate(word, minScore - 0.5, 0.0, FuzzyBeamSearch.Tier.DICTIONARY)
+                // Give seeded candidates a baseline score equal to maxScore so learned spatial paths
+                // can compete directly for the primary output position.
+                results[word] = Candidate(word, maxScore, 0.0, FuzzyBeamSearch.Tier.DICTIONARY)
             }
         }
 
