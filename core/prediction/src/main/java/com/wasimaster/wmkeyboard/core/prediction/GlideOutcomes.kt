@@ -305,7 +305,7 @@ class GlideOutcomes(private val storageFile: File?) {
     }
 
     companion object {
-        private const val VERSION = 1
+        private const val VERSION = 2
 
         /** Strength a strip pick adds to `(rejected, chosen)`. */
         const val ALTERNATIVE_STEP = 2
