@@ -578,13 +578,15 @@ class GlideBeam(private val tuning: Tuning = Tuning()) {
         // even if trie pruning or anchor mismatch filtered them from results.
         if (shapes != null && tuning.shapeSeeding && tuning.learnedShapeGain > 0.0) {
             quantise(ws.pathX, ws.pathY, ws.drawnShape8)
-            val nearWords = shapes.wordsNear(ws.drawnShape8, radius = 0.50f, limit = limit)
+            // Use 1.2f search radius to allow adjacent starting key variations (e.g. b->a->n for v->a->n) to seed learned words
+            val nearWords = shapes.wordsNear(ws.drawnShape8, radius = 1.20f, limit = limit)
             val maxScore = results.values.maxOfOrNull { it.score } ?: 0.0
             for (word in nearWords) {
-                if (results.containsKey(word)) continue
-                // Give seeded candidates a baseline score equal to maxScore so learned spatial paths
-                // can compete directly for the primary output position.
-                results[word] = Candidate(word, maxScore, 0.0, FuzzyBeamSearch.Tier.DICTIONARY)
+                val existing = results[word]
+                // Promote seeded candidate score even if beam search already included it with a low score
+                if (existing == null || existing.score < maxScore) {
+                    results[word] = Candidate(word, maxScore, 0.0, FuzzyBeamSearch.Tier.DICTIONARY)
+                }
             }
         }
 
@@ -1808,8 +1810,7 @@ class GlideBeam(private val tuning: Tuning = Tuning()) {
 
     /**
      * [ideal] shortened by how this user draws [word], when [shapes] know: the
-     * nearer of the ideal path and the word's learned shapes, but never more
-     * than [Tuning.learnedShapeGain] nearer than the ideal.
+     * nearer of the ideal path and the word's learned spatial shapes.
      */
     private fun learnedDistance(
         word: String,
@@ -1820,7 +1821,8 @@ class GlideBeam(private val tuning: Tuning = Tuning()) {
         shapes ?: return ideal
         val own = shapes.minDistance(word, ws.drawnShape8)
         if (own < 0f) return ideal
-        return maxOf(minOf(ideal, own.toDouble()), ideal - tuning.learnedShapeGain)
+        // Allow learned spatial shape distance to replace ideal shape distance directly when better
+        return minOf(ideal, own.toDouble())
     }
 
     /** A normalised path as the shape store keeps one: [GlideShapeStore.QUANT] to the unit, clamped to a byte. */
