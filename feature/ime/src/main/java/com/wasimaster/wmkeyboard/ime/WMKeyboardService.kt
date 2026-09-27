@@ -4908,13 +4908,10 @@ open class WMKeyboardService : InputMethodService() {
             pendingAutoSpace = false
             pendingPunctuationSpace = false
             pendingWordSpace = false
-            // The last field's text is behind us and nobody is going back to
-            // edit it, so the unknown words still waiting in it have settled.
-            // This is also how a message field that was *sent* gets counted
-            // when the app restarts input instead of clearing the text. No
-            // correction verification: the editor answering reads is this new
-            // field, and its text says nothing about the old one's.
-            flushLearningBuffer(verifyCorrections = false)
+            // Schedule a deferred flush (2-minute proofreading window) rather than an
+            // immediate flush when switching fields/apps, allowing the user to return
+            // to edit or proofread recent text without losing buffered learning items.
+            scheduleDeferredFlush()
             // A different field is a different run of typing, and the blocks an
             // undo puts on a correction are scoped to the run that earned them.
             // What should outlive it is in the persisted pair counts by now.
