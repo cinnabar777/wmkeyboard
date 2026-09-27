@@ -3,6 +3,9 @@
 
     <!-- Text scanner (OCR) panel: camera viewfinder, capture, recognized words. -->
     <string name="ime_scanner_ocr_hint">Put the text in the frame, then press the shutter</string>
+    <!-- Over a copied picture that the OCR panel reads in place of the camera. -->
+    <string name="ime_scanner_ocr_image_hint">Press the button to read this picture</string>
+    <string name="ime_scanner_ocr_image_error">The keyboard cannot open this picture.</string>
     <string name="ime_scanner_ocr_permission_body">The text scanner needs the camera to read printed text. Your device does all of the recognition.</string>
     <!-- Content description of the frozen photo while the text is recognized. -->
     <string name="ime_scanner_ocr_capture_desc">The photo of the captured text</string>

@@ -70,6 +70,9 @@ internal class XmlSearchStrings(
 
     override fun resourceName(id: Int): String = names[id] ?: error("no R field has id $id")
 
+    /** Looks up a string by its XML name, or null when undefined. */
+    fun getByName(name: String): String? = strings[name]
+
     private fun unescape(raw: String): String {
         var text = raw.trim()
         if (text.length >= 2 && text.startsWith('"') && text.endsWith('"')) text = text.substring(1, text.length - 1)

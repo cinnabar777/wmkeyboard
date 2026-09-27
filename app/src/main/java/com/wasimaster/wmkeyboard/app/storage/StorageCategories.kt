@@ -3,10 +3,12 @@ package com.wasimaster.wmkeyboard.app.storage
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.GifBox
 import androidx.compose.material.icons.outlined.NetworkCheck
 import androidx.compose.material.icons.outlined.SystemUpdate
 import androidx.compose.material.icons.outlined.AutoStories
 import com.wasimaster.wmkeyboard.core.netlog.NetLog
+import com.wasimaster.wmkeyboard.core.tools.offlinegif.OfflineGifPacks
 import com.wasimaster.wmkeyboard.core.vocab.VocabDownloadManager
 import com.wasimaster.wmkeyboard.core.vocab.VocabPacks
 import androidx.compose.material.icons.automirrored.outlined.Article
@@ -455,6 +457,40 @@ internal object StorageCategories {
             deleteOne = { env, item -> OcrPacks.delete(env.roots.files, item.id) },
             clearOf = { env ->
                 OcrPacks.downloaded(env.roots.files).forEach { OcrPacks.delete(env.roots.files, it) }
+            },
+        ),
+        StorageCategory(
+            id = "gif_packs",
+            title = R.string.storage_gif_packs_title,
+            subtitle = R.string.storage_gif_packs_subtitle,
+            icon = Icons.Outlined.GifBox,
+            accent = Color(0xFF7E57C2),
+            group = StorageGroup.DOWNLOADS,
+            danger = Danger.REDOWNLOAD,
+            manageRoute = "tool/GIF",
+            pathsOf = { listOf(File(it.files, "gif_packs")) },
+            itemsOf = { env ->
+                OfflineGifPacks.attach(env.roots.files)
+                OfflineGifPacks.packs().map { pack ->
+                    val dir = File(File(env.roots.files, "gif_packs"), pack.id)
+                    StorageItem(
+                        id = pack.id,
+                        label = pack.name,
+                        detail = pack.id,
+                        bytes = diskUsage(dir, env.roots.blockSize),
+                        files = listOf(dir),
+                        directory = true,
+                    )
+                }
+            },
+            deleteOne = { env, item ->
+                OfflineGifPacks.attach(env.roots.files)
+                OfflineGifPacks.delete(item.id)
+            },
+            clearOf = { env ->
+                OfflineGifPacks.attach(env.roots.files)
+                OfflineGifPacks.packs().forEach { OfflineGifPacks.delete(it.id) }
+                emptyOut(File(env.roots.files, "gif_packs"))
             },
         ),
         StorageCategory(

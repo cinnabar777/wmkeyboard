@@ -63,10 +63,12 @@ data class DictionaryEntry(
     /** Which kind of list this is, and so how its frequencies read. */
     val source: WordlistSource = WordlistSource.FREQUENCY,
 ) {
+    /** The list's file name in the data repo, and in a language pack. */
+    val fileName: String get() = "${fileStem ?: "${repoCode}_$suffix"}.txt.gz"
+
     /** Where the list is fetched from: the data repository, wherever [ServiceRepo.DATA] points. */
     val url: String
-        get() = ServiceEndpoints.repo(ServiceRepo.DATA)
-            .rawUrl("data/$repoCode/${fileStem ?: "${repoCode}_$suffix"}.txt.gz")
+        get() = ServiceEndpoints.repo(ServiceRepo.DATA).rawUrl("data/$repoCode/$fileName")
 }
 
 /**
@@ -169,7 +171,7 @@ object DictionaryCatalog {
         entry("es", "es", "es", 1_190_537, 4_833_505L),
         entry("et", "et", "et", 1_000_180, 4_084_505L),
         entry("eu", "eu", "eu", 389_587, 1_584_930L),
-        entry("fa", "fa", "fa", 442_333, 1_756_622L),
+        entry("fa", "fa", "fa", 363_989, 1_426_839L),
         entry("fi", "fi", "fi", 2_488_573, 10_584_625L),
         entry("fj", "fj", "fj", 10_583, 44_024L),
         entry("fo", "fo", "fo", 231_427, 1_049_407L),
@@ -519,6 +521,16 @@ object DictionaryCatalog {
     }
 
     fun byId(id: String): DictionaryEntry? = entries.firstOrNull { it.id == id }
+
+    /**
+     * The entry whose list is called [name], gzip or not (`de_full.txt.gz`,
+     * `de_full.txt`). Several entries can share a file only by sharing a
+     * language, so the first is as good as any.
+     */
+    fun byFileName(name: String): DictionaryEntry? {
+        val gz = if (name.endsWith(".txt")) "$name.gz" else name
+        return entries.firstOrNull { it.fileName == gz }
+    }
 
     fun forLanguage(langId: String): List<DictionaryEntry> =
         entries.filter { it.languageId == langId }

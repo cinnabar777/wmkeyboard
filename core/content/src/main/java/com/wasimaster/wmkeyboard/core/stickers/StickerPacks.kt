@@ -48,7 +48,9 @@ data class StickerPack(
     /**
      * Where the pack was imported from, or blank for one the user built.
      * `signal:<pack id>` for a Signal pack, which is what lets the Signal
-     * browser mark the packs already added. Never the pack key.
+     * browser mark the packs already added. Never the pack key. `whatsapp`
+     * for a pack read out of a `.wastickers` file or WhatsApp's own sticker
+     * folder, which carry no id of their own.
      */
     val source: String = "",
 ) {
@@ -56,6 +58,8 @@ data class StickerPack(
         const val MAX_SOURCE_LENGTH = 64
 
         fun signalSource(packId: String): String = "signal:$packId"
+
+        fun whatsappSource(): String = "whatsapp"
     }
 }
 

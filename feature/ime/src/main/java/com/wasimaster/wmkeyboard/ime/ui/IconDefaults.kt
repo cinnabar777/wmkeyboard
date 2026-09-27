@@ -76,6 +76,7 @@ import androidx.compose.material.icons.outlined.PictureInPictureAlt
 import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material.icons.outlined.QrCode2
+import androidx.compose.material.icons.outlined.QueryStats
 import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.School
@@ -171,6 +172,9 @@ object IconDefaults {
         ToolbarTool.QR_GEN -> Icons.Outlined.QrCode2
         ToolbarTool.PASSWORD_GEN -> Icons.Outlined.Password
         ToolbarTool.TYPING_TEST -> Icons.Outlined.Speed
+        // The settings app's own Statistics glyph, so the tool and the row it
+        // opens look like the same thing.
+        ToolbarTool.STATISTICS -> Icons.Outlined.QueryStats
         ToolbarTool.MEDIA_CONTROL -> Icons.Outlined.MusicNote
         ToolbarTool.KDE_CONNECT -> Icons.Outlined.Phonelink
         ToolbarTool.PLUGINS -> Icons.Outlined.Extension

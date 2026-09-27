@@ -19,6 +19,19 @@
     <string name="layout_number_row_in_symbols_subtitle">Keep the digit row on the ?123 symbols layer too</string>
     <string name="layout_number_row_in_symbols_info">The digit row stays in place when you change to the symbols layer. This is the default. Turn it off to drop the digits from the ?123 layer and keep them on the letters, where the number row is already showing them. The symbols keep their bracket and maths row, so nothing but the digits goes, and the keyboard is one row shorter on the symbols layer.</string>
 
+    <!-- Layout screen: the arrow row under the keyboard (issue #369). The group
+         header and the toggle carry the same name, so they share one key. -->
+    <string name="layout_arrow_row_title">Arrow keys row</string>
+    <string name="layout_arrow_row_subtitle">Show left, up, down and right keys under the keyboard</string>
+    <string name="layout_arrow_row_info">The keyboard adds a row of four arrow keys under the spacebar, so you can move the cursor without the toolbar or a drag on the spacebar. Hold an arrow to keep moving. The row is as tall as the number row, and the keyboard grows by that much.</string>
+    <string name="layout_arrow_row_order_title">Arrow order</string>
+    <string name="layout_arrow_row_order_subtitle">Drag the handles to put the arrows in the order you want</string>
+    <string name="layout_arrow_row_order_info">The keys appear on the row from left to right in the order of this list.</string>
+    <string name="layout_arrow_left">Left</string>
+    <string name="layout_arrow_up">Up</string>
+    <string name="layout_arrow_down">Down</string>
+    <string name="layout_arrow_right">Right</string>
+
     <!-- Layout screen: the symbols (?123) layer. ?123 is the label printed on
          the key that opens it. -->
     <string name="layout_symbols_title">Symbols layer</string>
@@ -26,6 +39,9 @@
     <string name="layout_symbols_return_subtitle">Leave ?123 after you type one of these characters</string>
     <string name="layout_symbols_return_info">You change to ?123 for one full stop or one question mark, and the keyboard changes back to the letters after it. Turn this off to stay on the symbols layer until you press ABC. The emoji panel has the same setting.</string>
     <string name="layout_symbols_return_chars_title">Characters that go back</string>
+    <string name="layout_symbols_return_space_title">Go back after a space</string>
+    <string name="layout_symbols_return_space_subtitle">Leave ?123 when you press the spacebar</string>
+    <string name="layout_symbols_return_space_info">You type a number or a symbol on ?123, press space, and the keyboard changes back to the letters for the next word. Turn this off to stay on the symbols layer, for example to type a phone number with spaces in it. This works on its own, with or without Go back to the letters.</string>
     <string name="layout_symbols_return_chars_info">Type the characters that send the keyboard back to the letters. Spaces between them are optional. An empty box uses the default characters ! ? . , ; and :. Digits are not in the default set, because you usually type more than one digit at a time.</string>
 
     <!-- Layout screen: where the keyboard types the digits of a non-Latin
@@ -129,7 +145,7 @@
     <string name="layout_one_handed_side_subtitle">The edge that the keyboard docks to in <xliff:g id="orientation" example="Portrait">%1$s</xliff:g></string>
     <string name="layout_split_title">Split keyboard</string>
     <string name="layout_split_subtitle">Divide the keys into a left half and a right half</string>
-    <string name="layout_split_info">The keyboard divides each row in the middle and puts a gap between the halves, so your thumbs move less on wide screens. This helps most on tablets, foldable devices and phones in landscape. The keyboard divides the spacebar between the two halves.</string>
+    <string name="layout_split_info">The keyboard divides each row in the middle and puts a gap between the halves, so your thumbs move less on wide screens. This helps most on tablets, foldable devices and phones in landscape. By default the keyboard also divides the spacebar between the two halves.</string>
     <string name="layout_split_gap_title">Split gap</string>
     <string name="layout_split_gap_subtitle">The width of the gap between the halves</string>
     <string name="layout_split_gap_info">This is the gap in the centre, as a percentage of the keyboard width. A larger gap moves the halves toward the edges, but each key becomes narrower.</string>
@@ -179,6 +195,9 @@
     <string name="layout_globe_hidden_subtitle">No effect while the 🌐 key is hidden</string>
     <string name="layout_split_large_only_title">Split only on wide screens</string>
     <string name="layout_split_large_only_subtitle">Stay whole on a portrait phone, split when there is room</string>
+    <string name="layout_split_spacebar_title">Split the spacebar</string>
+    <string name="layout_split_spacebar_subtitle">Divide the spacebar too, or keep it as one key across the gap</string>
+    <string name="layout_split_spacebar_info">When this is on, the spacebar is divided between the two halves like every other row, and the centre of the bottom row is empty. When this is off, the spacebar stays as one key and fills the gap, so both thumbs can press it where they meet. The other keys on the bottom row stay in their halves. This setting is on by default.</string>
     <string name="layout_split_large_only_info">Split is one setting for every screen shape, so turning it on in landscape leaves the keyboard split after you rotate back, where a split layout is hard to use. Turn this on to split only in landscape or on an unfolded screen. This setting is off by default.</string>
 
     <string name="layout_floating_height_title">Floating keyboard height</string>

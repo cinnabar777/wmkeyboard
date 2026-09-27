@@ -50,6 +50,24 @@ object Lattice {
         val options: Array<Array<String>>,
         /** Parallel to [options]: 0.0 for the as-typed reading, negative for a guess. */
         val penalties: Array<DoubleArray>,
+        /**
+         * Per unit, the index in [options] from which the readings are
+         * *abbreviations* — the unit spells only the start of its syllable
+         * (jianpin `h` for hao/hen/hua…) rather than a complete reading that
+         * might have been misspelled. Defaults to `options[i].size`: no
+         * abbreviations. The distinction matters to [Opts.maxAmbiguousSpan],
+         * which caps guesses but must never cap deliberate abbreviation.
+         */
+        val partialFrom: IntArray = IntArray(options.size) { options[it].size },
+        /**
+         * Per unit, readings that cover this unit *and the next one* as a single
+         * syllable — jianpin's `z` + `h` read as the digraph initial `zh…`, so
+         * `zhg` still reaches 中国 while `sh` also reads as `s` + `h` (上海).
+         * Empty by default. These are always abbreviations, never capped.
+         */
+        val merged: Array<Array<String>> = Array(options.size) { emptyArray() },
+        /** Parallel to [merged]. */
+        val mergedPenalties: Array<DoubleArray> = Array(options.size) { DoubleArray(0) },
     ) {
         val units: Int get() = options.size
     }
@@ -76,7 +94,7 @@ object Lattice {
 
     /** Decoder bounds and weights. Defaults suit Chinese; Japanese overrides one. */
     class Opts(
-        /** Longest word, in units. Beyond ~6 syllables a "word" is really a phrase. */
+        /** Longest word, in syllables. Beyond ~6 a "word" is really a phrase. */
         val maxWordUnits: Int = 6,
         /**
          * Spans longer than this use only each unit's first reading.
@@ -92,6 +110,10 @@ object Lattice {
          * the exact alphabetical bias the lattice replaced: `726726726` would
          * offer nothing beginning `san`. Cost there is bounded by the dictionary
          * prune instead, which is what it is for.
+         *
+         * Abbreviations ([Input.partialFrom]) are exempt for the same reason: a
+         * jianpin `zgrm` is four deliberately ambiguous units, and pinning the
+         * third to `ra` would make 中国人民 untypeable.
          */
         val maxAmbiguousSpan: Int = 2,
         /**
@@ -227,7 +249,7 @@ object Lattice {
         val n = input.units
         val out = Array(n) { mutableListOf<Edge>() }
         for (i in 0 until n) {
-            if (!dict.isEmpty) extend(i, i, "", 0 until dict.size, 0.0, input, dict, opts, out)
+            if (!dict.isEmpty) extend(i, i, "", 0 until dict.size, 0.0, 0, input, dict, opts, out)
             val raw = input.options[i].firstOrNull().orEmpty()
             out[i].add(Edge(i, i + 1, raw, raw, UNK_LOG, 0, fallback = true))
         }
@@ -236,50 +258,70 @@ object Lattice {
 
     /**
      * Walks forward from unit [start], extending the reading one unit at a time
-     * and narrowing the candidate rows with it. Recursion depth is bounded by
+     * and narrowing the candidate rows with it. [syllables] is how many the
+     * reading so far spells — the unit count, except where two units merged
+     * into one digraph syllable. Recursion depth is bounded by
      * [Opts.maxWordUnits], so it cannot outrun the stack.
      */
+    @Suppress("LongParameterList")
     private fun extend(
         start: Int,
         unit: Int,
         prefix: String,
         range: IntRange,
         penalty: Double,
+        syllables: Int,
         input: Input,
         dict: ConversionDictionary,
         opts: Opts,
         out: Array<MutableList<Edge>>,
     ) {
-        if (unit >= input.units || unit - start >= opts.maxWordUnits) return
+        if (unit >= input.units || syllables >= opts.maxWordUnits) return
         val options = input.options[unit]
         val ambiguous = unit - start < opts.maxAmbiguousSpan
-        val last = if (ambiguous) options.size - 1 else 0
-        for (oi in 0..minOf(last, options.size - 1)) {
+        val partialFrom = input.partialFrom[unit]
+        for (oi in options.indices) {
+            // Past the ambiguity cap only the as-typed reading and the
+            // abbreviations are tried; a spelling guess is not worth the fan-out.
+            if (!ambiguous && oi > 0 && oi < partialFrom) continue
             val reading = prefix + options[oi]
             // The prune that makes per-unit ambiguity affordable: no word starts
             // this way, so nothing longer can either.
             val sub = dict.prefixRange(reading, range)
             if (sub.isEmpty()) continue
             val cost = penalty + input.penalties[unit].getOrElse(oi) { 0.0 }
-            emitSpan(start, unit + 1, reading, cost, dict, opts, out)
-            extend(start, unit + 1, reading, sub, cost, input, dict, opts, out)
+            emitSpan(start, unit + 1, reading, cost, syllables + 1, dict, opts, out)
+            extend(start, unit + 1, reading, sub, cost, syllables + 1, input, dict, opts, out)
+        }
+        // Two units read as one syllable (`z` + `h` → `zh…`): the edge lands
+        // past both, but counts one syllable towards the word-length test.
+        if (unit + 1 >= input.units) return
+        val merged = input.merged[unit]
+        for (mi in merged.indices) {
+            val reading = prefix + merged[mi]
+            val sub = dict.prefixRange(reading, range)
+            if (sub.isEmpty()) continue
+            val cost = penalty + input.mergedPenalties[unit].getOrElse(mi) { 0.0 }
+            emitSpan(start, unit + 2, reading, cost, syllables + 1, dict, opts, out)
+            extend(start, unit + 2, reading, sub, cost, syllables + 1, input, dict, opts, out)
         }
     }
 
     /** Adds the best [Opts.spanCandCap] words read exactly [reading] over the span. */
+    @Suppress("LongParameterList")
     private fun emitSpan(
         start: Int,
         end: Int,
         reading: String,
         penalty: Double,
+        syllables: Int,
         dict: ConversionDictionary,
         opts: Opts,
         out: Array<MutableList<Edge>>,
     ) {
         val rows = dict.rowsFor(reading)
         if (rows.isEmpty()) return
-        val units = end - start
-        val usable = if (opts.charPerUnit) rows.filter { dict.wordLength(it) >= units } else rows.toList()
+        val usable = if (opts.charPerUnit) rows.filter { dict.wordLength(it) >= syllables } else rows.toList()
         if (usable.isEmpty()) return
         val cap = maxOf(opts.spanCandCap, opts.limit)
         val kept = usable.sortedByDescending { dict.frequency(it) }.take(cap)
@@ -288,7 +330,7 @@ object Lattice {
             val freq = dict.frequency(row).coerceAtLeast(1)
             var emission = BETA * (ln(freq.toDouble()) - ln(maxFreq.toDouble())) + penalty
             if (opts.charPerUnit) {
-                emission += opts.overLengthPenalty * (dict.wordLength(row) - units)
+                emission += opts.overLengthPenalty * (dict.wordLength(row) - syllables)
             }
             out[start].add(Edge(start, end, dict.word(row), reading, emission, dict.frequency(row)))
         }

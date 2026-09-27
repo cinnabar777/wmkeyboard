@@ -32,6 +32,10 @@ class NgramPackEntry(
     fun bigramUrl(): String = url(bigramStem)
     fun trigramUrl(): String = url(trigramStem)
 
+    /** The two files' names in the data repo, and in a language pack. */
+    val bigramFileName: String get() = "$bigramStem.txt.gz"
+    val trigramFileName: String get() = "$trigramStem.txt.gz"
+
     /** The data repository, wherever [ServiceRepo.DATA] points. */
     private fun url(stem: String): String =
         ServiceEndpoints.repo(ServiceRepo.DATA).rawUrl("data/$repoCode/$stem.txt.gz")
@@ -81,4 +85,14 @@ object NgramPackCatalog {
 
     fun forLanguage(languageId: String): NgramPackEntry? =
         entries.firstOrNull { it.languageId == languageId }
+
+    /** The pack [name] (gzip or not) belongs to, and whether it is the trigram half. */
+    fun byFileName(name: String): Pair<NgramPackEntry, Boolean>? {
+        val gz = if (name.endsWith(".txt")) "$name.gz" else name
+        for (entry in entries) {
+            if (entry.bigramFileName == gz) return entry to false
+            if (entry.trigramFileName == gz) return entry to true
+        }
+        return null
+    }
 }

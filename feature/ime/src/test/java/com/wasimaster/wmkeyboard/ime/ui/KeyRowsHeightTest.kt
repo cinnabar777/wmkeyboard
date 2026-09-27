@@ -15,6 +15,7 @@ import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.OctopusPlacement
 import com.wasimaster.wmkeyboard.core.settings.OctopusSettings
 import com.wasimaster.wmkeyboard.ime.KeyboardUiState
+import com.wasimaster.wmkeyboard.ime.LayoutMode
 import com.wasimaster.wmkeyboard.ime.LayoutSet
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -73,6 +74,24 @@ class KeyRowsHeightTest {
         )
         assertEquals(keyRowsHeight(plain), keyRowsHeight(off))
         assertEquals(0.dp, octopusLane(off))
+    }
+
+    @Test
+    fun `the arrow row reserves one number-row height, and none on a secondary layout`() {
+        // Issue #369. The row is drawn under the body at the digit row's
+        // height, so panels sized from this have to count it too.
+        val plain = state(LayoutSet(grid(4), grid(4), grid(4)))
+        val on = plain.copy(
+            settings = plain.settings.copy(
+                layoutBehavior = plain.settings.layoutBehavior.copy(arrowRow = true),
+            ),
+        )
+        assertTrue(arrowRowShown(on))
+        assertEquals(
+            keyRowsHeight(plain) + on.settings.numberRowHeightDp.dp + 4.dp * 2,
+            keyRowsHeight(on),
+        )
+        assertFalse(arrowRowShown(on.copy(layoutMode = LayoutMode.SECONDARY)))
     }
 
     /** What the function shipped as, for four rows: (keyHeight + 2*4) * rows + 2*2. */

@@ -109,6 +109,10 @@ object CjkDictCatalog {
 
     fun byId(id: String): CjkDictPack? = packs.firstOrNull { it.id == id }
 
+    /** The pack published as [name] (`pinyin.tsv`), by the file name in the data repo. */
+    fun byFileName(name: String): CjkDictPack? =
+        packs.firstOrNull { it.available && it.path.substringAfterLast('/') == name }
+
     fun forLang(langId: String): List<CjkDictPack> = packs.filter { it.langId == langId }
 }
 

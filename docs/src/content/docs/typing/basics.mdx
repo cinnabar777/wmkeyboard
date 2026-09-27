@@ -42,7 +42,8 @@ A few more long-press behaviors live under the same **Press and hold shortcuts**
 <SettingsPath path="Key press / Press and hold shortcuts" />
 
 - **All accents on press and hold** (off by default) adds each Latin letter's complete accent set to its long-press popup. Nothing is taken away to make room: the digit or symbol stays, with every accent beside it.
-- **Shifted letter on press and hold** (off by default) puts each key's shifted character, the capital in Latin scripts, at the end of its popup. Handy on its own, and the way to type a capital out of the [drag off ?123 or ABC](/typing/gestures/#dragging-from-123-or-abc), which types on a layer the Shift key isn't on.
+- **Your language's letters first** (on by default) puts the letters of the language you're typing ahead of the number or symbol that opens a key's popup. On German, holding <KeyCap>u</KeyCap> types ü instead of 7. English has no accented letters, so its keys stay as they were.
+- **Shifted letter on press and hold** (off by default) puts each key's shifted character at the end of its popup: the capital in Latin scripts, the key's second letter in Arabic, Devanagari and other scripts without capitals. Handy on its own, and the way to type a capital out of the [drag off ?123 or ABC](/typing/gestures/#dragging-from-123-or-abc), which types on a layer the Shift key isn't on.
 - **Press and hold ?123 for the number pad** (on by default) makes a long press on the symbols key open a full numeric keypad panel over the current field. A quick tap still switches to the symbols layer as usual.
 - **Press and hold enter for emoji** (off by default) puts an emoji entry at the front of the <KeyCap>Enter</KeyCap> key's popup, so a hold and release opens the emoji panel. Where Enter shows Send or Search, the line break stays in the popup next to it.
 - **Currency keys** lets you reorder or replace the glyphs the <KeyCap>$</KeyCap> key's popup offers (৳ € £ ¥ ₹ ₿ by default). Type them space-separated, with the one you use most first.
@@ -56,6 +57,8 @@ A few more long-press behaviors live under the same **Press and hold shortcuts**
 </PhoneFrame>
 
 <KeyCap>Shift</KeyCap> cycles through three states. From off, one tap arms a one-shot **Shift** that capitalizes only the next letter and then reverts on its own. A second tap inside the **caps-lock double-tap** window (350&nbsp;ms by default, adjustable 150–600&nbsp;ms) locks **Caps Lock** instead. From either state, a single tap that *isn't* a fast double-tap turns it back off. Getting out of caps lock takes one plain tap, not another double-tap.
+
+You can also **hold** <KeyCap>Shift</KeyCap> and type with another finger, the way a physical Shift works: every letter tapped while it's down comes out a capital, and lifting it puts the keyboard back where it was, without arming Shift for the letter after. Hold it without typing anything and letting go counts as an ordinary tap. Under caps lock a held Shift does nothing extra, since the letters are capitals already.
 
 Auto-capitalization arms Shift for you at the start of a sentence, but only when three things line up: **Automatic capital letters** is on (the default), the field is a plain text field rather than a structured keypad, and the active language's script has letter case at all. Bangla, for instance, doesn't, so auto-capitalize never fires while you type it. It re-checks after every sentence-ending mark (`.`, `!`, `?`, `।`) and whenever you move the cursor or switch fields. Caps Lock is off limits to it, so an all-caps line you locked in stays locked in.
 
@@ -110,6 +113,8 @@ There's a second way in that doesn't need the setting at all: in any field where
 </PhoneFrame>
 
 **Number row** (on by default) gives the digits 1–0 a dedicated row above the letters, so they don't need a long-press. While it's there, the digit that would otherwise be the top row's first long-press alternate is dropped, since the row makes it redundant. A few sub-settings sit under it. **Number row height** runs 32–100&nbsp;dp. **Symbols on shift** (off by default) swaps the row to `= \ < > [ ] { } | ~` while Shift is held, instead of digits. **Number row in symbols** (on by default) keeps the digit row up on the ?123 layer too. The symbols layer's own second page carries its arrow and comparison symbols either way. You can change the keys of the number row on each layer, and the row that takes the place of the digits on the symbols layer, in the [layout editor](/reference/settings/keymaps/#the-number-row-and-the-row-in-place-of-the-digits).
+
+If you'd rather move the cursor with keys than with a drag on the spacebar, **Arrow keys row** under Layout & size adds a row of ←&nbsp;↑&nbsp;↓&nbsp;→ under the spacebar, in the order you choose. See [Layout & size](/reference/settings/layout/#arrow-keys-row).
 
 <SettingsPath path="Layout & size / Numerals" />
 
@@ -166,6 +171,7 @@ Both delete keys also have a drag-to-delete-whole-words gesture, on by default, 
 | Caps lock double press | 350&nbsp;ms (150–600&nbsp;ms) |
 | Press and hold hints | On |
 | All accents on press and hold | Off |
+| Your language's letters first | On |
 | Shifted letter on press and hold | Off |
 | Press and hold ?123 for the number pad | On |
 | Press and hold enter for emoji | Off |

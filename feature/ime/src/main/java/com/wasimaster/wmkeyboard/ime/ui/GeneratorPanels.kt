@@ -1,7 +1,5 @@
 package com.wasimaster.wmkeyboard.ime.ui
 
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.Image
@@ -54,6 +52,7 @@ import com.wasimaster.wmkeyboard.core.tools.PasswordGen
 import com.wasimaster.wmkeyboard.core.tools.QrCodeGen
 import com.wasimaster.wmkeyboard.common.R as CommonR
 import com.wasimaster.wmkeyboard.ime.FocusRegion
+import com.wasimaster.wmkeyboard.ime.KeyboardClipboard
 import com.wasimaster.wmkeyboard.ime.KeyboardUiState
 import com.wasimaster.wmkeyboard.ime.PanelMode
 import com.wasimaster.wmkeyboard.ime.PwSettingAction
@@ -137,8 +136,7 @@ internal fun PasswordPanel(
 
     fun copyGenerated() {
         if (generated.isEmpty()) return
-        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        clipboard.setPrimaryClip(ClipData.newPlainText("Password", generated))
+        KeyboardClipboard.copy(context, generated, "Password")
         Toast.makeText(context, copiedMessage, Toast.LENGTH_SHORT).show()
     }
 

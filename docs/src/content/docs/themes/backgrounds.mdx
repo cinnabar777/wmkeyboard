@@ -70,6 +70,26 @@ Opacity and blur are shared between both images rather than set per orientation,
   ![A theme with distinct portrait and landscape background images.](@assets/screens/themes/background-landscape.webp)
 </PhoneFrame>
 
+## Image sizes and templates
+
+<SettingsPath path="Appearance / Keyboard themes / (edit a theme) / Board / Image sizes and templates" />
+
+If you draw a theme yourself, this screen tells you how big each picture should be before you start. It lists the background, the letter, function and Enter keys, the space bar, the pressed key, the key popup, stickers and press effect images, each with two sizes:
+
+- **On screen** is what the picture covers on the keyboard.
+- **Draw at** is the same shape, made as large as the keyboard keeps. A key image is kept at up to 256 pixels on its long side and a space bar image at up to 1024 × 320, so a larger drawing only gets made smaller again.
+
+The sizes are measured from the keyboard itself, so they are right for your layout, number row, key height and spacing. **Screen** picks what they are measured for:
+
+- **This phone** (the default): your own layout and sizes on this screen.
+- **Phone**: a 1080 pixel wide phone with the default sizes. Use this for a theme you want to share, since other people see the defaults.
+- **Phone, landscape**: the same phone on its side, for the [landscape image](#separate-landscape-image).
+- **Tablet**: a 1600 pixel wide tablet or an open foldable, with the default sizes.
+
+The picture under the selector is the board template: every key's outline over the background area, the toolbar band at the top, and the band under the navigation bar at the bottom. The background runs on under the navigation bar on Android 15 and later only, so keep that band plain.
+
+**Save board image** saves that template as a PNG. **Save all templates** saves a ZIP with the board template, one template each for the letter key, function key, Enter key, space bar and popup (with a dashed box where the label sits), and a `README.txt` with every size. The templates are transparent with white lines. Put one on the top layer of your drawing, and hide it before you export.
+
 ## Details and edge cases
 
 - **No image by default.** A freshly created theme, every built-in gallery theme, and the Default (system) theme all start with no background image, so the board is a flat color or gradient until you add one.

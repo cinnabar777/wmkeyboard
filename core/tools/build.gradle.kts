@@ -52,4 +52,7 @@ dependencies {
     implementation(libs.zxing.core)
 
     testImplementation(libs.junit)
+    // Offline GIF packs are SQLite databases, and opening one is an Android
+    // API call, so OfflineGifPacksTest runs under Robolectric.
+    testImplementation(libs.robolectric)
 }

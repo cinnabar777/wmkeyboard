@@ -5,6 +5,7 @@ import com.wasimaster.wmkeyboard.core.icons.IconPackFile
 import com.wasimaster.wmkeyboard.core.layout.LayoutFile
 import com.wasimaster.wmkeyboard.core.plugins.PluginFile
 import com.wasimaster.wmkeyboard.core.stickers.StickerPackFile
+import com.wasimaster.wmkeyboard.core.stickers.whatsapp.WaStickersFile
 import com.wasimaster.wmkeyboard.core.theme.FlexTheme
 import com.wasimaster.wmkeyboard.core.theme.ThemeCodec
 import org.junit.Assert.assertEquals
@@ -142,6 +143,16 @@ class FileImportSniffTest {
             WMFileTypes.Opened.Plugin,
             WMFileTypes.archiveKindFor("""{"format":"${PluginFile.FORMAT}"}"""),
         )
+    }
+
+    @Test
+    fun `a WhatsApp pack is told by its two text files, never by pictures alone`() {
+        // The one archive format with no manifest. Its signature is the
+        // title.txt / author.txt beside the pictures; a ZIP of pictures with
+        // neither is any ZIP of pictures, and a pack.json makes it ours.
+        assertTrue(WaStickersFile.looksLikeWaStickers(listOf("title.txt", "author.txt", "tray.png", "sticker_1.webp")))
+        assertFalse(WaStickersFile.looksLikeWaStickers(listOf("tray.png", "sticker_1.webp")))
+        assertFalse(WaStickersFile.looksLikeWaStickers(listOf("pack.json", "title.txt", "sticker_1.webp")))
     }
 
     @Test

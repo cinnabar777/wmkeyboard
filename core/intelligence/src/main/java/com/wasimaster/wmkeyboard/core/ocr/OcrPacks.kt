@@ -115,6 +115,31 @@ object OcrPacks {
         }
     }
 
+    /** The pack a `<pack>.traineddata` file named [name] is, or null for any other file. */
+    fun packOf(name: String): String? =
+        name.removeSuffix(".traineddata").takeIf { name.endsWith(".traineddata") && it in OcrLanguages.allPacks }
+
+    /**
+     * Installs [pack] from a copy the user fetched some other way (the same
+     * `tessdata_fast` file the download fetches). Nothing can check it before
+     * Tesseract opens it; a file Tesseract will not load is caught there and
+     * [markBroken], as a bad download would be. Runs on the caller's thread.
+     */
+    fun install(filesDir: File, pack: String, source: File) {
+        cancel(pack)
+        val part = partFile(filesDir, pack)
+        part.parentFile?.mkdirs()
+        try {
+            source.inputStream().use { input -> part.outputStream().use { input.copyTo(it) } }
+            val target = file(filesDir, pack)
+            target.delete()
+            check(part.renameTo(target)) { "could not move the pack into place" }
+            set(pack, Status.Downloaded)
+        } finally {
+            part.delete()
+        }
+    }
+
     fun cancel(pack: String) {
         synchronized(jobs) { jobs[pack]?.cancel() }
     }

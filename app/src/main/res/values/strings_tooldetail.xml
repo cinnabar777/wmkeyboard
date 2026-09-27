@@ -226,6 +226,9 @@
     <string name="tooldetail_incognito_learning_subtitle">The keyboard learns no words and no emoji habits from your typing</string>
     <string name="tooldetail_incognito_clipboard_title">Pause clipboard capture</string>
     <string name="tooldetail_incognito_clipboard_subtitle">Copies do not go into the history of the clipboard tool</string>
+    <string name="tooldetail_incognito_private_clipboard_title">Keep copies in the keyboard</string>
+    <string name="tooldetail_incognito_private_clipboard_subtitle">Copy and cut from the keyboard do not go to the system clipboard, so other apps cannot read them</string>
+    <string name="tooldetail_incognito_private_clipboard_info">While incognito is on, text you copy or cut with the keyboard stays inside the keyboard. The paste keys of the keyboard paste it back. When incognito goes off, the keyboard forgets it.\n\nIf you have not copied with the keyboard yet, paste gives what is on the system clipboard, as usual. The copy and paste menu of the app itself still uses the system clipboard.</string>
 
     <!-- Power saving tool: when power saving runs. -->
     <string name="tooldetail_chips_nav_title">Suggestion chip</string>
@@ -416,6 +419,8 @@
     <!-- One line under each option in the "After you send one" picker. -->
     <string name="tooldetail_sticker_suggest_trigger_delete_desc">The sticker replaces the title, keyword or emoji that you typed</string>
     <string name="tooldetail_sticker_suggest_trigger_keep_desc">The sticker is sent and your text stays in the field</string>
+    <string name="tooldetail_sticker_suggest_magnify_title">Hold to see them bigger</string>
+    <string name="tooldetail_sticker_suggest_magnify_subtitle">Hold a sticker in the tray to see it large, and slide to see the others</string>
     <string name="tooldetail_media_layout_group">Layout</string>
     <string name="tooldetail_media_full_bleed_title">Full-screen picker</string>
     <string name="tooldetail_media_full_bleed_subtitle">Hide the toolbar and move the search up next to a back button</string>

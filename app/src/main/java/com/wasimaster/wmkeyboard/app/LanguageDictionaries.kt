@@ -210,6 +210,19 @@ internal fun DictionariesGroup(
                 )
             }
         }
+        // For a phone that cannot download: the same files, as one language
+        // pack fetched elsewhere and imported here.
+        if (wordlists.isNotEmpty() || emojiEntry != null || pairsEntry != null) {
+            item {
+                val links = remember(langId) { LanguagePacks.links(context, langId) }
+                OfflineImportRow(
+                    title = stringResource(R.string.offline_import_language_pack_title),
+                    subtitle = stringResource(R.string.offline_import_language_pack_subtitle),
+                    links = links,
+                    wordlistSize = size,
+                )
+            }
+        }
         item {
             NavRow(
                 R.string.languages_custom_dictionaries_title,

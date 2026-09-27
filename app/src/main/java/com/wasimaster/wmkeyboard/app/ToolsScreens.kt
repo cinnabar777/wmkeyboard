@@ -77,6 +77,8 @@ private val ToolsWithoutOptions: Set<ToolbarTool> =
         // Everything it changes is a Layout slider; the tool is only the
         // in-place way to drag them.
         ToolbarTool.RESIZE,
+        // A shortcut, like Settings: its page only leads to the Statistics screen.
+        ToolbarTool.STATISTICS,
     )
 /**
  * The name of a tool on its settings screen, as a string resource the caller
@@ -142,6 +144,7 @@ internal fun toolTitle(tool: ToolbarTool): Int = when (tool) {
     ToolbarTool.TYPING_TEST -> R.string.fonts_tool_typing_test_title
     ToolbarTool.MEDIA_CONTROL -> R.string.fonts_tool_media_control_title
     ToolbarTool.KDE_CONNECT -> ImeR.string.ime_tool_kde_connect
+    ToolbarTool.STATISTICS -> ImeR.string.ime_tool_statistics
     ToolbarTool.PLUGINS -> ImeR.string.ime_tool_plugins
     ToolbarTool.APP_LAUNCHER -> R.string.fonts_tool_app_launcher_title
     ToolbarTool.AI -> R.string.fonts_tool_ai_title
@@ -222,6 +225,7 @@ internal fun toolDescription(tool: ToolbarTool): Int = when (tool) {
     ToolbarTool.TYPING_TEST -> R.string.fonts_tool_typing_test_desc
     ToolbarTool.MEDIA_CONTROL -> R.string.fonts_tool_media_control_desc
     ToolbarTool.KDE_CONNECT -> R.string.fonts_tool_kde_connect_desc
+    ToolbarTool.STATISTICS -> R.string.fonts_tool_statistics_desc
     ToolbarTool.PLUGINS -> R.string.fonts_tool_plugins_desc
     ToolbarTool.APP_LAUNCHER -> R.string.fonts_tool_app_launcher_desc
     ToolbarTool.AI -> R.string.fonts_tool_ai_desc
@@ -566,7 +570,7 @@ internal val ToolGroups: List<Pair<Int, List<ToolbarTool>>> = buildList {
             ToolbarTool.COPY, ToolbarTool.CUT, ToolbarTool.PASTE,
             ToolbarTool.AUTOCORRECT, ToolbarTool.SELECTION_ACTIONS, ToolbarTool.PHONETIC_ENGLISH,
             ToolbarTool.FANCY, ToolbarTool.CUSTOM_LAYOUT, ToolbarTool.INCOGNITO, ToolbarTool.SOUND_HAPTICS,
-            ToolbarTool.THEMES, ToolbarTool.POWER_SAVING, ToolbarTool.SETTINGS,
+            ToolbarTool.THEMES, ToolbarTool.POWER_SAVING, ToolbarTool.SETTINGS, ToolbarTool.STATISTICS,
         ),
     )
     add(

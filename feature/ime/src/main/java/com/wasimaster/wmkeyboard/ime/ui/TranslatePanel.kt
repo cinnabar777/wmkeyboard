@@ -43,9 +43,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
@@ -83,8 +85,31 @@ data class TranslateCallbacks(
     val onInsert: () -> Unit = {},
 )
 
-/** How tall the panel stands while its text is typed into, keys underneath. */
-internal val TranslateCompactHeight = 260.dp
+/**
+ * How tall the panel stands while its text is typed into, keys underneath:
+ * 260dp at the default font size.
+ *
+ * Issue #378. The budget was a flat 260dp, but the rows it pays for — the text
+ * box, the language chips, the translation and Replace/Insert — are set in sp
+ * and grow with the system font size, while the budget did not. At a large
+ * font the fixed rows took it all and the translation, the one row that gives,
+ * was left a sliver under the chips. So the part of the budget that is lines
+ * of text is asked for in sp, one line at a time: Android 14's nonlinear font
+ * scaling grows a 19sp line far more than it would one 91sp block.
+ */
+@Composable
+internal fun translateCompactHeight(): Dp = with(LocalDensity.current) {
+    TranslateCompactLines.fold(TranslateCompactChrome) { height, line -> height + line.toDp() }
+}
+
+/**
+ * The text lines [translateCompactHeight] pays for: the text box's one, a
+ * chip's label, two of translation, and a button's label.
+ */
+private val TranslateCompactLines = listOf(19.sp, 16.sp, 19.sp, 19.sp, 18.sp)
+
+/** Everything else in the typed-in panel: header, paddings, the suggestion strip's row. */
+private val TranslateCompactChrome = 169.dp
 
 /** The most the text box grows before it scrolls. */
 private val TranslateQueryMaxHeight = 96.dp
@@ -163,7 +188,7 @@ internal fun TranslateTool(
         // Translations run long, and the text being translated is a box of
         // several lines in the panel itself rather than the header's one-line
         // search bar: room for both over the keys.
-        compactHeight = TranslateCompactHeight,
+        compactHeight = translateCompactHeight(),
         headerActions = if (sideBySide) {
             {
                 TranslateLanguageRow(state, callbacks, menus, Modifier.weight(1f))

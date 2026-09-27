@@ -104,6 +104,9 @@
     <string name="appearance_tool_width_subtitle">Width of the shape behind each toolbar tool</string>
     <!-- Gboard is the name of another keyboard app. Keep it as it is. -->
     <string name="appearance_tool_width_info">38 keeps the classic circle. Wider values stretch it into a pill, like Gboard. The background only shows when the tool circle radius is above 0. Pairs well with the scrollable toolbar.</string>
+    <string name="appearance_tool_icon_size_title">Tool icon size</string>
+    <string name="appearance_tool_icon_size_subtitle">Size of the icon inside each tool button</string>
+    <string name="appearance_tool_icon_size_info">Applies to the toolbar and the toolbox grid. The buttons keep their size, so the same number of tools still fit. 22 is the default.</string>
 
     <!-- Appearance screen, Toolbar group: the toolbox, the grid of all tools. -->
     <string name="appearance_toolbox_layout_title">Toolbox layout</string>

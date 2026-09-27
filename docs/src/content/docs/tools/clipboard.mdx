@@ -9,6 +9,7 @@ import PhoneFrame from '@components/PhoneFrame.astro';
 import SettingsPath from '@components/SettingsPath.astro';
 import KeyCap from '@components/KeyCap.astro';
 import Shot from '@components/Shot.astro';
+import Flavor from '@components/Flavor.astro';
 
 The clipboard tool keeps a running history of what you copy: text, images, files and more. A paste from ten minutes ago is still one tap away instead of gone the moment you copy something new. On a phone it's one of only three tools pinned to the toolbar out of the box, alongside Emoji and Settings. A tablet starts wider, because three icons across a twelve-inch bar is mostly empty space. A small tablet pins five (Emoji, GIF, Clipboard, Voice, Settings) and a large one pins seven, those five plus Translate and Text edit. Clipboard is in all three sets.
 
@@ -30,6 +31,12 @@ The square button beside the search box switches the history between the grid an
 
 Turn on **Number the clips** and every clip gets a small number: at the start of its row in the list, and next to the pin in the grid, so a card never gets taller for it. The number belongs to the clip, not to the spot it's drawn in. Search the history and the results keep the numbers they had, so the third clip is still number 3 when it's the only match. Numbers follow the panel's order from the top, pinned clips included.
 
+### Pinned and unpinned tabs
+
+Turn on **Pinned and unpinned tabs** and two tabs sit over the history: **Unpinned**, where the panel opens, and **Pinned**. Each shows how many clips it holds. Pin a clip and it moves across to the Pinned tab, and unpin it to send it back, so the clips you keep for good are never in the way of a fresh copy. A search looks through both tabs at once, and the tabs step aside while it runs. With the tabs on, **Pinned entries last** has nothing left to do, so it's greyed out.
+
+Or leave the history in one list and turn on **Outline pinned clips**: each pinned clip gets a thin border in the accent color, the same color as its lit pin, so it stands out from across the panel and not only from its pin circle.
+
 ### Columns, lines and times
 
 Three settings change how much each clip shows. **Grid columns** sets how many columns the grid has, one to four (two by default): more suits a history of short text, fewer gives long text and pictures room. The list is always one clip per row. **Lines per clip** sets how many lines of text a clip shows, up to 20, in both views. Its default, **Auto**, is six lines on a card and three in a row. Longer text ends in an ellipsis. **Time on each clip** puts a small time next to the number: **Time copied** reads "5 min. ago", and **Time left** counts down to when the [expiry](#expiry-and-the-entry-cap) deletes the clip. A pinned clip, or any clip while expiry is off, has no time left to show. The times update while the panel is open.
@@ -38,7 +45,7 @@ However many lines you ask for, a clip's preview is cut before it's laid out: at
 
 ### Editing a clip
 
-Press and hold a text clip and tap **Edit** in its popup. An editor opens where the history was, with the keys back underneath it, and your typing goes into the clip rather than into the app you're writing in. Enter starts a new line. Tap the text to move the cursor, or use the spacebar and arrow keys like anywhere else. **Save** keeps the change and **Cancel** (or Back) leaves the clip as it was.
+Press and hold a text clip and tap **Edit** in its popup. An editor opens where the history was, as tall as the panel, with the keys back underneath it, so the keyboard grows upward while you edit. On a phone held sideways it gets whatever room the keys leave. Your typing goes into the clip rather than into the app you're writing in. Enter starts a new line. Tap the text to move the cursor, or use the spacebar and arrow keys like anywhere else. **Save** keeps the change and **Cancel** (or Back) leaves the clip as it was.
 
 An edited clip keeps its place in the history, its number, its pin and its age, so it doesn't jump to the top and push the others around. A few things do change:
 
@@ -49,9 +56,17 @@ An edited clip keeps its place in the history, its number, its pin and its age, 
 
 Images, files, folders and videos have no text to edit, so their popup has no **Edit**. Neither does a [hidden password or code](#passwords-are-handled-deliberately): the panel never shows its text, and an editor would. Editing only changes the history. What's on the system clipboard stays as it was.
 
-Every card carries two small circles along its bottom edge: a pin and a delete. Tap the pin to keep a clip out of reach of the expiry and the entry cap. Tap the bin to drop it. Swiping a card left or right until it slides off deletes it too, unless you've turned off **Swipe to delete** under [Options](#options): then a sideways swipe does nothing, and the card's press-and-hold popup gets a red **Delete** button instead. Neither the bin nor the swipe asks first, so a bar pops up at the bottom of the panel for five seconds saying **Clip deleted**, with an **Undo** button that puts the clip back in the spot it had, pin and all. Delete a few more while the bar is up and it counts them ("3 clips deleted"), and one Undo brings back the lot. If you've asked Android for more time under Accessibility, **Time to take action**, the bar stays up that long instead. Once it's gone the delete is for good. Don't want the bar? Turn off **Undo a deleted clip** under [Options](#options).
+Every card carries two small circles along its bottom edge: a pin and a delete. Tap the pin to keep a clip out of reach of the expiry and the entry cap. Tap the bin to drop it. Swiping a card left or right until it slides off deletes it too, unless you've turned off **Swipe to delete** under [Options](#options): then a sideways swipe does nothing, and the card's press-and-hold popup gets a red **Delete** button instead. Neither the bin nor the swipe asks first, so a bar pops up at the bottom of the panel for five seconds saying **Clip deleted**, with an **Undo** button that puts the clip back in the spot it had, pin and all. Delete a few more while the bar is up and it counts them ("3 clips deleted"), and one Undo brings back the lot. If you've asked Android for more time under Accessibility, **Time to take action**, the bar stays up that long instead. Swipe the bar sideways to put it away sooner. Once it's gone, swiped or timed out, the delete is for good. Don't want the bar? Turn off **Undo a deleted clip** under [Options](#options).
 
-To see a clip's info popup instead, press and hold its card. The popup gives the time it was copied, its type and size, and (if [source tracking](#options) is on) the app it came from. An image clip gets one extra line there: **Send as sticker**, which runs the picture through the sticker processor before it goes.
+### Clearing the history
+
+Turn on **Clear button** under [Options](#options) and a bin sits at the end of the search box, or on its own in that spot while the search bar is off. It's there while at least one clip is unpinned. Tap it and the panel asks first: "Delete 12 unpinned clips? Pinned clips stay." **Delete** takes every unpinned clip at once and leaves the pinned ones where they are. **Cancel**, or a second tap on the bin, takes the question away. With **Undo a deleted clip** on, the Undo bar then offers all of them back in one tap. On a hardware keyboard the bin is the search box's neighbour: Enter on it asks, and Enter again deletes.
+
+To see a clip's info popup instead, press and hold its card. The popup gives the time it was copied, its type and size, and (if [source tracking](#options) is on) the app it came from. Some clips get buttons there too:
+
+- A **link**, a clip that is one web address and nothing else, gets **Open link**, which opens it in your browser. A hidden clip never does, since the browser would show what the panel hides.
+- An **image** gets **View**, which shows the picture full screen: pinch or double-tap to zoom, drag to look around, tap or press Back to return to where you were typing. It also gets **Send as sticker**, which runs the picture through the sticker processor before it goes.
+- An **image** also gets **Extract text** while the [text scanner](/tools/scanner/#scanning-text-ocr) is on in your tools <Flavor edition="full" />. The scanner opens on the picture instead of the camera and reads it straight away, in the language you type in. The words come back as chips: keep the ones you want, then **Copy** puts them on the clipboard, where they become a clip of their own, or **Insert** types them. **Scan again** shows the picture with its language chip, so you can read it again in another language. The back button returns to the clipboard.
 
 <PhoneFrame caption="Long-pressing a clip: the info popup shows when it was copied, its type and its size.">
   <Shot id="tools/clipboard-info-popup" alt="Long-pressing a clip: the info popup shows when it was copied, its type and its size." />
@@ -146,10 +161,13 @@ Everything below lives on the Clipboard screen, under Features on the settings h
 - **Lines per clip**: **Auto** (default: six on a card, three in a row) or 1–20.
 - **Time on each clip**: **None** (default), **Time copied** or **Time left**. See [Columns, lines and times](#columns-lines-and-times).
 - **Number the clips**: puts a [number](#numbered-clips) beside every clip; off by default.
+- **Pinned and unpinned tabs**: splits the history into [two tabs](#pinned-and-unpinned-tabs); off by default.
+- **Outline pinned clips**: a thin accent border around each pinned clip; off by default.
 - **Swipe to delete**: a sideways swipe across a clip deletes it; on by default. Off, the swipe does nothing and a **Delete** button joins the clip's press-and-hold popup. The bin works either way.
 - **Undo a deleted clip**: shows the Undo bar for a few seconds after you delete a clip with the bin or a swipe; on by default. Off, a delete is immediate and final.
-- **Pinned entries last**: moves pinned clips to the end of the panel instead of the top; off by default.
+- **Pinned entries last**: moves pinned clips to the end of the panel instead of the top; off by default. Greyed out while the tabs are on.
 - **Search bar**: enables the [search pill](#finding-a-clip-again) described above; off by default.
+- **Clear button**: the [bin](#clearing-the-history) that deletes every unpinned clip after asking; off by default.
 - **Detect codes, numbers and links**: enables the [entity chips](#pulling-codes-and-links-out-of-a-clip); on by default. Detection runs entirely on the device.
 - **Phone number formats**: a nav row, shown only while detection is on, opening the mask editor covered in [Phone number formats](/reference/settings/phone-formats/). Its subtitle counts your saved formats, and says every number becomes a chip once you have deleted them all.
 - **Forget after you paste a password**: the paste-time purge described [above](#passwords-are-handled-deliberately); off by default.
@@ -180,8 +198,8 @@ The whole-app [config backup](/privacy/backup/) has its own Clipboard section, o
 
 - Every toggle and slider on this screen carries the usual [restore button](/reference/settings/#putting-one-setting-back) once you've moved it off its shipped value, so the rows that grew one are the ones you've changed.
 - The clipboard tool needs the device to have been unlocked at least once since restart. Its history lives in credential-encrypted storage, so it sits out any lock-screen or pre-unlock typing until then.
-- Ships the same way in the full and lite editions. Nothing about this tool is edition-gated.
+- Ships the same way in the full and lite editions, except **Extract text** on an image clip, which needs the full edition's text scanner.
 - Link previews make a direct, unauthenticated request to whichever site you copied a link from, not through any of the app's own network services. Turn that setting on and the site sees a request from your device the moment you open the panel with a fresh link in history.
 - A file or folder clip is only as good as the URI permission grant behind it. If that's lapsed by the time you tap it (the source app cleared its cache, for instance), pasting puts the URI back on the system clipboard with an explanatory toast rather than failing silently.
 - "Pop-up when you copy" appears in this same screen's History group but is actually a [feedback](/typing/feedback/) setting. It's about the keyboard's own copy shortcuts (<KeyCap>A</KeyCap>/<KeyCap>C</KeyCap>/<KeyCap>V</KeyCap>/<KeyCap>X</KeyCap> and the text-editing panel's copy button), not clipboard history. It only fires in fields that give no copy feedback of their own, and it's off by default.
-- Pausing capture while [incognito](/privacy/incognito/) is on is a separate Incognito setting, not part of this screen.
+- Pausing capture while [incognito](/privacy/incognito/) is on is a separate Incognito setting, not part of this screen. So is [keeping the keyboard's copies off the system clipboard](/privacy/incognito/#keeping-copies-off-the-system-clipboard) while incognito is on.

@@ -1,0 +1,66 @@
+---
+title: "Using it without internet"
+description: "What works with no connection, and how to bring in language packs, voice models, OCR data and GIF packs fetched on another device."
+sidebar:
+  order: 5
+---
+
+import SettingsPath from '@components/SettingsPath.astro';
+import Flavor from '@components/Flavor.astro';
+
+Typing never needs the internet. Layouts, prediction, autocorrect, gesture typing, learning, the clipboard, snippets and every tool that works on the device run the same with the phone in airplane mode. What the internet is for is fetching things: word lists and word pairs, emoji names, voice and AI models, text recognition data, GIFs. This page is about getting those onto a phone that can't fetch them itself, whether it is offline for now or running the [build with no internet permission](/development/building/#a-build-with-no-internet-permission) that every GitHub release carries.
+
+## Importing instead of downloading
+
+Everything the keyboard downloads is a file with a public address. Fetch it anywhere, in a browser on this phone or on a computer, move it to the phone, and import it. The keyboard installs it through the same code the download would have used: the same parsing, the same checksum where the download has one, and the same place on disk. An imported word list is indistinguishable from a downloaded one.
+
+Each screen that downloads something has an import row with two buttons:
+
+- **Get the files** lists what that screen would download, with an open-in-browser and a copy button beside each file, and **Share** to send the whole list to another device. The browser does the fetching, so this works on a build with no internet permission too.
+- **Import** opens the file picker. Pick one file or many, loose or in a zip. Afterwards a report lists each file and what became of it.
+
+| What | Where the import row is | Files |
+|---|---|---|
+| A language's word list, word pairs and emoji names | <SettingsPath path="Languages & layouts / (a language) / Dictionaries / Language pack" /> | The language pack zip, or the loose `.txt.gz` and `.json.gz` files |
+| Chinese, Japanese and Cantonese conversion tables | The same Language pack row | Inside the language pack, or the loose `.tsv` |
+| Offline voice models <Flavor edition="full" /> | <SettingsPath path="Voice typing" />, below the model catalog | The model's `.tflite` and its `filters_vocab_*.bin` |
+| Text recognition data <Flavor edition="full" /> | <SettingsPath path="Tools / Text scan (OCR) / Tesseract languages" />, below the languages | `<language>.traineddata` |
+| GIF packs | <SettingsPath path="Tools / GIFs / Offline GIF packs" /> | A CleverKeys GIF pack zip |
+| Anything above, plus AI models and the background remover | <SettingsPath path="About / Storage / Import downloaded files" /> | Any of these |
+
+The Storage row takes every kind of file, so it is the one to use for a folder of mixed downloads. It is also the only way in for an on-device AI model other than the AI model screen's own import, and for the sticker editor's background remover (`u2netp.tflite`).
+
+Files are recognised by name, which is the name they are published under. Renaming one (a browser adding `(1)` to a second download, for instance) makes it unrecognisable, and the report says so rather than guessing.
+
+## Language packs
+
+A language pack is one zip holding everything a language downloads: its word lists, its word-pair data, its emoji names, and for Chinese, Japanese and Cantonese their conversion tables. There is one per folder of the [data repository](https://github.com/wasi-master/wmkeyboard-data), named `wmkb-lang-<code>.zip`, on its [language packs release](https://github.com/wasi-master/wmkeyboard-data/releases/tag/language-packs). **Get the files** on a language's screen links its own pack directly. The packs are rebuilt whenever the data changes.
+
+Some folders serve two languages. The Bangla pack also carries Banglish, and importing it installs both. Where a pack holds two word lists for one language (English has the AOSP list and the counted one), the one a download would pick is installed and the other is listed as not used. The word list is kept at the size you last chose for downloads (Large, 300,000 words, until you pick another), the same cap a download applies.
+
+## Voice models
+
+A Whisper model is two files: the graph and a vocabulary file that several models share. Import both together, or in either order. A vocabulary imported first waits for its model; a model imported without its vocabulary is placed and reported as still needing it, and becomes ready the moment the vocabulary arrives. Graphs are matched on their exact size as well as their name, because two different files have been published as `whisper-tiny.en.tflite` and only one of them works.
+
+## GIF packs
+
+The GIF panel can show packs of GIFs kept on the phone, with no key and no connection. It reads [CleverKeys' offline GIF packs](https://github.com/tribixbite/CleverKeys/releases/tag/CleverKeys-GIF): download one in the browser and import it under <SettingsPath path="Tools / GIFs / Offline GIF packs" />. Once a pack is installed, the GIF panel gains an **Offline** chip beside any online source, with its own grid, search and category chips. See [GIFs](/emoji/gifs/#offline-gif-packs).
+
+Only the **Discord community** packs carry animated GIFs. The **thumbnail** packs hold 80-pixel stills, previews with nothing behind them to send, so the import refuses them and says why.
+
+## What cannot work offline
+
+Two things on the full edition have no file to import:
+
+- **Handwriting.** The recogniser's models are downloaded and stored by Google's ML Kit, which offers no way to install one from a file.
+- **On-device translation.** The same: ML Kit keeps its language models to itself.
+
+Everything reaching an online service (web and image search, GIFs from Klipy or GIPHY, the dictionary and synonyms lookups, cloud AI providers, the currency rates, backups to a cloud account) needs the connection by definition. On a build with no internet permission those say that the build cannot connect, rather than waiting for a network that will never come.
+
+## Details & edge cases
+
+- **An import replaces what is there.** Importing a word list over a downloaded one swaps it, as a second download would. An import also undoes an earlier Delete, so the automatic downloads that were told to leave that language alone count it as present again.
+- **Nothing is half-installed.** Each file goes through a temporary copy and is renamed into place only once it is whole, so a failed or cancelled import leaves the previous state untouched.
+- **An import waits for a download of the same thing.** Both would write the same file, so while a word list, voice model or conversion table is downloading, an import of that kind is refused with a note to try again.
+- **Checksums where the download has them.** Conversion tables and the background remover are checked against the checksum the app ships with, and a file that differs is refused. Word lists, word pairs and emoji names are checked by parsing them; a file that does not parse is reported as damaged.
+- **Space.** A picked file is copied into the app before it is installed, so an import needs room for about twice its size for a moment.

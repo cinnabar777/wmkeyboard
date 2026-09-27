@@ -397,6 +397,16 @@ internal fun ToolDetailSettings(
     when (tool) {
         ToolbarTool.KDE_CONNECT ->
             com.wasimaster.wmkeyboard.app.kdeconnect.KdeConnectToolSettings(repository, settings, onNavigate)
+        // The tool is a shortcut to a screen, and its page leads to it too (#390).
+        ToolbarTool.STATISTICS -> SettingsGroup {
+            item {
+                NavRow(
+                    R.string.statistics_title,
+                    stringResource(R.string.statistics_subtitle),
+                    route = "statistics",
+                ) { onNavigate("statistics") }
+            }
+        }
         ToolbarTool.MEDIA_CONTROL -> {
             // Re-read whenever this screen comes back to the foreground: the
             // grant is made on a system screen, so the user leaves, ticks the
@@ -1344,6 +1354,15 @@ internal fun ToolDetailSettings(
                     ) { scope.launch { repository.setIncognitoPausesClipboard(it) } }
                 }
                 item {
+                    ToggleSetting(
+                        R.string.tooldetail_incognito_private_clipboard_title,
+                        stringResource(R.string.tooldetail_incognito_private_clipboard_subtitle),
+                        settings.watch { it.incognitoPrivateClipboard },
+                        info = stringResource(R.string.tooldetail_incognito_private_clipboard_info),
+                        default = SettingsDefaults.incognitoPrivateClipboard,
+                    ) { scope.launch { repository.setIncognitoPrivateClipboard(it) } }
+                }
+                item {
                     NavRow(
                         R.string.tooldetail_incognito_auto_nav_title,
                         stringResource(R.string.tooldetail_incognito_auto_nav_subtitle),
@@ -1966,6 +1985,14 @@ internal fun ToolDetailSettings(
                                 },
                             ) { scope.launch { repository.setStickerSuggestTrigger(it) } }
                         }
+                        item {
+                            ToggleSetting(
+                                R.string.tooldetail_sticker_suggest_magnify_title,
+                                stringResource(R.string.tooldetail_sticker_suggest_magnify_subtitle),
+                                settings.watch { it.gif.stickerSuggestMagnify },
+                                default = SettingsDefaults.gif.stickerSuggestMagnify,
+                            ) { scope.launch { repository.setStickerSuggestMagnify(it) } }
+                        }
                     }
                 }
             }
@@ -1980,6 +2007,7 @@ internal fun ToolDetailSettings(
                     ) { scope.launch { repository.setMediaFullBleed(it) } }
                 }
             }
+            if (tool == ToolbarTool.GIF) OfflineGifPacksGroup()
             SettingsGroup(
                 stringResource(R.string.tooldetail_media_keys_group),
                 info = stringResource(R.string.tooldetail_media_info),
@@ -3866,6 +3894,16 @@ private fun OcrPackManager(settings: LiveSettings) {
                     },
                 )
             }
+        }
+        item {
+            val links = packs.map { (pack, languages) ->
+                OfflineLink(languages.joinToString(", ") { it.displayName }, OcrLanguages.downloadUrl(pack))
+            }
+            OfflineImportRow(
+                subtitle = stringResource(R.string.offline_import_ocr_subtitle),
+                links = links,
+                onImported = { OcrPacks.refresh(filesDir, packs.map { it.first }) },
+            )
         }
     }
     askFor?.let { pack ->

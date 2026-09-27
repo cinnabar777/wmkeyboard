@@ -79,6 +79,7 @@ import com.wasimaster.wmkeyboard.core.snippets.SnippetStore
 import com.wasimaster.wmkeyboard.core.stickers.StickerImportResult
 import com.wasimaster.wmkeyboard.core.stickers.StickerPackFile
 import com.wasimaster.wmkeyboard.core.stickers.StickerPackStore
+import com.wasimaster.wmkeyboard.core.stickers.whatsapp.WaStickersFile
 import com.wasimaster.wmkeyboard.core.theme.ConvertedTheme
 import com.wasimaster.wmkeyboard.core.theme.FlexResult
 import com.wasimaster.wmkeyboard.core.theme.FlexTheme
@@ -159,6 +160,11 @@ object WMFileTypes {
         // open it. Keyman's own filter is unaffected, and with both installed
         // Android asks which app should handle it.
         KEYMAN_PACKAGE_EXTENSION,
+        // A WhatsApp sticker pack as the sticker-maker apps export it, claimed
+        // for the same reason again: whoever has one made it for WhatsApp and
+        // wants it here too. The apps that write the format keep their own
+        // filter, and with one installed Android asks which app should open it.
+        WaStickersFile.FILE_EXTENSION,
     )
 
     /**
@@ -212,6 +218,14 @@ object WMFileTypes {
          */
         data object Stickers : Opened
         data object Icons : Opened
+
+        /**
+         * A WhatsApp sticker pack, the `.wastickers` the sticker-maker apps
+         * export. Carries what the dialog needs to say — the title, the
+         * author and the count — and nothing else: the importer re-opens
+         * [uri] and streams the archive itself, as the sticker importer does.
+         */
+        data class WhatsAppStickers(val header: WaStickersFile.Header) : Opened
 
         /**
          * A key-sound pack. A ZIP with the same `pack.json` sticker and icon
@@ -411,6 +425,10 @@ object WMFileTypes {
      * sticker importer.
      */
     private fun identifyArchive(context: android.content.Context, uri: Uri): Opened {
+        // The entry names seen on the way to the manifest, for the one archive
+        // format that has no manifest: a `.wastickers` is told by the two text
+        // files it carries, which the scan below walks past.
+        val names = ArrayList<String>()
         val manifest = runCatching {
             context.contentResolver.requireInputStream(uri).use { input ->
                 java.util.zip.ZipInputStream(input.buffered()).use { zip ->
@@ -418,6 +436,7 @@ object WMFileTypes {
                     while (scanned++ < MANIFEST_SCAN_LIMIT) {
                         val entry = zip.nextEntry ?: break
                         if (entry.isDirectory) continue
+                        names += entry.name
                         if (entry.name !in ARCHIVE_MANIFESTS) continue
                         // Both manifests are small; the tag is near the front.
                         // (InputStream.readNBytes is API 33; minSdk here is 24.)
@@ -433,7 +452,7 @@ object WMFileTypes {
                     null
                 }
             }
-        }.getOrNull() ?: return Opened.Unrecognized
+        }.getOrNull() ?: return identifyManifestless(context, uri, names)
 
         // Converting reads the whole archive, so it happens only once the
         // manifest has said the archive is worth reading.
@@ -465,6 +484,23 @@ object WMFileTypes {
             return Opened.GboardThemeFile(result)
         }
         return archiveKindFor(manifest)
+    }
+
+    /**
+     * A ZIP with none of the manifests above in it.
+     *
+     * One format is recognised anyway: a WhatsApp `.wastickers` has no
+     * manifest, only a `title.txt` and an `author.txt` beside the pictures,
+     * and those two names are its whole signature (see
+     * [WaStickersFile.looksLikeWaStickers]). Anything else stays unrecognised,
+     * because a ZIP of pictures with no such file is any ZIP of pictures.
+     */
+    private fun identifyManifestless(context: android.content.Context, uri: Uri, names: List<String>): Opened {
+        if (!WaStickersFile.looksLikeWaStickers(names)) return Opened.Unrecognized
+        val header = runCatching {
+            context.contentResolver.requireInputStream(uri).use { WaStickersFile.peek(it) }
+        }.getOrNull() ?: return Opened.Unrecognized
+        return Opened.WhatsAppStickers(header)
     }
 
     /**
@@ -1230,6 +1266,8 @@ private fun rememberProposal(
             },
         )
 
+        is WMFileTypes.Opened.WhatsAppStickers -> whatsAppStickersProposal(state.header, context, uri)
+
         WMFileTypes.Opened.Icons -> ImportProposal(
             titleRes = R.string.import_icons_title,
             body = context.getString(R.string.import_icons_body),
@@ -1294,6 +1332,48 @@ private fun rememberProposal(
             apply = null,
         )
     }
+}
+
+/**
+ * The confirmation for a WhatsApp `.wastickers` file.
+ *
+ * Worded as a foreign import, like the Keyman and FlorisBoard ones: the file
+ * was made for another app, and the dialog says so and says what is in it —
+ * the title, who made it, how many stickers — before anything is written. The
+ * author is shown here and nowhere else, because a pack of this app's keeps
+ * no author; the title becomes the pack's name.
+ */
+private fun whatsAppStickersProposal(
+    header: WaStickersFile.Header,
+    context: android.content.Context,
+    uri: Uri,
+): ImportProposal {
+    val title = header.title.ifBlank { context.getString(ContentR.string.core_content_sticker_pack_imported_label) }
+    val count = context.resources.getQuantityString(
+        R.plurals.import_sticker_count,
+        header.stickerCount,
+        header.stickerCount,
+    )
+    return ImportProposal(
+        titleRes = R.string.import_name_title,
+        titleArg = title,
+        body = if (header.author.isBlank()) {
+            context.getString(R.string.import_whatsapp_file_body, count)
+        } else {
+            context.getString(R.string.import_whatsapp_file_body_author, count, header.author)
+        },
+        apply = {
+            val store = StickerPackStore.get(context)
+            val fallbackName = context.getString(ContentR.string.core_content_sticker_pack_imported_label)
+            val result = withContext(Dispatchers.IO) {
+                runCatching {
+                    context.contentResolver.requireInputStream(uri)
+                        .use { WaStickersFile.import(it, store, fallbackName) }
+                }.getOrDefault(StickerImportResult.Failed)
+            }
+            result.describe(context)
+        },
+    )
 }
 
 /**

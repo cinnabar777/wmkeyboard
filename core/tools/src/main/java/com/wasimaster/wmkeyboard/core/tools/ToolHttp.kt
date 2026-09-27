@@ -62,9 +62,11 @@ object ToolHttp {
     /**
      * Browser-ish UA for every request: arbitrary image hosts surfaced by
      * Google image/GIF search often 403 the default Java agent, and the
-     * APIs don't mind either way.
+     * APIs don't mind either way. Public because the media image loader
+     * sends it too: Wikimedia's thumb and upload hosts answer 403 to
+     * OkHttp's default `okhttp/x.y` agent.
      */
-    private const val USER_AGENT =
+    const val USER_AGENT =
         "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) " +
             "Chrome/124.0 Mobile Safari/537.36"
 

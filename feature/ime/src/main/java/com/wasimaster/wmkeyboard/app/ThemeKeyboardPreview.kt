@@ -41,6 +41,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -123,6 +125,11 @@ fun ThemeKeyboardPreview(
     miniature: Boolean,
     modifier: Modifier = Modifier,
     onHide: () -> Unit = {},
+    /**
+     * Told where the board itself was laid out, inside the miniature's scale,
+     * for a host that measures it (the image-size guide, #397).
+     */
+    onBoardPositioned: ((LayoutCoordinates) -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val view = LocalView.current
@@ -310,7 +317,17 @@ fun ThemeKeyboardPreview(
         ) {
             // Rounded on the keyboard itself, inside the scale, so the corners
             // are the keyboard's whatever width it settles at.
-            Box(modifier = Modifier.clip(RoundedCornerShape(12.dp))) { keyboard() }
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .then(
+                        if (onBoardPositioned == null) {
+                            Modifier
+                        } else {
+                            Modifier.onGloballyPositioned(onBoardPositioned)
+                        },
+                    ),
+            ) { keyboard() }
         }
     } else {
         Column(modifier = modifier.fillMaxWidth()) {

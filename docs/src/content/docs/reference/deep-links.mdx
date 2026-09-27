@@ -434,11 +434,12 @@ Like every other link, this one only navigates. It opens a confirm naming the se
 
 ## Opening files WM Keyboard made
 
-WM Keyboard registers a file association for thirteen extensions. Most are
-things it exports itself, plus five it only ever reads: plugin and sound pack
+WM Keyboard registers a file association for fourteen extensions. Most are
+things it exports itself, plus six it only ever reads: plugin and sound pack
 files are built by their authors rather than the app, the settings-only backup
-has no export button left, a `.flex` belongs to FlorisBoard, and a `.kmp`
-belongs to Keyman. Tapping any of these in a file manager offers to import the
+has no export button left, a `.flex` belongs to FlorisBoard, a `.kmp`
+belongs to Keyman, and a `.wastickers` is a WhatsApp sticker pack as the
+sticker-maker apps export it. Tapping any of these in a file manager offers to import the
 file instead of opening it as plain text, and so does sharing one into WM
 Keyboard from another app's share sheet.
 
@@ -457,6 +458,7 @@ Keyboard from another app's share sheet.
 | `.wmsettings.json` | An older, settings-only backup format |
 | `.flex` | A FlorisBoard theme extension, converted rather than installed. Not WM Keyboard's own format at all, and claiming it is the point: someone moving over opens the file they already have |
 | `.kmp` | A Keyman keyboard package, converted to a layout rather than installed |
+| `.wastickers` | A WhatsApp sticker pack from Sticker Maker or a similar app, read as a pack of ours |
 
 This opens a separate, minimal activity, not the settings app itself, since
 tapping a theme in a file manager shouldn't drop you into full settings. It

@@ -8,7 +8,6 @@ import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.zip.ZipEntry
-import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
 
 /** The outcome of reading a `.wmstickers` file. */
@@ -158,9 +157,9 @@ object StickerPackFile {
     const val MANIFEST = "pack.json"
     private const val STICKER_DIR = "stickers/"
 
-    /** Zip-bomb guards: nothing legitimate comes close to either. */
-    private const val MAX_ENTRIES = 500
-    private const val MAX_TOTAL_BYTES = 64L * 1024 * 1024
+    /** Zip-bomb guards, shared with every sticker archive: see [StickerArchive]. */
+    const val MAX_ENTRIES = StickerArchive.MAX_ENTRIES
+    const val MAX_TOTAL_BYTES = StickerArchive.MAX_TOTAL_BYTES
 
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true; prettyPrint = true }
 
@@ -236,11 +235,12 @@ object StickerPackFile {
     ): StickerImportResult {
         val staging = store.stagingDir() ?: return StickerImportResult.Failed
         try {
-            val unpacked = unpack(input, staging)
-            if (!unpacked.read && unpacked.manifest == null) return StickerImportResult.Failed
+            val unpacked = StickerArchive.unpack(input, staging, texts = setOf(MANIFEST))
+            val manifestText = unpacked.texts[MANIFEST]
+            if (!unpacked.read && manifestText == null) return StickerImportResult.Failed
             val staged = unpacked.files
 
-            val envelope = unpacked.manifest
+            val envelope = manifestText
                 ?.let { runCatching { json.decodeFromString<ReadEnvelope>(it) }.getOrNull() }
                 ?: return StickerImportResult.NotAStickerPack
             if (envelope.format != FORMAT) return StickerImportResult.NotAStickerPack
@@ -271,78 +271,6 @@ object StickerPackFile {
         } finally {
             staging.deleteRecursively()
         }
-    }
-
-    /** The archive spilled into a staging directory: entry name -> staged file. */
-    private class Unpacked(
-        val files: Map<String, File>,
-        val manifest: String?,
-        /** False when the archive read threw partway; a manifest may still have landed. */
-        val read: Boolean,
-    )
-
-    /**
-     * Spills every entry into [staging] under a name of our own choosing, and
-     * keeps the manifest as text.
-     *
-     * Nothing is written to a path derived from an entry name — the map's keys
-     * carry the names, and only for looking entries up afterwards.
-     */
-    private fun unpack(input: InputStream, staging: File): Unpacked {
-        val staged = HashMap<String, File>()
-        var manifest: String? = null
-        val read = runCatching {
-            ZipInputStream(input.buffered()).use { zip ->
-                var count = 0
-                var total = 0L
-                while (true) {
-                    val entry = zip.nextEntry ?: break
-                    if (entry.isDirectory) continue
-                    if (++count > MAX_ENTRIES) break
-                    val name = entry.name
-                    if (name == MANIFEST) {
-                        manifest = zip.readBytes().decodeToString()
-                        continue
-                    }
-                    val target = File(staging, "e$count.bin")
-                    val written = spill(zip, target, total)
-                    total += written
-                    if (written < 0 || written > StickerImage.MAX_SOURCE_BYTES) {
-                        target.delete()
-                        if (written < 0) break
-                    } else {
-                        staged[name] = target
-                    }
-                }
-            }
-            true
-        }.getOrDefault(false)
-        return Unpacked(staged, manifest, read)
-    }
-
-    /**
-     * Copies one entry into [target]. Returns the bytes written, or -1 once the
-     * archive as a whole has gone past [MAX_TOTAL_BYTES] — at which point there
-     * is no point reading the rest of it.
-     */
-    private fun spill(zip: ZipInputStream, target: File, soFar: Long): Long {
-        var written = 0L
-        var overran = false
-        target.outputStream().buffered().use { sink ->
-            val buffer = ByteArray(16 * 1024)
-            while (true) {
-                val n = zip.read(buffer)
-                if (n <= 0) break
-                written += n
-                if (soFar + written > MAX_TOTAL_BYTES) {
-                    overran = true
-                    break
-                }
-                if (written > StickerImage.MAX_SOURCE_BYTES) break
-                sink.write(buffer, 0, n)
-            }
-        }
-        return if (overran) -1 else written
     }
 
     /**

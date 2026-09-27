@@ -778,9 +778,10 @@ fun panelFocusRegions(panel: PanelMode): List<FocusRegion> = when (panel) {
     // has: the region is empty until something publishes into it.
     PanelMode.THEMES ->
         listOf(FocusRegion.CHIPS, FocusRegion.CATEGORIES, FocusRegion.RESULTS)
-    // The clipboard's chips are the fragments pulled out of its history.
+    // The clipboard's chips are the fragments pulled out of its history; its
+    // categories are the unpinned and pinned tabs, when those are on (#371).
     PanelMode.CLIPBOARD ->
-        listOf(FocusRegion.SEARCH, FocusRegion.CHIPS, FocusRegion.RESULTS)
+        listOf(FocusRegion.SEARCH, FocusRegion.CHIPS, FocusRegion.CATEGORIES, FocusRegion.RESULTS)
     PanelMode.DICTIONARY,
     PanelMode.WEB_SEARCH, PanelMode.IMAGE_SEARCH, PanelMode.WIKIPEDIA,
     -> listOf(FocusRegion.SEARCH, FocusRegion.RESULTS)
@@ -3107,6 +3108,14 @@ data class KeyboardUiState(
      * panel is open.
      */
     val cameraSearchOnly: Boolean = false,
+    /**
+     * The picture the OCR panel reads instead of the camera: the file of an
+     * image clip whose Extract text was pressed in the clipboard panel (#371).
+     * Its back button returns to the clipboard. Cleared by
+     * [WMKeyboardService.onPanelChange] on every panel change, like
+     * [cameraSearchOnly].
+     */
+    val ocrImage: String? = null,
     val translate: TranslateUi = TranslateUi(),
     val grammar: GrammarUi = GrammarUi(),
     val wiki: WikiUi = WikiUi.Idle,

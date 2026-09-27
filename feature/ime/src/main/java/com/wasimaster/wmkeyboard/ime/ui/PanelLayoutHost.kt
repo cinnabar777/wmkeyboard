@@ -226,13 +226,14 @@ internal fun ClipboardPanelHost(state: KeyboardUiState, callbacks: PanelLayoutCa
     val onClose = { callbacks.onPanelChange(PanelMode.CLIPBOARD) }
     val edit = state.clipEdit
     if (edit != null && state.clipEditActive) {
-        // The editor takes the search's compact height, for the same reason:
-        // the keys are back underneath, and the window must not move.
+        // The keys come back underneath, as for the search, but the editor
+        // keeps the history's own height rather than the search's few rows
+        // (#371): a clip is read and changed here, and a note needs the room.
         ClipEditDialog(
             state, edit, callbacks.clipboard.actions,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(clipboardSearchPanelHeight(state)),
+                .height(clipEditPanelHeight(state)),
         )
         return
     }
@@ -257,7 +258,7 @@ internal fun ClipboardPanelHost(state: KeyboardUiState, callbacks: PanelLayoutCa
     // The strips only exist when they have something to show, as before: a
     // row holding nothing but an empty strip takes no height.
     val collapsed = buildSet {
-        if (!session.showSearch) add(PanelFieldKind.CLIPBOARD_SEARCH)
+        if (!session.showSearch && !session.showClear) add(PanelFieldKind.CLIPBOARD_SEARCH)
         if (session.entities.isEmpty()) add(PanelFieldKind.CLIPBOARD_ENTITIES)
         // Nothing to lay out either way until there is a clip.
         if (state.clipboardItems.isEmpty()) add(PanelFieldKind.CLIPBOARD_VIEW)
@@ -282,8 +283,9 @@ internal fun ClipboardPanelHost(state: KeyboardUiState, callbacks: PanelLayoutCa
                         for (key in shown) {
                             val kind = (key.action as KeyAction.Field).kind
                             // The pill takes its share of the width; the switch
-                            // is a fixed square beside it, or alone at the end.
-                            val cell = if (kind == PanelFieldKind.CLIPBOARD_SEARCH) {
+                            // is a fixed square beside it, or alone at the end,
+                            // and so is the clear button with the pill hidden.
+                            val cell = if (kind == PanelFieldKind.CLIPBOARD_SEARCH && session.showSearch) {
                                 Modifier.weight(key.width)
                             } else {
                                 Modifier.width(HeaderToggleWidth)
@@ -385,9 +387,9 @@ private val HeaderToggleWidth = 44.dp
 internal val ClipboardSearchHeight = 132.dp
 
 /**
- * The search's and the clip editor's height: [ClipboardSearchHeight] plus the
- * toolbar row it stands in for, less the query's own strip below (#161), and
- * fitted to the screen with the keys underneath it (#333).
+ * The search's height: [ClipboardSearchHeight] plus the toolbar row it stands
+ * in for, less the query's own strip below (#161), and fitted to the screen
+ * with the keys underneath it (#333).
  */
 @Composable
 private fun clipboardSearchPanelHeight(state: KeyboardUiState): Dp = toolPanelHeight(
@@ -395,3 +397,21 @@ private fun clipboardSearchPanelHeight(state: KeyboardUiState): Dp = toolPanelHe
     wanted = ClipboardSearchHeight + topBarHeight(state.settings) - captureStripHeight(state),
     floor = FullBleedHeaderHeight,
 )
+
+/**
+ * The clip editor's height (#371): the key area the history filled plus the
+ * toolbar row, less the editor's strip below, so the editor opens as tall as
+ * the panel it replaces and the keys push the keyboard up underneath it. The
+ * same fit to the screen as the search's (#333) keeps a phone held sideways
+ * from losing its keys to it, and it is never shorter than the search.
+ */
+@Composable
+private fun clipEditPanelHeight(state: KeyboardUiState): Dp {
+    val strip = captureStripHeight(state)
+    val bar = topBarHeight(state.settings)
+    return toolPanelHeight(
+        state,
+        wanted = maxOf(keyRowsHeight(state), ClipboardSearchHeight) + bar - strip,
+        floor = FullBleedHeaderHeight,
+    )
+}

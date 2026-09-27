@@ -178,9 +178,34 @@
 .lb-picked {
 	margin: 0;
 	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	padding: 0.65rem 0.85rem;
+	border: 1px solid var(--lb-border);
+	border-radius: 8px;
+	background: var(--lb-bg);
+}
+.lb-picked-header {
+	display: flex;
 	flex-wrap: wrap;
 	gap: 0.25rem 0.5rem;
 	align-items: baseline;
+}
+.lb-picked-desc {
+	margin: 0;
+	color: var(--sl-color-gray-2);
+	font-size: var(--sl-text-xs);
+	line-height: 1.4;
+}
+.lb-picked-help {
+	margin: 0.25rem 0 0;
+	padding: 0.5rem 0.7rem;
+	border-radius: 6px;
+	background: var(--lb-field-bg);
+	border-left: 3px solid var(--sl-color-accent);
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
 }
 .lb-results {
 	list-style: none;
@@ -224,6 +249,12 @@
 	color: var(--sl-color-white);
 	font-weight: 600;
 }
+.lb-result-desc {
+	grid-column: 1;
+	color: var(--sl-color-gray-2);
+	font-size: var(--sl-text-xs);
+	line-height: 1.4;
+}
 .lb-result-path {
 	grid-column: 1;
 	color: var(--sl-color-gray-3);
@@ -231,7 +262,7 @@
 }
 .lb-results button code {
 	grid-column: 2;
-	grid-row: 1 / span 2;
+	grid-row: 1 / span 3;
 	align-self: center;
 	color: var(--sl-color-gray-3);
 }
@@ -243,6 +274,56 @@
 		grid-column: 1;
 		grid-row: auto;
 	}
+}
+
+/* setting context card */
+.lb-setting-card {
+	display: flex;
+	flex-direction: column;
+	gap: 0.45rem;
+	padding: 0.75rem 0.9rem;
+	border: 1px solid var(--lb-border);
+	border-radius: 8px;
+	background: var(--lb-bg);
+}
+.lb-setting-card-head {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.35rem 0.6rem;
+	align-items: baseline;
+}
+.lb-setting-card-title {
+	color: var(--sl-color-white);
+	font-weight: 600;
+}
+.lb-setting-desc {
+	margin: 0;
+	color: var(--sl-color-gray-2);
+	line-height: 1.45;
+}
+.lb-setting-help {
+	margin-top: 0.25rem;
+	padding: 0.6rem 0.8rem;
+	border-radius: 6px;
+	background: var(--lb-field-bg);
+	border-left: 3px solid var(--sl-color-accent);
+	display: flex;
+	flex-direction: column;
+	gap: 0.3rem;
+}
+.lb-help-badge {
+	font-size: var(--sl-text-xs);
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--sl-color-accent-high);
+}
+.lb-help-text {
+	margin: 0;
+	color: var(--sl-color-gray-2);
+	font-size: var(--sl-text-xs);
+	line-height: 1.5;
+	white-space: pre-line;
 }
 
 /* output */

@@ -6,14 +6,21 @@ import com.wasimaster.wmkeyboard.tools.R
 /**
  * Where a GIF/sticker result came from. [LOCAL] is the user's own sticker
  * packs on device — sticker-only, always available, and never mixed into a
- * provider grid.
+ * provider grid. [OFFLINE] is its GIF-panel twin: packs of GIFs imported from
+ * a file ([com.wasimaster.wmkeyboard.core.tools.offlinegif.OfflineGifPacks]),
+ * offered once one is installed and needing no network at all.
  *
  * [COMMONS] is the F-Droid build's only remote source and appears in no other
  * channel: KLIPY and GIPHY both want an API key that build cannot carry. Its
  * corpus is educational rather than reactive, which the panel says out loud
  * rather than leaving the user to conclude the search is broken.
  */
-enum class GifSource { KLIPY, GIPHY, LOCAL, COMMONS }
+enum class GifSource {
+    KLIPY, GIPHY, LOCAL, COMMONS, OFFLINE;
+
+    /** Files on the device rather than a provider: its own grid, never interleaved, never metered. */
+    val onDevice: Boolean get() = this == LOCAL || this == OFFLINE
+}
 
 /**
  * One GIF or sticker result: a small preview for the panel grid and the
@@ -48,38 +55,39 @@ object GifSources {
         GifSource.GIPHY -> R.string.core_tools_gif_source_giphy
         GifSource.LOCAL -> R.string.core_tools_gif_source_local
         GifSource.COMMONS -> R.string.core_tools_gif_source_commons
+        GifSource.OFFLINE -> R.string.core_tools_gif_source_offline
     }
 
     /**
      * Which sources one fetch should hit, given the chip the user is on.
      *
-     * Local packs are never interleaved with providers: picking them is
-     * always a grid of its own, in mixed mode as much as in tabs mode.
+     * Packs on the device are never interleaved with providers: picking
+     * them is always a grid of its own, in mixed mode as much as in tabs mode.
      */
     fun targets(sources: List<GifSource>, selected: GifSource, tabs: Boolean): List<GifSource> {
         if (sources.isEmpty()) return emptyList()
         val pick = selected.takeIf { it in sources }
-        if (pick == GifSource.LOCAL) return listOf(GifSource.LOCAL)
+        if (pick != null && pick.onDevice) return listOf(pick)
         if (tabs) return listOf(pick ?: sources.first())
-        val remote = sources.filter { it != GifSource.LOCAL }
-        return remote.ifEmpty { sources }
+        val remote = sources.filterNot { it.onDevice }
+        return remote.ifEmpty { listOf(sources.first()) }
     }
 
     /**
      * Chips for the source row, or an empty list when there is nothing to
      * switch between. Mixed mode collapses the providers into one "Online"
-     * chip standing for the interleaved grid, so local packs still get a tab.
+     * chip standing for the interleaved grid, so packs on the device still
+     * get a tab each.
      */
     fun chips(sources: List<GifSource>, tabs: Boolean): List<SourceChip> {
         if (tabs) {
             return if (sources.size > 1) sources.map { SourceChip(displayNameRes(it), it) } else emptyList()
         }
-        val remote = sources.filter { it != GifSource.LOCAL }
-        if (remote.isEmpty() || GifSource.LOCAL !in sources) return emptyList()
-        return listOf(
-            SourceChip(R.string.core_tools_gif_source_online, remote.first()),
-            SourceChip(displayNameRes(GifSource.LOCAL), GifSource.LOCAL),
-        )
+        val remote = sources.filterNot { it.onDevice }
+        val onDevice = sources.filter { it.onDevice }
+        if (remote.size + onDevice.size < 2 || onDevice.isEmpty()) return emptyList()
+        val online = remote.firstOrNull()?.let { listOf(SourceChip(R.string.core_tools_gif_source_online, it)) }
+        return online.orEmpty() + onDevice.map { SourceChip(displayNameRes(it), it) }
     }
 
     /** Index of the active chip in [chips], falling back to the first. */
@@ -87,7 +95,7 @@ object GifSources {
         val exact = chips.indexOfFirst { it.source == selected }
         if (exact >= 0) return exact
         // Mixed mode: any provider means the "Online" chip is the active one.
-        return chips.indexOfFirst { it.source != GifSource.LOCAL }.coerceAtLeast(0)
+        return chips.indexOfFirst { !it.source.onDevice }.coerceAtLeast(0)
     }
 
     /**

@@ -52,6 +52,10 @@
     <string name="voice_server_url_label">Server address</string>
     <!-- Keep the example address as it is. -->
     <string name="voice_server_url_hint">For example http://192.168.1.10:8000/v1. The keyboard adds /audio/transcriptions</string>
+    <!-- The server's own route, for one that does not answer on the standard endpoint (#388). -->
+    <string name="voice_server_path_label">Endpoint path</string>
+    <!-- Keep the paths as they are. -->
+    <string name="voice_server_path_hint">Optional. For a server with its own route, such as /v1/transcribe. It is added to the address as typed. Leave it empty to use /audio/transcriptions</string>
     <string name="voice_server_model_label">Model</string>
     <!-- Keep the model names as they are. -->
     <string name="voice_server_model_hint">Optional. For example Systran/faster-whisper-small or whisper-large-v3-turbo</string>
@@ -69,6 +73,21 @@
     <string name="voice_bias_personal_info">Each time you dictate, the keyboard sends a list of your own words with it: the words you added by hand, the words in Android\'s personal dictionary, and the words the keyboard learned from your typing that are not in any word list, such as names. The system engine also gets permission to use what it knows about your phone, such as your contacts. The list goes to the engine that listens to your voice, and nowhere else. The system engine uses it on Android 13 and later, if the engine supports it. A transcription server gets it as part of its prompt. Offline Whisper cannot use a list, so this setting does not show for it.</string>
     <string name="voice_bias_words_label">More words to listen for</string>
     <string name="voice_bias_words_hint">Optional. Separate them with commas. These go first, before the words from your dictionary</string>
+    <!-- A model or a whole other server for one language (#389). -->
+    <string name="voice_server_languages_group">Per language</string>
+    <string name="voice_server_languages_info">Some models are better at some languages. Give a language its own model on the same server, or a server of its own. Dictation follows the language of the layout you are typing on.</string>
+    <string name="voice_server_lang_main">Main server</string>
+    <!-- %1$s is a model name. -->
+    <string name="voice_server_lang_model">Model %1$s</string>
+    <!-- %1$s is a server address. -->
+    <string name="voice_server_lang_server">Own server: %1$s</string>
+    <string name="voice_server_lang_change">Change</string>
+    <!-- %1$s is a language name. -->
+    <string name="voice_server_lang_dialog_title">Server for %1$s</string>
+    <string name="voice_server_lang_url_hint">Leave it empty to use the main server with the model below</string>
+    <string name="voice_server_lang_model_hint">Leave it empty to use the model of the main server</string>
+    <string name="voice_server_lang_own_model_hint">Leave it empty to let this server choose</string>
+    <string name="voice_server_lang_reset">Use main server</string>
     <string name="voice_server_test_title">Test the server</string>
     <string name="voice_server_test_subtitle">Send one second of silence and check that the server answers</string>
     <string name="voice_server_test_action">Test</string>

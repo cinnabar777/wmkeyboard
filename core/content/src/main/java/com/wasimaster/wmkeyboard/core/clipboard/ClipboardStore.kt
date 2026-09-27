@@ -576,6 +576,20 @@ class ClipboardStore(
         removeWhere { !it.pinned }
     }
 
+    /**
+     * [clearUnpinned] with an Undo (#371): every unpinned clip is taken out the
+     * way [detach] takes one, so each can go back through [reattach] or end in
+     * [discard]. Returns them, newest first; empty when every clip is pinned.
+     */
+    @Synchronized
+    fun detachUnpinned(now: Long = System.currentTimeMillis()): List<ClipItem> {
+        prune(now)
+        val unpinned = items.filter { !it.pinned }.sortedByDescending { it.timestamp }
+        items.removeAll { !it.pinned }
+        detached.addAll(unpinned)
+        return unpinned
+    }
+
     @Synchronized
     fun search(query: String): List<ClipItem> = items().filter { it.matchesQuery(query) }
 

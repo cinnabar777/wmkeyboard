@@ -264,6 +264,43 @@ class BengaliPhoneticIndex(entries: List<Pair<String, Int>>) : PhoneticIndex {
         return 0
     }
 
+    /**
+     * [byWord] is already in word order, so the words with [prefix] are one
+     * contiguous run of it: binary-search the run's start and keep the
+     * commonest [limit] while walking it. A one-letter prefix over a big
+     * downloaded list is a run of tens of thousands, which is still a linear
+     * pass over ints on the suggestion thread, not a sort.
+     */
+    override fun completions(prefix: String, limit: Int): List<String> {
+        if (prefix.isEmpty() || limit <= 0) return emptyList()
+        var low = 0
+        var high = byWord.size
+        while (low < high) {
+            val mid = (low + high) ushr 1
+            if (compareWord(byWord[mid], prefix) < 0) low = mid + 1 else high = mid
+        }
+        // Min-heap on frequency: the head is the weakest word kept so far.
+        val best = java.util.PriorityQueue<Int>(limit + 1, compareBy { frequencies[it] })
+        var i = low
+        while (i < byWord.size && startsWith(byWord[i], prefix)) {
+            best.add(byWord[i])
+            if (best.size > limit) best.poll()
+            i++
+        }
+        val out = ArrayList<String>(best.size)
+        while (best.isNotEmpty()) out.add(wordAt(best.poll()))
+        // A word listed twice (bundled and imported) is offered once.
+        return out.asReversed().distinct()
+    }
+
+    /** Whether entry [position]'s word begins with [prefix]. */
+    private fun startsWith(position: Int, prefix: String): Boolean {
+        val start = wordStart[position]
+        if (wordStart[position + 1] - start < prefix.length) return false
+        for (i in prefix.indices) if (wordChars[start + i] != prefix[i]) return false
+        return true
+    }
+
     override fun matchStrength(input: String): Int {
         val folded = foldRomanFull(input)
         val bucket = bucketOf(folded.key)

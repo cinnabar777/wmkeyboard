@@ -10,6 +10,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -40,6 +41,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.DeleteSweep
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.GridView
 import androidx.compose.material.icons.outlined.PushPin
@@ -52,7 +54,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.key
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -69,13 +73,19 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -87,6 +97,7 @@ import com.wasimaster.wmkeyboard.core.clipboard.ClipEntities
 import com.wasimaster.wmkeyboard.core.clipboard.ClipEntity
 import com.wasimaster.wmkeyboard.core.clipboard.ClipItem
 import com.wasimaster.wmkeyboard.core.clipboard.ClipKind
+import com.wasimaster.wmkeyboard.core.clipboard.ClipLinks
 import com.wasimaster.wmkeyboard.core.clipboard.PhoneFormats
 import com.wasimaster.wmkeyboard.core.clipboard.clipEditable
 import com.wasimaster.wmkeyboard.core.clipboard.clipPreviewText
@@ -104,6 +115,7 @@ import com.wasimaster.wmkeyboard.ime.FocusRegion
 import com.wasimaster.wmkeyboard.ime.KeyboardUiState
 import com.wasimaster.wmkeyboard.ime.PanelMode
 import com.wasimaster.wmkeyboard.ime.R
+import com.wasimaster.wmkeyboard.ime.clipOcrAvailable
 
 /**
  * The clipboard panel's components, each in the cell its panel layout gives it
@@ -128,7 +140,20 @@ data class ClipboardPanelActions(
     val onViewToggle: () -> Unit = {},
     /** The Undo bar's button: put back the clips just deleted (#327). */
     val onUndoDelete: () -> Unit = {},
+    /** The Undo bar swiped away: the delete is final now, not at the timeout (#371). */
+    val onUndoDismiss: () -> Unit = {},
+    /** The clear button's question answered Delete: every unpinned clip goes (#371). */
+    val onClearUnpinned: () -> Unit = {},
+    /** A link clip's Open link: the address in the browser (#371). */
+    val onOpenLink: (ClipItem) -> Unit = {},
+    /** An image clip's View: the picture full screen (#371). */
+    val onViewImage: (ClipItem) -> Unit = {},
+    /** An image clip's Extract text: the OCR panel, reading the picture (#371). */
+    val onExtractText: (ClipItem) -> Unit = {},
 )
+
+/** The history's two tabs, when [ClipboardSettings.pinnedTabs] is on (#371). */
+internal enum class ClipTab { UNPINNED, PINNED }
 
 /** Everything the clipboard components call back into the service with. */
 @Immutable
@@ -159,17 +184,53 @@ internal class ClipboardPanelSession(
      * Empty when numbering is off.
      */
     val numbers: Map<Long, Int>,
-)
+    /**
+     * The unpinned / pinned tabs are drawn and [shownItems] is one of them
+     * (#371): the setting is on, there is history, and no search is running,
+     * since a search looks through both.
+     */
+    val tabbed: Boolean,
+    /** The open tab. Kept while the panel is, so a pin does not throw the user back. */
+    val tab: MutableState<ClipTab>,
+    val pinnedCount: Int,
+    val unpinnedCount: Int,
+    /** The bin beside the search pill (#371): the setting is on and something is unpinned. */
+    val showClear: Boolean,
+    /**
+     * The bin's question is up. Its own state rather than a field of this
+     * session, which is rebuilt whenever the history moves: a clip copied
+     * meanwhile must not take the question away.
+     */
+    val clearAsking: MutableState<Boolean>,
+    /** Image clips offer Extract text: the OCR tool is on in a build that has it. */
+    val ocr: Boolean,
+) {
+    /** The question is on screen: asked, and there is still something to delete. */
+    val confirmingClear: Boolean get() = showClear && clearAsking.value
+}
 
 @Composable
 internal fun rememberClipboardPanelSession(state: KeyboardUiState): ClipboardPanelSession {
     val showSearch = state.settings.clipboard.search && state.clipboardItems.isNotEmpty()
     val query = state.clipboardQuery.trim()
-    val shownItems = if (query.isEmpty()) {
-        state.clipboardItems
+    val tab = remember { mutableStateOf(ClipTab.UNPINNED) }
+    val tabbed = state.settings.clipboard.pinnedTabs && !state.clipboardSearchActive &&
+        state.clipboardItems.isNotEmpty()
+    val pinnedCount = state.clipboardItems.count { it.pinned }
+    val unpinnedCount = state.clipboardItems.size - pinnedCount
+    val inTab = if (tabbed) {
+        val pinned = tab.value == ClipTab.PINNED
+        state.clipboardItems.filter { it.pinned == pinned }
     } else {
-        state.clipboardItems.filter { it.matchesQuery(query) }
+        state.clipboardItems
     }
+    val shownItems = if (query.isEmpty()) inTab else inTab.filter { it.matchesQuery(query) }
+    val showClear = state.settings.clipboard.clearButton && unpinnedCount > 0
+    val clearAsking = remember { mutableStateOf(false) }
+    // A question left standing while there was nothing to clear would pop
+    // back up, unasked, with the next copy.
+    LaunchedEffect(showClear) { if (!showClear) clearAsking.value = false }
+    val ocr = clipOcrAvailable(state.settings)
     // Scanning every clip with three regexes is not free, so it happens once
     // per history change rather than on every recomposition.
     val phoneFormats = state.settings.clipboard.phoneFormats
@@ -192,8 +253,14 @@ internal fun rememberClipboardPanelSession(state: KeyboardUiState): ClipboardPan
     val numbers = remember(state.clipboardItems, showNumbers) {
         if (showNumbers) clipNumbers(state.clipboardItems) else emptyMap()
     }
-    return remember(shownItems, entities, showSearch, query, gridState, list, numbers) {
-        ClipboardPanelSession(shownItems, entities, showSearch, query, gridState, list, numbers)
+    return remember(
+        shownItems, entities, showSearch, query, gridState, list, numbers,
+        tabbed, pinnedCount, unpinnedCount, showClear, ocr,
+    ) {
+        ClipboardPanelSession(
+            shownItems, entities, showSearch, query, gridState, list, numbers,
+            tabbed, tab, pinnedCount, unpinnedCount, showClear, clearAsking, ocr,
+        )
     }
 }
 
@@ -214,31 +281,100 @@ internal fun ClipboardField(
     }
 }
 
-/** The search pill, or an empty cell while there is nothing to filter. */
+/**
+ * The search pill with the clear button at its end when that is on (#371), or
+ * an empty cell while there is nothing to filter or clear. The bin rides the
+ * pill's cell rather than a cell of its own, so it turns up in every panel
+ * layout the user already has, beside the search bar the way it was asked for.
+ */
 @Composable
 private fun ClipboardSearchFieldCell(
     state: KeyboardUiState,
     session: ClipboardPanelSession,
     callbacks: ClipboardFieldCallbacks,
 ) {
+    val clearIndex = if (session.showSearch) 1 else 0
     // Published even when hidden, at zero, so a stale count left behind cannot
-    // let Tab land on a pill nothing is drawing.
+    // let Tab land on a pill nothing is drawing. The bin is the region's second
+    // item: Enter on it asks, and Enter again, with the question up, deletes.
+    val count = (if (session.showSearch) 1 else 0) + (if (session.showClear) 1 else 0)
     PanelFocusTarget(
         panel = PanelMode.CLIPBOARD,
         region = FocusRegion.SEARCH,
-        count = if (session.showSearch) 1 else 0,
-        columns = 1,
-        onActivate = { callbacks.onSearchToggle() },
+        count = count,
+        columns = count.coerceAtLeast(1),
+        onActivate = { index ->
+            when {
+                index < clearIndex -> callbacks.onSearchToggle()
+                session.confirmingClear -> {
+                    session.clearAsking.value = false
+                    callbacks.actions.onClearUnpinned()
+                }
+                else -> session.clearAsking.value = true
+            }
+        },
     )
-    if (!session.showSearch) return
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        ClipboardSearchField(
-            state = state,
-            onToggle = callbacks.onSearchToggle,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 4.dp)
-                .focusRing(state.focusedIndex(FocusRegion.SEARCH) == 0, RoundedCornerShape(18.dp)),
+    if (count == 0) return
+    val focused = state.focusedIndex(FocusRegion.SEARCH)
+    Row(
+        modifier = Modifier.fillMaxSize(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (session.showSearch) {
+            ClipboardSearchField(
+                state = state,
+                onToggle = callbacks.onSearchToggle,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 4.dp)
+                    .focusRing(focused == 0, RoundedCornerShape(18.dp)),
+            )
+        } else {
+            Spacer(Modifier.weight(1f))
+        }
+        if (session.showClear) {
+            ClipboardClearButton(
+                asking = session.confirmingClear,
+                focused = focused == clearIndex,
+                // A second tap takes the question back down.
+                onClick = { session.clearAsking.value = !session.clearAsking.value },
+                modifier = Modifier.padding(end = 4.dp),
+            )
+        }
+    }
+}
+
+/**
+ * The clear button: a square in the view switch's style, in the error colour
+ * while its question is up so the two read as one thing.
+ */
+@Composable
+private fun ClipboardClearButton(
+    asking: Boolean,
+    focused: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val kb = LocalKbTheme.current
+    val shape = kb.cardShape()
+    Box(
+        modifier = modifier
+            .heightIn(max = 36.dp)
+            .fillMaxHeight()
+            .aspectRatio(1f)
+            .clip(shape)
+            .background(if (asking) MaterialTheme.colorScheme.errorContainer else kb.chip)
+            .chipBorder(kb, shape)
+            .focusRing(focused, shape)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            Icons.Outlined.DeleteSweep,
+            contentDescription = stringResource(R.string.ime_clipboard_clear_desc),
+            modifier = Modifier.size(18.dp),
+            tint = if (asking) MaterialTheme.colorScheme.onErrorContainer
+            else MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
@@ -280,16 +416,177 @@ private fun ClipboardListField(
     session: ClipboardPanelSession,
     callbacks: ClipboardFieldCallbacks,
 ) {
+    // Published at zero with the tabs off, for the reason the search pill is.
+    PanelFocusTarget(
+        panel = PanelMode.CLIPBOARD,
+        region = FocusRegion.CATEGORIES,
+        count = if (session.tabbed) ClipTab.entries.size else 0,
+        columns = ClipTab.entries.size,
+        onActivate = { index -> ClipTab.entries.getOrNull(index)?.let { session.tab.value = it } },
+    )
     Box(modifier = Modifier.fillMaxSize()) {
-        ClipboardHistory(state, session, callbacks)
+        Column(modifier = Modifier.fillMaxSize()) {
+            if (session.tabbed) {
+                ClipTabRow(
+                    selected = session.tab.value,
+                    unpinned = session.unpinnedCount,
+                    pinned = session.pinnedCount,
+                    focused = state.focusedIndex(FocusRegion.CATEGORIES),
+                    onSelect = { session.tab.value = it },
+                )
+            }
+            Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+                ClipboardHistory(state, session, callbacks)
+            }
+        }
+        ClipClearQuestion(
+            // Not over the search's few rows: the bin that asked is not drawn there.
+            count = if (session.confirmingClear && !state.clipboardSearchActive) session.unpinnedCount else null,
+            reduceMotion = state.settings.reduceMotion,
+            onCancel = { session.clearAsking.value = false },
+            onDelete = {
+                session.clearAsking.value = false
+                callbacks.actions.onClearUnpinned()
+            },
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(horizontal = 10.dp, vertical = 8.dp),
+        )
         ClipUndoBar(
             undo = state.clipboardUndo,
             reduceMotion = state.settings.reduceMotion,
             onUndo = callbacks.actions.onUndoDelete,
+            onDismiss = callbacks.actions.onUndoDismiss,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(horizontal = 10.dp, vertical = 8.dp),
         )
+    }
+}
+
+/**
+ * The Unpinned and Pinned tabs over the history (#371), each with its count,
+ * so a pin moving a clip across is visible as a number changing.
+ */
+@Composable
+private fun ClipTabRow(
+    selected: ClipTab,
+    unpinned: Int,
+    pinned: Int,
+    focused: Int?,
+    onSelect: (ClipTab) -> Unit,
+) {
+    val kb = LocalKbTheme.current
+    val shape = kb.cardShape()
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 6.dp, end = 6.dp, top = 6.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        for ((index, tab) in ClipTab.entries.withIndex()) {
+            val on = tab == selected
+            val color = if (on) kb.toolCircleActiveIcon else MaterialTheme.colorScheme.onSurfaceVariant
+            Row(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(ClipTabHeight)
+                    .clip(shape)
+                    .background(if (on) kb.toolCircleActive else kb.chip)
+                    .chipBorder(kb, shape)
+                    .focusRing(focused == index, shape)
+                    .semantics {
+                        role = Role.Tab
+                        this.selected = on
+                    }
+                    .clickable { onSelect(tab) }
+                    .padding(horizontal = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+            ) {
+                Icon(
+                    if (tab == ClipTab.PINNED) Icons.Filled.PushPin else Icons.Outlined.PushPin,
+                    contentDescription = null,
+                    modifier = Modifier.size(14.dp),
+                    tint = color,
+                )
+                Spacer(Modifier.width(6.dp))
+                Text(
+                    stringResource(
+                        if (tab == ClipTab.PINNED) R.string.ime_clipboard_tab_pinned else R.string.ime_clipboard_tab_unpinned,
+                    ),
+                    fontSize = 12.sp,
+                    fontWeight = if (on) FontWeight.SemiBold else FontWeight.Normal,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = color,
+                    modifier = Modifier.weight(1f, fill = false),
+                )
+                Spacer(Modifier.width(6.dp))
+                Text(
+                    (if (tab == ClipTab.PINNED) pinned else unpinned).toString(),
+                    fontSize = 11.sp,
+                    maxLines = 1,
+                    color = color.copy(alpha = 0.75f),
+                )
+            }
+        }
+    }
+}
+
+/**
+ * The clear button's question, in the Undo bar's popup style, over the top of
+ * the history where the bin that asked it is (#371). [count] is how many clips
+ * would go, or null while nothing is being asked.
+ */
+@Composable
+private fun ClipClearQuestion(
+    count: Int?,
+    reduceMotion: Boolean,
+    onCancel: () -> Unit,
+    onDelete: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var lastCount by remember { mutableIntStateOf(1) }
+    if (count != null) lastCount = count
+    AnimatedVisibility(
+        visible = count != null,
+        modifier = modifier,
+        enter = if (reduceMotion) fadeIn(tween(0)) else slideInVertically(tween(180)) { -it } + fadeIn(tween(180)),
+        exit = if (reduceMotion) fadeOut(tween(0)) else slideOutVertically(tween(160)) { -it } + fadeOut(tween(160)),
+    ) {
+        val kb = LocalKbTheme.current
+        Surface(
+            shape = kb.menuShape(),
+            color = kb.popup,
+            border = kb.popupSurfaceBorder(),
+            shadowElevation = elevationFor(kb.menuShapeKind, 6.dp),
+            modifier = Modifier
+                .widthIn(max = 420.dp)
+                .semantics { liveRegion = LiveRegionMode.Polite },
+        ) {
+            Column(modifier = Modifier.padding(start = 14.dp, end = 4.dp, top = 10.dp)) {
+                Text(
+                    pluralStringResource(R.plurals.ime_clip_clear_question, lastCount, lastCount),
+                    fontSize = 13.sp,
+                    color = kb.popupText,
+                    modifier = Modifier.padding(end = 10.dp),
+                )
+                Row(
+                    modifier = Modifier.align(Alignment.End),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    TextButton(onClick = onCancel) { Text(stringResource(CommonR.string.common_cancel)) }
+                    TextButton(onClick = onDelete) {
+                        Text(
+                            stringResource(CommonR.string.common_delete),
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -305,10 +602,18 @@ private fun ClipUndoBar(
     undo: ClipUndo?,
     reduceMotion: Boolean,
     onUndo: () -> Unit,
+    onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var lastCount by remember { mutableIntStateOf(1) }
-    if (undo != null) lastCount = undo.items.size
+    // The bar last shown, kept while it slides away, so the swipe below starts
+    // afresh for each new delete but not for its own exit animation.
+    var shown by remember { mutableStateOf(undo) }
+    if (undo != null) {
+        lastCount = undo.items.size
+        shown = undo
+    }
+    val dismissLabel = stringResource(R.string.ime_clip_undo_dismiss)
     AnimatedVisibility(
         visible = undo != null,
         modifier = modifier,
@@ -316,33 +621,42 @@ private fun ClipUndoBar(
         exit = if (reduceMotion) fadeOut(tween(0)) else slideOutVertically(tween(160)) { it } + fadeOut(tween(160)),
     ) {
         val kb = LocalKbTheme.current
-        Surface(
-            shape = kb.menuShape(),
-            color = kb.popup,
-            border = kb.popupSurfaceBorder(),
-            shadowElevation = elevationFor(kb.menuShapeKind, 6.dp),
-            modifier = Modifier
-                .widthIn(max = 420.dp)
-                .semantics { liveRegion = LiveRegionMode.Polite },
-        ) {
-            Row(
-                modifier = Modifier.padding(start = 14.dp, end = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    pluralStringResource(R.plurals.ime_clip_deleted, lastCount, lastCount),
-                    fontSize = 13.sp,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    color = kb.popupText,
-                    modifier = Modifier.weight(1f, fill = false),
-                )
-                Spacer(Modifier.width(12.dp))
-                TextButton(onClick = onUndo) {
-                    Text(
-                        stringResource(R.string.ime_clip_undo_delete),
-                        fontWeight = FontWeight.SemiBold,
-                    )
+        // A sideways swipe puts the bar away and ends the Undo there and then
+        // (#371), the way a snackbar goes; the clips it held are gone for good.
+        key(shown) {
+            SwipeToDeleteCard(onDelete = onDismiss) {
+                Surface(
+                    shape = kb.menuShape(),
+                    color = kb.popup,
+                    border = kb.popupSurfaceBorder(),
+                    shadowElevation = elevationFor(kb.menuShapeKind, 6.dp),
+                    modifier = Modifier
+                        .widthIn(max = 420.dp)
+                        .semantics {
+                            liveRegion = LiveRegionMode.Polite
+                            customActions = listOf(CustomAccessibilityAction(dismissLabel) { onDismiss(); true })
+                        },
+                ) {
+                    Row(
+                        modifier = Modifier.padding(start = 14.dp, end = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            pluralStringResource(R.plurals.ime_clip_deleted, lastCount, lastCount),
+                            fontSize = 13.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            color = kb.popupText,
+                            modifier = Modifier.weight(1f, fill = false),
+                        )
+                        Spacer(Modifier.width(12.dp))
+                        TextButton(onClick = onUndo) {
+                            Text(
+                                stringResource(R.string.ime_clip_undo_delete),
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -399,8 +713,13 @@ private fun ClipboardHistory(
     if (shownItems.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(
-                stringResource(R.string.ime_clipboard_no_match, session.query),
+                when {
+                    session.query.isNotEmpty() -> stringResource(R.string.ime_clipboard_no_match, session.query)
+                    session.tab.value == ClipTab.PINNED -> stringResource(R.string.ime_clipboard_tab_pinned_empty)
+                    else -> stringResource(R.string.ime_clipboard_tab_unpinned_empty)
+                },
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
             )
         }
         return
@@ -447,10 +766,12 @@ private fun ClipboardHistory(
             ) {
                 val number = session.numbers[item.id]
                 val time = clipTimeText(item, timeLabel, clipboard, now)
+                val hold = ClipHold(holdDelete = !swipe, ocr = session.ocr)
+                val outlined = clipboard.outlinePinned && item.pinned
                 if (session.list) {
-                    ClipRow(item, number, lines, time, focused = index == focused, holdDelete = !swipe, callbacks)
+                    ClipRow(item, number, lines, time, focused = index == focused, outlined, hold, callbacks)
                 } else {
-                    ClipCard(item, number, lines, time, focused = index == focused, holdDelete = !swipe, callbacks)
+                    ClipCard(item, number, lines, time, focused = index == focused, outlined, hold, callbacks)
                 }
             }
         }
@@ -525,6 +846,7 @@ private fun Modifier.clipSurface(
     kb: KbTheme,
     item: ClipItem,
     focused: Boolean,
+    outlined: Boolean,
     callbacks: ClipboardFieldCallbacks,
     onHold: () -> Unit,
 ): Modifier {
@@ -533,6 +855,9 @@ private fun Modifier.clipSurface(
         .clip(shape)
         .background(kb.chip)
         .chipBorder(kb, shape)
+        // A pinned clip's outline, when that is on (#371): the pin circle's
+        // own accent, around the whole clip.
+        .then(if (outlined) Modifier.border(PinnedOutlineWidth, MaterialTheme.colorScheme.primary, shape) else Modifier)
         .focusRing(focused, shape)
         .pointerInput(item.id) {
             detectTapGestures(
@@ -543,25 +868,46 @@ private fun Modifier.clipSurface(
 }
 
 /**
- * The press-and-hold popup for a clip, with the actions its kind allows, and a
- * Delete when [holdDelete] (the swipe that would otherwise delete is off).
+ * What a clip's press-and-hold popup offers beyond its kind: a Delete when
+ * [holdDelete] (the swipe that would otherwise delete is off), and Extract
+ * text on a picture when [ocr] (#371).
+ */
+@Immutable
+private class ClipHold(val holdDelete: Boolean, val ocr: Boolean)
+
+/**
+ * The press-and-hold popup for a clip, with the actions its kind allows: Edit
+ * for text, Open link for a bare address, View and Extract text for a picture
+ * (#371), and a Delete when [hold] asks for one.
  */
 @Composable
 private fun ClipHoldPopup(
     item: ClipItem,
-    holdDelete: Boolean,
+    hold: ClipHold,
     callbacks: ClipboardFieldCallbacks,
     onDismiss: () -> Unit,
 ) {
+    val image = item.kind == ClipKind.IMAGE
+    // Not a secret's: the panel never shows one's text, and the browser would.
+    val link = item.kind.isTextual && !item.sensitive && ClipLinks.asUrl(item.text) != null
     ClipInfoPopup(
         item,
-        onSendSticker = if (item.kind == ClipKind.IMAGE) {
+        onSendSticker = if (image) {
             { callbacks.onSticker(item); onDismiss() }
         } else null,
         onEdit = if (item.clipEditable) {
             { onDismiss(); callbacks.actions.onEdit(item) }
         } else null,
-        onDelete = if (holdDelete) {
+        onOpenLink = if (link) {
+            { onDismiss(); callbacks.actions.onOpenLink(item) }
+        } else null,
+        onView = if (image) {
+            { onDismiss(); callbacks.actions.onViewImage(item) }
+        } else null,
+        onExtractText = if (image && hold.ocr) {
+            { onDismiss(); callbacks.actions.onExtractText(item) }
+        } else null,
+        onDelete = if (hold.holdDelete) {
             { onDismiss(); callbacks.onDelete(item) }
         } else null,
         onDismiss = onDismiss,
@@ -646,17 +992,18 @@ private fun ClipCard(
     lines: Int,
     time: String?,
     focused: Boolean,
-    holdDelete: Boolean,
+    outlined: Boolean,
+    hold: ClipHold,
     callbacks: ClipboardFieldCallbacks,
 ) {
     var showInfo by remember { mutableStateOf(false) }
     Column(
         modifier = Modifier
-            .clipSurface(LocalKbTheme.current, item, focused, callbacks) { showInfo = true }
+            .clipSurface(LocalKbTheme.current, item, focused, outlined, callbacks) { showInfo = true }
             // An image card insets less: the picture is the content.
             .padding(if (item.kind == ClipKind.IMAGE || item.kind == ClipKind.VIDEO) 5.dp else 10.dp),
     ) {
-        if (showInfo) ClipHoldPopup(item, holdDelete, callbacks) { showInfo = false }
+        if (showInfo) ClipHoldPopup(item, hold, callbacks) { showInfo = false }
         ClipBody(item, maxLines = lines)
         Row(
             modifier = Modifier
@@ -696,7 +1043,8 @@ private fun ClipRow(
     lines: Int,
     time: String?,
     focused: Boolean,
-    holdDelete: Boolean,
+    outlined: Boolean,
+    hold: ClipHold,
     callbacks: ClipboardFieldCallbacks,
 ) {
     var showInfo by remember { mutableStateOf(false) }
@@ -704,12 +1052,12 @@ private fun ClipRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clipSurface(LocalKbTheme.current, item, focused, callbacks) { showInfo = true }
+            .clipSurface(LocalKbTheme.current, item, focused, outlined, callbacks) { showInfo = true }
             .padding(horizontal = 10.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        if (showInfo) ClipHoldPopup(item, holdDelete, callbacks) { showInfo = false }
+        if (showInfo) ClipHoldPopup(item, hold, callbacks) { showInfo = false }
         if (number != null) ClipNumberBadge(number)
         if (visual) {
             // Width-bound, so the picture keeps its own shape at thumbnail
@@ -814,6 +1162,12 @@ private val UndoBarClearance = 64.dp
 private val ListThumbnailWidth = 96.dp
 private val ListThumbnailMaxHeight = 80.dp
 
+/** A pinned clip's outline, when that setting is on: thin, a hairline over the card's own edge. */
+private val PinnedOutlineWidth = 1.5.dp
+
+/** The unpinned / pinned tabs' height. */
+private val ClipTabHeight = 32.dp
+
 /**
  * The grid / list switch. Its icon is the view a tap switches *to*, the way a
  * toolbar's view toggle reads, and it stands down with the history: with no
@@ -895,7 +1249,7 @@ internal fun ClipEditDialog(
 ) {
     // Nothing else in the panel is on screen, so no other region may keep a
     // ring on a card or a chip that is not drawn.
-    for (region in listOf(FocusRegion.SEARCH, FocusRegion.CHIPS, FocusRegion.RESULTS)) {
+    for (region in listOf(FocusRegion.SEARCH, FocusRegion.CHIPS, FocusRegion.CATEGORIES, FocusRegion.RESULTS)) {
         PanelFocusTarget(panel = PanelMode.CLIPBOARD, region = region, count = 0, columns = 1, onActivate = {})
     }
     // Cancel and Save, for a physical keyboard, whose Enter is a line break here.

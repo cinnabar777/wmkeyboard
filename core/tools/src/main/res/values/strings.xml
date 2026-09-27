@@ -73,6 +73,7 @@
     <string name="core_tools_gif_source_giphy" translatable="false">GIPHY</string>
     <!-- The sticker packs the user keeps on the device. -->
     <string name="core_tools_gif_source_local">My stickers</string>
+    <string name="core_tools_gif_source_offline">Offline</string>
     <!-- One chip that stands for every online provider together. -->
     <string name="core_tools_gif_source_online">Online</string>
 

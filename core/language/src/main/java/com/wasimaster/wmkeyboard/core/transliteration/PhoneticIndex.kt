@@ -20,6 +20,15 @@ interface PhoneticIndex {
     fun frequencyOf(word: String): Int
 
     /**
+     * The list's native-script words that begin with [prefix], commonest
+     * first, at most [limit] of them. What a layout whose keys already spell
+     * the word (Khipro) asks to finish it. Empty by default: an index is built
+     * for romanized lookup, and only one that keeps its words sorted can answer
+     * this cheaply.
+     */
+    fun completions(prefix: String, limit: Int): List<String> = emptyList()
+
+    /**
      * How good [lookup]'s best answer for [input] is: that word's frequency,
      * divided by whatever the fold's discarded detail disagreed with. 0 when
      * nothing matches. A caller weighing "is this romanization a word of the

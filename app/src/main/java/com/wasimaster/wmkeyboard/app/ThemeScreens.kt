@@ -2551,6 +2551,14 @@ fun ThemeEditorScreen(
             }
         }
         item {
+            // Before the first picture row, where someone about to pick one
+            // looks for how big it should be (#397).
+            NavRow(
+                R.string.theme_assets_title,
+                subtitle = stringResource(R.string.theme_assets_subtitle),
+            ) { onNavigate(themeAssetsRoute(look.id)) }
+        }
+        item {
             val image = look.watch { it.backgroundImage }
             WmRow(
                 title = stringResource(R.string.theme_background_image_title),

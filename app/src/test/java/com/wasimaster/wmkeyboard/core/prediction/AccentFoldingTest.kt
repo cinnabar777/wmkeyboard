@@ -54,6 +54,23 @@ class AccentFoldingTest {
         assertEquals(0.0, got.editCost, 1e-9)
     }
 
+    @Test fun aLeftOutHalfSpaceIsFoundWithoutSpendingAnEdit() {
+        // #406: Persian writes می‌کنم, typed as the letters alone.
+        val got = walk(listOf("می\u200Cکنم" to 58_927), "میکنم").single()
+        assertEquals("می\u200Cکنم", got.word)
+        assertEquals(0, got.edits)
+        assertEquals(1, got.accents)
+    }
+
+    @Test fun aWordTypedWithoutItsHalfSpaceIsCorrected() {
+        val e = engine("می\u200Cکنم" to 58_927, "سگ\u200Cها" to 319, "مکنم" to 40)
+        assertEquals("می\u200Cکنم", e.suggest("میکنم", previousWord = null).first())
+        assertEquals("می\u200Cکنم", e.shouldAutocorrect("میکنم"))
+        assertEquals("سگ\u200Cها", e.shouldAutocorrect("سگها"))
+        // Typed with it, the word is already right.
+        assertNull(e.shouldAutocorrect("می\u200Cکنم"))
+    }
+
     @Test fun theWordSpelledAsTypedLeadsItsTwinAtEqualFrequency() {
         val got = walk(listOf("cafe" to 100, "café" to 100), "cafe")
         assertEquals(listOf("cafe", "café"), got.map { it.word })

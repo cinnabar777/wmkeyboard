@@ -3,6 +3,7 @@ package com.wasimaster.wmkeyboard.app
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import com.wasimaster.wmkeyboard.core.layout.isShippedLayoutId
+import com.wasimaster.wmkeyboard.core.settings.ArrowKey
 import com.wasimaster.wmkeyboard.core.settings.SettingsDefaults
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
@@ -34,6 +35,7 @@ import com.wasimaster.wmkeyboard.core.settings.SidePadScaleRange
 import com.wasimaster.wmkeyboard.core.addons.AddonType
 import com.wasimaster.wmkeyboard.core.icons.IconPackStore
 import com.wasimaster.wmkeyboard.ime.ui.KeyboardFonts
+import com.wasimaster.wmkeyboard.ime.ui.arrowRowKey
 import com.wasimaster.wmkeyboard.ime.ui.gestureBarAtBottom
 import com.wasimaster.wmkeyboard.core.settings.autoBottomPaddingDp
 import com.wasimaster.wmkeyboard.core.settings.KeyboardAlignment
@@ -570,6 +572,19 @@ internal fun AppearanceToolbarSettings(
                 default = SettingsDefaults.toolbarBehavior.toolWidthDp.toFloat(),
             ) { scope.launch { repository.setToolbarToolWidthDp(it.roundToInt()) } }
         }
+        // Not gated on the toolbar: the toolbox grid draws the same buttons,
+        // and it is still one tap away from the keyboard with the bar off.
+        item {
+            SliderSetting(
+                R.string.appearance_tool_icon_size_title,
+                subtitle = stringResource(R.string.appearance_tool_icon_size_subtitle),
+                value = settings.watch { it.toolbarBehavior.iconSizeDp }.toFloat(),
+                range = 14f..30f,
+                display = { dpFormat.format(it.roundToInt()) },
+                info = stringResource(R.string.appearance_tool_icon_size_info),
+                default = SettingsDefaults.toolbarBehavior.iconSizeDp.toFloat(),
+            ) { scope.launch { repository.setToolbarIconSizeDp(it.roundToInt()) } }
+        }
         // Drawn only once something has actually moved, like the group reset on
         // Layout & size. Which tools are pinned is not a slider and stays.
         item(visible = toolbarMoved) {
@@ -712,6 +727,15 @@ internal fun AppearanceToolboxSettings(
 }
 // ---- layout & size ----
 
+/** The name the arrow order list gives [this] (issue #369). */
+@StringRes
+private fun ArrowKey.nameRes(): Int = when (this) {
+    ArrowKey.LEFT -> R.string.layout_arrow_left
+    ArrowKey.UP -> R.string.layout_arrow_up
+    ArrowKey.DOWN -> R.string.layout_arrow_down
+    ArrowKey.RIGHT -> R.string.layout_arrow_right
+}
+
 @Composable
 internal fun LayoutSettings(
     repository: SettingsRepository,
@@ -846,6 +870,45 @@ internal fun LayoutSettings(
             ) { scope.launch { repository.setNumberRowInSymbols(it) } }
         }
     }
+    // Issue #369: the caret keys as a row of their own under the spacebar.
+    val arrowRow = settings.watch { it.layoutBehavior.arrowRow }
+    SettingsGroup(stringResource(R.string.layout_arrow_row_title)) {
+        item {
+            ToggleSetting(
+                R.string.layout_arrow_row_title,
+                stringResource(R.string.layout_arrow_row_subtitle),
+                arrowRow,
+                info = stringResource(R.string.layout_arrow_row_info),
+                default = SettingsDefaults.layoutBehavior.arrowRow,
+            ) { scope.launch { repository.setArrowRow(it) } }
+        }
+        item(visible = arrowRow) {
+            ControlSetting(
+                R.string.layout_arrow_row_order_title,
+                subtitle = stringResource(R.string.layout_arrow_row_order_subtitle),
+                info = stringResource(R.string.layout_arrow_row_order_info),
+            ) {
+                val names = ArrowKey.entries.associateWith { stringResource(it.nameRes()) }
+                ReorderableColumn(
+                    items = settings.watch { it.layoutBehavior.arrowRowOrder },
+                    label = { names[it].orEmpty() },
+                    onReorder = { scope.launch { repository.setArrowRowOrder(it) } },
+                    modifier = Modifier.padding(top = 8.dp),
+                ) { arrow ->
+                    Text(
+                        arrowRowKey(arrow).label,
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(end = 16.dp),
+                    )
+                    Text(
+                        names[arrow].orEmpty(),
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
+        }
+    }
 
     SettingsGroup(stringResource(R.string.layout_symbols_title)) {
         item {
@@ -880,6 +943,15 @@ internal fun LayoutSettings(
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
+        }
+        item {
+            ToggleSetting(
+                R.string.layout_symbols_return_space_title,
+                stringResource(R.string.layout_symbols_return_space_subtitle),
+                settings.watch { it.layoutBehavior.symbolsReturnOnSpace },
+                info = stringResource(R.string.layout_symbols_return_space_info),
+                default = SettingsDefaults.layoutBehavior.symbolsReturnOnSpace,
+            ) { scope.launch { repository.setSymbolsReturnOnSpace(it) } }
         }
     }
 
@@ -1539,6 +1611,15 @@ internal fun LayoutOneHandedSettings(
                 info = stringResource(R.string.layout_split_gap_info),
                 default = SettingsDefaults.splitGapPercent.toFloat(),
             ) { scope.launch { repository.setSplitGapPercent(it.toInt()) } }
+        }
+        item(visible = split) {
+            ToggleSetting(
+                R.string.layout_split_spacebar_title,
+                stringResource(R.string.layout_split_spacebar_subtitle),
+                settings.watch { it.layoutBehavior.splitSpacebar },
+                info = stringResource(R.string.layout_split_spacebar_info),
+                default = SettingsDefaults.layoutBehavior.splitSpacebar,
+            ) { scope.launch { repository.setSplitSpacebar(it) } }
         }
         item {
             ToggleSetting(

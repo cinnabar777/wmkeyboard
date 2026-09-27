@@ -20,7 +20,14 @@ enum class StatsPeriod { DAY, WEEK, MONTH }
  * timestamps finer than the day bucket and a lifetime hour-of-day histogram.
  * That is the whole privacy story of the Statistics screen, so nothing may be
  * added here that would let a reader of the file reconstruct what was typed
- * or where.
+ * or where. The tap heatmap (issue #390) keeps to it: a lifetime count per
+ * quarter-key cell of each layout, with no order and no time, so it says
+ * which parts of the board get hit and never which letters followed which.
+ *
+ * Beside the typing itself sit the lifetime tallies the levels and
+ * achievements are built from (issue #390): words the strip predicted or
+ * finished, keystrokes that saved, glided words and how far the finger
+ * travelled drawing them. See [TypingProgress].
  *
  * What counts as typing is a keystroke that reaches the user's text field:
  * soft keys, hardware keys, braille and morse all funnel through the same
@@ -61,14 +68,45 @@ class TypingStats(
         val activeMs: Long,
     )
 
-    /** Lifetime sums; unaffected by day-bucket pruning. */
+    /**
+     * Lifetime sums; unaffected by day-bucket pruning.
+     *
+     * The last five are the achievement tallies. [wordsPredicted],
+     * [wordsCompleted] and [glideWords] are parts of [words], not additions to
+     * it, and [keystrokesSaved] is the taps those words spared: a suggestion's
+     * letters and its space, less what was typed of it and the tap on the chip.
+     */
     data class Totals(
         val chars: Long,
         val words: Long,
         val backspaces: Long,
         val activeMs: Long,
         val hourHistogram: List<Long>,
+        val keystrokesSaved: Long = 0,
+        val wordsPredicted: Long = 0,
+        val wordsCompleted: Long = 0,
+        val glideWords: Long = 0,
+        val glideDistanceMm: Double = 0.0,
     )
+
+    /**
+     * Where the soft keys of one layout get tapped. [cells] counts taps per
+     * [TypingHeatmapMath] cell; [keys] is the layout's letter keys at the last
+     * tap, so the screen can draw the board the counts belong to without
+     * knowing anything about layouts. Positions are in key widths across and
+     * rows down, which is what makes portrait and landscape taps land in the
+     * same cells.
+     */
+    data class Heatmap(
+        val layoutId: String,
+        val name: String,
+        val taps: Long,
+        val cells: Map<Int, Long>,
+        val keys: List<HeatKey>,
+    )
+
+    /** A letter key on a [Heatmap]'s board, at its centre. */
+    data class HeatKey(val label: String, val x: Float, val y: Float)
 
     @Serializable
     private data class DayStat(
@@ -79,6 +117,17 @@ class TypingStats(
     )
 
     @Serializable
+    private data class KeyStat(val label: String, val x: Float, val y: Float)
+
+    @Serializable
+    private data class HeatStat(
+        val name: String = "",
+        val taps: Long = 0,
+        val cells: Map<Int, Long> = emptyMap(),
+        val keys: List<KeyStat> = emptyList(),
+    )
+
+    @Serializable
     private data class Snapshot(
         val days: Map<Int, DayStat> = emptyMap(),
         val totalChars: Long = 0,
@@ -86,6 +135,19 @@ class TypingStats(
         val totalBackspaces: Long = 0,
         val totalActiveMs: Long = 0,
         val hourHistogram: List<Long> = emptyList(),
+        val keystrokesSaved: Long = 0,
+        val wordsPredicted: Long = 0,
+        val wordsCompleted: Long = 0,
+        val glideWords: Long = 0,
+        val glideDistanceMm: Double = 0.0,
+        val heatmaps: Map<String, HeatStat> = emptyMap(),
+    )
+
+    private class HeatAcc(
+        var name: String = "",
+        var taps: Long = 0,
+        val cells: HashMap<Int, Long> = HashMap(),
+        var keys: List<HeatKey> = emptyList(),
     )
 
     private class DayAcc(
@@ -101,6 +163,12 @@ class TypingStats(
     private var totalBackspaces = 0L
     private var totalActiveMs = 0L
     private val hourHistogram = LongArray(HOURS)
+    private var keystrokesSaved = 0L
+    private var wordsPredicted = 0L
+    private var wordsCompleted = 0L
+    private var glideWords = 0L
+    private var glideDistanceMm = 0.0
+    private val heatmaps = HashMap<String, HeatAcc>()
     private var dirty = false
     private val snapshotFile = storageFile?.let(::SnapshotFile)
 
@@ -196,6 +264,68 @@ class TypingStats(
         dirty = true
     }
 
+    /**
+     * [n] words taken off the suggestion strip (or flicked off a key), after
+     * [typed] characters of them had been typed. [letters] is what landed,
+     * [spaced] whether the keyboard added the space after it.
+     *
+     * Nothing typed makes it a prediction; something typed and more landing
+     * makes it a completion. A pick no longer than what was typed (a
+     * correction, or the typed word itself) is neither. The keystrokes saved
+     * are the ones the pick stood in for, less the tap on the chip itself.
+     */
+    @Synchronized
+    fun onWordsPicked(n: Int, typed: Int, letters: Int, spaced: Boolean, nowMillis: Long) {
+        if (!enabled || n <= 0) return
+        onWordsCommitted(n, nowMillis)
+        when {
+            typed == 0 -> wordsPredicted += n
+            letters > typed -> wordsCompleted += n
+            else -> return
+        }
+        keystrokesSaved += (letters + (if (spaced) 1 else 0) - typed - 1).coerceAtLeast(0)
+    }
+
+    /**
+     * One glided word, [letters] long, drawn along a stroke [distanceMm] long
+     * on the glass. One stroke for the lot: every letter after the first is a
+     * tap saved.
+     */
+    @Synchronized
+    fun onGlideWord(letters: Int, distanceMm: Double, nowMillis: Long) {
+        if (!enabled) return
+        onWordsCommitted(1, nowMillis)
+        glideWords += 1
+        keystrokesSaved += (letters - 1).coerceAtLeast(0)
+        if (distanceMm.isFinite() && distanceMm > 0.0) glideDistanceMm += distanceMm
+    }
+
+    /**
+     * A soft key went down at ([x], [y]) on layout [layoutId]: key widths
+     * across, rows down. [keys] is the board it happened on, stored as given
+     * — the caller hands the same list back for every tap on one board, so an
+     * identity check is all it costs to keep it current.
+     */
+    @Synchronized
+    fun onKeyTap(layoutId: String, name: String, x: Float, y: Float, keys: List<HeatKey>) {
+        if (!enabled || layoutId.isEmpty() || !x.isFinite() || !y.isFinite()) return
+        val map = heatmaps[layoutId] ?: HeatAcc().also {
+            evictHeatmap()
+            heatmaps[layoutId] = it
+        }
+        if (name.isNotEmpty()) map.name = name
+        if (keys.isNotEmpty() && map.keys !== keys) map.keys = keys
+        map.cells.merge(TypingHeatmapMath.cellOf(x, y), 1L, Long::plus)
+        map.taps += 1
+        dirty = true
+    }
+
+    /** Room for one more board: the least-tapped goes when the cap is reached. */
+    private fun evictHeatmap() {
+        if (heatmaps.size < MAX_HEATMAPS) return
+        heatmaps.entries.minByOrNull { it.value.taps }?.let { heatmaps.remove(it.key) }
+    }
+
     @Synchronized
     fun dayEntries(): List<DayEntry> =
         days.entries.sortedBy { it.key }.map { (key, acc) ->
@@ -204,7 +334,21 @@ class TypingStats(
 
     @Synchronized
     fun lifetime(): Totals =
-        Totals(totalChars, totalWords, totalBackspaces, totalActiveMs, hourHistogram.toList())
+        Totals(
+            totalChars, totalWords, totalBackspaces, totalActiveMs, hourHistogram.toList(),
+            keystrokesSaved = keystrokesSaved,
+            wordsPredicted = wordsPredicted,
+            wordsCompleted = wordsCompleted,
+            glideWords = glideWords,
+            glideDistanceMm = glideDistanceMm,
+        )
+
+    /** Every board with a tap on it, the most tapped first. */
+    @Synchronized
+    fun heatmaps(): List<Heatmap> =
+        heatmaps.entries
+            .map { (id, acc) -> Heatmap(id, acc.name, acc.taps, HashMap(acc.cells), acc.keys) }
+            .sortedByDescending { it.taps }
 
     fun save() {
         val file = snapshotFile ?: return
@@ -223,6 +367,19 @@ class TypingStats(
                 totalBackspaces = totalBackspaces,
                 totalActiveMs = totalActiveMs,
                 hourHistogram = hourHistogram.toList(),
+                keystrokesSaved = keystrokesSaved,
+                wordsPredicted = wordsPredicted,
+                wordsCompleted = wordsCompleted,
+                glideWords = glideWords,
+                glideDistanceMm = glideDistanceMm,
+                heatmaps = heatmaps.mapValues { (_, acc) ->
+                    HeatStat(
+                        name = acc.name,
+                        taps = acc.taps,
+                        cells = HashMap(acc.cells),
+                        keys = acc.keys.map { KeyStat(it.label, it.x, it.y) },
+                    )
+                },
             )
         }
         // Encoded and written outside the lock, so the store stays usable while
@@ -259,6 +416,12 @@ class TypingStats(
         totalBackspaces = 0
         totalActiveMs = 0
         hourHistogram.fill(0)
+        keystrokesSaved = 0
+        wordsPredicted = 0
+        wordsCompleted = 0
+        glideWords = 0
+        glideDistanceMm = 0.0
+        heatmaps.clear()
         pendingWord = false
         lastUptimeMs = 0
     }
@@ -311,6 +474,19 @@ class TypingStats(
             snapshot.hourHistogram.take(HOURS).forEachIndexed { hour, count ->
                 hourHistogram[hour] = count
             }
+            keystrokesSaved = snapshot.keystrokesSaved
+            wordsPredicted = snapshot.wordsPredicted
+            wordsCompleted = snapshot.wordsCompleted
+            glideWords = snapshot.glideWords
+            glideDistanceMm = snapshot.glideDistanceMm
+            for ((id, stat) in snapshot.heatmaps) {
+                heatmaps[id] = HeatAcc(
+                    name = stat.name,
+                    taps = stat.taps,
+                    cells = HashMap(stat.cells),
+                    keys = stat.keys.map { HeatKey(it.label, it.x, it.y) },
+                )
+            }
         }
     }
 
@@ -328,6 +504,11 @@ class TypingStats(
 
         /** Day buckets kept: a year of history plus a little slack. */
         const val MAX_DAYS = 370
+
+        /** Boards with a heatmap of their own; past this the least-tapped one
+         * makes room, so someone cycling through layouts cannot grow the file
+         * without bound. */
+        const val MAX_HEATMAPS = 8
 
         private const val HOURS = 24
     }

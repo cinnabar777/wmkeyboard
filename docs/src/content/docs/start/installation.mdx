@@ -27,6 +27,8 @@ Every release ships sixteen APKs on the [GitHub releases page](https://github.co
 
 4. Pick your CPU architecture. Almost every phone made since 2017 is `arm64-v8a`. Older or budget devices are `armeabi-v7a`. Emulators and a few tablets are `x86_64`. The `universal` APK holds all three and works anywhere, at several times the download size.
 
+   If you want a keyboard that cannot reach the network at all, take the `nointernet` APK instead. It is Full with every language, in `arm64-v8a` and `universal`, with the internet permission removed. Anything that downloads stops working, including its own update check, though language packs, models and GIF packs fetched on another device can be [imported instead](/privacy/offline/). See [A build with no internet permission](/development/building/#a-build-with-no-internet-permission).
+
 5. Download the APK to your device.
 
 6. Optional: verify the download against `SHA256SUMS.txt` from the same release. Run `sha256sum <file>` on a computer, or use a checksum app on the phone. Compare the result to the line for your file.

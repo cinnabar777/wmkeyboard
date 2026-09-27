@@ -343,6 +343,15 @@ private val bundledAttributions: List<Attribution> = buildList {
     )
     add(
         Attribution(
+            "Khipro",
+            R.string.about_bundled_khipro_used,
+            "Copyright (c) 2024 rank_coder, (c) 2026 KhiproTeam",
+            "MIT", "mit-khipro.txt",
+            "https://khipro.khiproteam.com/",
+        ),
+    )
+    add(
+        Attribution(
             "OpenCC",
             R.string.about_bundled_opencc_used,
             "Copyright Carbo Kuo and OpenCC contributors",

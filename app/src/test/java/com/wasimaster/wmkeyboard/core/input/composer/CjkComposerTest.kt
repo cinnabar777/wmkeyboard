@@ -29,12 +29,14 @@ class CjkComposerTest {
         CjkDictionaries.japanese = ConversionDictionary.EMPTY
         PinyinSyllables.valid = emptySet()
         T9Pinyin.index = emptyMap()
+        Jianpin.index = Jianpin.EMPTY
         ZhuyinSyllables.table = emptyMap()
         CjkDictionaries.cangjie = CodeTableDictionary.EMPTY
         CjkDictionaries.stroke = CodeTableDictionary.EMPTY
         CjkDictionaries.jyutping = ConversionDictionary.EMPTY
         JyutpingSyllables.valid = emptySet()
         CjkConfig.fuzzyPinyin = false
+        CjkConfig.jianpin = true
         CjkConfig.doublePinyin = DoublePinyinScheme.OFF
         CjkConfig.traditionalOutput = false
         CjkConfig.looseKanaMarks = false

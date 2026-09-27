@@ -151,6 +151,31 @@ class ClipboardStoreTest {
         assertEquals(listOf("pinned"), store.items(now = 3000).map { it.text })
     }
 
+    @Test fun detachUnpinnedKeepsPinsAndCanComeBack() {
+        val store = ClipboardStore(null)
+        val pin = store.add("pinned", now = 1000)!!
+        store.setPinned(pin.id, true)
+        store.add("older", now = 2000)
+        store.add("newer", now = 3000)
+        val removed = store.detachUnpinned(now = 4000)
+        assertEquals(listOf("newer", "older"), removed.map { it.text })
+        assertEquals(listOf("pinned"), store.items(now = 4000).map { it.text })
+        removed.forEach { store.reattach(it, now = 5000) }
+        assertEquals(listOf("pinned", "newer", "older"), store.items(now = 5000).map { it.text })
+    }
+
+    @Test fun detachUnpinnedKeepsImageFilesUntilDiscarded() {
+        val dir = Files.createTempDirectory("clips").toFile()
+        val store = ClipboardStore(null, imagesDir = dir)
+        val file = tempImage(dir, "a.png")
+        store.addImage(file, "image/png", now = 1000)
+        val removed = store.detachUnpinned(now = 2000)
+        assertEquals(1, removed.size)
+        assertTrue(file.exists())
+        removed.forEach(store::discard)
+        assertFalse(file.exists())
+    }
+
     private fun tempImage(dir: File, name: String): File =
         File(dir, name).apply { writeBytes(byteArrayOf(1, 2, 3)) }
 

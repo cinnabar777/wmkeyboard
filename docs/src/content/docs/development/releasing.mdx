@@ -24,7 +24,7 @@ of it, so nothing here needs a branch or a patched source tree.
 | `wmkb.splitApks` | `true` | not used | ignored by `bundle*` |
 | `wmkb.enableCrashScreen` | not set | not set | `false`, forced by the Fastfile over `local.properties` |
 | Automation `TYPE_TEXT` | offered | offered | left out |
-| Artifact | one APK per ABI, for all four flavor combinations, plus R8 mappings, native symbols and `SHA256SUMS.txt` | one APK, built by F-Droid, carrying our signature once it matches the release's `-fdroid.apk` | one AAB, with its R8 mapping and native symbols inside |
+| Artifact | one APK per ABI, for all four flavor combinations, plus R8 mappings, native symbols and `SHA256SUMS.txt`; the `offline` job adds `full-intl-nointernet` in `arm64-v8a` and `universal` | one APK, built by F-Droid, carrying our signature once it matches the release's `-fdroid.apk` | one AAB, with its R8 mapping and native symbols inside |
 | ML Kit | bundled in the APK | absent | unbundled, fetched from Play services |
 | Local LLM | bundled | absent | on-demand `:feature:llm` module |
 | On-device translation (ML Kit) | bundled | absent | on-demand `:feature:translate` module |
@@ -117,6 +117,17 @@ Neither of those two tags carries this workflow, so pushing them starts no run
 at all; the guard is for a tag that does reach it without a version to check. It signs with your release key, then
 attaches one APK per ABI for each of the four flavor combinations, plus a
 `SHA256SUMS.txt`, to the release.
+
+The `offline` job adds the [no-internet build](/development/building/#a-build-with-no-internet-permission):
+`full-intl` with `wmkb.noInternet=true`, `arm64-v8a` and `universal` only. It
+runs on its own runner because the flag applies to the whole Gradle
+invocation, and it fails the release if `aapt2 dump permissions` still finds
+`INTERNET`, since ML Kit's manifest would put the permission back without a
+build error if the overlay ever stopped applying. The `-nointernet-` part of
+the name keeps the in-app updater of a regular build from reading these as an
+update. Every other input matches the `apks` job, so R8 should rename it the
+same way as `full-intl`; the publish job attaches its mapping only when the two
+differ, and warns when they do.
 
 The release also carries the files you need to read a crash report from those
 APKs. The `*-mapping.txt.gz` files are the R8 mappings — one per flavor

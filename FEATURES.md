@@ -19,11 +19,11 @@ something only some of them do. Unmarked means Gboard or SwiftKey has it too.
 | Toolbar and the tool set | 10 | 85 | 311 |
 | Clipboard, snippets, text expansion | 7 | 37 | 191 |
 | AI, voice, handwriting, scanning | 11 | 70 | 162 |
-| Privacy, backup, storage, statistics | 14 | 65 | 163 |
+| Privacy, backup, storage, statistics | 14 | 69 | 173 |
 | Accessibility, form factors, platform integration | 13 | 61 | 111 |
 | Extensibility: addons, plugins, imports, formats | 5 | 35 | 164 |
 | Modes, rows, field adaptation, runtime | 12 | 97 | 203 |
-| **Total** | **133** | **803** | **2219** |
+| **Total** | **133** | **807** | **2229** |
 
 ## Typing core: prediction, autocorrect, learning, spell check
 
@@ -735,7 +735,7 @@ something only some of them do. Unmarked means Gboard or SwiftKey has it too.
   - Per-script pinned fonts `uncommon` — 25 scripts map to a specific Google font; Music to Noto Music, Braille to Noto Sans Symbols 2
     - Per-script font pickers — Curated alternative families per script, shown only while a language on that script is enabled
     - Per-glyph fallback — A glyph the pinned face lacks falls back to the system font rather than blanking
-- **Keyboard layouts** — 1,597 shipped layouts: 21 compiled built-ins + 1,576 JSON assets (862 of them converted Keyman keyboards)
+- **Keyboard layouts** — 1,598 shipped layouts: 22 compiled built-ins + 1,576 JSON assets (862 of them converted Keyman keyboards)
   - Shipped catalogue — 20 Kotlin LayoutSpecs (boot-critical) plus 354 .wmlayout.json assets parsed off the main thread
     - Latin ergonomic alternates — QWERTY, AZERTY, Dvorak, Colemak, Workman, Halmak built in; BÉPO, Swiss German, LatAm Spanish, Turkish-Q as assets
     - Ambiguous boards — T9 and Compact QWERTY built in; keys twice to four times the usual size, decoded rather than multi-tapped (#103); T9 keypads for 309 more languages as assets (#332)
@@ -833,7 +833,7 @@ something only some of them do. Unmarked means Gboard or SwiftKey has it too.
     - ASCII returned untouched — Nothing below U+0080 can carry a combining mark
   - Language is asked, never guessed silently `RARE` — A script histogram over the keys seeds the picker; a blank langId would otherwise migrate to English
   - Repaired once, in front of the user `RARE` — So the grid approved in the dialog is the grid that gets typed on
-- **Transliteration and composers** `uncommon` — 15 ComposerType values chosen from a layout's script plus optional override
+- **Transliteration and composers** `uncommon` — 16 ComposerType values chosen from a layout's script plus optional override
   - Bengali Avro phonetic `RARE` — Rule-based greedy longest-match transliteration with ~90 rules bucketed by first character
     - Context-sensitive vowels — Independent letter at word start or after a vowel, kar after a consonant
     - Inherent vowel handling — lowercase o is silent after a consonant but breaks the cluster: kolokata gives কলকাতা, kolkata conjuncts
@@ -844,6 +844,11 @@ something only some of them do. Unmarked means Gboard or SwiftKey has it too.
     - Ridmik spellings accepted alongside Avro's — qq/cb for ঁ, HH for ঃ, hs for hasant (only after a consonant, so "ahsan" is safe)
     - Stray capitals read as lowercase — "Bangla" still types বাংলা instead of dropping a Latin B into the buffer
     - Digits and currency — 0-9 map to ০-৯, $ to ৳, single dot to ।, double dot to a literal period
+  - Bengali Khipro `RARE` — Compositional ক্ষিপ্র layout (#400): the Khipro team's own m17n spec (v36.5.0, MIT) run by a small interpreter, passing their conformance cases
+    - Deterministic — space commits exactly the composed text; no spelling map, no phonetic fold, no autocorrect
+    - Completion strip — composed word first, then bundled/downloaded Bangla words and learned words that start with it
+    - Touch grid per the Khipro guideline — / slicer where shift sits, ; separator beside the spacebar, danda key kept
+    - Hardware keyboard uses the desktop spec — digits to ০-৯, . to ।, $ to ৳, chosen per word by the key that starts it
   - Lenient Banglish matching `RARE` — Both input and every dictionary word fold to a phonetic key where confusable sounds collapse
     - Aspiration kept as a parallel mask — Typing the h and not getting it is penalised 20x; leaving it out is penalised 2x; only ক/খ, গ/ঘ, ত/থ, ট/ঠ, দ/ধ, ড/ঢ count
     - ch and ph excluded on purpose — They are ordinary English-influenced spellings, not aspiration claims
@@ -886,6 +891,9 @@ something only some of them do. Unmarked means Gboard or SwiftKey has it too.
   - Double Pinyin — 5 schemes: Microsoft, Sogou, Xiaohe (小鹤), Ziranma, Pinyin++
     - Validity-filtered translation — An ambiguous final key resolves to whichever combination forms a real syllable
     - Apostrophes skipped, not paired — Otherwise one stray apostrophe desyncs the parity of every syllable after it
+  - Jianpin 简拼 — a bare initial is a syllable unit: `wm` → 我们, `zgrm` → 中国人民, mixed `haod` → 好的; z/c/s cover zh/ch/sh, a typed digraph reads both as one initial and as two (`sh` → 是 and 上海)
+    - No second index — Initials are per-unit option lists resolved against the sorted pinyin table by prefix range, the same path T9 and fuzzy use
+    - Exact over abbreviated — A syllable typed in full is never widened; a/e/o rank their exact reading first; a phrase covering the buffer beats a stitch
   - Fuzzy Pinyin — zh/z, ch/c, sh/s, n/l, r/l, f/h initials and an/ang, en/eng, in/ing, ian/iang, uan/uang finals
     - Ranking signal, not a filter — Two variants per syllable behind an ln(0.15) penalty, so an exact match only loses to a much likelier fuzzy word
     - Validity-filtered expansion — Only real syllables are ever generated
@@ -1462,6 +1470,14 @@ something only some of them do. Unmarked means Gboard or SwiftKey has it too.
     - Also an addon type — "stickers" is one of the addon-repository types, installable from a repo URL
   - WhatsApp-spec encoding `RARE` — Stills become 512×512 WebP under 100 KB via a 90/80/70/60/50 quality ladder.
     - Conforming files left alone — An already-spec 512 WebP is stored as-is rather than losing a lossy generation
+  - Signal pack import `RARE` — A signal.art / sgnl:// pack link fetches the manifest and stickers from Signal's CDN, decrypts them under the pack key, previews, then adopts them as a pack (#291).
+    - No directory of packs — signalstickers.org opens in the browser; its "Add to Signal" comes back through the chooser
+    - APNG becomes animated WebP — Frame for frame, with the emoji per sticker kept as a keyword
+  - WhatsApp sticker import `RARE` — Three ways in, none of them WhatsApp's own API, which no other app may read (#368).
+    - .wastickers files — The Sticker Maker export (title.txt, author.txt, tray PNG, WebP stickers): opened from a file manager, the share sheet or the Import row; the tray is dropped by name or as the lone PNG among WebPs
+    - WhatsApp's saved-sticker folder — Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Stickers picked with the folder picker (it carries a .nomedia, so the photo picker never sees it); every WebP becomes one pack, newest 200
+    - Hand-picked files — The document picker opened in that folder, multi-select, into an existing or new pack
+    - No emoji arrive — Neither source carries any; the packs read no network and keep no folder access
     - Animated sources stored byte-for-byte — Android has no animated-WebP encoder; those are capped at 2 MB instead of 100 KB
     - 12 MB source ceiling — Anything larger is refused before decoding starts
   - Pack management `RARE` — Create, rename, delete, export, reorder packs; per sticker: search words, reorder, move, delete.
@@ -1519,7 +1535,7 @@ something only some of them do. Unmarked means Gboard or SwiftKey has it too.
 
 ## Toolbar and the tool set
 
-- **Toolbar & toolbox mechanics** `uncommon` — 74 tools in ToolbarTool enum; 3 pinned by default (Emoji, Clipboard, Settings)
+- **Toolbar & toolbox mechanics** `uncommon` — 77 tools in ToolbarTool enum; 3 pinned by default (Emoji, Clipboard, Settings)
   - Pinned bar vs toolbox — A tool is on the bar or in the toolbox grid, never both
     - Default pinned row — Emoji, Clipboard, Settings (DefaultToolbarTools)
     - Tablet-aware default pin set — 5 pinned on small tablets, 7 on large, applied only if user never rearranged
@@ -1565,6 +1581,7 @@ something only some of them do. Unmarked means Gboard or SwiftKey has it too.
     - Tool labels under icons — toolbarLabels off; toolbarLabelSize default 10sp
     - Tool background radius and shape — toolCircleRadiusDp default 20, toolShape shares the key shapes; 0 removes it
     - Tool button width 38dp default — toolWidthDp stretches the circle into a pill
+    - Tool icon size 22dp default (14–30) — toolbarBehavior.iconSizeDp, glyph only, button stays 38dp; toolbar + toolbox grid
   - Per-tool settings screen `RARE` — Every one of the 71 tools has its own screen under Settings → Tools
     - Eight groups plus an Other catch-all — Panels, Scanners, Online, Create & convert, Modes, Cursor, Quick actions, Utilities
     - Tune icon marks tools with real options — toolHasOptions; toggle-only tools show just the switch
@@ -1574,7 +1591,7 @@ something only some of them do. Unmarked means Gboard or SwiftKey has it too.
     - Per-tool colour override — toolColorOverrides map, reset-all button when any override exists
     - Two-colour gradient icons — toolIconGradients off by default, with its own end-colour override map
     - Icon-pack glyph substitution — IconSlots.forTool resolves an installed icon pack's glyph
-  - Direct-boot tool filter `RARE` — 46 of 74 tools work before the first unlock after reboot
+  - Direct-boot tool filter `RARE` — 47 of 77 tools work before the first unlock after reboot
     - Rule is what the tool reads — Arithmetic, sensors and keyboard-own state stay; disk, credentials, providers, activities go
     - All 14 cursor tools stay usable — They only touch the input connection
     - Not a user toggle — isDirectBootSafeTool is automatic and only applies pre-first-unlock
@@ -1982,8 +1999,8 @@ something only some of them do. Unmarked means Gboard or SwiftKey has it too.
 | Clipboard source-app attribution | needs Usage Access; best-effort foreground-app guess |
 | Voice typing | needs microphone permission; audio may reach the OS recognizer service unless the on-device language model is installed |
 | Clipboard link previews and QR link details and dictionary auto-lookup | network, and force-disabled by power saving's background-network toggle |
-| 28 tools of 74 are unavailable before the first unlock after reboot | direct-boot filter; the other 46 (arithmetic, sensors, keyboard-own state, all 14 cursor tools) stay usable |
-| Lite edition tool count | 69 of 74 tools; the 5 ML Kit / Harper tools are compiled out, not just hidden |
+| 30 tools of 77 are unavailable before the first unlock after reboot | direct-boot filter; the other 47 (arithmetic, sensors, keyboard-own state, all 14 cursor tools) stay usable |
+| Lite edition tool count | 72 of 77 tools; the 5 ML Kit / Harper tools are compiled out, not just hidden |
 
 ## Clipboard, snippets, text expansion
 
@@ -2046,6 +2063,7 @@ something only some of them do. Unmarked means Gboard or SwiftKey has it too.
   - Capture gating `uncommon`
     - Blocked before first unlock and while the device is locked — History lives in credential-encrypted storage
     - Incognito pauses capture — Separate incognitoPausesClipboard setting, on by default
+    - Incognito private clipboard (#392) — incognitoPrivateClipboard, off by default; keyboard copy/cut kept in memory (KeyboardClipboard), keyboard paste pastes it, forgotten when incognito ends
     - Copies made from a password field never reach history
 - **Sensitive clips and password hygiene** `RARE` — Two independent passes: at copy time and at paste time
   - Copy-time classification `RARE`
@@ -2731,6 +2749,20 @@ something only some of them do. Unmarked means Gboard or SwiftKey has it too.
     - Delete with confirmation, then version bump — statsVersion tells the running IME to re-read instead of writing old numbers back.
     - Stored in stats/, not learning/ — "Delete learned words" must not take the statistics with it.
     - Direct boot means memory-only — A null storage file: counters run but nothing is written.
+  - Levels `uncommon` — XP from the lifetime counts; each level costs 500 XP more than the last; ten names from Beginner to Legend (#390).
+    - XP rule — 1 per word, 1 more per predicted, completed or glided word, 100 per achievement step.
+    - Computed, never stored — TypingProgress derives it on open, so a delete resets it and a backup restores it.
+  - Achievements `uncommon` — Six SwiftKey-style tiered counters with a progress ring each (#390).
+    - The six — Words typed, keystrokes saved, words predicted, words completed, glided words, glide distance (metres, last step 42,195).
+    - Pick classification — Nothing typed is a prediction, longer than typed is a completion; a pick over a glide or the caret word is a word only.
+    - Keystrokes saved — A pick saves its letters plus the auto space, less what was typed and the chip tap; a glide saves all letters but one.
+    - Glide distance in physical millimetres — Stroke length over xdpi/ydpi, so a bigger screen does not count faster.
+  - Tap heatmap `RARE` — Per layout, key downs counted per quarter-key cell and drawn over that layout's letter keys (#390).
+    - Rows down, not key widths — Portrait and landscape taps share cells.
+    - Letters layer only — Symbols, secondary layouts and open panels are left out; space and backspace count.
+    - Eight boards kept — The least tapped makes room; chips pick among the four most tapped.
+    - Most tapped letters in words — The screen-reader version of the hidden map.
+  - Statistics tool `uncommon` — ToolbarTool.STATISTICS opens the screen from the keyboard; not direct-boot safe (#390).
   - Typing-test achievements `RARE` — 4 badges stored as one comma-list preference; unlocks only accumulate.
     - The four — 100 WPM, a flawless run of 30+ chars, a pangram quote, 50 completed tests.
     - Unknown ids dropped on decode — Encoding is order-stable against the ALL list.
@@ -3135,6 +3167,7 @@ something only some of them do. Unmarked means Gboard or SwiftKey has it too.
   - Sticker pack .wmstickers `uncommon` — ZIP: pack.json + stickers/; 500 entries / 64 MB, 50 packs installed
     - Entry names never used as paths — Every image is written under a freshly minted sticker id
     - Source photos stay behind — The archive carries the finished sticker only, not the original it was cut from
+  - WhatsApp pack .wastickers `RARE` — Foreign format, read only: flat ZIP with title.txt / author.txt beside the pictures; recognised by those two names since it has no manifest; same 500-entry / 64 MB guards and staging as .wmstickers
   - Icon pack .wmicons `RARE` — ZIP: pack.json + icons/<slotId>.svg; 400 entries / 8 MB, 20 packs installed
     - 97 replaceable icon slots — 64 tool icons (derived from the toolbar enum), 14 key icons, 6 toolbar-chrome, 13 emoji-tab
     - Slot ids are the file names — manifest slots[] is advisory; the importer keeps every entry whose name matches a known slot and drops the rest

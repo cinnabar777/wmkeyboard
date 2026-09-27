@@ -147,6 +147,28 @@ object CjkDictDownloadManager {
         }
     }
 
+    /**
+     * Installs [pack] from a copy the user fetched some other way. The
+     * checksum a download must pass is the one this must pass too, so a
+     * mistyped or truncated file is refused rather than put in front of the
+     * composer. Runs on the caller's thread.
+     */
+    suspend fun install(filesDir: File, pack: CjkDictPack, file: File) {
+        check(!isBusy) { "a download is running" }
+        val part = CjkDictStore.partFile(filesDir, pack)
+        part.parentFile?.mkdirs()
+        try {
+            file.inputStream().use { input -> part.outputStream().use { input.copyTo(it) } }
+            verifyChecksum(pack, part)
+            val final = CjkDictStore.packFile(filesDir, pack)
+            final.delete()
+            check(part.renameTo(final)) { "could not move the dictionary into place" }
+            set(pack.id, DownloadStatus.Downloaded)
+        } finally {
+            part.delete()
+        }
+    }
+
     fun cancel() {
         activeJob?.cancel()
     }

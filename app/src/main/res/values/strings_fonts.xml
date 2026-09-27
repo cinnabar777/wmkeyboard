@@ -130,6 +130,7 @@
     <string name="fonts_tool_qr_gen_desc">Turn the text in the field into a QR code and send it as an image</string>
     <string name="fonts_tool_password_gen_desc">The app makes strong passwords and passphrases on your device</string>
     <string name="fonts_tool_typing_test_desc">Time your typing on this keyboard and keep a record of your best scores</string>
+    <string name="fonts_tool_statistics_desc">Open your typing statistics: your level, achievements and where you tap</string>
     <string name="fonts_tool_kde_connect_desc">Use a paired computer from the keyboard: its mouse, keys, media, clipboard and files. The computer can type into the phone too</string>
     <string name="fonts_tool_media_control_desc">Play, pause and skip the media that plays now. It shows album art and a seek bar</string>
     <string name="fonts_tool_plugins_desc">Run the plugins you install. They are small tools that run in a sandbox</string>

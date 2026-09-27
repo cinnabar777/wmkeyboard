@@ -37,6 +37,17 @@ interface Composer {
     val phoneticLanguage: String? get() = null
 
     /**
+     * The language whose word list completes this composer's *output*: the
+     * strip offers that language's words beginning with [composeBuffer] of the
+     * buffer, and a space still commits the composed text exactly. For a
+     * deterministic transliterator (Khipro) whose keys already spell the word,
+     * so there is nothing to rank or correct but a word to finish. Null for
+     * everything else, including Avro, whose buffer goes through
+     * [phoneticLanguage] instead.
+     */
+    val completionLanguage: String? get() = null
+
+    /**
      * A fixed complex-script layout (Probhat, and later Devanagari, Tamil …):
      * types script characters directly and shapes clusters / contextual vowel
      * forms. The registry-era replacement for `isFixedBengali`.
@@ -70,6 +81,14 @@ interface Composer {
      * instead of widening the search.
      */
     fun buffersChar(c: Char): Boolean = false
+
+    /**
+     * [buffersChar] for a composer whose answer depends on whether a word is
+     * already being composed: Khipro's comma is part of a word (`j,,` is জ়)
+     * but a comma typed between words is only punctuation. The service asks
+     * this one; the default defers to [buffersChar].
+     */
+    fun buffersChar(c: Char, composing: CharSequence): Boolean = buffersChar(c)
 
     /**
      * Whether [word] is shaped like a word of this composer's script, and so
@@ -229,4 +248,5 @@ fun composerFor(script: ScriptDef, type: ComposerType): Composer = when (type) {
     ComposerType.CANGJIE -> CangjieComposer
     ComposerType.CANGJIE_QUICK -> CangjieQuickComposer
     ComposerType.JYUTPING -> JyutpingComposer
+    ComposerType.KHIPRO -> if (script.id == ScriptId.BENGALI) KhiproComposer else NoComposer
 }

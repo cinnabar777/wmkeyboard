@@ -48,6 +48,68 @@
          %1$s is a number of words, %2$s a number of characters. -->
     <string name="statistics_bucket_detail">%1$s words · %2$s characters</string>
 
+    <!-- levels and achievements (issue #390) -->
+
+    <string name="statistics_level_section">Your level</string>
+    <string name="statistics_level_info">You earn 1 XP for every word you type, 1 more for every word the keyboard predicted, finished or read from a glide, and 100 for every achievement step. Each level takes 500 XP more than the one before.</string>
+    <!-- %1$d is the level number. -->
+    <string name="statistics_level_number">Level %1$d</string>
+    <!-- Progress through the current level. %1$s is the user's XP, %2$s the XP
+         the next level starts at. XP is short for experience points. -->
+    <string name="statistics_level_xp">%1$s / %2$s XP</string>
+    <!-- %1$s is an amount of XP still needed, %2$d the next level's number. -->
+    <string name="statistics_level_next">%1$s XP to level %2$d</string>
+    <!-- The names that go with the levels, from the first to the last. -->
+    <string name="statistics_level_title_beginner">Beginner</string>
+    <string name="statistics_level_title_novice">Novice</string>
+    <string name="statistics_level_title_apprentice">Apprentice</string>
+    <string name="statistics_level_title_regular">Regular</string>
+    <string name="statistics_level_title_skilled">Skilled</string>
+    <string name="statistics_level_title_adept">Adept</string>
+    <string name="statistics_level_title_expert">Expert</string>
+    <string name="statistics_level_title_master">Master</string>
+    <string name="statistics_level_title_grandmaster">Grandmaster</string>
+    <string name="statistics_level_title_legend">Legend</string>
+
+    <string name="statistics_achievements_section">Achievements</string>
+    <string name="statistics_achievement_words_title">Words typed</string>
+    <string name="statistics_achievement_words_subtitle">Every word, however it got there</string>
+    <string name="statistics_achievement_saved_title">Keystrokes saved</string>
+    <string name="statistics_achievement_saved_subtitle">Taps that suggestions and glides did for you</string>
+    <string name="statistics_achievement_predicted_title">Words predicted</string>
+    <string name="statistics_achievement_predicted_subtitle">Picked from the suggestions before you typed a letter</string>
+    <string name="statistics_achievement_completed_title">Words completed</string>
+    <string name="statistics_achievement_completed_subtitle">Finished from the suggestions after a few letters</string>
+    <string name="statistics_achievement_glide_title">Glide typing</string>
+    <string name="statistics_achievement_glide_subtitle">Words drawn with one stroke</string>
+    <string name="statistics_achievement_distance_title">Glide distance</string>
+    <string name="statistics_achievement_distance_subtitle">How far your finger has travelled gliding</string>
+    <!-- Which step of an achievement the user is working on. %1$d is the step,
+         %2$d how many there are. -->
+    <string name="statistics_achievement_step">Step %1$d of %2$d</string>
+    <!-- Every step of an achievement is done. %1$d is how many there were. -->
+    <plurals name="statistics_achievement_finished">
+        <item quantity="one">%1$d step done</item>
+        <item quantity="other">All %1$d steps done</item>
+    </plurals>
+    <!-- A count against its next target, as in "43/200". -->
+    <string name="statistics_achievement_count">%1$s/%2$s</string>
+    <!-- A distance in metres against its next target, as in "12/20 m". -->
+    <string name="statistics_achievement_metres">%1$s/%2$s m</string>
+
+    <!-- the tap heatmap (issue #390) -->
+
+    <string name="statistics_heatmap_section">Where you tap</string>
+    <string name="statistics_heatmap_info">Every tap on the letters layer is counted in the part of the key it lands on, space and backspace included. Only the counts are kept, never which key followed which. Hotter colours mean more taps.</string>
+    <!-- Caption over the choice of which layout's heatmap to show. -->
+    <string name="statistics_heatmap_layout_label">Layout</string>
+    <!-- %1$s is a comma-separated list of letters, the most tapped first. -->
+    <string name="statistics_heatmap_top">Most tapped: %1$s</string>
+    <plurals name="statistics_heatmap_taps">
+        <item quantity="one">%1$s tap on this layout</item>
+        <item quantity="other">%1$s taps on this layout</item>
+    </plurals>
+
     <string name="statistics_empty_body">Nothing counted yet. Type somewhere, then come back.</string>
     <string name="statistics_off_body">Statistics are off. Turn them on to start counting.</string>
 

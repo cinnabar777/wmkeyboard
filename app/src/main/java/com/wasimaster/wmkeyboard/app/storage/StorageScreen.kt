@@ -35,6 +35,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.wasimaster.wmkeyboard.R
+import com.wasimaster.wmkeyboard.app.OfflineImportRow
 import com.wasimaster.wmkeyboard.app.SectionHeader
 import com.wasimaster.wmkeyboard.app.lock.AppLockTargets
 import com.wasimaster.wmkeyboard.app.lock.LockTarget
@@ -132,6 +133,23 @@ internal fun StorageScreen(
                     )
                 }
             }
+        }
+    }
+
+    // Everything the app downloads can come in from a file instead: the one
+    // place to bring a language pack, a model or a GIF pack fetched elsewhere,
+    // for a phone that cannot fetch them itself.
+    SettingsGroup {
+        item {
+            OfflineImportRow(
+                title = stringResource(R.string.offline_import_storage_title),
+                subtitle = stringResource(R.string.offline_import_storage_subtitle),
+                links = emptyList(),
+                onImported = {
+                    StorageSnapshot.invalidate()
+                    revision++
+                },
+            )
         }
     }
 

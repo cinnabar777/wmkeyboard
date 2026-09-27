@@ -98,10 +98,11 @@
     <string name="search_kw_ime_tool_weather">forecast temperature rain</string>
     <string name="search_kw_ime_tool_wikipedia">encyclopedia wiki article</string>
     <string name="search_kw_keypress_all_accents">diacritics umlaut tilde cedilla circumflex</string>
+    <string name="search_kw_keypress_native_letters">umlaut accent diacritics order long press number german</string>
     <string name="search_kw_keypress_ctrl_raw">termux ssh vim emacs</string>
     <string name="search_kw_keypress_currency_keys">dollar euro pound rupee yen</string>
     <string name="search_kw_keypress_dnd_mute">dnd silent focus</string>
-    <string name="search_kw_keypress_shifted_popup">uppercase majuscule case</string>
+    <string name="search_kw_keypress_shifted_popup">uppercase majuscule case shift layer page second letter</string>
     <string name="search_kw_keypress_long_press_delay">timeout duration</string>
     <string name="search_kw_keypress_long_press_hints">secondary labels marks</string>
     <string name="search_kw_keypress_popup">preview flyout magnifier</string>
@@ -114,6 +115,7 @@
     <string name="search_kw_langemoji_emoji_skin_tone">fitzpatrick diversity complexion</string>
     <string name="search_kw_langemoji_emoji_sticker">sticker png</string>
     <string name="search_kw_langemoji_lang_os_switcher">ime subtype</string>
+    <string name="search_kw_languages_cjk_jianpin">mandarin abbreviated pinyin initials shorthand 简拼</string>
     <string name="search_kw_languages_cjk_fuzzy">mandarin putonghua</string>
     <string name="search_kw_languages_cjk_lazy">cantonese jyutping</string>
     <string name="search_kw_languages_cjk_full_width_space">japanese chinese zenkaku ideographic double wide u3000</string>
@@ -122,6 +124,7 @@
     <string name="search_kw_languages_conjunct_backspace">hindi devanagari indic akshara cluster</string>
     <string name="search_kw_languages_fancy_style_row">unicode aesthetic cursive strikethrough</string>
     <string name="search_kw_languages_translit_hints_row">transliteration phonetic romanized</string>
+    <string name="search_kw_languages_phonetic_strip_fixed">avro ridmik suggestion strip order fixed pinned english typed word</string>
     <string name="search_kw_languages_phonetic_guide">key map keymap avro hinglish help cheat sheet chandrabindu hasant</string>
     <string name="search_kw_layout_floating">undock detached unpinned draggable</string>
     <string name="search_kw_layout_globe_emoji">globe world</string>
@@ -191,6 +194,7 @@
     <string name="search_kw_voice_engine">offline whisper device model server transcription selfhosted hosted speaches remote</string>
     <string name="search_kw_deepl">write rephrase rewrite improve polish style tone translation</string>
     <string name="search_kw_sticker_suggest">suggestions suggest tray prediction autocomplete</string>
+    <string name="search_kw_sticker_suggest_magnify">magnify zoom enlarge preview peek large long press</string>
     <string name="search_kw_translate_engine">offline private internet airplane local device ml kit google model download cloud</string>
     <string name="search_kw_translate_models">offline translation model download delete storage ml kit google</string>
     <string name="search_kw_translate_downloaded_first">order sort top offline model picker menu list</string>

@@ -60,7 +60,8 @@ class FuzzyBeamSearch {
         val userScore: Double = Double.NEGATIVE_INFINITY,
         /**
          * Letters read as their accented form ([Accents]): `juz` reaching `już`
-         * carries 1. These are not edits, so neither [edits] nor [editCost]
+         * carries 1, and so does a half-space put back (`میکنم` reaching
+         * `می‌کنم`). These are not edits, so neither [edits] nor [editCost]
          * counts them.
          */
         val accents: Int = 0,
@@ -180,6 +181,24 @@ class FuzzyBeamSearch {
             // One read of the node's edges serves every branch below: the
             // accent step, the letters on an ambiguous key, and the edits.
             val count = walker.childrenInto(node, ws.children)
+            // A half-space the word is spelled with and the typing left out:
+            // میکنم standing for می‌کنم (#406). Persian writes one inside
+            // most verbs and plurals, and it has a key but no letter, so it is
+            // the easiest thing to leave out. Priced and counted as an accent,
+            // because it is one in every way that matters here: the same keys
+            // pressed, nothing mistyped, one mark missing.
+            if (expected != ZWNJ) {
+                val joined = ws.children.find(ZWNJ, count)
+                if (joined >= 0) {
+                    pushIfViable(
+                        ws, src, walker, floor,
+                        node = joined, pos = pos, cost = cost + COST_ACCENT,
+                        editSpend = editSpend,
+                        edits = edits, comp = comp, accents = accents + 1, parent = s,
+                        viaLabel = ZWNJ,
+                    )
+                }
+            }
             if (keySet == null) {
                 // Exact match of the next typed char. With touch evidence, an
                 // off-center tap makes even the "match" slightly expensive —
@@ -529,6 +548,9 @@ class FuzzyBeamSearch {
          * word, not three mistakes.
          */
         val COST_ACCENT = -ln(0.9)
+
+        /** The Persian half-space, U+200C ZERO WIDTH NON-JOINER. */
+        private const val ZWNJ = '‌'
         const val COMPLETION_STEP = 0.0
 
         /** Per-character completion cost once the path holds an edit. As

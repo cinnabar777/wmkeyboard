@@ -1,5 +1,6 @@
 package com.wasimaster.wmkeyboard.ime.ui
 
+import android.view.WindowManager
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
@@ -12,6 +13,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.awaitLongPressOrCancellation
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
@@ -22,25 +27,45 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupPositionProvider
+import androidx.compose.ui.window.PopupProperties
 import coil3.ImageLoader
 import coil3.compose.AsyncImage
 import com.wasimaster.wmkeyboard.core.settings.StickerSuggestStyle
@@ -73,6 +98,23 @@ private const val StripThumbs = 3
 private val StripThumb = 34.dp
 
 private const val TrayMotionMs = 140
+
+/** The sticker a hold on the tray shows large (#404), and how far above the tray it floats. */
+private val MagnifiedSticker = 168.dp
+private val MagnifiedGap = 8.dp
+
+/**
+ * The large sticker's window never takes a touch or the focus, and it exists
+ * only while a finger holds the tray, so it can never sit idle over the app
+ * and swallow a tap there (the rule [CaretMagnifierHost] follows too).
+ */
+private val MagnifiedPopupProperties = PopupProperties(
+    flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+)
+
+/** A sticker shown large, and the middle of its thumbnail in the tray, in the tray's pixels. */
+private data class Magnified(val pick: StickerOfferItem, val centerX: Int)
 
 /**
  * Whether the tray is up: for an emoji picked in the emoji panel, while that
@@ -126,14 +168,21 @@ internal fun ColumnScope.StickerTrayRow(state: KeyboardUiState, callbacks: Stick
             ExitTransition.None
         },
     ) {
-        last[0]?.let { StickerOfferTray(it, callbacks) }
+        last[0]?.let { StickerOfferTray(it, callbacks, magnify = state.settings.gif.stickerSuggestMagnify) }
     }
 }
 
 @Composable
-private fun StickerOfferTray(offer: StickerOffer, callbacks: StickerOfferCallbacks) {
+private fun StickerOfferTray(offer: StickerOffer, callbacks: StickerOfferCallbacks, magnify: Boolean) {
     val kb = LocalKbTheme.current
     val loader = rememberMediaImageLoader()
+    val listState = rememberLazyListState()
+    var magnified by remember { mutableStateOf<Magnified?>(null) }
+    val feedback = LocalKeyPressFeedback.current
+    val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    // Read by the gesture at the moment it needs them: the offer changes
+    // under a hold as the text does, and the gesture is not restarted for it.
+    val stickersNow by rememberUpdatedState(offer.stickers)
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -141,9 +190,23 @@ private fun StickerOfferTray(offer: StickerOffer, callbacks: StickerOfferCallbac
         verticalAlignment = Alignment.CenterVertically,
     ) {
         LazyRow(
+            state = listState,
             modifier = Modifier
                 .weight(1f)
-                .fillMaxHeight(),
+                .fillMaxHeight()
+                .then(
+                    if (magnify) {
+                        Modifier.magnifyOnHold(
+                            listState = listState,
+                            rtl = rtl,
+                            stickers = { stickersNow },
+                            onHold = feedback,
+                            onShow = { magnified = it },
+                        )
+                    } else {
+                        Modifier
+                    },
+                ),
             contentPadding = PaddingValues(horizontal = 6.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -171,6 +234,120 @@ private fun StickerOfferTray(offer: StickerOffer, callbacks: StickerOfferCallbac
                 modifier = Modifier.size(18.dp),
             )
         }
+        magnified?.let { MagnifiedStickerPopup(it, loader) }
+    }
+}
+
+/**
+ * Hold a sticker to see it large, then slide along the tray to see the others
+ * the same way; lifting the finger closes it and sends nothing (#404). The
+ * hold has to come before any slide: a finger that moves first scrolls the
+ * tray, and the tray's own scroll cancels the hold.
+ *
+ * Once the hold has fired, every event is consumed on the way down
+ * ([PointerEventPass.Initial]), before the tray's scroll and the thumbnails'
+ * taps see it: the slide must not scroll the row out from under the finger,
+ * and the lift must not send the sticker it ends on.
+ */
+private fun Modifier.magnifyOnHold(
+    listState: LazyListState,
+    rtl: Boolean,
+    stickers: () -> List<StickerOfferItem>,
+    onHold: () -> Unit,
+    onShow: (Magnified?) -> Unit,
+): Modifier = pointerInput(listState, rtl) {
+    /** The sticker under [x], or null in the gap between two. */
+    fun hit(x: Float): Magnified? {
+        val info = listState.layoutInfo
+        val fromStart = if (rtl) size.width - x else x
+        // Item offsets start after the content padding; the viewport's
+        // start is that padding, negated.
+        val along = fromStart + info.viewportStartOffset
+        val item = info.visibleItemsInfo.firstOrNull { along >= it.offset && along < it.offset + it.size }
+            ?: return null
+        val pick = stickers().getOrNull(item.index) ?: return null
+        val middle = item.offset - info.viewportStartOffset + item.size / 2
+        return Magnified(pick, if (rtl) size.width - middle else middle)
+    }
+    awaitEachGesture {
+        val down = awaitFirstDown(requireUnconsumed = false)
+        val held = awaitLongPressOrCancellation(down.id) ?: return@awaitEachGesture
+        var shown = hit(held.position.x)
+        onHold()
+        onShow(shown)
+        try {
+            while (true) {
+                val event = awaitPointerEvent(PointerEventPass.Initial)
+                val change = event.changes.firstOrNull { it.id == held.id } ?: break
+                event.changes.forEach { it.consume() }
+                if (!change.pressed) break
+                val next = hit(change.position.x)
+                if (next != null && next.pick.item.id != shown?.pick?.item?.id) {
+                    shown = next
+                    onShow(next)
+                }
+            }
+        } finally {
+            onShow(null)
+        }
+    }
+}
+
+/**
+ * The held sticker, large, centred over its thumbnail and just above the
+ * tray, with its title under it when it has one. A window of its own so it
+ * can reach above the keyboard over the app, where there is room for it.
+ */
+@Composable
+private fun MagnifiedStickerPopup(magnified: Magnified, loader: ImageLoader) {
+    val kb = LocalKbTheme.current
+    val gapPx = with(LocalDensity.current) { MagnifiedGap.roundToPx() }
+    val provider = remember(magnified.centerX, gapPx) { MagnifiedPosition(magnified.centerX, gapPx) }
+    val shape = RoundedCornerShape(16.dp)
+    val title = magnified.pick.item.title
+    Popup(popupPositionProvider = provider, properties = MagnifiedPopupProperties) {
+        Column(
+            modifier = Modifier
+                .shadow(6.dp, shape, clip = false)
+                .background(kb.popup, shape)
+                .clip(shape)
+                .padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            AsyncImage(
+                model = magnified.pick.item.previewUrl,
+                contentDescription = null,
+                imageLoader = loader,
+                modifier = Modifier.size(MagnifiedSticker),
+                contentScale = ContentScale.Fit,
+            )
+            if (title.isNotBlank()) {
+                Text(
+                    text = title,
+                    color = kb.popupText,
+                    fontSize = 13.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .widthIn(max = MagnifiedSticker)
+                        .padding(top = 4.dp),
+                )
+            }
+        }
+    }
+}
+
+/** Centred on the held thumbnail, kept on screen sideways, above the tray. */
+private class MagnifiedPosition(private val centerX: Int, private val gapPx: Int) : PopupPositionProvider {
+    override fun calculatePosition(
+        anchorBounds: IntRect,
+        windowSize: IntSize,
+        layoutDirection: LayoutDirection,
+        popupContentSize: IntSize,
+    ): IntOffset {
+        val maxX = (windowSize.width - popupContentSize.width).coerceAtLeast(0)
+        val x = (anchorBounds.left + centerX - popupContentSize.width / 2).coerceIn(0, maxX)
+        return IntOffset(x, anchorBounds.top - popupContentSize.height - gapPx)
     }
 }
 

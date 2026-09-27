@@ -31,4 +31,17 @@ class LanguageEchoTest {
     fun `a clock that runs backwards counts as unseen`() {
         assertEquals(500L, languageEchoMs(-5L))
     }
+
+    @Test
+    fun `the setting sets the whole time on screen`() {
+        assertEquals(1_000L, languageEchoMs(0L, 1_000L))
+        assertEquals(800L, languageEchoMs(200L, 1_000L))
+        assertEquals(0L, languageEchoMs(250L, 1_000L))
+    }
+
+    @Test
+    fun `off, or shorter than the preview already ran, echoes nothing`() {
+        assertEquals(0L, languageEchoMs(0L, 0L))
+        assertEquals(0L, languageEchoMs(150L, 100L))
+    }
 }

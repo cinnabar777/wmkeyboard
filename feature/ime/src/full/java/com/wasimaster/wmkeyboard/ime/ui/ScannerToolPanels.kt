@@ -1,9 +1,8 @@
 package com.wasimaster.wmkeyboard.ime.ui
 
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.text.format.Formatter
 import android.util.Log
 import android.util.Rational
@@ -111,6 +110,7 @@ import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.wasimaster.wmkeyboard.core.util.runCancellable
 import com.wasimaster.wmkeyboard.ime.FocusRegion
+import com.wasimaster.wmkeyboard.ime.KeyboardClipboard
 import com.wasimaster.wmkeyboard.ime.KeyboardUiState
 import com.wasimaster.wmkeyboard.ime.PanelMode
 import com.wasimaster.wmkeyboard.ime.R
@@ -157,6 +157,10 @@ private sealed interface OcrStage {
  * phone. Unlike the other tool panels this one covers
  * the toolbar too ([keyRowsHeight] + [TopBarHeight]): reading text off a
  * photo needs all the room the keyboard has.
+ *
+ * Opened from an image clip's Extract text (#371), it reads that picture
+ * ([KeyboardUiState.ocrImage]) instead: no camera and no permission, the
+ * picture where the viewfinder would be, and the read starts on its own.
  */
 @Composable
 internal fun OcrPanel(
@@ -171,12 +175,14 @@ internal fun OcrPanel(
     var hasPermission by remember { mutableStateOf(hasCameraPermission(context)) }
     PermissionRecheck { hasPermission = hasCameraPermission(context) }
 
+    // A picture from the clipboard needs no camera, so no camera permission.
+    val canRead = hasPermission || state.ocrImage != null
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(height),
     ) {
-        if (hasPermission) {
+        if (canRead) {
             OcrContent(
                 state = state,
                 onInsert = onInsert,
@@ -189,7 +195,7 @@ internal fun OcrPanel(
                 onRequestPermission,
             )
         }
-        if (!hasPermission) {
+        if (!canRead) {
             Box(modifier = Modifier.align(Alignment.TopStart).padding(8.dp)) {
                 CameraChipButton(
                     icon = Icons.AutoMirrored.Outlined.ArrowBack,
@@ -220,8 +226,18 @@ private fun OcrContent(
     var torchOn by remember { mutableStateOf(false) }
     var viewSize by remember { mutableStateOf(IntSize.Zero) }
 
-    val provider by produceState<ProcessCameraProvider?>(null) {
-        value = withContext(Dispatchers.IO) { ProcessCameraProvider.getInstance(context).get() }
+    // A clip's picture (#371) stands in for the camera, which is then never
+    // bound at all. Null while it loads; a failure when it will not decode.
+    val clipImage = state.ocrImage
+    val clipBitmap by produceState<Result<Bitmap>?>(null, clipImage) {
+        value = clipImage?.let { path ->
+            withContext(Dispatchers.IO) { runCatching { decodeClipImage(File(path)) } }
+        }
+    }
+    val provider by produceState<ProcessCameraProvider?>(null, clipImage) {
+        if (clipImage == null) {
+            value = withContext(Dispatchers.IO) { ProcessCameraProvider.getInstance(context).get() }
+        }
     }
     val recognizer = remember { TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS) }
     DisposableEffect(Unit) {
@@ -282,7 +298,7 @@ private fun OcrContent(
 
     // Bind only while the viewfinder is up; the frozen capture and its
     // words are the whole UI afterwards, so release the camera.
-    val scanning = stage is OcrStage.Viewfinder && packReady
+    val scanning = stage is OcrStage.Viewfinder && packReady && clipImage == null
     DisposableEffect(provider, scanning, viewSize) {
         val cameraProvider = provider
         if (cameraProvider != null && scanning && viewSize != IntSize.Zero) {
@@ -314,15 +330,19 @@ private fun OcrContent(
         }
     }
 
-    fun capture() {
+    fun capture(auto: Boolean = false) {
         if (stage !is OcrStage.Viewfinder || viewSize == IntSize.Zero || !packReady) return
-        feedback()
+        if (!auto) feedback()
         val readPack = pack
         scope.launch {
-            val bitmap = withContext(Dispatchers.IO) {
-                runCancellable {
-                    imageCapture.awaitCapture(context).use { it.toFramedBitmap(mirror = false) }
-                }.getOrNull()
+            val bitmap = if (clipImage != null) {
+                clipBitmap?.getOrNull()
+            } else {
+                withContext(Dispatchers.IO) {
+                    runCancellable {
+                        imageCapture.awaitCapture(context).use { it.toFramedBitmap(mirror = false) }
+                    }.getOrNull()
+                }
             } ?: return@launch
             stage = OcrStage.Recognizing(bitmap)
             val read = withContext(Dispatchers.Default) {
@@ -363,6 +383,17 @@ private fun OcrContent(
         }
     }
 
+    // A clip's picture is read as soon as it and the language's data are
+    // there, once: after that, Scan again waits for the shutter, so the
+    // language can be changed first.
+    var autoRead by remember(clipImage) { mutableStateOf(clipImage != null) }
+    LaunchedEffect(clipBitmap, packReady, viewSize) {
+        if (autoRead && clipBitmap?.isSuccess == true && packReady && viewSize != IntSize.Zero) {
+            autoRead = false
+            capture(auto = true)
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -385,7 +416,8 @@ private fun OcrContent(
                     bitmap = current.bitmap.asImageBitmap(),
                     contentDescription = stringResource(R.string.ime_scanner_ocr_capture_desc),
                     modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop,
+                    // A copied picture is shown whole: it was not framed for this panel.
+                    contentScale = if (clipImage != null) ContentScale.Fit else ContentScale.Crop,
                 )
                 Column(
                     modifier = Modifier.align(Alignment.Center),
@@ -405,8 +437,22 @@ private fun OcrContent(
         }
 
         val activeProvider = provider
-        if (activeProvider != null && backOrFrontSelector(activeProvider) == null) {
+        if (clipImage == null && activeProvider != null && backOrFrontSelector(activeProvider) == null) {
             PanelCenteredMessage(stringResource(R.string.ime_scanner_no_camera))
+            return@Box
+        }
+        if (clipImage != null && clipBitmap?.isFailure == true) {
+            PanelCenteredMessage(stringResource(R.string.ime_scanner_ocr_image_error))
+            Box(modifier = Modifier.align(Alignment.TopStart).padding(8.dp)) {
+                CameraChipButton(
+                    icon = Icons.AutoMirrored.Outlined.ArrowBack,
+                    description = stringResource(R.string.ime_scanner_ocr_close_desc),
+                    active = false,
+                ) {
+                    feedback()
+                    onClose()
+                }
+            }
             return@Box
         }
 
@@ -439,10 +485,21 @@ private fun OcrContent(
             return@Box
         }
 
-        AndroidView(factory = { previewView }, modifier = Modifier.fillMaxSize())
+        if (clipImage != null) {
+            clipBitmap?.getOrNull()?.let { picture ->
+                Image(
+                    bitmap = remember(picture) { picture.asImageBitmap() },
+                    contentDescription = stringResource(R.string.ime_scanner_ocr_capture_desc),
+                    modifier = Modifier.fillMaxSize().background(Color.Black),
+                    contentScale = ContentScale.Fit,
+                )
+            }
+        } else {
+            AndroidView(factory = { previewView }, modifier = Modifier.fillMaxSize())
+        }
 
         Text(
-            stringResource(R.string.ime_scanner_ocr_hint),
+            stringResource(if (clipImage != null) R.string.ime_scanner_ocr_image_hint else R.string.ime_scanner_ocr_hint),
             color = Color.White,
             fontSize = 12.sp,
             textAlign = TextAlign.Center,
@@ -652,6 +709,22 @@ private fun OcrPromptButton(
 }
 
 private val WHITESPACE = Regex("\\s+")
+
+/** The longest side a clip's picture is read at: past it, more pixels only slow the read. */
+private const val CLIP_OCR_MAX_SIDE = 4096
+
+/**
+ * A clip's picture (#371), halved until its longest side fits
+ * [CLIP_OCR_MAX_SIDE]. Throws when the file is gone or is not a picture.
+ */
+private fun decodeClipImage(file: File): Bitmap {
+    val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+    BitmapFactory.decodeFile(file.absolutePath, bounds)
+    var sample = 1
+    while (maxOf(bounds.outWidth, bounds.outHeight) / sample > CLIP_OCR_MAX_SIDE) sample *= 2
+    return BitmapFactory.decodeFile(file.absolutePath, BitmapFactory.Options().apply { inSampleSize = sample })
+        ?: throw IllegalArgumentException("not a picture: ${file.name}")
+}
 
 private const val OCR_LOG_TAG = "WMKB-OCR"
 
@@ -1374,8 +1447,7 @@ private fun backOrFrontSelector(provider: ProcessCameraProvider): CameraSelector
 }
 
 private fun copyPlainText(context: Context, text: String) {
-    (context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
-        .setPrimaryClip(ClipData.newPlainText("scanned text", text))
+    KeyboardClipboard.copy(context, text, "scanned text")
 }
 
 @StringRes

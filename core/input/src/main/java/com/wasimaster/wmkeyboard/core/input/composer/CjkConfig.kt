@@ -37,6 +37,16 @@ object CjkConfig {
         set(value) { field = value; CjkDictionaries.invalidate() }
 
     /**
+     * Jianpin (简拼): a bare initial stands for any syllable that starts with
+     * it, so `wm` finds 我们 and `haod` finds 好的. See [Jianpin]. On by default,
+     * as it is in every shipping Chinese IME; ignored under Double Pinyin, where
+     * a syllable is always exactly two keys.
+     */
+    @Volatile
+    var jianpin: Boolean = true
+        set(value) { field = value; CjkDictionaries.invalidate() }
+
+    /**
      * The Double Pinyin scheme in use, or [DoublePinyinScheme.OFF] for full
      * Pinyin. When set, each syllable is two keys that the composer expands to
      * full Pinyin before the normal segmentation runs.

@@ -186,9 +186,13 @@
     <string name="keypress_all_accents_subtitle">Fill the popup of every letter with its full set of accents</string>
     <string name="keypress_all_accents_info">This adds the complete set of accents for each Latin letter (à á â ä ã å ā …) to its press and hold popup. The keyboard keeps the characters that the layout already lists.\n\nThis setting is off by default. The built-in popups are short on purpose, and the full set has many characters. It applies to letters only.</string>
 
+    <string name="keypress_native_letters_title">Your language\'s letters first</string>
+    <string name="keypress_native_letters_subtitle">Put letters such as ü ahead of the number in the popup</string>
+    <string name="keypress_native_letters_info">Most letter keys start their press and hold popup with a number or a symbol, such as 7 on u. With this on, the letters of the language you are typing move in front of it. In German, a hold on u then types ü, and ü is the small character in the corner of the key. The number stays in the popup, right after them.\n\nThe keyboard knows which letters belong to each language, so accents that your language does not use stay where they were. English uses no accented letters, so its keys do not change. This setting is on by default.</string>
+
     <string name="keypress_shifted_popup_title">Shifted letter on press and hold</string>
-    <string name="keypress_shifted_popup_subtitle">Add the capital of each letter to its popup</string>
-    <string name="keypress_shifted_popup_info">This adds the character each key types under shift, which is the capital letter in Latin scripts, to the end of its press and hold popup. A key that already lists it is left alone.\n\nIt is most useful with the swipe from the ?123 and ABC keys: that gesture types one key from another layer, and the shift key is on the layer your finger has left. This setting is off by default.</string>
+    <string name="keypress_shifted_popup_subtitle">Add what each key types under shift to its popup</string>
+    <string name="keypress_shifted_popup_info">This adds the character each key types under shift to the end of its press and hold popup. In Latin scripts that is the capital letter. In scripts with no capitals, such as Arabic or Devanagari, it is the other letter or mark on that key, so you can reach it without pressing shift. Layouts that draw their shifted keys on a page of their own, which includes most imported Keyman keyboards, take them from that page. A key that already lists it is left alone.\n\nIt also pairs with the swipe from the ?123 and ABC keys: that gesture types one key from another layer, and the shift key is on the layer your finger has left. This setting is off by default.</string>
 
     <!-- ?123 is the label printed on the symbols key. Keep it as is. -->
     <string name="keypress_symbols_numpad_title">Press and hold ?123 for the number pad</string>

@@ -8,7 +8,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * The tablet expansion, run over every layout the app ships — 21 built in plus
+ * The tablet expansion, run over every layout the app ships — 22 built in plus
  * 1,259 assets, on both tablet forms with the digit row on and off.
  *
  * `TabletExpansionTest` pins the arithmetic on grids it builds by hand; this
@@ -56,7 +56,7 @@ class TabletExpansionCorpusTest {
 
     @Test
     fun `the corpus is the whole shipped set`() {
-        assertEquals("built-ins plus hand-authored assets", 21 + 714, handAuthored.size)
+        assertEquals("built-ins plus hand-authored assets", 22 + 714, handAuthored.size)
         assertTrue(
             "converted Keyman grids are missing from the corpus",
             corpus.size - handAuthored.size > 800,
@@ -91,6 +91,8 @@ class TabletExpansionCorpusTest {
 
         assertEquals(
             setOf(
+                // Khipro's shift key is its slicer, so there is none to mirror.
+                "builtin_khipro",
                 "builtin_t9",
                 "braille_chord", "ja_flick", "ja_kana_jis", "morse", "zh_stroke",
                 "ipa", "music", "nqo_nko",

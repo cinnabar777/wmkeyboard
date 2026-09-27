@@ -51,6 +51,25 @@ Cantonese is a separate language entry (not a Chinese sub-option) with one layou
 
 For Pinyin typists who want fewer keystrokes, Double Pinyin encodes every syllable as exactly two keys (one for the initial, one for the final), which the composer expands to full Pinyin before segmenting as usual. Five real schemes are available: Microsoft, Sogou (identical key table to Microsoft), Xiaohe (小鹤), Ziranma, and Pinyin++. Turning one on replaces the syllable-typing rules on the same Pinyin layout. It isn't a separate keyboard.
 
+## Jianpin (简拼): initials are enough
+
+Nobody types 中国人民 as `zhongguorenmin`. **Jianpin** lets a syllable be its first letter alone, so `zgrm` reaches the same word, `wm` finds 我们 and `bj` finds 北京. It's on by default, the way every desktop and phone Pinyin IME has it, and it's a switch on the Chinese screen if you'd rather not.
+
+The rule is one letter, one syllable, boundaries included: `hd` means *h…* plus *d…*, never "any reading with an h and a d in it". That's what makes mixed input work too. Spell out as many syllables as you like and abbreviate the rest: `haod` finds 好的, `zguo` finds 中国, `beij` finds 北京. A syllable you type in full is matched exactly and never widened, so `hao` still means 好 and nothing beginning with *hao*.
+
+Three conventions borrowed from Sogou and Google Pinyin:
+
+- **`z`, `c` and `s` cover the retroflex initials too.** `zg` finds 中国 (zhōng guó) as well as 祖国 (zǔ guó). A typed `zh`, `ch` or `sh` reads both ways: `sh` is s + h (上海, 生活) and also the initial sh… on its own (是, 说), and `zhg` still reaches 中国. Both are on the strip and rank by likelihood. An apostrophe is your own boundary: `s'h` is s + h only.
+- **The vowels `a`, `e` and `o` are both a syllable and an abbreviation.** `aq` finds 安全. Typed on their own, the exact reading leads: `a` offers 啊 before 爱 and 安.
+- **A phrase beats a stitch.** Where the dictionary has the word (我们, 中国), it comes first; single characters strung together to cover the same letters rank below it. So the strip leads with what the abbreviation was for, and the ranking the issue asks for falls out of that: an exact reading first, then a partly spelled one, then pure initials.
+
+Two things follow from abbreviations being real units:
+
+- **Candidates appear from the first key.** `n` alone offers 你, 那, 能 and so on, and `nih` already leads with 你好, so a whole word is often on the strip before its second syllable is finished.
+- **A half-typed trailing syllable is guessed, not ignored.** With `nihaoz` on the strip, the top candidate covers all six letters (你好在, say), where before it would have covered 你好 and left the `z`. Keep typing and the guess resolves; tap 你好 and only those five letters commit, the `z` stays.
+
+Jianpin is a matching rule, not a second dictionary. Its index is the ~410-syllable inventory grouped by first letter, so a run of initials costs a handful of binary searches per syllable rather than a scan. It has no effect under a Double Pinyin scheme, where a syllable is always exactly two keys, and it's independent of Fuzzy Pinyin: a syllable typed in full can still be matched fuzzily, an abbreviated one is expanded, and the two combine. Picks are learned under the reading the abbreviation resolved to, so choosing 我们 for `wm` also promotes it for `women`.
+
 ## Fuzzy Pinyin and lazy Jyutping
 
 Two independent toggles relax reading matching for imprecise typing:
@@ -136,6 +155,7 @@ Opening a Chinese, Cantonese, or Japanese entry from the Languages screen shows 
 | Lazy pronunciation (懶音) | On | Cantonese only |
 | Match kana without marks | On | Japanese only, and only kana typed on Flick or Kana JIS |
 | Full-width space | Off | Chinese, Cantonese, and Japanese, each on its own |
+| Jianpin (简拼) | On | Chinese only; ignored under a Double Pinyin scheme |
 | Fuzzy Pinyin | Off | Chinese only |
 | The eleven fuzzy pairs, one row each | All on | Chinese only, shown while Fuzzy Pinyin is on |
 | Double Pinyin scheme | Off (full Pinyin) | Chinese only |

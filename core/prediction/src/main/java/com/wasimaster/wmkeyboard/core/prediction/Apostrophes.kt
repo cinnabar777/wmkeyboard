@@ -108,8 +108,8 @@ object Apostrophes {
      * Guessing at these is what [fix] must never do. Applying them when the user
      * *drew the apostrophe* — a glide through the key that
      * `GestureSettings.apostropheKey` names — is a different question with a
-     * different answer, because the stroke said which word was meant. Only
-     * [fixExplicit] reads this table.
+     * different answer, because the stroke said which word was meant. So
+     * [fixExplicit] applies this table, and [offer] only ever shows it.
      */
     private val DECLARED: Map<String, String> = mapOf(
         "id" to "I'd",
@@ -154,6 +154,17 @@ object Apostrophes {
      */
     fun fixExplicit(word: String): String? =
         fix(word, DECLARED) ?: fix(word, CONTRACTIONS)
+
+    /**
+     * The contraction [word] may have been typed for, when it is also a word
+     * in its own right: ill → I'll, id → I'd, were → we're. Null for every
+     * other word.
+     *
+     * For the suggestion strip only, never a commit: the typed spelling is as
+     * likely to be meant as the contraction, so the strip offers the
+     * contraction next to it and the space bar leaves the word alone (#384).
+     */
+    fun offer(word: String): String? = fix(word, DECLARED)
 
     /**
      * Every spelling either table can hand back.

@@ -70,6 +70,8 @@ fun toolAccentColor(tool: ToolbarTool): Color = when (tool) {
     ToolbarTool.QR_GEN -> Color(0xFF26A69A)
     ToolbarTool.PASSWORD_GEN -> Color(0xFFEF5350)
     ToolbarTool.TYPING_TEST -> Color(0xFFFF7043)
+    // Trophy gold: the screen it opens is levels and achievements.
+    ToolbarTool.STATISTICS -> Color(0xFFFFA000)
     ToolbarTool.MEDIA_CONTROL -> Color(0xFFAB47BC)
     // KDE's own blue.
     ToolbarTool.KDE_CONNECT -> Color(0xFF1D99F3)

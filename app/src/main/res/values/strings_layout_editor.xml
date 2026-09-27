@@ -540,6 +540,7 @@
     <string name="layout_editor_composer_cangjie">Cangjie (倉頡)</string>
     <string name="layout_editor_composer_cangjie_quick">Quick (速成)</string>
     <string name="layout_editor_composer_jyutping">Jyutping (粵拼)</string>
+    <string name="layout_editor_composer_khipro">Khipro (ক্ষিপ্র)</string>
     <!-- One line under each option in the typing method picker. Each one says
          what you press, with an example where an example is short enough. -->
     <string name="layout_editor_composer_inherit_desc">The language above decides the method</string>
@@ -558,6 +559,7 @@
     <string name="layout_editor_composer_cangjie_desc">Type the shape codes of the character</string>
     <string name="layout_editor_composer_cangjie_quick_desc">The first Cangjie code and the last one only</string>
     <string name="layout_editor_composer_jyutping_desc">Type Cantonese sounds in roman letters</string>
+    <string name="layout_editor_composer_khipro_desc">Type Bangla in lowercase letters, with f and / as modifiers</string>
 
     <string name="layout_editor_actual_size_title">Preview at your key height</string>
     <string name="layout_editor_actual_size_subtitle">Draw the grid at the height you actually type at</string>

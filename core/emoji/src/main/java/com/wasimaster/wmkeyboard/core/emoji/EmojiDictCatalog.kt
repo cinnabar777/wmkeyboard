@@ -32,9 +32,12 @@ data class EmojiDictEntry(
      * with a parent language's files (Banglish `bn_rom` sits in `bn/`). */
     val repoDir: String = repoCode,
 ) {
+    /** The pack's file name in the data repo, and in a language pack. */
+    val fileName: String get() = "${repoCode}_emoji.json.gz"
+
     /** The data repository, wherever [ServiceRepo.DATA] points. */
     val url: String
-        get() = ServiceEndpoints.repo(ServiceRepo.DATA).rawUrl("data/$repoDir/${repoCode}_emoji.json.gz")
+        get() = ServiceEndpoints.repo(ServiceRepo.DATA).rawUrl("data/$repoDir/$fileName")
 }
 
 /**
@@ -203,4 +206,10 @@ object EmojiDictCatalog {
 
     /** True when [langId] has a dictionary worth offering. */
     fun has(langId: String): Boolean = forLanguage(langId) != null
+
+    /** The entry whose pack is called [name], gzip or not (`de_emoji.json.gz`, `de_emoji.json`). */
+    fun byFileName(name: String): EmojiDictEntry? {
+        val gz = if (name.endsWith(".json")) "$name.gz" else name
+        return entries.firstOrNull { it.fileName == gz }
+    }
 }

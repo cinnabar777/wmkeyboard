@@ -10,6 +10,7 @@ import com.wasimaster.wmkeyboard.core.script.ScriptRegistry
 import com.wasimaster.wmkeyboard.core.transliteration.AvroPhonetic
 import com.wasimaster.wmkeyboard.core.transliteration.BengaliGraphemes
 import com.wasimaster.wmkeyboard.core.transliteration.HindiPhonetic
+import com.wasimaster.wmkeyboard.core.transliteration.Khipro
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -37,6 +38,64 @@ class ComposerTest {
         assertSame(HindiTransliterateComposer, composerFor(devanagari, ComposerType.TRANSLITERATE))
         // A transliterator with no engine for its script degrades, never crashes.
         assertSame(NoComposer, composerFor(latin, ComposerType.TRANSLITERATE))
+        assertSame(KhiproComposer, composerFor(bengali, ComposerType.KHIPRO))
+        assertSame(NoComposer, composerFor(latin, ComposerType.KHIPRO))
+    }
+
+    @Test
+    fun `the Khipro layout types through the Khipro composer`() {
+        val spec = BuiltInLayouts.KHIPRO
+        assertSame(KhiproComposer, composerFor(spec.script(), spec.composerType()))
+        val composer = KhiproComposer
+        assertTrue(composer.isTransliterating)
+        // Exact, not phonetic: no Avro ranking pass, only completion.
+        assertNull(composer.phoneticLanguage)
+        assertEquals("bn", composer.completionLanguage)
+    }
+
+    @Test
+    fun `Khipro buffers its modifier keys, and a comma only inside a word`() {
+        val composer = KhiproComposer
+        composer.variant = Khipro.Variant.TOUCHSCREEN
+        for (c in "/;?\\") assertTrue("$c", composer.buffersChar(c, ""))
+        assertFalse(composer.buffersChar(',', ""))
+        assertTrue(composer.buffersChar(',', "j"))
+        assertFalse(composer.buffersChar('.', "ami"))
+        assertFalse(composer.bufferDigits)
+    }
+
+    @Test
+    fun `a word typed on a hardware keyboard reads against the desktop spec`() {
+        val composer = KhiproComposer
+        try {
+            composer.variant = Khipro.Variant.DESKTOP
+            assertTrue(composer.buffersChar('.', "ami"))
+            assertTrue(composer.bufferDigits && composer.digitsStartBuffer)
+            assertEquals("কথা।", composer.composeBuffer("kotha."))
+            assertEquals("১২", composer.composeBuffer("12"))
+        } finally {
+            composer.variant = Khipro.Variant.TOUCHSCREEN
+        }
+        assertEquals("কথা.", composer.composeBuffer("kotha."))
+    }
+
+    @Test
+    fun `Khipro key hints diff the spec's own output`() {
+        val composer = KhiproComposer
+        // h after k rewrites ক to খ: the key's contribution is the whole new letter.
+        assertEquals("খ", composer.keyPreview("k", "h", wholeCluster = false))
+        assertEquals("কা", composer.keyPreview("k", "a", wholeCluster = true))
+        // The slicer after a vowel writes the chandrabindu.
+        assertEquals("ঁ", composer.keyPreview("ca", "/", wholeCluster = false))
+    }
+
+    @Test
+    fun `Khipro learns whole Bengali words only`() {
+        val composer = KhiproComposer
+        assertTrue(composer.isPlausibleWord(composer.composeBuffer("ami")))
+        assertFalse(composer.isPlausibleWord(","))
+        assertFalse(composer.isPlausibleWord(composer.composeBuffer("?hello")))
+        assertFalse(composer.isPlausibleWord(composer.composeBuffer("kqq")))
     }
 
     @Test

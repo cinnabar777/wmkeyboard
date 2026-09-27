@@ -289,6 +289,36 @@ internal fun WhisperModelManager(repository: SettingsRepository, settings: LiveS
         row = { modelRow(it) },
     )
 
+    // For a phone that cannot fetch a model itself: the same two files per
+    // model, fetched elsewhere and imported. Suggested models first, then the
+    // rest of what the browse list shows, never one already on the device.
+    val offlineLinks = remember(enabledCodes, onDisk) {
+        val wanted = (suggestions + WhisperCatalog.visibleFor(enabledCodes)).distinct() - onDisk.toSet()
+        val vocabSeen = HashSet<String>()
+        wanted.flatMap { model ->
+            listOfNotNull(
+                OfflineLink(model.displayName, WhisperCatalog.downloadUrl(model.repo, model.modelFile)),
+                if (vocabSeen.add(model.vocabFile)) {
+                    OfflineLink(
+                        context.getString(R.string.offline_import_whisper_vocab_label, model.vocabFile),
+                        WhisperCatalog.downloadUrl(model.vocabRepo, model.vocabFile),
+                    )
+                } else {
+                    null
+                },
+            )
+        }
+    }
+    SettingsGroup {
+        item {
+            OfflineImportRow(
+                subtitle = stringResource(R.string.offline_import_whisper_subtitle),
+                links = offlineLinks,
+                onImported = { WhisperDownloadManager.refresh(filesDir) },
+            )
+        }
+    }
+
     if (storageUsed > 0) {
         CaptionText(
             stringResource(R.string.models_whisper_storage_info, formatBytes(storageUsed)),

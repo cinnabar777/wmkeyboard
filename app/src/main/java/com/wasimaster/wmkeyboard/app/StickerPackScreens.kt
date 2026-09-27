@@ -1,6 +1,7 @@
 package com.wasimaster.wmkeyboard.app
 
 import android.content.Context
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -68,6 +69,7 @@ import com.wasimaster.wmkeyboard.core.stickers.StickerPack
 import com.wasimaster.wmkeyboard.core.stickers.StickerPackFile
 import com.wasimaster.wmkeyboard.core.stickers.StickerPackStore
 import com.wasimaster.wmkeyboard.core.stickers.StickerKeywords
+import com.wasimaster.wmkeyboard.core.stickers.whatsapp.WaStickersFile
 import com.wasimaster.wmkeyboard.core.util.requireInputStream
 import com.wasimaster.wmkeyboard.core.util.requireOutputStream
 import com.wasimaster.wmkeyboard.ime.ui.rememberMediaImageLoader
@@ -144,10 +146,21 @@ internal fun StickerPacksScreen(onNavigate: (String) -> Unit) {
         val fallbackName = context.getString(ContentR.string.core_content_sticker_pack_imported_label)
         scope.launch {
             val result = withContext(Dispatchers.IO) {
-                runCatching {
+                val own = runCatching {
                     context.contentResolver.requireInputStream(uri)
                         .use { StickerPackFile.import(it, store, fallbackName) }
                 }.getOrDefault(StickerImportResult.Failed)
+                // Not one of ours: the same row takes a WhatsApp pack, which
+                // has no manifest to fail on, so the archive is read again as
+                // one. Only when it is neither does the message say so.
+                if (own != StickerImportResult.NotAStickerPack) {
+                    own
+                } else {
+                    runCatching {
+                        context.contentResolver.requireInputStream(uri)
+                            .use { WaStickersFile.import(it, store, fallbackName) }
+                    }.getOrDefault(StickerImportResult.Failed)
+                }
             }
             revision++
             message = result.describe(context)
@@ -196,6 +209,16 @@ internal fun StickerPacksScreen(onNavigate: (String) -> Unit) {
                 accent = routeAccent("sticker_packs"),
                 highlightKey = R.string.import_signal_row_title,
                 onClick = { onNavigate(SIGNAL_STICKERS_ROUTE) },
+            )
+        }
+        item {
+            WmRow(
+                title = stringResource(R.string.import_whatsapp_row_title),
+                subtitle = stringResource(R.string.import_whatsapp_row_subtitle),
+                icon = Icons.AutoMirrored.Outlined.StickyNote2,
+                accent = routeAccent("sticker_packs"),
+                highlightKey = R.string.import_whatsapp_row_title,
+                onClick = { onNavigate(WHATSAPP_STICKERS_ROUTE) },
             )
         }
         item {
@@ -399,42 +422,7 @@ internal fun StickerPackScreen(
                 onNavigate(STICKER_EDITOR_ROUTE)
                 return@launch
             }
-            val outcome = withContext(Dispatchers.IO) {
-                var added = 0
-                var tooLarge = 0
-                var unreadable = 0
-                var full = false
-                for (uri in uris) {
-                    val bytes = runCatching {
-                        context.contentResolver.requireInputStream(uri).use { it.readBytes() }
-                    }.getOrNull()
-                    if (bytes == null) {
-                        unreadable++
-                        continue
-                    }
-                    when (val processed = StickerImage.process(bytes)) {
-                        is StickerImage.Result.Ok ->
-                            when (
-                                store.addSticker(
-                                    packId,
-                                    processed.sticker,
-                                    // Kept so "Edit image" starts from the
-                                    // photo and not from the 512-pixel copy
-                                    // of it this batch just made.
-                                    original = StickerImage.encodeOriginal(bytes),
-                                )
-                            ) {
-                                is StickerAddResult.Added -> added++
-                                StickerAddResult.PackFull -> full = true
-                                else -> unreadable++
-                            }
-                        StickerImage.Result.TooLarge -> tooLarge++
-                        StickerImage.Result.NotAnImage -> unreadable++
-                    }
-                    if (full) break
-                }
-                AddOutcome(added, tooLarge, unreadable, full)
-            }
+            val outcome = addPickedStickers(context, store, packId, uris)
             busy = false
             revision++
             message = outcome.describe(context)
@@ -678,7 +666,55 @@ private const val MAX_PICK = 30
 /** A pack that dropped every sticker has one reason per sticker; show a few. */
 private const val MAX_SHOWN_REPAIRS = 5
 
-private data class AddOutcome(
+/**
+ * Adds every picture at [uris] to [packId], stopping at the first that fills
+ * the pack. Reads and encodes on the IO dispatcher.
+ *
+ * Shared by the pack page's photo picker and the WhatsApp screen's document
+ * picker: two ways of choosing files, one way of adding them.
+ */
+internal suspend fun addPickedStickers(
+    context: Context,
+    store: StickerPackStore,
+    packId: String,
+    uris: List<Uri>,
+): AddOutcome = withContext(Dispatchers.IO) {
+    var added = 0
+    var tooLarge = 0
+    var unreadable = 0
+    var full = false
+    for (uri in uris) {
+        val bytes = runCatching {
+            context.contentResolver.requireInputStream(uri).use { it.readBytes() }
+        }.getOrNull()
+        if (bytes == null) {
+            unreadable++
+            continue
+        }
+        when (val processed = StickerImage.process(bytes)) {
+            is StickerImage.Result.Ok ->
+                when (
+                    store.addSticker(
+                        packId,
+                        processed.sticker,
+                        // Kept so "Edit image" starts from the photo and not
+                        // from the 512-pixel copy of it this batch just made.
+                        original = StickerImage.encodeOriginal(bytes),
+                    )
+                ) {
+                    is StickerAddResult.Added -> added++
+                    StickerAddResult.PackFull -> full = true
+                    else -> unreadable++
+                }
+            StickerImage.Result.TooLarge -> tooLarge++
+            StickerImage.Result.NotAnImage -> unreadable++
+        }
+        if (full) break
+    }
+    AddOutcome(added, tooLarge, unreadable, full)
+}
+
+internal data class AddOutcome(
     val added: Int,
     val tooLarge: Int,
     val unreadable: Int,
@@ -816,7 +852,7 @@ private fun StickerEditDialog(
 }
 
 @Composable
-private fun NameDialog(
+internal fun NameDialog(
     title: String,
     value: String,
     onValueChange: (String) -> Unit,

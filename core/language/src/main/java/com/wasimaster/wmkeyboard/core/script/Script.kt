@@ -243,6 +243,13 @@ enum class ComposerType {
 
     /** Cantonese: 粵拼 Jyutping romanisation with optional tone digits 1-6. */
     JYUTPING,
+
+    /**
+     * Bengali: ক্ষিপ্র Khipro, composed from lowercase keys with `f` and `/` as
+     * modifiers (issue #400). Deterministic, so unlike [TRANSLITERATE] there is
+     * no dictionary reading to rank: the keys spell exactly one word.
+     */
+    KHIPRO,
 }
 
 /**
@@ -299,6 +306,16 @@ data class ScriptDef(
      * nothing is displaced.
      */
     val punctuationAlternates: Map<String, List<String>> = emptyMap(),
+    /**
+     * The mark this script asks a question with. Arabic-script languages and
+     * Dhivehi write the reversed ؟, not "?".
+     *
+     * Issue #408: when a letters grid offers no question mark within a single
+     * press or hold, this one leads the period key's long press, so a plain
+     * hold on the key beside the spacebar types it — the way a hold on m does
+     * on the built-in Latin grids.
+     */
+    val questionMark: String = "?",
 ) {
     /** Whether [codePoint] is one of this script's own characters. */
     fun contains(codePoint: Int): Boolean =
@@ -364,6 +381,8 @@ object ScriptRegistry {
             composer = ComposerType.NONE,
             fontHint = FontHint.ARABIC,
             unicodeRange = 0x0600..0x06FF,
+            // Persian, Urdu, Pashto, Sorani, Sindhi and Arabic alike.
+            questionMark = "؟",
         ),
         ScriptDef(
             id = ScriptId.GREEK,
@@ -562,6 +581,8 @@ object ScriptRegistry {
             composer = ComposerType.NONE,
             fontHint = FontHint.GENERIC,
             unicodeRange = 0x0780..0x07BF,
+            // Dhivehi borrows the Arabic question mark.
+            questionMark = "؟",
         ),
         // Japanese and Chinese: the script default is a plain 1:1 append, and the
         // layouts override it (romaji→kana for ja, pinyin for zh). Their fonts are

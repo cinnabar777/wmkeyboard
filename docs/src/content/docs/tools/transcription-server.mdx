@@ -37,6 +37,29 @@ Type the server's API root, up to and including the version segment, the same wa
 
 An address that already ends in `/transcriptions` or `/inference` is used as typed.
 
+### A server with its own route
+
+Some servers take the same request on a route of their own, such as `POST /v1/transcribe`. Put that route in **Endpoint path**, under **Server address**. When it is filled in, the keyboard adds it to the address exactly as typed, with no guessing and no `/v1`:
+
+| Server address | Endpoint path | The keyboard sends to |
+|---|---|---|
+| `http://192.168.1.10:8000` | `/v1/transcribe` | `http://192.168.1.10:8000/v1/transcribe` |
+| `http://192.168.1.10:8000/v1` | `transcribe` | `http://192.168.1.10:8000/v1/transcribe` |
+| `http://192.168.1.10:8000` | `https://asr.example.com/api/stt` | `https://asr.example.com/api/stt` (a whole address replaces the server address) |
+
+Leave **Endpoint path** empty for the usual `/audio/transcriptions`. The request itself is the same either way; see [The protocol](#the-protocol).
+
+## A model or server per language
+
+Some models are much better at one language than another. With two or more languages enabled, a **Per language** group appears under **Transcription server**, with one row per language. Each row says what that language uses. Tap it to change it:
+
+- **Same server, another model.** Leave **Server address** empty and fill in **Model**. The language uses the main server, its route and its key, with this model instead of the main one. Leave **Model** empty too and the language goes back to the main server.
+- **A server of its own.** Fill in **Server address**. **Endpoint path** and **API key** appear for that server. Nothing is borrowed from the main server: the main key is never sent to a different address, and an empty **Model** lets this server pick its own.
+
+**Test** in the dialog sends one second of silence to what the dialog holds, before you save. **Use main server** clears the language's entry.
+
+Dictation picks the server from the language of the layout you are typing on, the same way [offline Whisper](/tools/whisper/) picks a model. **Send the keyboard language**, **Prompt** and the words to listen for apply to every server. A language's own API key is left out of backups unless you choose to include API keys, like the main one.
+
 ## Running a server
 
 The keyboard does not use a protocol of its own. It speaks OpenAI's audio transcription API, which most speech-to-text servers already support. Any of these works.
@@ -116,7 +139,7 @@ So the keyboard builds the prompt for that limit. It sends at most 150 words, an
 
 ## Privacy
 
-With this engine, the recording of each phrase leaves your phone. It goes to the address you typed and nowhere else, and only after you start dictating. Nothing is sent in the background. The API key is stored with your other settings and is left out of backups unless you choose to include API keys. See [Network policy](/privacy/network/).
+With this engine, the recording of each phrase leaves your phone. It goes to the address you typed, or the one you set for the language you are typing in, and nowhere else, and only after you start dictating. Nothing is sent in the background. The API keys are stored with your other settings and are left out of backups unless you choose to include API keys. See [Network policy](/privacy/network/).
 
 An `http://` address sends the audio unencrypted. That is fine on your own network. Use `https://` for anything reached over the internet.
 

@@ -1,6 +1,6 @@
 ---
 title: "Tools"
-description: "The master tool list: how to enable, disable, recolour, and open each of the 75 tools' own settings, plus what each tool's in-panel manager does."
+description: "The master tool list: how to enable, disable, recolour, and open each of the 77 tools' own settings, plus what each tool's in-panel manager does."
 sidebar:
   order: 15
 ---
@@ -10,7 +10,7 @@ import SettingsPath from '@components/SettingsPath.astro';
 import Flavor from '@components/Flavor.astro';
 import Shot from '@components/Shot.astro';
 
-The Tools screen is the enable switch and the settings entry point for all 75 of WM Keyboard's tools. Turn a tool on or off, tint its icon, or tap through to its own options. This page is the field reference for that one screen. For how the toolbar and toolbox actually work, including pinning, dragging, groups and direct boot, see [The toolbar](/tools/overview/) instead.
+The Tools screen is the enable switch and the settings entry point for all 77 of WM Keyboard's tools. Turn a tool on or off, tint its icon, or tap through to its own options. This page is the field reference for that one screen. For how the toolbar and toolbox actually work, including pinning, dragging, groups and direct boot, see [The toolbar](/tools/overview/) instead.
 
 <PhoneFrame caption="The Tools screen: Colorful tool icons, then every tool grouped by what it does.">
   <Shot id="reference/settings/tools-list" alt="The Tools screen: Colorful tool icons, then every tool grouped by what it does." />
@@ -48,12 +48,12 @@ Tools are grouped by what they do, in this order. Each group starts folded shut,
 | Create and convert | Special symbols, Calculator, Unit converter, QR code generator, Password generator, Typing speed test |
 | Keyboard modes | Keyboard modes, One-handed mode, Split keyboard, Floating keyboard, Keep on screen, Resize |
 | Cursor | The twelve one-tap cursor moves, Selection mode, plus Hide keyboard |
-| Quick actions | Undo, Redo, Copy, Cut, Paste, Autocorrect, Selection actions, English words, Fancy text, Secondary layout, Incognito, Sound & haptics, Themes, Power saving, Settings shortcut |
+| Quick actions | Undo, Redo, Copy, Cut, Paste, Autocorrect, Selection actions, English words, Fancy text, Secondary layout, Incognito, Sound & haptics, Themes, Power saving, Settings shortcut, Statistics |
 | Utilities | Flashlight, Compass, Bubble level, Calendar, Weather, Moon phase, Plugins |
 
 A tool that a future group forgets to claim still shows. It would fall into a trailing **Other** catch-all, so nothing ever goes missing from the list. Every tool has a named home today, though, so that catch-all currently has nothing in it and doesn't appear.
 
-A tune icon marks the tools with settings beyond the switch. Five are toggle-only here, because their real options live somewhere else: **Settings** (shortcut), **Themes**, **Sound & haptics**, **One-handed mode**, and **[Resize](/tools/resize/)**, whose values are all sliders under <SettingsPath path="Layout & size" /> anyway.
+A tune icon marks the tools with settings beyond the switch. Six are toggle-only here, because their real options live somewhere else: **Settings** (shortcut), **[Statistics](/reference/settings/statistics/)** (a shortcut too, whose page only links to the Statistics screen), **Themes**, **Sound & haptics**, **One-handed mode**, and **[Resize](/tools/resize/)**, whose values are all sliders under <SettingsPath path="Layout & size" /> anyway.
 
 <Flavor edition="lite" /> hides the **Scanners** group entirely. Text scan, QR scan, and Document scanner are all unavailable, so the group has nothing left to show and doesn't render. **Panels** shrinks by two rows when Handwriting and Grammar check drop out, but it keeps its name and the rest of its tools. See [Lite edition](#lite-edition) below for the complete gating rule.
 
@@ -78,14 +78,14 @@ A handful of tools carry something bigger than a row of toggles: a model downloa
 
 | Tool | What's there | Notes |
 |---|---|---|
-| Voice typing | Recognition engine choice, the Whisper model manager, and the transcription server | Default engine is **System recognizer**. **Offline Whisper** is offered only <Flavor edition="full" />, and switching to it reveals a **Translate to English** toggle (off by default) and the model list. **Transcription server** is offered in every edition, and reveals **Server address**, **Model**, **API key**, **Send the keyboard language** (on by default) and a **Test the server** button. Full details: [Voice typing](/tools/voice/), [Offline voice (Whisper)](/tools/whisper/), [Transcription server](/tools/transcription-server/). |
+| Voice typing | Recognition engine choice, the Whisper model manager, and the transcription server | Default engine is **System recognizer**. **Offline Whisper** is offered only <Flavor edition="full" />, and switching to it reveals a **Translate to English** toggle (off by default) and the model list. **Transcription server** is offered in every edition, and reveals **Server address**, **Endpoint path** (empty by default), **Model**, **API key**, **Send the keyboard language** (on by default) and a **Test the server** button, plus a **Per language** group once two or more languages are enabled. Full details: [Voice typing](/tools/voice/), [Offline voice (Whisper)](/tools/whisper/), [Transcription server](/tools/transcription-server/). |
 | AI writing tools | Provider chips (Claude, OpenAI, Gemini, Grok, DeepSeek, Ollama, LM Studio, Other service, On your device) with per-provider API key or server fields, a local-model manager when On your device is selected, plus the action list, the changes view and the history | On your device is the only provider hidden on <Flavor edition="lite" />. See [AI tools](/tools/ai/). |
 | Handwriting | A recognition-model manager, one entry per typed language | Each model is an on-demand ML Kit download, roughly 8&nbsp;MB to 26&nbsp;MB depending on the language. See [Handwriting](/tools/handwriting/). |
 | Snippets | Full add/edit/delete list, plus import and export | Stored as a JSON file the tool manages itself. See [Snippets & text expansion](/tools/snippets/). |
 | Weather | A location picker, a Fahrenheit toggle (off by default), and Fetch the forecast as you type (on by default, off in the F-Droid edition) | See [Instruments](/tools/instruments/). |
 | Typing speed test | The default test's mode and length, its Punctuation and Numbers switches, a Typing aids group (Glide typing, Suggestions), a Records group (tests completed, recent average, best score per test length and language, and a "Clear records" row once there's something to clear), then an Achievements group | See [Utility tools](/tools/utilities/). |
 | Plugins | A "Manage plugins" row | **This one opens a separate screen.** <SettingsPath path="Tools / Plugins" /> is just an entry point into [Plugins overview](/plugins/overview/), not an inline manager. |
-| Stickers | A "Sticker packs" row alongside the tool's own settings, and a **Suggest while typing** group: **Offer your stickers as you type** (on by default), **Where they show** (Tray, On the strip or One chip, default **Tray**; the tray's place is set under Rows & bars) and **After you send one** (Remove the typed text or Keep the typed text, default **Remove**) | **Also a separate screen.** See [Stickers](/emoji/stickers/) and [Stickers as you type](/emoji/stickers/#stickers-as-you-type). |
+| Stickers | A "Sticker packs" row alongside the tool's own settings, and a **Suggest while typing** group: **Offer your stickers as you type** (on by default), **Where they show** (Tray, On the strip or One chip, default **Tray**; the tray's place is set under Rows & bars) and **After you send one** (Remove the typed text or Keep the typed text, default **Remove**) and **Hold to see them bigger** (on by default: hold a sticker in the tray to see it large, slide to see the others) | **Also a separate screen.** See [Stickers](/emoji/stickers/) and [Stickers as you type](/emoji/stickers/#stickers-as-you-type). |
 | Media controls | A "Music players" row, plus a notification-access row that reports the grant | **Also a separate screen.** The picker lists every installed app, players first. See [Media controls](/tools/media/#which-apps-count-as-music). |
 
 ## Lite edition
@@ -98,7 +98,7 @@ A handful of tools carry something bigger than a row of toggles: a model downloa
 - Document scanner
 - Grammar check
 
-Two more flags narrow what's *inside* a tool without removing the tool itself. The **On your device** AI provider chip and the whole **Offline Whisper** engine option are both full-only. AI writing tools and Voice typing still exist on lite, and still have a settings row, just with fewer choices on it. Lite ships 70 of the 75 tools.
+Two more flags narrow what's *inside* a tool without removing the tool itself. The **On your device** AI provider chip and the whole **Offline Whisper** engine option are both full-only. AI writing tools and Voice typing still exist on lite, and still have a settings row, just with fewer choices on it. Lite ships 72 of the 77 tools.
 
 One tool is gated by the device rather than the build. **Document scanner** is a Google Play services activity, so it's hidden on any phone without Play services, even on <Flavor edition="full" />. Text scan and QR scan stay, since their models are in the APK.
 
@@ -108,7 +108,7 @@ Every tool is documented somewhere outside this reference page, so use this tabl
 
 | Guide page | Tools covered |
 |---|---|
-| [The toolbar](/tools/overview/) | Pinning, toolbox groups, direct boot, hardware leader key (mechanics for all 75) |
+| [The toolbar](/tools/overview/) | Pinning, toolbox groups, direct boot, hardware leader key (mechanics for all 77) |
 | [Custom layouts & the layout editor](/languages/custom-layouts/) | Secondary layout |
 | [Clipboard manager](/tools/clipboard/) | Clipboard |
 | [Snippets & text expansion](/tools/snippets/) | Snippets |
@@ -133,6 +133,7 @@ Every tool is documented somewhere outside this reference page, so use this tabl
 | [Stickers](/emoji/stickers/) | Stickers |
 | [Plugins overview](/plugins/overview/) | Plugins |
 | [Size & position](/typing/size-position/) | One-handed mode, Split keyboard, Floating keyboard, Keep on screen |
+| [Statistics](/reference/settings/statistics/) | Statistics |
 | [Resize the keyboard](/tools/resize/) | Resize |
 | [App launcher](/tools/app-launcher/) | App launcher |
 | [Power saving](/typing/power-saving/) | Power saving |
@@ -149,7 +150,7 @@ Every tool is documented somewhere outside this reference page, so use this tabl
 
 ## Details & edge cases
 
-- **Setup decides what starts enabled, not the shipped default.** The default really is all 75 tools on, but you only ever see it after a settings reset. The [setup wizard](/start/setup/) overwrites it the moment you answer its "how much keyboard do you want" question: 8 tools for "keep it simple", 22 for the middle answer, 37 for "show me everything", or all 75 if you tap **Everything** on its Tools page. Answering "extra strict" on privacy adds Incognito. A set that loses tools this build or device can't run (grammar, handwriting, the scanners) gets Wikipedia and Power saving in their place, so the exact count moves a little. The wizard only writes over an untouched default, so a reinstall with your settings intact keeps your selection.
+- **Setup decides what starts enabled, not the shipped default.** The default really is all 77 tools on, but you only ever see it after a settings reset. The [setup wizard](/start/setup/) overwrites it the moment you answer its "how much keyboard do you want" question: 8 tools for "keep it simple", 22 for the middle answer, 37 for "show me everything", or all 77 if you tap **Everything** on its Tools page. Answering "extra strict" on privacy adds Incognito. A set that loses tools this build or device can't run (grammar, handwriting, the scanners) gets Wikipedia and Power saving in their place, so the exact count moves a little. The wizard only writes over an untouched default, so a reinstall with your settings intact keeps your selection.
 - **Disabling a tool is one switch, not three.** The tool disappears from the toolbar, the toolbox, and its hardware leader-key letter at the same moment. The one piece you can drop on its own is the toolbox: **Show in toolbox** on the tool's own screen takes it out of the grid and leaves it working everywhere else.
 - **A tool hidden from the toolbox can still be pinned.** If it is already on the toolbar it stays there. Drag it off the bar and it unpins without landing in the grid, since the grid no longer takes it; turn **Show in toolbox** back on to see it there again.
 - **The tune icon is a hint, not a guarantee of depth.** Some tools with a tune icon add only one or two settings past the shared Turn on, Icon colour and Keyword shortcut rows. The icon means "there's at least one more setting," not "there's a lot here."

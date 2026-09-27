@@ -96,6 +96,7 @@ import com.wasimaster.wmkeyboard.core.tools.GifSource
 import com.wasimaster.wmkeyboard.core.tools.GifSources
 import com.wasimaster.wmkeyboard.core.tools.MediaCategory
 import com.wasimaster.wmkeyboard.core.tools.ToolApiKeys
+import com.wasimaster.wmkeyboard.core.tools.ToolHttp
 import com.wasimaster.wmkeyboard.core.tools.ImageResult
 import com.wasimaster.wmkeyboard.core.tools.WebResult
 import com.wasimaster.wmkeyboard.ime.ImageSearchUi
@@ -374,6 +375,18 @@ fun mediaImageLoader(context: Context): ImageLoader =
                         callFactory = {
                             OkHttpClient.Builder()
                                 .addInterceptor(InternetGate)
+                                // OkHttp's own `okhttp/x.y` agent is refused
+                                // outright by Wikimedia's image hosts, which
+                                // left every Commons preview blank. Same agent
+                                // the downloads send, so the preview and the
+                                // file it stands for are fetched alike.
+                                .addInterceptor { chain ->
+                                    chain.proceed(
+                                        chain.request().newBuilder()
+                                            .header("User-Agent", ToolHttp.USER_AGENT)
+                                            .build(),
+                                    )
+                                }
                                 .addNetworkInterceptor(NetLogInterceptor(NetSource.MEDIA_IMAGES))
                                 .build()
                         },
@@ -674,8 +687,8 @@ private fun gifAttribution(state: KeyboardUiState, stickers: Boolean = false): S
     val sources = gifSourcesFor(state, stickers)
     val tabs = state.settings.gif.sourceMode == GifSourceMode.TABS
     val targets = GifSources.targets(sources, state.mediaSource, tabs)
-    // Nothing to credit for the user's own packs.
-    if (targets.isEmpty() || targets == listOf(GifSource.LOCAL)) return null
+    // Nothing to credit for packs on the device.
+    if (targets.isEmpty() || targets.all { it.onDevice }) return null
     val names = StringBuilder()
     for (target in targets) {
         if (names.isNotEmpty()) names.append(" · ")
@@ -1199,7 +1212,8 @@ private fun MediaActionSheet(
                 }
             }
             MediaActionRow(stringResource(CommonR.string.common_copy)) { onCopy(item) }
-            if (!local) {
+            // Reporting goes to the provider; an imported pack has none.
+            if (!item.source.onDevice) {
                 MediaActionRow(stringResource(R.string.ime_media_report_action)) { onReport(item) }
             }
         }

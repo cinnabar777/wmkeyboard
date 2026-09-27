@@ -133,6 +133,18 @@ class GlideJoinerTest {
     }
 
     /**
+     * Issue #406: the Persian half-space (U+200C) has a key on the Persian
+     * layout but no letter, so it is not on the grid, and the stroke for
+     * می‌کنم is the stroke for its letters. Latin stand-ins here, because the
+     * grid under test is QWERTY; the skip does not care which script it is in.
+     */
+    @Test
+    fun theHalfSpaceIsSteppedOver() {
+        assertTrue(GlideJoiners.isJoiner(0x200C))
+        assertEquals(listOf("mi\u200Ckonam"), decode("mikonam", sourcesOf("mi\u200Ckonam" to 100)))
+    }
+
+    /**
      * The apostrophe is deliberately excluded ([GlideJoiners]): it has its own
      * key and its own repair, and the contractions are exactly where a free
      * skip would decide `its` against `it's` by frequency.

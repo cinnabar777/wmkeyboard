@@ -107,13 +107,15 @@ fun ScrollRail(
     colors: ScrollRailColors = scrollRailColors(),
     /** See [ScrollRailBox]: off for a list that is not newly in front of you. */
     peek: Boolean = true,
+    /** See [ScrollRailBox]. */
+    reserveGutter: Boolean = true,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val scroll = requireNotNull(state.scroll.plain) {
         "ScrollRail owns the scroll, so its state comes from rememberScrollRailState() " +
             "with no lazy state. A lazy list keeps its own and uses ScrollRailBox."
     }
-    ScrollRailBox(state, modifier, fadeColor, colors, peek = peek) { listModifier ->
+    ScrollRailBox(state, modifier, fadeColor, colors, peek = peek, reserveGutter = reserveGutter) { listModifier ->
         Column(modifier = listModifier.verticalScroll(scroll), content = content)
     }
 }
@@ -144,6 +146,14 @@ fun ScrollRailBox(
      * scrolled something to get here, so it is noise: pass false.
      */
     peek: Boolean = true,
+    /**
+     * Keep [RailGutter] clear on the right for the rail. A caller that knows
+     * its list cannot scroll (a short menu, counted by rows) passes false, so
+     * its rows reach the edge instead of stopping at a gutter with no rail in
+     * it. Decided up front, not from [ScrollRailState.scrollable], which is
+     * only known after a measure and would shift the rows a frame late.
+     */
+    reserveGutter: Boolean = true,
     content: @Composable (Modifier) -> Unit,
 ) {
     if (peek) ScrollRailPeek(state)
@@ -156,7 +166,7 @@ fun ScrollRailBox(
         content(
             Modifier
                 .fillMaxWidth()
-                .padding(end = RailGutter)
+                .padding(end = if (reserveGutter) RailGutter else 0.dp)
                 // Drawn outside the scroll, so the gradient sits over the
                 // window rather than travelling with the content. Reading the
                 // scroll position in the draw phase and not in composition

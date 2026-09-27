@@ -115,6 +115,36 @@ Almost every phone sold since 2017 takes an **arm64-v8a** build, so start here:
 
 EOF
 
+# The no-internet build, from the `offline` job. Releases before it existed
+# carry neither file, and get no section rather than one saying "not built".
+if [ -f "$dist/${prefix}-full-intl-nointernet-arm64-v8a.apk" ] \
+  || [ -f "$dist/${prefix}-full-intl-nointernet-universal.apk" ]; then
+cat <<EOF
+<details>
+<summary><b>No internet permission</b> (a keyboard that cannot reach the network at all)</summary>
+
+**full · all languages**, with \`android.permission.INTERNET\` taken out of the
+manifest, so Android refuses every connection the app tries to make. Typing,
+prediction, gesture typing, the clipboard, grammar checking and the scanners
+work as usual, and so does a local AI model imported from a file. Anything
+that downloads (dictionary packs, voice and handwriting models, translation
+languages, GIFs, cloud backups) fails as it would with the phone offline, and
+the app cannot check for its own updates, so come back here for new versions.
+Language packs, voice models, OCR data and offline GIF packs fetched on another
+device can be imported instead
+([how](https://wmkeyboard.pages.dev/privacy/offline/)).
+It is signed with the same key as the builds above and installs over them, and
+back, without losing a setting.
+
+| arm64-v8a | universal |
+|:---|:---|
+| $(cell "${prefix}-full-intl-nointernet-arm64-v8a.apk") | $(cell "${prefix}-full-intl-nointernet-universal.apk") |
+
+</details>
+
+EOF
+fi
+
 # The extras block lists only what this release actually carries: mappings and
 # native symbols were first attached in 0.5.8, so an older release has nothing
 # under the checksums but the checksums.
@@ -130,6 +160,7 @@ row "${prefix}-full-intl-mapping.txt.gz" 'R8 mapping, **full · all languages**.
 row "${prefix}-full-en-mapping.txt.gz" 'R8 mapping, **full · English**'
 row "${prefix}-lite-intl-mapping.txt.gz" 'R8 mapping, **lite · all languages**'
 row "${prefix}-lite-en-mapping.txt.gz" 'R8 mapping, **lite · English**'
+row "${prefix}-full-intl-nointernet-mapping.txt.gz" 'R8 mapping, **no internet permission**. Only attached when it differs from full · all languages, which otherwise serves both'
 row "${prefix}-play-mapping.txt.gz" 'R8 mapping, **Play build**. The Play channel flags change what R8 renames, so this is the only one that reads a crash from a Play install'
 row "${prefix}-full-intl-native-symbols.zip" 'Native debug symbols, **full · all languages**'
 row "${prefix}-full-en-native-symbols.zip" 'Native debug symbols, **full · English**'

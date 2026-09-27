@@ -195,7 +195,7 @@ class FileAssociationTest {
 
     private companion object {
         /** Extensions belonging to other projects that we deliberately claim. */
-        val FOREIGN_EXTENSIONS = setOf("flex", "kmp")
+        val FOREIGN_EXTENSIONS = setOf("flex", "kmp", "wastickers")
 
         /**
          * The types a file of ours arrives as when its URI carries no name.

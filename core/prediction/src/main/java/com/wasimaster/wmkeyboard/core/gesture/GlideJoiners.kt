@@ -18,6 +18,11 @@ package com.wasimaster.wmkeyboard.core.gesture
  * indexed stripped, emitted whole — without a second index to build, keep in
  * memory or hold in step with the first.
  *
+ * The Persian half-space (ZWNJ, U+200C) is one of them for the same reason:
+ * می‌کنم and سگ‌ها are spelled with it, the Persian layout gives it a key of its
+ * own that is not a letter and so not on the grid, and the stroke for the word
+ * is the stroke for its letters (#406).
+ *
  * **The apostrophe is deliberately not here.** It has its own route onto the
  * grid (`GestureSettings.apostropheKey`, which puts `'` and `’` on a key the
  * user picks) and its own repair afterwards (`Apostrophes.fixExplicit`), built
@@ -42,6 +47,7 @@ object GlideJoiners {
     fun isJoiner(codePoint: Int): Boolean = when (codePoint) {
         '-'.code, HYPHEN, NON_BREAKING_HYPHEN -> true
         '.'.code, '@'.code, '_'.code, '&'.code, '+'.code, '/'.code -> true
+        ZERO_WIDTH_NON_JOINER -> true
         else -> false
     }
 
@@ -93,4 +99,7 @@ object GlideJoiners {
 
     /** U+2011 NON-BREAKING HYPHEN. */
     private const val NON_BREAKING_HYPHEN = 0x2011
+
+    /** U+200C, the Persian half-space. */
+    private const val ZERO_WIDTH_NON_JOINER = 0x200C
 }

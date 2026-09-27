@@ -15,6 +15,16 @@ object WhisperStore {
 
     fun rootDir(filesDir: File): File = File(filesDir, "whisper")
 
+    /**
+     * Where an imported `filters_vocab_*.bin` waits for a model to go with.
+     * One vocab serves many models, and the user may bring it before the
+     * graph, so it cannot go into a model's directory yet: a directory holding
+     * one of its two files reads as a download half done.
+     */
+    fun vocabPool(filesDir: File): File = File(rootDir(filesDir), VOCAB_POOL)
+
+    private const val VOCAB_POOL = ".vocab"
+
     fun modelDir(filesDir: File, model: WhisperModel): File =
         File(rootDir(filesDir), model.id)
 
@@ -145,7 +155,7 @@ object WhisperStore {
     fun orphanDirs(filesDir: File): List<File> {
         val known = WhisperCatalog.models.map { it.id }.toSet()
         return rootDir(filesDir).listFiles().orEmpty()
-            .filter { it.isDirectory && it.name !in known }
+            .filter { it.isDirectory && it.name !in known && it.name != VOCAB_POOL }
     }
 
     fun orphanBytes(filesDir: File): Long =

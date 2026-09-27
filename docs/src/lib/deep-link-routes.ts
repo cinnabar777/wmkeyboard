@@ -367,7 +367,7 @@ export const STORAGE_IDS = [
 export const LICENSE_ASSETS = [
 	'apache-2.0.txt', 'bsd-2-clause-stroke.txt', 'bsd-3-clause.txt', 'cc-by-4.0-lshk.txt', 'cc-by-4.0-noto-animated.txt',
 	'cc-by-sa-4.0.txt', 'harper-third-party.txt', 'jyutping-sources.txt', 'mit-color-themes.txt', 'mit-gemoji.txt',
-	'mit-keyman.txt', 'mit-luaj.txt', 'mit-whisper-android.txt', 'mit-whisper.txt', 'mit-wmkeyboard.txt',
+	'mit-keyman.txt', 'mit-khipro.txt', 'mit-luaj.txt', 'mit-whisper-android.txt', 'mit-whisper.txt', 'mit-wmkeyboard.txt',
 	'ofl-1.1-fonts.txt', 'ofl-1.1.txt', 'unicode-3.0.txt', 'wordlist-sources.txt',
 ];
 

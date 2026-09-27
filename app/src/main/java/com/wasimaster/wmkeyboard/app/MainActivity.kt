@@ -54,6 +54,8 @@ import com.wasimaster.wmkeyboard.app.statistics.StatisticsScreen
 import com.wasimaster.wmkeyboard.app.storage.StorageScreen
 import com.wasimaster.wmkeyboard.app.storage.storageRoute
 import com.wasimaster.wmkeyboard.app.language.appLanguageSplitCompat
+import com.wasimaster.wmkeyboard.app.launcher.LauncherCombos
+import com.wasimaster.wmkeyboard.app.launcher.LauncherCombosScreen
 import com.wasimaster.wmkeyboard.app.lock.AppLockTargets
 import com.wasimaster.wmkeyboard.app.lock.BiometricAppLock
 import com.wasimaster.wmkeyboard.app.lock.LocalAppLock
@@ -1155,13 +1157,13 @@ private fun SettingsNavGraph(
                 MusicAppsScreen(repository, settings)
             }
         }
-        composable(com.wasimaster.wmkeyboard.app.launcher.LauncherCombos.ROUTE) {
+        composable(LauncherCombos.ROUTE) {
             SettingsScreen(
                 stringResource(R.string.launchercombos_title),
                 { navController.popBackStack() },
-                route = com.wasimaster.wmkeyboard.app.launcher.LauncherCombos.ROUTE,
+                route = LauncherCombos.ROUTE,
             ) {
-                com.wasimaster.wmkeyboard.app.launcher.LauncherCombosScreen(repository, settings)
+                LauncherCombosScreen(repository, settings)
             }
         }
         composable("kdeconnect/devices") {
@@ -1323,6 +1325,15 @@ private fun SettingsNavGraph(
                 }
             }
         }
+        composable("theme_assets/{themeId}") { backStackEntry ->
+            val themeId = backStackEntry.arguments?.getString("themeId").orEmpty()
+            SettingsScreen(
+                stringResource(R.string.theme_assets_title),
+                { navController.popBackStack() },
+            ) {
+                ThemeAssetGuideScreen(settings, themeId)
+            }
+        }
         composable(PHOTO_HUB_ROUTE) {
             PhotoServicesScreen(
                 anim = this,
@@ -1461,6 +1472,15 @@ private fun SettingsNavGraph(
                 route = SIGNAL_STICKERS_ROUTE,
             ) {
                 SignalStickersScreen { route -> navController.navigate(route) }
+            }
+        }
+        composable(WHATSAPP_STICKERS_ROUTE) {
+            SettingsScreen(
+                stringResource(R.string.import_whatsapp_row_title),
+                { navController.popBackStack() },
+                route = WHATSAPP_STICKERS_ROUTE,
+            ) {
+                WhatsAppStickersScreen { route -> navController.navigate(route) }
             }
         }
         composable("signal_pack/{packId}/{packKey}") { backStackEntry ->

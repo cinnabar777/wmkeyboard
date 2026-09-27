@@ -155,6 +155,7 @@
     <!-- :tada: is one of the shortcodes and stays exactly as it is. -->
     <string name="about_bundled_gemoji_used">The emoji shortcodes, the :tada: names that GitHub, Discord and Slack use</string>
     <string name="about_bundled_keyman_used">The key grids for 862 layouts, mostly for languages no other keyboard covers</string>
+    <string name="about_bundled_khipro_used">The rules of the Khipro Bangla layout</string>
     <string name="about_bundled_opencc_used">The map between simplified and traditional characters, and the vocabulary of Taiwan and Hong Kong</string>
     <string name="about_bundled_lshk_used">The Cantonese Jyutping syllable inventory</string>
     <string name="about_bundled_palettes_used">The themes in the app: Dracula, Nord, Solarized, Catppuccin and Tokyo Night</string>

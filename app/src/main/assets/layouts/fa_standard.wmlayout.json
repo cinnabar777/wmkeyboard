@@ -11,28 +11,36 @@
         "rows": [
           [
             {
-              "label": "ض"
+              "label": "ض",
+              "shiftLabel": "ْ"
             },
             {
-              "label": "ص"
+              "label": "ص",
+              "shiftLabel": "ٌ"
             },
             {
-              "label": "ث"
+              "label": "ث",
+              "shiftLabel": "ٍ"
             },
             {
-              "label": "ق"
+              "label": "ق",
+              "shiftLabel": "ً"
             },
             {
-              "label": "ف"
+              "label": "ف",
+              "shiftLabel": "ُ"
             },
             {
-              "label": "غ"
+              "label": "غ",
+              "shiftLabel": "ِ"
             },
             {
-              "label": "ع"
+              "label": "ع",
+              "shiftLabel": "َ"
             },
             {
               "label": "ه",
+              "shiftLabel": "ّ",
               "longPress": [
                 "ۀ",
                 "ہ",
@@ -40,24 +48,30 @@
               ]
             },
             {
-              "label": "خ"
+              "label": "خ",
+              "shiftLabel": "ٔ"
             },
             {
-              "label": "ح"
+              "label": "ح",
+              "shiftLabel": "ٰ"
             },
             {
-              "label": "ج"
+              "label": "ج",
+              "shiftLabel": "ٓ"
             }
           ],
           [
             {
-              "label": "ش"
+              "label": "ش",
+              "shiftLabel": "ؤ"
             },
             {
-              "label": "س"
+              "label": "س",
+              "shiftLabel": "ئ"
             },
             {
               "label": "ی",
+              "shiftLabel": "ي",
               "longPress": [
                 "ئ",
                 "ي",
@@ -65,13 +79,16 @@
               ]
             },
             {
-              "label": "ب"
+              "label": "ب",
+              "shiftLabel": "إ"
             },
             {
-              "label": "ل"
+              "label": "ل",
+              "shiftLabel": "أ"
             },
             {
               "label": "ا",
+              "shiftLabel": "آ",
               "longPress": [
                 "آ",
                 "أ",
@@ -82,25 +99,30 @@
             },
             {
               "label": "ت",
+              "shiftLabel": "ة",
               "longPress": [
                 "ة"
               ]
             },
             {
-              "label": "ن"
+              "label": "ن",
+              "shiftLabel": "»"
             },
             {
-              "label": "م"
+              "label": "م",
+              "shiftLabel": "«"
             },
             {
               "label": "ک",
+              "shiftLabel": "ك",
               "longPress": [
                 "ك",
                 "ڪ"
               ]
             },
             {
-              "label": "گ"
+              "label": "گ",
+              "shiftLabel": "؛"
             }
           ],
           [
@@ -118,6 +140,7 @@
             },
             {
               "label": "ز",
+              "shiftLabel": "ژ",
               "longPress": [
                 "ژ"
               ]
@@ -132,7 +155,8 @@
               "label": "د"
             },
             {
-              "label": "پ"
+              "label": "پ",
+              "shiftLabel": "ء"
             },
             {
               "label": "و",

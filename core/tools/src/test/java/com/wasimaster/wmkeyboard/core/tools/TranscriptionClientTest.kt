@@ -40,6 +40,27 @@ class TranscriptionClientTest {
     }
 
     @Test
+    fun `a route of the server's own is added to the address as typed`() {
+        assertEquals(
+            "http://host:8000/v1/transcribe",
+            TranscriptionClient.endpoint("http://host:8000", "/v1/transcribe"),
+        )
+        assertEquals(
+            "http://host:8000/v1/transcribe",
+            TranscriptionClient.endpoint("http://host:8000/v1/", "transcribe"),
+        )
+        assertEquals(
+            "https://other/asr",
+            TranscriptionClient.endpoint("http://host:8000", " https://other/asr "),
+        )
+        // Blank, or nothing but a slash, keeps the automatic endpoint.
+        assertEquals(
+            "http://host:8000/v1/audio/transcriptions",
+            TranscriptionClient.endpoint("http://host:8000/v1", " / "),
+        )
+    }
+
+    @Test
     fun `json and plain replies both yield the text`() {
         assertEquals("hello world", TranscriptionClient.parseText("""{"text":" hello world "}"""))
         assertEquals(

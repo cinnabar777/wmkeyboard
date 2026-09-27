@@ -10,8 +10,9 @@ import kotlin.math.ln
  * The buffer is split into syllables so a multi-syllable reading like `nihao`
  * offers both the whole-phrase 你好 and the leading-syllable 你/尼/…, each
  * remembering how many *input* chars it consumed ([consumedFor]) so the service
- * commits that prefix and re-converts the tail. Two [CjkConfig] knobs feed in at
- * call time: Double Pinyin ([DoublePinyin]) changes how the buffer segments, and
+ * commits that prefix and re-converts the tail. Three [CjkConfig] knobs feed in
+ * at call time: Double Pinyin ([DoublePinyin]) changes how the buffer segments,
+ * Jianpin ([Jianpin]) lets a bare initial stand in for a whole syllable, and
  * Fuzzy Pinyin ([PinyinFuzzy]) widens each syllable's lookup. With no dictionary
  * match the raw pinyin commits, so the buffer never traps the user.
  */
@@ -42,6 +43,17 @@ object PinyinComposer : Composer {
      * probable, and a one-syllable slip outranks a three-syllable one.
      */
     private val FUZZY_PENALTY = ln(0.15)
+
+    /**
+     * What an abbreviated syllable costs. Most of the time this decides nothing
+     * — a bare `h` has no exact reading, so every option pays the same — and the
+     * real ordering comes from the decoder's word cost: a phrase covering N
+     * units always beats N stitched single characters, and a unit typed in full
+     * pays nothing at all, which is what puts exact > mixed > pure jianpin. It
+     * only discriminates on `a`, `e` and `o`, which are both a syllable and an
+     * initial: typed alone, the exact 啊 should lead the abbreviated 爱.
+     */
+    private val PARTIAL_PENALTY = ln(0.15)
 
     /**
      * Buffer length, in syllables, past which the lattice gives way to plain
@@ -83,22 +95,39 @@ object PinyinComposer : Composer {
         return if (scheme == DoublePinyinScheme.OFF) null else DoublePinyin.tableFor(scheme)
     }
 
-    /** Syllables of [buffer] with per-syllable input spans, in the active input mode. */
+    /**
+     * Jianpin's index while it applies: full pinyin with the switch on. Under
+     * Double Pinyin a syllable is always two keys, so there is nothing to
+     * abbreviate and the index is left out of the segmentation entirely.
+     */
+    private fun jianpin(): Jianpin.Index? =
+        if (CjkConfig.jianpin && CjkConfig.doublePinyin == DoublePinyinScheme.OFF) Jianpin.index else null
+
+    /**
+     * Syllables of [buffer] with per-syllable input spans, in the active input
+     * mode. With Jianpin on the inventory also holds every initial, so `hd`
+     * splits into `h` and `d`; a full syllable is always longer than its own
+     * initial, so the longest-first walk keeps `nihao` as `ni` + `hao`.
+     */
     private fun segments(buffer: String): List<Seg> {
         val table = doublePinyinTable()
-        return if (table != null) DoublePinyin.segments(buffer, table, PinyinSyllables.valid)
+        if (table != null) return DoublePinyin.segments(buffer, table, PinyinSyllables.valid)
+        val jianpin = jianpin()
+        return if (jianpin != null && jianpin.units.isNotEmpty()) PinyinSyllables.segment(buffer, jianpin.units)
         else PinyinSyllables.segment(buffer)
     }
 
     /**
      * The lattice input for [segs]: one unit per syllable, each offering the
-     * syllable as typed and — with Fuzzy Pinyin on — a couple of confusable
-     * spellings behind a penalty.
+     * syllable as typed, then — with Fuzzy Pinyin on — a couple of confusable
+     * spellings behind a penalty, then — with Jianpin on — every syllable an
+     * abbreviated unit could stand for. A bare initial has no as-typed reading,
+     * so its options are abbreviations alone; `a`, `e` and `o` are both.
      *
-     * The fuzzy variants are *options*, not readings. Building the cartesian
-     * product of readings was what forced a cap, and the cap dropped real
-     * candidates; the decoder instead prunes each variant against the dictionary
-     * before extending it, so an impossible spelling costs one binary search.
+     * The variants are *options*, not readings. Building the cartesian product
+     * of readings was what forced a cap, and the cap dropped real candidates;
+     * the decoder instead prunes each variant against the dictionary before
+     * extending it, so an impossible spelling costs one binary search.
      */
     private fun latticeInput(segs: List<Seg>): Lattice.Input {
         val n = segs.size
@@ -106,20 +135,55 @@ object PinyinComposer : Composer {
         for (i in 0 until n) boundaries[i + 1] = boundaries[i] + segs[i].inputLen
         val fuzzy = CjkConfig.fuzzyPinyin
         val fuzzyPairs = CjkConfig.fuzzyPinyinPairs
-        val options = Array(n) { i ->
-            val typed = segs[i].syllable
-            if (!fuzzy) arrayOf(typed)
-            else {
-                val variants = PinyinFuzzy.expand(typed, PinyinSyllables.valid, fuzzyPairs)
-                    .filter { it != typed }
-                    .take(FUZZY_VARIANTS)
-                (listOf(typed) + variants).toTypedArray()
+        val valid = PinyinSyllables.valid
+        val jianpin = jianpin()
+        val units = List(n) { i -> unitOptions(segs[i].syllable, valid, fuzzy, fuzzyPairs, jianpin) }
+        // A typed digraph reads both ways: `sh` is s + h (上海) by segmentation,
+        // and the initial sh… (是) by merging the two units. An apostrophe
+        // between them is the user's own boundary, so it blocks the merge.
+        val merged = Array(n) { i ->
+            val digraph = segs[i].syllable + segs.getOrNull(i + 1)?.syllable
+            if (jianpin == null || i + 1 >= n || segs[i + 1].inputLen != 1 || digraph !in Jianpin.DIGRAPHS) emptyArray()
+            else jianpin.expansions[digraph].orEmpty().toTypedArray()
+        }
+        return Lattice.Input(
+            boundaries,
+            Array(n) { units[it].readings },
+            Array(n) { units[it].costs },
+            IntArray(n) { units[it].partialFrom },
+            merged,
+            Array(n) { DoubleArray(merged[it].size) { PARTIAL_PENALTY } },
+        )
+    }
+
+    /** One unit's readings, what each costs, and where the abbreviations begin. */
+    private class UnitOptions(val readings: Array<String>, val costs: DoubleArray, val partialFrom: Int)
+
+    private fun unitOptions(
+        typed: String,
+        valid: Set<String>,
+        fuzzy: Boolean,
+        fuzzyPairs: Set<String>,
+        jianpin: Jianpin.Index?,
+    ): UnitOptions {
+        // Without Jianpin every unit came out of the syllable inventory.
+        val exact = jianpin == null || typed in valid
+        val readings = ArrayList<String>(4)
+        val costs = ArrayList<Double>(4)
+        if (exact) { readings.add(typed); costs.add(0.0) }
+        if (exact && fuzzy) {
+            for (v in PinyinFuzzy.expand(typed, valid, fuzzyPairs).filter { it != typed }.take(FUZZY_VARIANTS)) {
+                readings.add(v); costs.add(FUZZY_PENALTY)
             }
         }
-        val penalties = Array(n) { i ->
-            DoubleArray(options[i].size) { o -> if (o == 0) 0.0 else FUZZY_PENALTY }
+        val partialFrom = readings.size
+        if (jianpin != null) {
+            for (s in jianpin.expansions[typed].orEmpty()) {
+                if (s == typed) continue
+                readings.add(s); costs.add(PARTIAL_PENALTY)
+            }
         }
-        return Lattice.Input(boundaries, options, penalties)
+        return UnitOptions(readings.toTypedArray(), costs.toDoubleArray(), partialFrom)
     }
 
     /**

@@ -58,4 +58,32 @@ object CutoutModel {
      * megabytes each time the editor opens would buy nothing.
      */
     fun isDownloaded(filesDir: File): Boolean = file(filesDir).let { it.isFile && it.length() == SIZE_BYTES }
+
+    /**
+     * Installs the model from a copy the user fetched some other way. Held to
+     * the same [SHA256] a download is, so only this exact graph is ever
+     * loaded. Returns false, having kept nothing, for any other file.
+     */
+    fun install(filesDir: File, source: File): Boolean {
+        if (source.length() != SIZE_BYTES) return false
+        val digest = java.security.MessageDigest.getInstance("SHA-256")
+        source.inputStream().use { input ->
+            val buffer = ByteArray(64 * 1024)
+            while (true) {
+                val read = input.read(buffer)
+                if (read < 0) break
+                digest.update(buffer, 0, read)
+            }
+        }
+        if (digest.digest().joinToString("") { "%02x".format(it) } != SHA256) return false
+        val part = partFile(filesDir)
+        dir(filesDir).mkdirs()
+        try {
+            source.inputStream().use { input -> part.outputStream().use { input.copyTo(it) } }
+            file(filesDir).delete()
+            return part.renameTo(file(filesDir))
+        } finally {
+            part.delete()
+        }
+    }
 }

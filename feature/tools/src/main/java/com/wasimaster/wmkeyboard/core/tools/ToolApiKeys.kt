@@ -3,6 +3,7 @@ package com.wasimaster.wmkeyboard.core.tools
 import com.wasimaster.wmkeyboard.config.BuildConfig
 import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.hasSearchKey
+import com.wasimaster.wmkeyboard.core.tools.offlinegif.OfflineGifPacks
 
 /**
  * Resolves the effective API key for each network tool: a key the user
@@ -35,6 +36,9 @@ object ToolApiKeys {
         if (klipy(settings).isNotBlank()) add(GifSource.KLIPY)
         if (giphy(settings).isNotBlank()) add(GifSource.GIPHY)
         if (BuildConfig.ENABLE_FDROID) add(GifSource.COMMONS)
+        // Imported packs need no key and no network, so they are what keeps
+        // the panel working in a build that has neither.
+        if (OfflineGifPacks.hasPacks) add(GifSource.OFFLINE)
     }
 
     /**
@@ -43,7 +47,7 @@ object ToolApiKeys {
      * state the way the GIF panel can.
      */
     fun stickerSources(settings: KeyboardSettings): List<GifSource> =
-        gifSources(settings) + GifSource.LOCAL
+        gifSources(settings).filterNot { it == GifSource.OFFLINE } + GifSource.LOCAL
 
     fun brave(settings: KeyboardSettings): String =
         settings.webSearch.braveApiKey.ifBlank { BuildConfig.BRAVE_API_KEY }

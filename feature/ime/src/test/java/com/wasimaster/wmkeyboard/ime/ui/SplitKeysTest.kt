@@ -82,4 +82,29 @@ class SplitKeysTest {
             }
         }
     }
+
+    @Test
+    fun `a kept spacebar swallows the gap and nothing else moves`() {
+        val row = Layouts.QWERTY.rows[3]
+        val bridged = bridgeSpaceAcrossGap(row, 1.2f)!!
+        assertEquals(row.size, bridged.size)
+        for (i in row.indices) {
+            val grow = if (row[i].action == KeyAction.Space) 1.2f else 0f
+            assertEquals(row[i].width + grow, bridged[i].width, 0.001f)
+            assertEquals(row[i].label, bridged[i].label)
+        }
+    }
+
+    @Test
+    fun `a spacebar ending the left half bridges the gap`() {
+        val row = listOf(Key("a"), Key(" ", action = KeyAction.Space), Key("b"), Key("c"))
+        val bridged = bridgeSpaceAcrossGap(row, 1f)!!
+        assertEquals(2f, bridged[1].width, 0.001f)
+    }
+
+    @Test
+    fun `a row with no spacebar at the cut is left to split`() {
+        assertEquals(null, bridgeSpaceAcrossGap(Layouts.QWERTY.rows[0], 1f))
+        assertEquals(null, bridgeSpaceAcrossGap(listOf(Key("a")), 1f))
+    }
 }

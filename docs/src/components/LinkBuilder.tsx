@@ -40,6 +40,8 @@ interface SettingRow {
 	 * row drawn where `route` opens.
 	 */
 	pattern?: string;
+	description?: string;
+	help?: string;
 }
 
 /** Whether `row` is drawn on the screen `pattern` names. */
@@ -155,12 +157,49 @@ function Qr({ text }: { text: string }) {
 
 /* ---------- the explanation line ---------- */
 
+function SettingContext({ setting, route }: { setting: string; route?: string }) {
+	const [rows, setRows] = useState<SettingRow[] | null>(null);
+	useEffect(() => {
+		loadSettings().then(setRows);
+	}, []);
+	const row = useMemo(() => {
+		if (!rows) return null;
+		return (
+			rows.find((r) => !r.screen && r.name === setting && (!route || r.route === route)) ??
+			rows.find((r) => !r.screen && r.name === setting) ??
+			null
+		);
+	}, [rows, setting, route]);
+
+	if (!row || (!row.description && !row.help)) return null;
+
+	return (
+		<div class="lb-setting-card">
+			<div class="lb-setting-card-head">
+				<strong class="lb-setting-card-title">{row.title}</strong>
+				{row.screens.length > 0 && <span class="lb-hint"> {[...row.screens, row.title].join(' › ')}</span>}
+				<code>{row.name}</code>
+			</div>
+			{row.description && <p class="lb-setting-desc">{row.description}</p>}
+			{row.help && (
+				<div class="lb-setting-help">
+					<span class="lb-help-badge">Help text</span>
+					<div class="lb-help-text">{row.help}</div>
+				</div>
+			)}
+		</div>
+	);
+}
+
 function Explain({ link }: { link: string }) {
 	const x = useMemo(() => explain(link), [link]);
+	const settingName = x.kind === 'setting' ? x.setting : x.kind === 'settings' ? x.setting : undefined;
+	const settingRoute = x.kind === 'settings' ? x.route : undefined;
 	return (
 		<>
 			<ExplainView x={x} />
 			<SinceView x={x} />
+			{settingName && <SettingContext setting={settingName} route={settingRoute} />}
 		</>
 	);
 }
@@ -432,13 +471,15 @@ function SettingPicker({
 		const words = q.split(/\s+/);
 		return pool
 			.map((r) => {
-				const hay = `${r.title} ${r.screens.join(' ')} ${r.name}`.toLowerCase();
+				const hay = `${r.title} ${r.screens.join(' ')} ${r.name} ${r.description ?? ''} ${r.help ?? ''}`.toLowerCase();
 				let score = 0;
 				for (const w of words) {
 					if (!hay.includes(w)) return null;
-					if (r.title.toLowerCase().startsWith(w)) score += 3;
-					else if (r.title.toLowerCase().includes(w)) score += 2;
+					if (r.title.toLowerCase().startsWith(w)) score += 5;
+					else if (r.title.toLowerCase().includes(w)) score += 3;
+					else if (r.description?.toLowerCase().includes(w)) score += 2;
 					else if (r.name.includes(w)) score += 1;
+					else if (r.help?.toLowerCase().includes(w)) score += 1;
 				}
 				return { r, score };
 			})
@@ -474,11 +515,20 @@ function SettingPicker({
 				)}
 			</div>
 			{picked && (
-				<p class="lb-picked">
-					<strong>{picked.title}</strong>
-					<span class="lb-hint"> {[...picked.screens, picked.title].join(' › ')}</span>
-					<code>{picked.name}</code>
-				</p>
+				<div class="lb-picked">
+					<div class="lb-picked-header">
+						<strong>{picked.title}</strong>
+						<span class="lb-hint"> {[...picked.screens, picked.title].join(' › ')}</span>
+						<code>{picked.name}</code>
+					</div>
+					{picked.description && <p class="lb-picked-desc">{picked.description}</p>}
+					{picked.help && (
+						<div class="lb-picked-help">
+							<span class="lb-help-badge">Help text</span>
+							<div class="lb-help-text">{picked.help}</div>
+						</div>
+					)}
+				</div>
 			)}
 			{open && (
 				<ul class="lb-results" role="listbox">
@@ -496,6 +546,7 @@ function SettingPicker({
 								}}
 							>
 								<span class="lb-result-title">{r.title}</span>
+								{r.description && <span class="lb-result-desc">{r.description}</span>}
 								<span class="lb-result-path">{r.screens.join(' › ')}</span>
 								<code>{r.name}</code>
 							</button>
@@ -794,8 +845,7 @@ function DecodeMode({ initial }: { initial: string }) {
 			<Field label="Paste a link" hint="Any wmkeyboard:// address, in either spelling. Nothing is opened; this only says what would happen.">
 				<textarea class="lb-input lb-mono lb-textarea" value={text} onInput={(e) => setText((e.target as HTMLTextAreaElement).value)} spellcheck={false} />
 			</Field>
-			{text.trim() && <ExplainView x={x} />}
-			{text.trim() && <SinceView x={x} />}
+			{text.trim() && <Explain link={text.trim()} />}
 			{text.trim() && x.kind !== 'invalid' && (
 				<div class="lb-actions">
 					<CopyButton text={text.trim()} />

@@ -91,6 +91,8 @@ Downloaded models live in the app's private storage, not shared storage: the scr
 
 If you downloaded **Tiny (English)** in version 0.5.8 or earlier and dictation with it came back empty most of the time, that was the model file, not your microphone. Its source has since changed to a conversion that works, and the old file is recognised and discarded, so the model shows as not downloaded until you download it again.
 
+A phone that cannot download can import a model instead. Below the catalog, **Get the files** lists both files of each model that suits your languages, to fetch in a browser on any device, and **Import** installs them: pick the `.tflite` and its `filters_vocab_*.bin` together, or one after the other in either order. A model imported without its vocabulary file is reported as still needing it. See [Using it without internet](/privacy/offline/#voice-models).
+
 When exactly one model is on disk, the app quietly adopts it as that fallback, so dictation works right after your first download with no setup step in between. It does the same again if you delete whichever model was holding the job.
 
 ## Options

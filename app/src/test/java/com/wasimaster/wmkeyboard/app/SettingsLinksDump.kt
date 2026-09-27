@@ -45,7 +45,27 @@ class SettingsLinksDump {
             val isScreen = entry.weight == EntryWeight.SECTION || entry.weight == EntryWeight.TOOL
             val screens = entry.screenPath.filterNot { it == home }
                 .let { if (entry.weight == EntryWeight.TOOL && it.lastOrNull() == entry.title) it.dropLast(1) else it }
-            Row(entry.title, entry.key.substringAfter('#'), entry.route, screens, isScreen, entry.screenPattern)
+            val name = entry.key.substringAfter('#')
+            val base = if (name.endsWith("_title")) name.removeSuffix("_title") else name
+            val description = entry.subtitle.takeIf { it.isNotBlank() }
+                ?: strings.getByName("${base}_subtitle")
+                ?: strings.getByName("${base}_summary")
+                ?: strings.getByName("${base}_desc")
+                ?: strings.getByName("${name}_subtitle")
+            val help = strings.getByName("${base}_info")
+                ?: strings.getByName("${base}_help")
+                ?: strings.getByName("${name}_info")
+                ?: strings.getByName("${name}_help")
+            Row(
+                title = entry.title,
+                name = name,
+                route = entry.route,
+                screens = screens,
+                screen = isScreen,
+                pattern = entry.screenPattern,
+                description = description?.takeIf { it.isNotBlank() },
+                help = help?.takeIf { it.isNotBlank() },
+            )
         }
         // After the index's own rows, so a chip that names no mode still
         // matches the generic entry first.
@@ -73,6 +93,8 @@ class SettingsLinksDump {
         val screens: List<String>,
         val screen: Boolean,
         val pattern: String? = null,
+        val description: String? = null,
+        val help: String? = null,
     ) {
         fun toJson(): String = buildString {
             append("{\"title\":").append(json(title))
@@ -81,6 +103,8 @@ class SettingsLinksDump {
             append(",\"screens\":[").append(screens.joinToString(",") { json(it) }).append(']')
             append(",\"screen\":").append(if (screen) "true" else "false")
             if (pattern != null) append(",\"pattern\":").append(json(pattern))
+            if (description != null) append(",\"description\":").append(json(description))
+            if (help != null) append(",\"help\":").append(json(help))
             append('}')
         }
     }

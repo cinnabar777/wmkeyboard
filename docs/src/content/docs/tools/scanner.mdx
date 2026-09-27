@@ -33,7 +33,7 @@ With **Text recognition** on **Automatic** (the default), Latin-script languages
 
 A language without Tesseract data of its own reads with the main one for its script: Maithili and other Devanagari languages read with Hindi's, and a Latin-script language with no data of its own reads with English's.
 
-The first time you scan in a language that needs Tesseract data, the viewfinder is replaced by a **Download** button that says how big the data is. The download shows its progress in the panel and can be cancelled there. With [data saver](/privacy/data-saver/) set to ask, the first press explains that it uses mobile data and a second press starts it. Set to block, the button says why it can't. The data comes from the `tessdata_fast` 4.1.0 set of the Tesseract project on GitHub and stays in the app's private storage; you can also download or delete each language on the tool's settings page, and delete it under [Storage](/privacy/data/).
+The first time you scan in a language that needs Tesseract data, the viewfinder is replaced by a **Download** button that says how big the data is. The download shows its progress in the panel and can be cancelled there. With [data saver](/privacy/data-saver/) set to ask, the first press explains that it uses mobile data and a second press starts it. Set to block, the button says why it can't. The data comes from the `tessdata_fast` 4.1.0 set of the Tesseract project on GitHub and stays in the app's private storage; you can also download or delete each language on the tool's settings page, and delete it under [Storage](/privacy/data/). On a phone that cannot download, **Get the files** on that page links each language's `.traineddata` file, and **Import** installs ones fetched elsewhere ([Using it without internet](/privacy/offline/)).
 
 After a capture, the recognized words appear as tappable chips grouped by line:
 
@@ -48,6 +48,8 @@ After a capture, the recognized words appear as tappable chips grouped by line:
 Tesseract reads each photo twice, once with a threshold set from each small area of the photo and once with one threshold for the whole photo, and keeps whichever read found more text. The first copes with uneven light: a shadow across the page, the dark corners of a phone photo, or the torch's bright spot. The second copes with light text on a dark screen. "No text found" means both reads came back empty. If recognition itself fails, the panel says **Could not read** instead. If a downloaded language won't load, the scanner deletes that language's data and offers the download again.
 
 If your device has no camera, the panel shows a message instead of a blank viewfinder.
+
+A picture you copied can be read the same way, with no camera at all: press and hold it in the [clipboard panel](/tools/clipboard/) and tap **Extract text**. The scanner opens on the picture and reads it at once, and its back button returns to the clipboard. **Scan again** shows the picture with the language chip and the shutter, so you can read it again in another language. The button is only there while Text scan is on in your tools.
 
 ## Scanning QR codes and barcodes
 

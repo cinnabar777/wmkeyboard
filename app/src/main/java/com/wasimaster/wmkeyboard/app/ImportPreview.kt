@@ -100,6 +100,10 @@ internal fun ImportFilePreview(state: WMFileTypes.Opened, uri: Uri) {
 
         WMFileTypes.Opened.Stickers -> StickersFilePreview(uri)
 
+        // The same strip: the reader takes any picture in the archive, and a
+        // WhatsApp pack is pictures with two text files beside them.
+        is WMFileTypes.Opened.WhatsAppStickers -> StickersFilePreview(uri)
+
         WMFileTypes.Opened.SoundPack -> SoundPackFilePreview(uri)
 
         // Everything else says what it is in words and has nothing to add: a

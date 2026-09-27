@@ -243,6 +243,8 @@ data class KbTheme(
     /** Shape of the panel cards and search bars; a safe derivative of the chip shape. */
     val cardShapeKind: KeyShapeKind,
     val toolWidthDp: Int,
+    /** Glyph size inside a tool button; a user setting a theme doesn't override. */
+    val toolIconSizeDp: Int,
     val animation: ThemeAnimation,
     val animationSpeed: Float,
     /**
@@ -635,6 +637,7 @@ internal fun defaultKbTheme(
         chipShapeKind = KeyShapeKind.ROUNDED,
         cardShapeKind = KeyShapeKind.ROUNDED,
         toolWidthDp = settings.toolbarBehavior.toolWidthDp,
+        toolIconSizeDp = settings.toolbarBehavior.iconSizeDp,
         animation = ThemeAnimation.NONE,
         animationSpeed = 1f,
         reduceMotion = settings.reduceMotion,
@@ -791,6 +794,7 @@ private fun specKbTheme(spec: ThemeSpec, settings: KeyboardSettings): KbTheme {
         cardShapeKind = keyShapeKindOrNull(spec.cardShape)
             ?: safeContainerKind(keyShapeKindOrNull(spec.chipShape) ?: KeyShapeKind.ROUNDED),
         toolWidthDp = spec.toolWidthDp ?: settings.toolbarBehavior.toolWidthDp,
+        toolIconSizeDp = settings.toolbarBehavior.iconSizeDp,
         animation = spec.animation,
         animationSpeed = spec.animationSpeed,
         reduceMotion = settings.reduceMotion,
@@ -1416,6 +1420,7 @@ private fun lerpKbTheme(a: KbTheme, b: KbTheme, t: Float): KbTheme {
         // toolbar every crossfade frame, which the top bar forbids (a width
         // animation restarts every icon's placement spring). Snap at midpoint.
         toolWidthDp = if (past) b.toolWidthDp else a.toolWidthDp,
+        toolIconSizeDp = if (past) b.toolIconSizeDp else a.toolIconSizeDp,
         animation = if (past) b.animation else a.animation,
         animationSpeed = lerpF(a.animationSpeed, b.animationSpeed, t),
         reduceMotion = b.reduceMotion,

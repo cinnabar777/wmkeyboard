@@ -9,7 +9,7 @@ import PhoneFrame from '@components/PhoneFrame.astro';
 import SettingsPath from '@components/SettingsPath.astro';
 import Shot from '@components/Shot.astro';
 
-The GIF tool searches Klipy and GIPHY from a panel inside the keyboard, then sends the result straight into the field you're typing in. No switching apps, no copy-paste. On the F-Droid build it also searches Wikimedia Commons without any key at all, an educational corpus rather than reaction GIFs. Every other build needs a Klipy or GIPHY key before the tool can search anything.
+The GIF tool searches Klipy and GIPHY from a panel inside the keyboard, then sends the result straight into the field you're typing in. No switching apps, no copy-paste. On the F-Droid build it also searches Wikimedia Commons without any key at all, an educational corpus rather than reaction GIFs. Every other build needs a Klipy or GIPHY key before the tool can search anything online. [Offline GIF packs](#offline-gif-packs) need neither a key nor a connection.
 
 <PhoneFrame caption="The GIF panel, showing trending results on open.">
   <Shot id="emoji/gif-panel-trending" alt="The GIF panel, showing trending results on open." />
@@ -23,7 +23,7 @@ Results are laid out as justified rows of animated previews rather than a fixed 
 
 Before you've typed anything, a scrollable row of **category chips** sits above the grid: Trending first, then Reactions, Love, Happy, Sad and so on. Tap one to run it as a search, which is a way to browse without thinking of a word. Tap the active chip, or Trending, to go back. The chips come from the provider itself when it publishes categories, and from a built-in list when it doesn't, so the row is there offline too. It belongs to the default view only. Type anything and it steps aside for the results. With the full-screen picker turned off it also needs a certain amount of key height to be worth drawing, so a short three-row layout with the number row off loses it rather than losing the last row of the grid.
 
-If neither provider has a key configured, the panel shows a "needs an API key" notice with a shortcut into settings instead of a grid. The F-Droid build never hits that notice, since Commons is already searching.
+If neither provider has a key configured and no offline pack is installed, the panel shows a "needs an API key" notice with a shortcut into settings instead of a grid. The F-Droid build never hits that notice, since Commons is already searching.
 
 ## Sending a GIF
 
@@ -38,6 +38,16 @@ Tap a result and it downloads and lands in the field in one step. There's no sep
 3. **Nothing matches.** If the field won't take any form the tool can produce, the file goes to the system clipboard instead, with a toast: "This app does not accept images here. The keyboard copied the image. Paste it instead." Paste it in manually from there.
 
 Animated GIFs can never actually become stickers. Android has no animated-WebP encoder, so a GIF-format result keeps sending as a plain image no matter what `Send GIFs as` is set to. Only sources that already provide WebP can take the Sticker path.
+
+## Offline GIF packs
+
+The panel can also show GIFs kept on the phone, which need no key and no connection: [CleverKeys' offline GIF packs](https://github.com/tribixbite/CleverKeys/releases/tag/CleverKeys-GIF). Download a pack in your browser, then under <SettingsPath path="Tools / GIFs / Offline GIF packs" /> press **Import** and pick the zip. **Get the files** on the same row opens the release page.
+
+Once a pack is installed the panel gains an **Offline** chip. It is a grid of its own in either **Multiple sources** mode, never mixed in with online results, and like the user's own sticker packs it never asks about [mobile data](/privacy/data-saver/). Search matches the words each GIF is tagged with; the category chips are the packs' own (Funny, Love, Sad and the rest), and one searches for everything filed under it. A search lists up to 240 GIFs. Tapping one sends it as any other result is sent, without a download.
+
+Only the **Discord community** packs (about 100 MB each, around 900 animated GIFs) carry GIFs to send. The **thumbnail** packs hold 80-pixel still previews and nothing else, so the import refuses them and says so. Each pack installed is listed with its size and a Delete. Importing a pack again replaces it.
+
+Everything about getting files onto a phone that cannot download is on [Using it without internet](/privacy/offline/).
 
 ## Long-pressing a result
 
@@ -64,7 +74,8 @@ Saving to a pack is sticker-only, since a GIF can't become one. That row shows o
 | GIPHY API key | Empty | Paste a free key from `developers.giphy.com`, as a second source. |
 | Full-screen picker | On | The toolbar, emoji row and symbol row step aside so the GIF grid gets the full keyboard height, with search moved up next to a back button. Shared with the sticker tool. |
 | Send GIFs as | Image | Whether a tap tries to land the result as a sticker-style MIME first or always as a plain image. See the sticker-limitation note above. |
-| Multiple sources | Tabs | **Tabs**: one chip per configured provider once you have more than one, to switch between them. **Mixed**: a single grid interleaving results from every provider evenly. The GIF panel shows no chip row at all here, since (unlike the sticker panel) it has no "My stickers" tab to distinguish the online results from. |
+| Multiple sources | Tabs | **Tabs**: one chip per configured provider once you have more than one, to switch between them. **Mixed**: a single grid interleaving results from every provider evenly, with an **Online** chip for it and an **Offline** chip for your offline GIF packs once one is installed. Without an offline pack the Mixed panel shows no chip row at all. |
+| Offline GIF packs | None | The packs on the phone, each with a Delete, and the row that imports more. See [Offline GIF packs](#offline-gif-packs). |
 | Content filter | Medium | Four levels (Off, Low, Medium, High) mapped to each provider's own content rating (High maps to G-rated results, Off to R). Shared with the sticker tool. |
 | Results for each search | 24 | A slider from 6 to 48. How many GIFs one search or the trending view loads. Shared with the sticker tool. |
 

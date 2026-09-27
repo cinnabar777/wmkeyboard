@@ -26,6 +26,7 @@ import com.wasimaster.wmkeyboard.ime.FieldKind
 import com.wasimaster.wmkeyboard.ime.KeyboardUiState
 import com.wasimaster.wmkeyboard.ime.LayoutMode
 import com.wasimaster.wmkeyboard.ime.LayoutSet
+import com.wasimaster.wmkeyboard.ime.ShiftState
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -189,6 +190,65 @@ class CurrentLayoutTest {
         // Non-letters have no capital, so their popups are untouched.
         val period = currentLayout(s).keys().single { (it.output ?: it.label) == "." }
         assertTrue(period.longPress.none { it.length == 1 && it[0].isLetter() })
+    }
+
+    private fun keymanKey(label: String, vkey: Int, shifted: Boolean = false) = Key(
+        label,
+        action = KeyAction.KeymanKey(vkey = vkey, modifiers = if (shifted) KEYMAN_SHIFT else 0),
+    )
+
+    /**
+     * A converted Keyman layout keeps its shifted keys on a page of their own,
+     * with no shiftLabel on the keys under them, so the setting has to read that
+     * page. The entry goes out as the shifted key's own press, so the rules type
+     * it, and the popup's two lists stay paired by index.
+     */
+    @Test
+    fun `shifted popup keys reach a keyman shift page`() {
+        val letters = KeyboardLayout("ar", listOf(listOf(keymanKey("ض", 81), keymanKey("ص", 87))))
+        val shift = KeyboardLayout("ar", listOf(listOf(keymanKey("َ", 81, true), keymanKey("ً", 87, true))))
+        val base = plain()
+        val s = KeyboardUiState(
+            settings = base.copy(layoutBehavior = base.layoutBehavior.copy(shiftedPopupKeys = true)),
+            layouts = LayoutSet(letters, letters, letters, keymanShift = shift),
+        )
+        val dad = currentLayout(s).keys().first()
+        assertEquals(listOf("َ"), dad.longPress)
+        val entry = dad.alternateEntries().single() as AlternateEntry.Action
+        val press = entry.alternate.action as KeyAction.KeymanKey
+        assertEquals(81, press.vkey)
+        assertEquals(KEYMAN_SHIFT, press.modifiers)
+
+        // Off, the popup is the layout's own.
+        val off = s.copy(settings = base)
+        assertTrue(currentLayout(off).keys().first().longPress.isEmpty())
+    }
+
+    /** On the shift page itself every key already is its twin. */
+    @Test
+    fun `the keyman shift page adds nothing to itself`() {
+        val letters = KeyboardLayout("ar", listOf(listOf(keymanKey("ض", 81))))
+        val shift = KeyboardLayout("ar", listOf(listOf(keymanKey("َ", 81, true))))
+        val base = plain()
+        val s = KeyboardUiState(
+            settings = base.copy(layoutBehavior = base.layoutBehavior.copy(shiftedPopupKeys = true)),
+            layouts = LayoutSet(letters, letters, letters, keymanShift = shift),
+            shiftState = ShiftState.ON,
+        )
+        assertTrue(currentLayout(s).keys().single().longPress.isEmpty())
+    }
+
+    /** A row drawn at a different length on the shift page has no seats to pair. */
+    @Test
+    fun `a keyman row of another length pairs nothing`() {
+        val letters = KeyboardLayout("ar", listOf(listOf(keymanKey("ض", 81), keymanKey("ص", 87))))
+        val shift = KeyboardLayout("ar", listOf(listOf(keymanKey("َ", 81, true))))
+        val base = plain()
+        val s = KeyboardUiState(
+            settings = base.copy(layoutBehavior = base.layoutBehavior.copy(shiftedPopupKeys = true)),
+            layouts = LayoutSet(letters, letters, letters, keymanShift = shift),
+        )
+        assertTrue(currentLayout(s).keys().all { it.longPress.isEmpty() })
     }
 
     private fun enterKeyOf(s: KeyboardUiState): Key =
@@ -501,6 +561,72 @@ class CurrentLayoutTest {
         assertEquals(".", period.output ?: period.label)
     }
 
+    /**
+     * A letters grid in the shape most shipped layouts have: letters with no
+     * alternates, and every question mark in the period key's popup behind
+     * something else. The Persian layout of issue #408, near enough.
+     */
+    private fun buried(vararg periodPopup: String, letter: Key = Key("ب")) =
+        com.wasimaster.wmkeyboard.core.layout.LayoutSpec(
+            id = "custom_buried",
+            name = "Buried",
+            layers = mapOf(
+                LayoutLayer.LETTERS.key to com.wasimaster.wmkeyboard.core.layout.LayerSpec(
+                    listOf(
+                        listOf(letter),
+                        listOf(
+                            Key(" ", action = KeyAction.Space),
+                            Key(".", role = KeyRole.Period, longPress = periodPopup.toList()),
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+    private fun periodOf(s: KeyboardUiState) =
+        currentLayout(s).rows.last().first { it.role == KeyRole.Period }
+
+    /** Issue #408: a hold on the period key types ؟ on Persian. */
+    @Test
+    fun `an arabic-script grid leads the period popup with its own question mark`() {
+        val s = state(buried("…", "؟", "،", "?", "!"), settings = plain())
+            .copy(script = ScriptRegistry[ScriptId.ARABIC])
+        assertEquals(listOf("؟", "…", "،", "?", "!"), periodOf(s).longPress)
+    }
+
+    /** The same fix for every other language whose layout buried "?" there. */
+    @Test
+    fun `a grid with its question mark buried lifts it to the front`() {
+        val s = state(buried("…", ",", "?", "!"), settings = plain())
+        assertEquals(listOf("?", "…", ",", "!"), periodOf(s).longPress)
+    }
+
+    /** QWERTY's hold on m already types "?", so its period key is left alone. */
+    @Test
+    fun `a grid with a question mark to hand keeps its period popup`() {
+        val s = state(buried("…", "?", letter = Key("m", longPress = listOf("?"))), settings = plain())
+        assertEquals(listOf("…", "?"), periodOf(s).longPress)
+        val qwerty = periodOf(state(settings = plain()))
+        assertEquals("…", qwerty.longPress.first())
+    }
+
+    /** A grid that never offered "?" (a kana pad, Morse) does not grow one. */
+    @Test
+    fun `a grid with no question mark at all is not given one`() {
+        val s = state(buried("…", "!"), settings = plain())
+        assertEquals(listOf("…", "!"), periodOf(s).longPress)
+    }
+
+    /** The question mark leads, the "." the danda displaced follows it. */
+    @Test
+    fun `a danda grid puts the question mark ahead of the displaced full stop`() {
+        val s = state(buried("…", "?"), settings = plain())
+            .copy(script = ScriptRegistry[ScriptId.BENGALI])
+        val period = periodOf(s)
+        assertEquals("।", period.label)
+        assertEquals(listOf("?", ".", "…"), period.longPress)
+    }
+
     @Test
     fun `a uri field puts domain endings on the period key`() {
         val layout = currentLayout(state(fieldKind = FieldKind.URI))
@@ -786,3 +912,6 @@ class CurrentLayoutTest {
         ),
     ).compile(LayoutLayer.LETTERS)
 }
+
+/** Keyman's shift bit, as a converted shift page carries it on each key. */
+private const val KEYMAN_SHIFT = 16

@@ -5,6 +5,7 @@ import com.wasimaster.wmkeyboard.core.script.ScriptId
 import com.wasimaster.wmkeyboard.ime.keySpelling
 import java.io.File
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -244,6 +245,22 @@ class AssetLayoutsTest {
         assertTrue("u should not offer ó", keys["u"]?.longPress?.contains("ó") != true)
     }
 
+    /**
+     * #407: Persian is uncased, so shift carried nothing and the harakat were
+     * nowhere on the layout. It now carries the ISIRI 9147 shift plane.
+     */
+    @Test
+    fun `the persian layout puts the harakat and shadda on shift`() {
+        val file = layoutFiles.first { it.name == "fa_standard.${LayoutFile.FILE_EXTENSION}" }
+        val shifted = LayoutFile.decode(file.readText())!!.layout
+            .layers.getValue(LayoutLayer.LETTERS.key).rows.flatten()
+            .mapNotNull { it.shiftLabel }
+            .toSet()
+        for (mark in listOf("ْ", "ٌ", "ٍ", "ً", "ُ", "ِ", "َ", "ّ", "ٔ", "ٰ")) {
+            assertTrue("shift should reach U+%04X".format(mark[0].code), mark in shifted)
+        }
+    }
+
     @Test
     fun `asset layout ids are unique and never shadow a built-in`() {
         val builtInIds = BuiltInLayouts.all.mapTo(HashSet()) { it.id }
@@ -256,5 +273,13 @@ class AssetLayoutsTest {
                 id !in builtInIds,
             )
         }
+    }
+
+    @Test
+    fun `Thai layout script has no letter case`() {
+        val file = layoutFiles.first { it.name == "th_kedmanee.${LayoutFile.FILE_EXTENSION}" }
+        val layout = LayoutFile.decode(file.readText())!!.layout
+        assertEquals(ScriptId.THAI, layout.script().id)
+        assertFalse(layout.script().hasLetterCase)
     }
 }

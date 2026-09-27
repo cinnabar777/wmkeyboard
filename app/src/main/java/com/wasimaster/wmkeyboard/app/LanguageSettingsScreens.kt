@@ -73,6 +73,7 @@ import com.wasimaster.wmkeyboard.core.layout.composerType
 import com.wasimaster.wmkeyboard.core.layout.language
 import com.wasimaster.wmkeyboard.core.layout.resolveLayout
 import com.wasimaster.wmkeyboard.core.prediction.PhoneticSchemes
+import com.wasimaster.wmkeyboard.core.prediction.PhoneticStripSource
 import com.wasimaster.wmkeyboard.core.prediction.SpellingMap
 import com.wasimaster.wmkeyboard.core.script.ComposerType
 import com.wasimaster.wmkeyboard.core.script.DeviceLocales
@@ -1014,12 +1015,16 @@ internal fun LanguageDetailScreen(
     // Gated on an *enabled* transliterating layout rather than on the language:
     // someone typing Bengali on Probhat alone has Bengali keys in front of them
     // and nothing to hint.
-    val transliterating = settings.watch { s ->
-        s.enabledLayoutIds.any { id ->
-            val spec = resolveLayout(s.customLayouts, id)
-            spec.langId == langId && spec.composerType() == ComposerType.TRANSLITERATE
+    //
+    // Khipro's grid is roman too, so it gets the hints; the key map and the
+    // phonetic strip below are Avro's and stay with an Avro-style layout.
+    val composers = settings.watch { s ->
+        s.enabledLayoutIds.mapNotNullTo(HashSet()) { id ->
+            resolveLayout(s.customLayouts, id).takeIf { it.langId == langId }?.composerType()
         }
     }
+    val phonetic = ComposerType.TRANSLITERATE in composers
+    val transliterating = phonetic || ComposerType.KHIPRO in composers
     if (transliterating) {
         SettingsGroup(stringResource(R.string.languages_translit_hints_title)) {
             item {
@@ -1049,7 +1054,15 @@ internal fun LanguageDetailScreen(
         }
         // The whole key map, for the letters no hint can teach: a hint shows
         // what the next key writes, never which key writes ঁ.
-        PhoneticKeyMapGroup(langId) { uriHandler.openUri(it) }
+        if (phonetic) PhoneticKeyMapGroup(langId) { uriHandler.openUri(it) }
+        // The strip of a phonetic layout (Avro, Hindi phonetic) can keep the
+        // word as typed and its transliteration in the first two chips, with
+        // the suggestions after them. Other transliterating layouts (Hangul,
+        // Telex) commit their composer's output directly and have no such
+        // strip, so they get no row.
+        if (phonetic && PhoneticSchemes.forLanguage(langId) != null) {
+            PhoneticStripGroup(langId, lang.englishName, settings, repository, scope)
+        }
     }
 
     // Numerals are per language: Arabic can type ٠-٩ while English beside it
@@ -1527,6 +1540,19 @@ private fun CjkDictPackManager(
             stringResource(R.string.languages_cjk_pinyin_group_title),
             info = stringResource(R.string.languages_cjk_double_pinyin_info),
         ) {
+            // Jianpin (简拼): the first letter of each syllable is enough, so
+            // `wm` finds 我们. Every shipping Chinese IME does this by default
+            // (#405). Under a Double Pinyin scheme a syllable is always two
+            // keys, so the switch has nothing to abbreviate there.
+            item {
+                ToggleSetting(
+                    R.string.languages_cjk_jianpin_title,
+                    stringResource(R.string.languages_cjk_jianpin_subtitle),
+                    settings.watch { it.cjk.pinyinJianpin },
+                    info = stringResource(R.string.languages_cjk_jianpin_info),
+                    default = SettingsDefaults.cjk.pinyinJianpin,
+                ) { on -> scope.launch { repository.setPinyinJianpin(on) } }
+            }
             item {
                 ToggleSetting(
                     R.string.languages_cjk_fuzzy_title,
@@ -1624,6 +1650,69 @@ private fun packStatusLabel(
 private const val PERCENT = 100L
 
 /** How much of the joined letter each hint mode draws, for the picker sheet. */
+/**
+ * The fixed-chip strip of a phonetic layout, and what fills it after the two
+ * fixed chips. The second row only shows while the first is on: it chooses
+ * nothing otherwise.
+ */
+@Composable
+private fun PhoneticStripGroup(
+    langId: String,
+    languageName: String,
+    settings: LiveSettings,
+    repository: SettingsRepository,
+    scope: CoroutineScope,
+) {
+    // Branched on by the builder below, so watched once here.
+    val fixed = settings.watch { langId in it.suggestionStrip.phoneticFixedStripLangs }
+    SettingsGroup(stringResource(R.string.languages_phonetic_strip_title)) {
+        item {
+            ToggleSetting(
+                R.string.languages_phonetic_strip_fixed_title,
+                stringResource(R.string.languages_phonetic_strip_fixed_subtitle, languageName),
+                fixed,
+                info = stringResource(R.string.languages_phonetic_strip_fixed_info, languageName),
+                default = langId in SettingsDefaults.suggestionStrip.phoneticFixedStripLangs,
+            ) { scope.launch { repository.setPhoneticFixedStrip(langId, it) } }
+        }
+        if (fixed) {
+            item {
+                ChoiceSetting(
+                    R.string.languages_phonetic_strip_source_title,
+                    subtitle = stringResource(R.string.languages_phonetic_strip_source_subtitle),
+                    options = listOf(
+                        PhoneticStripSource.SMART to
+                            stringResource(R.string.languages_phonetic_strip_source_smart_label),
+                        PhoneticStripSource.NATIVE to
+                            stringResource(R.string.languages_phonetic_strip_source_native_label, languageName),
+                        PhoneticStripSource.ENGLISH to
+                            stringResource(R.string.languages_phonetic_strip_source_english_label),
+                    ),
+                    selected = settings.watch { it.suggestionStrip.phoneticStripSourceFor(langId) },
+                    default = SettingsDefaults.suggestionStrip.phoneticStripSourceFor(langId),
+                    detail = { source ->
+                        ChoiceDetail(
+                            when (source) {
+                                PhoneticStripSource.SMART -> stringResource(
+                                    R.string.languages_phonetic_strip_source_smart_desc,
+                                    languageName,
+                                )
+                                PhoneticStripSource.NATIVE -> stringResource(
+                                    R.string.languages_phonetic_strip_source_native_desc,
+                                    languageName,
+                                )
+                                PhoneticStripSource.ENGLISH -> stringResource(
+                                    R.string.languages_phonetic_strip_source_english_desc,
+                                )
+                            },
+                        )
+                    },
+                ) { scope.launch { repository.setPhoneticStripSource(langId, it) } }
+            }
+        }
+    }
+}
+
 private fun translitHintDescRes(mode: TransliterationHintMode): Int = when (mode) {
     TransliterationHintMode.OFF -> R.string.languages_translit_hints_off_desc
     TransliterationHintMode.ADDED -> R.string.languages_translit_hints_added_desc

@@ -64,7 +64,7 @@ Turning incognito on does seven things:
    lexicon. Emoji favourites and the skin tone you picked for each are
    unaffected.
 4. **Stops the typing counters.** [Typing statistics](/reference/settings/statistics/)
-   record nothing while incognito is on, and the paused stretch is kept out
+   record nothing while incognito is on, not even taps on the heatmap, and the paused stretch is kept out
    of the active-time sums rather than counted as idle. Same **Pause
    learning** switch again.
 5. **Blocks smart replies.** The system's [smart replies](/smart/autofill/)
@@ -92,6 +92,39 @@ follow incognito unconditionally. The [one-time-code chip](/smart/one-time-codes
 and the "you just copied a code" chip keep working in incognito: reading a
 code out of a notification or offering back what you just copied records
 nothing, and a login in a private tab is where a code is wanted.
+
+## Keeping copies off the system clipboard
+
+Pausing clipboard capture keeps copies out of the keyboard's history. It
+doesn't stop them landing on Android's system clipboard, where any app you
+open next can read them. **Keep copies in the keyboard**, under
+<SettingsPath path="Tools / Incognito" /> and off by default, closes that gap
+for the copies the keyboard makes itself.
+
+With it on and incognito active:
+
+- **Copy and cut stay inside the keyboard.** That covers the text-editing
+  panel's buttons, the Copy, Cut and Paste tools, the selection bar,
+  hold-<KeyCap>C</KeyCap> and hold-<KeyCap>X</KeyCap>, and the on-screen
+  <KeyCap>Ctrl</KeyCap> key with <KeyCap>C</KeyCap> or <KeyCap>X</KeyCap>.
+  The Copy buttons in the password generator,
+  the scanners, the AI chat, plugins and KDE Connect do the same. The
+  keyboard reads the selection and keeps it in memory. Nothing is written to
+  the system clipboard.
+- **The keyboard's paste pastes that copy back.** Until you've copied
+  something with the keyboard, paste falls through to the system clipboard
+  as usual. The app reads it then, not the keyboard.
+- **Leaving incognito forgets it.** The private copy is held in memory only,
+  never on disk, and it's gone the moment incognito switches off, including
+  when you leave a private-browsing field that turned incognito on by
+  itself.
+
+It only reaches what the keyboard does. The long-press menu of the app you're
+typing in still copies and pastes through the system clipboard, because the
+keyboard isn't involved there. Two fallbacks also still use the system
+clipboard: an image or file that the field wouldn't accept, which is put there
+so you can paste it by hand, and text arriving from a paired computer over
+KDE Connect.
 
 :::note[What incognito leaves alone]
 Incognito never turns off the suggestion strip, autocorrect or gesture
@@ -227,6 +260,9 @@ incognito or secure fields at all.
 - **Pause learning** (default **on**). Covers the lexicon, the CJK pick
   history and the emoji history together.
 - **Pause clipboard capture** (default **on**). Covers clipboard history.
+- **Keep copies in the keyboard** (default **off**). Copy and cut from the
+  keyboard stay in memory instead of going to the system clipboard. See
+  [Keeping copies off the system clipboard](#keeping-copies-off-the-system-clipboard).
 - **Follow private browsing** is the same setting as above, shown again here
   because this is also where you'd look for it.
 

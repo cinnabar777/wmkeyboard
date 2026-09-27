@@ -84,6 +84,7 @@ The toolbar is the strip above the keys that carries word suggestions while you 
 | Tool circle radius | Slider, 0–20 dp | 20 dp | 20 draws a full circle behind each tool icon, Gboard style. Smaller values give a rounded square. 0 removes the background, leaving bare icons. Has its own per-theme override in the [theme editor](/themes/editor/#corners). |
 | Tool background shape | Row → picker dialog, the same twelve shapes as Key shape | Rounded | The outline of that background. Only Rounded and Cut read the radius above, and the rest size themselves off the button. Hidden while the radius is 0, since there is no background to shape. Has its own per-theme override in the [theme editor](/themes/editor/#toolbar). |
 | Tool background width | Slider, 38–64 dp | 38 dp | How wide each tool's slot is once the bar stops spreading them, so it decides how many fit before the row scrolls or shrinks. Only shown while the toolbar is on. |
+| Tool icon size | Slider, 14–30 dp | 22 dp | The icon inside each tool button, on the toolbar and in the toolbox grid. The button itself keeps its size, so the same number of tools fit either way. With Tool labels on, the icon draws 2 dp smaller (at most 26 dp) to leave room for the caption. |
 | Reset toolbar *(shown only once something on this screen has moved)* | Button (confirms first) | n/a | Puts every slider and switch on this screen back to its default. Which tools are pinned is not affected. |
 
 For the toolbox itself (pinning, reordering, and which tools work before you unlock your phone), see [Tools](/tools/overview/).

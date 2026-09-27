@@ -1309,6 +1309,16 @@ internal fun KeyPressShortcutsSettings(
             ) { scope.launch { repository.setShowAllPopupKeys(it) } }
         }
         item {
+            // Discussion #382: ü ahead of 7 on German's u.
+            ToggleSetting(
+                R.string.keypress_native_letters_title,
+                stringResource(R.string.keypress_native_letters_subtitle),
+                settings.watch { it.layoutBehavior.nativeLettersFirst },
+                info = stringResource(R.string.keypress_native_letters_info),
+                default = SettingsDefaults.layoutBehavior.nativeLettersFirst,
+            ) { scope.launch { repository.setNativeLettersFirst(it) } }
+        }
+        item {
             // Issue #108: the capital of every letter joins its popup, which is
             // where a layer peek has to reach one from.
             ToggleSetting(

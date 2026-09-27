@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+<resources xmlns:tools="http://schemas.android.com/tools" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
     <!-- Themes screen: the light/dark mode of the settings app and of the
          Default theme. -->
@@ -492,4 +492,54 @@
     <string name="theme_color_degrees_value">%1$d°</string>
 
     <string name="theme_background_source_title">Select a background</string>
+
+    <!-- Image sizes and templates for theme designers (issue #397). -->
+    <string name="theme_assets_title">Image sizes and templates</string>
+    <string name="theme_assets_subtitle">Sizes for backgrounds, key images and stickers, with templates to draw on</string>
+    <string name="theme_assets_intro">These sizes come from the keyboard itself, measured for the screen you select. Draw at the template size. The keyboard makes larger images smaller.</string>
+    <string name="theme_assets_screen_label">Screen</string>
+    <string name="theme_assets_preset_current">This phone</string>
+    <string name="theme_assets_preset_current_desc">Your layout and your key sizes on this screen</string>
+    <string name="theme_assets_preset_phone">Phone</string>
+    <string name="theme_assets_preset_phone_desc">A common 1080 pixel wide phone with the default sizes. Use this for a theme you share.</string>
+    <string name="theme_assets_preset_landscape">Phone, landscape</string>
+    <string name="theme_assets_preset_landscape_desc">The same phone turned on its side, for the landscape background</string>
+    <string name="theme_assets_preset_tablet">Tablet</string>
+    <string name="theme_assets_preset_tablet_desc">A 1600 pixel wide tablet or an open foldable, with the default sizes</string>
+    <string name="theme_assets_diagram_desc">The board template: the outline of each key over the background area</string>
+    <string name="theme_assets_save_pack">Save all templates</string>
+    <string name="theme_assets_save_board">Save board image</string>
+    <string name="theme_assets_saved">Templates saved</string>
+    <string name="theme_assets_save_failed">Could not save the templates</string>
+    <string name="theme_assets_measuring">Measuring the keyboard</string>
+    <string name="theme_assets_sizes_section">Image sizes</string>
+    <string name="theme_assets_sizes_info">Save images as PNG to keep transparent areas. The template files are transparent, with white lines: put them on the top layer of your drawing and hide them before you export. Key images fill the key and are cut to its shape, so keep the important parts in the middle. The keyboard crops the background from the center, so an image with the same shape as the board shows fully.</string>
+    <!-- %1$d and %2$d are the width and height, in pixels. -->
+    <string name="theme_assets_size_exact" tools:ignore="PluralsCandidate">%1$d × %2$d px</string>
+    <!-- %1$d × %2$d is the size on the screen, %3$d × %4$d the size to draw at, all in pixels. -->
+    <string name="theme_assets_size_line" tools:ignore="PluralsCandidate">%1$d × %2$d px on screen. Draw at %3$d × %4$d px.</string>
+    <string name="theme_assets_slot_background">Background</string>
+    <string name="theme_assets_slot_background_landscape">Landscape background</string>
+    <string name="theme_assets_slot_key">Letter key</string>
+    <string name="theme_assets_slot_modifier">Function key</string>
+    <string name="theme_assets_slot_enter">Enter key</string>
+    <string name="theme_assets_slot_space">Space bar</string>
+    <string name="theme_assets_slot_pressed">Pressed key</string>
+    <string name="theme_assets_slot_popup">Key popup</string>
+    <string name="theme_assets_slot_sticker">Sticker</string>
+    <string name="theme_assets_slot_effect">Press effect image</string>
+    <string name="theme_assets_note_background">The whole keyboard, with the toolbar at the top. The band at the bottom is under the navigation bar, and shows only on Android 15 and later.</string>
+    <string name="theme_assets_note_key">Shift, delete and the other function keys have a different width. The template is the most common key.</string>
+    <string name="theme_assets_note_space">The keyboard keeps up to 1024 × 320 pixels of a space bar image.</string>
+    <string name="theme_assets_note_popup">The bubble that shows the key you press. Its height follows the popup height of the theme.</string>
+    <string name="theme_assets_note_sticker">Transparent PNG, up to 512 pixels on the long side. The size shown is the default sticker width, and you can change it.</string>
+    <string name="theme_assets_note_effect">Transparent PNG, square. The keyboard keeps up to 192 pixels of each image.</string>
+    <string name="theme_assets_template_toolbar">Toolbar and suggestions</string>
+    <string name="theme_assets_template_nav_bar">Under the navigation bar</string>
+    <string name="theme_assets_template_label_area">Label</string>
+    <string name="theme_assets_readme_title">WM Keyboard theme templates</string>
+    <!-- %1$s is the screen name, %2$.2f the screen density (pixels per dp). -->
+    <string name="theme_assets_readme_screen">Screen: %1$s, density %2$.2f</string>
+    <string name="theme_assets_readme_on_screen" tools:ignore="PluralsCandidate">On screen: %1$d × %2$d px</string>
+    <string name="theme_assets_readme_template" tools:ignore="PluralsCandidate">Draw at: %1$d × %2$d px</string>
 </resources>

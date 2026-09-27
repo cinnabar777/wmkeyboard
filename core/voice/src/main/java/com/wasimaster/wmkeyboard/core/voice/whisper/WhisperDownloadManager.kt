@@ -132,6 +132,73 @@ object WhisperDownloadManager {
         }
     }
 
+    /** What [install] made of a file. */
+    sealed interface Installed {
+        /** [model] now has both files. */
+        data class Ready(val model: WhisperModel) : Installed
+
+        /** [model]'s graph is in place and still needs [vocabFile] beside it. */
+        data class NeedsVocab(val model: WhisperModel, val vocabFile: String) : Installed
+
+        /** A vocab file, kept for [models]; those already on disk now have it. */
+        data class Vocab(val models: List<WhisperModel>) : Installed
+    }
+
+    /**
+     * Whether [name], [size] bytes long, is one of the catalog's files. A graph
+     * is matched on its name *and* its exact size, because two repos publish a
+     * `whisper-tiny.en.tflite` and only one of them works (#207).
+     */
+    fun recognises(name: String, size: Long): Boolean =
+        modelFor(name, size) != null || WhisperCatalog.models.any { it.vocabFile == name && it.vocabBytes == size }
+
+    private fun modelFor(name: String, size: Long): WhisperModel? =
+        WhisperCatalog.models.firstOrNull { it.modelFile == name && it.modelBytes == size }
+
+    /**
+     * Puts a file the user fetched some other way where a download would have
+     * put it. A vocab goes to every model on the device that is waiting for it
+     * and into [WhisperStore.vocabPool] for the ones that are not; a graph
+     * takes its vocab from there when it can. Returns null for a file that is
+     * not in the catalog. Runs on the caller's thread.
+     */
+    fun install(filesDir: File, file: File, name: String): Installed? {
+        check(!isBusy) { "a download is running" }
+        val size = file.length()
+        val model = modelFor(name, size)
+        if (model != null) {
+            val dir = WhisperStore.modelDir(filesDir, model).apply { mkdirs() }
+            copyInto(file, File(dir, model.modelFile))
+            val vocab = File(dir, model.vocabFile)
+            val pooled = File(WhisperStore.vocabPool(filesDir), model.vocabFile)
+            if (!vocab.isFile && pooled.length() == model.vocabBytes) copyInto(pooled, vocab)
+            refresh(filesDir)
+            return if (vocab.isFile) Installed.Ready(model) else Installed.NeedsVocab(model, model.vocabFile)
+        }
+        val users = WhisperCatalog.models.filter { it.vocabFile == name && it.vocabBytes == size }
+        if (users.isEmpty()) return null
+        copyInto(file, File(WhisperStore.vocabPool(filesDir).apply { mkdirs() }, name))
+        for (user in users) {
+            if (WhisperStore.modelFile(filesDir, user).isFile) {
+                copyInto(file, WhisperStore.vocabFile(filesDir, user))
+            }
+        }
+        refresh(filesDir)
+        return Installed.Vocab(users)
+    }
+
+    /** [source] copied to [target] through a `.part`, so [target] is only ever whole. */
+    private fun copyInto(source: File, target: File) {
+        val part = File(target.parentFile, "${target.name}.part")
+        try {
+            source.inputStream().use { input -> part.outputStream().use { input.copyTo(it) } }
+            target.delete()
+            check(part.renameTo(target)) { "could not move $target into place" }
+        } finally {
+            part.delete()
+        }
+    }
+
     fun cancel() {
         activeJob?.cancel()
     }

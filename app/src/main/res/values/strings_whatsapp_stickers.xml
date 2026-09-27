@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- ================================================================== -->
+    <!-- WhatsApp stickers. WhatsApp is the name of a messaging app, and    -->
+    <!-- Sticker Maker is the name of an app that makes sticker packs for   -->
+    <!-- it. A .wastickers file is the file such an app exports. Do not     -->
+    <!-- translate WhatsApp, Sticker Maker, .wastickers, or the folder path -->
+    <!-- Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Stickers.       -->
+    <!-- ================================================================== -->
+
+    <!-- The row on the Sticker packs screen, and the title of the screen it opens. -->
+    <string name="import_whatsapp_row_title">WhatsApp stickers</string>
+    <string name="import_whatsapp_row_subtitle">Adds a pack made for WhatsApp, or the stickers that WhatsApp saved on this phone</string>
+
+    <string name="import_whatsapp_section_title">Add WhatsApp stickers</string>
+    <string name="import_whatsapp_caption">WhatsApp does not share its sticker packs with other apps. Two things on this phone are open: a .wastickers file, which apps like Sticker Maker export, and the folder where WhatsApp saves every sticker that you send or get. Both are read on this phone. Nothing is sent anywhere, and WhatsApp does not learn about it. The stickers stay the work of the people who made them, so add only stickers that you may use.</string>
+
+    <!-- .wastickers is a file extension. Keep it as it is. -->
+    <string name="import_whatsapp_file_title">Open a .wastickers file</string>
+    <string name="import_whatsapp_file_subtitle">A pack that Sticker Maker or a similar app exported</string>
+
+    <!-- “WhatsApp Stickers” is the name of a folder on the phone. Keep it in English. -->
+    <string name="import_whatsapp_folder_title">Add the stickers that WhatsApp saved</string>
+    <string name="import_whatsapp_folder_subtitle">Select the “WhatsApp Stickers” folder under Android/media. Every sticker in it becomes one pack.</string>
+    <string name="import_whatsapp_folder_scanning">Looking through the folder…</string>
+    <!-- %1$d is the number of stickers. %2$s is the name of the folder. -->
+    <plurals name="import_whatsapp_folder_found">
+        <item quantity="one">%1$d sticker found in “%2$s”. Add it as a new pack?</item>
+        <item quantity="other">%1$d stickers found in “%2$s”. Add them as a new pack?</item>
+    </plurals>
+    <!-- %1$d is the number of stickers found, %2$s is the name of the folder,
+         and %3$d is the most stickers one pack can hold. -->
+    <string name="import_whatsapp_folder_found_capped">%1$d stickers found in “%2$s”. A pack holds %3$d, so the app adds the newest %3$d as a new pack.</string>
+    <!-- %1$s is a folder path. Keep it as it is. -->
+    <string name="import_whatsapp_folder_none">No WhatsApp stickers in that folder. WhatsApp keeps them under %1$s.</string>
+    <!-- The name of the pack the folder becomes. -->
+    <string name="import_whatsapp_folder_pack_name">WhatsApp stickers</string>
+    <!-- %1$d is how many stickers are done, %2$d is how many there are. -->
+    <string name="import_whatsapp_adding">Adding %1$d of %2$d…</string>
+
+    <string name="import_whatsapp_pick_title">Pick stickers for one of your packs</string>
+    <string name="import_whatsapp_pick_subtitle">Select single stickers in the WhatsApp folder and add them to a pack of yours</string>
+    <string name="import_whatsapp_pick_pack_title">Add to which pack?</string>
+    <string name="import_whatsapp_pick_new_pack">New pack…</string>
+
+    <!-- The body of the dialog that opens a .wastickers file. %1$s is a
+         count like "12 stickers". -->
+    <string name="import_whatsapp_file_body">A sticker pack made for WhatsApp, with %1$s. The app adds it to your packs. You can then send the stickers from the keyboard in every app.</string>
+    <!-- %1$s is a count like "12 stickers", %2$s is the name of the person who made the pack. -->
+    <string name="import_whatsapp_file_body_author">A sticker pack made for WhatsApp by %2$s, with %1$s. The app adds it to your packs. You can then send the stickers from the keyboard in every app.</string>
+</resources>

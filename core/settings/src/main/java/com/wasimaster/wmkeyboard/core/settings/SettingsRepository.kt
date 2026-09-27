@@ -43,6 +43,7 @@ import com.wasimaster.wmkeyboard.core.gesture.GlideBeam
 import com.wasimaster.wmkeyboard.core.gesture.GlideShapeStore
 import com.wasimaster.wmkeyboard.core.prediction.CustomDictionaries
 import com.wasimaster.wmkeyboard.core.prediction.OctopusKind
+import com.wasimaster.wmkeyboard.core.prediction.PhoneticStripSource
 import com.wasimaster.wmkeyboard.core.prediction.SuggestionEngine
 import com.wasimaster.wmkeyboard.core.prediction.UndoMemory
 import com.wasimaster.wmkeyboard.prediction.R as PredictionR
@@ -1517,6 +1518,12 @@ data class ToolbarBehavior(
      */
     val toolWidthDp: Int = 38,
     /**
+     * Side of the glyph inside each tool button on the bar and in the toolbox
+     * grid, in dp. The button stays 38 dp either way, so this only changes how
+     * much of the circle the icon fills, never how many tools fit.
+     */
+    val iconSizeDp: Int = 22,
+    /**
      * Space above the toolbar's content, in dp, added to the strip's height.
      * 4 by default (#208): with none, the tool pills sat almost against the
      * keyboard's top edge, closer than any two key rows sit to each other.
@@ -2407,6 +2414,12 @@ data class GifSettings(
     val stickerSuggestStyle: StickerSuggestStyle = StickerSuggestStyle.TRAY,
     /** What sending one does to the text that asked for it; see [StickerTriggerAction]. */
     val stickerSuggestTrigger: StickerTriggerAction = StickerTriggerAction.DELETE,
+    /**
+     * Holding a sticker in the offer's tray shows it large above the keyboard,
+     * and sliding along the tray shows the next ones the same way (#404).
+     * Off, a hold does nothing and a slide scrolls the tray.
+     */
+    val stickerSuggestMagnify: Boolean = true,
 )
 
 /**
@@ -2967,6 +2980,12 @@ data class KeyboardSettings(
     val numpadCalculatorLayout: Boolean = false,
     /** Incognito stops the clipboard tool from capturing copies. */
     val incognitoPausesClipboard: Boolean = true,
+    /**
+     * Incognito keeps the keyboard's own copies off the system clipboard
+     * (#392): copy and cut keep the text inside the keyboard, paste pastes it
+     * back, and leaving incognito forgets it. Off by default.
+     */
+    val incognitoPrivateClipboard: Boolean = false,
     /** Incognito stops word and emoji learning. */
     val incognitoPausesLearning: Boolean = true,
     /**
@@ -4262,6 +4281,12 @@ data class RateSourceSettings(
 )
 
 data class CjkSettings(
+    /**
+     * Chinese: Jianpin (简拼), a bare initial standing for any syllable that
+     * starts with it, so `wm` finds 我们. On by default, as in every shipping
+     * Chinese IME; it widens matching rather than triggering anything.
+     */
+    val pinyinJianpin: Boolean = true,
     /** Chinese: treat confusable pinyin initials/finals as equivalent (zh↔z, an↔ang…). */
     val pinyinFuzzy: Boolean = false,
     /**
@@ -4490,6 +4515,35 @@ data class VoiceBarSettings(
     }
 }
 
+/**
+ * One language's own transcription settings (#389). With [url] blank it is the
+ * main server with a different [model]. With [url] filled in it is a server of
+ * its own, and nothing is borrowed from the main one: its key belongs to the
+ * main server and must not travel to another, and a model id means nothing to
+ * a server it was not named for.
+ */
+data class VoiceServerOverride(
+    val url: String = "",
+    val path: String = "",
+    val model: String = "",
+    val key: String = "",
+) {
+    fun isEmpty(): Boolean = url.isBlank() && path.isBlank() && model.isBlank() && key.isBlank()
+}
+
+/** Where one clip goes and what it asks for: the main server, or a language's own. */
+data class VoiceServerTarget(val url: String, val path: String, val model: String, val key: String)
+
+/** The server, route, model and key that dictation in [languageId] uses (#389). */
+fun WhisperSettings.serverFor(languageId: String): VoiceServerTarget {
+    val own = serverByLang[languageId]
+    return when {
+        own == null || own.isEmpty() -> VoiceServerTarget(serverUrl, serverPath, serverModel, serverKey)
+        own.url.isNotBlank() -> VoiceServerTarget(own.url, own.path, own.model, own.key)
+        else -> VoiceServerTarget(serverUrl, serverPath, own.model.ifBlank { serverModel }, serverKey)
+    }
+}
+
 /** The microphone survives typing: [VoiceBarSettings.TYPING_INTERACTIVE] or [VoiceBarSettings.TYPING_PLAIN]. */
 fun VoiceBarSettings.interactiveTyping(): Boolean =
     typingMode == VoiceBarSettings.TYPING_INTERACTIVE || typingMode == VoiceBarSettings.TYPING_PLAIN
@@ -4533,6 +4587,18 @@ data class WhisperSettings(
     val serverKey: String = "",
     /** The `model` field; blank leaves it out so the server uses its default. */
     val serverModel: String = "",
+    /**
+     * The server's own route, for one that does not answer on
+     * `/audio/transcriptions` (#388). Blank works the endpoint out from
+     * [serverUrl]; see `TranscriptionClient.endpoint`.
+     */
+    val serverPath: String = "",
+    /**
+     * Language id → a model or a whole other server for that language (#389).
+     * A language without an entry, or with an empty one, uses the fields
+     * above; [serverFor] says how the two combine.
+     */
+    val serverByLang: Map<String, VoiceServerOverride> = emptyMap(),
     /**
      * Send the active layout's language with each clip. Off lets the server
      * detect it, which suits people who dictate two languages on one layout.
@@ -4673,6 +4739,23 @@ data class TextEditingSettings(
      * overshoots.
      */
     val spaceCursorStepDp: Int = 16,
+    /**
+     * A spacebar cursor drag speeds up the further it goes (issue #385): past
+     * a short stretch at [spaceCursorStepDp], each character costs less
+     * travel, up to [spaceCursorTopSpeed] times as fast, and the drag keeps
+     * that pace while the finger goes the same way. Turning back starts slow
+     * again, so an overshoot is corrected at the exact speed. The 2-D pad's
+     * line steps ramp the same way on their own axis.
+     *
+     * Off by default: a flat step is what every keyboard does, and a caret
+     * that runs away from a finger nobody told it would is a surprise.
+     */
+    val spaceCursorAccelerate: Boolean = false,
+    /**
+     * How many times faster than [spaceCursorStepDp] an accelerating spacebar
+     * cursor drag ends up going, once it has gone far enough to reach it.
+     */
+    val spaceCursorTopSpeed: Int = 4,
     /**
      * A magnifier over the caret while a spacebar cursor swipe moves it
      * (discussion #303): the line around the caret, enlarged, in a bubble over
@@ -4849,6 +4932,9 @@ val BoardCornerRadiusRange = 0..40
 
 /** Bounds for [LayoutBehaviorSettings.globeTypingGuardMs]; 0 is off. The slider shares them. */
 val GlobeTypingGuardMsRange = 0..1000
+
+/** Bounds for [LayoutBehaviorSettings.languageEchoMs]; 0 is off. The slider shares them. */
+val LanguageEchoMsRange = 0..1000
 
 /** How many languages the user said they type in during onboarding. */
 enum class PersonaLanguages { UNSET, ONE, MANY }
@@ -5318,6 +5404,25 @@ data class ClipboardSettings(
      * pastes something other than what was copied. See [ClipMaxTextCharsSteps].
      */
     val maxTextChars: Int = 0,
+    /**
+     * A bin beside the panel's search bar that deletes every unpinned clip,
+     * after asking (#371). Pinned clips stay. Off by default: the panel has a
+     * bin on every clip, and one that empties the history is for the few who
+     * clear it often.
+     */
+    val clearButton: Boolean = false,
+    /**
+     * Split the history into two tabs, unpinned clips and pinned ones (#371),
+     * so the clips kept for good are not scrolled past on the way to a fresh
+     * copy. Off by default. A search looks through both tabs.
+     */
+    val pinnedTabs: Boolean = false,
+    /**
+     * Draw a thin accent border around every pinned clip (#371), so a pinned
+     * clip reads as one from the whole card and not only from its pin. Off by
+     * default.
+     */
+    val outlinePinned: Boolean = false,
 )
 
 /**
@@ -6125,6 +6230,14 @@ data class LayoutBehaviorSettings(
      */
     val spaceHoldPickerForLongRing: Boolean = true,
     /**
+     * How long, in ms, a spacebar language switch keeps the language it landed
+     * on up after the finger lifts, counting the time the swipe preview already
+     * showed it (issue #376). A flick lifts before the preview draws, so this
+     * is how it shows where it went. 0 turns the echo off; a slow swipe that
+     * rested on its language gets none either way.
+     */
+    val languageEchoMs: Int = 500,
+    /**
      * Size multiplier for the small corner hint character on each key (the
      * first long-press alternate, shown when [KeyboardSettings.longPressHints]
      * is on). 1.0 keeps the default 10sp base.
@@ -6244,6 +6357,15 @@ data class LayoutBehaviorSettings(
      */
     val numberRowInSymbols: Boolean = true,
     /**
+     * A row of the four arrow keys under the keyboard (issue #369), for moving
+     * the caret without a toolbar tool or a spacebar drag. Off by default. The
+     * row takes the number row's height, so the resize handle and one-handed
+     * mode scale it with everything else.
+     */
+    val arrowRow: Boolean = false,
+    /** The order [arrowRow] draws its keys in, left to right. */
+    val arrowRowOrder: List<ArrowKey> = DefaultArrowRowOrder,
+    /**
      * Height of the bottom row (space / enter), in dp, independent of the other
      * keys' [KeyboardSettings.keyHeightDp]. 0 means "follow the key height" — the
      * default, so the row is unchanged until asked. Raise it for a fatter,
@@ -6276,6 +6398,13 @@ data class LayoutBehaviorSettings(
      */
     val splitOnlyOnLargeScreens: Boolean = false,
     /**
+     * Whether split mode cuts the spacebar too (issue #399). On, a spacebar
+     * that meets the cut is divided between the halves, which is how split has
+     * always drawn it. Off, it stays one key and reaches across the centre gap,
+     * so both thumbs land on it where they meet. On by default.
+     */
+    val splitSpacebar: Boolean = true,
+    /**
      * How long, in ms, a second shift tap still counts as the double-tap that
      * turns on caps lock. Lower makes caps lock quicker but easier to trigger by
      * accident; higher makes a deliberate double-tap more forgiving. Default 350.
@@ -6290,6 +6419,15 @@ data class LayoutBehaviorSettings(
      * want. See [LatinAccents].
      */
     val showAllPopupKeys: Boolean = false,
+    /**
+     * Lift the letters of the typing language ahead of the digit or symbol that
+     * leads a key's long-press popup: on German QWERTZ a hold on `u` gives `ü`
+     * rather than `7`, and `ü` is the corner hint (discussion #382). Which
+     * letters count comes from the language's CLDR exemplar set, so English,
+     * whose alphabet is a-z, keeps its digits exactly as before. On by default:
+     * the umlaut is the character a German speaker holds `u` for.
+     */
+    val nativeLettersFirst: Boolean = true,
     /**
      * Add each letter key's shifted form to its long-press popup — `A` under
      * `a` — so a capital can be typed without arming shift.
@@ -6363,6 +6501,15 @@ data class LayoutBehaviorSettings(
      * case where the user wants to stay.
      */
     val symbolsReturnChars: String = "",
+    /**
+     * Go back to the letters after a space typed on the symbols layer (#359):
+     * "at 5 pm" is a number and then a word. Its own switch rather than a
+     * character in [symbolsReturnChars], which drops whitespace and would
+     * show an invisible entry anyway, and independent of
+     * [symbolsReturnToLetters] so either can be on alone. Off by default: a
+     * phone number or a time typed with spaces stays on ?123 the whole way.
+     */
+    val symbolsReturnOnSpace: Boolean = false,
     /**
      * The user has never touched the number-row toggle, so [applyDeviceForm] is
      * free to pick a default for the screen they are on.
@@ -6907,6 +7054,23 @@ data class SuggestionStripSettings(
      */
     val phoneticEnglishSwitch: Boolean = true,
     /**
+     * The languages whose phonetic layout keeps the strip's first two chips
+     * in place: the word as typed in Latin letters on the left, the rules'
+     * reading of it (Avro's letter-for-letter Bengali) beside it, and the
+     * suggestions after them. Off by default: the ordinary strip leads with
+     * whatever a space would commit, and moving that is a change of habit
+     * nobody should get without asking. A space commits the same word either
+     * way. Per language, on the language's own screen, like
+     * [phoneticEnglishLangs].
+     */
+    val phoneticFixedStripLangs: Set<String> = emptySet(),
+    /**
+     * What fills a fixed phonetic strip after its two chips, per language;
+     * a language with no entry gets [PhoneticStripSource.SMART]. Read it
+     * through [phoneticStripSourceFor].
+     */
+    val phoneticStripSources: Map<String, PhoneticStripSource> = emptyMap(),
+    /**
      * Which optional items the held-word menu shows (#99). An item missing
      * from the set is never drawn; "Edit" is drawn regardless. All three by
      * default: the menu is contextual (add only while typing an unlearned
@@ -6954,6 +7118,18 @@ data class SuggestionStripSettings(
     /** Whether [langId]'s phonetic layout commits English words as English; null is no phonetic layout. */
     fun phoneticEnglishFor(langId: String?): Boolean = langId != null && langId in phoneticEnglishLangs
 
+    /** What fills [langId]'s fixed phonetic strip after its two chips. */
+    fun phoneticStripSourceFor(langId: String): PhoneticStripSource =
+        phoneticStripSources[langId] ?: PhoneticStripSource.SMART
+
+    /**
+     * [langId]'s fixed-strip source when its phonetic layout keeps the first
+     * two chips in place, or null for the ordinary strip (and for no phonetic
+     * layout at all).
+     */
+    fun phoneticFixedStripFor(langId: String?): PhoneticStripSource? =
+        langId?.takeIf { it in phoneticFixedStripLangs }?.let(::phoneticStripSourceFor)
+
     /**
      * Whether [langId] still reads the bundled and downloaded dictionaries, as
      * opposed to the user's imported lists alone. See [importedOnlyLangs].
@@ -7000,6 +7176,42 @@ private fun decodePerAppLayouts(raw: String): Map<String, String> =
             entry.substring(0, eq) to entry.substring(eq + 1)
         }
         .toMap()
+
+private val voiceServerMapSerializer =
+    MapSerializer(String.serializer(), MapSerializer(String.serializer(), String.serializer()))
+private val voiceServerKeySerializer = MapSerializer(String.serializer(), String.serializer())
+
+/** The per-language servers without their keys, as `{"lang": {"url": …, "path": …, "model": …}}`. */
+private fun encodeVoiceServerByLang(map: Map<String, VoiceServerOverride>): String =
+    Json.encodeToString(
+        voiceServerMapSerializer,
+        map.mapValues { (_, o) ->
+            buildMap {
+                if (o.url.isNotEmpty()) put("url", o.url)
+                if (o.path.isNotEmpty()) put("path", o.path)
+                if (o.model.isNotEmpty()) put("model", o.model)
+            }
+        },
+    )
+
+/** Only the per-language keys, as `{"lang": "key"}`; see VOICE_SERVER_KEY_BY_LANG. */
+private fun encodeVoiceServerKeyByLang(map: Map<String, VoiceServerOverride>): String =
+    Json.encodeToString(voiceServerKeySerializer, map.filterValues { it.key.isNotEmpty() }.mapValues { it.value.key })
+
+/** Null when neither half was ever written, so the default applies. */
+private fun decodeVoiceServerByLang(raw: String?, keysRaw: String?): Map<String, VoiceServerOverride>? {
+    if (raw == null && keysRaw == null) return null
+    val fields = raw?.let {
+        runCatching { Json.decodeFromString(voiceServerMapSerializer, it) }.getOrNull()
+    }.orEmpty()
+    val keys = keysRaw?.let {
+        runCatching { Json.decodeFromString(voiceServerKeySerializer, it) }.getOrNull()
+    }.orEmpty()
+    return (fields.keys + keys.keys).associateWith { lang ->
+        val f = fields[lang].orEmpty()
+        VoiceServerOverride(f["url"].orEmpty(), f["path"].orEmpty(), f["model"].orEmpty(), keys[lang].orEmpty())
+    }.filterValues { !it.isEmpty() }
+}
 
 /** Serializes the per-language Whisper model map to a compact `lang=modelId;...` string. */
 private fun encodeWhisperModelByLang(map: Map<String, String>): String =
@@ -7357,6 +7569,10 @@ class SettingsRepository(private val context: Context) {
         private val PHONETIC_AUTO_ENGLISH = booleanPreferencesKey("phonetic_auto_english")
         private val PHONETIC_ENGLISH_LANGS = stringSetPreferencesKey("phonetic_english_langs")
         private val PHONETIC_ENGLISH_SWITCH = booleanPreferencesKey("phonetic_english_switch")
+        private val PHONETIC_FIXED_STRIP_LANGS = stringSetPreferencesKey("phonetic_fixed_strip_langs")
+
+        /** `langId=SOURCE` entries, one per language that has picked one. */
+        private val PHONETIC_STRIP_SOURCES = stringSetPreferencesKey("phonetic_strip_sources")
 
         /** What the old single switch meant while it was on: every language with a phonetic layout. */
         private val LEGACY_PHONETIC_ENGLISH_LANGS = setOf("bn", "hi")
@@ -7500,6 +7716,8 @@ class SettingsRepository(private val context: Context) {
         private val CUSTOM_LAYOUT_TOOL = stringPreferencesKey("custom_layout_tool")
         private val NUMBER_ROW_SHIFT_SYMBOLS = booleanPreferencesKey("number_row_shift_symbols")
         private val NUMBER_ROW_IN_SYMBOLS = booleanPreferencesKey("number_row_in_symbols")
+        private val ARROW_ROW = booleanPreferencesKey("arrow_row")
+        private val ARROW_ROW_ORDER = stringPreferencesKey("arrow_row_order")
         private val BOTTOM_ROW_HEIGHT = intPreferencesKey("bottom_row_height")
         // Legacy, read-only (issue #41): the one symmetric pad. Still read so an
         // upgrade keeps the padding it had; never written again.
@@ -7507,14 +7725,17 @@ class SettingsRepository(private val context: Context) {
         private val SIDE_PAD_LEFT_SCALE = floatPreferencesKey("side_pad_left_scale")
         private val SIDE_PAD_RIGHT_SCALE = floatPreferencesKey("side_pad_right_scale")
         private val SPLIT_ONLY_LARGE = booleanPreferencesKey("split_only_large_screens")
+        private val SPLIT_SPACEBAR = booleanPreferencesKey("split_spacebar")
         private val SHIFT_CAPS_LOCK_MS = intPreferencesKey("shift_caps_lock_ms")
         private val SHOW_ALL_POPUP_KEYS = booleanPreferencesKey("show_all_popup_keys")
+        private val NATIVE_LETTERS_FIRST = booleanPreferencesKey("native_letters_first")
         private val SHIFTED_POPUP_KEYS = booleanPreferencesKey("shifted_popup_keys")
         private val CURRENCY_KEYS = stringPreferencesKey("currency_keys")
         private val SPACE_HOLD_KEYS = stringPreferencesKey("space_hold_keys")
         private val SYMBOLS_RETURN_TO_LETTERS =
             booleanPreferencesKey("symbols_return_to_letters")
         private val SYMBOLS_RETURN_CHARS = stringPreferencesKey("symbols_return_chars")
+        private val SYMBOLS_RETURN_ON_SPACE = booleanPreferencesKey("symbols_return_on_space")
         private val AUTO_SPACE_AFTER_SUGGESTION = booleanPreferencesKey("auto_space_after_suggestion")
         private val SKIP_TYPED_WORD = booleanPreferencesKey("skip_typed_word")
         private val EXPAND_USER_DICT_SHORTCUTS = booleanPreferencesKey("expand_user_dict_shortcuts")
@@ -7541,6 +7762,7 @@ class SettingsRepository(private val context: Context) {
         private val SPACEBAR_DISPLAY = stringPreferencesKey("spacebar_display")
         private val LANGUAGE_PICKER_STYLE = stringPreferencesKey("language_picker_style")
         private val SPACE_HOLD_PICKER_FOR_LONG_RING = booleanPreferencesKey("space_hold_picker_for_long_ring")
+        private val LANGUAGE_ECHO_MS = intPreferencesKey("language_echo_ms")
         private val NUMERAL_SYSTEM_BY_LANG = stringPreferencesKey("numeral_system_by_lang")
         private val NUMERAL_COMMIT_SCOPE = stringPreferencesKey("numeral_commit_scope")
         private val SHIFT_ENTER_NEWLINE = booleanPreferencesKey("shift_enter_newline")
@@ -7637,6 +7859,7 @@ class SettingsRepository(private val context: Context) {
          * in. Never written again.
          */
         private val CONJUNCT_BACKSPACE = booleanPreferencesKey("conjunct_backspace")
+        private val PINYIN_JIANPIN = booleanPreferencesKey("pinyin_jianpin")
         private val PINYIN_FUZZY = booleanPreferencesKey("pinyin_fuzzy")
         private val PINYIN_FUZZY_PAIRS = stringSetPreferencesKey("pinyin_fuzzy_pairs")
         private val PINYIN_DOUBLE_PINYIN = stringPreferencesKey("pinyin_double_pinyin")
@@ -7709,6 +7932,9 @@ class SettingsRepository(private val context: Context) {
         private val CLIPBOARD_GRID_COLUMNS = intPreferencesKey("clipboard_grid_columns")
         private val CLIPBOARD_TIME_LABEL = stringPreferencesKey("clipboard_time_label")
         private val CLIPBOARD_MAX_TEXT_CHARS = intPreferencesKey("clipboard_max_text_chars")
+        private val CLIPBOARD_CLEAR_BUTTON = booleanPreferencesKey("clipboard_clear_button")
+        private val CLIPBOARD_PINNED_TABS = booleanPreferencesKey("clipboard_pinned_tabs")
+        private val CLIPBOARD_OUTLINE_PINNED = booleanPreferencesKey("clipboard_outline_pinned")
         private val OTP_CHIP_ENABLED = booleanPreferencesKey("otp_chip_enabled")
         // Stored under its old name: the test behind it grew from "number
         // field" to "code box", but a user who turned it on meant the same
@@ -7815,6 +8041,7 @@ class SettingsRepository(private val context: Context) {
         private val TOOL_CIRCLE_RADIUS = intPreferencesKey("tool_circle_radius")
         private val TOOL_SHAPE = stringPreferencesKey("tool_circle_shape")
         private val TOOLBAR_TOOL_WIDTH = intPreferencesKey("toolbar_tool_width")
+        private val TOOLBAR_ICON_SIZE = intPreferencesKey("toolbar_icon_size")
         private val TOOLBAR_PADDING_TOP = intPreferencesKey("toolbar_padding_top")
         private val TOOLBAR_PADDING_BOTTOM = intPreferencesKey("toolbar_padding_bottom")
         private val TOOLBAR_PLACEMENT = stringPreferencesKey("toolbar_placement")
@@ -7915,6 +8142,11 @@ class SettingsRepository(private val context: Context) {
         private val VOICE_SERVER_URL = stringPreferencesKey("voice_server_url")
         private val VOICE_SERVER_KEY = stringPreferencesKey("voice_server_key")
         private val VOICE_SERVER_MODEL = stringPreferencesKey("voice_server_model")
+        private val VOICE_SERVER_PATH = stringPreferencesKey("voice_server_path")
+        private val VOICE_SERVER_BY_LANG = stringPreferencesKey("voice_server_by_lang")
+        // Kept apart from the map above so backups can leave the keys out
+        // (SettingsBackup.SECRET_KEYS) and still carry the rest.
+        private val VOICE_SERVER_KEY_BY_LANG = stringPreferencesKey("voice_server_key_by_lang")
         private val VOICE_SERVER_SEND_LANGUAGE = booleanPreferencesKey("voice_server_send_language")
         private val VOICE_BIAS_PERSONAL_WORDS = booleanPreferencesKey("voice_bias_personal_words")
         private val VOICE_BIAS_WORDS = stringPreferencesKey("voice_bias_words")
@@ -7976,6 +8208,8 @@ class SettingsRepository(private val context: Context) {
         private val DOUBLE_SPACE_WINDOW_MS = intPreferencesKey("double_space_window_ms")
         private val SPACE_CURSOR_STEP_DP = intPreferencesKey("space_cursor_step_dp")
         private val SPACE_CURSOR_MAGNIFIER = booleanPreferencesKey("space_cursor_magnifier")
+        private val SPACE_CURSOR_ACCELERATE = booleanPreferencesKey("space_cursor_accelerate")
+        private val SPACE_CURSOR_TOP_SPEED = intPreferencesKey("space_cursor_top_speed")
         private val BACKSPACE_WORD_STEP_DP = intPreferencesKey("backspace_word_step_dp")
         private val BACKSPACE_SWIPE_UNIT = stringPreferencesKey("backspace_swipe_unit")
         private val BACKSPACE_SWIPE_PREVIEW = booleanPreferencesKey("backspace_swipe_preview")
@@ -7996,6 +8230,7 @@ class SettingsRepository(private val context: Context) {
          */
         private val NUMPAD_PHONE_LAYOUT = booleanPreferencesKey("numpad_phone_layout")
         private val INCOGNITO_PAUSES_CLIPBOARD = booleanPreferencesKey("incognito_pauses_clipboard")
+        private val INCOGNITO_PRIVATE_CLIPBOARD = booleanPreferencesKey("incognito_private_clipboard")
         private val INCOGNITO_PAUSES_LEARNING = booleanPreferencesKey("incognito_pauses_learning")
         private val AUTO_INCOGNITO = booleanPreferencesKey("auto_incognito")
         private val OCR_AUTO_SELECT_WORDS = booleanPreferencesKey("ocr_auto_select_words")
@@ -8073,6 +8308,7 @@ class SettingsRepository(private val context: Context) {
         private val STICKER_SUGGEST = booleanPreferencesKey("sticker_suggest")
         private val STICKER_SUGGEST_STYLE = stringPreferencesKey("sticker_suggest_style")
         private val STICKER_SUGGEST_TRIGGER = stringPreferencesKey("sticker_suggest_trigger")
+        private val STICKER_SUGGEST_MAGNIFY = booleanPreferencesKey("sticker_suggest_magnify")
         private val SEARCH_SAFE = booleanPreferencesKey("search_safe")
         private val SEARCH_RESULT_COUNT = intPreferencesKey("search_result_count")
         private val WIKI_LANGUAGE = stringPreferencesKey("wiki_language")
@@ -8615,6 +8851,7 @@ class SettingsRepository(private val context: Context) {
                 ?: p[NUMPAD_PHONE_LAYOUT]?.not()
                 ?: defaults.numpadCalculatorLayout,
             incognitoPausesClipboard = p[INCOGNITO_PAUSES_CLIPBOARD] ?: defaults.incognitoPausesClipboard,
+            incognitoPrivateClipboard = p[INCOGNITO_PRIVATE_CLIPBOARD] ?: defaults.incognitoPrivateClipboard,
             incognitoPausesLearning = p[INCOGNITO_PAUSES_LEARNING] ?: defaults.incognitoPausesLearning,
             autoIncognito = p[AUTO_INCOGNITO] ?: defaults.autoIncognito,
             cloudBackup = p[CloudBackup.KEY] ?: defaults.cloudBackup,
@@ -9056,6 +9293,7 @@ class SettingsRepository(private val context: Context) {
 
     private fun readCjk(p: Preferences, defaults: KeyboardSettings) =
         CjkSettings(
+            pinyinJianpin = p[PINYIN_JIANPIN] ?: defaults.cjk.pinyinJianpin,
             pinyinFuzzy = p[PINYIN_FUZZY] ?: defaults.cjk.pinyinFuzzy,
             // Unknown ids are dropped rather than kept: a pair removed in
             // a later build must not sit in the set forever, and the
@@ -9126,6 +9364,9 @@ class SettingsRepository(private val context: Context) {
                 ?: defaults.clipboard.timeLabel,
             maxTextChars = p[CLIPBOARD_MAX_TEXT_CHARS]?.coerceAtLeast(0)
                 ?: defaults.clipboard.maxTextChars,
+            clearButton = p[CLIPBOARD_CLEAR_BUTTON] ?: defaults.clipboard.clearButton,
+            pinnedTabs = p[CLIPBOARD_PINNED_TABS] ?: defaults.clipboard.pinnedTabs,
+            outlinePinned = p[CLIPBOARD_OUTLINE_PINNED] ?: defaults.clipboard.outlinePinned,
         )
 
     private fun readOtp(p: Preferences, defaults: KeyboardSettings) =
@@ -9302,6 +9543,19 @@ class SettingsRepository(private val context: Context) {
                 ?: defaults.suggestionStrip.phoneticEnglishLangs,
             phoneticEnglishSwitch = p[PHONETIC_ENGLISH_SWITCH]
                 ?: defaults.suggestionStrip.phoneticEnglishSwitch,
+            phoneticFixedStripLangs = p[PHONETIC_FIXED_STRIP_LANGS]
+                ?: defaults.suggestionStrip.phoneticFixedStripLangs,
+            // A source name this build does not know is dropped, and the
+            // language falls back to the default.
+            phoneticStripSources = p[PHONETIC_STRIP_SOURCES]
+                ?.mapNotNull { entry ->
+                    val lang = entry.substringBefore('=', "")
+                    val source = runCatching { PhoneticStripSource.valueOf(entry.substringAfter('=')) }
+                        .getOrNull()
+                    if (lang.isEmpty() || source == null) null else lang to source
+                }
+                ?.toMap()
+                ?: defaults.suggestionStrip.phoneticStripSources,
             // An item name this build does not know is dropped, not kept
             // as a stale string.
             wordMenuItems = p[WORD_MENU_ITEMS]
@@ -9422,6 +9676,8 @@ class SettingsRepository(private val context: Context) {
                 ?: defaults.layoutBehavior.languagePickerStyle,
             spaceHoldPickerForLongRing = p[SPACE_HOLD_PICKER_FOR_LONG_RING]
                 ?: defaults.layoutBehavior.spaceHoldPickerForLongRing,
+            languageEchoMs = p[LANGUAGE_ECHO_MS]?.coerceIn(LanguageEchoMsRange)
+                ?: defaults.layoutBehavior.languageEchoMs,
             numeralSystemByLang = p[NUMERAL_SYSTEM_BY_LANG]
                 ?.let { decodeNumeralSystems(it) }
                 ?: defaults.layoutBehavior.numeralSystemByLang,
@@ -9432,6 +9688,9 @@ class SettingsRepository(private val context: Context) {
                 p[SHIFT_ENTER_NEWLINE] ?: defaults.layoutBehavior.shiftEnterNewline,
             numberRowInSymbols =
                 p[NUMBER_ROW_IN_SYMBOLS] ?: defaults.layoutBehavior.numberRowInSymbols,
+            arrowRow = p[ARROW_ROW] ?: defaults.layoutBehavior.arrowRow,
+            arrowRowOrder = p[ARROW_ROW_ORDER]?.let(::decodeArrowRowOrder)
+                ?: defaults.layoutBehavior.arrowRowOrder,
             bottomRowHeightDp =
                 p[BOTTOM_ROW_HEIGHT] ?: defaults.layoutBehavior.bottomRowHeightDp,
             sidePadLeftScale = p[SIDE_PAD_LEFT_SCALE] ?: p[SIDE_PAD_SCALE]
@@ -9440,8 +9699,11 @@ class SettingsRepository(private val context: Context) {
                 ?: defaults.layoutBehavior.sidePadRightScale,
             splitOnlyOnLargeScreens = p[SPLIT_ONLY_LARGE]
                 ?: defaults.layoutBehavior.splitOnlyOnLargeScreens,
+            splitSpacebar = p[SPLIT_SPACEBAR] ?: defaults.layoutBehavior.splitSpacebar,
             shiftCapsLockMs = p[SHIFT_CAPS_LOCK_MS] ?: defaults.layoutBehavior.shiftCapsLockMs,
             showAllPopupKeys = p[SHOW_ALL_POPUP_KEYS] ?: defaults.layoutBehavior.showAllPopupKeys,
+            nativeLettersFirst = p[NATIVE_LETTERS_FIRST]
+                ?: defaults.layoutBehavior.nativeLettersFirst,
             shiftedPopupKeys = p[SHIFTED_POPUP_KEYS]
                 ?: defaults.layoutBehavior.shiftedPopupKeys,
             currencyKeys = p[CURRENCY_KEYS]
@@ -9451,6 +9713,8 @@ class SettingsRepository(private val context: Context) {
                 ?: defaults.layoutBehavior.symbolsReturnToLetters,
             symbolsReturnChars = p[SYMBOLS_RETURN_CHARS]
                 ?: defaults.layoutBehavior.symbolsReturnChars,
+            symbolsReturnOnSpace = p[SYMBOLS_RETURN_ON_SPACE]
+                ?: defaults.layoutBehavior.symbolsReturnOnSpace,
             // Derived from whether the key is *there*, not from its value —
             // see the fields' own docs. This is the only place that
             // information survives; every other read collapses it with `?:`.
@@ -9497,6 +9761,7 @@ class SettingsRepository(private val context: Context) {
             scrollable = p[TOOLBAR_SCROLLABLE] ?: defaults.toolbarBehavior.scrollable,
             hideWhenLocked = p[TOOLBAR_HIDE_WHEN_LOCKED] ?: defaults.toolbarBehavior.hideWhenLocked,
             toolWidthDp = p[TOOLBAR_TOOL_WIDTH] ?: defaults.toolbarBehavior.toolWidthDp,
+            iconSizeDp = p[TOOLBAR_ICON_SIZE] ?: defaults.toolbarBehavior.iconSizeDp,
             paddingTopDp = p[TOOLBAR_PADDING_TOP] ?: defaults.toolbarBehavior.paddingTopDp,
             paddingBottomDp = p[TOOLBAR_PADDING_BOTTOM] ?: defaults.toolbarBehavior.paddingBottomDp,
             themesPanelBuiltIns = p[THEMES_PANEL_BUILTINS],
@@ -9626,6 +9891,9 @@ class SettingsRepository(private val context: Context) {
             serverUrl = p[VOICE_SERVER_URL] ?: defaults.whisper.serverUrl,
             serverKey = p[VOICE_SERVER_KEY] ?: defaults.whisper.serverKey,
             serverModel = p[VOICE_SERVER_MODEL] ?: defaults.whisper.serverModel,
+            serverPath = p[VOICE_SERVER_PATH] ?: defaults.whisper.serverPath,
+            serverByLang = decodeVoiceServerByLang(p[VOICE_SERVER_BY_LANG], p[VOICE_SERVER_KEY_BY_LANG])
+                ?: defaults.whisper.serverByLang,
             serverSendLanguage = p[VOICE_SERVER_SEND_LANGUAGE]
                 ?: defaults.whisper.serverSendLanguage,
             biasPersonalWords = p[VOICE_BIAS_PERSONAL_WORDS] ?: defaults.whisper.biasPersonalWords,
@@ -9697,6 +9965,7 @@ class SettingsRepository(private val context: Context) {
             stickerSuggestTrigger = p[STICKER_SUGGEST_TRIGGER]
                 ?.let { runCatching { StickerTriggerAction.valueOf(it) }.getOrNull() }
                 ?: defaults.gif.stickerSuggestTrigger,
+            stickerSuggestMagnify = p[STICKER_SUGGEST_MAGNIFY] ?: defaults.gif.stickerSuggestMagnify,
         )
 
     private fun readTextEditing(p: Preferences, defaults: KeyboardSettings) =
@@ -9726,6 +9995,10 @@ class SettingsRepository(private val context: Context) {
                 ?: defaults.textEditing.spaceCursorStepDp,
             spaceCursorMagnifier = p[SPACE_CURSOR_MAGNIFIER]
                 ?: defaults.textEditing.spaceCursorMagnifier,
+            spaceCursorAccelerate = p[SPACE_CURSOR_ACCELERATE]
+                ?: defaults.textEditing.spaceCursorAccelerate,
+            spaceCursorTopSpeed = p[SPACE_CURSOR_TOP_SPEED]
+                ?: defaults.textEditing.spaceCursorTopSpeed,
             backspaceWordStepDp = p[BACKSPACE_WORD_STEP_DP]
                 ?: defaults.textEditing.backspaceWordStepDp,
             backspaceSwipeUnit = p[BACKSPACE_SWIPE_UNIT]
@@ -10634,6 +10907,28 @@ class SettingsRepository(private val context: Context) {
     suspend fun setVoiceServerModel(value: String) =
         editPrefs { it[VOICE_SERVER_MODEL] = value.trim() }
 
+    suspend fun setVoiceServerPath(value: String) =
+        editPrefs { it[VOICE_SERVER_PATH] = value.trim() }
+
+    /**
+     * Gives [languageId] its own model or server (#389), or drops the entry
+     * when [value] is empty so the language goes back to the main server.
+     */
+    suspend fun setVoiceServerForLanguage(languageId: String, value: VoiceServerOverride) =
+        editPrefs { prefs ->
+            val current = decodeVoiceServerByLang(prefs[VOICE_SERVER_BY_LANG], prefs[VOICE_SERVER_KEY_BY_LANG])
+                .orEmpty()
+            val clean = VoiceServerOverride(
+                url = value.url.trim().trimEnd('/'),
+                path = value.path.trim(),
+                model = value.model.trim(),
+                key = value.key.trim(),
+            )
+            val next = if (clean.isEmpty()) current - languageId else current + (languageId to clean)
+            prefs[VOICE_SERVER_BY_LANG] = encodeVoiceServerByLang(next)
+            prefs[VOICE_SERVER_KEY_BY_LANG] = encodeVoiceServerKeyByLang(next)
+        }
+
     suspend fun setVoiceServerSendLanguage(value: Boolean) =
         editPrefs { it[VOICE_SERVER_SEND_LANGUAGE] = value }
 
@@ -10727,6 +11022,12 @@ class SettingsRepository(private val context: Context) {
     suspend fun setSpaceCursorMagnifier(value: Boolean) =
         editPrefs { it[SPACE_CURSOR_MAGNIFIER] = value }
 
+    suspend fun setSpaceCursorAccelerate(value: Boolean) =
+        editPrefs { it[SPACE_CURSOR_ACCELERATE] = value }
+
+    suspend fun setSpaceCursorTopSpeed(value: Int) =
+        editPrefs { it[SPACE_CURSOR_TOP_SPEED] = value.coerceIn(2, 8) }
+
     suspend fun setBackspaceWordStepDp(value: Int) =
         editPrefs { it[BACKSPACE_WORD_STEP_DP] = value.coerceIn(32, 120) }
 
@@ -10819,6 +11120,9 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setIncognitoPausesClipboard(value: Boolean) =
         editPrefs { it[INCOGNITO_PAUSES_CLIPBOARD] = value }
+
+    suspend fun setIncognitoPrivateClipboard(value: Boolean) =
+        editPrefs { it[INCOGNITO_PRIVATE_CLIPBOARD] = value }
 
     suspend fun setIncognitoPausesLearning(value: Boolean) =
         editPrefs { it[INCOGNITO_PAUSES_LEARNING] = value }
@@ -11036,6 +11340,9 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setToolbarToolWidthDp(value: Int) =
         editPrefs { it[TOOLBAR_TOOL_WIDTH] = value.coerceIn(38, 64) }
+
+    suspend fun setToolbarIconSizeDp(value: Int) =
+        editPrefs { it[TOOLBAR_ICON_SIZE] = value.coerceIn(14, 30) }
 
     suspend fun setToolbarPaddingTopDp(value: Int) =
         editPrefs { it[TOOLBAR_PADDING_TOP] = value.coerceIn(0, 24) }
@@ -13446,6 +13753,18 @@ class SettingsRepository(private val context: Context) {
     suspend fun setPhoneticEnglishSwitch(value: Boolean) =
         editPrefs { it[PHONETIC_ENGLISH_SWITCH] = value }
 
+    suspend fun setPhoneticFixedStrip(langId: String, enabled: Boolean) =
+        editPrefs {
+            val on = it[PHONETIC_FIXED_STRIP_LANGS].orEmpty()
+            it[PHONETIC_FIXED_STRIP_LANGS] = if (enabled) on + langId else on - langId
+        }
+
+    suspend fun setPhoneticStripSource(langId: String, source: PhoneticStripSource) =
+        editPrefs {
+            val others = it[PHONETIC_STRIP_SOURCES].orEmpty().filterNot { e -> e.substringBefore('=') == langId }
+            it[PHONETIC_STRIP_SOURCES] = others.toSet() + "$langId=${source.name}"
+        }
+
     suspend fun setNumberRowCorrections(value: Boolean) =
         editPrefs { it[NUMBER_ROW_CORRECTIONS] = value }
 
@@ -13479,6 +13798,12 @@ class SettingsRepository(private val context: Context) {
     suspend fun setNumberRowInSymbols(value: Boolean) =
         editPrefs { it[NUMBER_ROW_IN_SYMBOLS] = value }
 
+    suspend fun setArrowRow(value: Boolean) =
+        editPrefs { it[ARROW_ROW] = value }
+
+    suspend fun setArrowRowOrder(value: List<ArrowKey>) =
+        editPrefs { it[ARROW_ROW_ORDER] = encodeArrowRowOrder(value) }
+
     suspend fun setBottomRowHeightDp(value: Int) =
         editPrefs { it[BOTTOM_ROW_HEIGHT] = value.coerceIn(0, BottomRowHeightRange.last) }
 
@@ -13496,6 +13821,9 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setSplitOnlyOnLargeScreens(value: Boolean) =
         editPrefs { it[SPLIT_ONLY_LARGE] = value }
+
+    suspend fun setSplitSpacebar(value: Boolean) =
+        editPrefs { it[SPLIT_SPACEBAR] = value }
 
     /**
      * Puts the floating panel back where it starts: centred, 320 dp wide, at
@@ -13572,6 +13900,7 @@ class SettingsRepository(private val context: Context) {
         it.remove(TOOL_CIRCLE_RADIUS)
         it.remove(TOOL_SHAPE)
         it.remove(TOOLBAR_TOOL_WIDTH)
+        it.remove(TOOLBAR_ICON_SIZE)
         it.remove(TOOLBAR_PADDING_TOP)
         it.remove(TOOLBAR_PADDING_BOTTOM)
     }
@@ -13607,11 +13936,17 @@ class SettingsRepository(private val context: Context) {
     suspend fun setShowAllPopupKeys(value: Boolean) =
         editPrefs { it[SHOW_ALL_POPUP_KEYS] = value }
 
+    suspend fun setNativeLettersFirst(value: Boolean) =
+        editPrefs { it[NATIVE_LETTERS_FIRST] = value }
+
     suspend fun setShiftedPopupKeys(value: Boolean) =
         editPrefs { it[SHIFTED_POPUP_KEYS] = value }
 
     suspend fun setSymbolsReturnToLetters(value: Boolean) =
         editPrefs { it[SYMBOLS_RETURN_TO_LETTERS] = value }
+
+    suspend fun setSymbolsReturnOnSpace(value: Boolean) =
+        editPrefs { it[SYMBOLS_RETURN_ON_SPACE] = value }
 
     /**
      * Persist the characters that send ?123 back to the letters. Whitespace and
@@ -14256,6 +14591,9 @@ class SettingsRepository(private val context: Context) {
     suspend fun setSpaceHoldPickerForLongRing(value: Boolean) =
         editPrefs { it[SPACE_HOLD_PICKER_FOR_LONG_RING] = value }
 
+    suspend fun setLanguageEchoMs(value: Int) =
+        editPrefs { it[LANGUAGE_ECHO_MS] = value.coerceIn(LanguageEchoMsRange) }
+
     suspend fun setNumeralCommitScope(value: NumeralCommitScope) =
         editPrefs { it[NUMERAL_COMMIT_SCOPE] = value.name }
 
@@ -14467,6 +14805,9 @@ class SettingsRepository(private val context: Context) {
             .mapTo(mutableSetOf()) { it.id }
     }
 
+    suspend fun setPinyinJianpin(value: Boolean) =
+        editPrefs { it[PINYIN_JIANPIN] = value }
+
     suspend fun setPinyinFuzzy(value: Boolean) =
         editPrefs { it[PINYIN_FUZZY] = value }
 
@@ -14670,6 +15011,15 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setClipboardMaxTextChars(value: Int) =
         editPrefs { it[CLIPBOARD_MAX_TEXT_CHARS] = value.coerceAtLeast(0) }
+
+    suspend fun setClipboardClearButton(value: Boolean) =
+        editPrefs { it[CLIPBOARD_CLEAR_BUTTON] = value }
+
+    suspend fun setClipboardPinnedTabs(value: Boolean) =
+        editPrefs { it[CLIPBOARD_PINNED_TABS] = value }
+
+    suspend fun setClipboardOutlinePinned(value: Boolean) =
+        editPrefs { it[CLIPBOARD_OUTLINE_PINNED] = value }
 
     suspend fun setOtpChipEnabled(value: Boolean) =
         editPrefs { it[OTP_CHIP_ENABLED] = value }
@@ -15208,6 +15558,9 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setStickerSuggestTrigger(value: StickerTriggerAction) =
         editPrefs { it[STICKER_SUGGEST_TRIGGER] = value.name }
+
+    suspend fun setStickerSuggestMagnify(value: Boolean) =
+        editPrefs { it[STICKER_SUGGEST_MAGNIFY] = value }
 
     suspend fun setGifContentFilter(value: GifContentFilter) =
         editPrefs { it[GIF_CONTENT_FILTER] = value.name }

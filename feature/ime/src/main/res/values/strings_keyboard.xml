@@ -455,6 +455,7 @@
     <string name="ime_tool_qr_gen">QR code</string>
     <string name="ime_tool_password_gen">Password</string>
     <string name="ime_tool_typing_test">Typing speed</string>
+    <string name="ime_tool_statistics">Statistics</string>
     <string name="ime_tool_media_control">Media</string>
     <string name="ime_tool_kde_connect" translatable="false">KDE Connect</string>
     <string name="ime_tool_plugins">Plugins</string>
@@ -638,6 +639,24 @@
         <item quantity="other">%1$d clips deleted</item>
     </plurals>
     <string name="ime_clip_undo_delete">Undo</string>
+    <!-- Spoken action on the Undo bar: it can also be swiped away, which ends the Undo at once. -->
+    <string name="ime_clip_undo_dismiss">Dismiss</string>
+    <!-- Actions in the press-and-hold popup of a clip. -->
+    <string name="ime_clip_open_link">Open link</string>
+    <string name="ime_clip_view_image">View</string>
+    <string name="ime_clip_extract_text">Extract text</string>
+    <!-- The bin beside the clipboard search bar, for a screen reader. -->
+    <string name="ime_clipboard_clear_desc">Delete all unpinned clips</string>
+    <!-- The question the bin asks before it deletes. %1$d is how many clips it deletes. -->
+    <plurals name="ime_clip_clear_question">
+        <item quantity="one">Delete %1$d unpinned clip? Pinned clips stay.</item>
+        <item quantity="other">Delete %1$d unpinned clips? Pinned clips stay.</item>
+    </plurals>
+    <!-- The two tabs of the clipboard history, when the tabs setting is on. -->
+    <string name="ime_clipboard_tab_unpinned">Unpinned</string>
+    <string name="ime_clipboard_tab_pinned">Pinned</string>
+    <string name="ime_clipboard_tab_unpinned_empty">No unpinned clips.\nNew copies show here.</string>
+    <string name="ime_clipboard_tab_pinned_empty">No pinned clips.\nPin a clip to keep it here.</string>
     <string name="ime_clipboard_view_list_desc">Show clips as a list</string>
     <string name="ime_clipboard_view_grid_desc">Show clips as a grid</string>
     <!-- Spoken before a clip's content when clip numbers are on. %1$d is the clip's number in the history. -->

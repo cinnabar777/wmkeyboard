@@ -189,6 +189,49 @@ object WordlistDownloadManager {
         }
     }
 
+    /**
+     * Builds [entry]'s dictionary from a copy of its list the user fetched
+     * some other way, [file], which is the repo's `.txt.gz` or the same list
+     * inflated. The same parse and the same trie as a download, run on the
+     * caller's thread, so a build with no internet permission can still have
+     * every language's words. Returns the words kept.
+     *
+     * Refused while a download is running, for the same reason a second
+     * download is: both write the one `.part` beside the list.
+     */
+    fun install(filesDir: File, entry: DictionaryEntry, size: DictionaryCatalog.DictionarySize, file: File): Int {
+        check(!isBusy) { "a download is running" }
+        val part = DictionaryStore.partFile(filesDir, entry.languageId)
+        part.parentFile?.mkdirs()
+        activeId = entry.id
+        try {
+            set(entry.id, DownloadStatus.Processing)
+            val list = openList(file).use { input ->
+                parse(entry, DictionaryCatalog.wordCap(entry, size), input) {}
+            }
+            val trie = PackedTrie.of(list.words, list.frequencies, list.count)
+            part.outputStream().use { PackedTrieCodec.write(trie, it) }
+            val final = DictionaryStore.downloadedFile(filesDir, entry.languageId)
+            if (!part.renameTo(final)) throw IOException("could not move the list into place")
+            DictionaryStore.writeSourceEntryId(filesDir, entry.languageId, entry.id)
+            DictionaryStore.writeDownloadedSize(filesDir, entry.languageId, size.name)
+            return trie.wordCount
+        } finally {
+            part.delete()
+            activeId = null
+            refresh(filesDir)
+        }
+    }
+
+    /** [file] inflated when it is gzip (the repo's form), as it is otherwise. */
+    private fun openList(file: File): InputStream {
+        val raw = file.inputStream().buffered()
+        raw.mark(2)
+        val gzip = raw.read() == 0x1f && raw.read() == 0x8b
+        raw.reset()
+        return if (gzip) GZIPInputStream(raw, 32 * 1024) else raw
+    }
+
     fun cancel() {
         activeJob?.cancel()
     }
@@ -299,53 +342,11 @@ object WordlistDownloadManager {
             }
             val total = connection.contentLengthLong.takeIf { it > 0 } ?: entry.approxGzBytes
 
-            // wordCap is already clamped to the list's length, and a sorted
-            // list stops at it, so only a flat one (below) ever grows these.
-            var words = arrayOfNulls<String>(wordCap)
-            var frequencies = IntArray(wordCap)
-            var count = 0
             val counting = CountingInputStream(netCall.countIn(connection.inputStream))
             var lastUpdate = 0L
-            // Whether the noise cut below applies at all, decided by the first
-            // usable line. A few repo lists are bare wordlists wearing the
-            // frequency format — Bengali's 451,348 words all say `1` — and on
-            // those the cut fires on line one, empties the list and reports it
-            // as unreadable. A list whose *most frequent* word is already under
-            // the floor has no frequencies to rank by, so there is no noise
-            // tail to trim and every word is kept.
-            //
-            // An AOSP list has no noise tail to cut either: it is curated, and
-            // its bottom is real words AOSP rated rare, down to 0.
-            //
-            // A flat list has no order for the word cap to choose by either.
-            // Bengali's is alphabetical, so its first 300k lines stopped at
-            // বিশ্ব… and every word from ভ to হ was missing — সরাসরি among
-            // them, which then lost to a sibling from the kept half. A flat
-            // list is taken whole, whatever size was asked for.
-            val aosp = entry.source == WordlistSource.AOSP
-            var ranked: Boolean? = if (aosp) false else null
-            GZIPInputStream(counting, 32 * 1024).bufferedReader().useLines { lines ->
-                for (line in lines) {
+            return GZIPInputStream(counting, 32 * 1024).use { input ->
+                parse(entry, wordCap, input) {
                     currentCoroutineContext().ensureActive()
-                    val trimmed = line.trim()
-                    if (trimmed.isEmpty() || trimmed.startsWith("#")) continue
-                    val separator = trimmed.lastIndexOf(' ')
-                    if (separator <= 0) continue
-                    val word = trimmed.substring(0, separator).trim()
-                    val raw = trimmed.substring(separator + 1).toIntOrNull() ?: continue
-                    val frequency = if (aosp) AospScores.listCount(raw) else raw
-                    if (ranked == null) ranked = frequency >= MIN_FREQUENCY
-                    // Sorted desc, so on a ranked list only noise follows.
-                    if (ranked == true && frequency < MIN_FREQUENCY) break
-                    if (word.length > MAX_WORD_LENGTH || ' ' in word) continue
-                    words[count] = word
-                    frequencies[count] = frequency
-                    count++
-                    if (count >= words.size) {
-                        if (ranked == true || aosp) break
-                        words = words.copyOf(maxOf(words.size * 2, MIN_GROWTH))
-                        frequencies = frequencies.copyOf(words.size)
-                    }
                     val now = System.currentTimeMillis()
                     if (now - lastUpdate >= PROGRESS_INTERVAL_MS) {
                         lastUpdate = now
@@ -353,10 +354,6 @@ object WordlistDownloadManager {
                     }
                 }
             }
-            if (count == 0) {
-                throw FailedException(FailReason.MALFORMED, R.string.core_pred_wordlist_malformed_error)
-            }
-            return Wordlist(words, frequencies, count)
         } catch (t: Throwable) {
             netCall.fail(t)
             throw t
@@ -364,5 +361,64 @@ object WordlistDownloadManager {
             connection.disconnect()
             netCall.end()
         }
+    }
+
+    /**
+     * The first [wordCap] usable entries of an inflated `word count` list, the
+     * way [fetchEntries] and [install] both read it. [onLine] runs once per
+     * line, for progress and cancellation.
+     */
+    private inline fun parse(entry: DictionaryEntry, wordCap: Int, input: InputStream, onLine: () -> Unit): Wordlist {
+        // wordCap is already clamped to the list's length, and a sorted
+        // list stops at it, so only a flat one (below) ever grows these.
+        var words = arrayOfNulls<String>(wordCap)
+        var frequencies = IntArray(wordCap)
+        var count = 0
+        // Whether the noise cut below applies at all, decided by the first
+        // usable line. A few repo lists are bare wordlists wearing the
+        // frequency format — Bengali's 451,348 words all say `1` — and on
+        // those the cut fires on line one, empties the list and reports it
+        // as unreadable. A list whose *most frequent* word is already under
+        // the floor has no frequencies to rank by, so there is no noise
+        // tail to trim and every word is kept.
+        //
+        // An AOSP list has no noise tail to cut either: it is curated, and
+        // its bottom is real words AOSP rated rare, down to 0.
+        //
+        // A flat list has no order for the word cap to choose by either.
+        // Bengali's is alphabetical, so its first 300k lines stopped at
+        // বিশ্ব… and every word from ভ to হ was missing — সরাসরি among
+        // them, which then lost to a sibling from the kept half. A flat
+        // list is taken whole, whatever size was asked for.
+        val aosp = entry.source == WordlistSource.AOSP
+        var ranked: Boolean? = if (aosp) false else null
+        input.bufferedReader().useLines { lines ->
+            for (line in lines) {
+                onLine()
+                val trimmed = line.trim()
+                if (trimmed.isEmpty() || trimmed.startsWith("#")) continue
+                val separator = trimmed.lastIndexOf(' ')
+                if (separator <= 0) continue
+                val word = trimmed.substring(0, separator).trim()
+                val raw = trimmed.substring(separator + 1).toIntOrNull() ?: continue
+                val frequency = if (aosp) AospScores.listCount(raw) else raw
+                if (ranked == null) ranked = frequency >= MIN_FREQUENCY
+                // Sorted desc, so on a ranked list only noise follows.
+                if (ranked == true && frequency < MIN_FREQUENCY) break
+                if (word.length > MAX_WORD_LENGTH || ' ' in word) continue
+                words[count] = word
+                frequencies[count] = frequency
+                count++
+                if (count >= words.size) {
+                    if (ranked == true || aosp) break
+                    words = words.copyOf(maxOf(words.size * 2, MIN_GROWTH))
+                    frequencies = frequencies.copyOf(words.size)
+                }
+            }
+        }
+        if (count == 0) {
+            throw FailedException(FailReason.MALFORMED, R.string.core_pred_wordlist_malformed_error)
+        }
+        return Wordlist(words, frequencies, count)
     }
 }

@@ -661,6 +661,9 @@
     <string name="typing_spacebar_display_language_label">Language</string>
     <string name="typing_spacebar_display_layout_label">Layout</string>
     <string name="typing_spacebar_display_both_label">Both</string>
+    <string name="typing_language_echo_title">Keep the new language on screen</string>
+    <string name="typing_language_echo_subtitle">How long a spacebar swipe shows the language it switched to</string>
+    <string name="typing_language_echo_info">A quick flick on the spacebar is over before its preview can draw, so the keyboard keeps the language it landed on up for a moment after you lift, to show where you went. This is how long it stays, counting the time the preview was already up. Slide to Off to have it go the instant you lift. A slow swipe that rested on its language for a quarter of a second has already shown it, so it goes at once whatever this is set to.</string>
     <string name="typing_language_picker_style_title">Language picker shape</string>
     <string name="typing_language_picker_style_subtitle">A list to drag through, or a carousel that keeps the swipe sideways</string>
     <string name="typing_language_picker_style_info">This is the chooser that opens when you hold the spacebar with more than four layouts on, or press and hold the 🌐 key. List shows your layouts top to bottom, and a hold on the spacebar walks it up and down. Carousel shows them side by side, centred on the one you are typing in, and the same hold walks it left and right, the way the spacebar swipe already moves. Both let you tap a layout, and both keep Other keyboards… at the end.</string>
@@ -798,6 +801,12 @@
 
     <string name="typing_space_cursor_step_title">Cursor speed</string>
     <string name="typing_space_cursor_step_subtitle">How far you slide along the spacebar to move one character</string>
+    <string name="typing_space_cursor_accelerate_title">Speed up long cursor swipes</string>
+    <string name="typing_space_cursor_accelerate_subtitle">The further a spacebar swipe goes, the faster the cursor moves</string>
+    <string name="typing_space_cursor_accelerate_info">After a short distance at the normal cursor speed, each character needs less movement. The speed increases until it gets to the top speed, and it stays at that speed while you continue in the same direction. When you go back, the speed starts again at the normal speed, so you can correct an overshoot accurately. With the 2-D cursor touchpad, movement up and down also increases speed in the same way. A short swipe moves one character at a time, as before. This setting is off by default.</string>
+    <string name="typing_space_cursor_top_speed_title">Top cursor speed</string>
+    <string name="typing_space_cursor_top_speed_subtitle">How fast a long spacebar swipe moves the cursor at its fastest</string>
+    <string name="typing_space_cursor_top_speed_info">The value is how many times faster than the normal cursor speed the cursor goes at the end of a long swipe. This setting is 4× by default.</string>
     <string name="typing_space_cursor_magnifier_title">Cursor magnifier</string>
     <string name="typing_space_cursor_magnifier_subtitle">Show the text at the cursor, larger, while a spacebar swipe moves the cursor</string>
     <string name="typing_space_cursor_magnifier_info">The magnifier shows the line of text around the cursor. It goes above the cursor when the app tells the keyboard where the cursor is. If the app does not, it goes above the keyboard. The trackpad tool has a separate setting for this.</string>

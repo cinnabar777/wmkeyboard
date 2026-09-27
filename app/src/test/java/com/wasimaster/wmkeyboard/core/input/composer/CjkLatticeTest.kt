@@ -21,12 +21,14 @@ class CjkLatticeTest {
     @Before
     fun reset() {
         CjkConfig.fuzzyPinyin = false
+        CjkConfig.jianpin = true
         CjkConfig.doublePinyin = DoublePinyinScheme.OFF
         CjkConfig.traditionalOutput = false
         HanVariant.s2t = emptyMap()
         CjkDictionaries.pinyin = ConversionDictionary.EMPTY
         CjkDictionaries.ngrams = CjkNgrams.EMPTY
         PinyinSyllables.valid = emptySet()
+        Jianpin.index = Jianpin.EMPTY
     }
 
     @After

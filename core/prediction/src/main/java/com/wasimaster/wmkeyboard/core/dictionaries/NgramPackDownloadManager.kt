@@ -203,6 +203,45 @@ object NgramPackDownloadManager {
         }
     }
 
+    /**
+     * Compiles [entry]'s pack from copies of its lists the user fetched some
+     * other way, gzip or not. Either may be missing: a pack of bigrams alone
+     * still predicts the next word, just from one word back. Runs on the
+     * caller's thread and throws when neither list holds a usable line.
+     */
+    fun install(filesDir: File, entry: NgramPackEntry, bigrams: File?, trigrams: File?) {
+        val langId = entry.languageId
+        synchronized(jobs) { jobs[langId]?.cancel() }
+        deleteLegacy(filesDir, langId)
+        val builder = NgramPackBuilder()
+        bigrams?.let { file ->
+            read(openLocal(file), MAX_BIGRAMS, parts = 2) { words, count ->
+                builder.addBigram(words[0], words[1], count)
+            }
+        }
+        trigrams?.let { file ->
+            read(openLocal(file), MAX_TRIGRAMS, parts = 3) { words, count ->
+                builder.addTrigram(words[0], words[1], words[2], count)
+            }
+        }
+        if (builder.isEmpty) throw IOException("no usable lines in the word pair lists for $langId")
+        write(filesDir, langId, builder)
+        // An import is a request for the pack, so it undoes an earlier Delete.
+        File(langDir(filesDir, langId), DECLINED_NAME).delete()
+        synchronized(jobs) { givenUp.remove(langId) }
+        set(langId, DownloadStatus.Downloaded(packFile(filesDir, langId).length()))
+        _completions.tryEmit(langId)
+    }
+
+    /** A local list, inflated when it is gzip (the repo's form), as it is otherwise. */
+    private fun openLocal(file: File): InputStream {
+        val raw = file.inputStream().buffered()
+        raw.mark(2)
+        val gzip = raw.read() == 0x1f && raw.read() == 0x8b
+        raw.reset()
+        return if (gzip) GZIPInputStream(raw) else raw
+    }
+
     private fun download(filesDir: File, entry: NgramPackEntry) {
         val langId = entry.languageId
         if (isDownloaded(filesDir, langId)) {
@@ -228,7 +267,11 @@ object NgramPackDownloadManager {
             builder.addTrigram(words[0], words[1], words[2], count)
         }
         if (builder.isEmpty) throw IOException("empty ngram lists for ${entry.languageId}")
-        val target = packFile(filesDir, entry.languageId)
+        write(filesDir, entry.languageId, builder)
+    }
+
+    private fun write(filesDir: File, langId: String, builder: NgramPackBuilder) {
+        val target = packFile(filesDir, langId)
         target.parentFile?.mkdirs()
         val part = File(target.parentFile, target.name + ".part")
         part.outputStream().use { out -> NgramPackCodec.write(builder.build(), out) }
@@ -236,9 +279,23 @@ object NgramPackDownloadManager {
     }
 
     private inline fun read(url: String, cap: Int, parts: Int, accept: (List<String>, Int) -> Unit) {
+        val raw = openStream(url)
+        // The gzip header is read here, so a bad one must still close the
+        // connection and end its network-log entry.
+        val inflated = try {
+            GZIPInputStream(raw)
+        } catch (t: Throwable) {
+            raw.close()
+            throw t
+        }
+        read(inflated, cap, parts, accept)
+    }
+
+    /** [stream] is the inflated list. */
+    private inline fun read(stream: InputStream, cap: Int, parts: Int, accept: (List<String>, Int) -> Unit) {
         var taken = 0
-        openStream(url).use { raw ->
-            GZIPInputStream(raw).bufferedReader().useLines { lines ->
+        stream.use { raw ->
+            raw.bufferedReader().useLines { lines ->
                 for (line in lines) {
                     if (taken >= cap) break
                     val trimmed = line.trim()

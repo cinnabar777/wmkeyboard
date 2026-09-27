@@ -76,6 +76,7 @@ import androidx.compose.material.icons.outlined.Tag
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material.icons.outlined.Widgets
 import androidx.compose.material.icons.outlined.MusicNote
+import androidx.compose.material.icons.outlined.VerticalSplit
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -551,6 +552,7 @@ internal object SettingsRouteIcons {
         "phoneformats" to { Icons.Outlined.Phone },
         "hwshortcuts" to { Icons.Outlined.Keyboard },
         "musicapps" to { Icons.Outlined.MusicNote },
+        "launchercombos" to { Icons.Outlined.VerticalSplit },
         "kdeconnect/devices" to { Icons.Outlined.Devices },
     )
 

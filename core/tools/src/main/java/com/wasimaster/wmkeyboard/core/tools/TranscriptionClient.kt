@@ -27,9 +27,17 @@ object TranscriptionClient {
      * endpoint is added here. An address that already names an endpoint —
      * `…/audio/transcriptions`, or whisper.cpp's own `…/inference` — is used as
      * it stands. A bare `http://host:8000` gets the standard `/v1` root.
+     *
+     * A server on a route of its own (#388, e.g. `POST /v1/transcribe`) is
+     * reached through [path]: when it is filled in, it is added to the address
+     * as typed, with no guessing and no `/v1`. A [path] that is a whole
+     * address replaces [url] outright.
      */
-    fun endpoint(url: String): String {
+    fun endpoint(url: String, path: String = ""): String {
         val base = url.trim().trimEnd('/')
+        val route = path.trim()
+        if (route.contains("://")) return route
+        if (route.trim('/').isNotEmpty()) return "$base/${route.trimStart('/')}"
         val path = base.substringAfter("://", base).substringAfter('/', "").substringBefore('?')
         return when {
             path.endsWith("transcriptions") || path.endsWith("inference") -> base
@@ -46,6 +54,8 @@ object TranscriptionClient {
      * [prompt] is OpenAI's `prompt` field (#305): text the model treats as
      * what came before the clip, which is how names and jargon get spelled
      * right. Whisper models keep only its last 224 tokens. Left out when null.
+     *
+     * [path] is the server's own route, when it has one; see [endpoint].
      */
     fun transcribe(
         url: String,
@@ -54,7 +64,9 @@ object TranscriptionClient {
         language: String?,
         wav: ByteArray,
         prompt: String? = null,
+        path: String = "",
     ): String {
+        val endpoint = endpoint(url, path)
         val fields = buildList {
             if (model.isNotBlank()) add("model" to model.trim())
             if (!language.isNullOrBlank()) add("language" to language)
@@ -67,13 +79,13 @@ object TranscriptionClient {
             emptyMap()
         }
         val body = ToolHttp.postMultipart(
-            url = endpoint(url),
+            url = endpoint,
             fields = fields,
             file = ToolHttp.FilePart("file", "speech.wav", "audio/wav", wav),
             timeoutMs = READ_TIMEOUT_MS,
             headers = headers,
             source = NetSource.TRANSCRIPTION,
-            route = NetLog.pathOf(endpoint(url)),
+            route = NetLog.pathOf(endpoint),
         )
         return parseText(body)
     }
