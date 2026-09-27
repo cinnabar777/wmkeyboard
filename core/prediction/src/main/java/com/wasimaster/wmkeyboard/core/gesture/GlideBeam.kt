@@ -582,10 +582,8 @@ class GlideBeam(private val tuning: Tuning = Tuning()) {
             val nearWords = shapes.wordsNear(ws.drawnShape8, radius = 1.20f, limit = limit)
             val maxScore = results.values.maxOfOrNull { it.score } ?: 0.0
             for (word in nearWords) {
-                val existing = results[word]
-                // Promote seeded candidate score even if beam search already included it with a low score
-                if (existing == null || existing.score < maxScore) {
-                    results[word] = Candidate(word, maxScore, 0.0, FuzzyBeamSearch.Tier.DICTIONARY)
+                if (word !in results) {
+                    results[word] = Candidate(word, maxScore - 1.0, 0.0, FuzzyBeamSearch.Tier.DICTIONARY)
                 }
             }
         }

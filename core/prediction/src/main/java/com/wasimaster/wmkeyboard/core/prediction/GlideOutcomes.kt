@@ -275,7 +275,7 @@ class GlideOutcomes(private val storageFile: File?) {
         if (!file.exists()) return
         runCatching {
             val snapshot = json.decodeFromString<Snapshot>(file.readText())
-            if (snapshot.version != VERSION || snapshot.epoch < 0L) return@runCatching
+            if (snapshot.version > VERSION || snapshot.epoch < 0L) return@runCatching
             epoch = snapshot.epoch
             for (row in snapshot.pairs) {
                 if (row.r == row.c || row.e < 0L || row.e > epoch) continue
@@ -325,7 +325,7 @@ class GlideOutcomes(private val storageFile: File?) {
         const val CHOSEN_NATS = 0.35
 
         /** Nats per unit on the word the user passed over, when the word they took is in the pool. */
-        const val REJECTED_NATS = 0.04
+        const val REJECTED_NATS = 0.10
 
         /** Nats per unit on a word the user backspaced straight away. */
         const val UNDONE_NATS = 0.10
@@ -333,10 +333,10 @@ class GlideOutcomes(private val storageFile: File?) {
         /**
          * The most a word is ever lifted.
          */
-        const val MAX_LIFT_NATS = 1.2
+        const val MAX_LIFT_NATS = 2.5
 
         /** The most a word is ever sunk. */
-        const val MAX_DROP_NATS = 0.4
+        const val MAX_DROP_NATS = 1.5
 
         private const val MIN_WORD_LENGTH = 2
         private const val MAX_WORD_LENGTH = UserLexicon.MAX_WORD_LENGTH

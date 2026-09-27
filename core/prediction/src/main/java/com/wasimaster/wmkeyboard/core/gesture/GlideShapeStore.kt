@@ -402,7 +402,7 @@ class GlideShapeStore(private val storageFile: File?) {
         if (!file.exists()) return
         runCatching {
             val snapshot = json.decodeFromString<Snapshot>(file.readText())
-            if (snapshot.v != VERSION) return@runCatching
+            if (snapshot.v > VERSION) return@runCatching
             tick = snapshot.tick.coerceAtLeast(0L)
             for ((layoutHex, words) in snapshot.layouts) {
                 val layoutKey = java.lang.Long.parseUnsignedLong(layoutHex, 16)
