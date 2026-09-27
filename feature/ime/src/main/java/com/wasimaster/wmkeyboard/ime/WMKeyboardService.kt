@@ -4932,9 +4932,13 @@ open class WMKeyboardService : InputMethodService() {
             pendingAutoSpace = false
             pendingPunctuationSpace = false
             pendingWordSpace = false
-            // Persist un-settled learning buffer entries per package without force-settling them,
-            // preserving proofreading state across field/app changes.
-            saveLearningBufferSnapshot(currentPackage)
+            // The last field's text is behind us and nobody is going back to
+            // edit it, so the unknown words still waiting in it have settled.
+            // This is also how a message field that was *sent* gets counted
+            // when the app restarts input instead of clearing the text. No
+            // correction verification: the editor answering reads is this new
+            // field, and its text says nothing about the old one's.
+            flushLearningBuffer(verifyCorrections = false)
             // A different field is a different run of typing, and the blocks an
             // undo puts on a correction are scoped to the run that earned them.
             // What should outlive it is in the persisted pair counts by now.
@@ -5972,7 +5976,7 @@ open class WMKeyboardService : InputMethodService() {
         clearLearnOffer()
         clearCorrectionOffer()
         finishRevisionOnLeave()
-        saveLearningBufferSnapshot(currentPackage)
+        flushLearningBuffer()
         // Where the user was, for the keyboard that comes back — which is
         // usually a new process, this one having been stopped in the meantime
         // (issue #227). Read after the closes above, so nothing that did not
