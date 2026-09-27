@@ -1906,10 +1906,9 @@ internal fun TypingGesturesSettings(
             }
             item(visible = learnSwipeStyle) {
                 ToggleSetting(
-                    title = stringResource(R.string.typing_glide_shape_seeding_title),
-                    subtitle = stringResource(R.string.typing_glide_shape_seeding_subtitle),
+                    title = "Seed candidates from learned shapes",
+                    subtitle = "Allows imprecise or off-target gestures to suggest learned words",
                     checked = settings.watch { it.gesture.shapeSeeding },
-                    info = stringResource(R.string.typing_glide_shape_seeding_info),
                     default = SettingsDefaults.gesture.shapeSeeding,
                 ) { scope.launch { repository.setGestureShapeSeeding(it) } }
             }

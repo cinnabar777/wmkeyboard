@@ -684,31 +684,7 @@ open class WMKeyboardService : InputMethodService() {
         serviceScope.launch(persistDispatcher) { clipboardStore.save() }
     }
 
-    private fun learningBufferFile(pkg: String?): File? {
-        val safePkg = pkg?.replace(Regex("[^a-zA-Z0-9._-]"), "_") ?: "default"
-        return File(filesDir, "learning_buffer_$safePkg.json")
-    }
-
-    private fun saveLearningBufferSnapshot(pkg: String? = currentPackage) {
-        val file = learningBufferFile(pkg) ?: return
-        if (learningBuffer.isEmpty()) {
-            file.delete()
-        } else {
-            learningBuffer.saveSnapshot(file, pkg)
-        }
-    }
-
-    private fun loadLearningBufferSnapshot(pkg: String?) {
-        val file = learningBufferFile(pkg) ?: return
-        if (file.exists()) {
-            learningBuffer.loadSnapshot(file)
-        } else {
-            learningBuffer.clear()
-        }
-    }
-
     private fun saveLearningStores() {
-        saveLearningBufferSnapshot(currentPackage)
         userLexicon.save()
         pendingLearn.save()
         wordRanks.save()
@@ -5108,13 +5084,7 @@ open class WMKeyboardService : InputMethodService() {
         // per-app memory reads a different id in the next app, which the pending
         // one would otherwise outrank for as long as the write took to land.
         if (pkg != null && pkg != currentPackage) pendingLayoutId = null
-        if (pkg != null && pkg != currentPackage) {
-            saveLearningBufferSnapshot(currentPackage)
-            currentPackage = pkg
-            loadLearningBufferSnapshot(pkg)
-        } else if (pkg != null) {
-            currentPackage = pkg
-        }
+        if (pkg != null) currentPackage = pkg
         refreshPerAppContext()
         currentFieldHint = info?.hintText?.toString()?.takeIf { it.isNotBlank() }
         // Whether a code chip may show here, when the user has asked for code

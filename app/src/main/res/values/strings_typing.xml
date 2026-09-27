@@ -433,10 +433,6 @@
     <string name="typing_glide_picker_choices_title">Words to choose from</string>
     <string name="typing_glide_picker_choices_subtitle">How many words appear above your finger</string>
     <string name="typing_glide_picker_choices_info">Two to five words. Up to three fit in one row above your finger. Four or five use a second row above the first. More words give more choice, but each one is a smaller target to land on.</string>
-    <string name="typing_glide_shape_seeding_title">Seed candidates from learned shapes</string>
-    <string name="typing_glide_shape_seeding_subtitle">Allow imprecise or off-target gestures to suggest learned words</string>
-    <string name="typing_glide_shape_seeding_info">When enabled, off-target gestures that match a learned spatial shape will seed candidate words directly into the suggestion pool, even if the gesture started on an adjacent key or missed initial key anchors.</string>
-
     <string name="typing_glide_swipe_style_title">Learn my swipe style</string>
     <string name="typing_glide_swipe_style_subtitle">Where your finger lands, how you draw each word, and which readings you correct</string>
     <string name="typing_glide_swipe_style_info">Nobody swipes through the exact middle of every key. A thumb cuts the far keys short and lands low on the near ones, and the keyboard used to charge every swipe for that. With this on, each swipe you keep records where your finger really passed each letter, and later swipes are read against keys moved to match. It keeps a few of your own shapes for each word you swipe and leave alone, so a word you have drawn before is read against the way you draw it as well as the textbook path. And it remembers when you take a different word off the strip, or backspace a swiped word straight away, so the same stroke reads your word first next time; only scrambled fingerprints of those words are kept, never the words. Backspacing a swiped word takes its lessons back. Turn this off to freeze what has been learned, or use Forget below to start over.</string>
