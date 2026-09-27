@@ -17774,7 +17774,10 @@ open class WMKeyboardService : InputMethodService() {
             val (hand, shape) = withContext(Dispatchers.Default) {
                 learnGlideStroke(points, keys, keyWidthPx, word, drawn)
             }
-            if (shape != null) learningBuffer.attachGlide(word, shape)
+            if (shape != null) {
+                val targetWord = chosen ?: word
+                learningBuffer.attachGlide(targetWord, shape)
+            }
             val stroke = GlideStroke(points, keys, keyWidthPx, shape)
             lastGestureStroke = stroke
             // The path itself rides the same entry the readings went into, so
@@ -18251,7 +18254,10 @@ open class WMKeyboardService : InputMethodService() {
                 val (hand, shape) = withContext(Dispatchers.Default) {
                     learnGlideStroke(segment, keys, keyWidthPx, word, reading.guesses[leader])
                 }
-                if (shape != null) learningBuffer.attachGlide(word, shape)
+                if (shape != null) {
+                    val targetWord = picked ?: word
+                    learningBuffer.attachGlide(targetWord, shape)
+                }
                 val stroke = GlideStroke(segment, keys, keyWidthPx, shape)
                 lastGestureStroke = stroke
                 // Each word teaches; only the last is on the undo's reach.
