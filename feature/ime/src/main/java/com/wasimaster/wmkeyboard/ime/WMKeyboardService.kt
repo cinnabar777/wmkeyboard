@@ -5034,15 +5034,22 @@ open class WMKeyboardService : InputMethodService() {
     private fun startInputView(info: EditorInfo?, restarting: Boolean) {
         super.onStartInputView(info, restarting)
         val pkg = info?.packageName.orEmpty()
+        val isPrivate = info.requestsNoPersonalizedLearning() || info.isSecureField()
         if (pkg.isNotEmpty() && pkg != activePackageName) {
             cancelSettlementTimer()
             if (activePackageName.isNotEmpty() && !learningBuffer.isEmpty()) {
                 saveSessionSnapshot(activePackageName)
             }
             activePackageName = pkg
-            restoreSessionSnapshot(pkg)
+            learningBuffer.clear()
+            if (!isPrivate) {
+                restoreSessionSnapshot(pkg)
+            }
         } else if (pkg.isNotEmpty()) {
             cancelSettlementTimer()
+            if (isPrivate) {
+                learningBuffer.clear()
+            }
         }
         // The keyboard is up, by the system's hand or ours; a hide that
         // suspended pinning has run its course.
@@ -5960,7 +5967,7 @@ open class WMKeyboardService : InputMethodService() {
     override fun onFinishInputView(finishingInput: Boolean) {
         super.onFinishInputView(finishingInput)
         keyboardVisible = false
-        val minutes = keyboardSettings.learningBufferSettlementMinutes
+        val minutes = _uiState.value.settings.learningBufferSettlementMinutes
         if (minutes > 0) {
             scheduleSettlementTimer(minutes)
         } else {
@@ -10366,7 +10373,7 @@ open class WMKeyboardService : InputMethodService() {
         val action = if (forceNewline) null else currentInputEditorInfo.editorActionId()
         if (action != null) {
             ic.performEditorAction(action)
-            val minutes = keyboardSettings.learningBufferSettlementMinutes
+            val minutes = _uiState.value.settings.learningBufferSettlementMinutes
             if (minutes > 0) {
                 scheduleSettlementTimer(minutes)
             } else {
@@ -13724,13 +13731,35 @@ open class WMKeyboardService : InputMethodService() {
         cancelSettlementTimer()
         val pkg = activePackageName
         val runnable = Runnable {
-            if (pkg == activePackageName && !keyboardVisible) {
-                flushLearningBuffer()
-                deleteSessionSnapshot(pkg)
+            if (pkg.isNotEmpty() && !keyboardVisible) {
+                if (pkg == activePackageName) {
+                    flushLearningBuffer()
+                    deleteSessionSnapshot(pkg)
+                } else {
+                    // Settle background session snapshot from disk
+                    settleBackgroundSessionSnapshot(pkg)
+                }
             }
         }
         pendingSettlementRunnable = runnable
         sessionHandler.postDelayed(runnable, minutes * 60_000L)
+    }
+
+    private fun settleBackgroundSessionSnapshot(packageName: String) {
+        if (packageName.isEmpty()) return
+        val file = sessionSnapshotFile(packageName)
+        if (!file.exists()) return
+        runCatching {
+            val text = file.readText(Charsets.UTF_8)
+            val json = org.json.JSONArray(text)
+            val tempBuffer = LearningBuffer()
+            tempBuffer.restoreFromJson(json)
+            val queued = tempBuffer.drain()
+            if (queued.isNotEmpty()) {
+                settleLearned(queued, verify = false)
+            }
+            if (file.exists()) file.delete()
+        }
     }
 
     private fun sessionSnapshotFile(packageName: String): java.io.File {
