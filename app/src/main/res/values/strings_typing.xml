@@ -297,6 +297,10 @@
 
     <string name="typing_personal_dictionary_title">Personal dictionary</string>
     <string name="typing_personal_dictionary_subtitle">Review, delete or add the words that the keyboard learned</string>
+    <string name="typing_settlement_timer_title">Word cache settlement timer</string>
+    <string name="typing_settlement_timer_subtitle">How long un-settled words wait before committing to history after exiting an app</string>
+    <string name="typing_settlement_timer_immediate">Learn immediately upon closing keyboard or exiting app</string>
+    <string name="typing_settlement_timer_minutes">%d min delay</string>
 
     <string name="typing_custom_dictionaries_title">Custom dictionaries</string>
     <string name="typing_custom_dictionaries_subtitle">Import your own word lists for each language</string>

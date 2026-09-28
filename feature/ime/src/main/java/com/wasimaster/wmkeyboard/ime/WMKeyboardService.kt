@@ -776,6 +776,10 @@ open class WMKeyboardService : InputMethodService() {
      */
     private val learningBuffer = LearningBuffer()
 
+    private val sessionHandler = android.os.Handler(android.os.Looper.getMainLooper())
+    private var pendingSettlementRunnable: Runnable? = null
+    private var activePackageName: String = ""
+
     /**
      * Autocorrects that have fired in this field and are waiting to be judged
      * against the text they landed in.
@@ -5029,6 +5033,17 @@ open class WMKeyboardService : InputMethodService() {
 
     private fun startInputView(info: EditorInfo?, restarting: Boolean) {
         super.onStartInputView(info, restarting)
+        val pkg = info?.packageName.orEmpty()
+        if (pkg.isNotEmpty() && pkg != activePackageName) {
+            cancelSettlementTimer()
+            if (activePackageName.isNotEmpty() && !learningBuffer.isEmpty()) {
+                saveSessionSnapshot(activePackageName)
+            }
+            activePackageName = pkg
+            restoreSessionSnapshot(pkg)
+        } else if (pkg.isNotEmpty()) {
+            cancelSettlementTimer()
+        }
         // The keyboard is up, by the system's hand or ours; a hide that
         // suspended pinning has run its course.
         pinSuspended = false
@@ -5945,6 +5960,12 @@ open class WMKeyboardService : InputMethodService() {
     override fun onFinishInputView(finishingInput: Boolean) {
         super.onFinishInputView(finishingInput)
         keyboardVisible = false
+        val minutes = keyboardSettings.learningBufferSettlementMinutes
+        if (minutes > 0) {
+            scheduleSettlementTimer(minutes)
+        } else {
+            flushLearningBuffer()
+        }
         // The drag that put it up cannot finish with the keyboard gone.
         caretMagnifier.stop()
         // The ring belongs to the board that is going away: a new session gets
@@ -10345,6 +10366,12 @@ open class WMKeyboardService : InputMethodService() {
         val action = if (forceNewline) null else currentInputEditorInfo.editorActionId()
         if (action != null) {
             ic.performEditorAction(action)
+            val minutes = keyboardSettings.learningBufferSettlementMinutes
+            if (minutes > 0) {
+                scheduleSettlementTimer(minutes)
+            } else {
+                flushLearningBuffer()
+            }
             // The action is the app's to answer, and a message box answers it by
             // emptying itself. Neither the cached caret nor the words the
             // pattern gate remembers survive that, and an app that empties the
@@ -13685,6 +13712,68 @@ open class WMKeyboardService : InputMethodService() {
         // Persist learning stores to disk when new items have been settled.
         if (drainedLearning.isNotEmpty() || drainedCorrections.isNotEmpty()) {
             serviceScope.launch(persistDispatcher) { saveLearningStores() }
+        }
+    }
+
+    private fun cancelSettlementTimer() {
+        pendingSettlementRunnable?.let { sessionHandler.removeCallbacks(it) }
+        pendingSettlementRunnable = null
+    }
+
+    private fun scheduleSettlementTimer(minutes: Int) {
+        cancelSettlementTimer()
+        val pkg = activePackageName
+        val runnable = Runnable {
+            if (pkg == activePackageName && !keyboardVisible) {
+                flushLearningBuffer()
+                deleteSessionSnapshot(pkg)
+            }
+        }
+        pendingSettlementRunnable = runnable
+        sessionHandler.postDelayed(runnable, minutes * 60_000L)
+    }
+
+    private fun sessionSnapshotFile(packageName: String): java.io.File {
+        val dir = java.io.File(filesDir, "learning/sessions")
+        if (!dir.exists()) dir.mkdirs()
+        // Replace non-alphanumeric chars to prevent invalid path issues
+        val safeName = packageName.replace(Regex("[^a-zA-Z0-9._-]"), "_")
+        return java.io.File(dir, "$safeName.json")
+    }
+
+    private fun saveSessionSnapshot(packageName: String) {
+        if (packageName.isEmpty()) return
+        val json = learningBuffer.snapshotToJson()
+        serviceScope.launch(persistDispatcher) {
+            runCatching {
+                val file = sessionSnapshotFile(packageName)
+                if (json.length() > 0) {
+                    file.writeText(json.toString(), Charsets.UTF_8)
+                } else if (file.exists()) {
+                    file.delete()
+                }
+            }
+        }
+    }
+
+    private fun restoreSessionSnapshot(packageName: String) {
+        if (packageName.isEmpty()) return
+        val file = sessionSnapshotFile(packageName)
+        if (!file.exists()) return
+        runCatching {
+            val text = file.readText(Charsets.UTF_8)
+            val json = org.json.JSONArray(text)
+            learningBuffer.restoreFromJson(json)
+        }
+    }
+
+    private fun deleteSessionSnapshot(packageName: String) {
+        if (packageName.isEmpty()) return
+        serviceScope.launch(persistDispatcher) {
+            runCatching {
+                val file = sessionSnapshotFile(packageName)
+                if (file.exists()) file.delete()
+            }
         }
     }
 

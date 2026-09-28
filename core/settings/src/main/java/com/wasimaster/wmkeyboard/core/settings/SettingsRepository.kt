@@ -2787,6 +2787,11 @@ data class KeyboardSettings(
     val oneHanded: OneHandedSettings = OneHandedSettings(),
     val learnFromTyping: Boolean = true,
     /**
+     * How long un-settled words wait in the buffer after closing the keyboard or leaving an app
+     * before being committed to user history (0 = immediate upon exit, 1..30 minutes).
+     */
+    val learningBufferSettlementMinutes: Int = 0,
+    /**
      * Also add words the keyboard learns to Android's system personal
      * dictionary, so other keyboards and spell checkers know them too. Off by
      * default — the on-device lexicon already covers this keyboard.
@@ -7934,6 +7939,7 @@ class SettingsRepository(private val context: Context) {
         private fun oneHandedSideKey(landscape: Boolean) =
             stringPreferencesKey("one_handed_side_${if (landscape) "landscape" else "portrait"}")
         private val LEARN_FROM_TYPING = booleanPreferencesKey("learn_from_typing")
+        private val LEARNING_BUFFER_SETTLEMENT_MINUTES = intPreferencesKey("learning_buffer_settlement_minutes")
         private val ADD_WORDS_TO_SYSTEM_DICTIONARY =
             booleanPreferencesKey("add_words_to_system_dictionary")
         private val CLIPBOARD_HISTORY = booleanPreferencesKey("clipboard_history")
@@ -8816,6 +8822,7 @@ class SettingsRepository(private val context: Context) {
                 ?: defaults.oneHandedMode,
             oneHanded = readOneHanded(p, defaults),
             learnFromTyping = p[LEARN_FROM_TYPING] ?: defaults.learnFromTyping,
+            learningBufferSettlementMinutes = p[LEARNING_BUFFER_SETTLEMENT_MINUTES] ?: defaults.learningBufferSettlementMinutes,
             addWordsToSystemDictionary =
                 p[ADD_WORDS_TO_SYSTEM_DICTIONARY] ?: defaults.addWordsToSystemDictionary,
             clipboard = readClipboard(p, defaults),
@@ -14950,6 +14957,9 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setLearnFromTyping(value: Boolean) =
         editPrefs { it[LEARN_FROM_TYPING] = value }
+
+    suspend fun setLearningBufferSettlementMinutes(value: Int) =
+        editPrefs { it[LEARNING_BUFFER_SETTLEMENT_MINUTES] = value.coerceIn(0, 30) }
 
     suspend fun setAddWordsToSystemDictionary(value: Boolean) =
         editPrefs { it[ADD_WORDS_TO_SYSTEM_DICTIONARY] = value }

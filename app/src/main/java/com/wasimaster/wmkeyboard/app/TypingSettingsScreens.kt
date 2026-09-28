@@ -900,6 +900,25 @@ internal fun TypingSuggestionsSettings(
             )
         }
         item {
+            val minutes = settings.watch { it.learningBufferSettlementMinutes }
+            val immediateText = stringResource(R.string.typing_settlement_timer_immediate)
+            val minutesFormat = stringResource(R.string.typing_settlement_timer_minutes)
+            SliderSetting(
+                R.string.typing_settlement_timer_title,
+                subtitle = stringResource(R.string.typing_settlement_timer_subtitle),
+                value = minutes.toFloat(),
+                range = 0f..30f,
+                steps = 29,
+                display = { v ->
+                    val min = v.toInt()
+                    if (min == 0) immediateText else minutesFormat.format(min)
+                },
+                default = SettingsDefaults.learningBufferSettlementMinutes.toFloat(),
+            ) { v ->
+                scope.launch { repository.setLearningBufferSettlementMinutes(v.toInt()) }
+            }
+        }
+        item {
             NavRow(
                 R.string.typing_custom_dictionaries_title,
                 stringResource(R.string.typing_custom_dictionaries_subtitle),

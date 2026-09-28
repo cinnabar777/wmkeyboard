@@ -1,6 +1,9 @@
 package com.wasimaster.wmkeyboard.core.prediction
 
 import com.wasimaster.wmkeyboard.core.gesture.GlideShapeSample
+import android.util.Base64
+import org.json.JSONArray
+import org.json.JSONObject
 import kotlin.math.abs
 
 /**
@@ -422,6 +425,86 @@ class LearningBuffer(private val capacity: Int = DEFAULT_CAPACITY) {
     fun clear() {
         entries.clear()
         recent.clear()
+    }
+
+    /** Serializes all queued entries to a JSON array for disk persistence. */
+    fun snapshotToJson(): JSONArray {
+        val array = JSONArray()
+        for (e in entries) {
+            val obj = JSONObject()
+            obj.put("word", e.word)
+            obj.put("langId", e.langId)
+            obj.put("weight", e.weight)
+            obj.put("caseTrusted", e.caseTrusted)
+            obj.put("known", e.known)
+            obj.put("origin", e.origin.name)
+            e.replaces?.let { obj.put("replaces", it) }
+            obj.put("typed", e.typed)
+            obj.put("replacesOrigin", e.replacesOrigin.name)
+            e.revised?.let { obj.put("revised", it) }
+            obj.put("anchor", e.anchor)
+            obj.put("suspended", e.suspended)
+            e.glideShape?.let { g ->
+                val gObj = JSONObject()
+                gObj.put("layoutKey", g.layoutKey)
+                gObj.put("shape", Base64.encodeToString(g.shape, Base64.NO_WRAP))
+                obj.put("glideShape", gObj)
+            }
+            array.put(obj)
+        }
+        return array
+    }
+
+    /** Restores queued entries from a JSON array snapshot. */
+    fun restoreFromJson(array: JSONArray) {
+        entries.clear()
+        recent.clear()
+        for (i in 0 until array.length()) {
+            val obj = array.optJSONObject(i) ?: continue
+            val word = obj.optString("word", "")
+            if (word.isEmpty()) continue
+            val langId = obj.optString("langId", "en")
+            val weight = obj.optInt("weight", 1)
+            val caseTrusted = obj.optBoolean("caseTrusted", false)
+            val known = obj.optBoolean("known", false)
+            val originStr = obj.optString("origin", WordOrigin.TYPED.name)
+            val origin = runCatching { WordOrigin.valueOf(originStr) }.getOrDefault(WordOrigin.TYPED)
+            val replaces = if (obj.has("replaces")) obj.optString("replaces") else null
+            val typed = obj.optString("typed", word)
+            val replacesOriginStr = obj.optString("replacesOrigin", WordOrigin.TYPED.name)
+            val replacesOrigin = runCatching { WordOrigin.valueOf(replacesOriginStr) }.getOrDefault(WordOrigin.TYPED)
+            val revised = if (obj.has("revised")) obj.optString("revised") else null
+
+            val entry = Entry(
+                word = word,
+                langId = langId,
+                weight = weight,
+                caseTrusted = caseTrusted,
+                known = known,
+                origin = origin,
+                replaces = replaces,
+                typed = typed,
+                replacesOrigin = replacesOrigin,
+                revised = revised,
+                pushIndex = ++pushes,
+            )
+            entry.anchor = obj.optInt("anchor", UNANCHORED)
+            entry.suspended = obj.optBoolean("suspended", false)
+            if (obj.has("glideShape")) {
+                val gObj = obj.optJSONObject("glideShape")
+                if (gObj != null) {
+                    val lKey = gObj.optLong("layoutKey", 0L)
+                    val shapeStr = gObj.optString("shape", "")
+                    if (shapeStr.isNotEmpty()) {
+                        val shapeBytes = runCatching { Base64.decode(shapeStr, Base64.NO_WRAP) }.getOrNull()
+                        if (shapeBytes != null) {
+                            entry.glideShape = GlideShapeSample(lKey, shapeBytes)
+                        }
+                    }
+                }
+            }
+            entries.addLast(entry)
+        }
     }
 
     private fun remember(d: Dropped) {
