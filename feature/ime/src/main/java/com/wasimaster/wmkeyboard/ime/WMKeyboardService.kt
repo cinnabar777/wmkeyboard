@@ -5034,9 +5034,14 @@ open class WMKeyboardService : InputMethodService() {
     private fun startInputView(info: EditorInfo?, restarting: Boolean) {
         super.onStartInputView(info, restarting)
         val pkg = info?.packageName.orEmpty()
-        val isPrivate = info.requestsNoPersonalizedLearning() || info.isSecureField()
+        val isPrivate = info?.requestsNoPersonalizedLearning() == true || info?.isSecureField() == true
         if (pkg.isNotEmpty() && pkg != activePackageName) {
-            cancelSettlementTimer()
+            val minutes = _uiState.value.settings.learningBufferSettlementMinutes
+            if (minutes > 0 && activePackageName.isNotEmpty()) {
+                scheduleSettlementTimer(minutes)
+            } else {
+                cancelSettlementTimer()
+            }
             if (activePackageName.isNotEmpty() && !learningBuffer.isEmpty()) {
                 saveSessionSnapshot(activePackageName)
             }
@@ -14219,11 +14224,12 @@ open class WMKeyboardService : InputMethodService() {
         if (selStart == 0 &&
             currentInputConnection?.getTextAfterCursor(1, 0).isNullOrEmpty()
         ) {
-            // An empty field that a moment ago was a selection from the top
-            // was cut or typed over, not sent: nothing in it stands (#160).
-            // The keyboard's own deletes have already been reported to the
-            // buffer; this is the app's or a hardware keyboard's.
-            if (oldSelStart == 0 && oldSelEnd > 0) learningBuffer.clear()
+            // An empty field that a moment ago was a selection (e.g. Select All + Delete)
+            // was cut, deleted, or typed over: nothing in it stands (#160).
+            if (oldSelStart == 0 && oldSelEnd > 0) {
+                learningBuffer.clear()
+                return
+            }
             // Before the caret is handed on, so a send does not read as the
             // user going back in front of every word in the message.
             flushLearningBuffer()
