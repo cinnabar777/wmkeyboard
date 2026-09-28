@@ -4,9 +4,6 @@ import com.wasimaster.wmkeyboard.core.util.SnapshotFile
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.File
-import java.nio.ByteBuffer
-import java.security.MessageDigest
-import java.security.SecureRandom
 
 /**
  * What the user did with the words a glide gave them, remembered as a nudge
@@ -19,10 +16,9 @@ import java.security.SecureRandom
  * is a fact about the *pair*: choosing `nor` over `not` says nothing about
  * `nor` against `now`. So the store keeps pairs, `(rejected, chosen)`, with a
  * strength that grows two a pick and is undone by a pick the other way, and
- * single words with a strength that grows one an immediate undo. Both fade
- * with use rather than time: a row loses a unit every [DECAY_INTERVAL]
- * observations it goes unrefreshed, so a habit the user has stopped
- * correcting stops being corrected for.
+ * single words with a strength that grows one an immediate undo. Context-aware
+ * entries `(context, rejected, chosen)` are also recorded when a preceding
+ * word context is available. Both fade with use rather than time.
  *
  * Applied in nats on the decoder's own scores, before the context rerank and
  * beside the user's rank adjustments, and bounded: a word can be lifted at
@@ -30,75 +26,84 @@ import java.security.SecureRandom
  * a close call and the ambiguity picker stops asking about it — and sunk at
  * most [MAX_DROP_NATS], so a clear reading is never overturned by a habit.
  *
- * Nothing here is text. Words are stored as the first eight bytes of a
- * salted SHA-256, the salt is rotated when the store is cleared, and a row
- * carries a strength and a logical age — no stroke, no coordinates, no
- * timestamp. The file is a device-local record of the decoder's mistakes,
- * not a vocabulary, which is why it does not travel in a backup.
+ * Words are stored as plain text strings.
  *
  * The same shape as [WordRanks]: mutations on the keyboard's thread under
  * the lock, an immutable [View] published whole for the decode thread.
  */
 class GlideOutcomes(private val storageFile: File?) {
 
-    internal data class PairKey(val rejected: Long, val chosen: Long)
+    internal data class PairKey(val rejected: String, val chosen: String)
+    internal data class ContextPairKey(val context: String, val rejected: String, val chosen: String)
+    internal data class ContextUndoKey(val context: String, val word: String)
 
     private class Evidence(val strength: Int, val epoch: Long)
 
     @Serializable
-    private data class PairRow(val r: Long, val c: Long, val s: Int, val e: Long)
+    private data class PairRow(val r: String, val c: String, val s: Int, val e: Long)
 
     @Serializable
-    private data class UndoRow(val w: Long, val s: Int, val e: Long)
+    private data class UndoRow(val w: String, val s: Int, val e: Long)
+
+    @Serializable
+    private data class ContextPairRow(val ctx: String, val r: String, val c: String, val s: Int, val e: Long)
+
+    @Serializable
+    private data class ContextUndoRow(val ctx: String, val w: String, val s: Int, val e: Long)
 
     @Serializable
     private data class Snapshot(
         val version: Int = VERSION,
-        val salt: String = "",
         val epoch: Long = 0L,
         val pairs: List<PairRow> = emptyList(),
         val undone: List<UndoRow> = emptyList(),
+        val contextPairs: List<ContextPairRow> = emptyList(),
+        val contextUndone: List<ContextUndoRow> = emptyList(),
     )
 
     /**
      * The store as the decoder reads it: every row's strength as it stands
-     * now, under the salt it was written with. Replaced whole on each change.
+     * now. Replaced whole on each change.
      */
     class View internal constructor(
-        private val salt: ByteArray,
         private val pairs: Map<PairKey, Int>,
-        private val undone: Map<Long, Int>,
+        private val undone: Map<String, Int>,
+        private val contextPairs: Map<ContextPairKey, Int> = emptyMap(),
+        private val contextUndone: Map<ContextUndoKey, Int> = emptyMap(),
     ) {
-        val isEmpty: Boolean get() = pairs.isEmpty() && undone.isEmpty()
+        val isEmpty: Boolean get() = pairs.isEmpty() && undone.isEmpty() && contextPairs.isEmpty() && contextUndone.isEmpty()
 
         /**
          * One nat shift per candidate in [words], index-aligned, or null when
          * no row here concerns any of them — the common case, and the one the
          * decode path should pay nothing for.
          *
-         * A pair only speaks when both its words are in the pool: the user
-         * chose one *over* the other, and that says nothing about either
-         * against a third word.
+         * [prevWord] provides preceding word context to look up context-aware
+         * outcome preferences alongside global pair preferences.
          */
-        fun adjustments(words: List<String>): DoubleArray? {
+        fun adjustments(words: List<String>, prevWord: String? = null): DoubleArray? {
             if (isEmpty || words.isEmpty()) return null
-            val prints = LongArray(words.size)
-            val known = BooleanArray(words.size)
-            for (i in words.indices) {
-                val print = fingerprint(salt, words[i]) ?: continue
-                prints[i] = print
-                known[i] = true
-            }
+            val ctxKey = prevWord?.let { keyOf(it) }
+            val keys = Array(words.size) { keyOf(words[it]) }
             val out = DoubleArray(words.size)
             var any = false
             for (i in words.indices) {
-                if (!known[i]) continue
+                val keyI = keys[i] ?: continue
                 var lift = 0.0
-                var drop = (undone[prints[i]] ?: 0) * UNDONE_NATS
+                var drop = (undone[keyI] ?: 0) * UNDONE_NATS
+                if (ctxKey != null) {
+                    drop += (contextUndone[ContextUndoKey(ctxKey, keyI)] ?: 0) * UNDONE_NATS
+                }
                 for (j in words.indices) {
-                    if (j == i || !known[j]) continue
-                    pairs[PairKey(prints[j], prints[i])]?.let { lift += it * CHOSEN_NATS }
-                    pairs[PairKey(prints[i], prints[j])]?.let { drop += it * REJECTED_NATS }
+                    if (j == i) continue
+                    val keyJ = keys[j] ?: continue
+                    pairs[PairKey(keyJ, keyI)]?.let { lift += it * CHOSEN_NATS }
+                    pairs[PairKey(keyI, keyJ)]?.let { drop += it * REJECTED_NATS }
+
+                    if (ctxKey != null) {
+                        contextPairs[ContextPairKey(ctxKey, keyJ, keyI)]?.let { lift += it * CONTEXT_CHOSEN_NATS }
+                        contextPairs[ContextPairKey(ctxKey, keyI, keyJ)]?.let { drop += it * CONTEXT_REJECTED_NATS }
+                    }
                 }
                 val delta = (lift - drop).coerceIn(-MAX_DROP_NATS, MAX_LIFT_NATS)
                 if (delta != 0.0) {
@@ -110,13 +115,14 @@ class GlideOutcomes(private val storageFile: File?) {
         }
 
         internal companion object {
-            val EMPTY = View(ByteArray(SALT_BYTES), emptyMap(), emptyMap())
+            val EMPTY = View(emptyMap(), emptyMap(), emptyMap(), emptyMap())
         }
     }
 
     private val pairs = LinkedHashMap<PairKey, Evidence>()
-    private val undone = LinkedHashMap<Long, Evidence>()
-    private var salt = freshSalt()
+    private val undone = LinkedHashMap<String, Evidence>()
+    private val contextPairs = LinkedHashMap<ContextPairKey, Evidence>()
+    private val contextUndone = LinkedHashMap<ContextUndoKey, Evidence>()
     private var epoch = 0L
     private val json = Json { ignoreUnknownKeys = true }
     private var dirty = false
@@ -143,40 +149,50 @@ class GlideOutcomes(private val storageFile: File?) {
     /**
      * The user took [chosen] off the strip in place of [rejected], the word
      * the stroke was read as. Strengthens the pair, weakens the reverse pair
-     * by the same amount — a later pick the other way is counter-evidence,
-     * not a second habit — and repays one undo strike against [chosen].
-     * False when either is not a word this store keeps, or they are the same.
+     * by the same amount. When [context] (preceding word) is provided, also
+     * strengthens the context-aware pair `(context, rejected, chosen)`.
      */
     @Synchronized
-    fun observeAlternative(rejected: String, chosen: String): Boolean {
-        val r = fingerprint(salt, rejected) ?: return false
-        val c = fingerprint(salt, chosen) ?: return false
+    fun observeAlternative(rejected: String, chosen: String, context: String? = null): Boolean {
+        val r = keyOf(rejected) ?: return false
+        val c = keyOf(chosen) ?: return false
         if (r == c) return false
         epoch++
         val key = PairKey(r, c)
         pairs[key] = Evidence(minOf(effective(pairs[key]) + ALTERNATIVE_STEP, STRENGTH_CAP), epoch)
         weaken(pairs, PairKey(c, r), ALTERNATIVE_STEP)
         weaken(undone, c, 1)
+
+        val ctx = context?.let { keyOf(it) }
+        if (ctx != null) {
+            val ctxKey = ContextPairKey(ctx, r, c)
+            contextPairs[ctxKey] = Evidence(minOf(effective(contextPairs[ctxKey]) + ALTERNATIVE_STEP, STRENGTH_CAP), epoch)
+            weaken(contextPairs, ContextPairKey(ctx, c, r), ALTERNATIVE_STEP)
+            weaken(contextUndone, ContextUndoKey(ctx, c), 1)
+        }
         settle()
         return true
     }
 
     /**
-     * The user backspaced [word] the moment a glide committed it. Weaker than
-     * naming an alternative on purpose: an undo says the reading was wrong
-     * without saying what was right.
+     * The user backspaced [word] the moment a glide committed it.
      */
     @Synchronized
-    fun observeImmediateUndo(word: String): Boolean {
-        val w = fingerprint(salt, word) ?: return false
+    fun observeImmediateUndo(word: String, context: String? = null): Boolean {
+        val w = keyOf(word) ?: return false
         epoch++
         undone[w] = Evidence(minOf(effective(undone[w]) + UNDO_STEP, STRENGTH_CAP), epoch)
+        val ctx = context?.let { keyOf(it) }
+        if (ctx != null) {
+            val ctxKey = ContextUndoKey(ctx, w)
+            contextUndone[ctxKey] = Evidence(minOf(effective(contextUndone[ctxKey]) + UNDO_STEP, STRENGTH_CAP), epoch)
+        }
         settle()
         return true
     }
 
     @Synchronized
-    fun isEmpty(): Boolean = pairs.isEmpty() && undone.isEmpty()
+    fun isEmpty(): Boolean = pairs.isEmpty() && undone.isEmpty() && contextPairs.isEmpty() && contextUndone.isEmpty()
 
     fun save() {
         val file = snapshotFile ?: return
@@ -185,15 +201,13 @@ class GlideOutcomes(private val storageFile: File?) {
             dirty = false
             file.ticket() to Snapshot(
                 version = VERSION,
-                salt = salt.toHex(),
                 epoch = epoch,
                 pairs = pairs.map { (k, e) -> PairRow(k.rejected, k.chosen, e.strength, e.epoch) },
                 undone = undone.map { (w, e) -> UndoRow(w, e.strength, e.epoch) },
+                contextPairs = contextPairs.map { (k, e) -> ContextPairRow(k.context, k.rejected, k.chosen, e.strength, e.epoch) },
+                contextUndone = contextUndone.map { (k, e) -> ContextUndoRow(k.context, k.word, e.strength, e.epoch) },
             )
         }
-        // Encoded and written outside the lock, so the store stays usable while
-        // the file goes to disk. A failed write makes the store dirty again, so
-        // the next save retries rather than assuming it landed.
         if (!file.write(ticket) { json.encodeToString(snapshot) }) markUnsaved()
     }
 
@@ -208,33 +222,32 @@ class GlideOutcomes(private val storageFile: File?) {
         snapshotFile?.supersede()
         pairs.clear()
         undone.clear()
+        contextPairs.clear()
+        contextUndone.clear()
         epoch = 0L
-        salt = freshSalt()
         load()
         dirty = false
     }
 
     /**
-     * Forgets everything and rotates the salt, so a copy of the old file that
-     * survived somewhere can never be read against what is learned next.
+     * Forgets everything.
      */
     @Synchronized
     fun clear() {
         pairs.clear()
         undone.clear()
+        contextPairs.clear()
+        contextUndone.clear()
         epoch = 0L
-        salt = freshSalt()
         publish()
-        // The delete is the write; stay dirty only if it failed, so the next
-        // save overwrites the stale file with the empty snapshot.
         dirty = snapshotFile?.delete() == false
     }
 
     /**
-     * The print [word] is filed under, or null when it is not a word this
-     * store keeps. Public for the tests: `:app`'s cannot see `internal`.
+     * The key [word] is filed under, or null when it is not a word this
+     * store keeps. Public for tests.
      */
-    fun fingerprint(word: String): Long? = synchronized(this) { fingerprint(salt, word) }
+    fun fingerprint(word: String): String? = keyOf(word)
 
     private fun effective(evidence: Evidence?): Int {
         evidence ?: return 0
@@ -253,6 +266,8 @@ class GlideOutcomes(private val storageFile: File?) {
         prune()
         trim(pairs, MAX_PAIRS)
         trim(undone, MAX_UNDONE)
+        trim(contextPairs, MAX_CONTEXT_PAIRS)
+        trim(contextUndone, MAX_CONTEXT_UNDONE)
         publish()
         dirty = true
     }
@@ -260,6 +275,8 @@ class GlideOutcomes(private val storageFile: File?) {
     private fun prune() {
         pairs.entries.removeAll { effective(it.value) <= 0 }
         undone.entries.removeAll { effective(it.value) <= 0 }
+        contextPairs.entries.removeAll { effective(it.value) <= 0 }
+        contextUndone.entries.removeAll { effective(it.value) <= 0 }
     }
 
     private fun <K> trim(rows: LinkedHashMap<K, Evidence>, capacity: Int) {
@@ -272,13 +289,14 @@ class GlideOutcomes(private val storageFile: File?) {
     }
 
     private fun publish() {
-        published = if (pairs.isEmpty() && undone.isEmpty()) {
+        published = if (isEmpty()) {
             View.EMPTY
         } else {
             View(
-                salt.copyOf(),
                 pairs.entries.associate { it.key to effective(it.value) },
                 undone.entries.associate { it.key to effective(it.value) },
+                contextPairs.entries.associate { it.key to effective(it.value) },
+                contextUndone.entries.associate { it.key to effective(it.value) },
             )
         }
     }
@@ -289,9 +307,6 @@ class GlideOutcomes(private val storageFile: File?) {
         runCatching {
             val snapshot = json.decodeFromString<Snapshot>(file.readText())
             if (snapshot.version != VERSION || snapshot.epoch < 0L) return@runCatching
-            val restored = snapshot.salt.fromHex() ?: return@runCatching
-            if (restored.size != SALT_BYTES) return@runCatching
-            salt = restored
             epoch = snapshot.epoch
             for (row in snapshot.pairs) {
                 if (row.r == row.c || row.e < 0L || row.e > epoch) continue
@@ -306,23 +321,31 @@ class GlideOutcomes(private val storageFile: File?) {
                 val current = undone[row.w]
                 if (current == null || current.strength < strength) undone[row.w] = Evidence(strength, row.e)
             }
+            for (row in snapshot.contextPairs) {
+                if (row.r == row.c || row.e < 0L || row.e > epoch) continue
+                val key = ContextPairKey(row.ctx, row.r, row.c)
+                val strength = row.s.coerceIn(1, STRENGTH_CAP)
+                val current = contextPairs[key]
+                if (current == null || current.strength < strength) contextPairs[key] = Evidence(strength, row.e)
+            }
+            for (row in snapshot.contextUndone) {
+                if (row.e < 0L || row.e > epoch) continue
+                val key = ContextUndoKey(row.ctx, row.w)
+                val strength = row.s.coerceIn(1, STRENGTH_CAP)
+                val current = contextUndone[key]
+                if (current == null || current.strength < strength) contextUndone[key] = Evidence(strength, row.e)
+            }
             prune()
             trim(pairs, MAX_PAIRS)
             trim(undone, MAX_UNDONE)
+            trim(contextPairs, MAX_CONTEXT_PAIRS)
+            trim(contextUndone, MAX_CONTEXT_UNDONE)
         }
         publish()
     }
 
-    private fun ByteArray.toHex(): String = joinToString("") { "%02x".format(it) }
-
-    private fun String.fromHex(): ByteArray? {
-        if (length % 2 != 0 || any { it !in "0123456789abcdefABCDEF" }) return null
-        return ByteArray(length / 2) { i -> substring(2 * i, 2 * i + 2).toInt(16).toByte() }
-    }
-
     companion object {
-        private const val VERSION = 1
-        private const val SALT_BYTES = 16
+        private const val VERSION = 2
 
         /** Strength a strip pick adds to `(rejected, chosen)`. */
         const val ALTERNATIVE_STEP = 2
@@ -337,21 +360,28 @@ class GlideOutcomes(private val storageFile: File?) {
 
         const val MAX_PAIRS = 256
         const val MAX_UNDONE = 128
+        const val MAX_CONTEXT_PAIRS = 256
+        const val MAX_CONTEXT_UNDONE = 128
 
         /** Nats per unit of strength on the word the user chose, when the word it beat is in the pool. */
-        const val CHOSEN_NATS = 0.15
+        const val CHOSEN_NATS = 0.35
 
         /** Nats per unit on the word the user passed over, when the word they took is in the pool. */
         const val REJECTED_NATS = 0.04
+
+        /** Nats per unit on context-aware chosen word. */
+        const val CONTEXT_CHOSEN_NATS = 0.35
+
+        /** Nats per unit on context-aware rejected word. */
+        const val CONTEXT_REJECTED_NATS = 0.04
 
         /** Nats per unit on a word the user backspaced straight away. */
         const val UNDONE_NATS = 0.10
 
         /**
-         * The most a word is ever lifted: [SuggestionEngine.AMBIGUOUS_MARGIN],
-         * so a fully learned preference is worth exactly one close call.
+         * The most a word is ever lifted.
          */
-        const val MAX_LIFT_NATS = SuggestionEngine.AMBIGUOUS_MARGIN
+        const val MAX_LIFT_NATS = 1.2
 
         /** The most a word is ever sunk. */
         const val MAX_DROP_NATS = 0.4
@@ -362,24 +392,7 @@ class GlideOutcomes(private val storageFile: File?) {
         private const val ZWNJ = 0x200C
         private const val ZWJ = 0x200D
 
-        private fun freshSalt(): ByteArray = ByteArray(SALT_BYTES).also { SecureRandom().nextBytes(it) }
-
-        /**
-         * The salted print of [word], or null when it is not a word this store
-         * keeps: letters and the marks that ride on them in any script, two to
-         * [MAX_WORD_LENGTH] code points, apostrophes dropped first so the bare
-         * spelling the decoder ranks and the contracted one the strip shows
-         * file under the same print.
-         */
-        private fun fingerprint(salt: ByteArray, word: String): Long? {
-            val key = keyOf(word) ?: return null
-            val digest = MessageDigest.getInstance("SHA-256")
-            digest.update(salt)
-            val bytes = digest.digest(key.toByteArray(Charsets.UTF_8))
-            return ByteBuffer.wrap(bytes).long
-        }
-
-        private fun keyOf(word: String): String? {
+        fun keyOf(word: String): String? {
             val folded = WordKey.of(word)
             val out = StringBuilder(folded.length)
             var letters = 0

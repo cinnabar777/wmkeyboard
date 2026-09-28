@@ -16677,12 +16677,12 @@ open class WMKeyboardService : InputMethodService() {
 
     /** The user took [chosen] in place of [rejected], the word a stroke was read as (issue #52). */
     private fun noteGlidePreference(rejected: String, chosen: String) {
-        if (swipeStyleLearning) glideOutcomes.observeAlternative(rejected, chosen)
+        if (swipeStyleLearning) glideOutcomes.observeAlternative(rejected, chosen, previousWord)
     }
 
     /** The user backspaced [word] the moment a glide committed it. */
     private fun noteGlideUndone(word: String) {
-        if (swipeStyleLearning) glideOutcomes.observeImmediateUndo(word)
+        if (swipeStyleLearning) glideOutcomes.observeImmediateUndo(word, previousWord)
     }
 
     /**

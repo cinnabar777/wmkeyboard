@@ -3,7 +3,6 @@ package com.wasimaster.wmkeyboard.core.prediction
 import java.io.File
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -18,8 +17,8 @@ class GlideOutcomesTest {
 
     private fun file(): File = File(temp.root, "learning/glide_outcomes.json")
 
-    private fun deltas(store: GlideOutcomes, vararg words: String): DoubleArray? =
-        store.view().adjustments(words.toList())
+    private fun deltas(store: GlideOutcomes, vararg words: String, prevWord: String? = null): DoubleArray? =
+        store.view().adjustments(words.toList(), prevWord)
 
     /** A distinct all-letter word per [i]; the store keeps letters only. */
     private fun filler(i: Int): String = "filler" + ('a' + i / 26) + ('a' + i % 26)
@@ -104,36 +103,33 @@ class GlideOutcomesTest {
     }
 
     @Test
-    fun clearRotatesTheSaltAndDeletesTheFile() {
+    fun clearDeletesTheFileAndEmptiesStore() {
         val store = GlideOutcomes(file())
         store.observeAlternative("there", "three")
         store.save()
         assertTrue(file().exists())
-        val before = store.fingerprint("three")
+        assertEquals("three", store.fingerprint("three"))
         store.clear()
         assertFalse(file().exists())
         assertTrue(store.isEmpty())
-        assertNotEquals(before, store.fingerprint("three"))
     }
 
     @Test
-    fun theFileHoldsNoWordsAndComesBackWhole() {
+    fun theFileStoresWordsInPlainTextAndComesBackWhole() {
         val store = GlideOutcomes(file())
         repeat(2) { store.observeAlternative("there", "three") }
         store.observeImmediateUndo("these")
         store.save()
         val text = file().readText()
-        assertFalse(text.contains("there") || text.contains("three") || text.contains("these"))
+        assertTrue(text.contains("there") && text.contains("three") && text.contains("these"))
         val reopened = GlideOutcomes(file())
         assertEquals(deltas(store, "there", "three", "these")!!.toList(), deltas(reopened, "there", "three", "these")!!.toList())
     }
 
     @Test
-    fun aFileFromAnotherVersionOrWithoutItsSaltStartsEmpty() {
+    fun aFileFromAnotherVersionStartsEmpty() {
         file().parentFile?.mkdirs()
-        file().writeText("""{"version":2,"salt":"00112233445566778899aabbccddeeff","epoch":1,"pairs":[{"r":1,"c":2,"s":4,"e":1}]}""")
-        assertTrue(GlideOutcomes(file()).isEmpty())
-        file().writeText("""{"version":1,"salt":"nope","epoch":1,"pairs":[{"r":1,"c":2,"s":4,"e":1}]}""")
+        file().writeText("""{"version":99,"epoch":1,"pairs":[{"r":"there","c":"three","s":4,"e":1}]}""")
         assertTrue(GlideOutcomes(file()).isEmpty())
     }
 
@@ -160,5 +156,49 @@ class GlideOutcomesTest {
         assertTrue(store.view().isEmpty)
         store.applied = true
         assertTrue(deltas(store, "there", "three")!![1] > 0.0)
+    }
+
+    @Test
+    fun contextAwarePicksBoostCandidatesOnlyUnderMatchingContext() {
+        val store = GlideOutcomes(null)
+        store.observeAlternative("there", "three", context = "in")
+
+        val matchingShift = deltas(store, "there", "three", prevWord = "in")!!
+        val nonMatchingShift = deltas(store, "there", "three", prevWord = "on")!!
+
+        // Matching context has additional context lift for 'three'
+        assertTrue(matchingShift[1] > nonMatchingShift[1])
+        // Non-matching context only applies global preference
+        assertEquals(GlideOutcomes.ALTERNATIVE_STEP * GlideOutcomes.CHOSEN_NATS, nonMatchingShift[1], 1e-9)
+    }
+
+    @Test
+    fun contextAwareUndosApplyOnlyWhenContextMatches() {
+        val store = GlideOutcomes(null)
+        store.observeImmediateUndo("there", context = "in")
+
+        val matchingShift = deltas(store, "there", "three", prevWord = "in")!!
+        val nonMatchingShift = deltas(store, "there", "three", prevWord = "on")!!
+
+        // Matching context has double undo penalty
+        assertEquals(-2 * GlideOutcomes.UNDONE_NATS, matchingShift[0], 1e-9)
+        assertEquals(-1 * GlideOutcomes.UNDONE_NATS, nonMatchingShift[0], 1e-9)
+    }
+
+    @Test
+    fun contextAwareOutcomesPersistAndReload() {
+        val store = GlideOutcomes(file())
+        store.observeAlternative("there", "three", context = "in")
+        store.observeImmediateUndo("these", context = "in")
+        store.save()
+
+        val text = file().readText()
+        assertTrue(text.contains("contextPairs") && text.contains("contextUndone") && text.contains("in"))
+
+        val reopened = GlideOutcomes(file())
+        assertEquals(
+            deltas(store, "there", "three", "these", prevWord = "in")!!.toList(),
+            deltas(reopened, "there", "three", "these", prevWord = "in")!!.toList(),
+        )
     }
 }

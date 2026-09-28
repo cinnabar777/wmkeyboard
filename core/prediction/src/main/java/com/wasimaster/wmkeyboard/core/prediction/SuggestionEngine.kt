@@ -1055,7 +1055,7 @@ class SuggestionEngine(
         // stands for are what the rest of this — the blacklist, the reranker,
         // the caller — should ever see.
         val words = if (romanization.isEmpty) decoded else romanization.resolve(decoded)
-        val kept = shiftGlideScores(words.filterNot { suppressed(it.word) })
+        val kept = shiftGlideScores(words.filterNot { suppressed(it.word) }, previousWord)
         if (kept.isEmpty()) return kept
         return rerankGlide(kept, previousWord, previousWord2, previousWord3, recentWords)
             // One word per spelling, whatever source it came from (#172). The
@@ -1093,9 +1093,9 @@ class SuggestionEngine(
      * times stops asking. A rank adjustment is ten times anything the
      * outcomes can say, so where the user put a word by hand always wins.
      */
-    private fun shiftGlideScores(decoded: List<GlideBeam.Candidate>): List<GlideBeam.Candidate> {
+    private fun shiftGlideScores(decoded: List<GlideBeam.Candidate>, previousWord: String? = null): List<GlideBeam.Candidate> {
         if (decoded.isEmpty()) return decoded
-        val nudges = glideOutcomes.view().adjustments(decoded.map { it.word })
+        val nudges = glideOutcomes.view().adjustments(decoded.map { it.word }, previousWord)
         if (rankOffsets.isEmpty() && nudges == null) return decoded
         var moved = false
         val shifted = decoded.mapIndexed { i, c ->
