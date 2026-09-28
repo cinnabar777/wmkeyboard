@@ -18,6 +18,7 @@ class TextWordScanTest {
         val text = "the cat saw the dog"
         val result = scan(text)
         assertEquals(listOf("the", "cat", "saw", "dog"), result.words.map { it.key })
+        assertEquals(5, result.scannedWordCount)
         val the = result.word("the")
         assertEquals(2, the.count)
         assertEquals(0, the.firstStart)
@@ -62,6 +63,21 @@ class TextWordScanTest {
         assertEquals("Zelda", zelda.spelling)
         assertTrue(zelda.caseEvidence)
         assertEquals(3, zelda.count)
+    }
+
+    @Test
+    fun majorityVotingForMidSentenceCapitalization() {
+        // "Zelda" seen 2 times mid-sentence, "zelda" seen 1 time mid-sentence -> "Zelda" wins (2 > 1)
+        val resultCap = scan("then Zelda came, and zelda left with Zelda.")
+        val zeldaCap = resultCap.word("zelda")
+        assertEquals("Zelda", zeldaCap.spelling)
+        assertTrue(zeldaCap.caseEvidence)
+
+        // "Zelda" seen 1 time mid-sentence, "zelda" seen 1 time mid-sentence -> "zelda" wins tie (1 <= 1)
+        val resultTie = scan("then Zelda came, and zelda left.")
+        val zeldaTie = resultTie.word("zelda")
+        assertEquals("zelda", zeldaTie.spelling)
+        assertFalse(zeldaTie.caseEvidence)
     }
 
     @Test

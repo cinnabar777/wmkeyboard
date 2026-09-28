@@ -65,7 +65,7 @@ data class LearnFromTextCallbacks(
 )
 
 /** The panel's height while its spelling editor shares the window with the key rows. */
-private val LearnEditHeight = 96.dp
+private val LearnEditHeight = 132.dp
 
 /**
  * Learn from text (#174): the words in the field, or the selection, that the
@@ -90,18 +90,26 @@ internal fun LearnFromTextPanel(
     val focusedChip = state.focusedIndex(FocusRegion.CHIPS)
     val focusedRow = state.focusedIndex(FocusRegion.RESULTS)
     val hasRows = ui.rows.isNotEmpty() && !editing
+    val canLearn = !ui.scanning && !ui.blocked && !editing
 
     PanelFocusTarget(
         panel = PanelMode.LEARN_FROM_TEXT,
         region = FocusRegion.CHIPS,
-        count = if (hasRows) 4 else 0,
-        columns = 4,
+        count = if (canLearn) (if (hasRows) 4 else 2) else 0,
+        columns = if (hasRows) 4 else 2,
     ) { index ->
-        when (index) {
-            0 -> callbacks.onToggleAll()
-            1 -> callbacks.onSort(nextSort(sort))
-            2 -> callbacks.onPairs(!pairsOn)
-            else -> callbacks.onAdd()
+        if (hasRows) {
+            when (index) {
+                0 -> callbacks.onToggleAll()
+                1 -> callbacks.onSort(nextSort(sort))
+                2 -> callbacks.onPairs(!pairsOn)
+                else -> callbacks.onAdd()
+            }
+        } else {
+            when (index) {
+                0 -> callbacks.onPairs(!pairsOn)
+                else -> callbacks.onAdd()
+            }
         }
     }
     PanelFocusTarget(
@@ -153,39 +161,48 @@ private fun RowScope.ListHeader(
         Text(
             if (ui.scanning) {
                 stringResource(R.string.ime_tool_learn_from_text)
+            } else if (ui.scannedWords > 0) {
+                pluralStringResource(R.plurals.ime_learn_found_count, ui.rows.size, ui.rows.size, ui.scannedWords)
             } else {
-                pluralStringResource(R.plurals.ime_learn_found_count, ui.rows.size, ui.rows.size)
+                pluralStringResource(R.plurals.ime_learn_found_count, ui.rows.size, ui.rows.size, 0)
             },
             color = kb.secondaryText,
             fontSize = 12.sp,
             maxLines = 1,
         )
-        if (ui.rows.isNotEmpty()) {
-            val allChecked = ui.rows.all { it.checked }
-            ToolPanelChip(
-                stringResource(if (allChecked) R.string.ime_learn_select_none_action else R.string.ime_learn_select_all_action),
-                modifier = Modifier.focusRing(focusedChip == 0, kb.chipShape()),
-            ) { callbacks.onToggleAll() }
-            val sortDescription = stringResource(R.string.ime_learn_sort_desc)
-            ToolPanelChip(
-                stringResource(sortLabel(sort)),
-                modifier = Modifier
-                    .focusRing(focusedChip == 1, kb.chipShape())
-                    .semantics { contentDescription = sortDescription },
-            ) { callbacks.onSort(nextSort(sort)) }
+        if (!ui.scanning && !ui.blocked) {
+            if (ui.rows.isNotEmpty()) {
+                val allChecked = ui.rows.all { it.checked }
+                ToolPanelChip(
+                    stringResource(if (allChecked) R.string.ime_learn_select_none_action else R.string.ime_learn_select_all_action),
+                    modifier = Modifier.focusRing(focusedChip == 0, kb.chipShape()),
+                ) { callbacks.onToggleAll() }
+                val sortDescription = stringResource(R.string.ime_learn_sort_desc)
+                ToolPanelChip(
+                    stringResource(sortLabel(sort)),
+                    modifier = Modifier
+                        .focusRing(focusedChip == 1, kb.chipShape())
+                        .semantics { contentDescription = sortDescription },
+                ) { callbacks.onSort(nextSort(sort)) }
+            }
             val pairsDescription = stringResource(R.string.ime_learn_pairs_desc)
             ToolPanelChip(
                 stringResource(R.string.ime_learn_pairs_label),
                 selected = pairsOn,
                 modifier = Modifier
-                    .focusRing(focusedChip == 2, kb.chipShape())
+                    .focusRing(if (ui.rows.isNotEmpty()) focusedChip == 2 else focusedChip == 0, kb.chipShape())
                     .semantics { contentDescription = pairsDescription },
             ) { callbacks.onPairs(!pairsOn) }
+            val addLabel = if (ui.checkedCount > 0) {
+                stringResource(R.string.ime_learn_add_action, ui.checkedCount)
+            } else {
+                stringResource(R.string.ime_learn_text_action)
+            }
             ToolPanelChip(
-                stringResource(R.string.ime_learn_add_action, ui.checkedCount),
+                addLabel,
                 selected = true,
-                enabled = ui.checkedCount > 0,
-                modifier = Modifier.focusRing(focusedChip == 3, kb.chipShape()),
+                enabled = true,
+                modifier = Modifier.focusRing(if (ui.rows.isNotEmpty()) focusedChip == 3 else focusedChip == 1, kb.chipShape()),
             ) { callbacks.onAdd() }
         }
         Spacer(Modifier.width(4.dp))
@@ -222,7 +239,7 @@ private fun EditBody(ui: LearnFromTextUi) {
             query = ui.editText,
             placeholder = stringResource(R.string.ime_learn_edit_hint),
             active = true,
-            textColor = kb.suggestionText,
+            textColor = kb.chipText,
             placeholderColor = kb.secondaryText,
             fontSize = 14.sp,
             modifier = Modifier.weight(1f),
@@ -260,7 +277,12 @@ private fun ListBody(ui: LearnFromTextUi, focusedRow: Int?, callbacks: LearnFrom
             ui.rows.isEmpty() -> Centered {
                 Icon(Icons.Outlined.Check, contentDescription = null, modifier = Modifier.size(16.dp), tint = kb.accent)
                 Spacer(Modifier.width(6.dp))
-                Text(stringResource(R.string.ime_learn_empty), color = kb.secondaryText, fontSize = 13.sp)
+                val emptyMessage = if (ui.scannedWords > 0) {
+                    pluralStringResource(R.plurals.ime_learn_empty_with_scanned, ui.scannedWords, ui.scannedWords)
+                } else {
+                    stringResource(R.string.ime_learn_empty)
+                }
+                Text(emptyMessage, color = kb.secondaryText, fontSize = 13.sp)
             }
             else -> {
                 var expanded by remember { mutableStateOf<String?>(null) }
@@ -290,10 +312,28 @@ private fun ListBody(ui: LearnFromTextUi, focusedRow: Int?, callbacks: LearnFrom
 @Composable
 private fun resultLine(ui: LearnFromTextUi): String {
     val result = ui.result ?: return ""
-    val words = pluralStringResource(R.plurals.ime_learn_result_words, result.words, result.words)
-    if (result.pairs == 0) return words
-    val pairs = pluralStringResource(R.plurals.ime_learn_result_pairs, result.pairs, result.pairs)
-    return stringResource(R.string.ime_learn_result_both, words, pairs)
+    val base = if (result.words == 0 && result.pairs == 0) {
+        if (result.scannedWords > 0) {
+            pluralStringResource(R.plurals.ime_learn_result_text_only_scanned, result.scannedWords, result.scannedWords)
+        } else {
+            stringResource(R.string.ime_learn_result_text_only)
+        }
+    } else {
+        val words = if (result.words > 0) pluralStringResource(R.plurals.ime_learn_result_words, result.words, result.words) else null
+        val pairs = if (result.pairs > 0) pluralStringResource(R.plurals.ime_learn_result_pairs, result.pairs, result.pairs) else null
+        val learnedSummary = when {
+            words != null && pairs != null -> stringResource(R.string.ime_learn_result_both, words, pairs)
+            words != null -> words
+            pairs != null -> pairs
+            else -> stringResource(R.string.ime_learn_result_text_only)
+        }
+        if (result.scannedWords > 0) {
+            stringResource(R.string.ime_learn_result_with_scanned, learnedSummary, result.scannedWords)
+        } else {
+            learnedSummary
+        }
+    }
+    return base
 }
 
 @Composable

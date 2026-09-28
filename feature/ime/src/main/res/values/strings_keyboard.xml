@@ -403,6 +403,7 @@
     <string name="ime_learn_select_all_action">Select all</string>
     <string name="ime_learn_select_none_action">Select none</string>
     <string name="ime_learn_add_action">Add %1$d</string>
+    <string name="ime_learn_text_action">Learn text</string>
     <string name="ime_learn_pairs_label">Word pairs</string>
     <string name="ime_learn_pairs_desc">Also learn the word pairs in this text</string>
     <string name="ime_learn_sort_frequent_label">Most used</string>
@@ -410,10 +411,14 @@
     <string name="ime_learn_sort_alpha_label">A to Z</string>
     <string name="ime_learn_sort_desc">Change the order</string>
     <plurals name="ime_learn_found_count">
-        <item quantity="one">%d new word</item>
-        <item quantity="other">%d new words</item>
+        <item quantity="one">%1$d new word (%2$d scanned)</item>
+        <item quantity="other">%1$d new words (%2$d scanned)</item>
     </plurals>
     <string name="ime_learn_scanning_progress">Reading the text…</string>
+    <plurals name="ime_learn_empty_with_scanned">
+        <item quantity="one">Scanned %d word — no new words found. The keyboard knows every word in this text.</item>
+        <item quantity="other">Scanned %d words — no new words found. The keyboard knows every word in this text.</item>
+    </plurals>
     <string name="ime_learn_empty">No new words here. The keyboard knows every word in this text.</string>
     <string name="ime_learn_blocked_info">This is a password field, so nothing was read.</string>
     <string name="ime_learn_partial_info">Only part of this field could be read.</string>
@@ -427,6 +432,12 @@
         <item quantity="other">%d word pairs</item>
     </plurals>
     <string name="ime_learn_result_both">%1$s · %2$s</string>
+    <string name="ime_learn_result_with_scanned">%1$s (%2$d scanned)</string>
+    <plurals name="ime_learn_result_text_only_scanned">
+        <item quantity="one">Learned text statistics (%d word scanned)</item>
+        <item quantity="other">Learned text statistics (%d words scanned)</item>
+    </plurals>
+    <string name="ime_learn_result_text_only">Learned text statistics</string>
     <string name="ime_learn_count_label">×%1$d</string>
     <string name="ime_learn_seen_label">seen %1$d</string>
     <string name="ime_learn_edited_label">%1$s → %2$s</string>

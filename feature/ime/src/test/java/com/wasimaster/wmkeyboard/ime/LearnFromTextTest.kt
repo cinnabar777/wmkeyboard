@@ -86,6 +86,14 @@ class LearnFromTextTest {
         assertFalse(LearnFromTextUi(editText = "th\"e").editValid)
     }
 
+    @Test
+    fun scannedWordCountPreservedInLearnResult() {
+        val result = LearnResult(words = 3, pairs = 5, scannedWords = 42)
+        assertEquals(3, result.words)
+        assertEquals(5, result.pairs)
+        assertEquals(42, result.scannedWords)
+    }
+
     private fun row(key: String, count: Int = 1, start: Int = 0) =
         LearnRow(key = key, spelling = key, count = count, start = start, length = key.length, caseEvidence = false)
 }
