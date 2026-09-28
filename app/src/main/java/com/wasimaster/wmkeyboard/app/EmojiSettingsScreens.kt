@@ -44,6 +44,7 @@ import com.wasimaster.wmkeyboard.core.util.PlayServices
 import com.wasimaster.wmkeyboard.ime.ui.KeyboardFonts
 import com.wasimaster.wmkeyboard.core.settings.EmojiInsertMode
 import com.wasimaster.wmkeyboard.core.settings.EmojiTabMode
+import com.wasimaster.wmkeyboard.core.settings.MediaSwitcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import com.wasimaster.wmkeyboard.core.layout.PanelKind
@@ -422,6 +423,29 @@ internal fun EmojiPanelSettings(
                 info = stringResource(R.string.langemoji_emoji_close_after_insert_info),
                 default = SettingsDefaults.emoji.closeAfterInsert,
             ) { scope.launch { repository.setEmojiCloseAfterInsert(it) } }
+        }
+        item {
+            ChoiceSetting(
+                title = R.string.langemoji_media_switcher_title,
+                subtitle = stringResource(R.string.langemoji_media_switcher_subtitle),
+                info = stringResource(R.string.langemoji_media_switcher_info),
+                options = listOf(
+                    MediaSwitcher.OFF to stringResource(CommonR.string.common_off),
+                    MediaSwitcher.TOP to stringResource(R.string.langemoji_media_switcher_top),
+                    MediaSwitcher.BOTTOM to stringResource(R.string.langemoji_media_switcher_bottom),
+                ),
+                selected = settings.watch { it.emoji.mediaSwitcher },
+                default = SettingsDefaults.emoji.mediaSwitcher,
+            ) { scope.launch { repository.setEmojiMediaSwitcher(it) } }
+        }
+        item {
+            ToggleSetting(
+                R.string.langemoji_media_remember_title,
+                stringResource(R.string.langemoji_media_remember_subtitle),
+                settings.watch { it.emoji.rememberMediaTab },
+                info = stringResource(R.string.langemoji_media_remember_info),
+                default = SettingsDefaults.emoji.rememberMediaTab,
+            ) { scope.launch { repository.setEmojiRememberMediaTab(it) } }
         }
         item {
             ChoiceSetting(

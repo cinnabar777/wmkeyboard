@@ -1,0 +1,112 @@
+---
+title: "Performance tooling"
+description: "Tracing the keyboard with Perfetto, logging janky frames, Compose compiler reports, macrobenchmarks and the baseline profile."
+sidebar:
+  order: 4
+---
+
+A keyboard is judged a frame at a time: a stutter under a finger is felt long before it would show up in any average. This page covers the tools the project has for finding one, from the cheapest question (was a frame late?) to the most expensive (did this change make typing slower on a real phone?).
+
+Everything here works on a release-like build. Release builds carry `<profileable android:shell="true" />`, so the shell's profilers attach to whatever build is actually on the phone. Without it the shell refuses with *"not debuggable, and not profileable by shell"*, and the only way to see inside a frame would be a debug build: not the build anyone runs, and not timings worth trusting. It grants the shell user nothing else, so no debugger, no `run-as` and no access to app data. For iterating by hand, `./gradlew :app:installFullFast` is release minus R8 and is close enough to judge typing latency.
+
+## Was a frame late?
+
+`adb shell dumpsys gfxinfo com.wasimaster.wmkeyboard framestats` prints the last 120 frames as CSV. Subtract `IntendedVsync` from `FrameCompleted` for a frame's own cost, and compare consecutive `IntendedVsync` values: a gap much wider than one refresh interval is dropped frames, which is what a stutter actually is. Run `reset` before the interaction and read the stats straight after.
+
+### Logging janky frames as they happen
+
+The keyboard window and the settings app both carry a JankStats monitor that stays detached until you ask for it. It works on any build:
+
+```sh
+adb shell setprop log.tag.WMJank DEBUG     # a summary each time the window goes away
+adb shell setprop log.tag.WMJank VERBOSE   # plus one line per janky frame
+adb logcat -s WMJank
+```
+
+The property is read each time the window comes back, so hide and show the keyboard (or leave and reopen the settings app) after setting it. A summary names the window, counts its frames and janky frames, and gives the worst one. Every janky frame is tagged with the screen that was showing: the keyboard's open panel, or the settings route. A stutter that only happens in the emoji panel says so. A frame counts as janky by JankStats' own measure, twice the display's refresh interval. `adb shell setprop log.tag.WMJank ""` turns it off again.
+
+## Where did a frame go?
+
+```sh
+scripts/perfetto.sh          # 10 seconds; or scripts/perfetto.sh 20
+```
+
+The script records a Perfetto system trace from the connected device while you type, pulls it into `build/perfetto/`, and prints the next step. Open the file at [ui.perfetto.dev](https://ui.perfetto.dev). The config it records with is `config/perfetto/ime.pbtxt`: scheduling and CPU frequency, the graphics, view and input trace categories, the frame timeline, and the app's own trace sections. It needs Android 9 or later.
+
+The keyboard marks its own work with named sections, all prefixed `WM:`, so it reads as more than one long `Choreographer#doFrame`:
+
+| Section | What it covers |
+|---|---|
+| `WM:key` | One key press, from the grid's callback to the edit it makes |
+| `WM:refreshSuggestions` | The main-thread half of a strip refresh |
+| `WM:suggest` | The engine ranking words for what is being typed (background thread) |
+| `WM:glideDecode` | One glide stroke decoded to candidates (background thread) |
+| `WM:updateSelection` | The editor reporting that the caret moved |
+| `WM:createInputView` | Building the keyboard window's Compose root |
+| `WM:startInputView` | A field gaining the keyboard |
+
+They are defined in `feature/ime/.../ime/ImeTrace.kt`. A section costs one flag check when nothing is tracing, which is why they stay in release builds. To rank them, paste this into the trace's Query (SQL) tab:
+
+```sql
+select name, count(*) as n, round(avg(dur) / 1e6, 2) as avg_ms, round(max(dur) / 1e6, 2) as max_ms
+from slice where name like 'WM:%' group by name order by max_ms desc;
+```
+
+Compose runs its measure and layout pass from `AndroidComposeView.dispatchDraw`. A screen that is slow to compose therefore shows up as one enormous `Record View#draw()`, not under measure or layout, which is the opposite of where you would look first.
+
+## Why does a composable recompose?
+
+```sh
+scripts/compose-reports.sh                     # feature/ime
+scripts/compose-reports.sh feature/ime app     # several modules
+```
+
+The script recompiles the modules you name with the Compose compiler's reports on. It then prints the compiler's counts and lists every composable that takes an *unstable* parameter, naming those parameters. The raw reports land in each module's `build/compose/reports` and `build/compose/metrics`. The switch behind the script works for any module that applies the Compose plugin:
+
+```sh
+./gradlew :feature:ime:compileFullDebugKotlin --rerun -PcomposeMetrics=true
+```
+
+`--rerun` is not optional. The report destinations are not task inputs, so an up-to-date or cached compile writes nothing.
+
+Read the parameter lists, not the `skippable` flag. Under strong skipping every restartable composable is reported skippable. What actually decides whether one skips is an unstable parameter, which is compared by instance, arriving as a new object on every recomposition. The keyboard service publishes a fresh `KeyboardUiState` for every keystroke. That is why the key composables take a resolved `KeyVisual` instead of the state, and the [architecture tests](/development/testing/#architecture-rules) fail if one of them starts taking it again.
+
+## Macrobenchmarks and the baseline profile
+
+The `:benchmark` module holds a baseline profile generator and three macrobenchmarks, run on a real device against a release-like build. It joins the build only with `-Pwmkb.benchmark=true`, for two reasons. Applying the baseline profile plugin adds two build types to every flavour pair of `:app`, which every other build would then pay for. And its tests install a build over the app on the connected device.
+
+:::caution[It installs over the app on the device]
+The benchmark build has the same package name as the app and is signed with the release key when `local.properties` points at one. On a phone with a release-signed install it replaces that install and keeps its data, the same as an update would. Over a debug-signed install it fails to install instead. It also switches the device's input method to WM Keyboard. `gradle.properties` sets `android.injected.androidTest.leaveApksInstalledAfterRun=true`, so nothing is uninstalled afterwards; AGP's default would uninstall the app, and with it every setting and learned word. A spare phone is still the better choice.
+:::
+
+The benchmarks bring the keyboard up over the settings app's own search field, then tap and glide at fixed fractions of the keyboard's window. The keys carry no accessibility labels unless a screen reader is on, so they can't be found by name. A fresh install is skipped past onboarding first.
+
+### The baseline profile
+
+A baseline profile lists the methods ART compiles ahead of time at install instead of interpreting them until the JIT gets round to them. For a keyboard this matters more than for most apps. The IME process is killed and restarted all day whenever memory is short, and a low-end phone pays the warm-up cost on every one of those starts.
+
+The app has two profiles, and every build packages both:
+
+- `app/src/main/baseline-prof.txt` is written by hand: wildcard rules over the keyboard's runtime and the settings app. It says why each part is in, and why the tool subsystems are left out.
+- `app/src/fullIntlRelease/baselineProfiles/` is generated from a recorded journey: open the settings app, bring the keyboard up over search, type, glide, type again. It is added to every variant, not only the one it was recorded from.
+
+To regenerate the second one, with a device on API 33 or later connected (or a rooted one on API 28 or later):
+
+```sh
+./gradlew :app:generateFullIntlReleaseBaselineProfile -Pwmkb.benchmark=true
+```
+
+Commit what it writes. It is filtered to the app's own classes, since the libraries ship profiles of their own. Use this variant's task rather than the plugin's merged `generateBaselineProfile`: the merged task would run the journey once for each of eight variants to produce the same file.
+
+### Benchmarks
+
+```sh
+./gradlew :benchmark:connectedFullIntlBenchmarkReleaseAndroidTest -Pwmkb.benchmark=true \
+    -Pandroid.testInstrumentationRunnerArguments.class=com.wasimaster.wmkeyboard.benchmark.KeyboardBenchmark
+```
+
+- **`StartupBenchmark`** cold-starts the settings app twice over, with and without the profile. The gap between the two is what the profile is worth. If it closes, the profile has stopped covering what start-up runs.
+- **`KeyboardBenchmark.coldShow`** brings the keyboard up in a process that was not running, and reports `WM:createInputView`, `WM:startInputView` and frame timings.
+- **`KeyboardBenchmark.typing`** and **`.gliding`** report frame timings plus the summed time in `WM:key`, `WM:refreshSuggestions`, `WM:suggest` and `WM:glideDecode`. A regression then shows up as the section that grew, not only as more jank.
+
+Results are printed in the test output and written as JSON under `benchmark/build/outputs/connected_android_test_additional_output/`. Each iteration's trace is saved beside them and opens in Perfetto.

@@ -1,6 +1,6 @@
 package com.wasimaster.wmkeyboard.core.tools
 
-import java.text.BreakIterator
+import com.wasimaster.wmkeyboard.core.text.Graphemes
 
 /**
  * Compares the text an AI action ran on against what it produced, so the panel
@@ -317,28 +317,14 @@ object TextDiff {
     }
 
     /**
-     * One grapheme cluster per token, via [BreakIterator]. That is what keeps a
+     * One grapheme cluster per token, via [Graphemes]. That is what keeps a
      * comparison from cutting through an emoji built out of joined parts, a skin
      * tone or variation selector, a Bengali or Devanagari conjunct, a nukta
      * form, or a surrogate pair. Every one of those is several code units that
-     * mean one thing on screen.
-     *
-     * The iterator is built per call on purpose: it is not thread safe, and this
-     * runs off the UI thread from more than one panel state.
+     * mean one thing on screen. [Graphemes] adds what the platform's own
+     * iterator misses on older Android releases, where emoji sequences split.
      */
-    private fun graphemeTokens(text: String): List<String> {
-        val out = ArrayList<String>()
-        val breaks = BreakIterator.getCharacterInstance()
-        breaks.setText(text)
-        var start = breaks.first()
-        var end = breaks.next()
-        while (end != BreakIterator.DONE) {
-            out += text.substring(start, end)
-            start = end
-            end = breaks.next()
-        }
-        return out
-    }
+    private fun graphemeTokens(text: String): List<String> = Graphemes.split(text)
 
     /** A line and the newline that ends it. */
     private fun lineTokens(text: String): List<String> {

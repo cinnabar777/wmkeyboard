@@ -3,6 +3,7 @@ package com.wasimaster.wmkeyboard.core.input.composer
 import com.wasimaster.wmkeyboard.core.script.ComposerType
 import com.wasimaster.wmkeyboard.core.script.ScriptDef
 import com.wasimaster.wmkeyboard.core.script.ScriptId
+import com.wasimaster.wmkeyboard.core.text.Graphemes
 
 /**
  * Turns keystrokes into committed text for scripts that need more than a 1:1
@@ -210,12 +211,12 @@ interface Composer {
     fun contextualForm(text: String, before: Char?): String = text
 }
 
-/** One visual unit at the end of [before]: a surrogate pair, else one char. */
-internal fun defaultDeleteLength(before: CharSequence): Int {
-    if (before.isEmpty()) return 0
-    val last = before.length - 1
-    return if (last >= 1 && Character.isSurrogatePair(before[last - 1], before[last])) 2 else 1
-}
+/**
+ * One unit at the end of [before] by the keyboard's ordinary backspace rule:
+ * a code point, never half a surrogate pair, with an invisible trailing part
+ * taken together with what it belongs to (see [Graphemes.backspaceLength]).
+ */
+internal fun defaultDeleteLength(before: CharSequence): Int = Graphemes.backspaceLength(before)
 
 /**
  * No special composing: Latin, Cyrillic, Greek. Dead-key accent fusion is a

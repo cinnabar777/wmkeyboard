@@ -144,6 +144,17 @@ On the default layout, <KeyCap>⌫</KeyCap> and <KeyCap>Space</KeyCap> are the t
 
 Both delete keys also have a drag-to-delete-whole-words gesture, on by default, separate from this hold-and-repeat: leftward on <KeyCap>⌫</KeyCap>, rightward on <KeyCap>⌦</KeyCap>. [Gestures](/typing/gestures/) covers them.
 
+### What one press deletes
+
+A press of <KeyCap>⌫</KeyCap> takes one character as it appears on screen, which is not always one thing in the text underneath:
+
+- **A multi-part emoji goes whole.** A family, a flag, a thumbs-up with a skin tone or a keycap like 1️⃣ is several code points, and one press removes all of them.
+- **Invisible parts go with what they belong to.** A variation selector (which picks the text or emoji style of a symbol, or a variant form of a CJK character), the second half of a Windows line break, and a Korean syllable spelled out as separate jamo would each leave a press that changed nothing on screen, so they are taken together with the character before them.
+- **A mark you type with its own key comes off on its own.** An Arabic harakah, a Hebrew vowel point, a combining accent or a Persian zero-width non-joiner is deleted alone and leaves its letter in place, so fixing a wrong mark costs one press rather than a retyped letter.
+- **Indic conjuncts** follow a per-language setting: whole, or one part at a time. [Bengali](/languages/bengali/#editing-conjuncts-and-clusters) describes it.
+
+<KeyCap>⌦</KeyCap> has nothing typed ahead of the cursor to peel back, so it always takes the whole character after it, marks and all. What counts as one character comes from Android's own Unicode rules, with the keyboard's emoji rules on top for older Android versions that split emoji apart. On Android 15 and later those rules also treat a whole Indic conjunct as one character, so <KeyCap>⌦</KeyCap> takes क्ष in one press there.
+
 ## Options
 
 <SettingsPath path="Key press" />

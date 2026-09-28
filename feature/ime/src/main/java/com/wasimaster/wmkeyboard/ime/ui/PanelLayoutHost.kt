@@ -1,6 +1,7 @@
 package com.wasimaster.wmkeyboard.ime.ui
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,7 +10,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -21,6 +25,7 @@ import com.wasimaster.wmkeyboard.core.layout.LayerSpec
 import com.wasimaster.wmkeyboard.core.layout.PanelFieldKind
 import com.wasimaster.wmkeyboard.core.layout.PanelKind
 import com.wasimaster.wmkeyboard.core.layout.PanelLayoutSpec
+import com.wasimaster.wmkeyboard.core.settings.ClipPanelExtraHeightRange
 import com.wasimaster.wmkeyboard.core.settings.EmojiBarMode
 import com.wasimaster.wmkeyboard.core.settings.TextEditAction
 import com.wasimaster.wmkeyboard.ime.KeyboardUiState
@@ -93,6 +98,9 @@ internal fun KeyboardUiState.panelLayout(kind: PanelKind): PanelLayoutSpec {
         }
         return BuiltInPanelLayouts.numpad(calculator = settings.numpadCalculatorLayout)
     }
+    // The shipped emoji panel with the switch to GIFs and stickers where the
+    // setting puts it (issue #366), or left out while there is nowhere to switch.
+    if (kind == PanelKind.EMOJI) return BuiltInPanelLayouts.emoji(mediaSwitcherPlacement(settings))
     return shared ?: BuiltInPanelLayouts.default(kind)
 }
 
@@ -137,7 +145,8 @@ private fun PanelLayoutSpec.withoutLeadingRow(): PanelLayoutSpec = copy(
 )
 
 /** The emoji components a full-bleed header can carry. */
-private val EmojiHeaderFields = setOf(PanelFieldKind.EMOJI_TABS, PanelFieldKind.EMOJI_SEARCH)
+private val EmojiHeaderFields =
+    setOf(PanelFieldKind.EMOJI_TABS, PanelFieldKind.EMOJI_SEARCH, PanelFieldKind.MEDIA_TABS)
 
 /** The clipboard components a full-bleed header can carry. */
 private val ClipboardHeaderFields = setOf(PanelFieldKind.CLIPBOARD_SEARCH, PanelFieldKind.CLIPBOARD_VIEW)
@@ -157,7 +166,13 @@ internal fun EmojiPanelHost(state: KeyboardUiState, callbacks: PanelLayoutCallba
     } else {
         val spec = state.panelLayout(PanelKind.EMOJI)
         val fields: @Composable (PanelFieldKind) -> Unit = { kind ->
-            EmojiField(kind, state, session, callbacks.emoji)
+            // The switch to GIFs and stickers changes panels, which is this
+            // host's business rather than the emoji components'.
+            if (kind == PanelFieldKind.MEDIA_TABS) {
+                MediaTabsField(state, callbacks.onPanelChange)
+            } else {
+                EmojiField(kind, state, session, callbacks.emoji)
+            }
         }
         if (state.settings.emojiFullBleed) {
             // Full-bleed spends the reclaimed toolbar row on the panel's own
@@ -218,7 +233,8 @@ internal fun EmojiPanelHost(state: KeyboardUiState, callbacks: PanelLayoutCallba
 /**
  * The clipboard panel. Searching or editing a clip hands the key rows back
  * and steps out of full-bleed, as before; otherwise the layout fills the key
- * area, inside the full-bleed chrome when that setting is on.
+ * area, inside the full-bleed chrome when that setting is on, plus however
+ * much taller the height bar on top has made it (#414).
  */
 @Composable
 internal fun ClipboardPanelHost(state: KeyboardUiState, callbacks: PanelLayoutCallbacks) {
@@ -263,7 +279,22 @@ internal fun ClipboardPanelHost(state: KeyboardUiState, callbacks: PanelLayoutCa
         // Nothing to lay out either way until there is a clip.
         if (state.clipboardItems.isEmpty()) add(PanelFieldKind.CLIPBOARD_VIEW)
     }
-    if (state.settings.clipboard.fullBleed) {
+    // The height bar (#414): the panel opens this much taller than the
+    // keyboard, up to what the screen can give it, and the bar on top drags it.
+    val clipboard = state.settings.clipboard
+    val resize = rememberClipPanelResize(clipboard.panelExtraHeightDp)
+    val base = if (clipboard.fullBleed) keyRowsHeight(state) + fullBleedHiddenRows(state) else keyRowsHeight(state)
+    val maxPanel = toolPanelHeight(state, wanted = base + ClipPanelExtraHeightRange.last.dp, floor = base)
+    val maxExtra = (maxPanel - base).coerceAtLeast(0.dp)
+    val extra = resize.shownDp(clipboard.panelExtraHeightDp).dp.coerceIn(0.dp, maxExtra)
+    val maxPanelPx = with(LocalDensity.current) { maxPanel.roundToPx() }
+    SideEffect { resize.maxPanelPx = maxPanelPx }
+    val probe = remember(resize) { Modifier.clipPanelHeightProbe(resize) }
+    // No bar where the screen leaves no room to grow: it would drag nothing.
+    val bar: (@Composable () -> Unit)? = if (maxExtra < 1.dp) null else {
+        { ClipPanelHeightBar(resize, extra, maxExtra, callbacks.clipboard.actions.onPanelHeight) }
+    }
+    if (clipboard.fullBleed) {
         // Full-bleed: the toolbar row becomes the back header and the
         // reclaimed rows go to the history. A first row of nothing but the
         // search pill and the view switch moves up into that header, as the
@@ -274,47 +305,62 @@ internal fun ClipboardPanelHost(state: KeyboardUiState, callbacks: PanelLayoutCa
         if (strip != null) {
             val shown = strip.filter { (it.action as KeyAction.Field).kind !in collapsed }
             val searchShown = shown.any { (it.action as KeyAction.Field).kind == PanelFieldKind.CLIPBOARD_SEARCH }
-            FullBleedTool(
-                state,
-                title = if (searchShown) "" else stringResource(R.string.ime_tool_clipboard),
-                onClose = onClose,
-                headerActions = if (shown.isEmpty()) null else {
-                    {
-                        for (key in shown) {
-                            val kind = (key.action as KeyAction.Field).kind
-                            // The pill takes its share of the width; the switch
-                            // is a fixed square beside it, or alone at the end,
-                            // and so is the clear button with the pill hidden.
-                            val cell = if (kind == PanelFieldKind.CLIPBOARD_SEARCH && session.showSearch) {
-                                Modifier.weight(key.width)
-                            } else {
-                                Modifier.width(HeaderToggleWidth)
+            Box(modifier = probe) {
+                FullBleedTool(
+                    state,
+                    title = if (searchShown) "" else stringResource(R.string.ime_tool_clipboard),
+                    onClose = onClose,
+                    extraHeight = extra,
+                    topHandle = bar,
+                    headerActions = if (shown.isEmpty()) null else {
+                        {
+                            for (key in shown) {
+                                val kind = (key.action as KeyAction.Field).kind
+                                // The pill takes its share of the width; the switch
+                                // is a fixed square beside it, or alone at the end,
+                                // and so is the clear button with the pill hidden.
+                                val cell = if (kind == PanelFieldKind.CLIPBOARD_SEARCH && session.showSearch) {
+                                    Modifier.weight(key.width)
+                                } else {
+                                    Modifier.width(HeaderToggleWidth)
+                                }
+                                Box(
+                                    modifier = cell
+                                        .fillMaxHeight()
+                                        .padding(horizontal = 2.dp),
+                                ) { fields(kind) }
                             }
-                            Box(
-                                modifier = cell
-                                    .fillMaxHeight()
-                                    .padding(horizontal = 2.dp),
-                            ) { fields(kind) }
                         }
-                    }
-                },
-            ) {
-                PanelLayoutGrid(
-                    state, spec.withoutLeadingRow(), callbacks, onClose, fields, Modifier.fillMaxSize(), collapsed,
-                )
+                    },
+                ) {
+                    PanelLayoutGrid(
+                        state, spec.withoutLeadingRow(), callbacks, onClose, fields, Modifier.fillMaxSize(), collapsed,
+                    )
+                }
             }
         } else {
-            FullBleedTool(state, stringResource(R.string.ime_tool_clipboard), onClose = onClose) {
-                PanelLayoutGrid(state, spec, callbacks, onClose, fields, Modifier.fillMaxSize(), collapsed)
+            Box(modifier = probe) {
+                FullBleedTool(
+                    state,
+                    stringResource(R.string.ime_tool_clipboard),
+                    onClose = onClose,
+                    extraHeight = extra,
+                    topHandle = bar,
+                ) {
+                    PanelLayoutGrid(state, spec, callbacks, onClose, fields, Modifier.fillMaxSize(), collapsed)
+                }
             }
         }
     } else {
-        Box(
-            modifier = Modifier
+        Column(
+            modifier = probe
                 .fillMaxWidth()
-                .height(keyRowsHeight(state)),
+                .height(toolPanelHeight(state, wanted = base + extra, floor = base)),
         ) {
-            PanelLayoutGrid(state, spec, callbacks, onClose, fields, Modifier.fillMaxSize(), collapsed)
+            bar?.invoke()
+            Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+                PanelLayoutGrid(state, spec, callbacks, onClose, fields, Modifier.fillMaxSize(), collapsed)
+            }
         }
     }
 }

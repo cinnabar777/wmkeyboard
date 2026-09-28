@@ -941,6 +941,8 @@ private fun SearchStrings.emojiPanelRows(): List<SettingsSearchEntry> {
         row(R.string.langemoji_emoji_animated_title, R.string.langemoji_emoji_animated_subtitle),
         row(R.string.langemoji_emoji_sticker_title, R.string.langemoji_emoji_sticker_subtitle),
         row(R.string.langemoji_emoji_close_after_insert_title, R.string.langemoji_emoji_close_after_insert_subtitle),
+        row(R.string.langemoji_media_switcher_title, R.string.langemoji_media_switcher_subtitle),
+        row(R.string.langemoji_media_remember_title, R.string.langemoji_media_remember_subtitle),
     )
 }
 
@@ -978,6 +980,7 @@ private fun SearchStrings.clipboardRows(): List<SettingsSearchEntry> {
         row(R.string.clipboard_max_title, R.string.clipboard_max_subtitle),
         row(R.string.panel_layout_row_title, R.string.panel_layout_row_subtitle),
         row(R.string.clipboard_full_bleed_title, R.string.clipboard_full_bleed_subtitle),
+        row(R.string.clipboard_panel_height_title, R.string.clipboard_panel_height_subtitle),
         row(R.string.clipboard_view_title, R.string.clipboard_view_subtitle),
         row(R.string.clipboard_columns_title, R.string.clipboard_columns_subtitle),
         row(R.string.clipboard_lines_title, R.string.clipboard_lines_subtitle),
@@ -985,6 +988,7 @@ private fun SearchStrings.clipboardRows(): List<SettingsSearchEntry> {
         row(R.string.clipboard_numbers_title, R.string.clipboard_numbers_subtitle),
         row(R.string.clipboard_pinned_tabs_title, R.string.clipboard_pinned_tabs_subtitle),
         row(R.string.clipboard_outline_pinned_title, R.string.clipboard_outline_pinned_subtitle),
+        row(R.string.clipboard_card_buttons_title, R.string.clipboard_card_buttons_subtitle),
         row(R.string.clipboard_swipe_delete_title, R.string.clipboard_swipe_delete_subtitle),
         row(R.string.clipboard_undo_delete_title, R.string.clipboard_undo_delete_subtitle),
         row(R.string.clipboard_pinned_last_title, R.string.clipboard_pinned_last_subtitle),

@@ -65,6 +65,18 @@ class AutoBackupNamingTest {
     }
 
     @Test
+    fun `a WebDAV upload in flight is swept like a part file and never rotated`() {
+        val upload = AutoBackupNaming.name(0L, encrypted = false, zone = utc) +
+            AutoBackupNaming.UPLOAD_SUFFIX
+        // Nextcloud 30+ answers 400 to any name ending in .part (#411).
+        assertFalse(upload.endsWith(".part"))
+        assertTrue(AutoBackupNaming.isPart(upload))
+        assertFalse(AutoBackupNaming.isOurs(upload))
+        assertFalse(AutoBackupNaming.isListed(upload))
+        assertFalse(AutoBackupNaming.isPart("someone-elses.upload"))
+    }
+
+    @Test
     fun `rotation deletes the oldest and keeps the newest`() {
         val entries = listOf(
             entry("c", 300),

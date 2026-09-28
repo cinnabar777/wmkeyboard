@@ -4,10 +4,10 @@ import androidx.compose.runtime.Immutable
 import com.wasimaster.wmkeyboard.core.layout.Key
 import com.wasimaster.wmkeyboard.core.layout.KeyAction
 import com.wasimaster.wmkeyboard.core.settings.ToolbarTool
+import com.wasimaster.wmkeyboard.core.text.Graphemes
 import com.wasimaster.wmkeyboard.ime.LayoutMode
 import com.wasimaster.wmkeyboard.ime.PanelMode
 import com.wasimaster.wmkeyboard.ime.ShiftState
-import java.text.BreakIterator
 
 /**
  * What the theme editor's live keyboard is typing into.
@@ -169,11 +169,10 @@ data class ThemePreviewSandbox(
 
     private fun deleted(context: SandboxContext): ThemePreviewSandbox {
         if (text.isEmpty()) return this
-        // A grapheme at a time, the way backspace behaves on the keyboard, so
-        // an emoji with a skin tone leaves in one press rather than in pieces.
-        val iterator = BreakIterator.getCharacterInstance()
-        iterator.setText(text)
-        val cut = iterator.preceding(text.length).takeIf { it != BreakIterator.DONE } ?: 0
+        // By the keyboard's own backspace rule, so an emoji with a skin tone
+        // leaves in one press rather than in pieces, exactly as it would in a
+        // real field.
+        val cut = text.length - Graphemes.backspaceLength(text)
         return copy(text = text.substring(0, cut)).withAutoShift(context)
     }
 

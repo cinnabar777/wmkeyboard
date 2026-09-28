@@ -54,7 +54,7 @@ Tap, hold-to-repeat, and the delete swipe are one state machine on <KeyCap>⌫</
 | Lift after dragging left | Backspace | Deletes everything the swipe highlighted | (same) |
 | Drag right mid-swipe | Backspace | Re-anchors instead of undeleting, so the next leftward word costs full travel again | Show what you will delete (Off) |
 | Hold still | Either delete key | Repeats a whole word per tick instead of a character, at the word interval | Holding delete clears words · Word delete interval (Off · 140 ms) |
-| Tap | Forward delete | Deletes one character after the cursor | None |
+| Tap | Forward delete | Deletes the character after the cursor, with its marks and any emoji parts | None |
 | Drag right past a small slop | Forward delete | Cancels the repeat and takes a word or a character after the cursor per step | Swipe on forward delete · Swipe deletes (On · Words) |
 | Drag left mid-swipe | Forward delete | Gives back one step of the highlight per step of travel | Show what you will delete (On) |
 | Lift after dragging right | Forward delete | Deletes everything the swipe highlighted | (same) |
@@ -129,6 +129,7 @@ A grab-bag of drags that live on their own feature pages, linked below each row.
 | Hold a sticker in the sticker tray, then slide | [Stickers as you type](/emoji/stickers/#stickers-as-you-type) | Shows the sticker large above the keyboard, and each one you slide over in turn. Lifting closes it and sends nothing | Hold to see them bigger (On) |
 | Swipe a card left or right | [Clipboard panel](/tools/clipboard/) | Deletes it once the drag passes 40% of the card's width. No confirmation, but an Undo bar offers it back for five seconds | Swipe to delete (On) |
 | Swipe the Undo bar left or right | Clipboard panel | Puts the bar away at once, and the delete is final | None |
+| Drag the bar on top of the panel up or down | [Clipboard panel](/tools/clipboard/#making-the-panel-taller) | Makes the panel taller or shorter, and it opens at that height from then on | Panel height (Same as keyboard) |
 | Hold and drag a tool | [Toolbar / toolbox](/tools/overview/) | Pins, unpins, or reorders it | None |
 | Swipe down on the toolbar strip | Toolbar | Dismisses the keyboard | Swipe down to hide, toolbar (Off) |
 | Drag the seek bar | [Media controls](/tools/media/) | Scrubs playback to that point | None |

@@ -703,6 +703,12 @@ enum class PanelFieldKind(val panel: PanelKind) {
     @SerialName("emoji_tabs") EMOJI_TABS(PanelKind.EMOJI),
     @SerialName("emoji_search") EMOJI_SEARCH(PanelKind.EMOJI),
     @SerialName("emoji_grid") EMOJI_GRID(PanelKind.EMOJI),
+    /**
+     * The emoji / GIF / sticker switch (issue #366). An emoji panel component
+     * because that panel is the one with a layout; the GIF and sticker panels
+     * draw the row it sits in, so the switch is in the same place in all three.
+     */
+    @SerialName("media_tabs") MEDIA_TABS(PanelKind.EMOJI),
     @SerialName("clipboard_search") CLIPBOARD_SEARCH(PanelKind.CLIPBOARD),
     @SerialName("clipboard_entities") CLIPBOARD_ENTITIES(PanelKind.CLIPBOARD),
     @SerialName("clipboard_list") CLIPBOARD_LIST(PanelKind.CLIPBOARD),

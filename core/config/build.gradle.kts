@@ -2,6 +2,17 @@ import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.library)
+    // Applied at the root with their versions; see build.gradle.kts there.
+    id("org.jetbrains.kotlinx.kover")
+    id("com.autonomousapps.dependency-analysis")
+}
+
+// Coverage for the root's merged report (`./gradlew koverHtmlReportUnit`):
+// this module's full-flavour debug unit tests.
+kover {
+    currentProject {
+        createVariant("unit") { add("fullDebug") }
+    }
 }
 
 // Build-wide flags and API keys for library modules. The app module keeps its

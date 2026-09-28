@@ -132,10 +132,30 @@ This is off by default so a mid-refactor warning doesn't block a local build.
 
 See [contributing](/development/contributing/) for how static analysis fits into a pull request, and [testing](/development/testing/) for running the unit test suite itself.
 
+## Checking dependencies
+
+Two checks look at the dependencies rather than the code.
+
+**Licenses.** [Licensee](https://github.com/cashapp/licensee) checks every library the APK ships against the licenses the project allows, and fails the build on anything else:
+
+```sh
+./gradlew :app:licenseeAndroidFullIntlRelease     # any variant works
+```
+
+The allow list in `app/build.gradle.kts` is Apache-2.0, MIT, the two BSD licenses and ISC. Three libraries whose POMs name their license by URL are allowed one by one, each with the reason written next to it. Google's own terms (ML Kit, Play services, Play Core) are allowed only outside the F-Droid channel, so a Google binary that slips into an F-Droid build fails there, before F-Droid's own scanner finds it. A new dependency under any other license stops the build until someone has read the license and added it, with a reason. Each run writes an inventory of every artifact and its license to `app/build/reports/licensee/android<Variant>/artifacts.json`. CI runs the check for the full and lite builds, and for lite as F-Droid builds it.
+
+**Unused and mis-scoped dependencies.** The [Dependency Analysis plugin](https://github.com/autonomousapps/dependency-analysis-gradle-plugin) reads which dependencies each module's code actually uses:
+
+```sh
+./gradlew buildHealth     # build/reports/dependency-analysis/build-health-report.txt
+```
+
+It reports what could be removed, what is declared `api` but only used internally (or the other way round), and what the code uses but only gets through another module. It gives advice and passes; nothing here gates on it. It reads one variant per module, `fullIntlDebug` in `:app` and `fullDebug` elsewhere, which `gradle.properties` sets. Every other variant is the same code against the same dependencies. Treat its advice as a starting point: a library reached only through reflection, a manifest entry or a `runtimeOnly` need looks unused to it.
+
 ## Details & edge cases
 
 - **No `local.properties` is required to build.** API keys for the network tools (GIF/sticker search, web search, translation, and the Unsplash/Pexels photo backgrounds) are read from `local.properties`, falling back to environment variables, falling back to an empty string. The Dropbox and OneDrive backup destinations read their OAuth client ids the same way. A missing key never fails the build. The affected tool just shows a "needs API key" panel at runtime, and a backup destination with no client id is left out of the list instead.
 - **A missing release keystore doesn't fail a release build, but it doesn't sign it either.** If `RELEASE_STORE_FILE` isn't set or the file doesn't exist, `assembleFullRelease` drops the signing config and emits an *unsigned* release APK. There's no debug-key fallback, and that's deliberate: a debug-signed "release" looks shippable and isn't, because Play rejects the debug key and nothing installed from such a build could ever be updated by the real one.
 - **Module build files can't declare their own repositories.** `settings.gradle.kts` sets `repositoriesMode = FAIL_ON_PROJECT_REPOS`, so only the `google()`/`mavenCentral()` repositories declared centrally are allowed. Adding a `repositories { }` block inside any module's `build.gradle.kts` hard-fails the build rather than silently working.
 - **Dictionaries compile automatically.** Every build variant wires in a `compileBundledDictionaries` task that runs the `:tools:dictc` compiler over `dictionaries-src/*.txt` and produces the `.wmdict` assets bundled into the APK. There's no separate manual compilation step. See [the dictionary pipeline](/development/dictionaries/) for the format and how to add or edit a wordlist.
-- **CI runs on every pull request** (`.github/workflows/ci.yml`): unit tests (`testFullDebugUnitTest`), a full **and** lite debug assemble, an advisory prediction/gesture eval run, and a docs link-check. `./gradlew staticAnalysis` is *not* in CI, so run it yourself before opening a PR. There's no pull-request or issue template.
+- **CI runs on every pull request** (`.github/workflows/ci.yml`): unit tests and the architecture rules (`unitTests`), a debug assemble of every flavor, the dex method-size check, the license check, an advisory prediction/gesture eval run, and a docs link-check. `./gradlew staticAnalysis` is *not* in CI, so run it yourself before opening a PR. There's no pull-request or issue template.

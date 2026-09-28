@@ -116,6 +116,7 @@ internal fun fieldTitleRes(kind: PanelFieldKind): Int = when (kind) {
     PanelFieldKind.EMOJI_TABS -> R.string.field_name_emoji_tabs
     PanelFieldKind.EMOJI_SEARCH -> R.string.field_name_emoji_search
     PanelFieldKind.EMOJI_GRID -> R.string.field_name_emoji_grid
+    PanelFieldKind.MEDIA_TABS -> R.string.field_name_media_tabs
     PanelFieldKind.CLIPBOARD_SEARCH -> R.string.field_name_clipboard_search
     PanelFieldKind.CLIPBOARD_ENTITIES -> R.string.field_name_clipboard_entities
     PanelFieldKind.CLIPBOARD_LIST -> R.string.field_name_clipboard_list

@@ -17,6 +17,14 @@ import com.wasimaster.wmkeyboard.core.util.PlayServices
  */
 enum class MediaSendMode { IMAGE, STICKER }
 
+/**
+ * Where the emoji, GIF and sticker panels draw the switch that jumps between
+ * the three (issue #366): along the bottom beside abc and space, or up top
+ * beside the search. Down here rather than with the emoji settings so the
+ * shipped emoji panel layout, in the layout module, can be drawn for either.
+ */
+enum class MediaSwitcher { OFF, TOP, BOTTOM }
+
 
 /**
  * A tool that can live on the top toolbar. Tools not in

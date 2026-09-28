@@ -42,8 +42,9 @@ import okhttp3.Response
  * that asks for none. Taildrive is one: being on the tailnet is the permission.
  *
  * Unlike the SAF sink this one gets a real atomic install: `MOVE` is part of the
- * protocol rather than an optional capability, so a backup is written to a
- * `.part` name and moved into place. The caller still verifies before it
+ * protocol rather than an optional capability, so a backup is written to an
+ * [AutoBackupNaming.UPLOAD_SUFFIX] name and moved into place. Not `.part`, the
+ * suffix every other sink stages under: Nextcloud refuses that one. The caller still verifies before it
  * rotates, because a server that accepted every byte can still have written
  * them somewhere that is not there any more.
  */
@@ -122,6 +123,7 @@ class WebDavSink(
             throw BackupSinkException(SinkError.IO, failure)
         }
         val code = response.use { it.code }
+        if (code !in 200..299) BackupLog.d("webdav MKCOL: HTTP $code")
         when {
             code in 200..299 || code == HTTP_METHOD_NOT_ALLOWED -> Unit
             code == HTTP_CONFLICT && depth > 0 -> {
@@ -147,7 +149,7 @@ class WebDavSink(
             // and knowing the length up front lets the server reject an
             // over-quota upload before any of it is sent.
             val bytes = ByteArrayOutputStream().also(body).toByteArray()
-            val partName = name + AutoBackupNaming.PART_SUFFIX
+            val partName = name + AutoBackupNaming.UPLOAD_SUFFIX
             val partUrl = url(partName)
 
             call(
@@ -255,6 +257,9 @@ class WebDavSink(
         response.use {
             if (it.isSuccessful) return read(it)
             if (allowMissing && it.code == HTTP_NOT_FOUND) return read(it)
+            // The method and the status, never the URL: it carries the user
+            // name on most services. A bare IO in the log says nothing.
+            BackupLog.w("webdav ${request.method}: HTTP ${it.code}")
             throw BackupSinkException(statusError(it.code))
         }
     }

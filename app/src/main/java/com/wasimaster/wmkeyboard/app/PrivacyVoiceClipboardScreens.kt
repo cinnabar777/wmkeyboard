@@ -32,7 +32,9 @@ import com.wasimaster.wmkeyboard.core.layout.PanelKind
 import com.wasimaster.wmkeyboard.core.settings.HoldToTalkRange
 import com.wasimaster.wmkeyboard.core.settings.ClipboardView
 import com.wasimaster.wmkeyboard.core.settings.ClipGridColumnsRange
+import com.wasimaster.wmkeyboard.core.settings.ClipMaxItemsSteps
 import com.wasimaster.wmkeyboard.core.settings.ClipMaxTextCharsSteps
+import com.wasimaster.wmkeyboard.core.settings.ClipPanelExtraHeightRange
 import com.wasimaster.wmkeyboard.core.settings.ClipPreviewLinesRange
 import com.wasimaster.wmkeyboard.core.settings.ClipTimeLabel
 import com.wasimaster.wmkeyboard.core.settings.CopiedCodeChip
@@ -566,15 +568,28 @@ internal fun ClipboardSettings(
             ) { scope.launch { repository.setClipboardHistory(it) } }
         }
         item {
+            // Stops, with no cap at all as the last one (#414). A value from
+            // before the stops shows at the nearest one until it is moved.
+            val unlimited = stringResource(R.string.clipboard_max_unlimited)
+            val steps = ClipMaxItemsSteps
+            val stored = settings.watch { it.clipboard.maxItems }
+            val index = if (stored <= 0) {
+                steps.lastIndex
+            } else {
+                steps.indices.filter { steps[it] > 0 }.minByOrNull { kotlin.math.abs(steps[it] - stored) } ?: 0
+            }
             SliderSetting(
                 R.string.clipboard_max_title,
                 subtitle = stringResource(R.string.clipboard_max_subtitle),
-                value = settings.watch { it.clipboard.maxItems }.toFloat(),
-                range = 5f..500f,
-                display = { numberFormat.format(it.toInt()) },
+                value = index.toFloat(),
+                range = 0f..steps.lastIndex.toFloat(),
+                display = {
+                    val items = steps[it.roundToInt().coerceIn(steps.indices)]
+                    if (items == 0) unlimited else numberFormat.format(items)
+                },
                 info = stringResource(R.string.clipboard_max_info),
-                default = SettingsDefaults.clipboard.maxItems.toFloat(),
-            ) { scope.launch { repository.setClipboardMaxItems(it.toInt()) } }
+                default = steps.indexOf(SettingsDefaults.clipboard.maxItems).coerceAtLeast(0).toFloat(),
+            ) { scope.launch { repository.setClipboardMaxItems(steps[it.roundToInt().coerceIn(steps.indices)]) } }
         }
         item {
             // The readout lambda is not composable, so the "never" word
@@ -722,6 +737,8 @@ internal fun ClipboardSettings(
                 },
                 info = stringResource(R.string.clipboard_chip_life_info),
                 default = SettingsDefaults.clipboard.pasteChipSeconds.toFloat(),
+                // Seconds, then minutes: a bare number cannot say which.
+                typed = false,
             ) { value ->
                 val secs = (value / 30f).roundToInt() * 30
                 scope.launch { repository.setPasteChipSeconds(secs) }
@@ -785,6 +802,23 @@ internal fun ClipboardSettings(
                 info = stringResource(R.string.clipboard_full_bleed_info),
                 default = SettingsDefaults.clipboard.fullBleed,
             ) { scope.launch { repository.setClipboardFullBleed(it) } }
+        }
+        item {
+            // Also set by dragging the bar on top of the panel (#414).
+            val none = stringResource(R.string.clipboard_panel_height_none)
+            val taller = stringResource(R.string.clipboard_panel_height_value)
+            SliderSetting(
+                R.string.clipboard_panel_height_title,
+                subtitle = stringResource(R.string.clipboard_panel_height_subtitle),
+                value = settings.watch { it.clipboard.panelExtraHeightDp }.toFloat(),
+                range = ClipPanelExtraHeightRange.first.toFloat()..ClipPanelExtraHeightRange.last.toFloat(),
+                display = {
+                    val dp = it.roundToInt()
+                    if (dp == 0) none else taller.format(dp)
+                },
+                info = stringResource(R.string.clipboard_panel_height_info),
+                default = SettingsDefaults.clipboard.panelExtraHeightDp.toFloat(),
+            ) { scope.launch { repository.setClipboardPanelExtraHeightDp(it.roundToInt()) } }
         }
         item {
             ChoiceSetting(
@@ -855,6 +889,15 @@ internal fun ClipboardSettings(
                 settings.watch { it.clipboard.outlinePinned },
                 default = SettingsDefaults.clipboard.outlinePinned,
             ) { scope.launch { repository.setClipboardOutlinePinned(it) } }
+        }
+        item {
+            ToggleSetting(
+                R.string.clipboard_card_buttons_title,
+                stringResource(R.string.clipboard_card_buttons_subtitle),
+                settings.watch { it.clipboard.cardButtons },
+                info = stringResource(R.string.clipboard_card_buttons_info),
+                default = SettingsDefaults.clipboard.cardButtons,
+            ) { scope.launch { repository.setClipboardCardButtons(it) } }
         }
         item {
             ToggleSetting(

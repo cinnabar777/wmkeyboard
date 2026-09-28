@@ -155,7 +155,8 @@ object ClipLinks {
  * The IME service feeds new clips in via [add]/[addHtml]/[addImage]/[addUri]
  * from its OnPrimaryClipChangedListener. History is bounded two ways at once,
  * and both are the user's to set: unpinned items expire after [expiryMillis]
- * (0 disables expiry), and only the newest [maxItems] unpinned ones are kept.
+ * (0 disables expiry), and only the newest [maxItems] unpinned ones are kept
+ * (0 keeps them all).
  * Sensitive clips get their own, much shorter [sensitiveExpiryMillis]. Pinned
  * items are exempt from all three — pinning is an explicit "keep this".
  *
@@ -171,7 +172,7 @@ class ClipboardStore(
     private val imagesDir: File? = null,
     /** When true, [items] lists pinned entries last instead of first. */
     var pinnedLast: Boolean = false,
-    /** Newest unpinned entries kept; older ones fall off the end. */
+    /** Newest unpinned entries kept; older ones fall off the end. 0 is no cap. */
     var maxItems: Int = DEFAULT_MAX_ITEMS,
     /**
      * How long a clip marked [ClipItem.sensitive] survives (0 disables the
@@ -613,7 +614,8 @@ class ClipboardStore(
         removeWhere { item ->
             item.expiresAt(expiryMillis, sensitiveExpiryMillis)?.let { now > it } == true
         }
-        val cap = maxItems.coerceAtLeast(1)
+        // 0 is no cap (#414): the expiry above is then the only bound.
+        val cap = maxItems.takeIf { it > 0 } ?: return
         while (items.count { !it.pinned } > cap) {
             val oldest = items.filter { !it.pinned }.minByOrNull { it.timestamp } ?: break
             removeWhere { it === oldest }

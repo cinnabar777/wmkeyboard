@@ -5,6 +5,7 @@ sidebar:
   order: 3
 ---
 
+import KeyCap from '@components/KeyCap.astro';
 import PhoneFrame from '@components/PhoneFrame.astro';
 import SettingsPath from '@components/SettingsPath.astro';
 import Shot from '@components/Shot.astro';
@@ -22,6 +23,8 @@ Open the GIF tool and it fetches trending GIFs immediately, before you type anyt
 Results are laid out as justified rows of animated previews rather than a fixed grid: every preview keeps its own aspect ratio and nothing is cropped, so squarish results sit three across and a pair of wide ones fills a row on its own. At the end of the search box a small line reads "from Klipy" (or "from Klipy · GIPHY" once Mixed mode is pulling from both at once), so you know where a result came from.
 
 Before you've typed anything, a scrollable row of **category chips** sits above the grid: Trending first, then Reactions, Love, Happy, Sad and so on. Tap one to run it as a search, which is a way to browse without thinking of a word. Tap the active chip, or Trending, to go back. The chips come from the provider itself when it publishes categories, and from a built-in list when it doesn't, so the row is there offline too. It belongs to the default view only. Type anything and it steps aside for the results. With the full-screen picker turned off it also needs a certain amount of key height to be worth drawing, so a short three-row layout with the number row off loses it rather than losing the last row of the grid.
+
+Along the bottom sits the same row the [emoji panel](/emoji/picker/#switching-to-gifs-and-stickers) has: <KeyCap>ABC</KeyCap>, a switch to emoji, GIFs and stickers, space and backspace. The switch jumps straight to the emoji or sticker panel, and <KeyCap>ABC</KeyCap> goes back to the keys. <SettingsPath path="Emoji / Emoji panel / Switch to GIFs and stickers" /> moves the switch next to the search box instead, which gives the row back to the results, or turns it off. The row steps aside while you type a search, since the keys come back under the panel then.
 
 If neither provider has a key configured and no offline pack is installed, the panel shows a "needs an API key" notice with a shortcut into settings instead of a grid. The F-Droid build never hits that notice, since Commons is already searching.
 

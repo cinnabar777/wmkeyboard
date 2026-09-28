@@ -28,6 +28,14 @@ object AutoBackupNaming {
     const val PART_SUFFIX = ".part"
 
     /**
+     * [PART_SUFFIX] for a WebDAV upload. Nextcloud 30 and later refuse any
+     * name ending in `.part` or `.filepart` with a 400, because they use those
+     * for their own uploads, so a backup staged under [PART_SUFFIX] never
+     * reached the server at all (#411).
+     */
+    const val UPLOAD_SUFFIX = ".upload"
+
+    /**
      * [Locale.US] because a Thai-Buddhist locale stamps 2569 for 2026, and a
      * name whose job is to sort by date has to mean the same thing on every
      * device. Same format and same reason as the manual export's name.
@@ -128,6 +136,7 @@ object AutoBackupNaming {
     fun isOurs(displayName: String): Boolean =
         displayName.startsWith(PREFIX) &&
             !displayName.endsWith(PART_SUFFIX) &&
+            !displayName.endsWith(UPLOAD_SUFFIX) &&
             (
                 displayName.endsWith(".${ConfigBackup.FILE_EXTENSION}") ||
                     displayName.endsWith(".${ConfigBackup.ENCRYPTED_FILE_EXTENSION}")
@@ -147,7 +156,7 @@ object AutoBackupNaming {
     fun isPart(displayName: String): Boolean =
         (displayName.startsWith(PREFIX) ||
             displayName.startsWith(com.wasimaster.wmkeyboard.core.settings.sync.SyncNaming.PREFIX)) &&
-            displayName.endsWith(PART_SUFFIX)
+            (displayName.endsWith(PART_SUFFIX) || displayName.endsWith(UPLOAD_SUFFIX))
 
     /**
      * The entries to delete so that at most [keep] remain, oldest first.

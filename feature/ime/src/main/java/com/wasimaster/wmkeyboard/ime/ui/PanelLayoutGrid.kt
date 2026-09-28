@@ -77,6 +77,12 @@ internal fun PanelLayoutGrid(
      * blank row for a strip that is not there.
      */
     collapsedFields: Set<PanelFieldKind> = emptySet(),
+    /**
+     * Whether a drag off `?123` or `ABC` shows that layer over the grid. Off
+     * for a grid that is one row of a panel rather than the whole of it: the
+     * layer would be drawn into that row's height.
+     */
+    layerPeek: Boolean = true,
 ) {
     val settings = state.settings
     if (spec.grid.rows.isEmpty()) return
@@ -137,7 +143,8 @@ internal fun PanelLayoutGrid(
             }
             // After the padding, so a pointer arrives in the same space the
             // grids below record their cells in.
-            .pointerInput(onPanelKey, trailMs, settings.longPressDelayMs) {
+            .pointerInput(onPanelKey, trailMs, settings.longPressDelayMs, layerPeek) {
+                if (!layerPeek) return@pointerInput
                 detectLayerPeek(
                     peek = peek,
                     rects = { liveRects.value },

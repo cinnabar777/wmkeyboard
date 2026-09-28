@@ -80,7 +80,24 @@ if (playStoreChannel) {
     include(":feature:litert")
     include(":feature:handwriting")
 }
+// Macrobenchmarks and the baseline profile generator (-Pwmkb.benchmark=true).
+// Out of the ordinary build for two reasons. Applying the baselineprofile
+// plugin to :app adds two build types to every flavour pair, which every
+// configuration, analyser and `./gradlew tasks` then pays for. And this
+// module's tests install a release-like build over the app on whichever
+// device is connected, which nobody should get by running a task on a whim.
+val benchmarkBuild: Boolean = run {
+    val local = java.util.Properties()
+    file("local.properties").takeIf { it.exists() }?.inputStream()?.use(local::load)
+    (providers.gradleProperty("wmkb.benchmark").orNull
+        ?: local.getProperty("wmkb.benchmark")
+        ?: System.getenv("WMKB_BENCHMARK")
+        ?: "false").toBoolean()
+}
+if (benchmarkBuild) include(":benchmark")
 // Host-side dictionary compiler: turns dictionaries-src/*.txt into the .wmdict
 // binary assets at build time, sharing the app's own trie/codec sources so the
 // written format can never drift from the reader.
 include(":tools:dictc")
+// Konsist architecture rules over the whole source tree (tests only).
+include(":tools:architecture")

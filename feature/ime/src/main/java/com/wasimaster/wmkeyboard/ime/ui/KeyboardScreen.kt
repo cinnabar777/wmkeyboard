@@ -105,6 +105,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Article
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.automirrored.outlined.Backspace
@@ -120,6 +121,8 @@ import androidx.compose.material.icons.automirrored.outlined.InsertDriveFile
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.outlined.Undo
 import androidx.compose.material.icons.outlined.Link
+import androidx.compose.material.icons.filled.PushPin
+import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material.icons.outlined.PictureAsPdf
 import androidx.compose.material.icons.outlined.PhotoSizeSelectActual
 import androidx.compose.material.icons.outlined.PlayCircleOutline
@@ -7069,7 +7072,13 @@ internal fun toolLabelRes(tool: ToolbarTool): Int = when (tool) {
 internal fun toolLabel(tool: ToolbarTool): String = stringResource(toolLabelRes(tool))
 
 private fun toolActive(tool: ToolbarTool, state: KeyboardUiState): Boolean = when (tool) {
-    ToolbarTool.EMOJI -> state.panel == PanelMode.EMOJI
+    // With "open the last used" on, the emoji tool opens and closes all three
+    // of emoji, GIFs and stickers (#366), so it is lit for any of them.
+    ToolbarTool.EMOJI -> if (state.settings.emoji.rememberMediaTab) {
+        state.panel in MediaTabPanels
+    } else {
+        state.panel == PanelMode.EMOJI
+    }
     ToolbarTool.CLIPBOARD -> state.panel == PanelMode.CLIPBOARD
     ToolbarTool.SNIPPETS -> state.panel == PanelMode.SNIPPETS
     ToolbarTool.TEXT_EDIT -> state.panel == PanelMode.TEXT_EDIT
@@ -9644,6 +9653,9 @@ internal fun FullBleedTool(
     // on screen above them and already carries a way back, so a second back
     // button in the header is just a duplicate eating header width.
     showBack: Boolean = true,
+    // A band over the header, out of the panel's own height: the clipboard's
+    // drag bar that sets how tall the panel opens (#414).
+    topHandle: (@Composable () -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
     val kb = LocalKbTheme.current
@@ -9664,6 +9676,7 @@ internal fun FullBleedTool(
             .fillMaxWidth()
             .height(height),
     ) {
+        topHandle?.invoke()
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -10678,6 +10691,8 @@ private fun KeyboardBody(
                 }
                 PanelMode.GIF, PanelMode.STICKER -> {
                     val stickers = state.panel == PanelMode.STICKER
+                    // The switch to emoji and the other of the two (#366).
+                    val switch = mediaSwitchSlots(state, panelCallbacks)
                     if (state.settings.mediaFullBleed) {
                         // Search moves up into the reclaimed toolbar row, next
                         // to the back button — same shape as the dictionary.
@@ -10690,6 +10705,7 @@ private fun KeyboardBody(
                             compact = state.mediaSearchActive,
                             headerActions = {
                                 GifHeaderSearchBar(state, stickers, onMediaQueryTap)
+                                switch.top?.invoke()
                             },
                         ) {
                             GifPanel(
@@ -10709,6 +10725,7 @@ private fun KeyboardBody(
                                 onReport = onMediaReport,
                                 onDismissAction = onMediaActionDismiss,
                                 onOpenRoute = onOpenRoute,
+                                bottomBar = switch.bottom,
                             )
                         }
                     } else {
@@ -10728,6 +10745,8 @@ private fun KeyboardBody(
                             onReport = onMediaReport,
                             onDismissAction = onMediaActionDismiss,
                             onOpenRoute = onOpenRoute,
+                            switcher = switch.top,
+                            bottomBar = switch.bottom,
                         )
                     }
                 }
@@ -17574,7 +17593,7 @@ private val OnKeyLabelBottomPadding = 4.dp
 private const val LabelLineHeightRatio = 1.2f
 
 @Composable
-private fun rememberAboveAnchorPopup(): PopupPositionProvider {
+internal fun rememberAboveAnchorPopup(): PopupPositionProvider {
     val density = LocalDensity.current
     return remember(density) {
         AboveAnchorPopupPositionProvider(with(density) { KeyPopupGap.roundToPx() })
@@ -23846,6 +23865,10 @@ internal fun ClipInfoPopup(
     onView: (() -> Unit)? = null,
     /** Reads the text in an image clip; null for any other, or with the OCR tool off (#371). */
     onExtractText: (() -> Unit)? = null,
+    /** Shows the clip's whole text; null for a clip with none, or one kept hidden (#414). */
+    onViewText: (() -> Unit)? = null,
+    /** Pins or unpins the clip; null while the clip's own pin button does that (#414). */
+    onTogglePin: (() -> Unit)? = null,
     onDismiss: () -> Unit,
 ) {
     val kb = LocalKbTheme.current
@@ -23909,6 +23932,16 @@ internal fun ClipInfoPopup(
                 sizeLabel?.let {
                     ClipInfoRow(stringResource(R.string.ime_clip_info_size), it, kb.popupText)
                 }
+                if (onViewText != null) {
+                    TextButton(
+                        onClick = onViewText,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Icon(Icons.AutoMirrored.Outlined.Article, contentDescription = null)
+                        Spacer(Modifier.width(6.dp))
+                        Text(stringResource(R.string.ime_clip_view_text))
+                    }
+                }
                 if (onEdit != null) {
                     TextButton(
                         onClick = onEdit,
@@ -23957,6 +23990,19 @@ internal fun ClipInfoPopup(
                         Icon(Icons.Outlined.EmojiEmotions, contentDescription = null)
                         Spacer(Modifier.width(6.dp))
                         Text(stringResource(R.string.ime_clip_send_as_sticker))
+                    }
+                }
+                if (onTogglePin != null) {
+                    TextButton(
+                        onClick = onTogglePin,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Icon(
+                            if (item.pinned) Icons.Filled.PushPin else Icons.Outlined.PushPin,
+                            contentDescription = null,
+                        )
+                        Spacer(Modifier.width(6.dp))
+                        Text(stringResource(if (item.pinned) R.string.ime_clip_unpin else R.string.ime_clip_pin))
                     }
                 }
                 if (onDelete != null) {

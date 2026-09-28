@@ -30,6 +30,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
@@ -90,6 +92,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 import com.wasimaster.wmkeyboard.common.R as CommonR
@@ -150,6 +153,8 @@ data class ClipboardPanelActions(
     val onViewImage: (ClipItem) -> Unit = {},
     /** An image clip's Extract text: the OCR panel, reading the picture (#371). */
     val onExtractText: (ClipItem) -> Unit = {},
+    /** The height bar let go: how many dp taller than the keyboard the panel opens (#414). */
+    val onPanelHeight: (Int) -> Unit = {},
 )
 
 /** The history's two tabs, when [ClipboardSettings.pinnedTabs] is on (#371). */
@@ -686,8 +691,10 @@ private fun ClipboardHistory(
     // The clock the time labels read. Ticks only while they are shown, and
     // only twice a minute: they count in minutes.
     val timeLabel = clipboard.timeLabel
-    // With the swipe off (#344), the hold popup carries the delete instead.
+    // With the swipe off (#344), or the buttons (#414), the hold popup
+    // carries the delete instead; without the buttons, the pin as well.
     val swipe = clipboard.swipeToDelete
+    val buttons = clipboard.cardButtons
     val now by produceState(System.currentTimeMillis(), timeLabel) {
         if (timeLabel == ClipTimeLabel.OFF) return@produceState
         while (true) {
@@ -766,12 +773,12 @@ private fun ClipboardHistory(
             ) {
                 val number = session.numbers[item.id]
                 val time = clipTimeText(item, timeLabel, clipboard, now)
-                val hold = ClipHold(holdDelete = !swipe, ocr = session.ocr)
+                val hold = ClipHold(holdDelete = !swipe || !buttons, holdPin = !buttons, ocr = session.ocr)
                 val outlined = clipboard.outlinePinned && item.pinned
                 if (session.list) {
-                    ClipRow(item, number, lines, time, focused = index == focused, outlined, hold, callbacks)
+                    ClipRow(item, number, lines, time, focused = index == focused, outlined, buttons, hold, callbacks)
                 } else {
-                    ClipCard(item, number, lines, time, focused = index == focused, outlined, hold, callbacks)
+                    ClipCard(item, number, lines, time, focused = index == focused, outlined, buttons, hold, callbacks)
                 }
             }
         }
@@ -869,16 +876,18 @@ private fun Modifier.clipSurface(
 
 /**
  * What a clip's press-and-hold popup offers beyond its kind: a Delete when
- * [holdDelete] (the swipe that would otherwise delete is off), and Extract
- * text on a picture when [ocr] (#371).
+ * [holdDelete] (the swipe or the bin that would otherwise delete is off), Pin
+ * when [holdPin] (the clip has no pin button, #414), and Extract text on a
+ * picture when [ocr] (#371).
  */
 @Immutable
-private class ClipHold(val holdDelete: Boolean, val ocr: Boolean)
+private class ClipHold(val holdDelete: Boolean, val holdPin: Boolean, val ocr: Boolean)
 
 /**
- * The press-and-hold popup for a clip, with the actions its kind allows: Edit
- * for text, Open link for a bare address, View and Extract text for a picture
- * (#371), and a Delete when [hold] asks for one.
+ * The press-and-hold popup for a clip, with the actions its kind allows: View
+ * full text for text (#414), Edit for text, Open link for a bare address, View
+ * and Extract text for a picture (#371), and Pin and Delete when [hold] asks.
+ * View full text turns the popup into [ClipFullTextPopup].
  */
 @Composable
 private fun ClipHoldPopup(
@@ -887,11 +896,26 @@ private fun ClipHoldPopup(
     callbacks: ClipboardFieldCallbacks,
     onDismiss: () -> Unit,
 ) {
+    var fullText by remember { mutableStateOf(false) }
+    if (fullText) {
+        ClipFullTextPopup(
+            item,
+            onPaste = { onDismiss(); callbacks.onItem(item) },
+            onDismiss = onDismiss,
+        )
+        return
+    }
     val image = item.kind == ClipKind.IMAGE
     // Not a secret's: the panel never shows one's text, and the browser would.
     val link = item.kind.isTextual && !item.sensitive && ClipLinks.asUrl(item.text) != null
     ClipInfoPopup(
         item,
+        onViewText = if (item.kind.isTextual && !item.sensitive && item.text.isNotEmpty()) {
+            { fullText = true }
+        } else null,
+        onTogglePin = if (hold.holdPin) {
+            { onDismiss(); callbacks.onPin(item) }
+        } else null,
         onSendSticker = if (image) {
             { callbacks.onSticker(item); onDismiss() }
         } else null,
@@ -913,6 +937,101 @@ private fun ClipHoldPopup(
         onDismiss = onDismiss,
     )
 }
+
+/**
+ * A clip's whole text (#414), in place of its hold popup: a card shows a few
+ * lines, and the rest of a long clip could only be read by pasting it or by
+ * opening the editor. The text scrolls under a fixed ceiling, in the chunks
+ * [clipTextChunks] cuts, so a clip the size of a document lays out a screenful
+ * at a time rather than whole. Paste does what a tap on the clip does.
+ */
+@Composable
+private fun ClipFullTextPopup(item: ClipItem, onPaste: () -> Unit, onDismiss: () -> Unit) {
+    val kb = LocalKbTheme.current
+    val chunks = remember(item.text) { clipTextChunks(item.text) }
+    val length = item.text.length
+    Popup(
+        popupPositionProvider = rememberAboveAnchorPopup(),
+        onDismissRequest = onDismiss,
+    ) {
+        Surface(
+            shape = kb.menuShape(),
+            color = kb.popup,
+            border = kb.popupSurfaceBorder(),
+            shadowElevation = elevationFor(kb.menuShapeKind, 6.dp),
+            modifier = Modifier
+                .padding(horizontal = 8.dp)
+                .widthIn(max = ClipFullTextMaxWidth)
+                .fillMaxWidth(),
+        ) {
+            Column(modifier = Modifier.padding(top = 10.dp)) {
+                Text(
+                    pluralStringResource(R.plurals.ime_clip_character_count, length, length),
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = kb.popupText.copy(alpha = 0.6f),
+                    modifier = Modifier.padding(horizontal = 14.dp),
+                )
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = ClipFullTextMaxHeight),
+                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
+                ) {
+                    items(chunks) { chunk ->
+                        Text(chunk, fontSize = 13.sp, color = kb.popupText)
+                    }
+                }
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.End)
+                        .padding(end = 4.dp),
+                ) {
+                    TextButton(onClick = onDismiss) { Text(stringResource(CommonR.string.common_close)) }
+                    TextButton(onClick = onPaste) {
+                        Text(stringResource(CommonR.string.common_paste), fontWeight = FontWeight.SemiBold)
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * [text] cut into pieces of at most [max] characters for [ClipFullTextPopup]'s
+ * lazy list: at the last line break inside the limit, else the last space,
+ * else at the limit itself, one character early rather than between the two
+ * halves of a surrogate pair. The break a piece ends on is dropped, since the
+ * next piece starts on a line of its own anyway. Empty text is one empty piece.
+ */
+internal fun clipTextChunks(text: String, max: Int = ClipTextChunkChars): List<String> {
+    if (text.length <= max) return listOf(text)
+    val out = ArrayList<String>()
+    var start = 0
+    while (start < text.length) {
+        var end = minOf(start + max, text.length)
+        var next = end
+        if (end < text.length) {
+            val newline = text.lastIndexOf('\n', end - 1)
+            val space = text.lastIndexOf(' ', end - 1)
+            when {
+                newline > start -> { end = newline; next = newline + 1 }
+                space > start -> { end = space; next = space + 1 }
+                Character.isHighSurrogate(text[end - 1]) -> { end--; next = end }
+            }
+        }
+        out += text.substring(start, end)
+        start = next
+    }
+    return out
+}
+
+/** How much text one item of [ClipFullTextPopup]'s list holds. */
+internal const val ClipTextChunkChars = 2_000
+
+/** [ClipFullTextPopup]'s size: most of a phone's width, and a few paragraphs tall. */
+private val ClipFullTextMaxWidth = 440.dp
+private val ClipFullTextMaxHeight = 320.dp
 
 /** A clip's body by kind; [maxLines] bounds plain text, the one body that can run on. */
 @Composable
@@ -983,7 +1102,8 @@ private fun ClipNumberBadge(number: Int, modifier: Modifier = Modifier) {
 /**
  * One history card: body by kind, then the number, the pin and the delete
  * circle along the bottom. The number rides the row the circles already
- * take, so turning numbering on never makes a card taller.
+ * take, so turning numbering on never makes a card taller. With [buttons] off
+ * (#414) the row goes too, on any card it would have left empty.
  */
 @Composable
 private fun ClipCard(
@@ -993,6 +1113,7 @@ private fun ClipCard(
     time: String?,
     focused: Boolean,
     outlined: Boolean,
+    buttons: Boolean,
     hold: ClipHold,
     callbacks: ClipboardFieldCallbacks,
 ) {
@@ -1005,7 +1126,10 @@ private fun ClipCard(
     ) {
         if (showInfo) ClipHoldPopup(item, hold, callbacks) { showInfo = false }
         ClipBody(item, maxLines = lines)
-        Row(
+        // Per card: one clip may still have a number or a time to show while
+        // the next, pinned and unnumbered, has nothing left for the row.
+        val footer = buttons || number != null || time != null || item.kind == ClipKind.HTML
+        if (footer) Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 6.dp),
@@ -1025,16 +1149,17 @@ private fun ClipCard(
             }
             if (time != null) ClipTimeText(time, Modifier.weight(1f, fill = false))
             Spacer(Modifier.weight(1f))
-            ClipActions(item, callbacks)
+            if (buttons) ClipActions(item, callbacks)
         }
     }
 }
 
 /**
  * One history row of the list view: the number, the clip across the full
- * width, and the pin and delete circles at the end. Text gets three lines
- * rather than a card's six — a list is for scanning many clips — and a
- * picture is a thumbnail at the start of the row rather than the whole row.
+ * width, and the pin and delete circles at the end ([buttons], #414). Text
+ * gets three lines rather than a card's six — a list is for scanning many
+ * clips — and a picture is a thumbnail at the start of the row rather than the
+ * whole row.
  */
 @Composable
 private fun ClipRow(
@@ -1044,6 +1169,7 @@ private fun ClipRow(
     time: String?,
     focused: Boolean,
     outlined: Boolean,
+    buttons: Boolean,
     hold: ClipHold,
     callbacks: ClipboardFieldCallbacks,
 ) {
@@ -1094,7 +1220,7 @@ private fun ClipRow(
                 if (time != null) ClipTimeText(time, Modifier.padding(top = 2.dp))
             }
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) { ClipActions(item, callbacks) }
+        if (buttons) Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) { ClipActions(item, callbacks) }
     }
 }
 

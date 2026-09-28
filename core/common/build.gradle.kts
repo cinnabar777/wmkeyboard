@@ -2,7 +2,19 @@ plugins {
     alias(libs.plugins.android.library)
     id("wmkeyboard.detekt")
     alias(libs.plugins.kotlin.compose)
+    id("wmkeyboard.compose-metrics")
     alias(libs.plugins.kotlin.serialization)
+    // Applied at the root with their versions; see build.gradle.kts there.
+    id("org.jetbrains.kotlinx.kover")
+    id("com.autonomousapps.dependency-analysis")
+}
+
+// Coverage for the root's merged report (`./gradlew koverHtmlReportUnit`):
+// this module's full-flavour debug unit tests.
+kover {
+    currentProject {
+        createVariant("unit") { add("fullDebug") }
+    }
 }
 
 android {
@@ -50,8 +62,14 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons)
     implementation(libs.androidx.activity.compose)
+    // JankStats, behind a log property (JankMonitor): nothing attaches unless
+    // a developer turns it on.
+    implementation(libs.androidx.metrics.performance)
 
     testImplementation(libs.junit)
+    // Flow assertions: every emission accounted for (NetLogFlowTest).
+    testImplementation(libs.turbine)
+    testImplementation(libs.kotlinx.coroutines.test)
     // Compose's test rule on an Android runtime, so WmSlider can be driven with
     // real touch events inside a real scrolling column.
     testImplementation(libs.robolectric)

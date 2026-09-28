@@ -1041,6 +1041,8 @@ internal fun BackupAutoSettings(repository: SettingsRepository, settings: LiveSe
                 value = intervalSliderIndex(settings.watch { it.autoBackup.intervalHours }).toFloat(),
                 range = 0f..(AutoBackupIntervals.size - 1).toFloat(),
                 display = { backupIntervalLabel(context, intervalAt(it)) },
+                // Hours, then days: a bare number cannot say which.
+                typed = false,
                 default = intervalSliderIndex(SettingsDefaults.autoBackup.intervalHours).toFloat(),
             ) { index ->
                 scope.launch {
@@ -1256,6 +1258,8 @@ internal fun BackupSyncSettings(repository: SettingsRepository, settings: LiveSe
                 value = intervalSliderIndex(settings.watch { it.autoBackup.sync.intervalHours }).toFloat(),
                 range = 0f..(AutoBackupIntervals.size - 1).toFloat(),
                 display = { backupIntervalLabel(context, intervalAt(it)) },
+                // Hours, then days: a bare number cannot say which.
+                typed = false,
                 default = intervalSliderIndex(SettingsDefaults.autoBackup.sync.intervalHours).toFloat(),
             ) { index -> scope.launch { repository.setSyncIntervalHours(intervalAt(index)) } }
         }

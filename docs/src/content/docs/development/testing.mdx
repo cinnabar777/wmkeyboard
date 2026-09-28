@@ -23,18 +23,51 @@ Almost all of it lives in one place:
 
 | Module | JVM test files |
 |---|---|
-| `app` | 345 |
-| `feature/ime` | 74 |
+| `app` | 434 |
+| `feature/ime` | 134 |
+| `core/tools` | 25 |
+| `core/language` | 23 |
 | `feature/tools` | 12 |
-| `core/language` | 18 |
-| `core/tools` | 18 |
-| `core/theme` | 4 |
+| `core/keyman` | 10 |
+| `core/theme` | 9 |
+| `core/common` | 8 |
+| `core/intelligence` | 6 (three in `src/testFull/`, full-flavor only) |
 | `core/emoji` | 2 |
-| `core/keyman` | 7 |
-| `core/common` | 1 |
-| `core/intelligence` | 1 (in `src/testFull/`, full-flavor only) |
+| `core/input` | 1 |
+| `tools/architecture` | 1 (the [architecture rules](#architecture-rules)) |
 
-345 of 482 test files (about 7 in 10) sit in `app/src/test/`, and 12 of the 21 `core/*`/`feature/*` modules have no test source set at all. That's a leftover of how the codebase was split into modules rather than a rule anyone enforces. Tests mostly stayed where they were written. It also means `./gradlew unitTests` is the command you want almost all the time, since scoping to a single module rarely saves you much.
+434 of 665 test files (about two in three) sit in `app/src/test/`, and 11 of the 21 `core/*`/`feature/*` modules have no test source set at all. That's a leftover of how the codebase was split into modules rather than a rule anyone enforces. Tests mostly stayed where they were written. It also means `./gradlew unitTests` is the command you want almost all the time, since scoping to a single module rarely saves you much.
+
+## Coverage
+
+```sh
+./gradlew koverHtmlReportUnit     # build/reports/kover/htmlUnit/index.html
+./gradlew koverXmlReportUnit      # build/reports/kover/reportUnit.xml
+```
+
+[Kover](https://github.com/Kotlin/kotlinx-kover) runs the full-flavor debug unit tests of every module and merges them into one report. The merge is the point. Most tests live in `:app` and exercise `core/*` classes, so a single module's own report would say a library is barely tested when `:app` covers it thoroughly. Generated code (resource ids, `BuildConfig`, serializers, Compose's singletons) and `@Preview` functions are left out. Use the `Unit` tasks rather than the plain `koverHtmlReport`, which runs every variant's tests (lite, release, fast) over the same classes.
+
+## Testing flows
+
+Code that publishes a `Flow` or `StateFlow` is tested with [Turbine](https://github.com/cashapp/turbine), which makes a test account for every emission: an extra one fails the test as surely as a missing one does. That matters when the flow drives a UI. `ShiftStateFlowTest` watches the keyboard's published state while keys are typed on a real `WMKeyboardService` under Robolectric: a shifted letter lets go of the shift exactly once, and caps lock survives typing without announcing anything. `NetLogFlowTest` checks the network log's two flows, what is in flight and when the log changed. A request that started, a second `end()` from a `finally`, or a request begun while logging was off must not make the settings screen re-read the log.
+
+## Architecture rules
+
+```sh
+./gradlew :tools:architecture:test
+```
+
+`tools/architecture` is a test-only JVM module that reads the whole source tree with [Konsist](https://docs.konsist.lemonappdev.com/). It checks rules that compile fine when broken, pass every other test, and cost something later. `unitTests` runs it with everything else:
+
+- **Lite stubs offer what main code uses of the full flavor.** `src/main` compiles against whichever flavor is being built, so a name it uses has to exist in both. The rule fails on a stub with no full file at the same path, a stub declaring something the full flavor doesn't, and main code naming a top-level declaration or an object member that only the full flavor declares. Locally a lite build is the only other thing that would notice, and that is almost never run.
+- **Key composables never take `KeyboardUiState`.** `KeyRow`, `KeyCell`, `KeyButton` and `KeyContent` take a resolved `KeyVisual`. Taking the whole state would make every key recompose on every keystroke (see [Performance tooling](/development/performance/#why-does-a-composable-recompose)).
+- **Nothing launches on `GlobalScope`.**
+- **Every Robolectric test runs on a pinned SDK**, through its source set's `robolectric.properties` or its own `@Config(sdk = …)`. `compileSdk` is the minor level 36.1, for which Robolectric has no runtime.
+- **No Kotlin source holds a raw NUL byte.** One compiles and behaves, but `grep` then skips the file and `git` diffs it as binary.
+- **The dictionary compiler's shared sources exist and stand alone.** `:tools:dictc` compiles a named list of `core/prediction` files on a plain JVM, and a renamed file drops out of that list silently.
+- **Composers are named `*Composer`**, and the keyboard's trace sections are unique and prefixed `WM:`, which the profiling script and its query rely on.
+
+The module scans directories, never the project root: the checkout can hold session worktrees under `.claude/`, each a full copy of the tree.
 
 ## Instrumented and Compose UI tests
 
@@ -78,19 +111,15 @@ When something breaks while you're testing by hand, check <SettingsPath path="Ab
 
 The screen's own intro line is exact about what's in it: "The keyboard never records what you type." Call sites pass what happened, never what you typed, which is what makes the report safe to paste into an issue without reading it line by line first. There's also an opt-in **Include the system log** toggle, off by default, that adds this process's own logcat output, meaning everything the app's libraries printed rather than only what the keyboard chose to record. Turn it on for a hard-to-reproduce bug. Leave it off otherwise, since the keyboard doesn't control what ends up in it.
 
-## Profiling a slow frame
+## Profiling
 
-Release builds carry `<profileable android:shell="true" />`, so `adb shell am profile` and `simpleperf` attach to whatever build is actually on the phone. Without it the shell refuses with *"not debuggable, and not profileable by shell"*, and the only way to see inside a frame is a debug build — which is not the build anyone is running, and whose timings are not the ones to trust. It grants the shell user nothing else: no debugger, no `run-as`, no access to app data.
-
-For the cheaper question of *whether* a frame was late, `adb shell dumpsys gfxinfo com.wasimaster.wmkeyboard framestats` prints the last 120 frames as CSV. Subtract `IntendedVsync` from `FrameCompleted` for the frame's own cost, and compare consecutive `IntendedVsync` values: a gap much wider than one refresh interval is dropped frames, which is what a stutter actually is. `reset` before the interaction and read it straight after.
-
-To see where a long frame went, `adb shell atrace --async_start view gfx sched`, do the thing, then `--async_stop`. Compose runs its measure and layout pass from `AndroidComposeView.dispatchDraw`, so a screen that is slow to compose shows up as one enormous `Record View#draw()` rather than under measure or layout, which is the opposite of where you would look first.
+Performance has a page of its own: [Performance tooling](/development/performance/) covers frame stats, Perfetto traces and the keyboard's own trace sections, jank logging, Compose compiler reports, the macrobenchmarks and the baseline profile.
 
 ## Details & edge cases
 
 - **The unit-test task name is flavor-specific, not module-specific.** `testFullDebugUnitTest` runs against the `full` flavor's dependency set (ML Kit, Whisper, and the rest). If you're chasing a bug that only reproduces in the `lite` build, you need `testLiteDebugUnitTest`, not a different module scope. And in `:app` alone the name carries the language flavour too, so it is `testFullIntlDebugUnitTest` there.
 - **A green JVM suite doesn't mean the feature works on a phone.** The `SvgParserAndroidTest` story above is the concrete example: the JVM's XML stack silently tolerated a call Android's SAX parser rejects outright. If a class calls into an Android or platform API rather than pure Kotlin, treat JVM-green as provisional until it has also run on a device.
-- **`app` is where almost everything lives, tests included.** If you're adding tests for new logic and the surrounding code is in `app/src/main`, its test belongs in `app/src/test` alongside the rest. That isn't an oversight. It matches where about 72% of the existing suite already sits.
+- **`app` is where almost everything lives, tests included.** If you're adding tests for new logic and the surrounding code is in `app/src/main`, its test belongs in `app/src/test` alongside the rest. That isn't an oversight. It matches where about two thirds of the existing suite already sits.
 - Static analysis (`./gradlew staticAnalysis`, lint plus detekt) is a separate gate from either test suite. It's covered on the [building from source](/development/building/) page, not here.
 
 Found a bug while testing and want to file it well? Pull the report from <SettingsPath path="About / Diagnostics" /> rather than describing what you saw from memory. See [privacy at a glance](/privacy/overview/) for what else the app does and doesn't record about you.

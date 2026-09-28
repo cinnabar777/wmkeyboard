@@ -70,6 +70,7 @@ import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -142,11 +143,13 @@ internal fun showMediaCategories(
     /** Passed in rather than read off [state]: the state's own getter needs a
      *  framework call, and this rule is worth having under a plain JVM test. */
     acceptsRichMedia: Boolean,
+    /** Height a row under the grid takes from the panel: the switch's row (#366). */
+    reserved: Dp = 0.dp,
 ): Boolean {
     if (state.mediaCategories.isEmpty()) return false
     if (state.mediaSearchActive || localGrid || !acceptsRichMedia) return false
     if (state.mediaQuery.isNotBlank() && state.mediaCategory == null) return false
-    return fullBleed || keyRowsHeight(state) >= MediaCategoryMinPanelHeight
+    return fullBleed || keyRowsHeight(state) - reserved >= MediaCategoryMinPanelHeight
 }
 
 /**
@@ -508,6 +511,9 @@ private fun MediaSearchBar(
     onQueryTap: () -> Unit,
     attribution: String? = null,
     focused: Boolean = false,
+    // Drawn after the box and its credit: the switch to the emoji and the
+    // other media panel, when it sits up here (issue #366).
+    trailing: (@Composable () -> Unit)? = null,
 ) {
     val kb = LocalKbTheme.current
     Row(
@@ -556,6 +562,10 @@ private fun MediaSearchBar(
                 fontSize = 9.sp,
                 modifier = Modifier.padding(start = 8.dp),
             )
+        }
+        if (trailing != null) {
+            Spacer(Modifier.width(8.dp))
+            trailing()
         }
     }
 }
@@ -734,6 +744,10 @@ internal fun RowScope.GifHeaderSearchBar(
  * @param onReport a result should be reported.
  * @param onDismissAction the open long-press action sheet should close.
  * @param onOpenRoute a settings route should open.
+ * @param switcher the switch to the emoji and the other media panel, drawn at
+ *   the end of the search bar (issue #366). Unused in [fullBleed], whose
+ *   header is the host's to fill.
+ * @param bottomBar the row under the grid that carries that switch instead.
  */
 @Composable
 internal fun GifPanel(
@@ -753,6 +767,8 @@ internal fun GifPanel(
     onReport: (GifItem) -> Unit = {},
     onDismissAction: () -> Unit = {},
     onOpenRoute: (String) -> Unit = {},
+    switcher: (@Composable () -> Unit)? = null,
+    bottomBar: (@Composable () -> Unit)? = null,
 ) {
     val ui = if (stickers) state.sticker else state.gif
     val tool = if (stickers) ToolbarTool.STICKER else ToolbarTool.GIF
@@ -787,6 +803,7 @@ internal fun GifPanel(
                     onQueryTap = onQueryTap,
                     attribution = gifAttribution(state, stickers),
                     focused = state.focusedIndex(FocusRegion.SEARCH) == 0,
+                    trailing = switcher,
                 )
             }
             if (chips.isNotEmpty() && !state.mediaSearchActive) {
@@ -823,7 +840,8 @@ internal fun GifPanel(
                     },
                 )
             }
-            if (showMediaCategories(state, localGrid, fullBleed, state.acceptsRichMedia)) {
+            val reserved = if (bottomBar != null) mediaBottomRowHeight(state) else 0.dp
+            if (showMediaCategories(state, localGrid, fullBleed, state.acceptsRichMedia, reserved)) {
                 // Trending first, so there is always a way back out of a
                 // category — and somewhere for the focus ring to sit when no
                 // category is on.
@@ -854,51 +872,60 @@ internal fun GifPanel(
             // Not while the search box is up — the panel is squeezed to a couple
             // of rows there, and the notice is waiting when the results land.
             if (unsupported && !state.mediaSearchActive) MediaUnsupportedNotice(stickers)
-            when (ui) {
-                MediaUi.NeedKey -> PanelNotice(
-                    if (stickers) {
-                        stringResource(R.string.ime_sticker_need_key_body)
-                    } else {
-                        stringResource(R.string.ime_gif_need_key_body)
-                    },
-                    actionLabel = stringResource(R.string.ime_open_settings_action),
-                    onAction = { onOpenToolSettings(tool) },
-                )
-                MediaUi.Loading -> PanelSpinner()
-                is MediaUi.Error -> PanelNotice(
-                    ui.message,
-                    actionLabel = stringResource(CommonR.string.common_retry),
-                    onAction = onRetry,
-                )
-                is MediaUi.Metered -> MeteredNotice(ui.canAllow, onRetry)
-                is MediaUi.Ready -> {
-                    if (ui.items.isEmpty()) {
-                        LocalStickerEmptyNotice(
-                            localGrid = localGrid,
-                            state = state,
-                            query = ui.query,
-                            stickers = stickers,
-                            onOpenRoute = onOpenRoute,
-                        )
-                    } else {
-                        // Dimmed rather than removed when the field can't take
-                        // them: long-press (save, copy, report) still works, and
-                        // the user can see what they'd get in a field that
-                        // accepts it.
-                        Box(modifier = Modifier.alpha(if (unsupported) 0.45f else 1f)) {
-                            GifGrid(
-                                items = ui.items,
-                                downloadingId = state.mediaDownloadingId,
-                                progress = state.mediaDownloadProgress,
-                                onSelect = onSelect,
-                                onLongPress = onLongPress,
-                                panel = state.panel,
-                                focused = state.focusedIndex(),
+            // Weighted, so the row under it keeps its height and the results,
+            // the notices and the spinner fill what is left.
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+            ) {
+                when (ui) {
+                    MediaUi.NeedKey -> PanelNotice(
+                        if (stickers) {
+                            stringResource(R.string.ime_sticker_need_key_body)
+                        } else {
+                            stringResource(R.string.ime_gif_need_key_body)
+                        },
+                        actionLabel = stringResource(R.string.ime_open_settings_action),
+                        onAction = { onOpenToolSettings(tool) },
+                    )
+                    MediaUi.Loading -> PanelSpinner()
+                    is MediaUi.Error -> PanelNotice(
+                        ui.message,
+                        actionLabel = stringResource(CommonR.string.common_retry),
+                        onAction = onRetry,
+                    )
+                    is MediaUi.Metered -> MeteredNotice(ui.canAllow, onRetry)
+                    is MediaUi.Ready -> {
+                        if (ui.items.isEmpty()) {
+                            LocalStickerEmptyNotice(
+                                localGrid = localGrid,
+                                state = state,
+                                query = ui.query,
+                                stickers = stickers,
+                                onOpenRoute = onOpenRoute,
                             )
+                        } else {
+                            // Dimmed rather than removed when the field can't take
+                            // them: long-press (save, copy, report) still works, and
+                            // the user can see what they'd get in a field that
+                            // accepts it.
+                            Box(modifier = Modifier.alpha(if (unsupported) 0.45f else 1f)) {
+                                GifGrid(
+                                    items = ui.items,
+                                    downloadingId = state.mediaDownloadingId,
+                                    progress = state.mediaDownloadProgress,
+                                    onSelect = onSelect,
+                                    onLongPress = onLongPress,
+                                    panel = state.panel,
+                                    focused = state.focusedIndex(),
+                                )
+                            }
                         }
                     }
                 }
             }
+            bottomBar?.invoke()
         }
         if (choosingAddPack) {
             StickerAddPackSheet(

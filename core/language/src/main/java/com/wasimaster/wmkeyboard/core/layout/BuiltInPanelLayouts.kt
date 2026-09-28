@@ -1,5 +1,6 @@
 package com.wasimaster.wmkeyboard.core.layout
 
+import com.wasimaster.wmkeyboard.core.settings.MediaSwitcher
 import com.wasimaster.wmkeyboard.core.settings.TextEditAction
 import com.wasimaster.wmkeyboard.core.settings.repeats
 
@@ -47,21 +48,53 @@ object BuiltInPanelLayouts {
     )
 
     /**
+     * [bottomRow] with the emoji / GIF / sticker switch between abc and space
+     * (issue #366). The GIF and sticker panels draw this same row under their
+     * grids, so the switch and the keys either side of it do not move when one
+     * panel gives way to another.
+     */
+    val mediaBottomRow: List<Key> = listOf(
+        Key("ABC", action = KeyAction.Letters, width = 1.5f),
+        field(PanelFieldKind.MEDIA_TABS, 3f),
+        Key(" ", action = KeyAction.Space, width = 4f),
+        Key("⌫", action = KeyAction.Delete, width = 1.5f),
+    )
+
+    /**
+     * The emoji panel with its switch to GIFs and stickers where [switcher]
+     * says (issue #366): in the bottom row, at the end of the tab strip, or
+     * not at all. Like the Numpad's digit order, the setting reaches only the
+     * shipped panel; one the user laid out is drawn as laid out.
+     *
      * Search pill and category tabs across the top, the grid, then the bottom
      * row. The strip row is fixed at 0.7 of a key (the tabs are 32 dp icons),
      * the bottom row at a full key, and the grid takes everything between.
      */
-    val EMOJI: PanelLayoutSpec = PanelLayoutSpec(
-        panel = PanelKind.EMOJI,
-        grid = LayerSpec(
-            rows = listOf(
-                listOf(field(PanelFieldKind.EMOJI_SEARCH, 1f), field(PanelFieldKind.EMOJI_TABS, 9f)),
-                listOf(field(PanelFieldKind.EMOJI_GRID, 10f)),
-                bottomRow,
+    fun emoji(switcher: MediaSwitcher): PanelLayoutSpec {
+        val strip = if (switcher == MediaSwitcher.TOP) {
+            listOf(
+                field(PanelFieldKind.EMOJI_SEARCH, 1f),
+                field(PanelFieldKind.EMOJI_TABS, 7f),
+                field(PanelFieldKind.MEDIA_TABS, 2f),
+            )
+        } else {
+            listOf(field(PanelFieldKind.EMOJI_SEARCH, 1f), field(PanelFieldKind.EMOJI_TABS, 9f))
+        }
+        return PanelLayoutSpec(
+            panel = PanelKind.EMOJI,
+            grid = LayerSpec(
+                rows = listOf(
+                    strip,
+                    listOf(field(PanelFieldKind.EMOJI_GRID, 10f)),
+                    if (switcher == MediaSwitcher.BOTTOM) mediaBottomRow else bottomRow,
+                ),
+                rowHeights = listOf(0.7f, 3f, 1f),
             ),
-            rowHeights = listOf(0.7f, 3f, 1f),
-        ),
-    )
+        )
+    }
+
+    /** The emoji panel as it ships: the switch in the bottom row. */
+    val EMOJI: PanelLayoutSpec = emoji(MediaSwitcher.BOTTOM)
 
     /**
      * The clipboard: search pill and the grid / list switch, the fragment

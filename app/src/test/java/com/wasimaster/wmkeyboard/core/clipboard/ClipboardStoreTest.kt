@@ -356,6 +356,12 @@ class ClipboardStoreTest {
         assertEquals(listOf("clip 5", "clip 4", "clip 3"), texts)
     }
 
+    @Test fun zeroMaxItemsKeepsEveryClip() {
+        val store = ClipboardStore(null, expiryMillis = 0, maxItems = 0)
+        repeat(600) { store.add("clip $it", now = 1000L + it) }
+        assertEquals(600, store.items(now = 9000).size)
+    }
+
     @Test fun pinnedItemsDoNotCountAgainstTheCap() {
         val store = ClipboardStore(null, expiryMillis = 0, maxItems = 2)
         val pinned = store.add("keep me", now = 1000)!!

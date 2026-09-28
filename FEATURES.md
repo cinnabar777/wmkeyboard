@@ -2017,7 +2017,7 @@ something only some of them do. Unmarked means Gboard or SwiftKey has it too.
     - Orphaned image files swept at load — Files in the images dir with no matching item are deleted on restore
   - History bounds `uncommon`
     - Expiry in hours — 0–168, default 24; 0 disables expiry
-    - Unpinned entry cap — 5–500, default 100; oldest unpinned drops as new ones arrive
+    - Unpinned entry cap — stops 5–5,000 or Unlimited (0), default 100; oldest unpinned drops as new ones arrive
     - Pinning exempts a clip from expiry, the cap and the sensitive timer
     - Pinned-first or pinned-last ordering — Toggle; newest-first within each group either way
     - Per-clip text limit — clipboard.maxTextChars, default 0 (no limit), stops 1k–100k: capClipText at add and edit, surrogate-safe; markup dropped when the cut makes it lie; the system clipboard is untouched
@@ -2028,7 +2028,9 @@ something only some of them do. Unmarked means Gboard or SwiftKey has it too.
     - Time on each clip — clipboard.timeLabel NONE / COPIED (relative, abbreviated) / EXPIRES (countdown from ClipItem.expiresAt, the same rule prune uses), refreshed every 30 s only while shown
     - Swipe a card off to delete — Card follows the finger and fades; release past 40% of its width deletes
     - Press-and-hold info popup — Relative + exact copy time, source app, type, and size/duration/char count
-    - Per-card pin and delete buttons
+    - View full text — hold popup turns into the clip's whole text, scrolling in 2,000-char lazy chunks, with Paste and Close; not for hidden clips (#414)
+    - Per-card pin and delete buttons — clipboard.cardButtons, default on; off moves Pin/Delete into the hold popup and drops a card's bottom row when it has no number, time or rich-text tag (#414)
+    - Height bar on top of the panel — drag up to grow the panel over the app (clipboard.panelExtraHeightDp, 0–600 dp, fitted to 80% of the screen); the window is held at full height through the drag so it resizes twice, not per frame (#414)
     - Full-bleed panel — Panel takes the toolbar's row for more cards; on by default
     - Panel layout (issue #63) — search box, fragment strip and history are field cells of a PanelLayoutSpec; an abc/space/backspace row is a row of keys the user adds (the old bottom-row switch seeds it)
     - Send an image clip as a sticker — Info-popup action converts it to the 512px transparent WebP sticker format

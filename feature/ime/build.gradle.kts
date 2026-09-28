@@ -4,7 +4,19 @@ plugins {
     alias(libs.plugins.android.library)
     id("wmkeyboard.detekt")
     alias(libs.plugins.kotlin.compose)
+    id("wmkeyboard.compose-metrics")
     alias(libs.plugins.kotlin.serialization)
+    // Applied at the root with their versions; see build.gradle.kts there.
+    id("org.jetbrains.kotlinx.kover")
+    id("com.autonomousapps.dependency-analysis")
+}
+
+// Coverage for the root's merged report (`./gradlew koverHtmlReportUnit`):
+// this module's full-flavour debug unit tests.
+kover {
+    currentProject {
+        createVariant("unit") { add("fullDebug") }
+    }
 }
 
 // Same channel flag :app reads (see the flag() helper there): a Play-store
@@ -60,17 +72,6 @@ android {
     testOptions.unitTests.isIncludeAndroidResources = true
 }
 
-// Compose compiler skippability/stability report, on demand:
-//   ./gradlew :feature:ime:assembleFullDebug -PcomposeMetrics=true
-// then read build/compose/reports/*-composables.txt. Inert without the flag, so
-// ordinary builds neither slow down nor write the reports.
-if (providers.gradleProperty("composeMetrics").isPresent) {
-    composeCompiler {
-        metricsDestination.set(layout.buildDirectory.dir("compose/metrics"))
-        reportsDestination.set(layout.buildDirectory.dir("compose/reports"))
-    }
-}
-
 kotlin {
     compilerOptions {
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
@@ -102,6 +103,9 @@ dependencies {
     api(project(":feature:tools"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.android)
+    // Named sections in system traces (ImeTrace). A native flag check when
+    // nobody is tracing, so it stays in release builds.
+    implementation(libs.androidx.tracing)
     implementation(libs.kotlinx.serialization.json)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
@@ -134,6 +138,8 @@ dependencies {
     testImplementation(libs.junit)
     // A virtual clock for the coroutine plumbing around the input connection.
     testImplementation(libs.kotlinx.coroutines.test)
+    // Flow assertions on the published keyboard state: every emission accounted for.
+    testImplementation(libs.turbine)
     // An Android runtime on the JVM, so a test can drive WMKeyboardService
     // itself rather than only the pure helpers around it.
     testImplementation(libs.robolectric)

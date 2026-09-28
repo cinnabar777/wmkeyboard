@@ -67,6 +67,7 @@ import androidx.core.view.inputmethod.EditorInfoCompat
 import androidx.core.view.inputmethod.InputConnectionCompat
 import androidx.core.view.inputmethod.InputContentInfoCompat
 import androidx.core.graphics.createBitmap
+import androidx.tracing.trace
 import com.wasimaster.wmkeyboard.config.BuildConfig
 import com.wasimaster.wmkeyboard.app.CalendarPermissionActivity
 import com.wasimaster.wmkeyboard.app.CameraPermissionActivity
@@ -328,7 +329,9 @@ import com.wasimaster.wmkeyboard.core.settings.HAND_MODEL_FILE
 import com.wasimaster.wmkeyboard.core.settings.LEARNED_CORRECTIONS_FILE
 import com.wasimaster.wmkeyboard.core.settings.PHONETIC_SCRIPT_CHOICES_FILE
 import com.wasimaster.wmkeyboard.core.settings.TAP_MODEL_FILE
+import com.wasimaster.wmkeyboard.core.perf.JankMonitor
 import com.wasimaster.wmkeyboard.core.text.EmojiGraphemes
+import com.wasimaster.wmkeyboard.core.text.Graphemes
 import com.wasimaster.wmkeyboard.core.text.WordDelete
 import com.wasimaster.wmkeyboard.core.settings.SuggestionHotkeyMode
 import com.wasimaster.wmkeyboard.core.tools.BraveSearchClient
@@ -572,7 +575,9 @@ import com.wasimaster.wmkeyboard.ime.ui.InlineChipPaletteReporter
 import com.wasimaster.wmkeyboard.ime.ui.LocalInlineChipPaletteReporter
 import com.wasimaster.wmkeyboard.ime.ui.LocalSystemNavBarPainter
 import com.wasimaster.wmkeyboard.ime.ui.SystemNavBarPainter
+import com.wasimaster.wmkeyboard.ime.ui.MediaTabPanels
 import com.wasimaster.wmkeyboard.ime.ui.macroOpenIntents
+import com.wasimaster.wmkeyboard.ime.ui.mediaOpenerTarget
 import com.wasimaster.wmkeyboard.ime.ui.navigationBarWantsDarkIcons
 import android.inputmethodservice.InputMethodService
 import java.io.ByteArrayOutputStream
@@ -627,6 +632,9 @@ open class WMKeyboardService : InputMethodService() {
 
     /** The bubble over the caret while a drag moves it (discussion #303). */
     private val caretMagnifier = CaretMagnifierController(serviceScope)
+
+    /** Per-frame jank logging, off unless `log.tag.WMJank` asks for it; see [JankMonitor]. */
+    private val jankMonitor = JankMonitor("keyboard")
 
     /**
      * The one thread a [SuggestionEngine] pass may run on (issue #313).
@@ -2987,7 +2995,10 @@ open class WMKeyboardService : InputMethodService() {
         // scope is Main.immediate and every update comes from the main thread,
         // so this resumes inside the update rather than a frame later.
         serviceScope.launch {
-            _uiState.collect { if (windowOnScreen) _shownState.value = it }
+            _uiState.collect {
+                if (windowOnScreen) _shownState.value = it
+                jankMonitor.screen(it.panel.name)
+            }
         }
         // Marks the network activity log's rows made while incognito is on,
         // whether the switch or the field turned it on.
@@ -4227,7 +4238,9 @@ open class WMKeyboardService : InputMethodService() {
      */
     private var inputRootView: View? = null
 
-    override fun onCreateInputView(): View {
+    override fun onCreateInputView(): View = trace(ImeTrace.CREATE_INPUT_VIEW) { createInputView() }
+
+    private fun createInputView(): View {
         // The window is about to draw for the first time, so the gated state
         // starts from whatever the service has now rather than from an empty
         // keyboard — see [_shownState].
@@ -5011,7 +5024,10 @@ open class WMKeyboardService : InputMethodService() {
         reshowPinned()
     }
 
-    override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
+    override fun onStartInputView(info: EditorInfo?, restarting: Boolean) =
+        trace(ImeTrace.START_INPUT_VIEW) { startInputView(info, restarting) }
+
+    private fun startInputView(info: EditorInfo?, restarting: Boolean) {
         super.onStartInputView(info, restarting)
         // The keyboard is up, by the system's hand or ours; a hide that
         // suspended pinning has run its course.
@@ -5437,6 +5453,17 @@ open class WMKeyboardService : InputMethodService() {
     }
 
     override fun onUpdateSelection(
+        oldSelStart: Int,
+        oldSelEnd: Int,
+        newSelStart: Int,
+        newSelEnd: Int,
+        candidatesStart: Int,
+        candidatesEnd: Int,
+    ) = trace(ImeTrace.UPDATE_SELECTION) {
+        updateSelection(oldSelStart, oldSelEnd, newSelStart, newSelEnd, candidatesStart, candidatesEnd)
+    }
+
+    private fun updateSelection(
         oldSelStart: Int,
         oldSelEnd: Int,
         newSelStart: Int,
@@ -5897,6 +5924,7 @@ open class WMKeyboardService : InputMethodService() {
         super.onWindowShown()
         onScreenAgain()
         lifecycleOwner.onResume()
+        jankMonitor.start(window.window)
     }
 
     /**
@@ -5911,6 +5939,7 @@ open class WMKeyboardService : InputMethodService() {
         // composition stops being handed new state — see [_shownState].
         windowOnScreen = false
         lifecycleOwner.onStop()
+        jankMonitor.stop()
     }
 
     override fun onFinishInputView(finishingInput: Boolean) {
@@ -6286,7 +6315,9 @@ open class WMKeyboardService : InputMethodService() {
 
     // No vibrate() here: press-time haptics fire from the UI's pointer-down
     // callback (onKeyPressed) so feedback lands on touch, not on release.
-    fun onKey(key: Key) {
+    fun onKey(key: Key) = trace(ImeTrace.KEY) { handleKey(key) }
+
+    private fun handleKey(key: Key) {
         // Space, backspace and enter on a Keyman layout: the layer may say what
         // modifiers the rules see them with and where they lead, and the
         // keyboard's PostKeystroke group runs after them as after every other
@@ -6442,7 +6473,7 @@ open class WMKeyboardService : InputMethodService() {
             KeyAction.LanguageSwitch -> switchLanguage()
             KeyAction.InputMethodPicker -> showInputMethodPicker()
             is KeyAction.SwitchInputMethod -> switchToInputMethod((key.action as KeyAction.SwitchInputMethod).id)
-            KeyAction.Emoji -> onPanelChange(PanelMode.EMOJI, haptic = false)
+            KeyAction.Emoji -> onPanelChange(emojiOpenerTarget(), haptic = false)
             // Produced only by a long-press on ?123 when the opt-in is set.
             KeyAction.Numpad -> onPanelChange(PanelMode.NUMPAD, haptic = false)
             // A key — or a long-press alternate — bound to a tool: voice, the
@@ -8852,9 +8883,11 @@ open class WMKeyboardService : InputMethodService() {
     /**
      * How much of [before] one character-sized delete takes: a whole
      * multi-code-point emoji (☠️, 👍🏽, 👨‍👩‍👧) rather than a piece of one, a
-     * whole Bengali-style conjunct where the language asks for it, a surrogate
-     * pair rather than half of one, and otherwise a single code unit. 0 for
-     * empty text.
+     * whole Bengali-style conjunct where the language asks for it, and
+     * otherwise [Graphemes.backspaceLength] — one code point, so a surrogate
+     * pair is never halved and a typed accent or harakah comes off on its own,
+     * but an invisible part (a variation selector, the LF of CR LF, a Hangul
+     * jamo) together with what it belongs to. 0 for empty text.
      *
      * Shared by the backspace key and the character-mode backspace swipe, so
      * the two cannot disagree about what one character is.
@@ -8867,9 +8900,7 @@ open class WMKeyboardService : InputMethodService() {
             emojiLength > 0 -> emojiLength
             state.language.id in state.settings.conjunctBackspaceLanguages ->
                 state.composer.deleteLength(before).coerceAtLeast(1)
-            before.length >= 2 &&
-                Character.isSurrogatePair(before[before.length - 2], before[before.length - 1]) -> 2
-            else -> 1
+            else -> Graphemes.backspaceLength(before)
         }
     }
 
@@ -9327,7 +9358,7 @@ open class WMKeyboardService : InputMethodService() {
         // same way backspace's lookback does.
         val after = ic.getTextAfterCursor(64, 0)
         if (after.isNullOrEmpty()) return
-        val forward = EmojiGraphemes.forwardDeleteLength(after).coerceAtLeast(1)
+        val forward = Graphemes.firstLength(after).coerceAtLeast(1)
         // Mirrored for the same reason backspace mirrors its own deletions:
         // a caret parked inside a word is being followed, and an edit the
         // mirror never heard about leaves it a character behind the field.
@@ -10058,7 +10089,7 @@ open class WMKeyboardService : InputMethodService() {
             }
             val step = when {
                 deleteSwipeForward && byWord -> WordDelete.lengthAfter(rest)
-                deleteSwipeForward -> EmojiGraphemes.forwardDeleteLength(rest).coerceAtLeast(1)
+                deleteSwipeForward -> Graphemes.firstLength(rest).coerceAtLeast(1)
                 byWord -> WordDelete.lengthBefore(rest)
                 else -> charDeleteLength(rest)
             }
@@ -15538,7 +15569,9 @@ open class WMKeyboardService : InputMethodService() {
         return commitResolution?.takeIf { it.typed == typed }
     }
 
-    private fun refreshSuggestions() {
+    private fun refreshSuggestions() = trace(ImeTrace.REFRESH_SUGGESTIONS) { refreshStrip() }
+
+    private fun refreshStrip() {
         val state = _uiState.value
         if (emailFieldForceActive(state)) {
             refreshEmailFieldSuggestions()
@@ -15683,20 +15716,22 @@ open class WMKeyboardService : InputMethodService() {
                 // completed from what they spelled, not from the roman keys;
                 // the tap and key frames belong to those keys, so they stay out.
                 val completing = state.composer.completionLanguage
-                val deep = engine.suggest(
-                    composing = if (completing != null) state.composer.composeBuffer(typed) else typed,
-                    previousWord = previousWord,
-                    phoneticLanguage = state.composer.phoneticLanguage,
-                    limit = askFor,
-                    touch = touchFrame.takeIf { completing == null },
-                    previousWord2 = previousWord2,
-                    recentWords = recentSnapshot,
-                    allowRerank = true,
-                    keys = keyFrame.takeIf { completing == null },
-                    previousWord3 = previousWord3,
-                    phoneticSlots = state.settings.suggestionStrip.slotCount,
-                    completionLanguage = completing,
-                )
+                val deep = trace(ImeTrace.SUGGEST) {
+                    engine.suggest(
+                        composing = if (completing != null) state.composer.composeBuffer(typed) else typed,
+                        previousWord = previousWord,
+                        phoneticLanguage = state.composer.phoneticLanguage,
+                        limit = askFor,
+                        touch = touchFrame.takeIf { completing == null },
+                        previousWord2 = previousWord2,
+                        recentWords = recentSnapshot,
+                        allowRerank = true,
+                        keys = keyFrame.takeIf { completing == null },
+                        previousWord3 = previousWord3,
+                        phoneticSlots = state.settings.suggestionStrip.slotCount,
+                        completionLanguage = completing,
+                    )
+                }
                 // The walk itself cannot be interrupted — the engine has no
                 // suspension point in it — but everything after it can be, and
                 // on a phonetic or autocorrecting board what follows is not
@@ -16933,8 +16968,15 @@ open class WMKeyboardService : InputMethodService() {
     /** The sources a sandbox decode is restricted to: the words this user has written. */
     private val LEARNED_TIER = setOf(FuzzyBeamSearch.Tier.USER)
 
-    /** Decodes one stroke against the active language's word sources. */
+    /** Decodes one stroke against the active language's word sources; see [decodeStroke]. */
     private fun glideDecode(
+        points: List<GesturePoint>,
+        keys: List<KeyCenter>,
+        keyWidthPx: Float,
+        guessAhead: Boolean = true,
+    ): GlideReading = trace(ImeTrace.GLIDE_DECODE) { decodeStroke(points, keys, keyWidthPx, guessAhead) }
+
+    private fun decodeStroke(
         points: List<GesturePoint>,
         keys: List<KeyCenter>,
         keyWidthPx: Float,
@@ -18515,6 +18557,18 @@ open class WMKeyboardService : InputMethodService() {
     }
 
     /**
+     * Which of emoji, GIFs and stickers was open last, for the emoji key to
+     * reopen when that setting is on (issue #366). The session's memory only:
+     * a keyboard that restarts opens on emoji, as a fresh one does.
+     */
+    private var lastMediaPanel: PanelMode = PanelMode.EMOJI
+
+    /** The panel the emoji key and the emoji tool open; see [mediaOpenerTarget]. */
+    private fun emojiOpenerTarget(): PanelMode = _uiState.value.let {
+        mediaOpenerTarget(it.panel, lastMediaPanel, it.settings)
+    }
+
+    /**
      * The dispatch itself, once the caller's own gating has passed, plus the two
      * tests every caller shares: a lite build ships fewer tools than the enum
      * lists, and a search tool loses its key the moment it is cleared.
@@ -18524,7 +18578,7 @@ open class WMKeyboardService : InputMethodService() {
         val settings = _uiState.value.settings
         if (!isUsableTool(tool, settings)) return
         when (tool) {
-            ToolbarTool.EMOJI -> onPanelChange(PanelMode.EMOJI)
+            ToolbarTool.EMOJI -> onPanelChange(emojiOpenerTarget())
             ToolbarTool.CLIPBOARD -> {
                 if (isClipboardAccessible()) onPanelChange(PanelMode.CLIPBOARD)
             }
@@ -18786,6 +18840,9 @@ open class WMKeyboardService : InputMethodService() {
                 ocrImage = null,
             )
         }
+        // Whichever of emoji, GIFs and stickers is now up is the one the
+        // emoji key reopens next time, when that setting is on (#366).
+        _uiState.value.panel.takeIf { it in MediaTabPanels }?.let { lastMediaPanel = it }
         // Leaving the panel ends the plugin session outright. Not paused, not
         // backgrounded: the Globals are dropped and the thread is shut down, so
         // after this there is no plugin left in the process to receive
@@ -30254,7 +30311,18 @@ open class WMKeyboardService : InputMethodService() {
         onOpenLink = ::onClipboardOpenLink,
         onViewImage = ::onClipboardViewImage,
         onExtractText = ::onClipboardExtractText,
+        onPanelHeight = ::onClipboardPanelHeight,
     )
+
+    /**
+     * The clipboard panel's height bar let go (#414): [extraDp] is how much
+     * taller than the keyboard the panel opens from now on, the setting the
+     * settings screen's Panel height slider writes.
+     */
+    fun onClipboardPanelHeight(extraDp: Int) {
+        if (extraDp == _uiState.value.settings.clipboard.panelExtraHeightDp) return
+        serviceScope.launch { settingsRepository.setClipboardPanelExtraHeightDp(extraDp) }
+    }
 
     /**
      * Opens a link clip in the browser, from its press-and-hold popup (#371).

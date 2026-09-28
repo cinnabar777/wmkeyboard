@@ -2,6 +2,17 @@ plugins {
     alias(libs.plugins.android.library)
     id("wmkeyboard.detekt")
     alias(libs.plugins.kotlin.serialization)
+    // Applied at the root with their versions; see build.gradle.kts there.
+    id("org.jetbrains.kotlinx.kover")
+    id("com.autonomousapps.dependency-analysis")
+}
+
+// Coverage for the root's merged report (`./gradlew koverHtmlReportUnit`):
+// this module's full-flavour debug unit tests.
+kover {
+    currentProject {
+        createVariant("unit") { add("fullDebug") }
+    }
 }
 
 // The KDE Connect protocol engine (issue #285). An Android library because

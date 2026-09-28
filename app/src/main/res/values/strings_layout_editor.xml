@@ -596,6 +596,7 @@
     <string name="field_name_emoji_tabs">Emoji categories</string>
     <string name="field_name_emoji_search">Emoji search</string>
     <string name="field_name_emoji_grid">Emoji grid</string>
+    <string name="field_name_media_tabs">Emoji, GIF and sticker switch</string>
     <string name="field_name_clipboard_search">Clipboard search</string>
     <string name="field_name_clipboard_entities">Copied fragments</string>
     <string name="field_name_clipboard_list">Clipboard history</string>

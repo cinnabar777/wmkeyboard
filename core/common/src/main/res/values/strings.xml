@@ -56,6 +56,11 @@
     <!-- Content descriptions of the two buttons of a number stepper. %1$s is the setting's own name. -->
     <string name="common_decrease_setting_desc">Decrease %1$s</string>
     <string name="common_increase_setting_desc">Increase %1$s</string>
+    <!-- Click label of a slider's value, which opens a field to type the value in. %1$s is the setting's own name. -->
+    <string name="common_type_setting_value_desc">Type a value for %1$s</string>
+    <!-- Under the field that takes a slider's value. %1$s and %2$s are the slider's two ends as it shows them, for example "100 ms". -->
+    <string name="common_value_range">From %1$s to %2$s</string>
+    <string name="common_value_range_error">Type a number from %1$s to %2$s</string>
 
     <!-- ================================================================== -->
     <!-- States and values.                                                 -->

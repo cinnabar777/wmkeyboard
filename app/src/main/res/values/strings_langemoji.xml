@@ -97,6 +97,14 @@
     <string name="langemoji_emoji_close_after_insert_title">Return to the keyboard after you insert</string>
     <string name="langemoji_emoji_close_after_insert_subtitle">Close the panel when you insert one emoji or paste one clip</string>
     <string name="langemoji_emoji_close_after_insert_info">By default, the emoji panel and the clipboard panel stay open, so that you can select several items. Turn this on to go back to the keys directly after one emoji or one clipboard paste.</string>
+    <string name="langemoji_media_switcher_title">Switch to GIFs and stickers</string>
+    <string name="langemoji_media_switcher_subtitle">Where the emoji, GIF and sticker panels show the buttons that go between them</string>
+    <string name="langemoji_media_switcher_info">The switch has one button for each of the emoji panel, the GIF panel and the sticker panel, so that you can go from one to the next directly. It is at the same place in all three panels. \"Bottom\" puts it in the bottom row, between ABC and the space bar. \"Top\" puts it at the end of the search row. The GIF button and the sticker button show only while those tools are on. If you changed the layout of the emoji panel, the switch is where your layout puts it. To add it, use the \"Emoji, GIF and sticker switch\" part in the panel layout editor.</string>
+    <string name="langemoji_media_switcher_top">Top</string>
+    <string name="langemoji_media_switcher_bottom">Bottom</string>
+    <string name="langemoji_media_remember_title">Open the last used panel</string>
+    <string name="langemoji_media_remember_subtitle">The emoji key opens emoji, GIFs or stickers, the same as you left them</string>
+    <string name="langemoji_media_remember_info">When this is on, the emoji key and the emoji tool open the panel of the three that you used last. If one of the three panels is open, they close it. When this is off, the emoji key always opens the emoji panel. The keyboard forgets the last panel when it restarts.</string>
     <string name="langemoji_emoji_tab_mode_title">History tab</string>
     <string name="langemoji_emoji_tab_mode_subtitle">What the first tab of the emoji panel shows</string>
     <string name="langemoji_emoji_tab_mode_info">\"Recent\" lists emoji in the order that you used them last. \"Most used\" puts the emoji that you use most often first. The keyboard always keeps your favourite emoji at the start of both lists.</string>

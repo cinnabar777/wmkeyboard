@@ -2,6 +2,7 @@ package com.wasimaster.wmkeyboard.core.input.composer
 
 import com.wasimaster.wmkeyboard.core.script.ScriptDef
 import com.wasimaster.wmkeyboard.core.script.ScriptId
+import com.wasimaster.wmkeyboard.core.text.Graphemes
 import com.wasimaster.wmkeyboard.core.transliteration.BengaliGraphemes
 
 /**
@@ -59,8 +60,9 @@ internal fun viramaFor(id: ScriptId): Char? = when (id) {
 
 /**
  * Generic Brahmic cluster deletion: swallow trailing combining marks, then a
- * base, then any preceding (virama + base) pairs. Falls back to a surrogate
- * pair / single char when the text does not end in [range]. Bengali does not use
+ * base, then any preceding (virama + base) pairs. Falls back to the ordinary
+ * backspace rule ([Graphemes.backspaceLength]) when the text does not end in
+ * [range]. Bengali does not use
  * this — it has its own tested path — so this is exercised by the scripts added
  * in Phase 5.
  */
@@ -68,9 +70,7 @@ internal fun clusterDeleteLength(text: CharSequence, range: IntRange, virama: Ch
     if (text.isEmpty()) return 0
     val last = text.length - 1
     fun inScript(c: Char) = c.code in range
-    if (!inScript(text[last])) {
-        return if (last >= 1 && Character.isSurrogatePair(text[last - 1], text[last])) 2 else 1
-    }
+    if (!inScript(text[last])) return Graphemes.backspaceLength(text)
     var i = last
     while (i >= 0 && inScript(text[i]) && isCombiningMark(text[i])) i--
     if (i < 0) return text.length

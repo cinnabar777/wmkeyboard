@@ -4,7 +4,7 @@
   password or code is handled. It used to be the Clipboard tool page; the tool
   page now holds one row that opens this, the same shape the Emoji tool has.
 -->
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- The history group. -->
     <string name="clipboard_history_group">History</string>
@@ -30,7 +30,9 @@
     <string name="clipboard_expiry_never">never</string>
     <string name="clipboard_max_title">Maximum entries</string>
     <string name="clipboard_max_subtitle">How many unpinned clips the history keeps</string>
-    <string name="clipboard_max_info">This is the second limit on the history. The clipboard expiry above is the first one. A busy day of copying can make hundreds of clips well inside the expiry time. When the panel is full, each new copy deletes the oldest unpinned clip. Pinned clips do not count against this limit, and the keyboard never deletes them.</string>
+    <string name="clipboard_max_info">This is the second limit on the history. The clipboard expiry above is the first one. A busy day of copying can make hundreds of clips well inside the expiry time. When the panel is full, each new copy deletes the oldest unpinned clip. Pinned clips do not count against this limit, and the keyboard never deletes them. Unlimited keeps every clip until the expiry deletes it. With the expiry set to never as well, nothing is deleted, and a very long history makes the panel slower to open.</string>
+    <!-- Slider readout when the clipboard history keeps any number of clips. -->
+    <string name="clipboard_max_unlimited">Unlimited</string>
     <string name="clipboard_full_bleed_title">Full-screen clipboard panel</string>
     <string name="clipboard_full_bleed_subtitle">Hide the toolbar behind a back button so the history gets the whole keyboard</string>
     <string name="clipboard_full_bleed_info">The clipboard panel takes the whole keyboard. The toolbar, the emoji row and the symbol row step aside, and a slim back header takes their place. The history then shows more clips at once. While you search the history, the panel returns to its compact form so the keys fit below it. This setting is on by default.</string>
@@ -58,7 +60,7 @@
     <string name="clipboard_numbers_info">Each clip keeps its own number while you search. The results show the numbers the clips had, and the count does not start again from 1. The numbers follow the order of the panel, from the top. This setting is off by default.</string>
     <string name="clipboard_swipe_delete_title">Swipe to delete</string>
     <string name="clipboard_swipe_delete_subtitle">Swipe a clip sideways to delete it</string>
-    <string name="clipboard_swipe_delete_info">With this setting off, a sideways swipe on a clip does nothing, so a clip can\'t be lost to a swipe made while you scroll. Press and hold a clip instead and tap Delete in its popup. The bin on each clip still deletes it either way. This setting is on by default.</string>
+    <string name="clipboard_swipe_delete_info">With this setting off, a sideways swipe on a clip does nothing, so a clip can\'t be lost to a swipe made while you scroll. Press and hold a clip instead and tap Delete in its popup. The bin on each clip, when Pin and delete buttons is on, still deletes it either way. This setting is on by default.</string>
     <string name="clipboard_undo_delete_title">Undo a deleted clip</string>
     <string name="clipboard_undo_delete_subtitle">After you delete a clip, show an Undo button for a few seconds</string>
     <string name="clipboard_undo_delete_info">A swipe across a card deletes the clip with no question first, and a swipe is easy to make by accident while you scroll. With this setting on, a bar at the bottom of the panel offers the clip back. Delete more clips while the bar is up and one Undo brings them all back, each to the place it had. The bar stays for five seconds, or longer if you have set a longer time to take action in Android\'s accessibility settings. This setting is on by default.</string>
@@ -71,6 +73,16 @@
     <string name="clipboard_pinned_tabs_info">The panel opens on the Unpinned tab. When you pin a clip, it moves to the Pinned tab. A search looks through the two tabs. With the tabs on, Pinned entries last has no effect. This setting is off by default.</string>
     <string name="clipboard_outline_pinned_title">Outline pinned clips</string>
     <string name="clipboard_outline_pinned_subtitle">Draw a thin border in the accent color around each pinned clip</string>
+    <string name="clipboard_card_buttons_title">Pin and delete buttons</string>
+    <string name="clipboard_card_buttons_subtitle">Show a pin and a bin on every clip</string>
+    <string name="clipboard_card_buttons_info">With this setting off, press and hold a clip to pin or delete it from its popup. A card also loses the row the buttons sat on, unless the row still shows the clip\'s number, its time or a rich text tag, so more clips fit in the panel. This setting is on by default.</string>
+    <string name="clipboard_panel_height_title">Panel height</string>
+    <string name="clipboard_panel_height_subtitle">How much taller than the keyboard the clipboard panel opens</string>
+    <string name="clipboard_panel_height_info">You can also drag the bar on top of the clipboard panel up or down. A taller panel shows more clips, so there is less to scroll. The panel never covers more than most of the screen, so on a short screen, or with the phone sideways, it can stay shorter than this. The default is the keyboard\'s own height.</string>
+    <!-- Slider readout for the clipboard panel height at the keyboard's own height. -->
+    <string name="clipboard_panel_height_none">Same as keyboard</string>
+    <!-- Slider readout for how much taller than the keyboard the clipboard panel is. %1$d is a number of dp. -->
+    <string name="clipboard_panel_height_value" tools:ignore="PluralsCandidate">+%1$d dp</string>
     <!-- What a screen reader says for the picture in the full-screen viewer of a clipboard image. -->
     <string name="clipboard_image_viewer_desc">Copied image</string>
     <string name="clipboard_pinned_last_subtitle">List pinned clips at the end of the panel instead of the top</string>

@@ -141,6 +141,44 @@ jobs:
           path: app/build/reports/dex-methods/
           retention-days: 7
 
+  # Every library the APK ships, against the licences app/build.gradle.kts
+  # allows. Three builds because the answer differs: full carries ML Kit under
+  # Google's terms, lite does not, and an F-Droid build must carry nothing but
+  # free licences, which the F-Droid flag makes the allow list enforce.
+  licenses:
+    name: Dependency licences
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          build-scan-publish: true
+          build-scan-terms-of-use-url: "https://gradle.com/terms-of-service"
+          build-scan-terms-of-use-agree: "yes"
+
+      - name: Full and lite
+        run: ./gradlew :app:licenseeAndroidFullIntlRelease :app:licenseeAndroidLiteIntlRelease --stacktrace
+
+      - name: Lite as F-Droid builds it
+        run: ./gradlew :app:licenseeAndroidLiteIntlRelease -Pwmkb.enableFdroid=true --stacktrace
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: licensee
+          path: app/build/reports/licensee/
+          retention-days: 7
+
   # Accuracy floors move when a dictionary or a ranking weight changes, which
   # is a review conversation and not a merge blocker. Reported, never gating.
   eval:
