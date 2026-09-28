@@ -1819,8 +1819,7 @@ class GlideBeam(private val tuning: Tuning = Tuning()) {
         shapes ?: return ideal
         val own = shapes.minDistance(word, ws.drawnShape8)
         if (own < 0f) return ideal
-        // Allow learned spatial shape distance to replace ideal shape distance directly when better
-        return minOf(ideal, own.toDouble())
+        return maxOf(minOf(ideal, own.toDouble()), ideal - tuning.learnedShapeGain)
     }
 
     /** A normalised path as the shape store keeps one: [GlideShapeStore.QUANT] to the unit, clamped to a byte. */
