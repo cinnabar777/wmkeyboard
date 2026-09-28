@@ -578,12 +578,11 @@ class GlideBeam(private val tuning: Tuning = Tuning()) {
         // even if trie pruning or anchor mismatch filtered them from results.
         if (shapes != null && tuning.shapeSeeding && tuning.learnedShapeGain > 0.0) {
             quantise(ws.pathX, ws.pathY, ws.drawnShape8)
-            val nearWords = shapes.wordsNear(ws.drawnShape8, radius = 0.45f, limit = limit)
-            val maxScore = results.values.maxOfOrNull { it.score } ?: 0.0
-            val seedScore = (maxScore - 0.5).coerceAtLeast(0.0)
+            val nearWords = shapes.wordsNear(ws.drawnShape8, radius = 0.50f, limit = limit)
+            val minScore = results.values.minOfOrNull { it.score } ?: 0.0
             for (word in nearWords) {
                 if (!results.containsKey(word)) {
-                    results[word] = Candidate(word, seedScore, 0.0, FuzzyBeamSearch.Tier.DICTIONARY)
+                    results[word] = Candidate(word, minScore - 0.5, 0.0, FuzzyBeamSearch.Tier.DICTIONARY)
                 }
             }
         }
