@@ -5029,6 +5029,7 @@ open class WMKeyboardService : InputMethodService() {
 
     private fun startInputView(info: EditorInfo?, restarting: Boolean) {
         super.onStartInputView(info, restarting)
+        info?.packageName?.let { cancelSettlementTimer(it) }
         // The keyboard is up, by the system's hand or ours; a hide that
         // suspended pinning has run its course.
         pinSuspended = false
@@ -5170,7 +5171,15 @@ open class WMKeyboardService : InputMethodService() {
         // last until they change it. Clearing on the next app was right for a
         // mode picked in passing and wrong for one picked deliberately, and the
         // keyboard could not tell the two apart.
+        val isPrivateField = info?.requestsNoPersonalizedLearning() == true || info?.isSecureField() == true
         val pkg = info?.packageName
+        if (isPrivateField) {
+            learningBuffer.clear()
+        } else if (pkg != null && pkg != currentPackage) {
+            currentPackage?.let { saveSessionSnapshot(it) }
+            learningBuffer.clear()
+            restoreSessionSnapshot(pkg)
+        }
         val manualSticks = _uiState.value.settings.rows.manualModeDuration ==
             ManualModeDuration.UNTIL_CHANGED
         if (pkg != null && pkg != currentPackage && !manualSticks) manualModeId = null
@@ -6053,7 +6062,12 @@ open class WMKeyboardService : InputMethodService() {
         clearLearnOffer()
         clearCorrectionOffer()
         finishRevisionOnLeave()
-        flushLearningBuffer()
+        val settlementMinutes = _uiState.value.settings.suggestionStrip.learningBufferSettlementMinutes
+        if (settlementMinutes > 0) {
+            scheduleSettlementTimer()
+        } else {
+            flushLearningBuffer()
+        }
         // Where the user was, for the keyboard that comes back — which is
         // usually a new process, this one having been stopped in the meantime
         // (issue #227). Read after the closes above, so nothing that did not
@@ -10344,6 +10358,12 @@ open class WMKeyboardService : InputMethodService() {
         // actionLabel. Null means "no action": type a real newline.
         val action = if (forceNewline) null else currentInputEditorInfo.editorActionId()
         if (action != null) {
+            val settlementMinutes = _uiState.value.settings.suggestionStrip.learningBufferSettlementMinutes
+            if (settlementMinutes <= 0) {
+                flushLearningBuffer()
+            } else {
+                scheduleSettlementTimer()
+            }
             ic.performEditorAction(action)
             // The action is the app's to answer, and a message box answers it by
             // emptying itself. Neither the cached caret nor the words the
@@ -13581,6 +13601,100 @@ open class WMKeyboardService : InputMethodService() {
      * their anchors are a word apart. Only copies that end at the same offset —
      * the same instance rewritten in place — are the same use.
      */
+    private fun getSessionSnapshotFile(pkg: String): File {
+        val dir = File(filesDir, "learning/sessions")
+        if (!dir.exists()) dir.mkdirs()
+        return File(dir, "$pkg.json")
+    }
+
+    private fun saveSessionSnapshot(pkg: String) {
+        if (pkg.isBlank()) return
+        val json = learningBuffer.snapshotToJson()
+        val isEmpty = learningBuffer.isEmpty()
+        serviceScope.launch(persistDispatcher) {
+            runCatching {
+                val file = getSessionSnapshotFile(pkg)
+                if (isEmpty || json == "[]") {
+                    if (file.exists()) file.delete()
+                } else {
+                    file.writeText(json)
+                }
+            }
+        }
+    }
+
+    private fun restoreSessionSnapshot(pkg: String) {
+        if (pkg.isBlank()) return
+        val file = getSessionSnapshotFile(pkg)
+        if (!file.exists()) return
+        runCatching {
+            val json = file.readText()
+            learningBuffer.restoreFromJson(json)
+        }
+    }
+
+    private fun deleteSessionSnapshot(pkg: String) {
+        if (pkg.isBlank()) return
+        serviceScope.launch(persistDispatcher) {
+            runCatching {
+                val file = getSessionSnapshotFile(pkg)
+                if (file.exists()) file.delete()
+            }
+        }
+    }
+
+    private fun settleBackgroundSessionSnapshot(pkg: String) {
+        if (pkg.isBlank()) return
+        serviceScope.launch(persistDispatcher) {
+            runCatching {
+                val file = getSessionSnapshotFile(pkg)
+                if (file.exists()) {
+                    val json = file.readText()
+                    file.delete()
+                    if (json.isNotBlank() && json != "[]") {
+                        val tempBuffer = LearningBuffer()
+                        tempBuffer.restoreFromJson(json)
+                        val drained = tempBuffer.drain()
+                        if (drained.isNotEmpty()) {
+                            withContext(Dispatchers.Main) {
+                                settleLearned(drained, verify = false)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private val settlementRunnables = HashMap<String, Runnable>()
+    private val settlementHandler = Handler(Looper.getMainLooper())
+
+    private fun scheduleSettlementTimer(pkg: String? = currentPackage) {
+        val targetPkg = pkg?.takeIf { it.isNotBlank() } ?: return
+        cancelSettlementTimer(targetPkg)
+        val minutes = _uiState.value.settings.suggestionStrip.learningBufferSettlementMinutes
+        if (minutes <= 0) {
+            flushLearningBuffer()
+            return
+        }
+        val delayMs = minutes * 60 * 1000L
+        saveSessionSnapshot(targetPkg)
+        val runnable = Runnable {
+            settlementRunnables.remove(targetPkg)
+            if (currentPackage == targetPkg && keyboardVisible) {
+                return@Runnable
+            }
+            settleBackgroundSessionSnapshot(targetPkg)
+        }
+        settlementRunnables[targetPkg] = runnable
+        settlementHandler.postDelayed(runnable, delayMs)
+    }
+
+    private fun cancelSettlementTimer(pkg: String? = currentPackage) {
+        val targetPkg = pkg?.takeIf { it.isNotBlank() } ?: return
+        settlementRunnables.remove(targetPkg)?.let { settlementHandler.removeCallbacks(it) }
+    }
+
     private fun oneEntryPerInstance(
         queued: List<LearningBuffer.Entry>,
     ): List<LearningBuffer.Entry> {
@@ -14105,10 +14219,18 @@ open class WMKeyboardService : InputMethodService() {
             // was cut or typed over, not sent: nothing in it stands (#160).
             // The keyboard's own deletes have already been reported to the
             // buffer; this is the app's or a hardware keyboard's.
-            if (oldSelStart == 0 && oldSelEnd > 0) learningBuffer.clear()
+            if (oldSelStart == 0 && oldSelEnd > 0) {
+                learningBuffer.clear()
+                return
+            }
             // Before the caret is handed on, so a send does not read as the
             // user going back in front of every word in the message.
-            flushLearningBuffer()
+            val settlementMinutes = _uiState.value.settings.suggestionStrip.learningBufferSettlementMinutes
+            if (settlementMinutes > 0) {
+                scheduleSettlementTimer()
+            } else {
+                flushLearningBuffer()
+            }
             return
         }
         val moved = learningBuffer.onCaret(selStart)

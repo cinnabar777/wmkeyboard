@@ -1,7 +1,34 @@
 package com.wasimaster.wmkeyboard.core.prediction
 
 import com.wasimaster.wmkeyboard.core.gesture.GlideShapeSample
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import kotlin.math.abs
+
+@Serializable
+private data class GlideShapeSnapshot(
+    val layoutKey: Long,
+    val shapeHex: String,
+)
+
+@Serializable
+private data class EntrySnapshot(
+    val word: String,
+    val langId: String,
+    val weight: Int,
+    val caseTrusted: Boolean = false,
+    val known: Boolean = false,
+    val origin: String = "TYPED",
+    val replaces: String? = null,
+    val typed: String = word,
+    val replacesOrigin: String = "TYPED",
+    val revised: String? = null,
+    val anchor: Int = -1,
+    val suspended: Boolean = false,
+    val glideShape: GlideShapeSnapshot? = null,
+)
 
 /**
  * How a committed word got into the field.
@@ -422,6 +449,70 @@ class LearningBuffer(private val capacity: Int = DEFAULT_CAPACITY) {
     fun clear() {
         entries.clear()
         recent.clear()
+    }
+
+    private val snapshotJson = Json { ignoreUnknownKeys = true }
+
+    fun snapshotToJson(): String {
+        val snapshots = entries.map { entry ->
+            val glideSnap = entry.glideShape?.let { g ->
+                val hex = g.shape.joinToString("") { "%02x".format(it) }
+                GlideShapeSnapshot(g.layoutKey, hex)
+            }
+            EntrySnapshot(
+                word = entry.word,
+                langId = entry.langId,
+                weight = entry.weight,
+                caseTrusted = entry.caseTrusted,
+                known = entry.known,
+                origin = entry.origin.name,
+                replaces = entry.replaces,
+                typed = entry.typed,
+                replacesOrigin = entry.replacesOrigin.name,
+                revised = entry.revised,
+                anchor = entry.anchor,
+                suspended = entry.suspended,
+                glideShape = glideSnap,
+            )
+        }
+        return snapshotJson.encodeToString(snapshots)
+    }
+
+    fun restoreFromJson(jsonString: String) {
+        if (jsonString.isBlank()) return
+        runCatching {
+            val snapshots = snapshotJson.decodeFromString<List<EntrySnapshot>>(jsonString)
+            entries.clear()
+            recent.clear()
+            for (s in snapshots) {
+                val originEnum = runCatching { WordOrigin.valueOf(s.origin) }.getOrDefault(WordOrigin.TYPED)
+                val replacesOriginEnum = runCatching { WordOrigin.valueOf(s.replacesOrigin) }.getOrDefault(WordOrigin.TYPED)
+                val entry = Entry(
+                    word = s.word,
+                    langId = s.langId,
+                    weight = s.weight,
+                    caseTrusted = s.caseTrusted,
+                    known = s.known,
+                    origin = originEnum,
+                    replaces = s.replaces,
+                    typed = s.typed,
+                    replacesOrigin = replacesOriginEnum,
+                    revised = s.revised,
+                    pushIndex = ++pushes,
+                )
+                entry.anchor = s.anchor
+                entry.suspended = s.suspended
+                s.glideShape?.let { g ->
+                    if (g.shapeHex.isNotBlank() && g.shapeHex.length % 2 == 0) {
+                        val bytes = ByteArray(g.shapeHex.length / 2) { i ->
+                            g.shapeHex.substring(i * 2, i * 2 + 2).toInt(16).toByte()
+                        }
+                        entry.glideShape = GlideShapeSample(g.layoutKey, bytes)
+                    }
+                }
+                entries.addLast(entry)
+            }
+        }
     }
 
     private fun remember(d: Dropped) {
