@@ -201,6 +201,7 @@ object LanguageRegistry {
             layoutIds = listOf(
                 BuiltInLayouts.ARABIC_ID,
                 AssetLayouts.AR_HIJAI_ID,
+                AssetLayouts.AR_LETTERS_ID,
                 AssetLayouts.AR_LULUA_ID,
                 AssetLayouts.AR_T9_ID,
             ),

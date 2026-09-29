@@ -119,6 +119,8 @@ Turn this off with **Space after a glided word** (see [Options](#options)) and a
 
 You don't have to lift your finger between words. Start a glide, cross the spacebar without pausing, and keep gliding straight into the next word. Each crossing commits the word so far plus a space and starts decoding the next one, so a whole short phrase can land from a single unbroken stroke.
 
+A crossing has to reach the middle of the spacebar. Dip past its midline and come back up into the next word. A stroke that only clips the top of the bar on its way to a bottom-row letter like <KeyCap>n</KeyCap> or <KeyCap>m</KeyCap> stays part of the word it was drawing, so a long word that hugs the bottom row isn't cut in two.
+
 <PhoneFrame caption="One continuous stroke crossing the spacebar mid-glide, committing a full phrase.">
   {/* shot: typing/glide-multiword */}
 </PhoneFrame>
@@ -210,7 +212,7 @@ This is also the one way a swipe can teach a capital. A capital the *keyboard* c
 | Setting | Default | Notes |
 |---|---|---|
 | Glide typing | On | Master switch for glide typing. |
-| Glide across the spacebar | On | Only shown while glide typing (not handwriting) is the active swipe mode. Turn off to treat a spacebar-crossing swipe as one word. |
+| Glide across the spacebar | On | Only shown while glide typing (not handwriting) is the active swipe mode. A crossing has to reach the bar's midline; clipping its top edge doesn't count. Turn off to treat a spacebar-crossing swipe as one word. |
 | Glide over Shift to capitalize | On | Only shown while glide typing is the active swipe mode. Draw through the Shift key mid-swipe for a capital, twice for all capitals. See [Capitalizing without leaving the stroke](#capitalizing-without-leaving-the-stroke). |
 | What a pass over Shift capitalizes | Whole word | Only shown while Glide over Shift to capitalize is on. Whole word: one pass for a capital, two for all capitals. One letter: each pass capitalizes the letter the finger came from, and ending the stroke on Shift makes the whole word capitals. |
 | Ask when a glide is unclear | On | Only shown while glide typing is the active swipe mode. When a stroke's best word barely beats its runner-up, hold still without lifting to pick between them. See [When a swipe is a genuine toss-up](#when-a-swipe-is-a-genuine-toss-up). |
