@@ -1,0 +1,190 @@
+{
+  "format": "wmkeyboard-layout",
+  "version": 1,
+  "layout": {
+    "id": "asset_rue_phonetic",
+    "name": "Русиньскый фонетичный (Rusyn phonetic)",
+    "langId": "rue",
+    "version": 2,
+    "layers": {
+      "letters": {
+        "rows": [
+          [
+            {
+              "label": "ц"
+            },
+            {
+              "label": "є"
+            },
+            {
+              "label": "е"
+            },
+            {
+              "label": "р"
+            },
+            {
+              "label": "т"
+            },
+            {
+              "label": "й"
+            },
+            {
+              "label": "у"
+            },
+            {
+              "label": "ю"
+            },
+            {
+              "label": "і"
+            },
+            {
+              "label": "ї"
+            },
+            {
+              "label": "о"
+            },
+            {
+              "label": "ё"
+            },
+            {
+              "label": "п"
+            }
+          ],
+          [
+            {
+              "label": "я"
+            },
+            {
+              "label": "а"
+            },
+            {
+              "label": "с"
+            },
+            {
+              "label": "д"
+            },
+            {
+              "label": "ф"
+            },
+            {
+              "label": "ґ"
+            },
+            {
+              "label": "ы"
+            },
+            {
+              "label": "г"
+            },
+            {
+              "label": "ж"
+            },
+            {
+              "label": "к"
+            },
+            {
+              "label": "л"
+            },
+            {
+              "label": "ш"
+            },
+            {
+              "label": "щ"
+            }
+          ],
+          [
+            {
+              "label": "⇧",
+              "action": {
+                "type": "shift"
+              },
+              "width": 1.5
+            },
+            {
+              "label": "з"
+            },
+            {
+              "label": "х"
+            },
+            {
+              "label": "ч"
+            },
+            {
+              "label": "в"
+            },
+            {
+              "label": "б"
+            },
+            {
+              "label": "н"
+            },
+            {
+              "label": "м"
+            },
+            {
+              "label": "и"
+            },
+            {
+              "label": "ь"
+            },
+            {
+              "label": "⌫",
+              "action": {
+                "type": "delete"
+              },
+              "width": 1.5
+            }
+          ],
+          [
+            {
+              "label": "?123",
+              "action": {
+                "type": "symbols"
+              },
+              "width": 1.5
+            },
+            {
+              "label": ",",
+              "longPress": [
+                "!",
+                "?"
+              ],
+              "role": "Comma"
+            },
+            {
+              "label": "🌐",
+              "action": {
+                "type": "language_switch"
+              }
+            },
+            {
+              "label": " ",
+              "action": {
+                "type": "space"
+              },
+              "width": 4
+            },
+            {
+              "label": ".",
+              "longPress": [
+                "…",
+                ",",
+                "?",
+                "!",
+                ":",
+                ";"
+              ],
+              "role": "Period"
+            },
+            {
+              "label": "⏎",
+              "action": {
+                "type": "enter"
+              },
+              "width": 1.5
+            }
+          ]
+        ]
+      }
+    }
+  }
+}

@@ -65,7 +65,7 @@ object KeymanImport {
         if (report.droppedMultitaps > 0) {
             add(
                 LayoutMessage(
-                    pluralsRes = R.plurals.core_keyman_multitap_dropped,
+                    pluralsRes = R.plurals.core_keyman_multitap_unconverted,
                     quantity = report.droppedMultitaps,
                     args = listOf(report.droppedMultitaps),
                 ),

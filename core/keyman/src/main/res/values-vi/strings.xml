@@ -10,10 +10,6 @@
         <item quantity="one">%1$d phím gõ ký tự được in trên đó. Bàn phím gốc đã sử dụng một quy tắc để quyết định những gì nó gõ.</item>
         <item quantity="other">%1$d phím gõ các ký tự được in trên đó. Bàn phím gốc đã sử dụng các quy tắc để quyết định những gì chúng gõ.</item>
     </plurals>
-    <plurals name="core_keyman_multitap_dropped">
-        <item quantity="one">Bàn phím này có %1$d phím mà bạn nhấn nhiều lần để chuyển đổi giữa các ký tự. Ứng dụng bàn phím này không có phím như vậy, vì vậy chỉ có ký tự đầu tiên là khả dụng.</item>
-        <item quantity="other">Bàn phím này có %1$d phím mà bạn nhấn nhiều lần để chuyển đổi giữa các ký tự. Ứng dụng bàn phím này không có các phím như vậy, vì vậy chỉ có ký tự đầu tiên của mỗi phím là khả dụng.</item>
-    </plurals>
     <string name="core_keyman_rules_missing">Bàn phím này sử dụng các quy tắc để quyết định phím nào sẽ gõ ra ký tự gì. Ứng dụng không có các quy tắc đó, vì vậy mỗi phím sẽ gõ ra ký tự được in trên đó.</string>
     <plurals name="core_keyman_special_keys_dropped">
         <item quantity="one">Ứng dụng đã xóa %1$d phím. Bàn phím này không có phím nào thực hiện chức năng tương tự.</item>

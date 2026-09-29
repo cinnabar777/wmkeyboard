@@ -75,6 +75,10 @@ object LanguageRegistry {
             localeTag = "en-US",
             layoutIds = listOf(
                 BuiltInLayouts.QWERTY_ID,
+                // Its own id rather than German's: a layout belongs to one
+                // language, and English typed on a German grid still wants the
+                // English dictionary (#422).
+                AssetLayouts.EN_QWERTZ_ID,
                 BuiltInLayouts.AZERTY_ID,
                 BuiltInLayouts.DVORAK_ID,
                 BuiltInLayouts.COLEMAK_ID,
@@ -85,6 +89,9 @@ object LanguageRegistry {
                 AssetLayouts.EN_COLEMAK_DH_ID,
                 AssetLayouts.EN_NALMY_ID,
                 AssetLayouts.EN_SANGALINE_ID,
+                AssetLayouts.EN_CLEARFLOW_ID,
+                AssetLayouts.EN_KASROZ_ID,
+                AssetLayouts.EN_COLEMAK_DH_ANSI_ID,
             ),
             bundledDictionary = true,
         ),
@@ -102,6 +109,9 @@ object LanguageRegistry {
                 AssetLayouts.BN_BAISHAKHI_ID,
                 AssetLayouts.BN_BORNONA_ID,
                 AssetLayouts.BN_INSCRIPT_ID,
+                AssetLayouts.BN_AKKHOR_ID,
+                AssetLayouts.BN_UNIJOY_ID,
+                AssetLayouts.BN_OLD_ID,
                 AssetLayouts.BN_T9_ID,
             ),
             bundledDictionary = true,
@@ -133,6 +143,8 @@ object LanguageRegistry {
                 BuiltInLayouts.GERMAN_ID,
                 AssetLayouts.DE_SWISS_ID,
                 AssetLayouts.DE_NEO2_ID,
+                AssetLayouts.DE_DVORAK_ID,
+                AssetLayouts.DE_BONE_ID,
                 AssetLayouts.DE_T9_ID,
             ),
         ),
@@ -142,7 +154,12 @@ object LanguageRegistry {
             englishName = "Spanish",
             script = ScriptId.LATIN,
             localeTag = "es-ES",
-            layoutIds = listOf(BuiltInLayouts.SPANISH_ID, AssetLayouts.ES_LATAM_ID, AssetLayouts.ES_T9_ID),
+            layoutIds = listOf(
+                BuiltInLayouts.SPANISH_ID,
+                AssetLayouts.ES_LATAM_ID,
+                AssetLayouts.ES_DVORAK_ID,
+                AssetLayouts.ES_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "ko",
@@ -154,6 +171,9 @@ object LanguageRegistry {
                 BuiltInLayouts.KOREAN_ID,
                 AssetLayouts.KO_SEBEOLSIK_390_ID,
                 AssetLayouts.KO_SEBEOLSIK_FINAL_ID,
+                AssetLayouts.KO_CHEONJIIN_ID,
+                AssetLayouts.KO_PHONETIC_ID,
+                AssetLayouts.KO_DANMOEUM_ID,
             ),
         ),
         LanguageDef(
@@ -166,6 +186,9 @@ object LanguageRegistry {
                 BuiltInLayouts.RUSSIAN_ID,
                 AssetLayouts.RU_PHONETIC_ID,
                 AssetLayouts.RU_DIKTOR_ID,
+                AssetLayouts.RU_STUDENT_ID,
+                AssetLayouts.RU_YAZHERT_ID,
+                AssetLayouts.RU_YAVERT_ID,
                 AssetLayouts.RU_T9_ID,
             ),
         ),
@@ -175,7 +198,12 @@ object LanguageRegistry {
             englishName = "Arabic",
             script = ScriptId.ARABIC,
             localeTag = "ar-SA",
-            layoutIds = listOf(BuiltInLayouts.ARABIC_ID, AssetLayouts.AR_HIJAI_ID, AssetLayouts.AR_T9_ID),
+            layoutIds = listOf(
+                BuiltInLayouts.ARABIC_ID,
+                AssetLayouts.AR_HIJAI_ID,
+                AssetLayouts.AR_LULUA_ID,
+                AssetLayouts.AR_T9_ID,
+            ),
             numeralSystem = NumeralSystem.ARABIC_INDIC,
         ),
         LanguageDef(
@@ -192,7 +220,11 @@ object LanguageRegistry {
             englishName = "Hebrew",
             script = ScriptId.HEBREW,
             localeTag = "he-IL",
-            layoutIds = listOf(BuiltInLayouts.HEBREW_ID, AssetLayouts.HE_T9_ID),
+            layoutIds = listOf(
+                BuiltInLayouts.HEBREW_ID,
+                AssetLayouts.HE_SI1452_ID,
+                AssetLayouts.HE_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "hi",
@@ -206,6 +238,8 @@ object LanguageRegistry {
                 BuiltInLayouts.HINDI_ID,
                 BuiltInLayouts.HINDI_PHONETIC_ID,
                 AssetLayouts.HI_REMINGTON_GAIL_ID,
+                AssetLayouts.HI_COMPACT_ID,
+                AssetLayouts.HI_PHONETIC_KEYS_ID,
                 AssetLayouts.HI_T9_ID,
             ),
             numeralSystem = NumeralSystem.DEVANAGARI,
@@ -234,7 +268,11 @@ object LanguageRegistry {
             englishName = "Italian",
             script = ScriptId.LATIN,
             localeTag = "it-IT",
-            layoutIds = listOf(AssetLayouts.IT_QWERTY_ID, AssetLayouts.IT_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.IT_QWERTY_ID,
+                AssetLayouts.IT_SWISS_ID,
+                AssetLayouts.IT_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "nl",
@@ -258,7 +296,11 @@ object LanguageRegistry {
             englishName = "Swedish",
             script = ScriptId.LATIN,
             localeTag = "sv-SE",
-            layoutIds = listOf(AssetLayouts.SV_QWERTY_ID, AssetLayouts.SV_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.SV_QWERTY_ID,
+                AssetLayouts.SV_DVORAK_ID,
+                AssetLayouts.SV_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "sr",
@@ -274,7 +316,12 @@ object LanguageRegistry {
             englishName = "Bulgarian",
             script = ScriptId.CYRILLIC,
             localeTag = "bg-BG",
-            layoutIds = listOf(AssetLayouts.BG_PHONETIC_ID, AssetLayouts.BG_BDS_ID, AssetLayouts.BG_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.BG_PHONETIC_ID,
+                AssetLayouts.BG_BDS_ID,
+                AssetLayouts.BG_DVORAK_ID,
+                AssetLayouts.BG_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "ka",
@@ -282,7 +329,12 @@ object LanguageRegistry {
             englishName = "Georgian",
             script = ScriptId.GEORGIAN,
             localeTag = "ka-GE",
-            layoutIds = listOf(AssetLayouts.KA_QWERTY_ID, AssetLayouts.KA_LEGACY_ID, AssetLayouts.KA_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.KA_QWERTY_ID,
+                AssetLayouts.KA_LEGACY_ID,
+                AssetLayouts.KA_STANDARD_ID,
+                AssetLayouts.KA_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "cs",
@@ -306,7 +358,11 @@ object LanguageRegistry {
             englishName = "Romanian",
             script = ScriptId.LATIN,
             localeTag = "ro-RO",
-            layoutIds = listOf(AssetLayouts.RO_QWERTY_ID, AssetLayouts.RO_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.RO_QWERTY_ID,
+                AssetLayouts.RO_LETTERS_ID,
+                AssetLayouts.RO_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "hu",
@@ -314,7 +370,11 @@ object LanguageRegistry {
             englishName = "Hungarian",
             script = ScriptId.LATIN,
             localeTag = "hu-HU",
-            layoutIds = listOf(AssetLayouts.HU_QWERTZ_ID, AssetLayouts.HU_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.HU_QWERTZ_ID,
+                AssetLayouts.HU_ACCENT_ROW_ID,
+                AssetLayouts.HU_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "fi",
@@ -346,7 +406,11 @@ object LanguageRegistry {
             englishName = "Croatian",
             script = ScriptId.LATIN,
             localeTag = "hr-HR",
-            layoutIds = listOf(AssetLayouts.HR_QWERTZ_ID, AssetLayouts.HR_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.HR_QWERTZ_ID,
+                AssetLayouts.HR_LETTERS_ID,
+                AssetLayouts.HR_T9_ID,
+            ),
         ),
         // Persian reuses the Arabic script (RTL, no case) — a different language
         // on the same ScriptDef, adding the four Perso-Arabic letters پ چ ژ گ.
@@ -381,7 +445,11 @@ object LanguageRegistry {
             englishName = "Lithuanian",
             script = ScriptId.LATIN,
             localeTag = "lt-LT",
-            layoutIds = listOf(AssetLayouts.LT_QWERTY_ID, AssetLayouts.LT_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.LT_QWERTY_ID,
+                AssetLayouts.LT_LETTER_ROW_ID,
+                AssetLayouts.LT_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "lv",
@@ -397,7 +465,12 @@ object LanguageRegistry {
             englishName = "Slovenian",
             script = ScriptId.LATIN,
             localeTag = "sl-SI",
-            layoutIds = listOf(AssetLayouts.SL_QWERTZ_ID, AssetLayouts.SL_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.SL_QWERTZ_ID,
+                AssetLayouts.SL_LETTERS_ID,
+                AssetLayouts.SL_QWERTY_ID,
+                AssetLayouts.SL_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "ur",
@@ -405,7 +478,12 @@ object LanguageRegistry {
             englishName = "Urdu",
             script = ScriptId.ARABIC,
             localeTag = "ur-PK",
-            layoutIds = listOf(AssetLayouts.UR_PHONETIC_ID, AssetLayouts.UR_NLA_ID, AssetLayouts.UR_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.UR_PHONETIC_ID,
+                AssetLayouts.UR_NLA_ID,
+                AssetLayouts.UR_PHONETIC_FOUR_ROWS_ID,
+                AssetLayouts.UR_T9_ID,
+            ),
             numeralSystem = NumeralSystem.PERSIAN,
         ),
         LanguageDef(
@@ -432,7 +510,12 @@ object LanguageRegistry {
             englishName = "Uyghur",
             script = ScriptId.ARABIC,
             localeTag = "ug-CN",
-            layoutIds = listOf(AssetLayouts.UG_UYGHUR_ID, AssetLayouts.UG_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.UG_UYGHUR_ID,
+                AssetLayouts.UG_PHONETIC_ID,
+                AssetLayouts.UG_FULL_ID,
+                AssetLayouts.UG_T9_ID,
+            ),
             numeralSystem = NumeralSystem.ARABIC_INDIC,
         ),
         LanguageDef(
@@ -441,7 +524,14 @@ object LanguageRegistry {
             englishName = "Kurdish (Sorani)",
             script = ScriptId.ARABIC,
             localeTag = "ckb-IQ",
-            layoutIds = listOf(AssetLayouts.CKB_SORANI_ID, AssetLayouts.CKB_STANDARD_ID, AssetLayouts.CKB_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.CKB_SORANI_ID,
+                AssetLayouts.CKB_STANDARD_ID,
+                AssetLayouts.CKB_ALT_ID,
+                AssetLayouts.CKB_PHONETIC_ID,
+                AssetLayouts.CKB_FOUR_ROWS_ID,
+                AssetLayouts.CKB_T9_ID,
+            ),
             numeralSystem = NumeralSystem.PERSIAN,
         ),
         LanguageDef(
@@ -450,7 +540,12 @@ object LanguageRegistry {
             englishName = "Armenian",
             script = ScriptId.ARMENIAN,
             localeTag = "hy-AM",
-            layoutIds = listOf(AssetLayouts.HY_PHONETIC_ID, AssetLayouts.HY_EASTERN_ID, AssetLayouts.HY_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.HY_PHONETIC_ID,
+                AssetLayouts.HY_EASTERN_ID,
+                AssetLayouts.HY_PHONETIC_ALT_ID,
+                AssetLayouts.HY_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "mk",
@@ -466,7 +561,11 @@ object LanguageRegistry {
             englishName = "Kazakh",
             script = ScriptId.CYRILLIC,
             localeTag = "kk-KZ",
-            layoutIds = listOf(AssetLayouts.KK_CYRILLIC_ID, AssetLayouts.KK_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.KK_CYRILLIC_ID,
+                AssetLayouts.KK_LETTER_ROW_ID,
+                AssetLayouts.KK_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "ky",
@@ -482,7 +581,11 @@ object LanguageRegistry {
             englishName = "Tajik",
             script = ScriptId.CYRILLIC,
             localeTag = "tg-TJ",
-            layoutIds = listOf(AssetLayouts.TG_CYRILLIC_ID, AssetLayouts.TG_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.TG_CYRILLIC_ID,
+                AssetLayouts.TG_LETTER_ROW_ID,
+                AssetLayouts.TG_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "mn",
@@ -498,7 +601,11 @@ object LanguageRegistry {
             englishName = "Tatar",
             script = ScriptId.CYRILLIC,
             localeTag = "tt-RU",
-            layoutIds = listOf(AssetLayouts.TT_CYRILLIC_ID, AssetLayouts.TT_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.TT_CYRILLIC_ID,
+                AssetLayouts.TT_LETTER_ROW_ID,
+                AssetLayouts.TT_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "ba",
@@ -506,7 +613,11 @@ object LanguageRegistry {
             englishName = "Bashkir",
             script = ScriptId.CYRILLIC,
             localeTag = "ba-RU",
-            layoutIds = listOf(AssetLayouts.BA_CYRILLIC_ID, AssetLayouts.BA_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.BA_CYRILLIC_ID,
+                AssetLayouts.BA_LETTER_ROW_ID,
+                AssetLayouts.BA_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "cv",
@@ -514,7 +625,11 @@ object LanguageRegistry {
             englishName = "Chuvash",
             script = ScriptId.CYRILLIC,
             localeTag = "cv-RU",
-            layoutIds = listOf(AssetLayouts.CV_CYRILLIC_ID, AssetLayouts.CV_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.CV_CYRILLIC_ID,
+                AssetLayouts.CV_LETTER_ROW_ID,
+                AssetLayouts.CV_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "ce",
@@ -538,7 +653,11 @@ object LanguageRegistry {
             englishName = "Yakut",
             script = ScriptId.CYRILLIC,
             localeTag = "sah-RU",
-            layoutIds = listOf(AssetLayouts.SAH_CYRILLIC_ID, AssetLayouts.SAH_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.SAH_CYRILLIC_ID,
+                AssetLayouts.SAH_LETTER_ROW_ID,
+                AssetLayouts.SAH_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "mr",
@@ -546,7 +665,11 @@ object LanguageRegistry {
             englishName = "Marathi",
             script = ScriptId.DEVANAGARI,
             localeTag = "mr-IN",
-            layoutIds = listOf(AssetLayouts.MR_INSCRIPT_ID, AssetLayouts.MR_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.MR_INSCRIPT_ID,
+                AssetLayouts.MR_ALPHABETIC_ID,
+                AssetLayouts.MR_T9_ID,
+            ),
             numeralSystem = NumeralSystem.DEVANAGARI,
         ),
         LanguageDef(
@@ -573,7 +696,12 @@ object LanguageRegistry {
             englishName = "Tamil",
             script = ScriptId.TAMIL,
             localeTag = "ta-IN",
-            layoutIds = listOf(AssetLayouts.TA_TAMIL99_ID, AssetLayouts.TA_INSCRIPT_ID, AssetLayouts.TA_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.TA_TAMIL99_ID,
+                AssetLayouts.TA_INSCRIPT_ID,
+                AssetLayouts.TA_ALPHABETIC_ID,
+                AssetLayouts.TA_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "si",
@@ -597,7 +725,12 @@ object LanguageRegistry {
             englishName = "Kannada",
             script = ScriptId.KANNADA,
             localeTag = "kn-IN",
-            layoutIds = listOf(AssetLayouts.KN_INSCRIPT_ID, AssetLayouts.KN_KPRAO_ID, AssetLayouts.KN_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.KN_INSCRIPT_ID,
+                AssetLayouts.KN_KPRAO_ID,
+                AssetLayouts.KN_EXTENDED_ID,
+                AssetLayouts.KN_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "ml",
@@ -608,6 +741,7 @@ object LanguageRegistry {
             layoutIds = listOf(
                 AssetLayouts.ML_INSCRIPT_ID,
                 AssetLayouts.ML_INSCRIPT_ENHANCED_ID,
+                AssetLayouts.ML_ALPHABETIC_ID,
                 AssetLayouts.ML_T9_ID,
             ),
         ),
@@ -617,7 +751,11 @@ object LanguageRegistry {
             englishName = "Gujarati",
             script = ScriptId.GUJARATI,
             localeTag = "gu-IN",
-            layoutIds = listOf(AssetLayouts.GU_INSCRIPT_ID, AssetLayouts.GU_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.GU_INSCRIPT_ID,
+                AssetLayouts.GU_ALPHABETIC_ID,
+                AssetLayouts.GU_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "pa",
@@ -625,7 +763,12 @@ object LanguageRegistry {
             englishName = "Punjabi",
             script = ScriptId.GURMUKHI,
             localeTag = "pa-IN",
-            layoutIds = listOf(AssetLayouts.PA_INSCRIPT_ID, AssetLayouts.PA_JHELUM_ID, AssetLayouts.PA_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.PA_INSCRIPT_ID,
+                AssetLayouts.PA_JHELUM_ID,
+                AssetLayouts.PA_ALPHABETIC_ID,
+                AssetLayouts.PA_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "or",
@@ -773,7 +916,11 @@ object LanguageRegistry {
             englishName = "Esperanto",
             script = ScriptId.LATIN,
             localeTag = "eo",
-            layoutIds = listOf(AssetLayouts.EO_ESPERANTO_ID, AssetLayouts.EO_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.EO_ESPERANTO_ID,
+                AssetLayouts.EO_LETTERS_ID,
+                AssetLayouts.EO_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "af",
@@ -965,7 +1112,11 @@ object LanguageRegistry {
             englishName = "Hausa",
             script = ScriptId.LATIN,
             localeTag = "ha-NG",
-            layoutIds = listOf(AssetLayouts.HA_QWERTY_ID, AssetLayouts.HA_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.HA_QWERTY_ID,
+                AssetLayouts.HA_LETTERS_ID,
+                AssetLayouts.HA_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "so",
@@ -1136,7 +1287,11 @@ object LanguageRegistry {
             englishName = "Khmer",
             script = ScriptId.KHMER,
             localeTag = "km-KH",
-            layoutIds = listOf(AssetLayouts.KM_NIDA_ID, AssetLayouts.KM_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.KM_NIDA_ID,
+                AssetLayouts.KM_FOUR_ROWS_ID,
+                AssetLayouts.KM_T9_ID,
+            ),
             numeralSystem = NumeralSystem.KHMER,
         ),
         LanguageDef(
@@ -1145,7 +1300,11 @@ object LanguageRegistry {
             englishName = "Burmese",
             script = ScriptId.MYANMAR,
             localeTag = "my-MM",
-            layoutIds = listOf(AssetLayouts.MY_MYANMAR3_ID, AssetLayouts.MY_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.MY_MYANMAR3_ID,
+                AssetLayouts.MY_LETTER_ROW_ID,
+                AssetLayouts.MY_T9_ID,
+            ),
             numeralSystem = NumeralSystem.MYANMAR,
         ),
         LanguageDef(
@@ -1162,7 +1321,11 @@ object LanguageRegistry {
             englishName = "Komi",
             script = ScriptId.CYRILLIC,
             localeTag = "kv-RU",
-            layoutIds = listOf(AssetLayouts.KV_CYRILLIC_ID, AssetLayouts.KV_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.KV_CYRILLIC_ID,
+                AssetLayouts.KV_LETTER_ROW_ID,
+                AssetLayouts.KV_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "xal",
@@ -1178,7 +1341,11 @@ object LanguageRegistry {
             englishName = "Tuvan",
             script = ScriptId.CYRILLIC,
             localeTag = "tyv-RU",
-            layoutIds = listOf(AssetLayouts.TYV_CYRILLIC_ID, AssetLayouts.TYV_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.TYV_CYRILLIC_ID,
+                AssetLayouts.TYV_LETTER_ROW_ID,
+                AssetLayouts.TYV_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "bua",
@@ -1202,7 +1369,11 @@ object LanguageRegistry {
             englishName = "Mari",
             script = ScriptId.CYRILLIC,
             localeTag = "chm-RU",
-            layoutIds = listOf(AssetLayouts.CHM_CYRILLIC_ID, AssetLayouts.CHM_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.CHM_CYRILLIC_ID,
+                AssetLayouts.CHM_LETTER_ROW_ID,
+                AssetLayouts.CHM_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "ady",
@@ -1473,7 +1644,11 @@ object LanguageRegistry {
             englishName = "Ganda",
             script = ScriptId.LATIN,
             localeTag = "lg-UG",
-            layoutIds = listOf(AssetLayouts.LG_QWERTY_ID, AssetLayouts.LG_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.LG_QWERTY_ID,
+                AssetLayouts.LG_LETTERS_ID,
+                AssetLayouts.LG_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "ki",
@@ -1481,7 +1656,11 @@ object LanguageRegistry {
             englishName = "Kikuyu",
             script = ScriptId.LATIN,
             localeTag = "ki-KE",
-            layoutIds = listOf(AssetLayouts.KI_QWERTY_ID, AssetLayouts.KI_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.KI_QWERTY_ID,
+                AssetLayouts.KI_LETTERS_ID,
+                AssetLayouts.KI_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "ak",
@@ -1489,7 +1668,11 @@ object LanguageRegistry {
             englishName = "Akan",
             script = ScriptId.LATIN,
             localeTag = "ak-GH",
-            layoutIds = listOf(AssetLayouts.AK_QWERTY_ID, AssetLayouts.AK_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.AK_QWERTY_ID,
+                AssetLayouts.AK_LETTERS_ID,
+                AssetLayouts.AK_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "ee",
@@ -1497,7 +1680,11 @@ object LanguageRegistry {
             englishName = "Ewe",
             script = ScriptId.LATIN,
             localeTag = "ee-GH",
-            layoutIds = listOf(AssetLayouts.EE_QWERTY_ID, AssetLayouts.EE_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.EE_QWERTY_ID,
+                AssetLayouts.EE_LETTERS_ID,
+                AssetLayouts.EE_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "bm",
@@ -1577,7 +1764,11 @@ object LanguageRegistry {
             englishName = "Northern Sami",
             script = ScriptId.LATIN,
             localeTag = "se-NO",
-            layoutIds = listOf(AssetLayouts.SE_QWERTY_ID, AssetLayouts.SE_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.SE_QWERTY_ID,
+                AssetLayouts.SE_LETTER_ROW_ID,
+                AssetLayouts.SE_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "smn",
@@ -1585,7 +1776,10 @@ object LanguageRegistry {
             englishName = "Inari Sami",
             script = ScriptId.LATIN,
             localeTag = "smn-FI",
-            layoutIds = listOf(AssetLayouts.SMN_QWERTY_ID),
+            layoutIds = listOf(
+                AssetLayouts.SMN_QWERTY_ID,
+                AssetLayouts.SMN_LETTER_ROW_ID,
+            ),
         ),
         LanguageDef(
             id = "sms",
@@ -1668,7 +1862,12 @@ object LanguageRegistry {
             englishName = "Tamazight (Tifinagh)",
             script = ScriptId.TIFINAGH,
             localeTag = "zgh-MA",
-            layoutIds = listOf(AssetLayouts.ZGH_TIFINAGH_ID, AssetLayouts.ZGH_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.ZGH_TIFINAGH_ID,
+                AssetLayouts.ZGH_TIFINAGH_ALT_ID,
+                AssetLayouts.ZGH_TIFINAGH_AZERTY_ID,
+                AssetLayouts.ZGH_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "chr",
@@ -1715,7 +1914,11 @@ object LanguageRegistry {
             englishName = "IPA (Phonetic)",
             script = ScriptId.IPA,
             localeTag = "mul-fonipa",
-            layoutIds = listOf(AssetLayouts.IPA_ID),
+            layoutIds = listOf(
+                AssetLayouts.IPA_ID,
+                AssetLayouts.IPA_QWERTY_ID,
+                AssetLayouts.IPA_QWERTY_G_ID,
+            ),
         ),
         // Not a language but a set of styled-Latin "fonts": one plain QWERTY
         // layout whose letters are mapped onto a Mathematical-Alphanumeric
@@ -2093,7 +2296,11 @@ object LanguageRegistry {
             englishName = "Dagbani",
             script = ScriptId.LATIN,
             localeTag = "dag",
-            layoutIds = listOf(AssetLayouts.DAG_ID, AssetLayouts.DAG_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.DAG_ID,
+                AssetLayouts.DAG_LETTERS_ID,
+                AssetLayouts.DAG_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "dga",
@@ -2199,7 +2406,11 @@ object LanguageRegistry {
             englishName = "Gagauz",
             script = ScriptId.LATIN,
             localeTag = "gag",
-            layoutIds = listOf(AssetLayouts.GAG_ID, AssetLayouts.GAG_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.GAG_ID,
+                AssetLayouts.GAG_LETTER_ROW_ID,
+                AssetLayouts.GAG_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "gcr",
@@ -2303,7 +2514,11 @@ object LanguageRegistry {
             englishName = "Kabyle",
             script = ScriptId.LATIN,
             localeTag = "kab",
-            layoutIds = listOf(AssetLayouts.KAB_ID, AssetLayouts.KAB_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.KAB_ID,
+                AssetLayouts.KAB_AZERTY_ID,
+                AssetLayouts.KAB_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "kaj",
@@ -2665,7 +2880,11 @@ object LanguageRegistry {
             englishName = "Veps",
             script = ScriptId.LATIN,
             localeTag = "vep",
-            layoutIds = listOf(AssetLayouts.VEP_ID, AssetLayouts.VEP_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.VEP_ID,
+                AssetLayouts.VEP_LETTER_ROW_ID,
+                AssetLayouts.VEP_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "vls",
@@ -2705,7 +2924,11 @@ object LanguageRegistry {
             englishName = "Southern Altai",
             script = ScriptId.CYRILLIC,
             localeTag = "alt",
-            layoutIds = listOf(AssetLayouts.ALT_ID, AssetLayouts.ALT_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.ALT_ID,
+                AssetLayouts.ALT_LETTER_ROW_ID,
+                AssetLayouts.ALT_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "inh",
@@ -2761,7 +2984,11 @@ object LanguageRegistry {
             englishName = "Hill Mari",
             script = ScriptId.CYRILLIC,
             localeTag = "mrj",
-            layoutIds = listOf(AssetLayouts.MRJ_ID, AssetLayouts.MRJ_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.MRJ_ID,
+                AssetLayouts.MRJ_LETTER_ROW_ID,
+                AssetLayouts.MRJ_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "rsk",
@@ -2777,7 +3004,12 @@ object LanguageRegistry {
             englishName = "Rusyn",
             script = ScriptId.CYRILLIC,
             localeTag = "rue",
-            layoutIds = listOf(AssetLayouts.RUE_ID, AssetLayouts.RUE_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.RUE_ID,
+                AssetLayouts.RUE_LETTERS_ID,
+                AssetLayouts.RUE_PHONETIC_ID,
+                AssetLayouts.RUE_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "anp",
@@ -3054,7 +3286,11 @@ object LanguageRegistry {
             englishName = "Toki Pona",
             script = ScriptId.LATIN,
             localeTag = "tok",
-            layoutIds = listOf(AssetLayouts.TOK_ID, AssetLayouts.TOK_T9_ID),
+            layoutIds = listOf(
+                AssetLayouts.TOK_ID,
+                AssetLayouts.TOK_COMPACT_ID,
+                AssetLayouts.TOK_T9_ID,
+            ),
         ),
         LanguageDef(
             id = "vo",
@@ -3093,7 +3329,10 @@ object LanguageRegistry {
             englishName = "Ho (Warang Citi)",
             script = ScriptId.WARANG_CITI,
             localeTag = "hoc-Wara",
-            layoutIds = listOf(AssetLayouts.HOC_WARANG_CITI_ID),
+            layoutIds = listOf(
+                AssetLayouts.HOC_WARANG_CITI_ID,
+                AssetLayouts.HOC_WARANG_CITI_ALT_ID,
+            ),
         ),
         // Languages whose only layout is one of the new national-standard grids.
         LanguageDef(
@@ -3102,7 +3341,10 @@ object LanguageRegistry {
             englishName = "Bemba",
             script = ScriptId.LATIN,
             localeTag = "bem-ZM",
-            layoutIds = listOf(AssetLayouts.BEM_QWERTY_ID),
+            layoutIds = listOf(
+                AssetLayouts.BEM_QWERTY_ID,
+                AssetLayouts.BEM_LETTERS_ID,
+            ),
         ),
         LanguageDef(
             id = "gaa",
@@ -3126,7 +3368,10 @@ object LanguageRegistry {
             englishName = "Mansi",
             script = ScriptId.CYRILLIC,
             localeTag = "mns-RU",
-            layoutIds = listOf(AssetLayouts.MNS_ID),
+            layoutIds = listOf(
+                AssetLayouts.MNS_ID,
+                AssetLayouts.MNS_LETTER_ROW_ID,
+            ),
         ),
         LanguageDef(
             id = "isv",
@@ -3146,7 +3391,279 @@ object LanguageRegistry {
             englishName = "Serbian (Latin)",
             script = ScriptId.LATIN,
             localeTag = "sr-Latn-RS",
-            layoutIds = listOf(AssetLayouts.SR_LATIN_ID),
+            layoutIds = listOf(
+                AssetLayouts.SR_LATIN_ID,
+                AssetLayouts.SR_LATIN_LETTERS_ID,
+            ),
+        ),
+    )
+
+    /**
+     * Hand-written languages added for layout parity with HeliBoard, FlorisBoard
+     * and FUTO Keyboard: minority languages those keyboards type that nothing
+     * here did, and three generated Keyman languages that now carry a grid of
+     * ours as well (their converted keyboards join through
+     * KeymanLanguages.extraLayoutIds, like every other hand-written entry's).
+     *
+     * A list of its own because [handWritten] is one initializer, and a JVM
+     * method's bytecode caps at 64 KB.
+     */
+    private val handWrittenMore: List<LanguageDef> = listOf(
+        LanguageDef(
+            id = "abq",
+            displayName = "Абаза бызшва · Abaza",
+            englishName = "Abaza",
+            script = ScriptId.CYRILLIC,
+            localeTag = "abq",
+            layoutIds = listOf(
+                AssetLayouts.ABQ_CYRILLIC_ID,
+            ),
+        ),
+        LanguageDef(
+            id = "agx",
+            displayName = "Aghul",
+            englishName = "Aghul",
+            script = ScriptId.CYRILLIC,
+            localeTag = "agx",
+            layoutIds = listOf(
+                AssetLayouts.AGX_CYRILLIC_ID,
+            ),
+        ),
+        LanguageDef(
+            id = "rut",
+            displayName = "Rutul",
+            englishName = "Rutul",
+            script = ScriptId.CYRILLIC,
+            localeTag = "rut",
+            layoutIds = listOf(
+                AssetLayouts.RUT_CYRILLIC_ID,
+            ),
+        ),
+        LanguageDef(
+            id = "tab",
+            displayName = "Tabasaran",
+            englishName = "Tabasaran",
+            script = ScriptId.CYRILLIC,
+            localeTag = "tab",
+            layoutIds = listOf(
+                AssetLayouts.TAB_CYRILLIC_ID,
+            ),
+        ),
+        LanguageDef(
+            id = "tkr",
+            displayName = "Tsakhur",
+            englishName = "Tsakhur",
+            script = ScriptId.CYRILLIC,
+            localeTag = "tkr",
+            layoutIds = listOf(
+                AssetLayouts.TKR_CYRILLIC_ID,
+            ),
+        ),
+        LanguageDef(
+            id = "xdq",
+            displayName = "Kaitag",
+            englishName = "Kaitag",
+            script = ScriptId.CYRILLIC,
+            localeTag = "xdq",
+            layoutIds = listOf(
+                AssetLayouts.XDQ_KAITAG_ID,
+                AssetLayouts.XDQ_KAITAG_4ROW_ID,
+            ),
+        ),
+        LanguageDef(
+            id = "enf",
+            displayName = "Forest Enets",
+            englishName = "Forest Enets",
+            script = ScriptId.CYRILLIC,
+            localeTag = "enf",
+            layoutIds = listOf(
+                AssetLayouts.ENF_CYRILLIC_ID,
+            ),
+        ),
+        LanguageDef(
+            id = "enh",
+            displayName = "Tundra Enets",
+            englishName = "Tundra Enets",
+            script = ScriptId.CYRILLIC,
+            localeTag = "enh",
+            layoutIds = listOf(
+                AssetLayouts.ENH_CYRILLIC_ID,
+            ),
+        ),
+        LanguageDef(
+            id = "nio",
+            displayName = "Nganasan",
+            englishName = "Nganasan",
+            script = ScriptId.CYRILLIC,
+            localeTag = "nio",
+            layoutIds = listOf(
+                AssetLayouts.NIO_CYRILLIC_ID,
+            ),
+        ),
+        LanguageDef(
+            id = "yrk",
+            displayName = "Nenets",
+            englishName = "Nenets",
+            script = ScriptId.CYRILLIC,
+            localeTag = "yrk",
+            layoutIds = listOf(
+                AssetLayouts.YRK_CYRILLIC_ID,
+            ),
+        ),
+        LanguageDef(
+            id = "izh",
+            displayName = "Ingrian",
+            englishName = "Ingrian",
+            script = ScriptId.LATIN,
+            localeTag = "izh",
+            layoutIds = listOf(
+                AssetLayouts.IZH_LATIN_ID,
+            ),
+        ),
+        LanguageDef(
+            id = "krl",
+            displayName = "Karjalan kieli · Karelian",
+            englishName = "Karelian",
+            script = ScriptId.LATIN,
+            localeTag = "krl",
+            layoutIds = listOf(
+                AssetLayouts.KRL_LATIN_ID,
+            ),
+        ),
+        LanguageDef(
+            id = "lud",
+            displayName = "Ludian",
+            englishName = "Ludian",
+            script = ScriptId.LATIN,
+            localeTag = "lud",
+            layoutIds = listOf(
+                AssetLayouts.LUD_LATIN_ID,
+            ),
+        ),
+        LanguageDef(
+            id = "vot",
+            displayName = "Votic",
+            englishName = "Votic",
+            script = ScriptId.LATIN,
+            localeTag = "vot",
+            layoutIds = listOf(
+                AssetLayouts.VOT_LATIN_ID,
+            ),
+        ),
+        LanguageDef(
+            id = "lkt",
+            displayName = "Lakȟótiyapi · Lakota",
+            englishName = "Lakota",
+            script = ScriptId.LATIN,
+            localeTag = "lkt",
+            layoutIds = listOf(
+                AssetLayouts.LKT_LATIN_ID,
+            ),
+        ),
+        LanguageDef(
+            id = "sje",
+            displayName = "Bidumsámegiella · Pite Sami",
+            englishName = "Pite Sami",
+            script = ScriptId.LATIN,
+            localeTag = "sje",
+            layoutIds = listOf(
+                AssetLayouts.SJE_LATIN_ID,
+            ),
+        ),
+        LanguageDef(
+            id = "sju",
+            displayName = "Ume Sami",
+            englishName = "Ume Sami",
+            script = ScriptId.LATIN,
+            localeTag = "sju",
+            layoutIds = listOf(
+                AssetLayouts.SJU_LATIN_ID,
+            ),
+        ),
+        LanguageDef(
+            id = "sma",
+            displayName = "Åarjelsaemien gïele · Southern Sami",
+            englishName = "Southern Sami",
+            script = ScriptId.LATIN,
+            localeTag = "sma",
+            layoutIds = listOf(
+                AssetLayouts.SMA_LATIN_ID,
+            ),
+        ),
+        LanguageDef(
+            id = "smj",
+            displayName = "Julevsámegiella · Lule Sami",
+            englishName = "Lule Sami",
+            script = ScriptId.LATIN,
+            localeTag = "smj",
+            layoutIds = listOf(
+                AssetLayouts.SMJ_LATIN_ID,
+            ),
+        ),
+        LanguageDef(
+            id = "kk-Latn",
+            displayName = "Qazaqşa (latyn) · Kazakh (Latin)",
+            englishName = "Kazakh (Latin)",
+            script = ScriptId.LATIN,
+            localeTag = "kk-Latn",
+            layoutIds = listOf(
+                AssetLayouts.KK_LATIN_ID,
+            ),
+        ),
+        LanguageDef(
+            id = "ks-Latn",
+            displayName = "Koshur (Latin) · Kashmiri (Latin)",
+            englishName = "Kashmiri (Latin)",
+            script = ScriptId.LATIN,
+            localeTag = "ks-Latn",
+            layoutIds = listOf(
+                AssetLayouts.KS_LATIN_ID,
+            ),
+        ),
+        LanguageDef(
+            id = "zgh-Latn",
+            displayName = "Tamaziɣt (Latin) · Tamazight (Latin)",
+            englishName = "Tamazight (Latin)",
+            script = ScriptId.LATIN,
+            localeTag = "zgh-Latn",
+            layoutIds = listOf(
+                AssetLayouts.ZGH_LATIN_AZERTY_ID,
+                AssetLayouts.ZGH_LATIN_QWERTY_ID,
+                AssetLayouts.ZGH_LATIN_QWERTZ_ID,
+            ),
+        ),
+        LanguageDef(
+            id = "be-Latn",
+            displayName = "Biełaruskaja (łacinka) · Belarusian (Latin)",
+            englishName = "Belarusian (Latin)",
+            script = ScriptId.LATIN,
+            localeTag = "be-Latn",
+            layoutIds = listOf(
+                AssetLayouts.BE_LATIN_ID,
+                AssetLayouts.BE_LATIN_ROW_ID,
+            ),
+        ),
+        LanguageDef(
+            id = "en-Shaw",
+            displayName = "English (Shavian)",
+            englishName = "English (Shavian)",
+            script = ScriptId.SHAVIAN,
+            localeTag = "en-Shaw",
+            layoutIds = listOf(
+                AssetLayouts.EN_SHAVIAN_ID,
+                AssetLayouts.EN_SHAVIAN_TWO_LAYER_ID,
+            ),
+        ),
+        LanguageDef(
+            id = "new-Newa",
+            displayName = "Nepal Bhasa (Newa)",
+            englishName = "Nepal Bhasa (Newa)",
+            script = ScriptId.NEWA,
+            localeTag = "new-Newa",
+            layoutIds = listOf(
+                AssetLayouts.NEW_NEWA_ROMANIZED_ID,
+                AssetLayouts.NEW_NEWA_TRADITIONAL_ID,
+            ),
         ),
     )
 
@@ -3171,7 +3688,7 @@ object LanguageRegistry {
      * them instead would leave 290 layouts that no language names — which is to
      * say, that the user cannot reach.
      */
-    val all: List<LanguageDef> = handWritten.map { lang ->
+    val all: List<LanguageDef> = (handWritten + handWrittenMore).map { lang ->
         val extra = KeymanLanguages.extraLayoutIds[lang.id]
         if (extra.isNullOrEmpty()) lang else lang.copy(layoutIds = lang.layoutIds + extra)
     } + KeymanLanguages.all

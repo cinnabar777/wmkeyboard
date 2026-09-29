@@ -1,0 +1,235 @@
+{
+  "format": "wmkeyboard-layout",
+  "version": 1,
+  "layout": {
+    "id": "asset_gu_alphabetic",
+    "name": "ગુજરાતી વર્ણમાળા (Gujarati alphabetic)",
+    "langId": "gu",
+    "version": 2,
+    "layers": {
+      "letters": {
+        "rows": [
+          [
+            {
+              "label": "અ"
+            },
+            {
+              "label": "ા"
+            },
+            {
+              "label": "િ"
+            },
+            {
+              "label": "ી"
+            },
+            {
+              "label": "ુ"
+            },
+            {
+              "label": "ૂ"
+            },
+            {
+              "label": "ે"
+            },
+            {
+              "label": "ૈ"
+            },
+            {
+              "label": "ો"
+            },
+            {
+              "label": "ૌ"
+            },
+            {
+              "label": "ં"
+            }
+          ],
+          [
+            {
+              "label": "ઃ",
+              "longPress": [
+                "ઍ"
+              ]
+            },
+            {
+              "label": "ક",
+              "longPress": [
+                "ઑ"
+              ]
+            },
+            {
+              "label": "ખ",
+              "longPress": [
+                "ૅ"
+              ]
+            },
+            {
+              "label": "ગ",
+              "longPress": [
+                "ૉ"
+              ]
+            },
+            {
+              "label": "ઘ",
+              "longPress": [
+                "ૃ"
+              ]
+            },
+            {
+              "label": "ઙ",
+              "longPress": [
+                "ઋ"
+              ]
+            },
+            {
+              "label": "ચ",
+              "longPress": [
+                "ત્ર"
+              ]
+            },
+            {
+              "label": "છ",
+              "longPress": [
+                "ત્ત"
+              ]
+            },
+            {
+              "label": "જ",
+              "longPress": [
+                "દ્વ"
+              ]
+            },
+            {
+              "label": "ઝ",
+              "longPress": [
+                "દ્ધ"
+              ]
+            },
+            {
+              "label": "ઞ",
+              "longPress": [
+                "દ્ર"
+              ]
+            }
+          ],
+          [
+            {
+              "label": "⇧",
+              "action": {
+                "type": "shift"
+              },
+              "width": 1.5
+            },
+            {
+              "label": "ટ"
+            },
+            {
+              "label": "ઠ",
+              "longPress": [
+                "શ્ર"
+              ]
+            },
+            {
+              "label": "ડ",
+              "longPress": [
+                "શ્વ"
+              ]
+            },
+            {
+              "label": "ઢ",
+              "longPress": [
+                "દ્દ"
+              ]
+            },
+            {
+              "label": "ણ",
+              "longPress": [
+                "હ્ય"
+              ]
+            },
+            {
+              "label": "ત",
+              "longPress": [
+                "꠰"
+              ]
+            },
+            {
+              "label": "થ",
+              "longPress": [
+                "꠱"
+              ]
+            },
+            {
+              "label": "દ",
+              "longPress": [
+                "꠲"
+              ]
+            },
+            {
+              "label": "્",
+              "longPress": [
+                "૱"
+              ]
+            },
+            {
+              "label": "⌫",
+              "action": {
+                "type": "delete"
+              },
+              "width": 1.5
+            }
+          ],
+          [
+            {
+              "label": "?123",
+              "action": {
+                "type": "symbols"
+              },
+              "width": 1.5
+            },
+            {
+              "label": ",",
+              "longPress": [
+                "!",
+                "?"
+              ],
+              "role": "Comma"
+            },
+            {
+              "label": "🌐",
+              "action": {
+                "type": "language_switch"
+              }
+            },
+            {
+              "label": " ",
+              "action": {
+                "type": "space"
+              },
+              "width": 4
+            },
+            {
+              "label": ".",
+              "longPress": [
+                "…",
+                ",",
+                "?",
+                "!",
+                ":",
+                ";"
+              ],
+              "role": "Period"
+            },
+            {
+              "label": "⏎",
+              "action": {
+                "type": "enter"
+              },
+              "width": 1.5
+            }
+          ]
+        ]
+      }
+    }
+  }
+}

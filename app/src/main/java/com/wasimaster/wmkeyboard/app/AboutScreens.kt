@@ -341,6 +341,27 @@ private val bundledAttributions: List<Attribution> = buildList {
             "https://github.com/keymanapp/keyboards",
         ),
     )
+    // The layouts added for parity with FUTO Keyboard and FlorisBoard were
+    // converted from their layout files, which both projects publish under
+    // Apache-2.0 (FUTO's app is source-available; its layout repository is not).
+    add(
+        Attribution(
+            "FUTO Keyboard layouts",
+            R.string.about_bundled_futo_layouts_used,
+            "Copyright the FUTO Keyboard layout contributors",
+            "Apache-2.0", "apache-2.0.txt",
+            "https://github.com/futo-org/futo-keyboard-layouts",
+        ),
+    )
+    add(
+        Attribution(
+            "FlorisBoard layouts",
+            R.string.about_bundled_floris_layouts_used,
+            "Copyright The FlorisBoard Contributors",
+            "Apache-2.0", "apache-2.0.txt",
+            "https://github.com/florisboard/florisboard",
+        ),
+    )
     add(
         Attribution(
             "Khipro",

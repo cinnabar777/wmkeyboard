@@ -1,0 +1,178 @@
+{
+  "format": "wmkeyboard-layout",
+  "version": 1,
+  "layout": {
+    "id": "asset_ru_yavert",
+    "name": "ЯВЕРТЫ (Russian Yavert)",
+    "langId": "ru",
+    "version": 2,
+    "layers": {
+      "letters": {
+        "rows": [
+          [
+            {
+              "label": "я"
+            },
+            {
+              "label": "в"
+            },
+            {
+              "label": "е"
+            },
+            {
+              "label": "р"
+            },
+            {
+              "label": "т"
+            },
+            {
+              "label": "ы"
+            },
+            {
+              "label": "у"
+            },
+            {
+              "label": "и"
+            },
+            {
+              "label": "о"
+            },
+            {
+              "label": "п"
+            },
+            {
+              "label": "ч"
+            }
+          ],
+          [
+            {
+              "label": "а"
+            },
+            {
+              "label": "с"
+            },
+            {
+              "label": "д"
+            },
+            {
+              "label": "ф"
+            },
+            {
+              "label": "г"
+            },
+            {
+              "label": "х"
+            },
+            {
+              "label": "й"
+            },
+            {
+              "label": "к"
+            },
+            {
+              "label": "л"
+            },
+            {
+              "label": "ш"
+            },
+            {
+              "label": "щ"
+            }
+          ],
+          [
+            {
+              "label": "⇧",
+              "action": {
+                "type": "shift"
+              },
+              "width": 1.5
+            },
+            {
+              "label": "з"
+            },
+            {
+              "label": "ь"
+            },
+            {
+              "label": "ц"
+            },
+            {
+              "label": "ж"
+            },
+            {
+              "label": "б"
+            },
+            {
+              "label": "н"
+            },
+            {
+              "label": "м"
+            },
+            {
+              "label": "э"
+            },
+            {
+              "label": "ю"
+            },
+            {
+              "label": "⌫",
+              "action": {
+                "type": "delete"
+              },
+              "width": 1.5
+            }
+          ],
+          [
+            {
+              "label": "?123",
+              "action": {
+                "type": "symbols"
+              },
+              "width": 1.5
+            },
+            {
+              "label": ",",
+              "longPress": [
+                "!",
+                "?"
+              ],
+              "role": "Comma"
+            },
+            {
+              "label": "🌐",
+              "action": {
+                "type": "language_switch"
+              }
+            },
+            {
+              "label": " ",
+              "action": {
+                "type": "space"
+              },
+              "width": 4
+            },
+            {
+              "label": ".",
+              "longPress": [
+                "…",
+                ",",
+                "?",
+                "!",
+                ":",
+                ";"
+              ],
+              "role": "Period"
+            },
+            {
+              "label": "⏎",
+              "action": {
+                "type": "enter"
+              },
+              "width": 1.5
+            }
+          ]
+        ]
+      }
+    }
+  }
+}

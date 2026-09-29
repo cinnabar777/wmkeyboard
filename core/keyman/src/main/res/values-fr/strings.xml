@@ -10,10 +10,6 @@
         <item quantity="one">%1$d touche tape le caractère imprimé dessus. Le clavier original utilisait une règle pour décider ce qu\'elle tape.</item>
         <item quantity="other">%1$d touches tapent les caractères imprimés dessus. Le clavier original utilisait des règles pour décider ce qu\'elles tapent.</item>
     </plurals>
-    <plurals name="core_keyman_multitap_dropped">
-        <item quantity="one">Ce clavier possède %1$d touche sur laquelle vous appuyez plusieurs fois pour faire défiler les caractères. Cette application de clavier ne dispose pas d\'une telle touche, seul le premier caractère est donc disponible.</item>
-        <item quantity="other">Ce clavier possède %1$d touches sur lesquelles vous appuyez plusieurs fois pour faire défiler les caractères. Cette application de clavier ne dispose pas de telles touches, seul le premier caractère de chacune est donc disponible.</item>
-    </plurals>
     <string name="core_keyman_rules_missing">Ce clavier utilise des règles pour décider ce que ses touches saisissent. L\'application ne possède pas ces règles, chaque touche saisit donc le caractère imprimé dessus.</string>
     <plurals name="core_keyman_special_keys_dropped">
         <item quantity="one">L\'application a supprimé %1$d touche. Ce clavier ne possède aucune touche effectuant la même action.</item>

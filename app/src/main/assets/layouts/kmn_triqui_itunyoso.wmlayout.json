@@ -26,12 +26,20 @@
                     "modifiers": 16,
                     "id": "T_L"
                   }
-                }
+                },
+                "multitap": [
+                  {
+                    "id": "T_NOTONE"
+                  }
+                ]
               },
               "flick": {
                 "up": "´",
                 "down": "`"
-              }
+              },
+              "multitap": [
+                "◌"
+              ]
             },
             {
               "label": "kw",
@@ -506,11 +514,20 @@
                   {
                     "id": "T_32"
                   }
+                ],
+                "multitap": [
+                  {
+                    "modifiers": 16,
+                    "id": "T_H"
+                  }
                 ]
               },
               "longPress": [
                 "◌́◌",
                 "◌◌"
+              ],
+              "multitap": [
+                "´"
               ]
             }
           ],
@@ -657,12 +674,21 @@
                   {
                     "id": "T_32"
                   }
+                ],
+                "multitap": [
+                  {
+                    "modifiers": 16,
+                    "id": "T_L"
+                  }
                 ]
               },
               "longPress": [
                 "◌◌̀",
                 "◌̀◌",
                 "◌◌"
+              ],
+              "multitap": [
+                "`"
               ]
             },
             {
@@ -1150,10 +1176,19 @@
                     "vkey": 50001,
                     "modifiers": 16
                   }
+                ],
+                "multitap": [
+                  {
+                    "vkey": 50001,
+                    "modifiers": 16
+                  }
                 ]
               },
               "width": 1.2,
               "longPress": [
+                "🌐"
+              ],
+              "multitap": [
                 "🌐"
               ]
             },
@@ -1962,10 +1997,18 @@
                   {
                     "vkey": 50001
                   }
+                ],
+                "multitap": [
+                  {
+                    "vkey": 50001
+                  }
                 ]
               },
               "width": 1.2,
               "longPress": [
+                "🌐"
+              ],
+              "multitap": [
                 "🌐"
               ]
             },
@@ -4101,10 +4144,19 @@
                     "vkey": 50001,
                     "modifiers": 256
                   }
+                ],
+                "multitap": [
+                  {
+                    "vkey": 50001,
+                    "modifiers": 256
+                  }
                 ]
               },
               "width": 1.2,
               "longPress": [
+                "🌐"
+              ],
+              "multitap": [
                 "🌐"
               ]
             },

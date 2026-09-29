@@ -1,6 +1,7 @@
 package com.wasimaster.wmkeyboard.ime.ui
 
 import com.wasimaster.wmkeyboard.core.layout.AlternateEntry
+import com.wasimaster.wmkeyboard.core.layout.BottomRowRules
 import com.wasimaster.wmkeyboard.core.layout.BuiltInLayouts
 import com.wasimaster.wmkeyboard.core.layout.Key
 import com.wasimaster.wmkeyboard.core.layout.KeyAction
@@ -9,15 +10,17 @@ import com.wasimaster.wmkeyboard.core.layout.KeyRole
 import com.wasimaster.wmkeyboard.core.layout.KeyboardLayout
 import com.wasimaster.wmkeyboard.core.layout.LayoutLayer
 import com.wasimaster.wmkeyboard.core.layout.alternateEntries
+import com.wasimaster.wmkeyboard.core.layout.arrangedBy
 import com.wasimaster.wmkeyboard.core.layout.compile
 import com.wasimaster.wmkeyboard.core.layout.expandForTablet
 import com.wasimaster.wmkeyboard.core.layout.opensAlternatesPopup
 import com.wasimaster.wmkeyboard.core.layout.roleIn
 import com.wasimaster.wmkeyboard.core.layout.tabletGridWidth
-import com.wasimaster.wmkeyboard.core.settings.DeviceForm
-import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
+import com.wasimaster.wmkeyboard.core.layout.withoutGlobeKey
 import com.wasimaster.wmkeyboard.core.script.ScriptId
 import com.wasimaster.wmkeyboard.core.script.ScriptRegistry
+import com.wasimaster.wmkeyboard.core.settings.DeviceForm
+import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.LongPressLetterActions
 import com.wasimaster.wmkeyboard.core.settings.TextEditAction
 import com.wasimaster.wmkeyboard.core.settings.ToolbarTool
@@ -451,6 +454,37 @@ class CurrentLayoutTest {
         val comma = row.indexOfFirst { it.role == KeyRole.Comma }
         assertTrue("no emoji key in $row", emoji >= 0)
         assertTrue("emoji key should lead the comma", emoji < comma)
+    }
+
+    /**
+     * Issue #420: the keyboard and the layout editor draw the bottom row from
+     * one pass, so under the shipped settings the keyboard's row is the one
+     * [arrangedBy] makes of the stored grid, which is the row the editor shows.
+     */
+    @Test
+    fun `the keyboard draws the bottom row the shared pass makes`() {
+        val s = state()
+        val drawn = currentLayout(s).rows.last()
+        val shared = s.layouts.letters.arrangedBy(
+            BottomRowRules(globeInOnePlace = true, swapCommaAndGlobe = true, globeAsEmoji = true),
+        ).layout.rows.last()
+        assertEquals(shared.map { it.label to it.action }, drawn.map { it.label to it.action })
+        assertEquals(shared.map { it.width }, drawn.map { it.width })
+    }
+
+    /** Issue #420: a layer laid out by hand in the editor is past every bottom-row setting. */
+    @Test
+    fun `a layer laid out by hand is drawn as it is stored`() {
+        val qwerty = BuiltInLayouts.QWERTY
+        val letters = requireNotNull(qwerty.layer(LayoutLayer.LETTERS))
+        val spec = qwerty.copy(
+            layers = qwerty.layers + (LayoutLayer.LETTERS.key to letters.copy(bottomRowAsLaidOut = true)),
+        )
+        val s = state(spec = spec, settings = KeyboardSettings(showGlobeKey = false, commaAsEmoji = true))
+        val stored = s.layouts.letters.rows.last()
+        val drawn = currentLayout(s).rows.last()
+        assertEquals(stored.map { it.label to it.action }, drawn.map { it.label to it.action })
+        assertEquals(stored.map { it.width }, drawn.map { it.width })
     }
 
     /**

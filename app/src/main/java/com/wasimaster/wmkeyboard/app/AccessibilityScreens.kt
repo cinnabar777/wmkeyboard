@@ -36,7 +36,16 @@ internal fun AccessibilitySettings(
     val context = LocalContext.current
     val readableFontId = KeyboardFonts.googleId(READABLE_FONT)
     // What decides which rows the group holds; each row reads its own value.
-    val screenReader = settings.watch { it.accessibility.screenReader }
+    // A Play build has no pass-through service, and Gestures without it runs
+    // as Explore, so a Gestures choice carried over from another build shows
+    // as the mode it actually is.
+    val screenReader = settings.watch { it.accessibility.screenReader }.let {
+        if (it == ScreenReaderMode.PASSTHROUGH && !ChannelFeatures.GESTURE_PASSTHROUGH) {
+            ScreenReaderMode.EXPLORE
+        } else {
+            it
+        }
+    }
 
     SettingsGroup(stringResource(R.string.accessibility_vision_title)) {
         item {
@@ -166,14 +175,16 @@ internal fun AccessibilitySettings(
                 title = R.string.accessibility_talkback_title,
                 subtitle = stringResource(R.string.accessibility_talkback_subtitle),
                 info = stringResource(R.string.accessibility_talkback_info),
-                options = listOf(
+                options = listOfNotNull(
                     ScreenReaderMode.OFF to stringResource(CommonR.string.common_off),
                     ScreenReaderMode.LABELS to
                         stringResource(R.string.accessibility_talkback_mode_labels),
                     ScreenReaderMode.EXPLORE to
                         stringResource(R.string.accessibility_talkback_mode_explore),
-                    ScreenReaderMode.PASSTHROUGH to
-                        stringResource(R.string.accessibility_talkback_mode_gestures),
+                    (
+                        ScreenReaderMode.PASSTHROUGH to
+                            stringResource(R.string.accessibility_talkback_mode_gestures)
+                        ).takeIf { ChannelFeatures.GESTURE_PASSTHROUGH },
                 ),
                 selected = screenReader,
                 default = SettingsDefaults.accessibility.screenReader,

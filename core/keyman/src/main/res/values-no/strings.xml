@@ -10,10 +10,6 @@
         <item quantity="one">%1$d tast skriver tegnet som er trykt på den. Det originale tastaturet brukte en regel for å bestemme hva den skriver.</item>
         <item quantity="other">%1$d taster skriver tegnene som er trykt på dem. Det originale tastaturet brukte regler for å bestemme hva de skriver.</item>
     </plurals>
-    <plurals name="core_keyman_multitap_dropped">
-        <item quantity="one">Dette tastaturet har %1$d tast du trykker gjentatte ganger på for å bla gjennom tegn. Denne tastaturappen har ingen slik tast, så bare det første tegnet er tilgjengelig.</item>
-        <item quantity="other">Dette tastaturet har %1$d taster du trykker gjentatte ganger på for å bla gjennom tegn. Denne tastaturappen har ingen slike taster, så bare det første tegnet for hver er tilgjengelig.</item>
-    </plurals>
     <string name="core_keyman_rules_missing">Dette tastaturet bruker regler for å bestemme hva tastene skriver. Appen har ikke disse reglene, så hver tast skriver tegnet som er trykt på den.</string>
     <plurals name="core_keyman_special_keys_dropped">
         <item quantity="one">Appen fjernet %1$d tast. Dette tastaturet har ingen tast som gjør det samme.</item>

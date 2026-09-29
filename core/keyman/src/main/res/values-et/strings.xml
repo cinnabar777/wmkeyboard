@@ -10,10 +10,6 @@
         <item quantity="one">%1$d klahv trükib sellele märgitud märgi. Algne klaviatuur kasutas reeglit, et otsustada, mida see trükib.</item>
         <item quantity="other">%1$d klahvi trükivad neile märgitud märgid. Algne klaviatuur kasutas reegleid, et otsustada, mida need trükivad.</item>
     </plurals>
-    <plurals name="core_keyman_multitap_dropped">
-        <item quantity="one">Sellel klaviatuuril on %1$d klahv, mida korduvalt vajutades saab märkide vahel liikuda. Sellel klaviatuurirakendusel sellist klahvi pole, seega on saadaval ainult esimene märk.</item>
-        <item quantity="other">Sellel klaviatuuril on %1$d klahvi, mida korduvalt vajutades saab märkide vahel liikuda. Sellel klaviatuurirakendusel selliseid klahve pole, seega on saadaval ainult igaühe esimene märk.</item>
-    </plurals>
     <string name="core_keyman_rules_missing">See klaviatuur kasutab reegleid, et otsustada, mida selle klahvid trükivad. Rakendusel neid reegleid pole, seega trükib iga klahv sellele trükitud märgi.</string>
     <plurals name="core_keyman_special_keys_dropped">
         <item quantity="one">Rakendus eemaldas %1$d klahvi. Sellel klaviatuuril pole klahvi, mis teeks sama asja.</item>

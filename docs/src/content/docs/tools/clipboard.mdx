@@ -89,7 +89,7 @@ Clips are stored under seven kinds. The panel groups them like this:
 
 - **Text and rich text**: the plain content, shown as-is.
 - **Links**: shown as the raw URL, or as a fetched title and description if [link previews](#options) are on.
-- **Images**: copied into the app's own storage, so the source app can discard its copy without losing yours. Also captures device screenshots directly, if you turn that on.
+- **Images**: copied into the app's own storage, so the source app can discard its copy without losing yours. Also captures device screenshots directly, if you turn that on (not in the Play Store build).
 - **Files and videos**: not copied. Only the file's URI, name, MIME type and size are kept, so copying a multi-gigabyte video costs nothing. A video card even shows a frame grabbed from the very start of the clip instead of a blank icon. Copying several files or a whole folder at once keeps up to 20 items from that one copy.
 - **Folders**: a reference, same as files. A folder can't be attached to anything, so tapping its card types the folder's name into the field and hands the folder's URI back to the system clipboard for a file manager to use.
 
@@ -179,7 +179,7 @@ Everything below lives on the Clipboard screen, under Features on the settings h
 - **Phone number formats**: a nav row, shown only while detection is on, opening the mask editor covered in [Phone number formats](/reference/settings/phone-formats/). Its subtitle counts your saved formats, and says every number becomes a chip once you have deleted them all.
 - **Forget after you paste a password**: the paste-time purge described [above](#passwords-are-handled-deliberately); off by default.
 - **Link previews**: fetches a copied link's page title and description directly from the linked site; off by default, and the toggle's own description says so plainly.
-- **Your screenshots**: shows device screenshots in the panel alongside copied text and images; off by default. While it's on without the photos permission granted, a row appears underneath to open system settings.
+- **Your screenshots**: shows device screenshots in the panel alongside copied text and images; off by default. While it's on without the photos permission granted, a row appears underneath to open system settings. The Play Store build has no such row: Google Play only allows the photos permission to apps that can't use the photo picker for their main job, so that build doesn't declare it, and screenshots reach the clipboard only the usual way, by copying one. GitHub and F-Droid builds keep it.
 - **Show the source app**: records which app a clip was copied from, for the long-press info popup; off by default, and needs the Usage Access permission. It's a best-effort guess of the foreground app at copy time, not a precise log. It gets the same "grant this" row underneath until you do.
 
 **Passwords and codes**

@@ -219,8 +219,10 @@ internal fun SelectionOverlay(overlay: SelectionOverlayState, modifier: Modifier
             // Each handle hangs from its end of the selection, the point of the
             // drop on the line's foot. A handle whose end is scrolled out of the
             // text's own view is not drawn: it would float over something else.
+            // A bar at a bare caret has nothing to stretch, so no handles.
+            val caretOnly = session.start == session.end
             listOf(geometry.startFoot, geometry.endFoot).forEachIndexed { index, foot ->
-                if (!inView(Offset(foot.x, foot.y - 1f))) return@forEachIndexed
+                if (caretOnly || !inView(Offset(foot.x, foot.y - 1f))) return@forEachIndexed
                 val x = (foot.x - handleBox / 2f).roundToInt()
                 val y = foot.y.roundToInt()
                 placeables[index].place(x, y)
@@ -263,6 +265,7 @@ private fun selectionGeometry(own: LayoutCoordinates, session: SelectionSession)
     // A detached box cannot be asked where it is; the text left the screen
     // and its DisposableEffect has not run yet.
     if (!own.isAttached || !text.isAttached) return null
+    if (session.start == session.end) return caretGeometry(own, text, session)
     val layout = session.layout() ?: return null
     val length = layout.layoutInput.text.length
     val start = session.start.coerceIn(0, length)
@@ -278,6 +281,27 @@ private fun selectionGeometry(own: LayoutCoordinates, session: SelectionSession)
         startFoot = own.localPositionOf(text, Offset(startX, layout.getLineBottom(startLine))),
         endFoot = own.localPositionOf(text, Offset(endX, layout.getLineBottom(endLine))),
         top = own.localPositionOf(text, Offset(0f, layout.getLineTop(startLine))).y,
+        visible = own.localBoundingBoxOf(text, clipBounds = true),
+    )
+}
+
+/**
+ * Where the bar goes over a bare caret (#434): both feet on the caret's own
+ * foot. An empty box has no layout of its text to ask, so its caret is the
+ * box's leading edge, which is where the first character will land.
+ */
+private fun caretGeometry(own: LayoutCoordinates, text: LayoutCoordinates, session: SelectionSession): SelectionGeometry {
+    val layout = session.layout()
+    val rect = if (layout != null) {
+        layout.getCursorRect(session.start.coerceIn(0, layout.layoutInput.text.length))
+    } else {
+        Rect(0f, 0f, 0f, text.size.height.toFloat())
+    }
+    val foot = own.localPositionOf(text, Offset(rect.left, rect.bottom))
+    return SelectionGeometry(
+        startFoot = foot,
+        endFoot = foot,
+        top = own.localPositionOf(text, Offset(rect.left, rect.top)).y,
         visible = own.localBoundingBoxOf(text, clipBounds = true),
     )
 }
@@ -575,6 +599,12 @@ internal fun SelectableText(
  * The bar and handles for a keyboard-owned field's selection: publishes the
  * service's selection of [text], and turns the bar's taps and the handles'
  * drags back into the field's own callbacks.
+ *
+ * [caretBar] is the other bar a field has (#434): a long press on no word,
+ * or on an empty field, asks for Paste at the caret, and Select all when
+ * there is text to select. Without it an empty field had no way to take a
+ * paste at all. Unlike a selection it is the field's own to forget: a tap
+ * anywhere else, or on the field, calls [onCaretBarDismiss].
  */
 @Composable
 internal fun PublishFieldSelection(
@@ -584,44 +614,59 @@ internal fun PublishFieldSelection(
     handle: CaptureCaretHandle,
     coordinates: () -> LayoutCoordinates?,
     layout: () -> TextLayoutResult?,
+    caretBar: Boolean = false,
+    onCaretBarDismiss: () -> Unit = {},
 ) {
-    val shown = active && handle.hasSelection && handle.selectionEnd <= text.length
+    val selecting = active && handle.hasSelection && handle.selectionEnd <= text.length
+    val atCaret = active && caretBar && !handle.hasSelection
     val cut = stringResource(CommonR.string.common_cut)
     val copy = stringResource(CommonR.string.common_copy)
     val paste = stringResource(CommonR.string.common_paste)
     val all = stringResource(CommonR.string.common_select_all)
     val onAction = handle.onSelectionAction
-    val actions = remember(onAction, cut, copy, paste, all, handle.selectionEnd - handle.selectionStart == text.length) {
+    val dismissCaretBar by rememberUpdatedState(onCaretBarDismiss)
+    val wholeSelected = handle.selectionEnd - handle.selectionStart == text.length
+    val actions = remember(onAction, cut, copy, paste, all, wholeSelected, atCaret) {
         buildList {
-            add(SelectionBarAction(cut) { onAction(CaptureSelectionAction.CUT) })
-            add(SelectionBarAction(copy) { onAction(CaptureSelectionAction.COPY) })
-            add(SelectionBarAction(paste) { onAction(CaptureSelectionAction.PASTE) })
-            if (handle.selectionEnd - handle.selectionStart < text.length) {
-                add(SelectionBarAction(all) { onAction(CaptureSelectionAction.SELECT_ALL) })
+            if (atCaret) {
+                add(SelectionBarAction(paste) { dismissCaretBar(); onAction(CaptureSelectionAction.PASTE) })
+                if (!wholeSelected) {
+                    add(SelectionBarAction(all) { dismissCaretBar(); onAction(CaptureSelectionAction.SELECT_ALL) })
+                }
+            } else {
+                add(SelectionBarAction(cut) { onAction(CaptureSelectionAction.CUT) })
+                add(SelectionBarAction(copy) { onAction(CaptureSelectionAction.COPY) })
+                add(SelectionBarAction(paste) { onAction(CaptureSelectionAction.PASTE) })
+                if (!wholeSelected) {
+                    add(SelectionBarAction(all) { onAction(CaptureSelectionAction.SELECT_ALL) })
+                }
             }
         }
     }
     val select = handle.onSelect
+    val caret = handle.at.coerceIn(0, text.length)
     PublishSelection(
         owner = owner,
-        shown = shown,
-        start = handle.selectionStart,
-        end = handle.selectionEnd,
+        shown = selecting || atCaret,
+        start = if (atCaret) caret else handle.selectionStart,
+        end = if (atCaret) caret else handle.selectionEnd,
         coordinates = coordinates,
         layout = layout,
         actions = actions,
         // The field's selection lives in the service next to its caret; a
-        // key press is meant to replace it, not to end it first.
-        dismissOnOutsideTap = false,
+        // key press is meant to replace it, not to end it first. The caret's
+        // bar is only an offer, and a key press is the answer no.
+        dismissOnOutsideTap = atCaret,
         // The moving end becomes the caret, so the strip follows the handle.
         onChange = { s, e, movedStart -> if (movedStart) select(e, s) else select(s, e) },
-        onDismiss = {},
+        onDismiss = { dismissCaretBar() },
     )
 }
 
 /**
  * The long press every keyboard-owned field shares: the word under the
- * finger selected, or the caret put there when it is on no word.
+ * finger selected, or the caret put there when it is on no word. False in
+ * the second case, which is the field's cue to offer Paste at the caret.
  */
 internal fun fieldLongPress(text: String, layout: TextLayoutResult?, position: Offset, handle: CaptureCaretHandle): Boolean {
     val result = layout?.takeIf { it.layoutInput.text.text == text } ?: return false

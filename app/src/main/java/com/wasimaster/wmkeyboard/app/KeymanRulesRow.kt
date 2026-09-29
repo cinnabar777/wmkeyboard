@@ -101,9 +101,20 @@ internal class KeymanRulesState internal constructor(
     private val scope: CoroutineScope,
     private val startDownload: State<(String, String) -> DownloadNotifications.Handle>,
 ) {
-    /** The installed version, [UNKNOWN_VERSION] when it is unrecorded, or null. */
-    var installedVersion by mutableStateOf<String?>(null)
-        internal set
+    private val version = mutableStateOf(KnownRules.of(binding.keyboardId))
+
+    /**
+     * The installed version, [UNKNOWN_VERSION] when it is unrecorded, or null.
+     * Starts from what this process last read for the layout, so a card that
+     * scrolls back into view shows its rules line as it left it rather than
+     * flicking from "get" to "ready" once the disk has been read again.
+     */
+    var installedVersion: String?
+        get() = version.value
+        internal set(value) {
+            version.value = value
+            KnownRules.note(binding.keyboardId, value)
+        }
     var busy by mutableStateOf(false)
         private set
     var progress by mutableStateOf(0)
@@ -174,6 +185,19 @@ internal class KeymanRulesState internal constructor(
             }
             busy = false
         }
+    }
+}
+
+/** What each layout's rules were last read as, for the next state built for it. */
+private object KnownRules {
+    private val versions = HashMap<String, String?>()
+
+    @Synchronized
+    fun of(keyboardId: String): String? = versions[keyboardId]
+
+    @Synchronized
+    fun note(keyboardId: String, version: String?) {
+        versions[keyboardId] = version
     }
 }
 

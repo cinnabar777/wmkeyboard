@@ -37,6 +37,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -56,8 +57,10 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.constrainHeight
 import androidx.compose.ui.unit.dp
@@ -126,52 +129,77 @@ internal fun LayoutCarousel(
         // The tallest board drawn so far, which the More card borrows so it
         // stands as tall as the cards beside it.
         val boardHeight = remember(cardWidth) { mutableIntStateOf(0) }
-        LazyRow(
-            state = listState,
-            contentPadding = PaddingValues(horizontal = CarouselEdge),
-            horizontalArrangement = Arrangement.spacedBy(CardGap),
-            // Bottom, so every name pill sits on one line whatever the height
-            // of the board above it.
-            verticalAlignment = Alignment.Bottom,
-            modifier = Modifier
-                .fillMaxWidth()
-                .then(
-                    if (reduceMotion) Modifier
-                    else Modifier.animateContentSize(spring(stiffness = GROW_STIFFNESS)),
-                )
-                .layout { measurable, constraints ->
-                    val placeable = measurable.measure(constraints.copy(minHeight = 0))
-                    tallest[0] = maxOf(tallest[0], placeable.height)
-                    val height = constraints.constrainHeight(tallest[0])
-                    layout(placeable.width, height) {
-                        placeable.place(0, height - placeable.height)
-                    }
-                },
-        ) {
-            items(layoutIds, key = { it }) { layoutId ->
-                val on = settings.watch { layoutId in it.enabledLayoutIds }
-                val customLayouts = settings.watch { it.customLayouts }
-                val name = remember(customLayouts, layoutId) {
-                    resolveLayout(customLayouts, layoutId).name
-                }
-                LayoutCard(
-                    name = name,
-                    layoutId = layoutId,
-                    on = on,
-                    settings = settings,
-                    modifier = Modifier.width(cardWidth),
-                    boardHeight = boardHeight,
-                    onToggle = { enable -> onToggle(layoutId, enable) },
-                )
-            }
-            if (moreCount > 0) {
-                item(key = MORE_CARD_KEY) {
-                    MoreLayoutsCard(
-                        count = moreCount,
-                        boardHeight = boardHeight.intValue,
-                        width = cardWidth,
-                        onClick = onMore,
+        // Names wrap rather than cut off, and every card's name takes as many
+        // lines as the longest one needs, so the pills stay level along the
+        // row and a board never sits higher than its neighbour for its name.
+        val customLayouts = settings.watch { it.customLayouts }
+        val names = remember(customLayouts, layoutIds) {
+            layoutIds.associateWith { resolveLayout(customLayouts, it).name }
+        }
+        val moreName = stringResource(R.string.languages_more_layouts_title)
+        val nameStyle = MaterialTheme.typography.labelLarge
+        val measurer = rememberTextMeasurer()
+        val nameLines = remember(names, moreCount, moreName, nameStyle, cardWidth, density) {
+            val width = with(density) { (cardWidth - CardInset * 2 - PillInset * 2 - TickSize - TickGap).roundToPx() }
+            val shown = if (moreCount > 0) names.values + moreName else names.values
+            shown.maxOfOrNull { name ->
+                measurer.measure(
+                    name,
+                    style = nameStyle,
+                    constraints = Constraints(maxWidth = width.coerceAtLeast(1)),
+                    // Measured without the cache: each name is measured once.
+                    skipCache = true,
+                ).lineCount
+            } ?: 1
+        }
+        // No card composes a keyboard to capture while the row moves.
+        val scrolling = remember(listState) { { listState.isScrollInProgress } }
+        CompositionLocalProvider(LocalLayoutPreviewScrolling provides scrolling) {
+            LazyRow(
+                state = listState,
+                contentPadding = PaddingValues(horizontal = CarouselEdge),
+                horizontalArrangement = Arrangement.spacedBy(CardGap),
+                // Bottom, so every name pill sits on one line whatever the height
+                // of the board above it.
+                verticalAlignment = Alignment.Bottom,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .then(
+                        if (reduceMotion) Modifier
+                        else Modifier.animateContentSize(spring(stiffness = GROW_STIFFNESS)),
                     )
+                    .layout { measurable, constraints ->
+                        val placeable = measurable.measure(constraints.copy(minHeight = 0))
+                        tallest[0] = maxOf(tallest[0], placeable.height)
+                        val height = constraints.constrainHeight(tallest[0])
+                        layout(placeable.width, height) {
+                            placeable.place(0, height - placeable.height)
+                        }
+                    },
+            ) {
+                items(layoutIds, key = { it }) { layoutId ->
+                    val on = settings.watch { layoutId in it.enabledLayoutIds }
+                    LayoutCard(
+                        name = names[layoutId].orEmpty(),
+                        layoutId = layoutId,
+                        on = on,
+                        settings = settings,
+                        nameLines = nameLines,
+                        modifier = Modifier.width(cardWidth),
+                        boardHeight = boardHeight,
+                        onToggle = { enable -> onToggle(layoutId, enable) },
+                    )
+                }
+                if (moreCount > 0) {
+                    item(key = MORE_CARD_KEY) {
+                        MoreLayoutsCard(
+                            count = moreCount,
+                            boardHeight = boardHeight.intValue,
+                            width = cardWidth,
+                            nameLines = nameLines,
+                            onClick = onMore,
+                        )
+                    }
                 }
             }
         }
@@ -193,6 +221,9 @@ internal fun LayoutCarousel(
  *
  * [boardHeight], when given, is raised to the tallest board this card has
  * drawn, for a neighbour that wants to match it.
+ *
+ * The name wraps onto as many lines as it needs, and takes at least
+ * [nameLines], so a row of cards can keep its pills level.
  */
 @Composable
 internal fun LayoutCard(
@@ -203,6 +234,7 @@ internal fun LayoutCard(
     onToggle: (Boolean) -> Boolean,
     modifier: Modifier = Modifier,
     boardHeight: MutableIntState? = null,
+    nameLines: Int = 1,
     footer: (@Composable ColumnScope.() -> Unit)? = null,
 ) {
     val reduceMotion = LocalReduceMotion.current
@@ -278,19 +310,19 @@ internal fun LayoutCard(
             )
             Spacer(Modifier.height(PillGap))
             Row(
-                verticalAlignment = Alignment.CenterVertically,
+                // Level with the first line of a name that wraps.
+                verticalAlignment = Alignment.Top,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 4.dp, vertical = 2.dp),
+                    .padding(horizontal = PillInset, vertical = 2.dp),
             ) {
                 Tick(selection)
-                Spacer(Modifier.width(8.dp))
+                Spacer(Modifier.width(TickGap))
                 Text(
                     name,
                     style = MaterialTheme.typography.labelLarge,
                     color = if (on) colors.onSecondaryContainer else colors.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
+                    minLines = nameLines,
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -313,6 +345,7 @@ private fun MoreLayoutsCard(
     count: Int,
     boardHeight: Int,
     width: Dp,
+    nameLines: Int,
     onClick: () -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
@@ -358,10 +391,10 @@ private fun MoreLayoutsCard(
         }
         Spacer(Modifier.height(PillGap))
         Row(
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.Top,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 4.dp, vertical = 2.dp),
+                .padding(horizontal = PillInset, vertical = 2.dp),
         ) {
             Box(
                 contentAlignment = Alignment.Center,
@@ -377,12 +410,11 @@ private fun MoreLayoutsCard(
                     modifier = Modifier.size(TickSize * 0.7f),
                 )
             }
-            Spacer(Modifier.width(8.dp))
+            Spacer(Modifier.width(TickGap))
             Text(
                 stringResource(R.string.languages_more_layouts_title),
                 style = MaterialTheme.typography.labelLarge,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
+                minLines = nameLines,
                 modifier = Modifier.weight(1f),
             )
         }
@@ -447,6 +479,8 @@ private val BoardShape = RoundedCornerShape(12.dp)
 private val CardInset = 5.dp
 private val PillGap = 4.dp
 private val TickSize = 18.dp
+private val TickGap = 8.dp
+private val PillInset = 4.dp
 
 private val RingOff = 1.dp
 private val RingOn = 2.dp

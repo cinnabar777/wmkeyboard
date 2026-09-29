@@ -14,7 +14,7 @@ import com.wasimaster.wmkeyboard.core.layout.AssetLayouts
 import com.wasimaster.wmkeyboard.core.settings.DeviceForm
 import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.OneHandedMode
-import com.wasimaster.wmkeyboard.ime.KeyboardUiState
+import com.wasimaster.wmkeyboard.core.settings.isTelevision
 import com.wasimaster.wmkeyboard.ime.ui.layoutSwitchLabel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -63,6 +63,19 @@ internal object LayoutPreviewCache {
      */
     private val latest = HashMap<String, String>()
 
+    /**
+     * The inputs each layout's key was last worked out from, so a card that
+     * scrolls back into view with none of them changed has its key, and its
+     * picture, without computing either again.
+     */
+    private val keys = HashMap<String, Pair<PreviewInputs, String>>()
+
+    @Volatile
+    private var television: Boolean? = null
+
+    private var environmentOf: EnvironmentInputs? = null
+    private var environment: String = ""
+
     /** Width over height of the last picture taken, for the skeleton's shape. */
     @Volatile
     var lastAspect: Float = FALLBACK_ASPECT
@@ -74,10 +87,47 @@ internal object LayoutPreviewCache {
     @Volatile
     private var appStamp: Long = -1L
 
+    /**
+     * Sized for a More layouts grid scrolled end to end and back, dozens of
+     * cards of ~0.7 MB each: a picture evicted is a card that shows a skeleton
+     * and decodes from disk again on the way back. Most of them are hardware
+     * bitmaps and do not sit on the heap this is a share of.
+     */
     private fun memoryBudget(): Int =
-        (Runtime.getRuntime().maxMemory() / 16).coerceAtMost(48L shl 20).toInt()
+        (Runtime.getRuntime().maxMemory() / 8).coerceAtMost(96L shl 20).toInt()
 
     fun get(key: String): ImageBitmap? = memory.get(key)
+
+    /** The key last worked out for [layoutId], if [inputs] are what it was worked out from. */
+    @Synchronized
+    fun knownKey(layoutId: String, inputs: PreviewInputs): String? =
+        keys[layoutId]?.takeIf { it.first.sameAs(inputs) }?.second
+
+    @Synchronized
+    fun noteKey(layoutId: String, inputs: PreviewInputs, key: String) {
+        keys[layoutId] = inputs to key
+    }
+
+    /** Whether this is a television, asked once: it is a binder call, and it never changes. */
+    fun television(context: Context): Boolean =
+        television ?: context.isTelevision().also { television = it }
+
+    /** [previewEnvironment], worked out once per configuration rather than once per card. */
+    @Synchronized
+    fun environment(
+        context: Context,
+        configuration: Configuration,
+        density: Density,
+        systemDark: Boolean,
+        darkSlot: Boolean,
+    ): String {
+        val inputs = EnvironmentInputs(Configuration(configuration), density, systemDark, darkSlot)
+        if (inputs != environmentOf) {
+            environment = previewEnvironment(context, configuration, density, systemDark, darkSlot)
+            environmentOf = inputs
+        }
+        return environment
+    }
 
     /** The last picture of [layoutId], whatever it was drawn for. */
     @Synchronized
@@ -157,20 +207,20 @@ internal object LayoutPreviewCache {
     private fun dir(context: Context) = File(context.cacheDir, DIR)
 
     /**
-     * The key of the picture of [state]'s board: a digest of every input the
+     * The key of the picture of [layoutId]'s board, drawn with [shown]: a digest of every input the
      * board is drawn from. Called off the main thread; the settings half is
      * the expensive part and is worked out once per settings instance.
      */
     fun keyOf(
         context: Context,
         settings: KeyboardSettings,
-        state: KeyboardUiState,
+        layoutId: String,
+        shown: KeyboardSettings,
         form: DeviceForm,
         television: Boolean,
         environment: String,
         widthPx: Int,
     ): String {
-        val shown = state.settings
         return sha256(
             listOf(
                 FORMAT.toString(),
@@ -179,16 +229,16 @@ internal object LayoutPreviewCache {
                 environment,
                 widthPx.toString(),
                 SettingsDigest.of(settings),
-                state.layoutId,
+                layoutId,
                 // A layout the user made or edited is drawn from its spec; a
                 // shipped one is fixed by its id and the app version above.
-                settings.customLayouts.lastOrNull { it.id == state.layoutId }?.toString().orEmpty(),
+                settings.customLayouts.lastOrNull { it.id == layoutId }?.toString().orEmpty(),
                 form.name,
                 television.toString(),
                 // All the board reads from the enabled list: the spacebar's
                 // name, and whether it draws the language arrows.
                 layoutSwitchLabel(
-                    state.layoutId,
+                    layoutId,
                     shown.enabledLayoutIds,
                     shown.customLayouts,
                     shown.layoutBehavior.spacebarDisplay,
@@ -213,6 +263,38 @@ internal object LayoutPreviewCache {
 
     private const val FALLBACK_ASPECT = 1.45f
 }
+
+/**
+ * What a card's key was worked out from, compared cheaply: the settings by
+ * identity, since the settings flow hands every card the same instance until
+ * something changes, and comparing two of them field by field is no cheaper
+ * than the work this saves.
+ */
+internal class PreviewInputs(
+    private val settings: KeyboardSettings,
+    private val form: DeviceForm,
+    private val television: Boolean,
+    private val environment: String,
+    private val widthPx: Int,
+) {
+    // The shipped layouts parsing moves every asset layout's key along.
+    private val generation = AssetLayouts.generation
+
+    fun sameAs(other: PreviewInputs): Boolean =
+        settings === other.settings &&
+            form == other.form &&
+            television == other.television &&
+            widthPx == other.widthPx &&
+            generation == other.generation &&
+            environment == other.environment
+}
+
+private data class EnvironmentInputs(
+    val configuration: Configuration,
+    val density: Density,
+    val systemDark: Boolean,
+    val darkSlot: Boolean,
+)
 
 /**
  * The settings half of a picture's key, once per settings instance: every card

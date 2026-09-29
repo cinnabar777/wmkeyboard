@@ -10,10 +10,6 @@
         <item quantity="one">%1$d tuşu, üzerinde yazılı olan karakteri yazar. Orijinal klavye, ne yazacağına karar vermek için bir kural kullanıyordu.</item>
         <item quantity="other">%1$d tuşu, üzerinde yazılı olan karakterleri yazar. Orijinal klavye, ne yazacaklarına karar vermek için kurallar kullanıyordu.</item>
     </plurals>
-    <plurals name="core_keyman_multitap_dropped">
-        <item quantity="one">Bu klavyede karakterler arasında geçiş yapmak için art arda dokunduğunuz %1$d tuş bulunuyor. Bu klavye uygulamasında böyle bir tuş yoktur, bu nedenle yalnızca ilk karakter kullanılabilir.</item>
-        <item quantity="other">Bu klavyede karakterler arasında geçiş yapmak için art arda dokunduğunuz %1$d tuş bulunuyor. Bu klavye uygulamasında böyle tuşlar yoktur, bu nedenle her birinin yalnızca ilk karakteri kullanılabilir.</item>
-    </plurals>
     <string name="core_keyman_rules_missing">Bu klavye, tuşlarının ne yazacağına karar vermek için kurallar kullanır. Uygulamada bu kurallar bulunmadığından, her tuş üzerinde yazılı olan karakteri yazar.</string>
     <plurals name="core_keyman_special_keys_dropped">
         <item quantity="one">Uygulama %1$d tuşu kaldırdı. Bu klavyede aynı işlevi gören bir tuş yok.</item>

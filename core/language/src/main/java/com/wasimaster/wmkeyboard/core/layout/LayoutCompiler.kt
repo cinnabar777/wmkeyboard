@@ -47,6 +47,7 @@ fun LayoutSpec.compile(layer: LayoutLayer): KeyboardLayout = synchronized(compil
         // and pressing ?123 changes it without anything having to be told.
         appearance = appearanceFor(resolved),
         persistent = resolved.persistent,
+        bottomRowAsLaidOut = resolved.bottomRowAsLaidOut,
         themeId = resolved.themeId ?: themeId,
         keymanFrames = resolved.keymanFrames.orEmpty(),
     )
@@ -70,6 +71,7 @@ fun LayoutSpec.compileNamed(name: String): KeyboardLayout? = synchronized(namedC
         rowHeights = resolved.rowHeights,
         appearance = appearanceFor(resolved),
         persistent = resolved.persistent,
+        bottomRowAsLaidOut = resolved.bottomRowAsLaidOut,
         themeId = resolved.themeId ?: themeId,
         keymanFrames = resolved.keymanFrames.orEmpty(),
     )

@@ -446,14 +446,6 @@ object KeymanLanguages {
             layoutIds = listOf("asset_kmn_itrans_odia"),
         ),
         LanguageDef(
-            id = "be-Latn",
-            displayName = "Belarusian (Latin)",
-            englishName = "Belarusian (Latin)",
-            script = ScriptId.LATIN,
-            localeTag = "be-Latn",
-            layoutIds = listOf("asset_kmn_slaviature"),
-        ),
-        LanguageDef(
             id = "bea",
             displayName = "Beaver",
             englishName = "Beaver",
@@ -1249,18 +1241,6 @@ object KeymanLanguages {
             script = ScriptId.RUNIC,
             localeTag = "en-Runr",
             layoutIds = listOf("asset_kmn_anglo_furthorc_english"),
-        ),
-        LanguageDef(
-            id = "en-Shaw",
-            displayName = "English (Shavian)",
-            englishName = "English (Shavian)",
-            script = ScriptId.LATIN,
-            localeTag = "en-Shaw",
-            layoutIds = listOf(
-                "asset_kmn_english_shavian_igc",
-                "asset_kmn_english_shavian_jafl",
-                "asset_kmn_english_shavian_qwerty",
-            ),
         ),
         LanguageDef(
             id = "eno",
@@ -2550,18 +2530,6 @@ object KeymanLanguages {
             script = ScriptId.LATIN,
             localeTag = "ndv",
             layoutIds = listOf("asset_kmn_sil_senegal_ndv_azerty"),
-        ),
-        LanguageDef(
-            id = "new-Newa",
-            displayName = "Nepal Bhasa (Newa)",
-            englishName = "Nepal Bhasa (Newa)",
-            script = ScriptId.NEWA,
-            localeTag = "new-Newa",
-            layoutIds = listOf(
-                "asset_kmn_newa_romanized",
-                "asset_kmn_newa_traditional",
-                "asset_kmn_newa_traditional_extended",
-            ),
         ),
         LanguageDef(
             id = "nia-Latn",
@@ -4197,6 +4165,7 @@ object KeymanLanguages {
         "as" to listOf("asset_kmn_basic_kbdinasa"),
         "ay" to listOf("asset_kmn_sil_bolivia"),
         "be" to listOf("asset_kmn_basic_kbdblr"),
+        "be-Latn" to listOf("asset_kmn_slaviature"),
         "bg" to listOf(
             "asset_kmn_basic_kbdbgph",
             "asset_kmn_basic_kbdbgph1",
@@ -4275,6 +4244,11 @@ object KeymanLanguages {
             "asset_kmn_postmodern_english_us_natural",
             "asset_kmn_symbolic_logic",
             "asset_kmn_xpert",
+        ),
+        "en-Shaw" to listOf(
+            "asset_kmn_english_shavian_igc",
+            "asset_kmn_english_shavian_jafl",
+            "asset_kmn_english_shavian_qwerty",
         ),
         "eo" to listOf(
             "asset_kmn_eo_plus",
@@ -4447,6 +4421,11 @@ object KeymanLanguages {
             "asset_kmn_nepali_traditional",
             "asset_kmn_sil_devanagari_romanized",
             "asset_kmn_sil_devanagari_typewriter",
+        ),
+        "new-Newa" to listOf(
+            "asset_kmn_newa_romanized",
+            "asset_kmn_newa_traditional",
+            "asset_kmn_newa_traditional_extended",
         ),
         "nl" to listOf("asset_kmn_basic_kbdne"),
         "nqo" to listOf(

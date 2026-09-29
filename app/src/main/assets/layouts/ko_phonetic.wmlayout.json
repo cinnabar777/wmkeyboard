@@ -1,0 +1,193 @@
+{
+  "format": "wmkeyboard-layout",
+  "version": 1,
+  "layout": {
+    "id": "asset_ko_phonetic",
+    "name": "한국어 음성 (Korean phonetic)",
+    "langId": "ko",
+    "version": 2,
+    "layers": {
+      "letters": {
+        "rows": [
+          [
+            {
+              "label": "ㅇ"
+            },
+            {
+              "label": "ㅡ"
+            },
+            {
+              "label": "ㅔ",
+              "longPress": [
+                "ㅖ"
+              ],
+              "shiftLabel": "ㅖ"
+            },
+            {
+              "label": "ㄹ"
+            },
+            {
+              "label": "ㅌ"
+            },
+            {
+              "label": "ㅐ",
+              "longPress": [
+                "ㅒ"
+              ],
+              "shiftLabel": "ㅒ"
+            },
+            {
+              "label": "ㅜ"
+            },
+            {
+              "label": "ㅣ"
+            },
+            {
+              "label": "ㅗ"
+            },
+            {
+              "label": "ㅍ"
+            }
+          ],
+          [
+            {
+              "label": "ㅏ"
+            },
+            {
+              "label": "ㅅ",
+              "longPress": [
+                "ㅆ"
+              ],
+              "shiftLabel": "ㅆ"
+            },
+            {
+              "label": "ㄷ",
+              "longPress": [
+                "ㄸ"
+              ],
+              "shiftLabel": "ㄸ"
+            },
+            {
+              "label": "ㅑ"
+            },
+            {
+              "label": "ㄱ",
+              "longPress": [
+                "ㄲ"
+              ],
+              "shiftLabel": "ㄲ"
+            },
+            {
+              "label": "ㅎ"
+            },
+            {
+              "label": "ㅈ",
+              "longPress": [
+                "ㅉ"
+              ],
+              "shiftLabel": "ㅉ"
+            },
+            {
+              "label": "ㅋ"
+            },
+            {
+              "label": "ㅛ"
+            }
+          ],
+          [
+            {
+              "label": "⇧",
+              "action": {
+                "type": "shift"
+              },
+              "width": 1.5
+            },
+            {
+              "label": "ㅕ"
+            },
+            {
+              "label": "ㅠ"
+            },
+            {
+              "label": "ㅊ"
+            },
+            {
+              "label": "ㅓ"
+            },
+            {
+              "label": "ㅂ",
+              "longPress": [
+                "ㅃ"
+              ],
+              "shiftLabel": "ㅃ"
+            },
+            {
+              "label": "ㄴ"
+            },
+            {
+              "label": "ㅁ"
+            },
+            {
+              "label": "⌫",
+              "action": {
+                "type": "delete"
+              },
+              "width": 1.5
+            }
+          ],
+          [
+            {
+              "label": "?123",
+              "action": {
+                "type": "symbols"
+              },
+              "width": 1.5
+            },
+            {
+              "label": ",",
+              "longPress": [
+                "!",
+                "?"
+              ],
+              "role": "Comma"
+            },
+            {
+              "label": "🌐",
+              "action": {
+                "type": "language_switch"
+              }
+            },
+            {
+              "label": " ",
+              "action": {
+                "type": "space"
+              },
+              "width": 4
+            },
+            {
+              "label": ".",
+              "longPress": [
+                "…",
+                "·",
+                "※",
+                ",",
+                "?",
+                "!",
+                ":",
+                ";"
+              ],
+              "role": "Period"
+            },
+            {
+              "label": "⏎",
+              "action": {
+                "type": "enter"
+              },
+              "width": 1.5
+            }
+          ]
+        ]
+      }
+    }
+  }
+}

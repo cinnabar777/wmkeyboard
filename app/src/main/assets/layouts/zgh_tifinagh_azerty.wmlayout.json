@@ -1,0 +1,238 @@
+{
+  "format": "wmkeyboard-layout",
+  "version": 1,
+  "layout": {
+    "id": "asset_zgh_tifinagh_azerty",
+    "name": "ⵜⴰⵎⴰⵣⵉⵖⵜ AZERTY (Tamazight Tifinagh AZERTY)",
+    "langId": "zgh",
+    "version": 2,
+    "layers": {
+      "letters": {
+        "rows": [
+          [
+            {
+              "label": "ⴰ"
+            },
+            {
+              "label": "ⵣ",
+              "longPress": [
+                "ⵥ",
+                "ⵤ"
+              ]
+            },
+            {
+              "label": "ⴻ",
+              "longPress": [
+                "ⵦ"
+              ]
+            },
+            {
+              "label": "ⵔ",
+              "longPress": [
+                "ⵕ"
+              ]
+            },
+            {
+              "label": "ⵜ",
+              "longPress": [
+                "ⵟ",
+                "ⵝ"
+              ]
+            },
+            {
+              "label": "ⵢ"
+            },
+            {
+              "label": "ⵓ",
+              "longPress": [
+                "ⵧ"
+              ]
+            },
+            {
+              "label": "ⵉ"
+            },
+            {
+              "label": "ⵄ"
+            },
+            {
+              "label": "ⵃ"
+            }
+          ],
+          [
+            {
+              "label": "ⵇ",
+              "longPress": [
+                "ⵈ"
+              ]
+            },
+            {
+              "label": "ⵙ",
+              "longPress": [
+                "ⵚ"
+              ]
+            },
+            {
+              "label": "ⴷ",
+              "longPress": [
+                "ⴹ",
+                "ⴸ",
+                "ⴺ"
+              ]
+            },
+            {
+              "label": "ⴼ",
+              "longPress": [
+                "ⵠ"
+              ]
+            },
+            {
+              "label": "ⴳ",
+              "longPress": [
+                "ⴴ",
+                "ⴵ",
+                "ⴶ"
+              ]
+            },
+            {
+              "label": "ⵀ",
+              "longPress": [
+                "ⵂ",
+                "ⵁ"
+              ]
+            },
+            {
+              "label": "ⵊ",
+              "longPress": [
+                "ⵌ",
+                "ⵋ"
+              ]
+            },
+            {
+              "label": "ⴽ",
+              "longPress": [
+                "ⴾ",
+                "ⴿ"
+              ]
+            },
+            {
+              "label": "ⵍ",
+              "longPress": [
+                "⵰"
+              ]
+            },
+            {
+              "label": "ⵎ",
+              "longPress": [
+                "⵿"
+              ]
+            }
+          ],
+          [
+            {
+              "label": "⇧",
+              "action": {
+                "type": "shift"
+              },
+              "width": 1.5
+            },
+            {
+              "label": "ⵡ"
+            },
+            {
+              "label": "ⵅ",
+              "longPress": [
+                "ⵆ"
+              ]
+            },
+            {
+              "label": "ⵛ",
+              "longPress": [
+                "ⵞ"
+              ]
+            },
+            {
+              "label": "ⵖ",
+              "longPress": [
+                "ⵗ",
+                "ⵘ"
+              ]
+            },
+            {
+              "label": "ⴱ",
+              "longPress": [
+                "ⴲ",
+                "ⵒ"
+              ]
+            },
+            {
+              "label": "ⵏ",
+              "longPress": [
+                "ⵐ",
+                "ⵑ"
+              ]
+            },
+            {
+              "label": "ⵯ"
+            },
+            {
+              "label": "⌫",
+              "action": {
+                "type": "delete"
+              },
+              "width": 1.5
+            }
+          ],
+          [
+            {
+              "label": "?123",
+              "action": {
+                "type": "symbols"
+              },
+              "width": 1.5
+            },
+            {
+              "label": ",",
+              "longPress": [
+                "!",
+                "?"
+              ],
+              "role": "Comma"
+            },
+            {
+              "label": "🌐",
+              "action": {
+                "type": "language_switch"
+              }
+            },
+            {
+              "label": " ",
+              "action": {
+                "type": "space"
+              },
+              "width": 4
+            },
+            {
+              "label": ".",
+              "longPress": [
+                "…",
+                ",",
+                "?",
+                "!",
+                ":",
+                ";"
+              ],
+              "role": "Period"
+            },
+            {
+              "label": "⏎",
+              "action": {
+                "type": "enter"
+              },
+              "width": 1.5
+            }
+          ]
+        ]
+      }
+    }
+  }
+}

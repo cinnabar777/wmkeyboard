@@ -490,12 +490,20 @@ private fun UndoChip(onClick: () -> Unit) {
     }
 }
 
-/** One AI action as a chip of its own, named as the AI panel names it. */
+/**
+ * One AI action as a chip of its own, named as the AI panel names it. Except
+ * Translate: on this row it can sit beside the Translate chip that opens the
+ * Translate tool, so it says which of the two it is (#434).
+ */
 @Composable
 private fun AiChip(spec: AiActionSpec, onClick: () -> Unit) {
     val kb = LocalKbTheme.current
     val shape = kb.chipShape()
-    val label = BuiltInAiActions.labelRes(spec)?.let { stringResource(it) } ?: spec.name
+    val label = if (spec.id == BuiltInAiActions.TRANSLATE_ID) {
+        stringResource(R.string.ime_selection_macro_ai_translate_label)
+    } else {
+        BuiltInAiActions.labelRes(spec)?.let { stringResource(it) } ?: spec.name
+    }
     Row(
         modifier = Modifier
             .clip(shape)

@@ -1,0 +1,176 @@
+{
+  "format": "wmkeyboard-layout",
+  "version": 1,
+  "layout": {
+    "id": "asset_en_kasroz",
+    "name": "KASROZ",
+    "langId": "en",
+    "version": 2,
+    "layers": {
+      "letters": {
+        "rows": [
+          [
+            {
+              "label": "⇧",
+              "action": {
+                "type": "shift"
+              },
+              "width": 1.5,
+              "rowSpan": 2
+            },
+            {
+              "label": "!"
+            },
+            {
+              "label": "g"
+            },
+            {
+              "label": "d"
+            },
+            {
+              "label": "n"
+            },
+            {
+              "label": "m"
+            },
+            {
+              "label": "?"
+            },
+            {
+              "label": "⌫",
+              "action": {
+                "type": "delete"
+              },
+              "width": 1.5,
+              "rowSpan": 2
+            }
+          ],
+          [
+            {
+              "label": "k"
+            },
+            {
+              "label": "a"
+            },
+            {
+              "label": "s"
+            },
+            {
+              "label": "r"
+            },
+            {
+              "label": "o"
+            },
+            {
+              "label": "z"
+            }
+          ],
+          [
+            {
+              "label": " ",
+              "action": {
+                "type": "space"
+              },
+              "width": 1.5,
+              "rowSpan": 2
+            },
+            {
+              "label": "h"
+            },
+            {
+              "label": "e"
+            },
+            {
+              "label": "t"
+            },
+            {
+              "label": "i"
+            },
+            {
+              "label": "u"
+            },
+            {
+              "label": "f"
+            },
+            {
+              "label": " ",
+              "action": {
+                "type": "space"
+              },
+              "width": 1.5,
+              "rowSpan": 2
+            }
+          ],
+          [
+            {
+              "label": "y"
+            },
+            {
+              "label": "c"
+            },
+            {
+              "label": "l"
+            },
+            {
+              "label": "p"
+            },
+            {
+              "label": "b"
+            },
+            {
+              "label": "q"
+            }
+          ],
+          [
+            {
+              "label": "?123",
+              "action": {
+                "type": "symbols"
+              },
+              "width": 1.5
+            },
+            {
+              "label": ",",
+              "longPress": [
+                "!",
+                "?"
+              ],
+              "role": "Comma"
+            },
+            {
+              "label": "w"
+            },
+            {
+              "label": "v"
+            },
+            {
+              "label": "x"
+            },
+            {
+              "label": "j"
+            },
+            {
+              "label": ".",
+              "longPress": [
+                "…",
+                ",",
+                "?",
+                "!",
+                ":",
+                ";"
+              ],
+              "role": "Period"
+            },
+            {
+              "label": "⏎",
+              "action": {
+                "type": "enter"
+              },
+              "width": 1.5
+            }
+          ]
+        ]
+      }
+    }
+  }
+}

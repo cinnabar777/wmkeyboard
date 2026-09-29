@@ -392,6 +392,9 @@
     <string name="ime_tool_autocorrect">Autocorrect</string>
     <string name="ime_tool_selection_actions">Selection actions</string>
     <string name="ime_tool_phonetic_english">English words</string>
+    <!-- The strip button on Bengali layouts. ANSI is the name of the encoding, not a word to translate. -->
+    <string name="ime_ansi_button" translatable="false">ANSI</string>
+    <string name="ime_ansi_output">ANSI output</string>
     <string name="ime_tool_sound_haptics">Sound &amp; haptics</string>
     <string name="ime_tool_numpad">Numpad</string>
     <string name="ime_tool_handwriting">Handwriting</string>
@@ -766,6 +769,8 @@
     <string name="ime_selection_macro_stop_label">Stop</string>
     <string name="ime_selection_macro_open_in_desc">Open in %1$s</string>
     <string name="ime_selection_macro_busy_desc">Working</string>
+    <!-- The AI Translate action as a chip on the selection bar, where the plain Translate chip (the Translate tool) can sit beside it (#434). -->
+    <string name="ime_selection_macro_ai_translate_label">AI translate</string>
     <string name="ime_selection_macro_nothing_to_undo_toast">Nothing left to undo</string>
     <string name="ime_selection_macro_grammar_clean_toast">Nothing to fix</string>
     <string name="ime_selection_macro_deepl_clean_toast">DeepL Write has nothing to change</string>

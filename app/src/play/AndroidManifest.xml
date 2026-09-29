@@ -15,7 +15,36 @@
         <package android:name="com.android.vending" />
     </queries>
 
+    <!--
+       Play rejected version code 26 over these (2026-09-28), so the Play APK
+       does not declare them. The photos pair backs only the clipboard's
+       screenshot watcher, which Play ruled should use the photo picker; the
+       picker cannot watch for new screenshots, so the feature is left out
+       instead. READ_MEDIA_VIDEO is never declared by the app, and is removed
+       here so a library update cannot bring it back. ChannelFeatures in
+       :core:common hides the matching settings rows.
+    -->
+    <uses-permission
+        android:name="android.permission.READ_MEDIA_IMAGES"
+        tools:node="remove" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        tools:node="remove" />
+    <uses-permission
+        android:name="android.permission.READ_MEDIA_VIDEO"
+        tools:node="remove" />
+
     <application>
+        <!--
+           TalkBack gesture pass-through. Play wants the store listing built
+           around an AccessibilityService, so the Play APK ships without one;
+           Gestures mode is hidden there and the keyboard's own fallback to
+           Explore covers anyone who had it on.
+        -->
+        <service
+            android:name="com.wasimaster.wmkeyboard.core.accessibility.TouchPassthroughService"
+            tools:node="remove" />
+
         <!--
            The ML Kit registrars of the two on-demand ML Kit modules, declared
            in the base while their classes ship in the :feature:translate and

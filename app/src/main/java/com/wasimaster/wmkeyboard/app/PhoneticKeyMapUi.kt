@@ -43,7 +43,7 @@ internal fun PhoneticKeyMapGroup(langId: String, onOpenGuide: ((String) -> Unit)
     ) {
         item { VowelCard(map) }
         item {
-            // Avro joins every cluster typed; Hindi phonetic guesses, because
+            // Avro joins the clusters Bangla writes; Hindi phonetic guesses, because
             // spoken Hindi drops the vowel that would say which.
             val note = if (langId == "hi") {
                 R.string.languages_keymap_consonants_note_guessed
@@ -202,4 +202,5 @@ private fun whereRes(where: KeyMapWhere): Int = when (where) {
     KeyMapWhere.BEFORE_VOWEL -> R.string.languages_keymap_before_vowel
     KeyMapWhere.AFTER_T -> R.string.languages_keymap_after_t
     KeyMapWhere.BETWEEN_CONSONANTS -> R.string.languages_keymap_between_consonants
+    KeyMapWhere.WORD_START -> R.string.languages_keymap_word_start
 }

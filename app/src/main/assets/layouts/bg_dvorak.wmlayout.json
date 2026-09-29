@@ -1,0 +1,178 @@
+{
+  "format": "wmkeyboard-layout",
+  "version": 1,
+  "layout": {
+    "id": "asset_bg_dvorak",
+    "name": "Български Дворак (Bulgarian Dvorak)",
+    "langId": "bg",
+    "version": 2,
+    "layers": {
+      "letters": {
+        "rows": [
+          [
+            {
+              "label": "'",
+              "shiftLabel": "\""
+            },
+            {
+              "label": ",",
+              "shiftLabel": "<"
+            },
+            {
+              "label": ".",
+              "shiftLabel": ">"
+            },
+            {
+              "label": "п"
+            },
+            {
+              "label": "ъ"
+            },
+            {
+              "label": "ф"
+            },
+            {
+              "label": "г"
+            },
+            {
+              "label": "ц"
+            },
+            {
+              "label": "р"
+            },
+            {
+              "label": "л"
+            }
+          ],
+          [
+            {
+              "label": "а"
+            },
+            {
+              "label": "о"
+            },
+            {
+              "label": "е"
+            },
+            {
+              "label": "у"
+            },
+            {
+              "label": "и"
+            },
+            {
+              "label": "д"
+            },
+            {
+              "label": "х"
+            },
+            {
+              "label": "т"
+            },
+            {
+              "label": "н"
+            },
+            {
+              "label": "с"
+            },
+            {
+              "label": "ю"
+            }
+          ],
+          [
+            {
+              "label": "⇧",
+              "action": {
+                "type": "shift"
+              },
+              "width": 1.5
+            },
+            {
+              "label": "я"
+            },
+            {
+              "label": "й"
+            },
+            {
+              "label": "к"
+            },
+            {
+              "label": "ь"
+            },
+            {
+              "label": "б"
+            },
+            {
+              "label": "м"
+            },
+            {
+              "label": "в"
+            },
+            {
+              "label": "ж"
+            },
+            {
+              "label": "з"
+            },
+            {
+              "label": "⌫",
+              "action": {
+                "type": "delete"
+              },
+              "width": 1.5
+            }
+          ],
+          [
+            {
+              "label": "?123",
+              "action": {
+                "type": "symbols"
+              },
+              "width": 1.5
+            },
+            {
+              "label": ",",
+              "longPress": [
+                "!",
+                "?"
+              ],
+              "role": "Comma"
+            },
+            {
+              "label": "🌐",
+              "action": {
+                "type": "language_switch"
+              }
+            },
+            {
+              "label": " ",
+              "action": {
+                "type": "space"
+              },
+              "width": 4
+            },
+            {
+              "label": ".",
+              "longPress": [
+                "…",
+                ",",
+                "?",
+                "!",
+                ":",
+                ";"
+              ],
+              "role": "Period"
+            },
+            {
+              "label": "⏎",
+              "action": {
+                "type": "enter"
+              },
+              "width": 1.5
+            }
+          ]
+        ]
+      }
+    }
+  }
+}

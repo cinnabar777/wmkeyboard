@@ -269,10 +269,18 @@
                   {
                     "id": "U_0046"
                   }
+                ],
+                "multitap": [
+                  {
+                    "vkey": 70
+                  }
                 ]
               },
               "width": 1.06,
               "longPress": [
+                "F"
+              ],
+              "multitap": [
                 "F"
               ]
             },
@@ -357,10 +365,18 @@
                   {
                     "id": "U_005A"
                   }
+                ],
+                "multitap": [
+                  {
+                    "vkey": 90
+                  }
                 ]
               },
               "width": 1.06,
               "longPress": [
+                "Z"
+              ],
+              "multitap": [
                 "Z"
               ]
             },
@@ -375,10 +391,18 @@
                   {
                     "id": "U_0058"
                   }
+                ],
+                "multitap": [
+                  {
+                    "vkey": 88
+                  }
                 ]
               },
               "width": 1.06,
               "longPress": [
+                "X"
+              ],
+              "multitap": [
                 "X"
               ]
             },
@@ -721,10 +745,18 @@
                   {
                     "vkey": 70
                   }
+                ],
+                "multitap": [
+                  {
+                    "vkey": 70
+                  }
                 ]
               },
               "width": 1.06,
               "longPress": [
+                "f"
+              ],
+              "multitap": [
                 "f"
               ]
             },
@@ -794,10 +826,18 @@
                   {
                     "vkey": 90
                   }
+                ],
+                "multitap": [
+                  {
+                    "vkey": 90
+                  }
                 ]
               },
               "width": 1.06,
               "longPress": [
+                "z"
+              ],
+              "multitap": [
                 "z"
               ]
             },
@@ -811,10 +851,18 @@
                   {
                     "vkey": 88
                   }
+                ],
+                "multitap": [
+                  {
+                    "vkey": 88
+                  }
                 ]
               },
               "width": 1.06,
               "longPress": [
+                "x"
+              ],
+              "multitap": [
                 "x"
               ]
             },
@@ -1176,10 +1224,19 @@
                     "vkey": 70,
                     "modifiers": 16
                   }
+                ],
+                "multitap": [
+                  {
+                    "vkey": 70,
+                    "modifiers": 16
+                  }
                 ]
               },
               "width": 1.06,
               "longPress": [
+                "F"
+              ],
+              "multitap": [
                 "F"
               ]
             },
@@ -1261,10 +1318,19 @@
                     "vkey": 90,
                     "modifiers": 16
                   }
+                ],
+                "multitap": [
+                  {
+                    "vkey": 90,
+                    "modifiers": 16
+                  }
                 ]
               },
               "width": 1.06,
               "longPress": [
+                "Z"
+              ],
+              "multitap": [
                 "Z"
               ]
             },
@@ -1280,10 +1346,19 @@
                     "vkey": 88,
                     "modifiers": 16
                   }
+                ],
+                "multitap": [
+                  {
+                    "vkey": 88,
+                    "modifiers": 16
+                  }
                 ]
               },
               "width": 1.06,
               "longPress": [
+                "X"
+              ],
+              "multitap": [
                 "X"
               ]
             },
@@ -1668,10 +1743,19 @@
                     "vkey": 70,
                     "modifiers": 16
                   }
+                ],
+                "multitap": [
+                  {
+                    "vkey": 70,
+                    "modifiers": 16
+                  }
                 ]
               },
               "width": 1.06,
               "longPress": [
+                "F"
+              ],
+              "multitap": [
                 "F"
               ]
             },
@@ -1759,10 +1843,19 @@
                     "vkey": 90,
                     "modifiers": 16
                   }
+                ],
+                "multitap": [
+                  {
+                    "vkey": 90,
+                    "modifiers": 16
+                  }
                 ]
               },
               "width": 1.06,
               "longPress": [
+                "Z"
+              ],
+              "multitap": [
                 "Z"
               ]
             },
@@ -1779,10 +1872,19 @@
                     "vkey": 88,
                     "modifiers": 16
                   }
+                ],
+                "multitap": [
+                  {
+                    "vkey": 88,
+                    "modifiers": 16
+                  }
                 ]
               },
               "width": 1.06,
               "longPress": [
+                "X"
+              ],
+              "multitap": [
                 "X"
               ]
             },

@@ -446,6 +446,7 @@ object AssetLayouts {
     const val EN_COLEMAK_DH_ID = "asset_en_colemak_dh"
     const val EN_NALMY_ID = "asset_en_nalmy"
     const val EN_SANGALINE_ID = "asset_en_sangaline"
+    const val EN_QWERTZ_ID = "asset_en_qwertz"
     const val FR_CANADIAN_ID = "asset_fr_canadian"
     const val FR_SWISS_ID = "asset_fr_swiss"
     const val GAA_QWERTY_ID = "asset_gaa_qwerty"
@@ -462,6 +463,13 @@ object AssetLayouts {
      */
     const val KO_SEBEOLSIK_390_ID = "asset_ko_sebeolsik_390"
     const val KO_SEBEOLSIK_FINAL_ID = "asset_ko_sebeolsik_final"
+
+    /**
+     * 천지인 (Cheonjiin), the Korean 12-key pad (discussion #372): vowels drawn
+     * from the strokes ㅣ ㆍ ㅡ by `CheonjiinComposer`, consonants picked by
+     * tapping their key again (`Key.multitap`).
+     */
+    const val KO_CHEONJIIN_ID = "asset_ko_cheonjiin"
     const val ML_INSCRIPT_ENHANCED_ID = "asset_ml_inscript_enhanced"
     const val MNI_INSCRIPT_ID = "asset_mni_inscript"
     const val MNS_ID = "asset_mns"
@@ -807,6 +815,119 @@ object AssetLayouts {
     const val SHI_LATN_T9_ID = "asset_shi_latn_t9"
     const val TLY_T9_ID = "asset_tly_t9"
 
+    // --- Parity with HeliBoard, FlorisBoard and FUTO Keyboard: every layout
+    // those ship that had no counterpart here. Converted from their files with
+    // the importers in this package, then given this app's shift, delete and
+    // bottom rows. Hebrew SI-1452, ClearFlow and KASROZ are written by hand. ---
+    const val ABQ_CYRILLIC_ID = "asset_abq_cyrillic"
+    const val AGX_CYRILLIC_ID = "asset_agx_cyrillic"
+    const val AK_LETTERS_ID = "asset_ak_letters"
+    const val ALT_LETTER_ROW_ID = "asset_alt_letter_row"
+    const val AR_LULUA_ID = "asset_ar_lulua"
+    const val BA_LETTER_ROW_ID = "asset_ba_letter_row"
+    const val BE_LATIN_ID = "asset_be_latin"
+    const val BE_LATIN_ROW_ID = "asset_be_latin_row"
+    const val BEM_LETTERS_ID = "asset_bem_letters"
+    const val BG_DVORAK_ID = "asset_bg_dvorak"
+    const val BN_AKKHOR_ID = "asset_bn_akkhor"
+    const val BN_OLD_ID = "asset_bn_old"
+    const val BN_UNIJOY_ID = "asset_bn_unijoy"
+    const val CHM_LETTER_ROW_ID = "asset_chm_letter_row"
+    const val CKB_ALT_ID = "asset_ckb_alt"
+    const val CKB_FOUR_ROWS_ID = "asset_ckb_four_rows"
+    const val CKB_PHONETIC_ID = "asset_ckb_phonetic"
+    const val CV_LETTER_ROW_ID = "asset_cv_letter_row"
+    const val DAG_LETTERS_ID = "asset_dag_letters"
+    const val DE_BONE_ID = "asset_de_bone"
+    const val DE_DVORAK_ID = "asset_de_dvorak"
+    const val EE_LETTERS_ID = "asset_ee_letters"
+    const val EN_CLEARFLOW_ID = "asset_en_clearflow"
+    const val EN_COLEMAK_DH_ANSI_ID = "asset_en_colemak_dh_ansi"
+    const val EN_KASROZ_ID = "asset_en_kasroz"
+    const val EN_SHAVIAN_ID = "asset_en_shavian"
+    const val EN_SHAVIAN_TWO_LAYER_ID = "asset_en_shavian_two_layer"
+    const val ENF_CYRILLIC_ID = "asset_enf_cyrillic"
+    const val ENH_CYRILLIC_ID = "asset_enh_cyrillic"
+    const val EO_LETTERS_ID = "asset_eo_letters"
+    const val ES_DVORAK_ID = "asset_es_dvorak"
+    const val GAG_LETTER_ROW_ID = "asset_gag_letter_row"
+    const val GU_ALPHABETIC_ID = "asset_gu_alphabetic"
+    const val HA_LETTERS_ID = "asset_ha_letters"
+    const val HE_SI1452_ID = "asset_he_si1452"
+    const val HI_COMPACT_ID = "asset_hi_compact"
+    const val HI_PHONETIC_KEYS_ID = "asset_hi_phonetic_keys"
+    const val HOC_WARANG_CITI_ALT_ID = "asset_hoc_warang_citi_alt"
+    const val HR_LETTERS_ID = "asset_hr_letters"
+    const val HU_ACCENT_ROW_ID = "asset_hu_accent_row"
+    const val HY_PHONETIC_ALT_ID = "asset_hy_phonetic_alt"
+    const val IPA_QWERTY_ID = "asset_ipa_qwerty"
+    const val IPA_QWERTY_G_ID = "asset_ipa_qwerty_g"
+    const val IT_SWISS_ID = "asset_it_swiss"
+    const val IZH_LATIN_ID = "asset_izh_latin"
+    const val KA_STANDARD_ID = "asset_ka_standard"
+    const val KAB_AZERTY_ID = "asset_kab_azerty"
+    const val KI_LETTERS_ID = "asset_ki_letters"
+    const val KK_LATIN_ID = "asset_kk_latin"
+    const val KK_LETTER_ROW_ID = "asset_kk_letter_row"
+    const val KM_FOUR_ROWS_ID = "asset_km_four_rows"
+    const val KN_EXTENDED_ID = "asset_kn_extended"
+    const val KO_DANMOEUM_ID = "asset_ko_danmoeum"
+    const val KO_PHONETIC_ID = "asset_ko_phonetic"
+    const val KRL_LATIN_ID = "asset_krl_latin"
+    const val KS_LATIN_ID = "asset_ks_latin"
+    const val KV_LETTER_ROW_ID = "asset_kv_letter_row"
+    const val LG_LETTERS_ID = "asset_lg_letters"
+    const val LKT_LATIN_ID = "asset_lkt_latin"
+    const val LT_LETTER_ROW_ID = "asset_lt_letter_row"
+    const val LUD_LATIN_ID = "asset_lud_latin"
+    const val ML_ALPHABETIC_ID = "asset_ml_alphabetic"
+    const val MNS_LETTER_ROW_ID = "asset_mns_letter_row"
+    const val MR_ALPHABETIC_ID = "asset_mr_alphabetic"
+    const val MRJ_LETTER_ROW_ID = "asset_mrj_letter_row"
+    const val MY_LETTER_ROW_ID = "asset_my_letter_row"
+    const val NEW_NEWA_ROMANIZED_ID = "asset_new_newa_romanized"
+    const val NEW_NEWA_TRADITIONAL_ID = "asset_new_newa_traditional"
+    const val NIO_CYRILLIC_ID = "asset_nio_cyrillic"
+    const val PA_ALPHABETIC_ID = "asset_pa_alphabetic"
+    const val RO_LETTERS_ID = "asset_ro_letters"
+    const val RU_STUDENT_ID = "asset_ru_student"
+    const val RU_YAVERT_ID = "asset_ru_yavert"
+    const val RU_YAZHERT_ID = "asset_ru_yazhert"
+    const val RUE_LETTERS_ID = "asset_rue_letters"
+    const val RUE_PHONETIC_ID = "asset_rue_phonetic"
+    const val RUT_CYRILLIC_ID = "asset_rut_cyrillic"
+    const val SAH_LETTER_ROW_ID = "asset_sah_letter_row"
+    const val SE_LETTER_ROW_ID = "asset_se_letter_row"
+    const val SJE_LATIN_ID = "asset_sje_latin"
+    const val SJU_LATIN_ID = "asset_sju_latin"
+    const val SL_LETTERS_ID = "asset_sl_letters"
+    const val SL_QWERTY_ID = "asset_sl_qwerty"
+    const val SMA_LATIN_ID = "asset_sma_latin"
+    const val SMJ_LATIN_ID = "asset_smj_latin"
+    const val SMN_LETTER_ROW_ID = "asset_smn_letter_row"
+    const val SR_LATIN_LETTERS_ID = "asset_sr_latin_letters"
+    const val SV_DVORAK_ID = "asset_sv_dvorak"
+    const val TA_ALPHABETIC_ID = "asset_ta_alphabetic"
+    const val TAB_CYRILLIC_ID = "asset_tab_cyrillic"
+    const val TG_LETTER_ROW_ID = "asset_tg_letter_row"
+    const val TKR_CYRILLIC_ID = "asset_tkr_cyrillic"
+    const val TOK_COMPACT_ID = "asset_tok_compact"
+    const val TT_LETTER_ROW_ID = "asset_tt_letter_row"
+    const val TYV_LETTER_ROW_ID = "asset_tyv_letter_row"
+    const val UG_FULL_ID = "asset_ug_full"
+    const val UG_PHONETIC_ID = "asset_ug_phonetic"
+    const val UR_PHONETIC_FOUR_ROWS_ID = "asset_ur_phonetic_four_rows"
+    const val VEP_LETTER_ROW_ID = "asset_vep_letter_row"
+    const val VOT_LATIN_ID = "asset_vot_latin"
+    const val XDQ_KAITAG_ID = "asset_xdq_kaitag"
+    const val XDQ_KAITAG_4ROW_ID = "asset_xdq_kaitag_4row"
+    const val YRK_CYRILLIC_ID = "asset_yrk_cyrillic"
+    const val ZGH_LATIN_AZERTY_ID = "asset_zgh_latin_azerty"
+    const val ZGH_LATIN_QWERTY_ID = "asset_zgh_latin_qwerty"
+    const val ZGH_LATIN_QWERTZ_ID = "asset_zgh_latin_qwertz"
+    const val ZGH_TIFINAGH_ALT_ID = "asset_zgh_tifinagh_alt"
+    const val ZGH_TIFINAGH_AZERTY_ID = "asset_zgh_tifinagh_azerty"
+
     /**
      * One shipped layout as the index describes it, without its grid. [name]
      * is empty when the index was missing and the file has not been read.
@@ -817,6 +938,12 @@ object AssetLayouts {
         val langId: String,
         /** The Keyman keyboard whose rules the layout runs, when it has one. */
         val keyman: KeymanBinding? = null,
+        /**
+         * Whether the grid is a desktop keyboard's, number row and all, rather
+         * than one drawn for a phone. The build measures it (see
+         * `generateLayoutIndex`), so asking costs no parse.
+         */
+        val desktop: Boolean = false,
     )
 
     @Volatile private var assets: AssetManager? = null
@@ -909,7 +1036,7 @@ object AssetLayouts {
                     } else {
                         val keyman = parts.getOrNull(3)?.takeIf { it.isNotEmpty() }
                             ?.let { KeymanBinding(it, parts.getOrNull(4).orEmpty()) }
-                        Entry(parts[0], parts[1], parts[2], keyman)
+                        Entry(parts[0], parts[1], parts[2], keyman, desktop = parts.getOrNull(5) == "1")
                     }
                 }.toList()
             }
@@ -932,8 +1059,9 @@ object AssetLayouts {
     const val ID_PREFIX = "asset_"
 
     /**
-     * The build-generated index: `id<TAB>name<TAB>langId<TAB>keymanId<TAB>keymanVersion`
-     * per line, the last two empty for a layout with no Keyman rules.
+     * The build-generated index: `id<TAB>name<TAB>langId<TAB>keymanId<TAB>keymanVersion<TAB>desktop`
+     * per line, the Keyman pair empty for a layout with no Keyman rules and
+     * `desktop` either `1` or empty.
      */
     private const val INDEX = "layouts-index.tsv"
 

@@ -71,7 +71,7 @@ All in `src/components/`, importable via the `@components/*` alias
 | Component | Use for | Example |
 |---|---|---|
 | `<KeyCap>` | Any key name inline | `<KeyCap>Shift</KeyCap>`, `<KeyCap>?123</KeyCap>` |
-| `<SettingsPath path="…" />` | Where a setting lives; put one at the top of every "Options" section. On an Android phone with the app installed it is also a `wmkeyboard://` link that opens that screen or row (resolved from `src/data/settings-links.json`; run `node scripts/check-settings-links.mjs` to find a path that lands one screen too high) | `<SettingsPath path="Typing / Autocorrect" />` |
+| `<SettingsPath path="…" />` | Where a setting lives; put one at the top of every "Options" section. On an Android phone with the app installed it is also a `wmkeyboard://` link that opens that screen or row, and anywhere else it opens a dialog with a QR code of the same link (resolved from `src/data/settings-links.json`; run `node scripts/check-settings-links.mjs` to find a path that lands one screen too high) | `<SettingsPath path="Typing / Autocorrect" />` |
 | `<Flavor edition="full" />` | Feature gated to an edition; place next to the H1 lead or section heading | also `lite`, `both` |
 | `<Since v="1.4" />` | Version a feature landed (start using once versions are documented) | |
 | `<PhoneFrame caption="…">` | Every screenshot. An empty `<PhoneFrame />` renders a "screenshot pending" placeholder, which no finished page should show | |
@@ -125,9 +125,9 @@ roughly in order of value:
    framework needed).
 2. **Layout explorer**: render a keyboard layout as HTML from its data file so
    readers can hover keys to see long-press popups. Worth building once,
-   reusable for all 1,598 layouts + notation layouts.
+   reusable for all 1,708 layouts + notation layouts.
 3. **Theme preview**: swatch grid that live-recolours an HTML keyboard mockup.
-4. **Searchable tables**: the 333-wordlist list and 845-language matrix
+4. **Searchable tables**: the 333-wordlist list and 867-language matrix
    should be filterable (a `<script>` in the MDX is fine at this scale).
 5. Mermaid/diagram embeds for the developer section (addon install pipeline,
    IME lifecycle).
@@ -151,10 +151,10 @@ widget needs a framework, question it first.
   full rule set and the term glossary live in `../config/i18n/STRINGS.md`, which
   the app's own strings already follow. Descriptive prose stays warm and normal,
   up to 25 words a sentence.
-- Numbers are features. Write "845 languages" and "29 Whisper models", and
+- Numbers are features. Write "867 languages" and "29 Whisper models", and
   verify the number in code before you write it. Headline counts were
-  code-verified on 2026-09-15: 845 registered languages (361 hand-written +
-  484 generated from Keyman), 1,598 layouts (22 built-in + 1,576 asset, of
+  code-verified on 2026-09-29: 867 registered languages (386 hand-written +
+  481 generated from Keyman), 1,708 layouts (22 built-in + 1,686 asset, of
   which 862 are converted Keyman grids), 333 wordlists, 72 toolbar tools (67
   on Lite), 14 addon types, 107 replaceable icon slots, 12 registered file
   extensions, 31 fancy-text styles plus Normal. Verified on 2026-08-12 and not

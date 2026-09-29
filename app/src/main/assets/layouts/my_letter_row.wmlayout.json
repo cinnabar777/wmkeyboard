@@ -1,0 +1,274 @@
+{
+  "format": "wmkeyboard-layout",
+  "version": 1,
+  "layout": {
+    "id": "asset_my_letter_row",
+    "name": "မြန်မာ (Myanmar, letters row)",
+    "langId": "my",
+    "version": 2,
+    "layers": {
+      "letters": {
+        "rows": [
+          [
+            {
+              "label": "ဈ",
+              "longPress": [
+                "ဍ္ဎ"
+              ],
+              "shiftLabel": "၁"
+            },
+            {
+              "label": "ဝ",
+              "longPress": [
+                "ကျပ်"
+              ],
+              "shiftLabel": "၂"
+            },
+            {
+              "label": "ဋ",
+              "longPress": [
+                "ဋ္ဌ"
+              ],
+              "shiftLabel": "၃"
+            },
+            {
+              "label": "ုံ",
+              "longPress": [
+                "င်္"
+              ],
+              "shiftLabel": "၄"
+            },
+            {
+              "label": "ော",
+              "longPress": [
+                "ေါ"
+              ],
+              "shiftLabel": "၅"
+            },
+            {
+              "label": "ဪ",
+              "longPress": [
+                "ဩ"
+              ],
+              "shiftLabel": "၆"
+            },
+            {
+              "label": "ရ",
+              "longPress": [
+                "ၒ",
+                "ၓ"
+              ],
+              "shiftLabel": "၇"
+            },
+            {
+              "label": "ဂ",
+              "longPress": [
+                "ၔ",
+                "ၕ"
+              ],
+              "shiftLabel": "၈"
+            },
+            {
+              "label": "ဟ",
+              "longPress": [
+                "ၐ",
+                "ၑ"
+              ],
+              "shiftLabel": "၉"
+            },
+            {
+              "label": "၏",
+              "shiftLabel": "၀"
+            }
+          ],
+          [
+            {
+              "label": "ဆ",
+              "shiftLabel": "ဍ"
+            },
+            {
+              "label": "တ",
+              "shiftLabel": "ဏ္ဍ"
+            },
+            {
+              "label": "န",
+              "shiftLabel": "ဣ"
+            },
+            {
+              "label": "မ",
+              "shiftLabel": "၎င်း"
+            },
+            {
+              "label": "အ",
+              "shiftLabel": "ဤ"
+            },
+            {
+              "label": "ပ",
+              "shiftLabel": "၌"
+            },
+            {
+              "label": "က",
+              "shiftLabel": "ဥ"
+            },
+            {
+              "label": "င",
+              "shiftLabel": "၍"
+            },
+            {
+              "label": "သ",
+              "shiftLabel": "ဿ"
+            },
+            {
+              "label": "စ",
+              "shiftLabel": "ဏ"
+            }
+          ],
+          [
+            {
+              "label": "ေ",
+              "shiftLabel": "ဗ"
+            },
+            {
+              "label": "ျ",
+              "shiftLabel": "ှ"
+            },
+            {
+              "label": "ိ",
+              "shiftLabel": "ီ"
+            },
+            {
+              "label": "်",
+              "shiftLabel": "္"
+            },
+            {
+              "label": "ါ",
+              "shiftLabel": "ွ"
+            },
+            {
+              "label": "့",
+              "shiftLabel": "ံ"
+            },
+            {
+              "label": "ြ",
+              "shiftLabel": "ဲ"
+            },
+            {
+              "label": "ု",
+              "shiftLabel": "ဒ"
+            },
+            {
+              "label": "ူ",
+              "shiftLabel": "ဓ"
+            },
+            {
+              "label": "း",
+              "shiftLabel": "ဏ္ဌ"
+            }
+          ],
+          [
+            {
+              "label": "⇧",
+              "action": {
+                "type": "shift"
+              },
+              "width": 1.5
+            },
+            {
+              "label": "ဖ",
+              "shiftLabel": "ဇ"
+            },
+            {
+              "label": "ထ",
+              "shiftLabel": "ဌ"
+            },
+            {
+              "label": "ခ",
+              "shiftLabel": "ဃ"
+            },
+            {
+              "label": "လ",
+              "shiftLabel": "ဠ"
+            },
+            {
+              "label": "ဘ",
+              "shiftLabel": "ဎ"
+            },
+            {
+              "label": "ည",
+              "shiftLabel": "ဉ"
+            },
+            {
+              "label": "ာ",
+              "shiftLabel": "ဦ"
+            },
+            {
+              "label": "ယ",
+              "shiftLabel": "ဧ"
+            },
+            {
+              "label": "⌫",
+              "action": {
+                "type": "delete"
+              },
+              "width": 1.5
+            }
+          ],
+          [
+            {
+              "label": "?123",
+              "action": {
+                "type": "symbols"
+              },
+              "width": 1.5
+            },
+            {
+              "label": "၊",
+              "longPress": [
+                ",",
+                "!",
+                "?",
+                "၌",
+                "၍",
+                "၎",
+                "၏"
+              ],
+              "role": "Comma"
+            },
+            {
+              "label": "🌐",
+              "action": {
+                "type": "language_switch"
+              }
+            },
+            {
+              "label": " ",
+              "action": {
+                "type": "space"
+              },
+              "width": 4
+            },
+            {
+              "label": ".",
+              "longPress": [
+                "…",
+                ",",
+                "?",
+                "!",
+                ":",
+                ";"
+              ],
+              "role": "Period"
+            },
+            {
+              "label": "⏎",
+              "action": {
+                "type": "enter"
+              },
+              "width": 1.5
+            }
+          ]
+        ]
+      }
+    }
+  }
+}

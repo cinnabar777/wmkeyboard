@@ -1963,7 +1963,12 @@
                   "down": {
                     "id": "U_208B"
                   }
-                }
+                },
+                "multitap": [
+                  {
+                    "id": "U_2212"
+                  }
+                ]
               },
               "longPress": [
                 "_",
@@ -1974,7 +1979,10 @@
               "flick": {
                 "up": "⁻",
                 "down": "₋"
-              }
+              },
+              "multitap": [
+                "−"
+              ]
             },
             {
               "label": "×",
@@ -2128,10 +2136,18 @@
                   {
                     "id": "U_2026"
                   }
+                ],
+                "multitap": [
+                  {
+                    "id": "U_002C"
+                  }
                 ]
               },
               "longPress": [
                 "…"
+              ],
+              "multitap": [
+                ","
               ]
             },
             {
@@ -2275,8 +2291,20 @@
               "action": {
                 "type": "keyman_key",
                 "vkey": 0,
-                "id": "U_2032"
-              }
+                "id": "U_2032",
+                "multitap": [
+                  {
+                    "id": "U_2033"
+                  },
+                  {
+                    "id": "U_2034"
+                  }
+                ]
+              },
+              "multitap": [
+                "″",
+                "‴"
+              ]
             },
             {
               "label": "№",
@@ -2345,8 +2373,20 @@
               "action": {
                 "type": "keyman_key",
                 "vkey": 0,
-                "id": "U_222B"
-              }
+                "id": "U_222B",
+                "multitap": [
+                  {
+                    "id": "U_222C"
+                  },
+                  {
+                    "id": "U_222D"
+                  }
+                ]
+              },
+              "multitap": [
+                "∬",
+                "∭"
+              ]
             },
             {
               "label": "≈",
@@ -2407,6 +2447,11 @@
                   {
                     "id": "U_212B"
                   }
+                ],
+                "multitap": [
+                  {
+                    "id": "U_03A0"
+                  }
                 ]
               },
               "longPress": [
@@ -2414,6 +2459,9 @@
                 "ℎ",
                 "℥",
                 "Å"
+              ],
+              "multitap": [
+                "Π"
               ]
             }
           ],
@@ -2433,8 +2481,16 @@
               "action": {
                 "type": "keyman_key",
                 "vkey": 0,
-                "id": "U_2126"
-              }
+                "id": "U_2126",
+                "multitap": [
+                  {
+                    "id": "U_2127"
+                  }
+                ]
+              },
+              "multitap": [
+                "℧"
+              ]
             },
             {
               "label": "℻",
@@ -2449,16 +2505,32 @@
               "action": {
                 "type": "keyman_key",
                 "vkey": 0,
-                "id": "U_2203"
-              }
+                "id": "U_2203",
+                "multitap": [
+                  {
+                    "id": "U_2204"
+                  }
+                ]
+              },
+              "multitap": [
+                "∄"
+              ]
             },
             {
               "label": "∴",
               "action": {
                 "type": "keyman_key",
                 "vkey": 0,
-                "id": "U_2234"
-              }
+                "id": "U_2234",
+                "multitap": [
+                  {
+                    "id": "U_2235"
+                  }
+                ]
+              },
+              "multitap": [
+                "∵"
+              ]
             },
             {
               "label": "∼",
@@ -2473,11 +2545,19 @@
                   {
                     "id": "U_224B"
                   }
+                ],
+                "multitap": [
+                  {
+                    "id": "U_223D"
+                  }
                 ]
               },
               "longPress": [
                 "≁",
                 "≋"
+              ],
+              "multitap": [
+                "∽"
               ]
             },
             {
@@ -2490,10 +2570,18 @@
                   {
                     "id": "U_03C2"
                   }
+                ],
+                "multitap": [
+                  {
+                    "id": "U_03A3"
+                  }
                 ]
               },
               "longPress": [
                 "ς"
+              ],
+              "multitap": [
+                "Σ"
               ]
             },
             {
@@ -2509,11 +2597,19 @@
                   {
                     "id": "U_03F4"
                   }
+                ],
+                "multitap": [
+                  {
+                    "id": "U_0398"
+                  }
                 ]
               },
               "longPress": [
                 "ϑ",
                 "ϴ"
+              ],
+              "multitap": [
+                "Θ"
               ]
             },
             {
@@ -2526,10 +2622,18 @@
                   {
                     "id": "U_2319"
                   }
+                ],
+                "multitap": [
+                  {
+                    "id": "U_2310"
+                  }
                 ]
               },
               "longPress": [
                 "⌙"
+              ],
+              "multitap": [
+                "⌐"
               ]
             },
             {
@@ -2578,8 +2682,16 @@
               "action": {
                 "type": "keyman_key",
                 "vkey": 0,
-                "id": "U_2236"
-              }
+                "id": "U_2236",
+                "multitap": [
+                  {
+                    "id": "U_2237"
+                  }
+                ]
+              },
+              "multitap": [
+                "∷"
+              ]
             },
             {
               "label": "⏎",

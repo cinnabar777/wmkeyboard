@@ -74,6 +74,15 @@ interface Composer {
     val digitsStartBuffer: Boolean get() = false
 
     /**
+     * Whether a space pressed while a `Key.multitap` run is still open only
+     * closes the run, typing nothing. A 천지인 (Cheonjiin) pad needs this: ㄱ is
+     * the key ㄱㅋ tapped once, so ㄱ followed by another ㄱ — 먹고 — is ㄱ, space,
+     * ㄱ, the way Samsung's pad spells it, and the second space is the real one.
+     * Everywhere else a space is a space.
+     */
+    val spaceEndsMultitap: Boolean get() = false
+
+    /**
      * Whether [c] is a non-letter this composer still takes into its buffer. The
      * buffer otherwise admits only letters, the apostrophe and (with
      * [bufferDigits]) digits, which is exactly right for spelling-based methods
@@ -239,6 +248,7 @@ fun composerFor(script: ScriptDef, type: ComposerType): Composer = when (type) {
         else -> NoComposer
     }
     ComposerType.HANGUL -> HangulComposer
+    ComposerType.CHEONJIIN -> CheonjiinComposer
     ComposerType.TELEX -> VietnameseTelexComposer
     ComposerType.VNI -> VietnameseVniComposer
     ComposerType.ROMAJI -> JapaneseComposer

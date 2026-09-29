@@ -10,10 +10,6 @@
         <item quantity="one">Inkinobho engu-%1$d ithayipha uhlamvu oluphrintwe kuyo. Ikhibhodi yasekuqaleni isebenzise umthetho ukunquma ukuthi ithayipha ini.</item>
         <item quantity="other">Izinkinobho ezingu-%1$d zithayipha izinhlamvu eziphrintwe kuzo. Ikhibhodi yasekuqaleni isebenzise imithetho ukunquma ukuthi zithayipha ini.</item>
     </plurals>
-    <plurals name="core_keyman_multitap_dropped">
-        <item quantity="one">Le khibhodi inokhiye ongu-%1$d owuthepha ngokuphindaphindiwe ukuze ujikeleze izinhlamvu. Lolu hlelo lokusebenza lwekhibhodi alunawo lowo khiye, ngakho uhlamvu lokuqala kuphela olutholakalayo.</item>
-        <item quantity="other">Le khibhodi inokhiye abangu-%1$d obathepha ngokuphindaphindiwe ukuze ujikeleze izinhlamvu. Lolu hlelo lokusebenza lwekhibhodi alunawo lowo khiye, ngakho uhlamvu lokuqala lwalowo nalowo kuphela olutholakalayo.</item>
-    </plurals>
     <string name="core_keyman_rules_missing">Le khibhodi isebenzisa imithetho ukunquma ukuthi izinkinobho zayo zithayipha ini. Uhlelo lokusebenza alunawo leyo mithetho, ngakho inkinobho ngayinye ithayipha uhlamvu oluphrintwe kuyo.</string>
     <plurals name="core_keyman_special_keys_dropped">
         <item quantity="one">Uhlelo lokusebenza lususe ukhiye ongu-%1$d. Le ikhibhodi ayinawo ukhiye owenza into efanayo.</item>

@@ -100,6 +100,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CutCornerShape
@@ -504,7 +505,10 @@ import com.wasimaster.wmkeyboard.core.settings.TextEditAction
 import com.wasimaster.wmkeyboard.ime.ShiftState
 import com.wasimaster.wmkeyboard.ime.displayCaseForShift
 import com.wasimaster.wmkeyboard.ime.shiftForGlide
+import com.wasimaster.wmkeyboard.core.layout.BottomRowRules
 import com.wasimaster.wmkeyboard.core.layout.BuiltInLayouts
+import com.wasimaster.wmkeyboard.core.layout.arrangedBy
+import com.wasimaster.wmkeyboard.core.layout.asEmojiKey
 import com.wasimaster.wmkeyboard.core.layout.LayoutSpec
 import com.wasimaster.wmkeyboard.core.layout.composerType
 import com.wasimaster.wmkeyboard.core.layout.resolveLayout
@@ -3753,6 +3757,16 @@ private fun TopBar(
                         // row reads as words first.
                         compact = true,
                     ) { onToolTap(ToolbarTool.PHONETIC_ENGLISH) }
+                }
+                // Bengali's ANSI button: on every Bengali layout once Bengali's
+                // screen allows ANSI output, lit while the layouts write it. Beside
+                // the words for the reason the switch above is: the field that
+                // wants ANSI is the one being typed in, and that is when it is
+                // reached for.
+                if (state.language.id == "bn" && state.settings.suggestionStrip.bengaliAnsiAllowed) {
+                    AnsiToggle(active = state.settings.suggestionStrip.bengaliAnsiOn) {
+                        onStripOfferAction(StripOfferAction.ToggleAnsi)
+                    }
                 }
                 // Autofill chips take the whole strip while they are up: they
                 // answer the field directly ("use this saved login"), which beats
@@ -8286,6 +8300,45 @@ internal fun ToolCircle(
                 }
             }
         }
+    }
+}
+
+/**
+ * The ANSI button on a Bengali layout's strip: the word ANSI on a pill the
+ * height of a compact [ToolCircle], filled while the layouts write ANSI. A word
+ * rather than an icon, because ANSI is what the fonts that want it call it and
+ * no glyph says it better.
+ */
+@Composable
+private fun AnsiToggle(active: Boolean, onClick: () -> Unit) {
+    val kb = LocalKbTheme.current
+    val shape = kb.toolShape()
+    val description = stringResource(R.string.ime_ansi_output)
+    Box(
+        modifier = Modifier
+            .height(CompactToolSide.dp)
+            .clip(shape)
+            .background(
+                when {
+                    active -> kb.toolCircleActive
+                    kb.toolRadiusDp > 0 -> kb.toolCircle
+                    else -> Color.Transparent
+                },
+                shape,
+            )
+            .toggleable(value = active, role = Role.Switch, onValueChange = { onClick() })
+            .semantics { contentDescription = description }
+            .padding(horizontal = 7.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            stringResource(R.string.ime_ansi_button),
+            color = if (active) kb.toolCircleActiveIcon else kb.toolbarIcon,
+            fontSize = 11.sp,
+            lineHeight = 12.sp,
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
+        )
     }
 }
 
@@ -16976,32 +17029,25 @@ internal fun currentLayout(state: KeyboardUiState): KeyboardLayout {
         LayoutMode.NAMED ->
             state.namedLayer?.let { state.layouts.named[it] } ?: state.layouts.letters
     }
-    // Issue #139: a hidden 🌐 key leaves the bottom row before anything below
-    // reads the grid. The emoji rewrite finds the key by its action and the
-    // comma swap reads positions off this grid, so taking the key out any later
-    // would mean undoing both. A secondary layout is drawn as its author made
-    // it, since a 🌐 key there can be the only way back out of it.
-    val shown = if (state.settings.showGlobeKey || state.layoutMode == LayoutMode.SECONDARY) {
-        grid
-    } else {
-        grid.withoutGlobeKey()
-    }
-    // Issue #310: the 🌐 key moved to the one slot every layout shares. Early,
-    // for the same reason as the hiding above: the emoji rewrite and the comma
-    // swap below find the key by where it is. Not on a secondary layout, whose
-    // author placed every key on purpose, nor on an expanded tablet grid, which
-    // arranges its own bottom row.
-    val swapCommaGlobe = state.settings.swapCommaAndGlobe
-    val placed = if (
-        state.settings.layoutBehavior.globeInOnePlace &&
-        state.layoutMode != LayoutMode.SECONDARY &&
-        state.layouts.gridWidth == null
-    ) {
-        shown.withGlobeInPlace(outer = swapCommaGlobe)
-    } else {
-        null
-    }
-    val base = placed ?: shown
+    // The Bottom row settings that move keys: the 🌐 key hidden (#139), put in
+    // the slot every layout shares (#310), and traded with the comma. One pass
+    // shared with the layout editor, so the grid it shows is the grid drawn here
+    // (#420). The emoji keys are left to the rewrite below, where an email
+    // field's @ outranks them. A secondary layout is drawn as its author made
+    // it, since a 🌐 key there can be the only way back out of it, and an
+    // expanded tablet grid arranges its own bottom row. A layer laid out by
+    // hand in the editor is left alone by every one of these; see
+    // [LayerSpec.bottomRowAsLaidOut].
+    val secondaryGrid = state.layoutMode == LayoutMode.SECONDARY
+    val base = grid.arrangedBy(
+        BottomRowRules(
+            hideGlobe = !state.settings.showGlobeKey && !secondaryGrid,
+            globeInOnePlace = state.settings.layoutBehavior.globeInOnePlace &&
+                !secondaryGrid && state.layouts.gridWidth == null,
+            swapCommaAndGlobe = state.settings.swapCommaAndGlobe,
+        ),
+    ).layout
+    val laidOut = grid.bottomRowAsLaidOut
     // Email and URI fields keep the letter layouts but put the character they
     // are full of on the bottom-row comma slot, and domain endings on the
     // period key's long press. Both are otherwise a trip through the symbols
@@ -17047,17 +17093,10 @@ internal fun currentLayout(state: KeyboardUiState): KeyboardLayout {
     val tabletGrid = state.layouts.gridWidth != null
     // Optional Gboard-style emoji key: the letter layouts' comma key becomes
     // an emoji-panel key, with comma demoted to its long-press alternates.
-    val commaAsEmoji = state.settings.commaAsEmoji && !tabletGrid &&
+    val commaAsEmoji = state.settings.commaAsEmoji && !tabletGrid && !laidOut &&
         state.layoutMode == LayoutMode.LETTERS
     // 🌐 → emoji key: language switching lives on spacebar swipes instead.
-    val globeAsEmoji = state.settings.globeAsEmoji && !tabletGrid
-    // The two keys either side of the spacebar trade places, so whichever one
-    // is the emoji key sits in the outer slot and the comma next to the space.
-    // Not scoped to the letter layers: the row would otherwise reshuffle on the
-    // way into ?123, which is worse than either order. A bottom row the
-    // placement above has arranged is already in that order, and swapping it
-    // again would undo it.
-    val swapBottom = swapCommaGlobe && placed == null
+    val globeAsEmoji = state.settings.globeAsEmoji && !tabletGrid && !laidOut
     // With the dedicated number row on, the digits duplicated on the top-row
     // letters' long press are redundant — drop them so those keys go straight
     // to their accents (or lose their popup entirely).
@@ -17139,7 +17178,7 @@ internal fun currentLayout(state: KeyboardUiState): KeyboardLayout {
     // Issue #340: the keys that stand in for 小゛゜ while the reading ends in a
     // kana that has one of those forms.
     val kanaVariantKeys = state.kanaVariantReady
-    if (!commaAsEmoji && !globeAsEmoji && !swapCommaGlobe && !stripDigits &&
+    if (!commaAsEmoji && !globeAsEmoji && !stripDigits &&
         clipboardKeys.isEmpty() && fieldKey == null && domainAlternates.isEmpty() &&
         currencyKeys.isEmpty() && !allAccents && !shiftedKeys && fullStop == null &&
         !newlineAlternate && !emojiAlternate && spaceHoldKeys.isEmpty() &&
@@ -17197,16 +17236,8 @@ internal fun currentLayout(state: KeyboardUiState): KeyboardLayout {
                 )
                 domainAlternates.isNotEmpty() && role == KeyRole.Period ->
                     key.copy(longPress = domainAlternates + key.longPress)
-                commaAsEmoji && role == KeyRole.Comma ->
-                    // copy, not a fresh Key: building one from scratch here
-                    // discarded a custom width, so the bottom row jumped
-                    // whenever the preference was on.
-                    key.copy(
-                        action = KeyAction.Emoji,
-                        longPress = listOf(key.output ?: key.label) + key.longPress,
-                    )
-                globeAsEmoji && key.action == KeyAction.LanguageSwitch ->
-                    key.copy(action = KeyAction.Emoji)
+                commaAsEmoji && role == KeyRole.Comma -> key.asEmojiKey()
+                globeAsEmoji && key.action == KeyAction.LanguageSwitch -> key.asEmojiKey()
                 else -> key
             }
             if (stripDigits && mapped.longPress.any { it.isSingleDigit() }) {
@@ -17314,178 +17345,7 @@ internal fun currentLayout(state: KeyboardUiState): KeyboardLayout {
             mapped
         }
     }
-    return base.copy(
-        rows = if (!swapCommaGlobe) {
-            rewritten
-        } else {
-            rewritten.mapIndexed { rowIndex, row ->
-                if (rowIndex == bottom && !swapBottom) {
-                    row
-                } else {
-                    swapCommaAndGlobe(base.rows[rowIndex], row, rowIndex, bottom)
-                }
-            }
-        },
-    )
-}
-
-/**
- * Trades the comma key and the 🌐 key's places in one row, leaving every other
- * key where it was. No-op for a row that hasn't got both.
- *
- * The positions are read off [source] rather than [rewritten] because the pass
- * above may already have turned either one into the emoji key (or the comma
- * into an @ for an email field) — by then there is nothing left to identify
- * them by.
- */
-private fun swapCommaAndGlobe(
-    source: List<Key>,
-    rewritten: List<Key>,
-    rowIndex: Int,
-    lastRow: Int,
-): List<Key> {
-    val comma = source.indexOfFirst { it.roleIn(rowIndex, lastRow) == KeyRole.Comma }
-    val globe = source.indexOfFirst { it.action == KeyAction.LanguageSwitch }
-    if (comma < 0 || globe < 0) return rewritten
-    return rewritten.toMutableList().also {
-        val held = it[comma]
-        it[comma] = it[globe]
-        it[globe] = held
-    }
-}
-
-/**
- * This grid with its 🌐 key in the slot the built-in bottom row gives it
- * (#310), or null when the bottom row cannot take that without damage — in
- * which case it is drawn as its author made it.
- *
- * The slot is a share of the row, not a count of keys, because rows differ in
- * both: `?123 , 🌐 ␣ . ⏎` puts the key's left edge at 25% of the row and makes
- * it 10% wide. With [outer] (the comma swap, on by default) the key and the
- * comma trade, so the key starts at 15% and the comma follows it. Everything
- * before the spacebar other than those two is scaled to fill what is left of
- * the slot's start; the spacebar gives or takes whatever the row's width needs,
- * and the keys after it keep their widths. The row keeps its total and the
- * order of every other key.
- *
- * A row with nothing before the 🌐 key widens the key to fill the space up to
- * the slot, so a thumb aimed where the key is on every other layout lands on
- * it here too, rather than on the spacebar.
- *
- * Returns null, leaving the grid alone, when:
- * - the bottom row has no spacebar, or more or fewer than one 🌐 key;
- * - any key spans rows, since moving keys would slide them under it;
- * - the keys before the slot would shrink below half or grow past two and a
- *   half times their width (a row with a long run of keys by the spacebar);
- * - the spacebar would end up under a fifth of the row.
- *
- * A row already in place comes back as the same grid. The built-in row is
- * already in place, and under [outer] it comes out exactly as the comma swap
- * would have left it, so the built-in layouts look as they always did. Null
- * is only for the rows it will not touch, which the caller then swaps the
- * old way.
- */
-internal fun KeyboardLayout.withGlobeInPlace(outer: Boolean): KeyboardLayout? {
-    val bottom = rows.lastOrNull() ?: return null
-    if (rows.any { row -> row.any { it.rowSpan > 1 } }) return null
-    if (bottom.count { it.action == KeyAction.LanguageSwitch } != 1) return null
-    val globe = bottom.first { it.action == KeyAction.LanguageSwitch }
-    val others = bottom.filterNot { it.action == KeyAction.LanguageSwitch }
-    val space = others.indexOfFirst { it.action == KeyAction.Space }
-    if (space < 0) return null
-    val lastRow = rows.lastIndex
-    val before = others.subList(0, space)
-    val after = others.subList(space + 1, others.size)
-    // Under the swap the comma is the key that follows the globe, so it leaves
-    // the run before the slot. The last one, the one nearest the spacebar.
-    val commaIndex = if (outer) {
-        before.indexOfLast { it.roleIn(lastRow, lastRow) == KeyRole.Comma }
-    } else {
-        -1
-    }
-    val comma = before.getOrNull(commaIndex)
-    val lead = if (comma == null) before else before.filterIndexed { i, _ -> i != commaIndex }
-
-    val total = bottom.sumOf { it.width.toDouble() }.toFloat()
-    val slotStart = total * (if (outer) GLOBE_SLOT_OUTER else GLOBE_SLOT_INNER)
-    val slotWidth = total * GLOBE_SLOT_WIDTH
-    val leadWidth = lead.sumOf { it.width.toDouble() }.toFloat()
-    val leadScale = if (lead.isEmpty()) 1f else slotStart / leadWidth
-    if (leadScale < GLOBE_LEAD_MIN_SCALE || leadScale > GLOBE_LEAD_MAX_SCALE) return null
-    val globeWidth = if (lead.isEmpty()) slotStart + slotWidth else slotWidth
-    val commaWidth = if (comma == null) 0f else slotWidth
-    val afterWidth = after.sumOf { it.width.toDouble() }.toFloat()
-    val spaceWidth = total - slotStart - slotWidth - commaWidth - afterWidth
-    if (spaceWidth < total * GLOBE_MIN_SPACE_SHARE) return null
-
-    val row = buildList {
-        lead.forEach { add(it.copy(width = it.width * leadScale)) }
-        add(globe.copy(width = globeWidth))
-        comma?.let { add(it.copy(width = commaWidth)) }
-        add(others[space].copy(width = spaceWidth))
-        addAll(after)
-    }
-    // Already there, give or take float rounding: hand back the grid itself, so
-    // an unchanged layout stays the same object and nothing downstream redraws.
-    val same = row.size == bottom.size && row.indices.all { i ->
-        row[i].copy(width = bottom[i].width) == bottom[i] &&
-            kotlin.math.abs(row[i].width - bottom[i].width) < GLOBE_WIDTH_EPSILON
-    }
-    return if (same) this else copy(rows = rows.dropLast(1) + listOf(row))
-}
-
-/** Where the 🌐 key starts in the built-in row, as a share of it: after `?123 ,`. */
-private const val GLOBE_SLOT_INNER = 0.25f
-
-/** The same under the comma swap: after `?123`, with the comma after the key. */
-private const val GLOBE_SLOT_OUTER = 0.15f
-
-/** The 🌐 key's width in the built-in row, as a share of it. */
-private const val GLOBE_SLOT_WIDTH = 0.10f
-
-/** The keys before the slot may not be squeezed below half their width… */
-private const val GLOBE_LEAD_MIN_SCALE = 0.5f
-
-/** …or stretched past two and a half times it (a lone `?123` at 1.0 just fits). */
-private const val GLOBE_LEAD_MAX_SCALE = 2.5f
-
-/** The spacebar keeps at least this share of the row, or the row is left alone. */
-private const val GLOBE_MIN_SPACE_SHARE = 0.2f
-
-/** Width differences below this are float noise, not a move. */
-private const val GLOBE_WIDTH_EPSILON = 0.001f
-
-/**
- * This grid with the 🌐 key taken off its bottom row, and the width the key
- * used given to the spacebar (issue #139).
- *
- * The spacebar gets all of it rather than every key a share: a bigger spacebar
- * is what the setting is for, and an even share would also widen `?123` and
- * enter. A row with no spacebar shares the width out instead, so it still fills
- * the board rather than leaving a gap at one end. Either way the row keeps its
- * total, which is what leaves a key spanning down into it where it was.
- *
- * Only the bottom row, because that is the key the setting names; a 🌐 key an
- * author placed anywhere else was placed on purpose. A row of nothing but 🌐
- * keys is left alone, since removing them would leave a row with no keys.
- */
-internal fun KeyboardLayout.withoutGlobeKey(): KeyboardLayout {
-    val bottom = rows.lastOrNull() ?: return this
-    val globes = bottom.count { it.action == KeyAction.LanguageSwitch }
-    if (globes == 0 || globes == bottom.size) return this
-    val freed = bottom.filter { it.action == KeyAction.LanguageSwitch }
-        .sumOf { it.width.toDouble() }.toFloat()
-    val kept = bottom.filterNot { it.action == KeyAction.LanguageSwitch }
-    val space = kept.indexOfFirst { it.action == KeyAction.Space }
-    val row = if (space >= 0) {
-        kept.mapIndexed { index, key ->
-            if (index == space) key.copy(width = key.width + freed) else key
-        }
-    } else {
-        val total = kept.sumOf { it.width.toDouble() }.toFloat()
-        kept.map { it.copy(width = it.width * (total + freed) / total) }
-    }
-    return copy(rows = rows.dropLast(1) + listOf(row))
+    return base.copy(rows = rewritten)
 }
 
 /**

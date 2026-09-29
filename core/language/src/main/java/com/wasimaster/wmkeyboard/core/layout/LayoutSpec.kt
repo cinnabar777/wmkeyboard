@@ -115,6 +115,26 @@ data class LayerSpec(
      */
     val persistent: Boolean = false,
     /**
+     * Draw this grid exactly as it is laid out here, whatever the Bottom row
+     * settings would do to it: no 🌐 key hidden, moved to its shared slot or
+     * swapped with the comma, and no key turned into the emoji key (issue #420).
+     *
+     * Those settings act on every layout at draw time, so the editor showed one
+     * bottom row and the keyboard drew another, and a key moved in the editor
+     * went straight back where the settings put it. The editor turns this on the
+     * moment a key the settings had moved or changed is moved or changed by
+     * hand, and writes the row as the keyboard was drawing it first, so nothing
+     * on screen jumps. See [arrangedBy].
+     *
+     * Per layer rather than per layout, because that write only touches the
+     * layer being edited: a symbols page the layout still inherits keeps
+     * following the settings, which is the row the letters were just written
+     * to match.
+     *
+     * Additive and defaulted, so no format-version bump.
+     */
+    val bottomRowAsLaidOut: Boolean = false,
+    /**
      * A theme of this layer's own (a `ThemeSpec.id`), shown while the layer is
      * on screen, over the layout's [LayoutSpec.themeId] and over whatever the
      * settings say (issue #61). Null — the normal case — follows the layout.

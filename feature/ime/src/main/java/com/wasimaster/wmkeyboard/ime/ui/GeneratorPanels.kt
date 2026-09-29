@@ -47,7 +47,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.wasimaster.wmkeyboard.core.prediction.DictionaryLoader
+import com.wasimaster.wmkeyboard.core.dictionaries.DictionaryStore
+import com.wasimaster.wmkeyboard.core.directboot.DirectBoot
+import com.wasimaster.wmkeyboard.core.prediction.MappedTrie
 import com.wasimaster.wmkeyboard.core.tools.PasswordGen
 import com.wasimaster.wmkeyboard.core.tools.QrCodeGen
 import com.wasimaster.wmkeyboard.common.R as CommonR
@@ -67,19 +69,28 @@ import kotlinx.coroutines.withContext
 /**
  * Passphrase material, filtered once from the bundled English dictionary
  * (no separate wordlist ships with the app).
+ *
+ * Read from the compiled `en.wmdict` the keyboard itself maps, through the
+ * same device-protected extraction. The plain `en.txt` this used to open left
+ * the APK when dictionaries went binary, and the failed open read as an empty
+ * list: the passphrase tab showed "…" and 0 bits, and refresh did nothing.
  */
 private object PassphraseWords {
     @Volatile private var cached: List<String>? = null
 
     suspend fun load(context: Context): List<String> = cached ?: withContext(Dispatchers.IO) {
-        val words = runCatching {
-            context.assets.open("dictionaries/en.txt").use { stream ->
-                PasswordGen.buildWordlist(
-                    DictionaryLoader.loadEntries(stream).asSequence().map { it.first },
-                )
-            }
-        }.getOrDefault(emptyList())
-        cached = words
+        val entries = DictionaryStore.ensureBundled(DirectBoot.deviceContext(context), "en")
+            ?.let { MappedTrie.open(it) }
+            ?.entries()
+            .orEmpty()
+        // The trie walks alphabetically; the wordlist keeps the first matches
+        // it sees, so rank by frequency first or it would be all a- words.
+        val words = PasswordGen.buildWordlist(
+            entries.sortedByDescending { it.second }.asSequence().map { it.first },
+        )
+        // An empty result is not cached, so a failed extraction (disk full)
+        // gets another try the next time the panel opens.
+        if (words.isNotEmpty()) cached = words
         words
     }
 }

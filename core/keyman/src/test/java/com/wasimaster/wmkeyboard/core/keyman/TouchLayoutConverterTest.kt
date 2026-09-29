@@ -5,6 +5,7 @@ import com.wasimaster.wmkeyboard.core.layout.LayoutFile
 import com.wasimaster.wmkeyboard.core.layout.LayoutLayer
 import com.wasimaster.wmkeyboard.core.layout.LayoutSeverity
 import com.wasimaster.wmkeyboard.core.layout.canBeEnabled
+import com.wasimaster.wmkeyboard.core.layout.multitapKey
 import com.wasimaster.wmkeyboard.core.layout.repair
 import com.wasimaster.wmkeyboard.core.layout.validateLayout
 import java.io.File
@@ -234,14 +235,58 @@ class TouchLayoutConverterTest {
         assertEquals(KmxFormat.CAPITALFLAG, KeymanLayers.modifiers("caps"))
     }
 
-    /** The gestures we cannot express are counted, not silently discarded. */
+    /**
+     * The gestures we cannot express are counted, not silently discarded. A
+     * cycle on a layer switch is one: these returned before the cycle was
+     * looked at, and went uncounted.
+     */
     @Test
     fun `dropped gestures are reported`() {
-        val report = convert("geezword_tigrinya").report
-        assertTrue(
-            "a keyboard using multitap reported none dropped",
-            report.droppedMultitaps > 0,
-        )
+        // Six `*123*`/`*Currency*`/`*Symbol*` keys that cycle through pages.
+        assertEquals(6, convert("sil_euro_latin").report.droppedMultitaps)
+        // Two `K_NUMLOCK` keys that cycle to the western digits.
+        assertEquals(2, convert("khmer_angkor").report.droppedMultitaps)
+    }
+
+    /**
+     * A cycle on a key that types is kept: its caps on the key, and a Keyman
+     * key for each step on the action, so each later tap reaches the rules as
+     * the key it is — `U_1255` here, which types ቕ with no rules loaded.
+     */
+    @Test
+    fun `multitap steps keep their keyman identity`() {
+        val converted = convert("geezword_tigrinya")
+        assertEquals(0, converted.report.droppedMultitaps)
+        val q = converted.keys(LayoutLayer.LETTERS.key).single { it.label == "ቅ." }
+        val keyman = q.action as KeyAction.KeymanKey
+        assertEquals(listOf("ቕ"), q.multitap)
+        val step = keyman.multitap.single()
+        assertEquals("U_1255", step.id)
+        assertEquals(0, step.vkey)
+        // The cap is the step's own character, so it needs no fallback of its own.
+        assertEquals(null, step.text)
+
+        val pressed = q.multitapKey(1)
+        assertEquals("ቕ", pressed.label)
+        assertEquals(step.toAction(), pressed.action)
+        assertTrue(pressed.multitap.isEmpty())
+        assertEquals(q, q.multitapKey(0))
+    }
+
+    /** Multitap caps and their keys stay parallel, which is how a step finds its key. */
+    @Test
+    fun `multitap keys line up with their labels`() {
+        var kept = 0
+        for (id in FIXTURES) {
+            for ((_, layer) in convert(id).layout.layers) {
+                for (key in layer.rows.flatten()) {
+                    val keyman = key.action as? KeyAction.KeymanKey
+                    assertEquals("$id '${key.label}'", key.multitap.size, keyman?.multitap?.size ?: 0)
+                    kept += key.multitap.size
+                }
+            }
+        }
+        assertTrue("no fixture kept a multitap", kept > 0)
     }
 
     /**

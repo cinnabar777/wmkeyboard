@@ -1,0 +1,199 @@
+{
+  "format": "wmkeyboard-layout",
+  "version": 1,
+  "layout": {
+    "id": "asset_kab_azerty",
+    "name": "Taqbaylit AZERTY (Kabyle AZERTY)",
+    "langId": "kab",
+    "version": 2,
+    "layers": {
+      "letters": {
+        "rows": [
+          [
+            {
+              "label": "a",
+              "longPress": [
+                "ɛ"
+              ]
+            },
+            {
+              "label": "z",
+              "longPress": [
+                "ẓ"
+              ]
+            },
+            {
+              "label": "e"
+            },
+            {
+              "label": "r",
+              "longPress": [
+                "ṛ"
+              ]
+            },
+            {
+              "label": "t",
+              "longPress": [
+                "ṭ"
+              ]
+            },
+            {
+              "label": "y"
+            },
+            {
+              "label": "u",
+              "longPress": [
+                "o"
+              ]
+            },
+            {
+              "label": "i"
+            },
+            {
+              "label": "ɛ"
+            },
+            {
+              "label": "ɣ"
+            }
+          ],
+          [
+            {
+              "label": "q"
+            },
+            {
+              "label": "s",
+              "longPress": [
+                "ṣ"
+              ]
+            },
+            {
+              "label": "d",
+              "longPress": [
+                "ḍ"
+              ]
+            },
+            {
+              "label": "f"
+            },
+            {
+              "label": "g",
+              "longPress": [
+                "ǧ"
+              ]
+            },
+            {
+              "label": "h",
+              "longPress": [
+                "ḥ"
+              ]
+            },
+            {
+              "label": "j"
+            },
+            {
+              "label": "k"
+            },
+            {
+              "label": "l"
+            },
+            {
+              "label": "m"
+            }
+          ],
+          [
+            {
+              "label": "⇧",
+              "action": {
+                "type": "shift"
+              },
+              "width": 1.5
+            },
+            {
+              "label": "w"
+            },
+            {
+              "label": "x"
+            },
+            {
+              "label": "c",
+              "longPress": [
+                "č"
+              ]
+            },
+            {
+              "label": "v"
+            },
+            {
+              "label": "b",
+              "longPress": [
+                "p"
+              ]
+            },
+            {
+              "label": "n"
+            },
+            {
+              "label": "-"
+            },
+            {
+              "label": "⌫",
+              "action": {
+                "type": "delete"
+              },
+              "width": 1.5
+            }
+          ],
+          [
+            {
+              "label": "?123",
+              "action": {
+                "type": "symbols"
+              },
+              "width": 1.5
+            },
+            {
+              "label": ",",
+              "longPress": [
+                "!",
+                "?"
+              ],
+              "role": "Comma"
+            },
+            {
+              "label": "🌐",
+              "action": {
+                "type": "language_switch"
+              }
+            },
+            {
+              "label": " ",
+              "action": {
+                "type": "space"
+              },
+              "width": 4
+            },
+            {
+              "label": ".",
+              "longPress": [
+                "…",
+                ",",
+                "?",
+                "!",
+                ":",
+                ";"
+              ],
+              "role": "Period"
+            },
+            {
+              "label": "⏎",
+              "action": {
+                "type": "enter"
+              },
+              "width": 1.5
+            }
+          ]
+        ]
+      }
+    }
+  }
+}

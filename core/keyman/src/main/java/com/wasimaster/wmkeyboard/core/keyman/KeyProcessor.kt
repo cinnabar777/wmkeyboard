@@ -129,6 +129,21 @@ interface KeyProcessor {
         // A processor that keeps no context has nothing to add it to.
     }
 
+    /**
+     * The context as it stands, deadkeys included, for [restoreContext]. Null
+     * from a processor that keeps no context, which has nothing to put back.
+     */
+    fun saveContext(): SavedContext? = null
+
+    /**
+     * Puts back a context [saveContext] took — for a multitap step, which acts
+     * as if it were the first thing typed since the state before the run's
+     * first tap, deadkeys and all, as KeymanWeb's multitap does.
+     */
+    fun restoreContext(saved: SavedContext) {
+        // A processor that keeps no context has nothing to restore.
+    }
+
     /** True while a deadkey is pending, for the strip's pending-accent hint. */
     val deadKeyPending: Boolean
 
@@ -139,4 +154,22 @@ interface KeyProcessor {
     fun setLayer(name: String) {
         // A processor with no layer-dependent rules has nothing to track.
     }
+}
+
+/**
+ * A rule engine's context at one moment, from [KeyProcessor.saveContext].
+ * Opaque to the host but for [visible], the text the field held behind the
+ * caret at that moment, and equal to another only when both hold the same text
+ * and the same deadkeys in the same places.
+ */
+class SavedContext internal constructor(internal val raw: String) {
+
+    /** The text, deadkey markers taken out: what the field showed. */
+    val visible: String by lazy { KeymanContext().apply { restore(this@SavedContext.raw) }.visible() }
+
+    override fun equals(other: Any?): Boolean = other is SavedContext && other.raw == raw
+
+    override fun hashCode(): Int = raw.hashCode()
+
+    override fun toString(): String = "SavedContext(${raw.length}u)"
 }

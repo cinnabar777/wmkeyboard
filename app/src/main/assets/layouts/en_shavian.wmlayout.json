@@ -1,0 +1,233 @@
+{
+  "format": "wmkeyboard-layout",
+  "version": 1,
+  "layout": {
+    "id": "asset_en_shavian",
+    "name": "Shavian",
+    "langId": "en-Shaw",
+    "version": 2,
+    "layers": {
+      "letters": {
+        "rows": [
+          [
+            {
+              "label": "𐑐"
+            },
+            {
+              "label": "𐑑"
+            },
+            {
+              "label": "𐑒"
+            },
+            {
+              "label": "𐑓"
+            },
+            {
+              "label": "𐑔"
+            },
+            {
+              "label": "𐑕"
+            },
+            {
+              "label": "𐑖"
+            },
+            {
+              "label": "𐑗"
+            },
+            {
+              "label": "𐑘"
+            },
+            {
+              "label": "𐑙"
+            }
+          ],
+          [
+            {
+              "label": "𐑚"
+            },
+            {
+              "label": "𐑛"
+            },
+            {
+              "label": "𐑜"
+            },
+            {
+              "label": "𐑝"
+            },
+            {
+              "label": "𐑞"
+            },
+            {
+              "label": "𐑟"
+            },
+            {
+              "label": "𐑠"
+            },
+            {
+              "label": "𐑡"
+            },
+            {
+              "label": "𐑢"
+            },
+            {
+              "label": "𐑣"
+            }
+          ],
+          [
+            {
+              "label": "𐑤"
+            },
+            {
+              "label": "𐑥"
+            },
+            {
+              "label": "𐑦"
+            },
+            {
+              "label": "𐑧"
+            },
+            {
+              "label": "𐑨"
+            },
+            {
+              "label": "𐑩"
+            },
+            {
+              "label": "𐑪"
+            },
+            {
+              "label": "𐑫"
+            },
+            {
+              "label": "𐑬"
+            },
+            {
+              "label": "𐑭"
+            }
+          ],
+          [
+            {
+              "label": "𐑮"
+            },
+            {
+              "label": "𐑯"
+            },
+            {
+              "label": "𐑰"
+            },
+            {
+              "label": "𐑱"
+            },
+            {
+              "label": "𐑲"
+            },
+            {
+              "label": "𐑳"
+            },
+            {
+              "label": "𐑴"
+            },
+            {
+              "label": "𐑵"
+            },
+            {
+              "label": "𐑶"
+            },
+            {
+              "label": "𐑷"
+            }
+          ],
+          [
+            {
+              "label": "⇧",
+              "action": {
+                "type": "shift"
+              },
+              "width": 1.5
+            },
+            {
+              "label": "𐑸"
+            },
+            {
+              "label": "𐑹"
+            },
+            {
+              "label": "𐑺"
+            },
+            {
+              "label": "𐑻"
+            },
+            {
+              "label": "𐑼"
+            },
+            {
+              "label": "𐑽"
+            },
+            {
+              "label": "𐑾"
+            },
+            {
+              "label": "𐑿"
+            },
+            {
+              "label": "⌫",
+              "action": {
+                "type": "delete"
+              },
+              "width": 1.5
+            }
+          ],
+          [
+            {
+              "label": "?123",
+              "action": {
+                "type": "symbols"
+              },
+              "width": 1.5
+            },
+            {
+              "label": ",",
+              "longPress": [
+                "!",
+                "?"
+              ],
+              "role": "Comma"
+            },
+            {
+              "label": "🌐",
+              "action": {
+                "type": "language_switch"
+              }
+            },
+            {
+              "label": " ",
+              "action": {
+                "type": "space"
+              },
+              "width": 4
+            },
+            {
+              "label": ".",
+              "longPress": [
+                "…",
+                ",",
+                "?",
+                "!",
+                ":",
+                ";"
+              ],
+              "role": "Period"
+            },
+            {
+              "label": "⏎",
+              "action": {
+                "type": "enter"
+              },
+              "width": 1.5
+            }
+          ]
+        ]
+      }
+    }
+  }
+}

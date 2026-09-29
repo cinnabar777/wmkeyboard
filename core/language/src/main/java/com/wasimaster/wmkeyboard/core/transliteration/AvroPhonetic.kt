@@ -9,17 +9,22 @@ package com.wasimaster.wmkeyboard.core.transliteration
  *
  *  1. Vowels render as independent letters at a word boundary or after
  *     another vowel, and as vowel signs (kar) after a consonant.
- *  2. Consecutive consonants are joined into conjuncts with a hasant.
- *     The inherent vowel "o" produces no glyph but breaks the cluster,
- *     so "kolokata" stays কলকাতা rather than forming a false conjunct
- *     (whereas "kolkata", with no vowel between l and k, does conjunct).
- *  3. Lowercase "o" is the inherent vowel: silent after a consonant, অ at a
- *     word start or after another vowel. It never writes ো — that is what
- *     the capital "O" is for, exactly as on desktop Avro, so "bhalo" is
- *     ভাল and "bhalO" is ভালো.
+ *  2. Consecutive consonants conjunct only where Bangla has that conjunct
+ *     ([JOINS], desktop Avro's own table): "kolkata" → কলকাতা, "bondhu" →
+ *     বন্ধু, but "korbo" → করব and "bolchi" → বলছি. র-ফলা, য-ফলা and
+ *     ব-ফলা ("kr", "ky", "kw") join any consonant, and ন before a velar or
+ *     palatal takes that nasal ("onko" → অঙ্ক, "poncho" → পঞ্ছ). The
+ *     inherent vowel "o" produces no glyph but breaks the cluster, so
+ *     "kolokata" stays কলকাতা whatever the pair.
+ *  3. Lowercase "o" is the inherent vowel: silent after a consonant, ও after
+ *     a vowel that wrote something ("amio" → আমিও), অ anywhere else. It
+ *     never writes ো — that is what the capital "O" is for, exactly as on
+ *     desktop Avro, so "bhalo" is ভাল and "bhalO" is ভালো.
  *  4. "rr" spells reph: it renders as a single র that conjuncts with the
  *     following consonant ("dhorrmo" → ধর্ম), except in "rri" (ঋ) or when
- *     no consonant follows.
+ *     no consonant follows. A single "r" stays apart from the consonant
+ *     after it ("korbo" → করব), as on desktop Avro; the reph words people
+ *     spell with one r ("dhormo" → ধর্ম) are in the fixed-spelling list.
  *  5. An "a" right after a rendered vowel glides with য় ("kiamot" →
  *     কিয়ামত, "Oasi"/"wasi" → ওয়াসি). Only after the silent
  *     inherent vowel does the independent আ survive ("kuroan" → কুরআন),
@@ -39,12 +44,16 @@ package com.wasimaster.wmkeyboard.core.transliteration
  * 10. ং, ঃ and ঁ are signs, not consonants: they hang off the syllable in
  *     front of them and join nothing, so "bangla" is বাংলা and not বাং্লা.
  *     Since only a consonant can start the next syllable, "ng" before a
- *     vowel is ঙ instead — "bangali" → বাঙালি.
+ *     vowel is ঙ্গ instead — "songe" → সঙ্গে — as on desktop Avro.
  * 11. A capital that spells nothing of its own reads as its lowercase self,
  *     so a stray shift types Bengali rather than dropping a Latin letter
  *     into the middle of a word. The capitals Avro *does* use (T D N S R J,
  *     the long vowels, OI/OU/Ng/NG/Th/Dh/Sh/Rh/TH/HH) are matched first and
  *     never reach that fallback.
+ * 12. At a word start "y" is ইয় and "x" এক্স ("yes" → ইয়েস), "ee" is ঈ/ী
+ *     anywhere ("kee" → কী), and "aZ" is অ্যা ("aZp" → অ্যাপ), all as on
+ *     desktop Avro. A "w" not after a consonant glides into the vowel after
+ *     it through য় ("we" → ওয়ে, "sawal" → সাওয়াল).
  *
  * Dictionary-level corrections (e.g. "asi" → আছি rather than আসি) are the
  * suggestion engine's job, not this transliterator's.
@@ -58,6 +67,62 @@ object AvroPhonetic {
 
     /** Breaks a cluster without writing anything: "k`s" → কস, not ক্স. */
     private const val BREAKER = '`'
+
+    /** Holds র and য-ফলা apart, so "ry" draws র‍্য (র‍্যাব) and not the reph of র্য. */
+    private const val ZWJ = '\u200D'
+
+    /**
+     * The consonant pairs that conjunct when typed back to back, as
+     * "first letter + second letter". Any other pair is written side by side,
+     * which is what desktop Avro does: "korbo" is করব, "bolchi" is বলছি, and
+     * the conjunct only appears where Bangla really has one ("kt" → ক্ত,
+     * "ndh" → ন্ধ). The list is Avro's own conjunct table, pair by pair, and
+     * it covers every conjunct common in the dictionary except the ত্স, ত্প
+     * and ত্ক that modern spelling writes with ৎ anyway.
+     *
+     * র, য and ব as the *second* letter are not here: র-ফলা, য-ফলা and
+     * ব-ফলা join any consonant ([joins], the "y" and "w" rules), and র as
+     * the *first* letter only joins as reph, which is spelled "rr".
+     */
+    private val JOINS: Set<String> = hashSetOf(
+        "কক", "কট", "কত", "কল", "কষ", "কস",
+        "গণ", "গধ", "গন", "গম", "গল",
+        "ঘন",
+        "ঙক", "ঙখ", "ঙগ", "ঙঘ", "ঙম", "ঙষ",
+        "চচ", "চছ", "চঞ",
+        "জজ", "জঝ", "জঞ",
+        "ঞচ", "ঞছ", "ঞজ", "ঞঝ",
+        "টট", "টম",
+        "ডড",
+        "ণট", "ণঠ", "ণড", "ণঢ", "ণণ", "ণন", "ণম",
+        "তত", "তথ", "তন", "তম",
+        "দগ", "দঘ", "দদ", "দধ", "দভ", "দম",
+        "ধন", "ধম",
+        "নট", "নঠ", "নড", "নত", "নথ", "নদ", "নধ", "নন", "নম", "নস",
+        "পট", "পত", "পন", "পপ", "পল", "পস",
+        "ফল",
+        "বজ", "বদ", "বধ", "বব", "বল",
+        "ভল",
+        "মথ", "মন", "মপ", "মফ", "মব", "মভ", "মম", "মল",
+        "লক", "লগ", "লট", "লড", "লধ", "লপ", "লব", "লভ", "লম", "লল",
+        "শচ", "শছ", "শত", "শন", "শম", "শল",
+        "ষক", "ষট", "ষঠ", "ষণ", "ষপ", "ষফ", "ষম",
+        "সক", "সখ", "সট", "সত", "সথ", "সন", "সপ", "সফ", "সম", "সল",
+        "হণ", "হন", "হম", "হল",
+        "\u09DCগ", // ড়্গ
+    )
+
+    /**
+     * ন takes the nasal of the class it joins, as it does in writing:
+     * "nk" → ঙ্ক (অঙ্ক), "nkh" → ঙ্খ (শঙ্খ), "nc" → ঞ্চ (অঞ্চল).
+     */
+    private val NASAL_BEFORE: Map<Char, Char> = mapOf(
+        'ক' to 'ঙ', 'খ' to 'ঙ',
+        'চ' to 'ঞ', 'ছ' to 'ঞ', 'জ' to 'ঞ', 'ঝ' to 'ঞ',
+    )
+
+    /** Roman letters after which an "r" is a plain র, never র-ফলা: "rr" is রর, "xr" এক্সর. */
+    private const val NO_R_PHOLA_AFTER = "ryYwWxZ"
 
     /**
      * [SIGN] is ং / ঃ / ঁ: written like a consonant but joined like nothing.
@@ -91,6 +156,7 @@ object AvroPhonetic {
         add(Rule("A", "আ", "া"))
         add(Rule("i", "ই", "ি"))
         add(Rule("I", "ঈ", "ী"))
+        add(Rule("ee", "ঈ", "ী")) // "kee" → কী, "free" → ফ্রী, as on desktop Avro
         add(Rule("u", "উ", "ু"))
         add(Rule("U", "ঊ", "ূ"))
         add(Rule("e", "এ", "ে"))
@@ -100,6 +166,7 @@ object AvroPhonetic {
 
         // Common fixed conjuncts spelled by digraph in Avro (longest match wins).
         add(Rule("kkh", "ক্ষ")) // লক্ষ, ক্ষমা — "kkh" is the conventional key
+        add(Rule("kx", "ক্ষ")) // Avro's other spelling of it
         add(Rule("gg", "জ্ঞ")) // জ্ঞান, আজ্ঞা — the গ্গ it displaces has one word
         add(Rule("nj", "ঞ্জ")) // পাঞ্জাবি, অঞ্জন — an n before j is ঞ, never ন
 
@@ -168,6 +235,7 @@ object AvroPhonetic {
         add(Rule(":", "ঃ", null, Kind.SIGN))
         add(Rule("^", "ঁ", null, Kind.SIGN))
         add(Rule(",,", HASANT.toString(), null, Kind.OTHER))
+        add(Rule("...", "...", null, Kind.OTHER)) // an ellipsis stays one
         add(Rule("..", ".", null, Kind.OTHER))
         add(Rule(".", "।", null, Kind.OTHER))
         add(Rule("$", "৳", null, Kind.OTHER))
@@ -214,6 +282,32 @@ object AvroPhonetic {
         return exactRuleAt(input.substring(at).lowercase(), 0)
     }
 
+    /**
+     * Whether the consonant [next] starts with conjuncts onto the consonant
+     * [out] ends with; [romanBefore] is the roman letter typed just before it.
+     * A ন about to join a velar or palatal becomes that class's nasal first
+     * ([NASAL_BEFORE]), which is the only edit this makes to [out].
+     */
+    private fun joins(out: StringBuilder, next: String, romanBefore: Char?): Boolean {
+        val head = next[0]
+        if (head == 'র') return romanBefore == null || romanBefore !in NO_R_PHOLA_AFTER
+        val last = out.lastOrNull() ?: return false
+        if (last == 'ন') {
+            NASAL_BEFORE[head]?.let {
+                out.setCharAt(out.length - 1, it)
+                return true
+            }
+        }
+        return "$last$head" in JOINS
+    }
+
+    /** Nothing Bengali before [out]'s end: a new word, where Avro spells "y" ইয় and "x" এক্স. */
+    private fun atWordStart(out: StringBuilder): Boolean {
+        val last = out.lastOrNull() ?: return true
+        return !Character.isLetter(last) && Character.getType(last) != Character.NON_SPACING_MARK.toInt() &&
+            Character.getType(last) != Character.COMBINING_SPACING_MARK.toInt()
+    }
+
     /** Transliterates one romanized word (or free text) into Bengali script. */
     fun transliterate(input: String): String {
         val out = StringBuilder()
@@ -226,6 +320,9 @@ object AvroPhonetic {
         // that does not happen. Only the join — a kar after the break still
         // attaches, since a vowel was never what the breaker was aimed at.
         var breakJoin = false
+        // Set by "rr" before a consonant: the reph joins whatever follows,
+        // pair list or not, since spelling it out was the whole request.
+        var reph = false
         var i = 0
         while (i < input.length) {
             if (input[i] == BREAKER) {
@@ -251,13 +348,31 @@ object AvroPhonetic {
                 i++
                 continue
             }
+            // "aZ" is অ্যা, the vowel of অ্যাপ and অ্যাকাউন্ট, and "oZ" the
+            // অ্য it is built on. Only where a vowel would stand on its own:
+            // after a consonant the "a" is a kar and "Z" its ordinary য-ফলা.
+            if (prev != Kind.CONSONANT &&
+                (input.startsWith("aZ", i) || input.startsWith("AZ", i) || input.startsWith("oZ", i))
+            ) {
+                val bare = input[i] == 'o'
+                out.append(if (bare) "অ্য" else "অ্যা")
+                // অ্য still wants its vowel, so it reads as a consonant.
+                prev = if (bare) Kind.CONSONANT else Kind.VOWEL
+                prevVowelGlyph = !bare
+                breakJoin = false
+                reph = false
+                i += 2
+                continue
+            }
             // Inherent vowel: no glyph after a consonant (or after a sign, which
             // closes a consonant's syllable), অ anywhere else. Never ো — the
             // capital "O" is the only thing that writes one, so "bhalo" is ভাল
             // and "bhalO" is ভালো, exactly as on desktop Avro.
             if (input[i] == 'o' && !input.startsWith("oo", i)) {
                 val carried = prev == Kind.CONSONANT || prev == Kind.SIGN
-                if (!carried) out.append('অ')
+                // After a vowel that wrote something, "o" is ও: "amio" →
+                // আমিও, "khaoa" → খাওয়া. Anywhere else uncarried it is অ.
+                if (!carried) out.append(if (prev == Kind.VOWEL && prevVowelGlyph) 'ও' else 'অ')
                 prevVowelGlyph = !carried
                 prev = Kind.VOWEL
                 i++
@@ -291,13 +406,23 @@ object AvroPhonetic {
             // where the "y" rule would have gone to য় instead.
             if (input[i] == 'y' || input[i] == 'Y' || input[i] == 'Z') {
                 if (input[i] == 'Z' || (input[i] == 'y' && prev == Kind.CONSONANT && !breakJoin)) {
+                    // A plain র (not reph, not itself a ফলা) keeps its shape
+                    // with a joiner: "rZab" → র‍্যাব. Without it the pair
+                    // would draw as reph over য.
+                    if (!reph && out.lastOrNull() == 'র' && out.getOrNull(out.length - 2) != HASANT) {
+                        out.append(ZWJ)
+                    }
                     out.append(HASANT).append('য')
+                } else if (input[i] == 'y' && prev == Kind.OTHER && atWordStart(out)) {
+                    // Avro opens a word's "y" with ই: "yes" → ইয়েস.
+                    out.append("ই\u09DF")
                 } else {
                     out.append('য়')
                 }
                 prev = Kind.CONSONANT
                 prevVowelGlyph = false
                 breakJoin = false
+                reph = false
                 i++
                 continue
             }
@@ -306,8 +431,17 @@ object AvroPhonetic {
             // "swadhInota" → স্বাধীনতা — and ও everywhere else, where the "a"
             // after it glides through the rule above ("wasi" → ওয়াসি).
             if (input[i] == 'w' || input[i] == 'W') {
+                val vowelNext = ruleAt(input, i + 1)?.kind == Kind.VOWEL ||
+                    input.getOrNull(i + 1) == 'o'
                 if (prev == Kind.CONSONANT && !breakJoin) {
                     out.append(HASANT).append('ব')
+                    prev = Kind.CONSONANT
+                    prevVowelGlyph = false
+                } else if (vowelNext) {
+                    // ও glides into the vowel after it through য়, which then
+                    // carries that vowel as a kar: "we" → ওয়ে, "win" → ওয়িন,
+                    // "sawal" → সাওয়াল.
+                    out.append("ও\u09DF")
                     prev = Kind.CONSONANT
                     prevVowelGlyph = false
                 } else {
@@ -316,6 +450,7 @@ object AvroPhonetic {
                     prevVowelGlyph = true
                 }
                 breakJoin = false
+                reph = false
                 i++
                 continue
             }
@@ -327,22 +462,28 @@ object AvroPhonetic {
                 out.append(HASANT)
                 prev = Kind.OTHER
                 prevVowelGlyph = false
+                reph = false
                 i += 2
                 continue
             }
 
             // "ng" is ং, which hangs off the syllable in front of it and joins
             // nothing. A vowel after it is a new syllable, and only a consonant
-            // can carry one — so there it is ঙ instead: "bangla" → বাংলা,
-            // "bangali" → বাঙালি.
+            // can carry one — so there it is ঙ্গ instead, as on desktop Avro:
+            // "bangla" → বাংলা, "songe" → সঙ্গে, "jongol" → জঙ্গল. ঙ্গ is
+            // the far commoner spelling before a vowel; the bare ঙ of বাঙালি
+            // or ভাঙা is "Ng", and the everyday ones are in the spelling list.
             if (input.startsWith("ng", i) &&
-                (ruleAt(input, i + 2)?.kind == Kind.VOWEL || input.startsWith("oo", i + 2))
+                (ruleAt(input, i + 2)?.kind == Kind.VOWEL || input.getOrNull(i + 2) == 'o')
             ) {
-                if (prev == Kind.CONSONANT && !breakJoin) out.append(HASANT)
-                out.append('ঙ')
+                if (prev == Kind.CONSONANT && !breakJoin && (reph || joins(out, "ঙ", input.getOrNull(i - 1)))) {
+                    out.append(HASANT)
+                }
+                out.append("ঙ্গ")
                 prev = Kind.CONSONANT
                 prevVowelGlyph = false
                 breakJoin = false
+                reph = false
                 i += 2
                 continue
             }
@@ -356,11 +497,14 @@ object AvroPhonetic {
                 val joinsConsonant = next?.kind == Kind.CONSONANT ||
                     (i + 2 < input.length && input[i + 2] == 'y')
                 if (joinsConsonant) {
-                    if (prev == Kind.CONSONANT && !breakJoin) out.append(HASANT)
+                    if (prev == Kind.CONSONANT && !breakJoin && joins(out, "র", input.getOrNull(i - 1))) {
+                        out.append(HASANT)
+                    }
                     out.append('র')
                     prev = Kind.CONSONANT
                     prevVowelGlyph = false
                     breakJoin = false
+                    reph = true
                     i += 2
                     continue
                 }
@@ -372,6 +516,7 @@ object AvroPhonetic {
                 prev = Kind.OTHER
                 prevVowelGlyph = false
                 breakJoin = false
+                reph = false
                 i++
                 continue
             }
@@ -381,7 +526,13 @@ object AvroPhonetic {
                     prevVowelGlyph = true
                 }
                 Kind.CONSONANT -> {
-                    if (prev == Kind.CONSONANT && !breakJoin) out.append(HASANT)
+                    if (prev == Kind.CONSONANT && !breakJoin &&
+                        (reph || joins(out, rule.full, input.getOrNull(i - 1)))
+                    ) {
+                        out.append(HASANT)
+                    } else if (rule.match == "x" && prev == Kind.OTHER && atWordStart(out)) {
+                        out.append('এ') // "x" opens a word as এক্স: "xray" → এক্সরে
+                    }
                     out.append(rule.full)
                     prevVowelGlyph = false
                 }
@@ -395,6 +546,7 @@ object AvroPhonetic {
             }
             prev = rule.kind
             breakJoin = false
+            reph = false
             i += rule.match.length
         }
         return collapseFinalKhandaTa(out)

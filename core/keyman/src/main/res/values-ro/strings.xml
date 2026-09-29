@@ -10,10 +10,6 @@
         <item quantity="one">%1$d tastă scrie caracterul imprimat pe ea. Tastatura originală a folosit o regulă pentru a decide ce scrie.</item>
         <item quantity="other">%1$d taste scriu caracterele imprimate pe ele. Tastatura originală a folosit reguli pentru a decide ce scriu.</item>
     </plurals>
-    <plurals name="core_keyman_multitap_dropped">
-        <item quantity="one">Această tastatură are %1$d tastă pe care o apăsați în mod repetat pentru a parcurge caracterele. Această aplicație de tastatură nu are o astfel de tastă, deci este disponibil doar primul caracter.</item>
-        <item quantity="other">Această tastatură are %1$d taste pe care le apăsați în mod repetat pentru a parcurge caracterele. Această aplicație de tastatură nu are astfel de taste, deci este disponibil doar primul caracter al fiecăreia.</item>
-    </plurals>
     <string name="core_keyman_rules_missing">Această tastatură folosește reguli pentru a decide ce tastează. Aplicația nu are acele reguli, așa că fiecare tastă scrie caracterul imprimat pe ea.</string>
     <plurals name="core_keyman_special_keys_dropped">
         <item quantity="one">Aplicația a eliminat %1$d tastă. Această tastatură nu are nicio tastă care să facă același lucru.</item>

@@ -38,7 +38,7 @@ The ones Android shows a prompt for. Each row reads **Granted** or **Not granted
 | Camera | Take a photo with the camera tool and send it into the chat | always |
 | Contacts | Suggest the names and the email addresses of your contacts while you type | always |
 | Calendar | The calendar tool lists the events of your day | always |
-| Photos and images | Show your new screenshots in the clipboard | always |
+| Photos and images | Show your new screenshots in the clipboard | not in the Play Store build |
 | Storage | Save images from the keyboard to your gallery | Android 9 and older only |
 
 Tap a row that isn't granted and you get that permission's own explanation, then Android's prompt. It's exactly the flow the feature itself would run. Tap a row that *is* granted and the app's page opens in Android's Settings instead, since that's the only place a grant can be handed back.
@@ -55,7 +55,7 @@ The grants Android won't prompt for. Each one is a switch on a system screen, so
 |---|---|---|
 | Notification access | Media controls on the keyboard, and one-time codes from your notifications | Android's full notification-listener list, where you find WM Keyboard yourself |
 | Usage access | Show which app a clipboard entry was copied from | Android's usage-access list |
-| Accessibility service | Keep the keyboard gestures while TalkBack is on | Android's accessibility list |
+| Accessibility service | Keep the keyboard gestures while TalkBack is on (not in the Play Store build) | Android's accessibility list |
 | Install updates | Install a new version of this app that you downloaded from its release page | Android's "install unknown apps" page for WM Keyboard |
 
 They all go through the explanation every time, granted or not, because the system screen you land on is also where you turn them off.

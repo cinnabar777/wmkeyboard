@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import com.wasimaster.wmkeyboard.R
 import com.wasimaster.wmkeyboard.common.R as CommonR
 import com.wasimaster.wmkeyboard.core.layout.resolveLayoutKeyman
+import com.wasimaster.wmkeyboard.core.transliteration.BijoyAnsi
 import com.wasimaster.wmkeyboard.core.dictionaries.DictionaryCatalog
 import com.wasimaster.wmkeyboard.core.dictionaries.DictionaryEntry
 import com.wasimaster.wmkeyboard.core.dictionaries.DictionaryStore
@@ -1153,6 +1154,38 @@ internal fun LanguageDetailScreen(
                         info = stringResource(R.string.languages_phonetic_english_switch_info),
                         default = SettingsDefaults.suggestionStrip.phoneticEnglishSwitch,
                     ) { scope.launch { repository.setPhoneticEnglishSwitch(it) } }
+                }
+            }
+        }
+    }
+
+    // Bengali written as ANSI, the encoding of Bijoy and the SutonnyMJ fonts,
+    // for fields set in one of those fonts. Allowing it puts the ANSI button
+    // on the strip of every Bengali layout, and the button turns it on.
+    if (langId == "bn") {
+        val ansiAllowed = settings.watch { it.suggestionStrip.bengaliAnsiAllowed }
+        SettingsGroup(stringResource(R.string.languages_ansi_group)) {
+            item {
+                ToggleSetting(
+                    R.string.languages_ansi_allowed_title,
+                    stringResource(R.string.languages_ansi_allowed_subtitle),
+                    ansiAllowed,
+                    info = stringResource(R.string.languages_ansi_allowed_info),
+                    default = SettingsDefaults.suggestionStrip.bengaliAnsiAllowed,
+                ) { scope.launch { repository.setBengaliAnsiAllowed(it) } }
+            }
+            if (ansiAllowed) {
+                item {
+                    ChoiceSetting(
+                        R.string.languages_ansi_version_title,
+                        subtitle = stringResource(R.string.languages_ansi_version_subtitle),
+                        info = stringResource(R.string.languages_ansi_version_info),
+                        options = BijoyAnsi.Version.entries.map {
+                            it.number to stringResource(R.string.languages_ansi_version_option, it.number)
+                        },
+                        selected = BijoyAnsi.Version.of(settings.watch { it.suggestionStrip.bengaliAnsiVersion }).number,
+                        default = SettingsDefaults.suggestionStrip.bengaliAnsiVersion,
+                    ) { scope.launch { repository.setBengaliAnsiVersion(it) } }
                 }
             }
         }

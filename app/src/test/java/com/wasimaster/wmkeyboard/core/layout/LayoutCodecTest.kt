@@ -244,6 +244,17 @@ class LayoutCodecTest {
         assertEquals(original, LayoutCodec.decode(LayoutCodec.encode(original)))
     }
 
+    @Test
+    fun `round trips a multitap cycle`() {
+        val original = spec(listOf(Key("ㄱㅋ", output = "ㄱ", multitap = listOf("ㅋ", "ㄲ"))))
+        val decoded = LayoutCodec.decode(LayoutCodec.encode(original))
+        assertEquals(original, decoded)
+        assertEquals(
+            listOf("ㅋ", "ㄲ"),
+            decoded!!.layers.getValue(LayoutLayer.LETTERS.key).rows[0][0].multitap,
+        )
+    }
+
     /**
      * A key that hides its corner hint keeps its alternates: the two are separate
      * fields on purpose, since clearing `longPress` is what an author does *not*

@@ -104,12 +104,23 @@ class KeymanImportTest {
         }
     }
 
+    /** `sil_euro_latin` cycles its `*123*` key through the symbol pages, which does not convert. */
     @Test
     fun `dropped gestures reach the notes`() {
+        val notes = KeymanImport.convert(fixture("sil_euro_latin"), "s.json")!!.notes
+        assertTrue(
+            "a keyboard whose multitap did not convert reported nothing",
+            notes.any { it.pluralsRes == R.plurals.core_keyman_multitap_unconverted },
+        )
+    }
+
+    /** `geezword_tigrinya`'s cycles are on keys that type, and all of them convert. */
+    @Test
+    fun `kept multitaps are not reported`() {
         val notes = KeymanImport.convert(fixture("geezword_tigrinya"), "t.json")!!.notes
         assertTrue(
-            "a keyboard using multitap reported nothing",
-            notes.any { it.pluralsRes == R.plurals.core_keyman_multitap_dropped },
+            "a keyboard whose multitaps all converted still reported some dropped",
+            notes.none { it.pluralsRes == R.plurals.core_keyman_multitap_unconverted },
         )
     }
 

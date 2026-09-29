@@ -1,0 +1,184 @@
+{
+  "format": "wmkeyboard-layout",
+  "version": 1,
+  "layout": {
+    "id": "asset_hoc_warang_citi_alt",
+    "name": "𑢹𑣉𑣉 alternative (Ho, Warang Citi alternative)",
+    "langId": "hoc-Wara",
+    "version": 2,
+    "layers": {
+      "letters": {
+        "rows": [
+          [
+            {
+              "label": "𑣄"
+            },
+            {
+              "label": "𑣆"
+            },
+            {
+              "label": "𑣈"
+            },
+            {
+              "label": "𑣜"
+            },
+            {
+              "label": "𑣛"
+            },
+            {
+              "label": "𑣒"
+            },
+            {
+              "label": "𑣅"
+            },
+            {
+              "label": "𑣃"
+            },
+            {
+              "label": "𑣂"
+            },
+            {
+              "label": "𑣉"
+            },
+            {
+              "label": "𑣘"
+            }
+          ],
+          [
+            {
+              "label": "𑣁"
+            },
+            {
+              "label": "𑣞",
+              "longPress": [
+                "𑣝"
+              ]
+            },
+            {
+              "label": "𑣑"
+            },
+            {
+              "label": "𑣔"
+            },
+            {
+              "label": "𑣋"
+            },
+            {
+              "label": "𑣊"
+            },
+            {
+              "label": "𑣙"
+            },
+            {
+              "label": "𑣎"
+            },
+            {
+              "label": "𑣌"
+            },
+            {
+              "label": "𑣚"
+            }
+          ],
+          [
+            {
+              "label": "⇧",
+              "action": {
+                "type": "shift"
+              },
+              "width": 1.5
+            },
+            {
+              "label": "𑣕"
+            },
+            {
+              "label": "𑣇"
+            },
+            {
+              "label": "𑣏"
+            },
+            {
+              "label": "𑣀"
+            },
+            {
+              "label": "𑣍"
+            },
+            {
+              "label": "𑣐"
+            },
+            {
+              "label": "𑣗",
+              "longPress": [
+                "𑣟"
+              ]
+            },
+            {
+              "label": "𑣓"
+            },
+            {
+              "label": "𑣖",
+              "longPress": [
+                "𑣿"
+              ]
+            },
+            {
+              "label": "⌫",
+              "action": {
+                "type": "delete"
+              },
+              "width": 1.5
+            }
+          ],
+          [
+            {
+              "label": "?123",
+              "action": {
+                "type": "symbols"
+              },
+              "width": 1.5
+            },
+            {
+              "label": ",",
+              "longPress": [
+                "!",
+                "?"
+              ],
+              "role": "Comma"
+            },
+            {
+              "label": "🌐",
+              "action": {
+                "type": "language_switch"
+              }
+            },
+            {
+              "label": " ",
+              "action": {
+                "type": "space"
+              },
+              "width": 4
+            },
+            {
+              "label": ".",
+              "longPress": [
+                "…",
+                ",",
+                "?",
+                "!",
+                ":",
+                ";"
+              ],
+              "role": "Period"
+            },
+            {
+              "label": "⏎",
+              "action": {
+                "type": "enter"
+              },
+              "width": 1.5
+            }
+          ]
+        ]
+      }
+    }
+  }
+}

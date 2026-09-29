@@ -10,10 +10,6 @@
         <item quantity="one">%1$d tangent skriver tecknet som är tryckt på den. Det ursprungliga tangentbordet använde en regel för att bestämma vad den skriver.</item>
         <item quantity="other">%1$d tangenter skriver tecknen som är tryckta på dem. Det ursprungliga tangentbordet använde regler för att bestämma vad de skriver.</item>
     </plurals>
-    <plurals name="core_keyman_multitap_dropped">
-        <item quantity="one">Detta tangentbord har %1$d tangent som du trycker på upprepade gånger för att bläddra igenom tecken. Denna tangentbordsapp har ingen sådan tangent, så endast det första tecknet är tillgängligt.</item>
-        <item quantity="other">Detta tangentbord har %1$d tangenter som du trycker på upprepade gånger för att bläddra igenom tecken. Denna tangentbordsapp har inga sådana tangenter, så endast det första tecknet för varje är tillgängligt.</item>
-    </plurals>
     <string name="core_keyman_rules_missing">Det här tangentbordet använder regler för att avgöra vad dess tangenter skriver. Appen har inte dessa regler, så varje tangent skriver tecknet som står på den.</string>
     <plurals name="core_keyman_special_keys_dropped">
         <item quantity="one">Appen tog bort %1$d tangent. Detta tangentbord har ingen tangent som gör samma sak.</item>

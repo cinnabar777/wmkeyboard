@@ -10,10 +10,6 @@
         <item quantity="one">%1$d klavišas įveda ant jo atspausdintą simbolį. Originali klaviatūra naudojo taisyklę nuspręsti, ką jis įveda.</item>
         <item quantity="other">%1$d klavišai įveda ant jų atspausdintus simbolius. Originali klaviatūra naudojo taisykles nuspręsti, ką jie įveda.</item>
     </plurals>
-    <plurals name="core_keyman_multitap_dropped">
-        <item quantity="one">Ši klaviatūra turi %1$d klavišą, kurį spaudžiate pakartotinai, kad perjungtumėte simbolius. Ši klaviatūros programėlė tokio klavišo neturi, todėl pasiekiamas tik pirmasis simbolis.</item>
-        <item quantity="other">Ši klaviatūra turi %1$d klavišų, kuriuos spaudžiate pakartotinai, kad perjungtumėte simbolius. Ši klaviatūros programėlė tokių klavišų neturi, todėl pasiekiamas tik pirmasis kiekvieno iš jų simbolis.</item>
-    </plurals>
     <string name="core_keyman_rules_missing">Ši klaviatūra naudoja taisykles, kad nuspręstų, kokius klavišus spausti. Programėlė neturi šių taisyklių, todėl kiekvienas klavišas įveda ant jo atspausdintą simbolį.</string>
     <plurals name="core_keyman_special_keys_dropped">
         <item quantity="one">Programa pašalino %1$d klavišą. Ši klaviatūra neturi klavišo, atliekančio tą patį veiksmą.</item>

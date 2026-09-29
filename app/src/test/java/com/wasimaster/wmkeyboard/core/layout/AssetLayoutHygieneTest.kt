@@ -87,6 +87,8 @@ class AssetLayoutHygieneTest {
      */
     private val latinByDesign = setOf(
         "asset_ipa",
+        "asset_ipa_qwerty",
+        "asset_ipa_qwerty_g",
         "asset_ja_romaji",
         "asset_music",
         "asset_yue_jyutping",
@@ -146,6 +148,11 @@ class AssetLayoutHygieneTest {
         // Tachelhit and Standard Moroccan Tamazight are both written in IRCAM
         // Tifinagh, the same letters on the same keys.
         setOf("shi", "zgh_tifinagh"),
+        // FUTO Keyboard's one North Caucasian board — ЙЦУКЕН with ё, the palochka
+        // and ъ on a row above — which it offers for every language below, as
+        // it offers a single Enets board for both Enets languages.
+        setOf("abq_cyrillic", "agx_cyrillic", "rut_cyrillic", "tab_cyrillic", "tkr_cyrillic"),
+        setOf("enf_cyrillic", "enh_cyrillic"),
     )
 
     @Test

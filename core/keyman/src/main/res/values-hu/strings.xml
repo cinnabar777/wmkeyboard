@@ -10,10 +10,6 @@
         <item quantity="one">%1$d billentyű a rajta lévő karaktert gépeli. Az eredeti billentyűzet szabályt használt annak eldöntésére, mit gépeljen.</item>
         <item quantity="other">%1$d billentyű a rajtuk lévő karaktereket gépeli. Az eredeti billentyűzet szabályokat használt annak eldöntésére, mit gépeljenek.</item>
     </plurals>
-    <plurals name="core_keyman_multitap_dropped">
-        <item quantity="one">Ez a billentyűzet %1$d billentyűvel rendelkezik, amelyet többször megérintve válthat a karakterek között. Ez a billentyűzetalkalmazás nem rendelkezik ilyen billentyűvel, így csak az első karakter érhető el.</item>
-        <item quantity="other">Ez a billentyűzet %1$d billentyűvel rendelkezik, amelyeket többször megérintve válthat a karakterek között. Ez a billentyűzetalkalmazás nem rendelkezik ilyen billentyűkkel, így mindegyikből csak az első karakter érhető el.</item>
-    </plurals>
     <string name="core_keyman_rules_missing">Ez a billentyűzet szabályokat használ annak eldöntésére, hogy mit gépeljenek a billentyűi. Az alkalmazás nem rendelkezik ezekkel a szabályokkal, így minden billentyű a rajta lévő karaktert gépeli.</string>
     <plurals name="core_keyman_special_keys_dropped">
         <item quantity="one">Az alkalmazás eltávolított %1$d billentyűt. Ezen a billentyűzeten nincs olyan billentyű, amely ugyanazt csinálná.</item>

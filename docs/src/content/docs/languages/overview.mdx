@@ -1,6 +1,6 @@
 ---
 title: "Languages overview"
-description: "845 languages, each enabled independently with its own layouts, numerals, and dictionary."
+description: "867 languages, each enabled independently with its own layouts, numerals, and dictionary."
 sidebar:
   label: "Overview"
   order: 1
@@ -13,7 +13,7 @@ import LayoutExplorer from '@components/LayoutExplorer.astro';
 import cherokee from '../../../../../app/src/main/assets/layouts/chr_cherokee.wmlayout.json';
 import Shot from '@components/Shot.astro';
 
-WM Keyboard's language catalogue holds 845 entries. Alongside the languages you'd expect are InScript variants, minority Cyrillic alphabets, and a dozen constructed languages. Every one you enable becomes a full input mode with its own layout, dictionary, and settings, and you move between them without leaving the keyboard.
+WM Keyboard's language catalogue holds 867 entries. Alongside the languages you'd expect are InScript variants, minority Cyrillic alphabets, and a dozen constructed languages. Every one you enable becomes a full input mode with its own layout, dictionary, and settings, and you move between them without leaving the keyboard.
 
 <PhoneFrame caption="The Languages screen: your enabled languages and Add language to search the full catalogue.">
   <Shot id="languages/list-overview" alt="The Languages screen: your enabled languages, plus Add language to search the full catalogue." />
@@ -62,7 +62,7 @@ Tap any enabled language to reach its screen. **Layouts** and **Dictionaries** a
   <Shot id="languages/language-detail-screen" alt="A language's own screen: a row of layout cards, numeral system, and other enabled languages to suggest from." />
 </PhoneFrame>
 
-- **Layouts**: a row of cards, one per layout the language ships. Each card is the keyboard itself drawn small, with your theme, fonts, key height, number row and toolbar, so you see what typing on that layout looks like before you pick it. The first time a card comes into view it shows a grey outline of keys while its keyboard is drawn, one card at a time. After that the drawing is kept, even across restarts, so the row opens straight onto the finished cards. Change your theme, fonts or key size and the cards keep their old picture until the new one is ready. A tick and a tinted card mark the layouts that are on. Tap a card to turn its layout on or off, and scroll the row sideways for the rest. Where a language has more layouts from the Keyman project, the row ends on a **More layouts** card that opens them, as the same kind of cards, with a search box and the download for each one's typing rules. See [Keyman layouts](/languages/keyman/). A card shows its layout as it looks once it is on, so the spacebar already names it if another layout of the same language is on too. At least one layout has to stay enabled somewhere across your whole set, so tapping the last one says so and leaves it on.
+- **Layouts**: a row of cards, one per layout the language ships. Each card is the keyboard itself drawn small, with your theme, fonts, key height, number row and toolbar, so you see what typing on that layout looks like before you pick it. The first time a card comes into view it shows a grey outline of keys while its keyboard is drawn, one card at a time, and only once the row stops moving, so scrolling stays smooth. After that the drawing is kept, even across restarts, so the row opens straight onto the finished cards. Change your theme, fonts or key size and the cards keep their old picture until the new one is ready. A long layout name wraps onto a second line under the card rather than being cut off. A tick and a tinted card mark the layouts that are on. Tap a card to turn its layout on or off, and scroll the row sideways for the rest. Where a language has more layouts from the Keyman project, the row ends on a **More layouts** card that opens them, as the same kind of cards, with a search box and the download for each one's typing rules. See [Keyman layouts](/languages/keyman/). A card shows its layout as it looks once it is on, so the spacebar already names it if another layout of the same language is on too. At least one layout has to stay enabled somewhere across your whole set, so tapping the last one says so and leaves it on.
 - **Numerals**: which digits the number row and keypad show while this language is active. Two options: the language's own digits (the default) or plain `0-9`. This is set per language, so Arabic can show `٠-٩` while English next to it stays on `0-9`. Languages that already use `0-9` don't get the group at all, and no language offers another language's digits, since nobody writes Bangla with Persian numerals.
 - **Also suggest from**: appears once you have more than one language enabled. Toggle other enabled languages on to blend their words into suggestions while you type this one. Words pulled in this way are never autocorrected away.
 - **Dictionaries**: the language's word list, emoji keywords and word pairs, one row each. A row on the device has a checkbox and a delete button, a row that is not has a Download button, and a **Download all** button sits in the heading while anything is missing. [Downloadable dictionaries](/languages/dictionaries/) covers it in full.
@@ -142,11 +142,21 @@ Neither script has capitals, so <KeyCap>Shift</KeyCap> opens a second set of key
 
 ## What ships
 
-WM Keyboard ships 1,598 layouts in total, in three groups. On a television every one of them is drawn as an even grid for the remote — see [Android TV and Google TV](/typing/television/).
+WM Keyboard ships 1,708 layouts in total, in three groups. On a television every one of them is drawn as an even grid for the remote — see [Android TV and Google TV](/typing/television/).
 
 22 are built into the app: QWERTY, AZERTY, Dvorak, Colemak, Workman, Halmak, Avro, Khipro, Probhat, Jatiya, dedicated layouts for French, German, Spanish, Korean, Russian, Arabic, Greek, Hebrew, and Hindi, and Hindi phonetic. Two more boards put more than one letter on a key: T9 and Compact QWERTY. See [Ambiguous layouts](/languages/ambiguous/) for how those two work. T9 also ships as a layout file for 315 more languages.
 
-714 more are bundled as individual layout files, one per language or variant that isn't among those 21.
+824 more are bundled as individual layout files, one per language or variant that isn't among those 21. English has QWERTZ among them, the German grid with Y and Z swapped, for anyone whose hands learned German keyboards but who types in English.
+
+Those files include every layout HeliBoard, FlorisBoard and FUTO Keyboard ship that had no match here, so moving over from one of them doesn't mean learning a new grid. Some highlights:
+
+- **Hebrew SI-1452**, the 2018 Israeli standard. ץ and ן move to the top left, ת takes ן's old place, and the bottom row ends at צ. The niqqud are on long-press of the keys the standard puts them on.
+- **Russian Student, ЯЖЕРТЫ and ЯВЕРТЫ**, the phonetic grids, plus Bulgarian Dvorak.
+- **German, Spanish and Swedish Dvorak**, Bone, Colemak-DH (ANSI), ClearFlow and KASROZ. The last two use tall shift, delete and space keys that cover two rows.
+- **Korean phonetic and Danmoeum**, Lulua for Arabic, Akkhor and Unijoy for Bangla, and alphabet-order boards for Kannada, Marathi, Gurmukhi, Gujarati, Malayalam and Tamil.
+- **"Letters row" and "letters on keys" versions** for languages whose usual grid here keeps some letters behind a long-press: Bashkir, Kazakh, Tatar, Chuvash, Yakut, Tajik, Northern and Inari Sami, Esperanto, Ewe, Hausa, Hungarian, Lithuanian, Croatian, Romanian and more. The original layout is still there. The new one sits next to it.
+
+22 languages came with them, mostly minority languages of Russia and the Nordic countries that these keyboards type and WM Keyboard didn't: Kaitag, Abaza, Aghul, Rutul, Tabasaran, Tsakhur, Forest and Tundra Enets, Nganasan, Nenets, Ingrian, Karelian, Ludian, Votic, Lakota, Pite, Ume, Southern and Lule Sami, and Latin-script Kazakh, Kashmiri and Tamazight.
 
 The remaining 862 are key grids converted from the [Keyman keyboards repository](https://github.com/keymanapp/keyboards), which is where most of the long tail comes from. They're what takes the language count past 800. See [Keyman layouts](/languages/keyman/) for what they are and what they can and can't do yet.
 
@@ -202,7 +212,7 @@ click a heading to sort.
 <FilterTable
 	columns={[{ label: 'Id' }, { label: 'Name' }, { label: 'English name' }, { label: 'Script' }]}
 	rows={languages.map((l) => [l.id, l.name, l.english, l.script])}
-	placeholder="Filter 845 languages…"
+	placeholder="Filter 867 languages…"
 	caption="Generated from the app's language registry."
 />
 {/* keep it */}

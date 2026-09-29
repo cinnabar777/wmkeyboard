@@ -194,6 +194,16 @@ class SelectionMacrosTest {
     }
 
     @Test
+    fun `translate ships on, just before the AI chip`() {
+        // #434: the Translate tool is how a selection in a language the user
+        // cannot read gets read, and it must not be mistaken for the AI's own.
+        assertTrue(SelectionMacro.TRANSLATE in SelectionMacros.defaultMacros)
+        val order = SelectionMacros.defaultOrder
+        assertEquals(order.indexOf(SelectionMacro.AI) - 1, order.indexOf(SelectionMacro.TRANSLATE))
+        assertTrue(SelectionMacro.SEARCH !in SelectionMacros.defaultMacros)
+    }
+
+    @Test
     fun `the lists agree with each other`() {
         assertEquals(SelectionMacros.configurable.toSet() - SelectionMacros.ladderOnly, SelectionMacros.defaultOrder.toSet())
         assertEquals(SelectionMacros.defaultOrder.size, SelectionMacros.defaultOrder.distinct().size)

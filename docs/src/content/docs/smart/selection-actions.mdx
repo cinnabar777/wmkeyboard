@@ -60,6 +60,7 @@ Two things sit outside the order. **Undo** is always first while there is someth
 | Sort, Unique, Number, Bullets | Two or more lines | On |
 | Grammar | Text, with the [Grammar](/smart/grammar/) tool on | On |
 | DeepL Write | Text up to 2,500 characters, once [DeepL Write](/tools/translate/#deepl) is set up | On |
+| Translate | Text, with the [Translate](/tools/translate/) tool on | On |
 | AI, and the AI buttons | Text, with the [AI](/tools/ai/) tool on and set up | On |
 | Bangla | Latin text, with Bengali among your languages | On |
 | Banglish | Bengali text | On |
@@ -74,7 +75,7 @@ Two things sit outside the order. **Undo** is always first while there is someth
 | QR | A link, with the QR generator on | On |
 | Contact | A phone number or an address | On |
 | Fancy | Text | On |
-| Search, Translate | Text, with those tools on | Off |
+| Search | Text, with the Web search tool on | Off |
 | Bold, Italic, Strike, Mono | Text, in a chat app whose syntax the keyboard knows | Off |
 | JSON | A JSON object or array | Off |
 | Base64, Decode | Base64 text; a percent-encoded link | Off |
@@ -167,8 +168,8 @@ Mono on several lines uses the app's fenced block where it has one. These four a
 - **Hinglish** writes Devanagari back in Latin letters the way it is said, not the way it is spelled: करना is `karna` and नमस्ते is `namaste`, because spoken Hindi drops the inherent vowel in the first and keeps it in the second. Long vowels are doubled inside a word and single at its end (`naam`, `theek`, `mera`, `ladki`).
 - **Grammar** runs the [Grammar](/smart/grammar/) checker over the selection alone and commits every suggestion at once, offline. It shows a spinner while it works and says so when there is nothing to fix.
 - **DeepL Write** sends the selection to DeepL Write and puts DeepL's rewrite in its place, in the [writing style](/tools/translate/#options) you picked. It shows only after you add a DeepL API Pro key and turn on **DeepL Write** under Tools / Translate, and it works in the Lite edition too. Undo brings the original back.
-- **AI** opens the [AI](/tools/ai/) tool on the selection. Under **AI buttons** you can give any AI action a chip of its own (Formal, Shorter, Friendly and Summarize are made for it): one tap runs it on the selection and the result lands in the AI panel, ready to apply. Applying replaces the selection, not the field around it.
-- **Translate** sends the selection to the [translate](/tools/translate/) tool.
+- **AI** opens the [AI](/tools/ai/) tool on the selection. Under **AI buttons** you can give any AI action a chip of its own (Formal, Shorter, Friendly and Summarize are made for it): one tap runs it on the selection and the result lands in the AI panel, ready to apply. Applying replaces the selection, not the field around it. The AI's own Translate action reads **AI translate** as a chip, so it is not confused with the Translate chip below.
+- **Translate** opens the [Translate](/tools/translate/) tool with the selection in its box and the translation under it, using the translation engine you picked there (online, or on the device). **Replace text** in the panel then replaces the selection, not the field around it. It sits just before AI on the bar and is on to start with; if you have already picked your own set of actions, switch it on under Actions. Opening the Translate tool from the toolbar with text selected does the same thing.
 
 ## Look up
 
@@ -197,7 +198,7 @@ None of these send anything anywhere themselves: each hands the text to an app y
 | Selection actions | Toggle | Off |
 | Where it appears | Choice of 2 | Own row |
 | Read what is selected | Toggle | On |
-| Actions | Screen | 28 of 45 on |
+| Actions | Screen | 33 of 48 on |
 | AI buttons | Screen | None |
 | Time zones | Screen | UTC and your own |
 

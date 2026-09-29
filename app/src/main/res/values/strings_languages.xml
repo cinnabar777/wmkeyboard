@@ -146,7 +146,7 @@
     <string name="languages_keymap_vowels">Vowels</string>
     <string name="languages_keymap_vowels_note">The first letter is the vowel on its own. The second is the sign it becomes after a consonant.</string>
     <string name="languages_keymap_consonants">Consonants</string>
-    <string name="languages_keymap_consonants_note">Two consonants in a row join into one letter. Type a vowel between them to keep them apart.</string>
+    <string name="languages_keymap_consonants_note">Two consonants in a row join into one letter where Bangla has that letter: "kt" is ক্ত, but "kb" stays কব. An r, y or w after a consonant always joins as a fola, and reph is a double r. Type a vowel between two consonants to keep them apart.</string>
     <string name="languages_keymap_consonants_note_guessed">Whether two consonants join is a guess from how the word is said. The suggestion strip offers the other reading.</string>
     <string name="languages_keymap_signs">Joins and signs</string>
     <string name="languages_keymap_after_consonant">After a consonant</string>
@@ -155,6 +155,7 @@
     <string name="languages_keymap_before_vowel">Before a vowel</string>
     <string name="languages_keymap_after_t">After t</string>
     <string name="languages_keymap_between_consonants">Between two consonants, keeps them apart</string>
+    <string name="languages_keymap_word_start">At the start of a word</string>
     <string name="languages_phonetic_guide_title">Full guide</string>
     <string name="languages_phonetic_guide_subtitle">Every rule with examples, on the WM Keyboard website</string>
     <string name="languages_phonetic_guide_action">Open guide</string>
@@ -198,6 +199,14 @@
     <string name="languages_phonetic_english_switch_title">Switch on the suggestion strip</string>
     <string name="languages_phonetic_english_switch_subtitle">A small button beside the suggestions turns English words on and off as you type</string>
     <string name="languages_phonetic_english_switch_info">The button shows on this language\'s phonetic layout and is lit while English words are on. It is for the moment a word keeps coming out in the wrong script: tap it in the middle of the word and the word turns back before you press space.\n\nOff takes the button away and leaves the setting above exactly as you set it, so English words simply stay on. Shared by every language with a phonetic layout.</string>
+    <string name="languages_ansi_group">ANSI output</string>
+    <string name="languages_ansi_allowed_title">Allow ANSI output</string>
+    <string name="languages_ansi_allowed_subtitle">An ANSI button on the Bengali layouts writes Bijoy-style text, so আ comes out as Av</string>
+    <string name="languages_ansi_allowed_info">ANSI is how Bengali was written before Unicode, in Bijoy and in fonts like SutonnyMJ: each Bengali letter is stored as a Latin character, and the font draws it as Bengali. Some design software and older documents still need it.\n\nWith this on, every Bengali layout gets an ANSI button beside the suggestions. Tap it and what you type goes into the text box as ANSI, so আমার সোনার বাংলা becomes Avgvi †mvbvi evsjv. Tap it again for Unicode.\n\nThe word you are typing shows as Unicode until you finish it. ANSI text only reads as Bengali in an ANSI font, so keep the button off everywhere else.</string>
+    <string name="languages_ansi_version_title">ANSI version</string>
+    <string name="languages_ansi_version_subtitle">Pick the one your ANSI font is made for</string>
+    <string name="languages_ansi_version_info">The ANSI fonts do not all put the letters in the same places, so there are three versions. Version 2 is the common one, used by SutonnyMJ and most Bijoy fonts. If the text comes out as the wrong letters in your font, try another version.</string>
+    <string name="languages_ansi_version_option">Version <xliff:g id="number" example="2">%1$d</xliff:g></string>
     <string name="languages_secondary_info">The keyboard offers words from these languages while you type <xliff:g id="language" example="Bengali">%1$s</xliff:g>. Autocorrect never changes them.</string>
     <!-- Toast after adding a romanized language pairs it with a same-script
          language. %1$s and %2$s are English names of the two languages. -->

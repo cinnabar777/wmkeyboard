@@ -1,0 +1,167 @@
+{
+  "format": "wmkeyboard-layout",
+  "version": 1,
+  "layout": {
+    "id": "asset_en_colemak_dh_ansi",
+    "name": "Colemak-DH (ANSI)",
+    "langId": "en",
+    "version": 2,
+    "layers": {
+      "letters": {
+        "rows": [
+          [
+            {
+              "label": "q"
+            },
+            {
+              "label": "w"
+            },
+            {
+              "label": "f"
+            },
+            {
+              "label": "p"
+            },
+            {
+              "label": "b"
+            },
+            {
+              "label": "j"
+            },
+            {
+              "label": "l"
+            },
+            {
+              "label": "u"
+            },
+            {
+              "label": "y"
+            },
+            {
+              "label": ";",
+              "shiftLabel": ":"
+            }
+          ],
+          [
+            {
+              "label": "a"
+            },
+            {
+              "label": "r"
+            },
+            {
+              "label": "s"
+            },
+            {
+              "label": "t"
+            },
+            {
+              "label": "g"
+            },
+            {
+              "label": "m"
+            },
+            {
+              "label": "n"
+            },
+            {
+              "label": "e"
+            },
+            {
+              "label": "i"
+            },
+            {
+              "label": "o"
+            }
+          ],
+          [
+            {
+              "label": "⇧",
+              "action": {
+                "type": "shift"
+              },
+              "width": 1.5
+            },
+            {
+              "label": "x"
+            },
+            {
+              "label": "c"
+            },
+            {
+              "label": "d"
+            },
+            {
+              "label": "v"
+            },
+            {
+              "label": "z"
+            },
+            {
+              "label": "k"
+            },
+            {
+              "label": "h"
+            },
+            {
+              "label": "⌫",
+              "action": {
+                "type": "delete"
+              },
+              "width": 1.5
+            }
+          ],
+          [
+            {
+              "label": "?123",
+              "action": {
+                "type": "symbols"
+              },
+              "width": 1.5
+            },
+            {
+              "label": ",",
+              "longPress": [
+                "!",
+                "?"
+              ],
+              "role": "Comma"
+            },
+            {
+              "label": "🌐",
+              "action": {
+                "type": "language_switch"
+              }
+            },
+            {
+              "label": " ",
+              "action": {
+                "type": "space"
+              },
+              "width": 4
+            },
+            {
+              "label": ".",
+              "longPress": [
+                "…",
+                ",",
+                "?",
+                "!",
+                ":",
+                ";"
+              ],
+              "role": "Period"
+            },
+            {
+              "label": "⏎",
+              "action": {
+                "type": "enter"
+              },
+              "width": 1.5
+            }
+          ]
+        ]
+      }
+    }
+  }
+}

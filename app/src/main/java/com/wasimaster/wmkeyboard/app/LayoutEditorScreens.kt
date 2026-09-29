@@ -31,7 +31,10 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
+import com.wasimaster.wmkeyboard.core.layout.BottomRowRule
+import com.wasimaster.wmkeyboard.core.layout.BottomRowRules
 import com.wasimaster.wmkeyboard.core.layout.KeyRole
+import com.wasimaster.wmkeyboard.core.layout.arrangedBy
 import com.wasimaster.wmkeyboard.core.layout.FlickDirection
 import com.wasimaster.wmkeyboard.core.layout.KanaVariantKeyLabel
 import com.wasimaster.wmkeyboard.core.layout.LayerFile
@@ -357,6 +360,7 @@ private fun composerLabel(type: ComposerType): String = stringResource(
         ComposerType.CANGJIE_QUICK -> R.string.layout_editor_composer_cangjie_quick
         ComposerType.JYUTPING -> R.string.layout_editor_composer_jyutping
         ComposerType.KHIPRO -> R.string.layout_editor_composer_khipro
+        ComposerType.CHEONJIIN -> R.string.layout_editor_composer_cheonjiin
     },
 )
 
@@ -383,6 +387,7 @@ private fun composerDescRes(type: ComposerType?): Int = when (type) {
     ComposerType.CANGJIE_QUICK -> R.string.layout_editor_composer_cangjie_quick_desc
     ComposerType.JYUTPING -> R.string.layout_editor_composer_jyutping_desc
     ComposerType.KHIPRO -> R.string.layout_editor_composer_khipro_desc
+    ComposerType.CHEONJIIN -> R.string.layout_editor_composer_cheonjiin_desc
 }
 
 /**
@@ -1342,6 +1347,41 @@ private const val ActualSizePreviewShare = 0.55f
  */
 internal const val UndoDepth = 30
 
+/**
+ * The Bottom row settings as the keyboard applies them to [layer] of a phone
+ * layout, so the editor draws the grid the keyboard draws (issue #420).
+ *
+ * The same exceptions `currentLayout` makes, from the same facts: a secondary
+ * layout keeps its 🌐 key where its author put it, only the letters take the
+ * comma's emoji key, and the number pads are drawn as they are, since a
+ * numeric field shows its pad before any of this runs.
+ */
+internal fun editorBottomRowRules(
+    settings: KeyboardSettings,
+    layer: LayoutLayer,
+    secondary: Boolean,
+): BottomRowRules = if (!layer.isCycled) {
+    BottomRowRules()
+} else {
+    BottomRowRules(
+        hideGlobe = !settings.showGlobeKey && !secondary,
+        globeInOnePlace = settings.layoutBehavior.globeInOnePlace && !secondary,
+        swapCommaAndGlobe = settings.swapCommaAndGlobe,
+        globeAsEmoji = settings.globeAsEmoji,
+        commaAsEmoji = settings.commaAsEmoji && layer == LayoutLayer.LETTERS && !secondary,
+    )
+}
+
+/** The setting that each [BottomRowRule] is, by the title its row carries. */
+@StringRes
+private fun BottomRowRule.titleRes(): Int = when (this) {
+    BottomRowRule.HIDE_GLOBE -> R.string.layout_show_globe_title
+    BottomRowRule.GLOBE_IN_ONE_PLACE -> R.string.layout_globe_in_one_place_title
+    BottomRowRule.SWAP_COMMA_AND_GLOBE -> R.string.layout_swap_comma_globe_title
+    BottomRowRule.GLOBE_AS_EMOJI -> R.string.layout_globe_emoji_title
+    BottomRowRule.COMMA_AS_EMOJI -> R.string.layout_comma_emoji_title
+}
+
 /** What a row reads for the instant between its layout being deleted and the editor closing. */
 private val GoneLayout = LayoutSpec(id = "", name = "")
 
@@ -1493,6 +1533,34 @@ internal fun KeyLayoutEditorScreen(
         edit { spec -> withLayerRows(spec, transform(baseLayerOf(spec).rows)) }
     }
 
+    /**
+     * [spec] with this layer written down as the keyboard draws it, and marked
+     * as laid out by hand so the Bottom row settings leave it there (#420).
+     *
+     * What an edit to a key those settings moved or changed goes through first.
+     * The edit is made on the grid the user is looking at, so it has to land on
+     * that grid: written into the row as authored, the settings would move it
+     * again, and the key the user just placed would jump somewhere else. A
+     * layer already laid out by hand, or one the settings do not change, comes
+     * back as it is, so a second edit a frame later does no harm.
+     */
+    fun laidOutAsDrawn(spec: LayoutSpec): LayoutSpec {
+        val base = baseLayerOf(spec)
+        if (base.bottomRowAsLaidOut || base.rows.isEmpty()) return spec
+        val arranged = spec.compile(layer).arrangedBy(editorBottomRowRules(settings.value, layer, spec.secondary))
+        if (arranged.applied.isEmpty()) return spec
+        val laidOut = base.copy(rows = arranged.layout.rows, bottomRowAsLaidOut = true)
+        return spec.copy(layers = spec.layers + (layer.key to laidOut))
+    }
+
+    /** [editRows], on this layer as drawn when [asDrawn] says the edit needs it. */
+    fun editDrawnRows(asDrawn: Boolean, transform: (List<List<Key>>) -> List<List<Key>>) {
+        edit { spec ->
+            val from = if (asDrawn) laidOutAsDrawn(spec) else spec
+            withLayerRows(from, transform(baseLayerOf(from).rows))
+        }
+    }
+
     // Whole-layer edit, so a structural change to the rows can keep the parallel
     // per-row heights aligned. Authoring an inherited layer copies the built-in's
     // compiled grid (heights and all) first.
@@ -1559,7 +1627,17 @@ internal fun KeyLayoutEditorScreen(
     }
     val rows = compiled.rows
     val rowHeights = compiled.rowHeights
-    val selectedKey = selection?.let { rows.getOrNull(it.row)?.getOrNull(it.col) }
+    // Issue #420: the grid as the keyboard draws it, the Bottom row settings
+    // applied. The preview shows this one, and selection and every edit address
+    // it; [arranged] says where each drawn key is in the grid as stored.
+    val bottomRules = settings.watch { editorBottomRowRules(it, layer, secondary) }
+    val arranged = remember(compiled, bottomRules) { compiled.arrangedBy(bottomRules) }
+    val drawnRows = arranged.layout.rows
+    val laidOut = compiled.bottomRowAsLaidOut
+    val selectedKey = selection?.let { drawnRows.getOrNull(it.row)?.getOrNull(it.col) }
+
+    /** Where a key drawn at [ref] is stored. */
+    fun storedRef(ref: KeyRef): KeyRef = KeyRef(ref.row, arranged.sourceColumn(ref.row, ref.col) ?: ref.col)
 
     // The grid is pinned under the bar, so the one line saying its keys can be
     // pressed goes first in the body, directly under it. It used to sit below
@@ -1567,6 +1645,60 @@ internal fun KeyLayoutEditorScreen(
     // the screen on arrival, and a reader looking at the grid had no way to
     // learn it was anything but a picture (issue #139).
     CaptionText(stringResource(R.string.layout_editor_drag_caption))
+
+    // Issue #420: say so when the keyboard draws this layer's bottom row other
+    // than as it is stored, name the settings doing it, and offer the switch
+    // that stops them. Right under the grid, because the grid is where the
+    // difference shows; the editor used to say nothing, and a row that the
+    // settings rearranged looked like a row the editor could not change.
+    if (panelKind == null && (arranged.applied.isNotEmpty() || laidOut)) {
+        if (!laidOut) {
+            val names = BottomRowRule.entries.filter { it in arranged.applied }.map { rule ->
+                val title = stringResource(rule.titleRes())
+                if (rule == BottomRowRule.HIDE_GLOBE) {
+                    stringResource(R.string.layout_editor_bottom_row_setting_off, title)
+                } else {
+                    title
+                }
+            }
+            val note = stringResource(R.string.layout_editor_repair_note)
+            CaptionText(
+                stringResource(R.string.layout_editor_bottom_row_caption) +
+                    names.joinToString("") { "\n" + note.format(it) },
+            )
+        }
+        SettingsGroup {
+            item {
+                ToggleSetting(
+                    R.string.layout_editor_bottom_row_laid_out_title,
+                    stringResource(
+                        if (laidOut) {
+                            R.string.layout_editor_bottom_row_laid_out_on_subtitle
+                        } else {
+                            R.string.layout_editor_bottom_row_laid_out_off_subtitle
+                        },
+                    ),
+                    laidOut,
+                    info = stringResource(R.string.layout_editor_bottom_row_laid_out_info),
+                ) { on ->
+                    if (on) edit { laidOutAsDrawn(it) } else editLayer { it.copy(bottomRowAsLaidOut = false) }
+                }
+            }
+            item {
+                WmRow(
+                    title = stringResource(R.string.layout_bottom_row_keys_title),
+                    subtitle = stringResource(R.string.layout_editor_bottom_row_settings_subtitle),
+                    onClick = {
+                        // The first setting changing this row, so the page
+                        // opens on it rather than at the top.
+                        val rule = BottomRowRule.entries.firstOrNull { it in arranged.applied }
+                        SettingsHighlight.request(rule?.titleRes() ?: R.string.layout_globe_emoji_title)
+                        onNavigate("layout")
+                    },
+                )
+            }
+        }
+    }
 
     SectionHeaderPublic(edited.watch { it.name })
 
@@ -1826,7 +1958,9 @@ internal fun KeyLayoutEditorScreen(
     val onKeyDragged: (KeyRef, KeyRef) -> Unit = { from, to ->
         val kind = panelKind
         if (kind == null) {
-            editRows { moveKeyIn(it, from, to) }
+            // A move in a row the settings rearranged is made on the row as
+            // drawn, which is the only order the drop makes sense in (#420).
+            editDrawnRows(arranged.rowChanged(from.row) || arranged.rowChanged(to.row)) { moveKeyIn(it, from, to) }
             selection = to
             stepPushed = false
         } else {
@@ -1860,7 +1994,7 @@ internal fun KeyLayoutEditorScreen(
             },
         ) {
             EditorGrid(
-                layout = panelPreviewPair?.first ?: compiled,
+                layout = panelPreviewPair?.first ?: arranged.layout,
                 settings = settings,
                 selection = if (panelKind != null) panelSelection else selection,
                 showShift = showShift && panelKind == null,
@@ -2013,7 +2147,7 @@ internal fun KeyLayoutEditorScreen(
             }
         }
         selection?.let { ref ->
-            item(visible = ref.row in rows.indices && rows[ref.row].size > 1) {
+            item(visible = ref.row in drawnRows.indices && drawnRows[ref.row].size > 1) {
                 ReorderSetting(
                     title = stringResource(
                         R.string.layout_editor_reorder_keys_title,
@@ -2027,10 +2161,10 @@ internal fun KeyLayoutEditorScreen(
                     // of them, so writing it back would put a key edited a
                     // frame ago back the way it was. It also disambiguates a
                     // row holding two identical keys.
-                    items = rows[ref.row].indices.toList(),
-                    label = { keyReorderLabel(context, rows[ref.row][it]) },
+                    items = drawnRows[ref.row].indices.toList(),
+                    label = { keyReorderLabel(context, drawnRows[ref.row][it]) },
                 ) { order ->
-                    editRows { r ->
+                    editDrawnRows(arranged.rowChanged(ref.row)) { r ->
                         r.mapIndexed { i, row ->
                             // Guarded because the stored row may have gained
                             // or lost a key since the dialog opened; a
@@ -2415,15 +2549,21 @@ internal fun KeyLayoutEditorScreen(
 
     val ref = selection
     if (panelKind == null && sheetOpen && ref != null && selectedKey != null) {
+        // Issue #420: the sheet edits the key as drawn. One the Bottom row
+        // settings moved or changed is written down as drawn first, row and
+        // all, and the layer then keeps it; any other key is edited where it
+        // is stored, and the settings go on arranging the row around it.
+        val asDrawn = arranged.rewritten(ref.row, ref.col)
+        val at = if (asDrawn) ref else storedRef(ref)
         KeyEditSheet(
             key = selectedKey,
             ref = ref,
-            rowSize = rows[ref.row].size,
-            rowCount = rows.size,
-            gridWeight = gridWeightOf(rows),
+            rowSize = drawnRows[ref.row].size,
+            rowCount = drawnRows.size,
+            gridWeight = gridWeightOf(drawnRows),
             // Counting the columns a spanning key above holds over this row, so
             // "Fill the row" offers the width that is genuinely left.
-            otherWidthsInRow = spanRowWidths(rows)[ref.row] - selectedKey.width,
+            otherWidthsInRow = spanRowWidths(drawnRows)[ref.row] - selectedKey.width,
             // A change to *one field* of the key, never a whole key built here.
             // The sheet's copy of the key comes from the settings flow, which lags
             // the write it just made, so a control that handed back `key.copy(…)`
@@ -2434,13 +2574,14 @@ internal fun KeyLayoutEditorScreen(
             // `updateCustomLayout` already follows for the layout as a whole.
             onChange = { change ->
                 editCoalesced { spec ->
+                    val from = if (asDrawn) laidOutAsDrawn(spec) else spec
                     withLayerRows(
-                        spec,
-                        baseLayerOf(spec).rows.mapIndexed { r, row ->
-                            if (r != ref.row) {
+                        from,
+                        baseLayerOf(from).rows.mapIndexed { r, row ->
+                            if (r != at.row) {
                                 row
                             } else {
-                                row.mapIndexed { c, k -> if (c == ref.col) change(k) else k }
+                                row.mapIndexed { c, k -> if (c == at.col) change(k) else k }
                             }
                         },
                     )
@@ -2448,8 +2589,8 @@ internal fun KeyLayoutEditorScreen(
             },
             onMove = { delta ->
                 val target = ref.col + delta
-                if (target in rows[ref.row].indices) {
-                    editRows { r ->
+                if (target in drawnRows[ref.row].indices) {
+                    editDrawnRows(arranged.rowChanged(ref.row)) { r ->
                         r.mapIndexed { i, row ->
                             if (i != ref.row) {
                                 row
@@ -2464,26 +2605,28 @@ internal fun KeyLayoutEditorScreen(
             onMoveRow = { delta ->
                 // Through the same guarded helper the preview's drag lands
                 // through, so the two ways of moving a key cannot disagree.
-                rowMoveTarget(rows, ref, delta)?.let { to ->
-                    editRows { moveKeyIn(it, ref, to) }
+                rowMoveTarget(drawnRows, ref, delta)?.let { to ->
+                    editDrawnRows(arranged.rowChanged(ref.row) || arranged.rowChanged(to.row)) {
+                        moveKeyIn(it, ref, to)
+                    }
                     selection = to
                 }
             },
             onDuplicate = {
-                editRows { r ->
+                editDrawnRows(asDrawn) { r ->
                     r.mapIndexed { i, row ->
-                        if (i != ref.row) {
+                        if (i != at.row || at.col !in row.indices) {
                             row
                         } else {
-                            row.subList(0, ref.col + 1) + row[ref.col] + row.drop(ref.col + 1)
+                            row.subList(0, at.col + 1) + row[at.col] + row.drop(at.col + 1)
                         }
                     }
                 }
             },
             onDelete = {
-                editRows { r ->
+                editDrawnRows(asDrawn) { r ->
                     r.mapIndexed { i, row ->
-                        if (i != ref.row) row else row.filterIndexed { c, _ -> c != ref.col }
+                        if (i != at.row) row else row.filterIndexed { c, _ -> c != at.col }
                     }
                 }
                 selection = null

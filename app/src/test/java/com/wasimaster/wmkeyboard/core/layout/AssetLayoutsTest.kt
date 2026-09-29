@@ -1,5 +1,6 @@
 package com.wasimaster.wmkeyboard.core.layout
 
+import com.wasimaster.wmkeyboard.core.script.ComposerType
 import com.wasimaster.wmkeyboard.core.script.LanguageRegistry
 import com.wasimaster.wmkeyboard.core.script.ScriptId
 import com.wasimaster.wmkeyboard.ime.keySpelling
@@ -168,6 +169,29 @@ class AssetLayoutsTest {
             assertEquals("$name: a should be 日", "日", keys.first { it.output == "a" }.label)
             assertEquals("$name: y should be 卜", "卜", keys.first { it.output == "y" }.label)
         }
+    }
+
+    /**
+     * The 천지인 pad (discussion #372) has to reach every initial consonant
+     * through its multi-tap cycles, and spell vowels only from the three
+     * strokes `CheonjiinComposer` reads — a key typing a finished vowel would
+     * bypass the stroke table.
+     */
+    @Test
+    fun `the cheonjiin pad reaches every consonant and types only strokes for vowels`() {
+        val file = layoutFiles.first { it.name == "ko_cheonjiin.${LayoutFile.FILE_EXTENSION}" }
+        val layout = LayoutFile.decode(file.readText())!!.layout
+        assertEquals("ko", layout.langId)
+        assertEquals(ComposerType.CHEONJIIN, layout.composer)
+        assertTrue(layout.id in LanguageRegistry.byId("ko").layoutIds)
+        val typed = layout.layers.getValue(LayoutLayer.LETTERS.key).rows.flatten()
+            .filter { it.action == KeyAction.Text }
+            .flatMap { listOf(it.output ?: it.label) + it.multitap }
+            .filter { it.length == 1 && it[0].code in 0x3131..0x318E }
+            .map { it[0] }
+            .toSet()
+        assertEquals("ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ".toSet(), typed.filter { it.code < 0x314F }.toSet())
+        assertEquals(setOf('ㅣ', 'ㆍ', 'ㅡ'), typed.filter { it.code >= 0x314F }.toSet())
     }
 
     /**

@@ -1,0 +1,179 @@
+{
+  "format": "wmkeyboard-layout",
+  "version": 1,
+  "layout": {
+    "id": "asset_de_bone",
+    "name": "Bone",
+    "langId": "de",
+    "version": 2,
+    "layers": {
+      "letters": {
+        "rows": [
+          [
+            {
+              "label": "j"
+            },
+            {
+              "label": "d"
+            },
+            {
+              "label": "u"
+            },
+            {
+              "label": "a"
+            },
+            {
+              "label": "x"
+            },
+            {
+              "label": "p"
+            },
+            {
+              "label": "h"
+            },
+            {
+              "label": "l"
+            },
+            {
+              "label": "m"
+            },
+            {
+              "label": "w"
+            },
+            {
+              "label": "ß",
+              "shiftLabel": "ẞ",
+              "longPress": [
+                "´"
+              ]
+            }
+          ],
+          [
+            {
+              "label": "c"
+            },
+            {
+              "label": "t"
+            },
+            {
+              "label": "i"
+            },
+            {
+              "label": "e"
+            },
+            {
+              "label": "o"
+            },
+            {
+              "label": "b"
+            },
+            {
+              "label": "n"
+            },
+            {
+              "label": "r"
+            },
+            {
+              "label": "s"
+            },
+            {
+              "label": "g"
+            },
+            {
+              "label": "q"
+            }
+          ],
+          [
+            {
+              "label": "⇧",
+              "action": {
+                "type": "shift"
+              },
+              "width": 1.5
+            },
+            {
+              "label": "f"
+            },
+            {
+              "label": "v"
+            },
+            {
+              "label": "ü"
+            },
+            {
+              "label": "ä"
+            },
+            {
+              "label": "ö"
+            },
+            {
+              "label": "y"
+            },
+            {
+              "label": "z"
+            },
+            {
+              "label": "k"
+            },
+            {
+              "label": "⌫",
+              "action": {
+                "type": "delete"
+              },
+              "width": 1.5
+            }
+          ],
+          [
+            {
+              "label": "?123",
+              "action": {
+                "type": "symbols"
+              },
+              "width": 1.5
+            },
+            {
+              "label": ",",
+              "longPress": [
+                "!",
+                "?"
+              ],
+              "role": "Comma"
+            },
+            {
+              "label": "🌐",
+              "action": {
+                "type": "language_switch"
+              }
+            },
+            {
+              "label": " ",
+              "action": {
+                "type": "space"
+              },
+              "width": 4
+            },
+            {
+              "label": ".",
+              "longPress": [
+                "…",
+                ",",
+                "?",
+                "!",
+                ":",
+                ";"
+              ],
+              "role": "Period"
+            },
+            {
+              "label": "⏎",
+              "action": {
+                "type": "enter"
+              },
+              "width": 1.5
+            }
+          ]
+        ]
+      }
+    }
+  }
+}

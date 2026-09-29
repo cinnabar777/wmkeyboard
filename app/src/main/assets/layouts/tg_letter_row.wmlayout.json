@@ -1,0 +1,217 @@
+{
+  "format": "wmkeyboard-layout",
+  "version": 1,
+  "layout": {
+    "id": "asset_tg_letter_row",
+    "name": "Тоҷикӣ (Tajik, letters row)",
+    "langId": "tg",
+    "version": 2,
+    "layers": {
+      "letters": {
+        "rows": [
+          [
+            {
+              "label": "ё"
+            },
+            {
+              "label": "ғ"
+            },
+            {
+              "label": "ӯ"
+            },
+            {
+              "label": "ъ",
+              "longPress": [
+                "ь",
+                "ы"
+              ]
+            }
+          ],
+          [
+            {
+              "label": "й"
+            },
+            {
+              "label": "қ",
+              "longPress": [
+                "ц"
+              ]
+            },
+            {
+              "label": "у"
+            },
+            {
+              "label": "к"
+            },
+            {
+              "label": "е"
+            },
+            {
+              "label": "н"
+            },
+            {
+              "label": "г"
+            },
+            {
+              "label": "ш",
+              "longPress": [
+                "щ"
+              ]
+            },
+            {
+              "label": "ҳ",
+              "longPress": [
+                "щ"
+              ]
+            },
+            {
+              "label": "з"
+            },
+            {
+              "label": "х"
+            }
+          ],
+          [
+            {
+              "label": "ф"
+            },
+            {
+              "label": "ҷ",
+              "longPress": [
+                "ы"
+              ]
+            },
+            {
+              "label": "в"
+            },
+            {
+              "label": "а"
+            },
+            {
+              "label": "п"
+            },
+            {
+              "label": "р"
+            },
+            {
+              "label": "о"
+            },
+            {
+              "label": "л"
+            },
+            {
+              "label": "д"
+            },
+            {
+              "label": "ж"
+            },
+            {
+              "label": "э"
+            }
+          ],
+          [
+            {
+              "label": "⇧",
+              "action": {
+                "type": "shift"
+              },
+              "width": 1.5
+            },
+            {
+              "label": "я"
+            },
+            {
+              "label": "ч"
+            },
+            {
+              "label": "с",
+              "longPress": [
+                "ц"
+              ]
+            },
+            {
+              "label": "м"
+            },
+            {
+              "label": "и",
+              "longPress": [
+                "ы"
+              ]
+            },
+            {
+              "label": "т"
+            },
+            {
+              "label": "ӣ",
+              "longPress": [
+                "ь"
+              ]
+            },
+            {
+              "label": "б"
+            },
+            {
+              "label": "ю"
+            },
+            {
+              "label": "⌫",
+              "action": {
+                "type": "delete"
+              },
+              "width": 1.5
+            }
+          ],
+          [
+            {
+              "label": "?123",
+              "action": {
+                "type": "symbols"
+              },
+              "width": 1.5
+            },
+            {
+              "label": ",",
+              "longPress": [
+                "!",
+                "?"
+              ],
+              "role": "Comma"
+            },
+            {
+              "label": "🌐",
+              "action": {
+                "type": "language_switch"
+              }
+            },
+            {
+              "label": " ",
+              "action": {
+                "type": "space"
+              },
+              "width": 4
+            },
+            {
+              "label": ".",
+              "longPress": [
+                "…",
+                ",",
+                "?",
+                "!",
+                ":",
+                ";"
+              ],
+              "role": "Period"
+            },
+            {
+              "label": "⏎",
+              "action": {
+                "type": "enter"
+              },
+              "width": 1.5
+            }
+          ]
+        ]
+      }
+    }
+  }
+}

@@ -10,10 +10,6 @@
         <item quantity="one">%1$d lykill slær inn stafinn sem er prentaður á hann. Upprunalega lyklaborðið notaði reglu til að ákveða hvað hann slær inn.</item>
         <item quantity="other">%1$d lyklar slá inn stafina sem eru prentaðir á þá. Upprunalega lyklaborðið notaði reglur til að ákveða hvað þeir slá inn.</item>
     </plurals>
-    <plurals name="core_keyman_multitap_dropped">
-        <item quantity="one">Þetta lyklaborð er með %1$d takka sem þú ýtir ítrekað á til að fletta í gegnum stafi. Þetta lyklaborðsforrit hefur engan slíkan takka, svo aðeins fyrsti stafurinn er í boði.</item>
-        <item quantity="other">Þetta lyklaborð er með %1$d takka sem þú ýtir ítrekað á til að fletta í gegnum stafi. Þetta lyklaborðsforrit hefur enga slíka takka, svo aðeins fyrsti stafur hvers og eins er í boði.</item>
-    </plurals>
     <string name="core_keyman_rules_missing">Þetta lyklaborð notar reglur til að ákveða hvað lyklar þess skrifa. Forritið hefur ekki þessar reglur, svo hver lykill skrifar stafinn sem er prentaður á hann.</string>
     <plurals name="core_keyman_special_keys_dropped">
         <item quantity="one">Forritið fjarlægði %1$d lykil. Þetta lyklaborð hefur engan lykil sem gerir það sama.</item>

@@ -128,6 +128,7 @@ Tap the row and a disclosure appears first, explaining what the service reads (n
 - **The gesture pass-through service needs Android 11 (API 30).** WM Keyboard's minimum supported version is Android 7.0 (API 24). Anywhere from Android 7 through Android 10 you can still grant the "WM Keyboard gestures" service, but the system call it depends on is unavailable, so the service does nothing. Gestures mode quietly behaves like Explore even with the service on.
 - **Icons in settings and Screen transitions are settings-app preferences, not keyboard ones.** Nothing you see while typing changes with them.
 - **No edition differences.** Every setting on this screen, and the pass-through service behind it, works the same on both the full and lite builds.
+- **Not in the Play Store build: Gestures.** That build carries no accessibility service, so TalkBack support offers Off, Labels and Explore, and there is no service row. A Gestures choice brought over in a backup shows, and behaves, as Explore. GitHub and F-Droid builds have all four modes.
 
 ## Related pages
 

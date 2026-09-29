@@ -36,10 +36,32 @@ class AvroPhoneticTest {
     }
 
     @Test fun conjuncts() {
-        // Consecutive consonants form conjuncts with hasant.
+        // Consecutive consonants form conjuncts with hasant where Bangla has one.
         assertEquals("ক্ক", t("kk"))
         assertEquals("স্কুল", t("skul"))
         assertEquals("বন্ধু", t("bondhu"))
+        assertEquals("শক্তি", t("shokti"))
+    }
+
+    @Test fun consonantsOutsideTheConjunctListStayApart() {
+        // Desktop Avro's rule: a pair Bangla does not write as a conjunct is
+        // two letters, which is what every present-tense verb needs.
+        assertEquals("বলছি", t("bolchi"))
+        assertEquals("করব", t("korbo"))
+        assertEquals("একদম", t("ekdom"))
+        assertEquals("দেখতে", t("dekhte"))
+        assertEquals("আজকে", t("ajke"))
+        // ...while the fola joins still take any consonant.
+        assertEquals("প্রথম", t("prothom"))
+        assertEquals("ক্যা", t("kya"))
+        assertEquals("দ্বীপ", t("dwIp"))
+    }
+
+    @Test fun nTakesTheNasalOfItsClass() {
+        assertEquals("অঙ্ক", t("onko"))
+        assertEquals("শঙ্খ", t("shonkh"))
+        assertEquals("অঞ্চল", t("oncol"))
+        assertEquals("পঞ্ছ", t("poncho"))
     }
 
     @Test fun fixedConjunctKkh() {
@@ -57,13 +79,16 @@ class AvroPhoneticTest {
         assertEquals("আদর্শ", t("adorrsho"))
         assertEquals("নির্ভর", t("nirrvor"))
         assertEquals("কার্য", t("karryo"))
-        // Plain single-r conjuncts still produce the same words.
-        assertEquals("ধর্ম", t("dhormo"))
-        assertEquals("নির্ভর", t("nirvor"))
-        // "rri" keeps ঋ, and "rr" with no consonant after stays literal.
+        // A single r stays apart, as on desktop Avro; the reph words people
+        // spell that way are in the fixed-spelling list, not the rules.
+        assertEquals("ধরম", t("dhormo"))
+        assertEquals("করলে", t("korle"))
+        // r-fola is still any consonant followed by r.
+        assertEquals("ক্র", t("kr"))
+        // "rri" keeps ঋ, and "rr" with no consonant after is two র.
         assertEquals("ঋণ", t("rriN"))
         assertEquals("কৃপা", t("krripa"))
-        assertEquals("বর্র", t("borr"))
+        assertEquals("বরর", t("borr"))
     }
 
     @Test fun aAfterKarGlidesWithAntastyaYo() {
@@ -87,7 +112,7 @@ class AvroPhoneticTest {
         // Lowercase "o" is the inherent vowel wherever a consonant precedes
         // it, word-final included — desktop Avro's rule, and the difference
         // between "bhalo" and "bhalO" is the whole point of the shift.
-        assertEquals("স্বপ্ন", t("sbopno"))
+        assertEquals("স্বপ্ন", t("swopno"))
         assertEquals("কষ্ট", t("koShTo"))
         assertEquals("সত্য", t("sotyo"))
         assertEquals("ভাল", t("valo"))
@@ -96,7 +121,7 @@ class AvroPhoneticTest {
         assertEquals("কালো", t("kalO"))
         // A sign closes a consonant's syllable, so the "o" after one is
         // inherent too rather than a fresh অ.
-        assertEquals("রং", t("rongo"))
+        assertEquals("দুঃখ", t("du:kho"))
     }
 
     @Test fun anusvaraJoinsNothing() {
@@ -105,8 +130,12 @@ class AvroPhoneticTest {
         assertEquals("পংক্তি", t("pongkti"))
         assertEquals("আকাংখা", t("akangkha"))
         assertEquals("অংক", t("ongko"))
-        // Before a vowel there is a new syllable to carry, and only ঙ can.
-        assertEquals("বাঙালি", t("bangali"))
+        // Before a vowel there is a new syllable to carry, and ঙ্গ carries it,
+        // as on desktop Avro; capital "Ng" is the bare ঙ.
+        assertEquals("সঙ্গে", t("songe"))
+        assertEquals("জঙ্গল", t("jongol"))
+        assertEquals("বাঙ্গালি", t("bangali"))
+        assertEquals("বাঙালি", t("baNgali"))
         // ...and ঁ and ঃ are the same kind of thing.
         assertEquals("চাঁদ", t("ca^d"))
         assertEquals("দুঃখ", t("du:kh"))
@@ -149,7 +178,8 @@ class AvroPhoneticTest {
         // "hs" is the hasant only where a hasant can go — on a consonant —
         // so the h and s of a name are still ordinary letters.
         assertEquals("ন্ব", t("nhsb"))
-        assertEquals("আহ্সান", t("ahsan"))
+        // (হ and স are not a conjunct pair, so they stand apart as well.)
+        assertEquals("আহসান", t("ahsan"))
     }
 
     @Test fun clusterBreaksOnlyWithInherentVowel() {
@@ -190,8 +220,9 @@ class AvroPhoneticTest {
         assertEquals("মেয়ে", t("meye"))
         assertEquals("নিয়ে", t("niye"))
         assertEquals("হয়", t("hoy"))
-        assertEquals("য়", t("y"))
-        assertEquals("য়া", t("ya"))
+        // At a word start Avro writes ইয়.
+        assertEquals("ই\u09DF", t("y"))
+        assertEquals("ই\u09DFেস", t("yes"))
         // "Y" never joins the cluster, so য় is reachable after a consonant.
         assertEquals("কয়া", t("kYa"))
     }
@@ -232,7 +263,9 @@ class AvroPhoneticTest {
         assertEquals("সত্য", t("sotyo"))
         // The difference is after a vowel, where "y" falls back to য়.
         assertEquals("আয়", t("ay"))
-        assertEquals("আ্য", t("aZ"))
+        // ...and "aZ" is the অ্যা of অ্যাপ.
+        assertEquals("অ্যা", t("aZ"))
+        assertEquals("অ্যাপ", t("aZp"))
     }
 
     @Test fun qIsKa() {
@@ -242,6 +275,40 @@ class AvroPhoneticTest {
         assertEquals("কলম", t("Qolom"))
         assertEquals("বাক্য", t("baqyo"))
         assertEquals("চাঁদ", t("caqqd"))
+    }
+
+    @Test fun oAfterAVowelIsO() {
+        assertEquals("আমিও", t("amio"))
+        assertEquals("খাও\u09DFা", t("khaoa"))
+        assertEquals("দিও", t("dio"))
+        // After a consonant it is still the silent inherent vowel.
+        assertEquals("ভাল", t("bhalo"))
+    }
+
+    @Test fun doubleEIsLongI() {
+        assertEquals("কী", t("kee"))
+        assertEquals("ঈদ", t("eed"))
+    }
+
+    @Test fun wGlidesIntoTheVowelAfterIt() {
+        assertEquals("ও\u09DFে", t("we"))
+        assertEquals("সাও\u09DFাল", t("sawal"))
+    }
+
+    @Test fun xOpensAWordWithE() {
+        assertEquals("এক্সরে", t("xre"))
+        assertEquals("বাক্স", t("bax"))
+        assertEquals("ক্ষ", t("kx"))
+    }
+
+    @Test fun plainRBeforeJofolaKeepsItsShape() {
+        // The joiner keeps র whole, where "rry" still spells the reph of কার্য.
+        assertEquals("র\u200D্যাব", t("rZab"))
+        assertEquals("কার্য", t("karryo"))
+    }
+
+    @Test fun ellipsisStaysDots() {
+        assertEquals("...", t("..."))
     }
 
     @Test fun mixedTextPassesThrough() {

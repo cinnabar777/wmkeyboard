@@ -355,29 +355,33 @@ object SelectionMacros {
         SelectionMacro.COPY, SelectionMacro.CUT, SelectionMacro.PASTE, SelectionMacro.DELETE, SelectionMacro.SHARE,
         SelectionMacro.FORMAT, SelectionMacro.FIND, SelectionMacro.REPLACE,
         SelectionMacro.LINES_SORT, SelectionMacro.LINES_DEDUPE, SelectionMacro.LINES_NUMBER, SelectionMacro.LINES_BULLET,
-        SelectionMacro.GRAMMAR_FIX, SelectionMacro.DEEPL_WRITE, SelectionMacro.AI,
+        SelectionMacro.GRAMMAR_FIX, SelectionMacro.DEEPL_WRITE, SelectionMacro.TRANSLATE, SelectionMacro.AI,
         SelectionMacro.TO_BANGLA, SelectionMacro.TO_BANGLISH,
         SelectionMacro.TO_HINDI, SelectionMacro.TO_HINGLISH,
         SelectionMacro.DIGITS_LATIN, SelectionMacro.COLOUR, SelectionMacro.FANCY,
         SelectionMacro.CHAT_BOLD, SelectionMacro.CHAT_ITALIC, SelectionMacro.CHAT_STRIKE, SelectionMacro.CHAT_MONO,
         SelectionMacro.JSON_FORMAT, SelectionMacro.BASE64_DECODE, SelectionMacro.URL_DECODE,
         SelectionMacro.TIME_ZONES, SelectionMacro.CALENDAR, SelectionMacro.MAP, SelectionMacro.READ_ALOUD,
-        SelectionMacro.SEARCH, SelectionMacro.TRANSLATE,
+        SelectionMacro.SEARCH,
     )
 
     /**
-     * The shipped set. Search and Translate are off because both are a round
-     * trip to a network service; DeepL Write is one too, but it is on because
-     * its gate already waits for the user to set DeepL up and switch Write on; the programmer's cases, chat markup, speech,
-     * maps, calendars and the decoders are off because each is a taste rather
-     * than a need, and the row is long enough already.
+     * The shipped set. Search is off because it is a round trip to a network
+     * service that spends a small daily quota; DeepL Write is one too, but it
+     * is on because its gate already waits for the user to set DeepL up and
+     * switch Write on. Translate is on (#434): it only opens the Translate
+     * tool, which may translate on the device, and a selection in a language
+     * the user cannot read is the one they could not have typed into the
+     * tool by hand. The programmer's cases, chat markup, speech, maps,
+     * calendars and the decoders are off because each is a taste rather than
+     * a need, and the row is long enough already.
      */
     val defaultMacros: Set<SelectionMacro> = setOf(
         SelectionMacro.UNDO, SelectionMacro.SELECT_ALL, SelectionMacro.COPY, SelectionMacro.CUT,
         SelectionMacro.PASTE, SelectionMacro.DELETE, SelectionMacro.SHARE, SelectionMacro.FORMAT,
         SelectionMacro.FIND, SelectionMacro.REPLACE,
         SelectionMacro.LINES_SORT, SelectionMacro.LINES_DEDUPE, SelectionMacro.LINES_NUMBER, SelectionMacro.LINES_BULLET,
-        SelectionMacro.GRAMMAR_FIX, SelectionMacro.DEEPL_WRITE, SelectionMacro.AI,
+        SelectionMacro.GRAMMAR_FIX, SelectionMacro.DEEPL_WRITE, SelectionMacro.TRANSLATE, SelectionMacro.AI,
         SelectionMacro.TO_BANGLA, SelectionMacro.TO_BANGLISH,
         SelectionMacro.TO_HINDI, SelectionMacro.TO_HINGLISH,
         SelectionMacro.DIGITS_LATIN, SelectionMacro.COLOUR,

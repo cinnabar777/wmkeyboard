@@ -637,8 +637,9 @@ internal fun ClipboardSettings(
             ) { scope.launch { repository.setClipboardPinnedLast(it) } }
         }
         // Screenshots, the source app and the paste chip are all read as a
-        // clip is being stored, and nothing is stored with history off.
-        if (historyOn) item {
+        // clip is being stored, and nothing is stored with history off. The
+        // Play build has no photos permission to ask for, so no screenshots.
+        if (historyOn && ChannelFeatures.SCREENSHOT_CLIPS) item {
             val context = LocalContext.current
             ToggleSetting(
                 R.string.clipboard_screenshots_title,
@@ -657,7 +658,7 @@ internal fun ClipboardSettings(
         // The guard sits outside item {} on purpose: an item whose body
         // draws nothing still gets its own card, which showed up as a
         // sliver of empty surface once the permission was granted.
-        if (historyOn && userScreenshots &&
+        if (historyOn && userScreenshots && ChannelFeatures.SCREENSHOT_CLIPS &&
             !screenshotsGranted
         ) {
             item {

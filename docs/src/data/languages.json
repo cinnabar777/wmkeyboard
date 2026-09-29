@@ -2527,6 +2527,181 @@
   "keyman": false
  },
  {
+  "id": "abq",
+  "name": "Абаза бызшва · Abaza",
+  "english": "Abaza",
+  "script": "Cyrillic",
+  "keyman": false
+ },
+ {
+  "id": "agx",
+  "name": "Aghul",
+  "english": "Aghul",
+  "script": "Cyrillic",
+  "keyman": false
+ },
+ {
+  "id": "rut",
+  "name": "Rutul",
+  "english": "Rutul",
+  "script": "Cyrillic",
+  "keyman": false
+ },
+ {
+  "id": "tab",
+  "name": "Tabasaran",
+  "english": "Tabasaran",
+  "script": "Cyrillic",
+  "keyman": false
+ },
+ {
+  "id": "tkr",
+  "name": "Tsakhur",
+  "english": "Tsakhur",
+  "script": "Cyrillic",
+  "keyman": false
+ },
+ {
+  "id": "xdq",
+  "name": "Kaitag",
+  "english": "Kaitag",
+  "script": "Cyrillic",
+  "keyman": false
+ },
+ {
+  "id": "enf",
+  "name": "Forest Enets",
+  "english": "Forest Enets",
+  "script": "Cyrillic",
+  "keyman": false
+ },
+ {
+  "id": "enh",
+  "name": "Tundra Enets",
+  "english": "Tundra Enets",
+  "script": "Cyrillic",
+  "keyman": false
+ },
+ {
+  "id": "nio",
+  "name": "Nganasan",
+  "english": "Nganasan",
+  "script": "Cyrillic",
+  "keyman": false
+ },
+ {
+  "id": "yrk",
+  "name": "Nenets",
+  "english": "Nenets",
+  "script": "Cyrillic",
+  "keyman": false
+ },
+ {
+  "id": "izh",
+  "name": "Ingrian",
+  "english": "Ingrian",
+  "script": "Latin",
+  "keyman": false
+ },
+ {
+  "id": "krl",
+  "name": "Karjalan kieli · Karelian",
+  "english": "Karelian",
+  "script": "Latin",
+  "keyman": false
+ },
+ {
+  "id": "lud",
+  "name": "Ludian",
+  "english": "Ludian",
+  "script": "Latin",
+  "keyman": false
+ },
+ {
+  "id": "vot",
+  "name": "Votic",
+  "english": "Votic",
+  "script": "Latin",
+  "keyman": false
+ },
+ {
+  "id": "lkt",
+  "name": "Lakȟótiyapi · Lakota",
+  "english": "Lakota",
+  "script": "Latin",
+  "keyman": false
+ },
+ {
+  "id": "sje",
+  "name": "Bidumsámegiella · Pite Sami",
+  "english": "Pite Sami",
+  "script": "Latin",
+  "keyman": false
+ },
+ {
+  "id": "sju",
+  "name": "Ume Sami",
+  "english": "Ume Sami",
+  "script": "Latin",
+  "keyman": false
+ },
+ {
+  "id": "sma",
+  "name": "Åarjelsaemien gïele · Southern Sami",
+  "english": "Southern Sami",
+  "script": "Latin",
+  "keyman": false
+ },
+ {
+  "id": "smj",
+  "name": "Julevsámegiella · Lule Sami",
+  "english": "Lule Sami",
+  "script": "Latin",
+  "keyman": false
+ },
+ {
+  "id": "kk-Latn",
+  "name": "Qazaqşa (latyn) · Kazakh (Latin)",
+  "english": "Kazakh (Latin)",
+  "script": "Latin",
+  "keyman": false
+ },
+ {
+  "id": "ks-Latn",
+  "name": "Koshur (Latin) · Kashmiri (Latin)",
+  "english": "Kashmiri (Latin)",
+  "script": "Latin",
+  "keyman": false
+ },
+ {
+  "id": "zgh-Latn",
+  "name": "Tamaziɣt (Latin) · Tamazight (Latin)",
+  "english": "Tamazight (Latin)",
+  "script": "Latin",
+  "keyman": false
+ },
+ {
+  "id": "be-Latn",
+  "name": "Biełaruskaja (łacinka) · Belarusian (Latin)",
+  "english": "Belarusian (Latin)",
+  "script": "Latin",
+  "keyman": false
+ },
+ {
+  "id": "en-Shaw",
+  "name": "English (Shavian)",
+  "english": "English (Shavian)",
+  "script": "Shavian",
+  "keyman": false
+ },
+ {
+  "id": "new-Newa",
+  "name": "Nepal Bhasa (Newa)",
+  "english": "Nepal Bhasa (Newa)",
+  "script": "Newa",
+  "keyman": false
+ },
+ {
   "id": "aae",
   "name": "Arbëreshë Albanian",
   "english": "Arbëreshë Albanian",
@@ -2867,13 +3042,6 @@
   "name": "Bodo Parja",
   "english": "Bodo Parja",
   "script": "Oriya",
-  "keyman": true
- },
- {
-  "id": "be-Latn",
-  "name": "Belarusian (Latin)",
-  "english": "Belarusian (Latin)",
-  "script": "Latin",
   "keyman": true
  },
  {
@@ -3546,13 +3714,6 @@
   "name": "English (Runic)",
   "english": "English (Runic)",
   "script": "Runic",
-  "keyman": true
- },
- {
-  "id": "en-Shaw",
-  "name": "English (Shavian)",
-  "english": "English (Shavian)",
-  "script": "Latin",
   "keyman": true
  },
  {
@@ -4596,13 +4757,6 @@
   "name": "Ndut",
   "english": "Ndut",
   "script": "Latin",
-  "keyman": true
- },
- {
-  "id": "new-Newa",
-  "name": "Nepal Bhasa (Newa)",
-  "english": "Nepal Bhasa (Newa)",
-  "script": "Newa",
   "keyman": true
  },
  {

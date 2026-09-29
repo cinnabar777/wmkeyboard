@@ -883,6 +883,8 @@ private fun SearchStrings.languageRows(): List<SettingsSearchEntry> {
         row(R.string.languages_phonetic_strip_fixed_title),
         row(R.string.languages_phonetic_strip_source_title, R.string.languages_phonetic_strip_source_subtitle),
         row(R.string.languages_phonetic_guide_title),
+        row(R.string.languages_ansi_allowed_title, R.string.languages_ansi_allowed_subtitle),
+        row(R.string.languages_ansi_version_title, R.string.languages_ansi_version_subtitle),
         row(R.string.languages_fancy_style_row_title, R.string.languages_fancy_style_row_subtitle),
         // The subtitle names the language it is about, so it is a format string
         // with nothing to fill it in here. The title carries the search anyway.
@@ -969,7 +971,7 @@ private fun SearchStrings.voiceRows(): List<SettingsSearchEntry> {
 private fun SearchStrings.clipboardRows(): List<SettingsSearchEntry> {
     fun row(@StringRes title: Int, @StringRes subtitle: Int = 0, weight: EntryWeight = EntryWeight.NORMAL) =
         entry(title, subtitle, R.string.home_clipboard_title, "clipboard", weight = weight)
-    return listOf(
+    return listOfNotNull(
         row(R.string.clipboard_history_title, R.string.clipboard_history_subtitle, weight = EntryWeight.PRIMARY),
         row(R.string.clipboard_suggest_recent_title, R.string.clipboard_suggest_recent_subtitle),
         row(R.string.clipboard_chip_life_title, R.string.clipboard_chip_life_subtitle),
@@ -997,7 +999,8 @@ private fun SearchStrings.clipboardRows(): List<SettingsSearchEntry> {
         row(R.string.clipboard_entities_title, R.string.clipboard_entities_subtitle),
         row(R.string.clipboard_password_paste_title, R.string.clipboard_password_paste_subtitle),
         row(R.string.clipboard_link_previews_title, R.string.clipboard_link_previews_subtitle),
-        row(R.string.clipboard_screenshots_title, R.string.clipboard_screenshots_subtitle),
+        row(R.string.clipboard_screenshots_title, R.string.clipboard_screenshots_subtitle)
+            .takeIf { ChannelFeatures.SCREENSHOT_CLIPS },
         row(R.string.clipboard_track_source_title, R.string.clipboard_track_source_subtitle),
         row(R.string.clipboard_sensitive_title, R.string.clipboard_sensitive_subtitle),
         row(R.string.clipboard_detect_sensitive_title, R.string.clipboard_detect_sensitive_subtitle),
@@ -1741,7 +1744,8 @@ private fun SearchStrings.otherRows(): List<SettingsSearchEntry> {
         permission(R.string.privacy_permissions_camera_title, R.string.privacy_permissions_camera_subtitle),
         permission(R.string.privacy_permissions_contacts_title, R.string.privacy_permissions_contacts_subtitle),
         permission(R.string.privacy_permissions_calendar_title, R.string.privacy_permissions_calendar_subtitle),
-        permission(R.string.privacy_permissions_images_title, R.string.privacy_permissions_images_subtitle),
+        permission(R.string.privacy_permissions_images_title, R.string.privacy_permissions_images_subtitle)
+            .takeIf { ChannelFeatures.SCREENSHOT_CLIPS },
         permission(
             R.string.privacy_permissions_notifications_title,
             R.string.privacy_permissions_notifications_subtitle,
@@ -1750,7 +1754,7 @@ private fun SearchStrings.otherRows(): List<SettingsSearchEntry> {
         permission(
             R.string.privacy_permissions_accessibility_title,
             R.string.privacy_permissions_accessibility_subtitle,
-        ),
+        ).takeIf { ChannelFeatures.GESTURE_PASSTHROUGH },
         // Only the channel that installs its own updates asks for this one.
         if (UpdateChannel.GITHUB) {
             permission(
@@ -1811,7 +1815,7 @@ private fun SearchStrings.otherRows(): List<SettingsSearchEntry> {
         access(R.string.accessibility_row_icons_title, R.string.accessibility_row_icons_subtitle),
         access(R.string.accessibility_screen_transitions_title, R.string.accessibility_screen_transitions_subtitle),
         access(R.string.accessibility_talkback_title, R.string.accessibility_talkback_subtitle),
-        access(R.string.accessibility_passthrough_service_title),
+        access(R.string.accessibility_passthrough_service_title).takeIf { ChannelFeatures.GESTURE_PASSTHROUGH },
         access(R.string.accessibility_debounce_title, R.string.accessibility_debounce_subtitle_off),
         access(R.string.accessibility_long_press_title, R.string.accessibility_long_press_subtitle),
         access(R.string.accessibility_key_size_title, R.string.accessibility_key_size_subtitle),

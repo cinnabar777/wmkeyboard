@@ -129,6 +129,8 @@ internal val SettingsSearchKeywords: Map<Int, Int> = buildMap {
     put(R.string.languages_translit_hints_row_title, R.string.search_kw_languages_translit_hints_row)
     put(R.string.languages_phonetic_strip_fixed_title, R.string.search_kw_languages_phonetic_strip_fixed)
     put(R.string.languages_phonetic_guide_title, R.string.search_kw_languages_phonetic_guide)
+    put(R.string.languages_ansi_allowed_title, R.string.search_kw_languages_ansi)
+    put(R.string.languages_ansi_version_title, R.string.search_kw_languages_ansi)
     put(R.string.layout_floating_title, R.string.search_kw_layout_floating)
     put(R.string.layout_globe_emoji_title, R.string.search_kw_layout_globe_emoji)
     put(R.string.layout_key_height_title, R.string.search_kw_layout_key_height)

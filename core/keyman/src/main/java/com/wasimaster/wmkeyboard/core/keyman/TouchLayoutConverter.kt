@@ -18,7 +18,7 @@ import com.wasimaster.wmkeyboard.core.layout.repair
  * [KeyAction.KeymanKey] carrying the key the rules know it as rather than to a
  * text key carrying its cap: the cap and the output agree on a positional
  * keyboard and disagree on a mnemonic one, and only the engine knows which this
- * is. The same goes for the keys behind a long press or a flick — in Keyman
+ * is. The same goes for the keys behind a long press, a flick or a repeated tap — in Keyman
  * those are keys too, with their own ids and layers.
  *
  * ## Layers
@@ -152,8 +152,22 @@ object TouchLayoutConverter {
         return out
     }
 
-    @Suppress("CyclomaticComplexMethod", "ReturnCount")
+    /**
+     * [convertShape], and the count of repeated-tap cycles it could not keep.
+     * Counted here rather than on each path because most paths lose a cycle
+     * without meaning to: a frame key or a layer switch returns before the
+     * cycle is looked at. Those are mostly `*123*` keys that cycle through the
+     * symbol pages, which KeymanWeb credits to the first key even after its tap
+     * has put another page under the finger, and ours cannot.
+     */
     private fun convertKey(k: TouchKey, layerId: String, layerNames: Set<String>, report: Report): Key? {
+        val key = convertShape(k, layerId, layerNames, report)
+        if (k.multitap.isNotEmpty() && key?.multitap.isNullOrEmpty()) report.droppedMultitaps++
+        return key
+    }
+
+    @Suppress("CyclomaticComplexMethod", "ReturnCount")
+    private fun convertShape(k: TouchKey, layerId: String, layerNames: Set<String>, report: Report): Key? {
         // Some authors cap a layer-switch key with the layer's own id, so the
         // key reads "rightalt" or "default". Those are internal identifiers, not
         // something to print on a key.
@@ -276,7 +290,6 @@ object TouchLayoutConverter {
 
         val longPress = convertGestures(k.sk, layerId, report)
         val flick = convertFlicks(k, layerId, report)
-        if (k.multitap.isNotEmpty()) report.droppedMultitaps++
 
         val target = keymanTarget(k, layerId, nextLayer)
         val unicode = unicodeOutput(k.id)
@@ -298,13 +311,15 @@ object TouchLayoutConverter {
         }
         // A U_ key types its own code points whatever its cap says.
         val fallbackOutput = unicode ?: special?.output
+        val multitap = convertMultitap(k.multitap, layerId, report)
         return Key(
             label = shown,
             output = fallbackOutput?.takeIf { it != shown },
-            action = target.copy(longPress = longPress.targets, flick = flick.targets),
+            action = target.copy(longPress = longPress.targets, flick = flick.targets, multitap = multitap.targets),
             width = width,
             longPress = longPress.labels,
             flick = flick.labels,
+            multitap = multitap.labels,
         )
     }
 
@@ -404,6 +419,26 @@ object TouchLayoutConverter {
             labels += label
             targets += target ?: KeymanTarget(text = label).also { report.unmappedIds++ }
         }
+        return LongPress(labels, targets)
+    }
+
+    /**
+     * A key's repeated-tap cycle, each step as the text to show and the key it
+     * is, parallel like [convertGestures]. All or nothing: a step with nothing
+     * to show dropped on its own would move every later step onto the wrong
+     * tap, so the whole cycle goes, and [convertKey] counts it.
+     */
+    private fun convertMultitap(steps: List<TouchKey>, layerId: String, report: Report): LongPress {
+        if (steps.isEmpty()) return LongPress(emptyList(), emptyList())
+        val labels = ArrayList<String>(steps.size)
+        val targets = ArrayList<KeymanTarget>(steps.size)
+        var unmapped = 0
+        for (sub in steps) {
+            val (label, target) = gestureKey(sub, layerId) ?: return LongPress(emptyList(), emptyList())
+            labels += label
+            targets += target ?: KeymanTarget(text = label).also { unmapped++ }
+        }
+        report.unmappedIds += unmapped
         return LongPress(labels, targets)
     }
 
@@ -667,7 +702,11 @@ data class ConvertedKeymanLayout(
  * situations for the person deciding whether to keep it.
  */
 data class KeymanConversionReport(
-    /** Repeated-tap cycles. We have no equivalent gesture. */
+    /**
+     * Keys whose repeated-tap cycle did not survive: a cycle on a frame key or
+     * a layer switch, or one with a step that has nothing to show. Cycles on
+     * keys that type are kept.
+     */
     val droppedMultitaps: Int = 0,
     /** Flicks aimed at a diagonal, which our four directions cannot express. */
     val droppedDiagonalFlicks: Int = 0,

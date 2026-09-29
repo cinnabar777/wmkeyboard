@@ -22,9 +22,9 @@ Bangla is one of only two languages that ship a dictionary and emoji keywords in
 
 Where it goes further than a plain transliterator is lenient spelling. Bangla speakers write the same word several different ways in Latin letters (আছি gets typed "achi", "achhi" or "asi" depending on the person), and Avro takes them all. Two layers do that, in this order.
 
-First a hand-built list of about 12,000 romanized spellings, described under [Spellings the rules can't reach](#spellings-the-rules-cant-reach) below. It covers most of the everyday vocabulary, and a spelling it names is settled there and nowhere else, because the list outranks both the dictionary and the literal transliteration. Both `achi` and `asi` are on it, and they're listed separately: `achi` commits আছি, `asi` commits আসি.
+First a hand-built list of about 13,000 romanized spellings, described under [Spellings the rules can't reach](#spellings-the-rules-cant-reach) below. It covers most of the everyday vocabulary, and a spelling it names is settled there and nowhere else, because the list outranks both the dictionary and the literal transliteration. Both `achi` and `asi` are on it, and they're listed separately: `achi` commits আছি, `asi` commits আসি.
 
-Anything the list has never heard of falls to a phonetic fold. Both your romanized input and every word in the Bangla dictionary are reduced to a lenient key where confusable sounds collapse (স/শ/ষ/ছ/চ all fold to the same sound, aspiration like "kh" or "bh" drops to "k"/"b", and so on), so an unlisted spelling still finds the dictionary word it sounds like. Words sharing a key are phonetic siblings, and the most frequent sibling leads. Two things you wrote down are weighed before frequency, because the fold throws them away: a sibling that contradicts an "h" you actually typed is pushed down, and so is one that ends in ও when you typed no final o. The "ch" of চ and the "ph" of ফ are exempt, since those are ordinary English-influenced spellings rather than claims about aspiration.
+Anything the list has never heard of falls to a phonetic fold. Both your romanized input and every word in the Bangla dictionary are reduced to a lenient key where confusable sounds collapse (স/শ/ষ/ছ/চ all fold to the same sound, aspiration like "kh" or "bh" drops to "k"/"b", and so on), so an unlisted spelling still finds the dictionary word it sounds like. The dictionary lists the verb forms of chat Bangla too (বানাইছি, করতিছে, নিছিলাম, আসবিনি, দেখেনাই), so `ashbini` finds আসবিনি and `khujtese` finds খুঁজতেছে. The `s` people type for the ছ sound still gives ছ. Words sharing a key are phonetic siblings, and the most frequent sibling leads. Two things you wrote down are weighed before frequency, because the fold throws them away: a sibling that contradicts an "h" you actually typed is pushed down, and so is one that ends in ও when you typed no final o. The "ch" of চ and the "ph" of ফ are exempt, since those are ordinary English-influenced spellings rather than claims about aspiration.
 
 A sibling only takes the commit from the literal transliteration when it is at least twice as frequent. A near-tie leaves what the composing text already showed you, because a silent swap between two words of roughly equal currency reads as a bug rather than a correction. The exception is a literal that isn't a dictionary word at all: with nothing to protect, the siblings lead. The literal transliteration is always in the suggestion strip as a fallback either way, so you can pick it if the substitution guesses wrong. To stop the substitution altogether, turn off **Correct to dictionary words** (see [Options](#options)).
 
@@ -39,17 +39,25 @@ A few more of the rules worth knowing:
 | `valo` or `bhalo` | ভাল | "bh" and "v" both fold to the "b" sound |
 | `valO` | ভালো | lowercase "o" is the inherent vowel and writes nothing; only capital "O" is ও/ো |
 | `kolokata` | কলকাতা | the explicit "o" between l and k breaks the conjunct that `kolkata` (no vowel between them) would form |
-| `bangla` / `bangali` | বাংলা / বাঙালি | ং joins nothing; before a vowel it is ঙ, which can carry the syllable |
+| `korbo`, `bolchi` | করব, বলছি | two consonants only join where Bangla writes them as one letter, the same list desktop Avro uses; `kt` is ক্ত, but `rb` and `lch` stay apart |
+| `dhorrmo` | ধর্ম | reph is a double r, as on desktop Avro; the common words people spell with one r, like `dhormo`, are on the known-spellings list |
+| `onko` / `oncol` | অঙ্ক / অঞ্চল | "n" before k or c takes that letter's own nasal |
+| `amio` / `khaoa` | আমিও / খাওয়া | "o" straight after a written vowel is ও |
+| `bangla` / `songe` / `baNgali` | বাংলা / সঙ্গে / বাঙালি | ং joins nothing; before a vowel it is ঙ্গ, as on desktop Avro, and capital `Ng` is the bare ঙ |
 | `swasthyo` | স্বাস্থ্য | "w" after a consonant is a ব-ফলা join |
 | `wasi` | ওয়াসি | "w" anywhere else is ও |
 | `panjabi` | পাঞ্জাবি | "n" before "j" is ঞ |
 | `hoThaTH`, `hoThat` + a trailing backquote, or `hoThat,,` | হঠাৎ | `TH`, a backquote or a trailing hasant all spell khanda-ta (ৎ) |
 | `shyam` | শ্যাম | "y" after a consonant is a য-ফলা join |
 | `meye` | মেয়ে | "y" elsewhere is য়, not a join |
+| `yes` | ইয়েস | "y" at the start of a word is ইয় |
+| `kee` | কী | "ee" is ঈ, or ী after a consonant |
+| `aZp` | অ্যাপ | `aZ` is the অ্যা of English loanwords |
+| `rZab` | র‍্যাব | after a plain র, য-ফলা keeps the র whole; `karryo` still gives the reph of কার্য |
 | `ggan` | জ্ঞান | `gg` is the জ্ঞ conjunct |
 | `Bangla` | বাংলা | a capital that spells nothing of its own reads as its lowercase self |
 | `$` / `123` | ৳ / ১২৩ | currency and digits convert too |
-| `.` / `..` | । / `.` | a single dot is দাঁড়ি; two dots is a literal period |
+| `.` / `..` / `...` | । / `.` / `...` | a single dot is দাঁড়ি; two dots is a literal period, and three stay an ellipsis |
 
 Both of Avro's spellings for the marks work, and so do the ones Ridmik uses: ঁ is `^` or `qq`/`cb`, ঃ is `:` or `HH`, ৎ is `t` plus a backquote or `TH`, and the hasant is `,,` or `hs`. The `hs` form only fires after a consonant, where a hasant can actually go, so it never eats the h and s of a name like `ahsan`.
 
@@ -64,7 +72,7 @@ Every key the engine reads, in one place. The same tables are in the app, under 
 | `o` | অ | nothing: the inherent vowel |
 | `a`, `A` | আ | া |
 | `i` | ই | ি |
-| `I` | ঈ | ী |
+| `I`, `ee` | ঈ | ী |
 | `u`, `oo` | উ | ু |
 | `U` | ঊ | ূ |
 | `rri` | ঋ | ৃ |
@@ -73,9 +81,9 @@ Every key the engine reads, in one place. The same tables are in the app, under 
 | `O` | ও | ো |
 | `OU` | ঔ | ৌ |
 
-An `a` straight after another written vowel glides with য়, so `kiamot` is কিয়ামত. A capital `A` is always a plain আ.
+An `o` straight after another written vowel is ও, so `amio` is আমিও. An `a` straight after another written vowel glides with য়, so `kiamot` is কিয়ামত. A capital `A` is always a plain আ.
 
-**Consonants.** Two consonants in a row join into a conjunct with no extra key. Type `o` between them to keep them apart.
+**Consonants.** Two consonants in a row join into a conjunct with no extra key, but only where Bangla writes that pair as one letter: `kt` is ক্ত, `ndh` is ন্ধ, `st` is স্ত, while `rb`, `lch` and `kd` stay apart, so `korbo` is করব and `bolchi` is বলছি. It is the same list of joins desktop Avro uses. An `r`, `y` or `w` after a consonant always joins as a ফলা, and "n" before k, kh, c, ch or j becomes ঙ or ঞ. Type `o` between two consonants to keep them apart whatever the pair.
 
 | | | | | |
 |---|---|---|---|---|
@@ -86,25 +94,29 @@ An `a` straight after another written vowel glides with য়, so `kiamot` is �
 | `p` প | `ph`, `f` ফ | `b` ব | `bh`, `v` ভ | `m` ম |
 | `z` য | `r` র | `l` ল | `sh`, `S` শ | `Sh` ষ |
 | `s` স | `h` হ | `R` ড় | `Rh` ঢ় | `Y` য় |
-| `J` জ় | `x` ক্স | `kkh` ক্ষ | `gg` জ্ঞ | `nj` ঞ্জ |
+| `J` জ় | `kkh`, `kx` ক্ষ | `gg` জ্ঞ | `nj` ঞ্জ | |
 
 **Joins and signs.**
 
 | Key | Gives | Example |
 |---|---|---|
 | `y` after a consonant | ্য (য-ফলা) | `shyam` শ্যাম |
-| `y` anywhere else | য় | `meye` মেয়ে |
+| `y` at the start of a word | ইয় | `yes` ইয়েস |
+| `y` after a vowel | য় | `meye` মেয়ে |
 | `Z` | ্য, wherever it is | |
 | `w` after a consonant | ্ব (ব-ফলা) | `swasthyo` স্বাস্থ্য |
-| `w` anywhere else | ও | `wasi` ওয়াসি |
+| `w` anywhere else | ও, or ওয় before a vowel | `wasi` ওয়াসি, `we` ওয়ে |
 | `rr` before a consonant | র্ (reph) | `dhorrmo` ধর্ম |
-| `ng` | ং, or ঙ before a vowel | `bangla` বাংলা, `bangali` বাঙালি |
+| `x` at the start of a word | এক্স | `xre` এক্সরে |
+| `x` anywhere else | ক্স | `bax` বাক্স |
+| `aZ`, `AZ` | অ্যা | `aZp` অ্যাপ |
+| `ng` | ং, or ঙ্গ before a vowel | `bangla` বাংলা, `songe` সঙ্গে; `Ng` for a bare ঙ, `baNgali` বাঙালি |
 | `^`, `qq`, `cb` | ঁ (চন্দ্রবিন্দু) | `ca^d` চাঁদ |
 | `:`, `HH` | ঃ (বিসর্গ) | `du:kho` দুঃখ |
 | `,,`, `hs` | ্ (hasant) | |
 | `TH`, or `t` then a backquote | ৎ | `hoThaTH` হঠাৎ |
 | a backquote between consonants | keeps them apart | `` k`s `` কস, where `ks` is ক্স |
-| `.` / `..` | । / `.` | |
+| `.` / `..` / `...` | । / `.` / `...` | |
 | `$`, `0` to `9` | ৳, ০ to ৯ | |
 
 A capital that isn't in these tables reads as its lowercase letter, so `B` is ব. Bangla has no q, so `q` and `Q` both type ক, the same as on Ridmik.
@@ -114,7 +126,7 @@ A capital that isn't in these tables reads as its lowercase letter, so `B` is �
 Some words just aren't spelled the way they sound, so a list of them is checked before the phonetic engine runs. A match there always wins over whatever the transliterator would have produced. Two kinds of word need this:
 
 - **English loanwords.** "Keyboard" is written কিবোর্ড and "chair" চেয়ার by convention, not by sound. Left to the rules, "table" would come out তাব্লে instead of টেবিল. About 2,400 of these are listed by hand.
-- **Banglish as people actually type it.** Chat spelling drops vowels wholesale, and no phonetic rule can put back a vowel that was never typed. `tmr` is তোমার, `amk` is আমাকে, `trpr` is তারপর. Colloquial and regional inflections like `boltiso` (বলতিসো) are in the same list, which covers about 12,000 spellings drawn from a corpus of real Bangla chat.
+- **Banglish as people actually type it.** Chat spelling drops vowels wholesale, and no phonetic rule can put back a vowel that was never typed. `tmr` is তোমার, `amk` is আমাকে, `trpr` is তারপর. Colloquial and regional inflections like `boltiso` (বলতিছো) are in the same list, which covers about 12,000 spellings drawn from a corpus of real Bangla chat. So are about 950 words with a reph spelled with a single r, like `dhormo` (ধর্ম) and `porjonto` (পর্যন্ত), since the rules keep a single r apart the way desktop Avro does.
 
 | you type | you get | without the list |
 | --- | --- | --- |
@@ -205,6 +217,18 @@ This toggle isn't unique to Bangla. Every language on a cluster-forming script g
 
 Bangla is one of the two languages (with English) whose search keywords are baked directly into the bundled emoji catalog, so searching emoji by their Bangla name works with nothing to download. A larger keyword pack for Bangla is downloadable too, and it stacks on top of the bundled set rather than replacing it. See [Emoji search in your language](/emoji/customization/#emoji-search-in-your-language) and [Emoji picker](/emoji/picker/) for how the ranking and language-merging work.
 
+## Writing ANSI (Bijoy) text
+
+Before Unicode, Bangla was typed with Bijoy into fonts like SutonnyMJ, and a lot of design software, print shops and older documents still expect it. That encoding, usually called ANSI, stores each Bangla glyph as a Latin character and leaves the font to draw it as Bangla. আ is stored as `Av`, and আমার সোনার বাংলা as `Avgvi †mvbvi evsjv`.
+
+Turn on **Allow ANSI output** on Bangla's own screen (see [Options](#options)) and every Bangla layout gets an **ANSI** button beside the suggestions: Avro, Khipro and all the fixed layouts. Tap it and everything the keyboard writes in Bangla goes into the text box as ANSI instead of Unicode, whether you typed it, picked it from the strip, swiped it or dictated it. The button stays lit while it's on. Tap it again to go back to Unicode.
+
+- The word you're typing stays in Unicode while it's still being composed, and turns into ANSI when you finish it with a space, a punctuation mark or a pick from the strip. ANSI puts some vowel signs in front of their consonant (কি is `wK`), so a word only converts right once it's whole.
+- On a layout that types letter by letter without composing, each letter rewrites the word as you go, so the vowel signs still land in the right place.
+- **ANSI version** picks the encoding. Version 2 is the usual one, matching SutonnyMJ and most Bijoy fonts. The fonts don't all put every letter in the same place, so if a conjunct comes out wrong in yours, try version 1 or 3.
+- ANSI text is Latin letters as far as the keyboard is concerned. Next-word predictions and taking a correction back with backspace don't work across it, and the keyboard doesn't pick an ANSI word back up for editing when you backspace into it. Backspace removes one ANSI character at a time, the way Bijoy always did.
+- ANSI only reads as Bangla in an ANSI font. Everywhere else it's gibberish, so switch the button off when you leave that app.
+
 ## Options
 
 <SettingsPath path="Languages & layouts / বাংলা · Bangla" />
@@ -224,6 +248,7 @@ Open Bangla's own screen from **Languages** in the app, or search for it from **
 - **Dictionary**: Bangla ships with a bundled dictionary, and a downloadable wordlist of about 451,000 words gives better suggestions. You can import your own list too. The downloaded list has no word frequencies of its own, so the bundled list's ranking is kept over it: without that, every sibling would tie and `sorasori` could commit a rarer word that shares its phonetic key instead of সরাসরি. See [Downloadable dictionaries](/languages/dictionaries/) for how sizes compare across languages.
 - **Emoji**: download the larger Bangla emoji-keyword pack here, which names about 3,900 emoji. The bundled catalog's Bangla keywords already work without it. The pack arrives on its own if [Download automatically](/emoji/customization/) is on.
 
+- **ANSI output**: <SettingsPath path="Languages & layouts / Bangla / ANSI output / Allow ANSI output" />, off by default. Puts the ANSI button on every Bangla layout, see [Writing ANSI (Bijoy) text](#writing-ansi-bijoy-text). **ANSI version** appears below it once it's on, with three choices and version 2 as the default.
 - **Spellings**: <SettingsPath path="Languages & layouts / Bangla / Spellings / Use known spellings" />, on by default. This is the list described above, and it's what makes `table` commit টেবিল rather than তাব্লে, and `tmr` commit তোমার rather than ত্ম্র. Switch it off if you want the letter-for-letter reading instead, which is otherwise unreachable because the list outranks every other suggestion source. The setting is per language, so turning it off for Bangla says nothing about any other script.
 - **Dictionary words**: <SettingsPath path="Languages & layouts / Bangla / Spellings / Correct to dictionary words" />, on by default. This is the phonetic fold described above, the step that turns `asi` into আছি when you press space. It runs whether or not autocorrect is on, because it's part of how Avro typing reaches real words. Switch it off and space always commits exactly what the Avro rules spell (`asi` is আসি); the dictionary words stay in the suggestion strip for you to tap. Known spellings are separate, so `tmr` still gives তোমার unless you turn that off too.
 - **Clusters**: <SettingsPath path="Languages & layouts / Bangla / Clusters / Conjunct-aware backspace" />, covered above, off by default.

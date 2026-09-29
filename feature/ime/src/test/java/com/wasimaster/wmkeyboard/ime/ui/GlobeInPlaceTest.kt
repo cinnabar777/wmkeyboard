@@ -8,6 +8,7 @@ import com.wasimaster.wmkeyboard.core.layout.KeyboardLayout
 import com.wasimaster.wmkeyboard.core.layout.LayoutLayer
 import com.wasimaster.wmkeyboard.core.layout.LayoutSpec
 import com.wasimaster.wmkeyboard.core.layout.compile
+import com.wasimaster.wmkeyboard.core.layout.withGlobeInPlace
 import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.LayoutBehaviorSettings
 import com.wasimaster.wmkeyboard.ime.KeyboardUiState

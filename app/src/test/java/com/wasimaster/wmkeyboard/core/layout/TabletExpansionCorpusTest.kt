@@ -56,7 +56,7 @@ class TabletExpansionCorpusTest {
 
     @Test
     fun `the corpus is the whole shipped set`() {
-        assertEquals("built-ins plus hand-authored assets", 22 + 714, handAuthored.size)
+        assertEquals("built-ins plus hand-authored assets", 22 + 824, handAuthored.size)
         assertTrue(
             "converted Keyman grids are missing from the corpus",
             corpus.size - handAuthored.size > 800,
@@ -97,6 +97,15 @@ class TabletExpansionCorpusTest {
                 "braille_chord", "ja_flick", "ja_kana_jis", "morse", "zh_stroke",
                 "ipa", "music", "nqo_nko",
                 "zh_cangjie", "zh_cangjie_quick", "zh_pinyin_t9", "zh_zhuyin",
+                // The 천지인 pad (#372): a 12-key keypad with no shift key.
+                "ko_cheonjiin",
+                // FUTO's ClearFlow and KASROZ: shift, delete and space are keys
+                // two rows tall, and the transform declines any grid with a span.
+                "en_clearflow", "en_kasroz",
+                // IPA on QWERTY declines for the reason the IPA grid does.
+                "ipa_qwerty", "ipa_qwerty_g",
+                // Toki Pona's fourteen letters fit on two short rows.
+                "tok_compact",
             ) + keypads,
             declined,
         )

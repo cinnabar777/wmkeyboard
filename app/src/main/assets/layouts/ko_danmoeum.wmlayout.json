@@ -1,0 +1,203 @@
+{
+  "format": "wmkeyboard-layout",
+  "version": 1,
+  "layout": {
+    "id": "asset_ko_danmoeum",
+    "name": "단모음 (Danmoeum)",
+    "langId": "ko",
+    "version": 2,
+    "layers": {
+      "letters": {
+        "rows": [
+          [
+            {
+              "label": "ㅂ",
+              "longPress": [
+                "ㅃ"
+              ],
+              "shiftLabel": "ㅃ"
+            },
+            {
+              "label": "ㅈ",
+              "longPress": [
+                "ㅉ"
+              ],
+              "shiftLabel": "ㅉ"
+            },
+            {
+              "label": "ㄷ",
+              "longPress": [
+                "ㄸ"
+              ],
+              "shiftLabel": "ㄸ"
+            },
+            {
+              "label": "ㄱ",
+              "longPress": [
+                "ㄲ"
+              ],
+              "shiftLabel": "ㄲ"
+            },
+            {
+              "label": "ㅅ",
+              "longPress": [
+                "ㅆ"
+              ],
+              "shiftLabel": "ㅆ"
+            },
+            {
+              "label": "ㅗ",
+              "longPress": [
+                "ㅛ"
+              ],
+              "shiftLabel": "ㅛ"
+            },
+            {
+              "label": "ㅐ",
+              "longPress": [
+                "ㅒ"
+              ],
+              "shiftLabel": "ㅒ"
+            },
+            {
+              "label": "ㅔ",
+              "longPress": [
+                "ㅖ"
+              ],
+              "shiftLabel": "ㅖ"
+            }
+          ],
+          [
+            {
+              "label": "ㅁ",
+              "longPress": [
+                "1"
+              ]
+            },
+            {
+              "label": "ㄴ"
+            },
+            {
+              "label": "ㅇ"
+            },
+            {
+              "label": "ㄹ"
+            },
+            {
+              "label": "ㅎ"
+            },
+            {
+              "label": "ㅓ",
+              "longPress": [
+                "ㅕ"
+              ],
+              "shiftLabel": "ㅕ"
+            },
+            {
+              "label": "ㅏ",
+              "longPress": [
+                "ㅑ"
+              ],
+              "shiftLabel": "ㅑ"
+            },
+            {
+              "label": "ㅣ",
+              "longPress": [
+                "0"
+              ]
+            }
+          ],
+          [
+            {
+              "label": "⇧",
+              "action": {
+                "type": "shift"
+              },
+              "width": 1.5
+            },
+            {
+              "label": "ㅋ"
+            },
+            {
+              "label": "ㅌ"
+            },
+            {
+              "label": "ㅊ"
+            },
+            {
+              "label": "ㅍ"
+            },
+            {
+              "label": "ㅜ",
+              "longPress": [
+                "ㅠ"
+              ],
+              "shiftLabel": "ㅠ"
+            },
+            {
+              "label": "ㅡ"
+            },
+            {
+              "label": "⌫",
+              "action": {
+                "type": "delete"
+              },
+              "width": 1.5
+            }
+          ],
+          [
+            {
+              "label": "?123",
+              "action": {
+                "type": "symbols"
+              },
+              "width": 1.5
+            },
+            {
+              "label": ",",
+              "longPress": [
+                "!",
+                "?"
+              ],
+              "role": "Comma"
+            },
+            {
+              "label": "🌐",
+              "action": {
+                "type": "language_switch"
+              }
+            },
+            {
+              "label": " ",
+              "action": {
+                "type": "space"
+              },
+              "width": 4
+            },
+            {
+              "label": ".",
+              "longPress": [
+                "…",
+                "·",
+                "※",
+                ",",
+                "?",
+                "!",
+                ":",
+                ";"
+              ],
+              "role": "Period"
+            },
+            {
+              "label": "⏎",
+              "action": {
+                "type": "enter"
+              },
+              "width": 1.5
+            }
+          ]
+        ]
+      }
+    }
+  }
+}

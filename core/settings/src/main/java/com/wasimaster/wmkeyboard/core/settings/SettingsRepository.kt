@@ -7113,6 +7113,22 @@ data class SuggestionStripSettings(
      */
     val phoneticStripSources: Map<String, PhoneticStripSource> = emptyMap(),
     /**
+     * Whether Bengali may be written as "ANSI", the pre-Unicode encoding of
+     * Bijoy and the SutonnyMJ fonts (আ as `Av`), for fields that are set in
+     * one of those fonts. Allowing it only puts the ANSI button on the strip
+     * of every Bengali layout; the button is what turns it on
+     * ([bengaliAnsiOn]). Off by default: ANSI text is unreadable in any other
+     * font. On Bengali's own screen.
+     */
+    val bengaliAnsiAllowed: Boolean = false,
+    /** Whether the Bengali layouts write ANSI right now: the strip button's state. */
+    val bengaliAnsiOn: Boolean = false,
+    /**
+     * Which ANSI encoding to write, 1 to 3, as the converters number them.
+     * Each matches a different family of fonts; 2 is the common one.
+     */
+    val bengaliAnsiVersion: Int = 2,
+    /**
      * Which optional items the held-word menu shows (#99). An item missing
      * from the set is never drawn; "Edit" is drawn regardless. All three by
      * default: the menu is contextual (add only while typing an unlearned
@@ -7159,6 +7175,9 @@ data class SuggestionStripSettings(
 
     /** Whether [langId]'s phonetic layout commits English words as English; null is no phonetic layout. */
     fun phoneticEnglishFor(langId: String?): Boolean = langId != null && langId in phoneticEnglishLangs
+
+    /** Whether a layout of [langId] writes ANSI now: allowed, switched on, and Bengali. */
+    fun bengaliAnsiFor(langId: String?): Boolean = langId == "bn" && bengaliAnsiAllowed && bengaliAnsiOn
 
     /** What fills [langId]'s fixed phonetic strip after its two chips. */
     fun phoneticStripSourceFor(langId: String): PhoneticStripSource =
@@ -7612,6 +7631,9 @@ class SettingsRepository(private val context: Context) {
         private val PHONETIC_ENGLISH_LANGS = stringSetPreferencesKey("phonetic_english_langs")
         private val PHONETIC_ENGLISH_SWITCH = booleanPreferencesKey("phonetic_english_switch")
         private val PHONETIC_FIXED_STRIP_LANGS = stringSetPreferencesKey("phonetic_fixed_strip_langs")
+        private val BENGALI_ANSI_ALLOWED = booleanPreferencesKey("bengali_ansi_allowed")
+        private val BENGALI_ANSI_ON = booleanPreferencesKey("bengali_ansi_on")
+        private val BENGALI_ANSI_VERSION = intPreferencesKey("bengali_ansi_version")
 
         /** `langId=SOURCE` entries, one per language that has picked one. */
         private val PHONETIC_STRIP_SOURCES = stringSetPreferencesKey("phonetic_strip_sources")
@@ -9594,6 +9616,9 @@ class SettingsRepository(private val context: Context) {
                 ?: defaults.suggestionStrip.phoneticEnglishSwitch,
             phoneticFixedStripLangs = p[PHONETIC_FIXED_STRIP_LANGS]
                 ?: defaults.suggestionStrip.phoneticFixedStripLangs,
+            bengaliAnsiAllowed = p[BENGALI_ANSI_ALLOWED] ?: defaults.suggestionStrip.bengaliAnsiAllowed,
+            bengaliAnsiOn = p[BENGALI_ANSI_ON] ?: defaults.suggestionStrip.bengaliAnsiOn,
+            bengaliAnsiVersion = p[BENGALI_ANSI_VERSION] ?: defaults.suggestionStrip.bengaliAnsiVersion,
             // A source name this build does not know is dropped, and the
             // language falls back to the default.
             phoneticStripSources = p[PHONETIC_STRIP_SOURCES]
@@ -13813,6 +13838,15 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setPhoneticEnglishSwitch(value: Boolean) =
         editPrefs { it[PHONETIC_ENGLISH_SWITCH] = value }
+
+    suspend fun setBengaliAnsiAllowed(value: Boolean) =
+        editPrefs { it[BENGALI_ANSI_ALLOWED] = value }
+
+    suspend fun setBengaliAnsiOn(value: Boolean) =
+        editPrefs { it[BENGALI_ANSI_ON] = value }
+
+    suspend fun setBengaliAnsiVersion(value: Int) =
+        editPrefs { it[BENGALI_ANSI_VERSION] = value }
 
     suspend fun setPhoneticFixedStrip(langId: String, enabled: Boolean) =
         editPrefs {

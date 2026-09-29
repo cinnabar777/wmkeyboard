@@ -7,8 +7,14 @@
  * On an Android phone the chip is also a link: the path is resolved against
  * the app's settings index (src/lib/settings-links.mjs) into a `wmkeyboard://`
  * address, and a small script sets it as the href once it knows the page is
- * being read on Android. Anywhere else the chip stays plain text, since only
- * a phone with WM Keyboard installed can open the address.
+ * being read on Android.
+ *
+ * Anywhere else (a desktop, an iPhone) nothing can open that address, so the
+ * chip opens a dialog instead, the way /open/ does off Android: what the link
+ * opens, and a QR code of its https /open/ form for an Android phone to scan.
+ * The app claims /open/ as an App Link, so a phone with it installed lands on
+ * the setting, and one without gets the page with where to install it. The
+ * chip's own href is that /open/ address, so a middle click still goes there.
  *
  * The link carries `since=` when the screen or row is newer than the first
  * release that opens links (src/lib/settings-since.ts), so an older copy of the
@@ -18,6 +24,7 @@
 import { resolveSettingsLink } from '../lib/settings-links.mjs';
 import { explain } from '../lib/deep-links';
 import { sinceOf, withSince } from '../lib/settings-since';
+import { SITE_URL } from '../site.mjs';
 
 interface Props {
 	path: string;
@@ -28,6 +35,15 @@ const link = resolveSettingsLink(path);
 const x = link ? explain(link.href) : null;
 const since = x ? sinceOf(x) : null;
 const href = x ? (withSince(x) ?? link?.href) : undefined;
+const unreleased = !!since && !since.released;
+// The chip wraps like text. Its first crumb stays with the gear and its last
+// word with the arrow, so neither icon is ever left alone on a line.
+const middle = crumbs.slice(1, -1);
+const last = crumbs[crumbs.length - 1];
+const cut = last.lastIndexOf(' ') + 1;
+const lastHead = last.slice(0, cut);
+const lastTail = last.slice(cut);
+const webHref = href ? `${SITE_URL}/open/#${href}` : undefined;
 const sinceNote = since ? (since.released ? ` (added in ${since.version})` : ` (not released yet, coming in ${since.version})`) : '';
 ---
 
@@ -35,50 +51,91 @@ const sinceNote = since ? (since.released ? ` (added in ${since.version})` : ` (
 	class="settings-path"
 	title={`Settings location: ${crumbs.join(' → ')}${sinceNote}`}
 	data-href={href}
+	data-web-href={webHref}
 	data-exact={link ? String(link.exact) : undefined}
 	data-since={sinceNote || undefined}
->
-	<svg
-		aria-hidden="true"
-		width="14"
-		height="14"
-		viewBox="0 0 24 24"
-		fill="none"
-		stroke="currentColor"
-		stroke-width="2"
-		stroke-linecap="round"
-		stroke-linejoin="round"
-	>
-		<circle cx="12" cy="12" r="3"></circle>
-		<path
-			d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
-		></path>
-	</svg>
+><span class="sp-text">
+	<span class="glue">
+		<svg
+			aria-hidden="true"
+			width="14"
+			height="14"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="2"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+		>
+			<circle cx="12" cy="12" r="3"></circle>
+			<path
+				d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
+			></path>
+		</svg>
+		<span class="crumb">{crumbs[0]}</span>
+	</span>
 	{
-		crumbs.map((crumb, i) => (
+		middle.map((crumb) => (
 			<>
-				{i > 0 && <span class="sep" aria-hidden="true">›</span>}
+				{' '}
+				<span class="sep" aria-hidden="true">›</span>
+				{'\u00a0'}
 				<span class="crumb">{crumb}</span>
 			</>
 		))
-	}
-	{since && !since.released && <span class="unreleased">Next release</span>}
-	<svg
-		class="open"
-		aria-hidden="true"
-		width="13"
-		height="13"
-		viewBox="0 0 24 24"
-		fill="none"
-		stroke="currentColor"
-		stroke-width="2.2"
-		stroke-linecap="round"
-		stroke-linejoin="round"
+	}{' '}
+	<span class="sep" aria-hidden="true">›</span>{'\u00a0'}<span class="crumb current"
+		>{lastHead}{
+			unreleased ? (
+				lastTail
+			) : (
+				<span class="glue">
+					{lastTail}
+					<svg
+						class="open"
+						aria-hidden="true"
+						width="13"
+						height="13"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2.2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+					>
+						<path d="M7 17 17 7"></path>
+						<path d="M9 7h8v8"></path>
+					</svg>
+				</span>
+			)
+		}</span
 	>
-		<path d="M7 17 17 7"></path>
-		<path d="M9 7h8v8"></path>
-	</svg>
-</a>
+	{
+		unreleased && (
+			<>
+				{' '}
+				<span class="glue">
+					<span class="unreleased">Next release</span>
+					<svg
+						class="open"
+						aria-hidden="true"
+						width="13"
+						height="13"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2.2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+					>
+						<path d="M7 17 17 7"></path>
+						<path d="M9 7h8v8"></path>
+					</svg>
+				</span>
+			</>
+		)
+	}
+</span></a>
 
 <script>
 	// Only Android can open a wmkeyboard:// address. Chromium browsers there
@@ -126,48 +183,208 @@ const sinceNote = since ? (since.released ? ` (added in ${since.version})` : ` (
 				installed === null ? 'unknown' : installed ? 'installed' : 'absent';
 			if (installed !== false) linkChips();
 		});
+	} else {
+		scanChips();
+	}
+
+	/* ---------- off Android: a dialog with a code to scan ---------- */
+
+	let dialog: HTMLDialogElement | null = null;
+	/** Guards the QR drawing: the chip pressed last wins. */
+	let openToken = 0;
+
+	function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls: string, text?: string): HTMLElementTagNameMap[K] {
+		const node = document.createElement(tag);
+		node.className = cls;
+		if (text) node.textContent = text;
+		return node;
+	}
+
+	/** One dialog per page, built the first time a chip asks for it. */
+	function ensureDialog(): HTMLDialogElement {
+		if (dialog) return dialog;
+		const d = el('dialog', 'wm-sp-dialog');
+		d.setAttribute('aria-labelledby', 'wm-sp-title');
+
+		const close = el('button', 'wm-sp-close');
+		close.type = 'button';
+		close.setAttribute('aria-label', 'Close');
+		close.innerHTML =
+			'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+		close.addEventListener('click', () => d.close());
+
+		const title = el('h2', 'wm-sp-title');
+		title.id = 'wm-sp-title';
+		const qr = el('div', 'wm-sp-qr');
+		const canvas = el('canvas', '');
+		canvas.width = canvas.height = 200;
+		canvas.setAttribute('role', 'img');
+		canvas.setAttribute('aria-label', 'QR code that opens this setting in WM Keyboard');
+		qr.append(canvas);
+
+		const row = el('div', 'wm-sp-row');
+		const copy = el('button', 'wm-sp-btn wm-sp-copy', 'Copy link');
+		copy.type = 'button';
+		copy.addEventListener('click', () => {
+			const label = 'Copy link';
+			navigator.clipboard?.writeText(copy.dataset.url ?? '').then(
+				() => (copy.textContent = 'Copied'),
+				() => (copy.textContent = 'Copy failed')
+			);
+			setTimeout(() => (copy.textContent = label), 1400);
+		});
+		const page = el('a', 'wm-sp-btn wm-sp-page', 'Open the link page');
+		page.target = '_blank';
+		page.rel = 'noopener';
+		row.append(copy, page);
+
+		d.append(
+			close,
+			el('p', 'wm-sp-kicker', 'Open in WM Keyboard'),
+			title,
+			el('p', 'wm-sp-path'),
+			el('p', 'wm-sp-since'),
+			el(
+				'p',
+				'wm-sp-note',
+				'Only an Android phone can open this. Scan the code with its camera and WM Keyboard opens right on it, or a page with where to get the app when it is not installed.'
+			),
+			qr,
+			el('p', 'wm-sp-fallback'),
+			row
+		);
+		// A press on the backdrop lands on the dialog itself, outside its box.
+		d.addEventListener('click', (e) => {
+			if (e.target !== d) return;
+			const r = d.getBoundingClientRect();
+			const inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+			if (!inside) d.close();
+		});
+		document.body.append(d);
+		dialog = d;
+		return d;
+	}
+
+	function openDialog(chip: HTMLAnchorElement) {
+		const url = chip.dataset.webHref;
+		if (!url) return;
+		const d = ensureDialog();
+		const token = ++openToken;
+		const crumbs = [...chip.querySelectorAll('.crumb')].map((c) => c.textContent ?? '');
+		const last = crumbs[crumbs.length - 1] ?? '';
+
+		d.querySelector('.wm-sp-title')!.textContent = last;
+		d.querySelector('.wm-sp-path')!.textContent = crumbs.slice(0, -1).join(' › ');
+		const since = d.querySelector<HTMLElement>('.wm-sp-since')!;
+		const note = chip.dataset.since?.trim().replace(/^\((.*)\)$/, '$1') ?? '';
+		since.textContent = note ? note.charAt(0).toUpperCase() + note.slice(1) : '';
+		since.dataset.released = String(!/not released/.test(note));
+		since.hidden = !note;
+		d.querySelector<HTMLElement>('.wm-sp-copy')!.dataset.url = url;
+		d.querySelector<HTMLAnchorElement>('.wm-sp-page')!.href = url;
+
+		const canvas = d.querySelector('canvas')!;
+		const fallback = d.querySelector<HTMLElement>('.wm-sp-fallback')!;
+		canvas.hidden = false;
+		fallback.hidden = true;
+		canvas.getContext('2d')?.clearRect(0, 0, canvas.width, canvas.height);
+		import('qrcode')
+			.then((QR) => {
+				if (token !== openToken) return;
+				return QR.toCanvas(canvas, url, {
+					margin: 1,
+					width: 200,
+					errorCorrectionLevel: 'M',
+					color: { dark: '#111111', light: '#ffffff' },
+				});
+			})
+			.catch(() => {
+				// The address is still readable without a code to scan.
+				canvas.hidden = true;
+				fallback.textContent = url;
+				fallback.hidden = false;
+			});
+
+		if (!d.open) d.showModal();
+	}
+
+	function scanChips() {
+		for (const chip of document.querySelectorAll<HTMLAnchorElement>('a.settings-path[data-web-href]')) {
+			chip.href = chip.dataset.webHref!;
+			chip.classList.add('is-link', 'is-scan');
+			chip.setAttribute('aria-haspopup', 'dialog');
+			chip.title =
+				(chip.dataset.exact === 'false'
+					? 'Show a code that opens the screen holding this setting on your phone'
+					: 'Show a code that opens this setting on your phone') + (chip.dataset.since ?? '');
+			chip.addEventListener('click', (e) => {
+				// A middle click or a modified one still opens the /open/ page.
+				if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+				e.preventDefault();
+				openDialog(chip);
+			});
+		}
 	}
 </script>
 
 
 <style>
+	/* One box, with its text wrapping inside it like prose: a line after the
+	   first is indented (hanging indent) so a wrapped path still reads as one
+	   path. The radius is half a one-line chip's height, so a one-line chip is
+	   a pill and a taller one gets corners instead of a tall capsule. */
 	.settings-path {
+		--sp-indent: 1.1em;
+		/* inline-flex around one block, so the chip sits on the baseline of its
+		   first line; a plain inline-block would sit on its last. */
 		display: inline-flex;
-		align-items: center;
-		flex-wrap: wrap;
-		gap: 0.35em;
-		padding: 0.3em 0.75em;
-		margin-block: 0.25rem;
+		max-width: 100%;
+		margin-block: 0.2rem;
+		padding: 0.28em 0.8em 0.28em calc(0.8em + var(--sp-indent));
+		text-indent: calc(-1 * var(--sp-indent));
 		border: 1px solid var(--sl-color-gray-5);
-		border-radius: 999px;
+		border-radius: 1.05em;
 		background: var(--sl-color-gray-6);
 		color: var(--sl-color-gray-2);
 		font-size: var(--sl-text-sm);
-		line-height: 1.4;
+		line-height: 1.5;
 		text-decoration: none;
+		overflow-wrap: anywhere;
+	}
+	.sp-text {
+		display: block;
+		min-width: 0;
 	}
 	.settings-path:hover {
 		color: var(--sl-color-gray-2);
 	}
 	.settings-path svg {
+		display: inline;
+		vertical-align: -0.15em;
 		color: var(--sl-color-accent);
-		flex-shrink: 0;
+	}
+	.glue {
+		white-space: nowrap;
+	}
+	.glue > svg:first-child {
+		margin-inline-end: 0.3em;
 	}
 	.sep {
 		color: var(--sl-color-gray-4);
 	}
-	.crumb:last-of-type {
+	.crumb.current {
 		color: var(--sl-color-white);
 		font-weight: 600;
 	}
 	.unreleased {
-		padding: 0 0.55em;
+		padding: 0.05em 0.55em;
 		border: 1px solid var(--sl-color-orange);
 		border-radius: 999px;
 		background: var(--sl-color-orange-low);
 		color: var(--sl-color-white);
 		font-size: var(--sl-text-xs);
 		font-weight: 600;
+		white-space: nowrap;
 	}
 	/* The open-in-app arrow only exists once the script has made a link. */
 	.open {
@@ -179,14 +396,183 @@ const sinceNote = since ? (since.released ? ` (added in ${since.version})` : ` (
 	}
 	.settings-path.is-link .open {
 		display: inline;
-		margin-inline-start: 0.1em;
+		margin-inline-start: 0.3em;
 	}
-	.settings-path.is-link .crumb:last-of-type {
+	.settings-path.is-link .crumb.current {
 		text-decoration: underline;
 		text-decoration-color: var(--sl-color-accent);
 		text-underline-offset: 0.2em;
 	}
+	.settings-path.is-link:hover {
+		background: var(--sl-color-accent-low);
+	}
 	.settings-path.is-link:active {
 		background: var(--sl-color-accent-low);
+	}
+	.settings-path.is-link:focus-visible {
+		outline: 2px solid var(--sl-color-accent);
+		outline-offset: 2px;
+	}
+</style>
+
+<style is:global>
+	/* The dialog is built by the script above, outside any chip, so its rules
+	   cannot be scoped. Same card language as /open/. */
+	/* Centred in the viewport. The site's reset zeroes every margin, which is
+	   what centres a modal <dialog>, so it is spelled out here. */
+	.wm-sp-dialog {
+		position: fixed;
+		inset: 0;
+		margin: auto;
+		height: fit-content;
+		width: min(calc(100% - 2rem), 24rem);
+		max-height: calc(100dvh - 2rem);
+		padding: 1.75rem 1.5rem 1.4rem;
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 20px;
+		background:
+			radial-gradient(22rem 12rem at 50% -5rem, color-mix(in oklab, var(--wm-violet) 28%, transparent), transparent 70%),
+			var(--sl-color-gray-6);
+		color: var(--sl-color-gray-2);
+		box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+		text-align: center;
+		overflow: auto;
+	}
+	:root[data-theme='light'] .wm-sp-dialog {
+		background:
+			radial-gradient(22rem 12rem at 50% -5rem, color-mix(in oklab, var(--wm-violet) 14%, transparent), transparent 70%),
+			#fff;
+		border-color: var(--sl-color-gray-6);
+		box-shadow: 0 24px 70px rgba(20, 24, 60, 0.2);
+	}
+	.wm-sp-dialog[open] {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.6rem;
+		animation: wm-sp-in 160ms ease-out;
+	}
+	.wm-sp-dialog::backdrop {
+		background: rgba(8, 10, 20, 0.6);
+		backdrop-filter: blur(3px);
+	}
+	@keyframes wm-sp-in {
+		from {
+			opacity: 0;
+			transform: translateY(8px) scale(0.98);
+		}
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.wm-sp-dialog[open] {
+			animation: none;
+		}
+	}
+	.wm-sp-dialog > * {
+		margin: 0;
+	}
+	.wm-sp-close {
+		position: absolute;
+		top: 0.7rem;
+		right: 0.7rem;
+		display: grid;
+		place-items: center;
+		width: 2rem;
+		height: 2rem;
+		padding: 0;
+		border: 0;
+		border-radius: 50%;
+		background: none;
+		color: var(--sl-color-gray-3);
+		cursor: pointer;
+	}
+	.wm-sp-close:hover {
+		background: var(--sl-color-gray-5);
+		color: var(--sl-color-white);
+	}
+	.wm-sp-kicker {
+		font-size: 0.7rem;
+		font-weight: 600;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--sl-color-gray-3);
+	}
+	.wm-sp-title {
+		padding: 0 1rem;
+		border: 0;
+		font-size: 1.4rem;
+		font-weight: 700;
+		line-height: 1.2;
+		letter-spacing: -0.015em;
+		color: var(--sl-color-white);
+		overflow-wrap: anywhere;
+	}
+	.wm-sp-path {
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-3);
+	}
+	.wm-sp-path:empty,
+	.wm-sp-since[hidden],
+	.wm-sp-fallback[hidden],
+	.wm-sp-qr:has(canvas[hidden]) {
+		display: none;
+	}
+	.wm-sp-since {
+		padding: 0.2em 0.75em;
+		border: 1px solid var(--sl-color-accent);
+		border-radius: 999px;
+		background: var(--sl-color-accent-low);
+		color: var(--sl-color-white);
+		font-size: var(--sl-text-xs);
+		font-weight: 650;
+	}
+	.wm-sp-since[data-released='false'] {
+		border-color: var(--sl-color-orange);
+		background: var(--sl-color-orange-low);
+	}
+	.wm-sp-note {
+		max-width: 20rem;
+		margin-top: 0.25rem !important;
+		font-size: var(--sl-text-sm);
+		line-height: 1.5;
+		color: var(--sl-color-gray-2);
+	}
+	.wm-sp-qr {
+		margin-top: 0.4rem !important;
+		padding: 0.7rem;
+		border-radius: 14px;
+		background: #fff;
+		line-height: 0;
+	}
+	.wm-sp-qr canvas {
+		display: block;
+		width: 200px;
+		height: 200px;
+	}
+	.wm-sp-fallback {
+		font-size: var(--sl-text-sm);
+		overflow-wrap: anywhere;
+	}
+	.wm-sp-row {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 0.5rem;
+		margin-top: 0.5rem !important;
+	}
+	.wm-sp-btn {
+		padding: 0.5rem 1rem;
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 999px;
+		background: none;
+		color: var(--sl-color-white);
+		font: inherit;
+		font-size: var(--sl-text-sm);
+		font-weight: 600;
+		text-decoration: none;
+		cursor: pointer;
+	}
+	.wm-sp-btn:hover {
+		border-color: var(--sl-color-accent);
+		color: var(--sl-color-white);
 	}
 </style>

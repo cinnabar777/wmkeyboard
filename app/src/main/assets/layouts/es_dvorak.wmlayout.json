@@ -1,0 +1,183 @@
+{
+  "format": "wmkeyboard-layout",
+  "version": 1,
+  "layout": {
+    "id": "asset_es_dvorak",
+    "name": "Español Dvorak (Spanish Dvorak)",
+    "langId": "es",
+    "version": 2,
+    "layers": {
+      "letters": {
+        "rows": [
+          [
+            {
+              "label": ",",
+              "longPress": [
+                "<",
+                "?"
+              ]
+            },
+            {
+              "label": ".",
+              "longPress": [
+                ">"
+              ]
+            },
+            {
+              "label": "ñ"
+            },
+            {
+              "label": "p"
+            },
+            {
+              "label": "y"
+            },
+            {
+              "label": "f"
+            },
+            {
+              "label": "g"
+            },
+            {
+              "label": "c"
+            },
+            {
+              "label": "h"
+            },
+            {
+              "label": "l"
+            }
+          ],
+          [
+            {
+              "label": "a"
+            },
+            {
+              "label": "o"
+            },
+            {
+              "label": "e"
+            },
+            {
+              "label": "u"
+            },
+            {
+              "label": "i"
+            },
+            {
+              "label": "d"
+            },
+            {
+              "label": "r"
+            },
+            {
+              "label": "t"
+            },
+            {
+              "label": "n"
+            },
+            {
+              "label": "s"
+            },
+            {
+              "label": "'",
+              "longPress": [
+                "!",
+                "\""
+              ]
+            },
+            {
+              "label": "ç"
+            }
+          ],
+          [
+            {
+              "label": "⇧",
+              "action": {
+                "type": "shift"
+              },
+              "width": 1.5
+            },
+            {
+              "label": "j"
+            },
+            {
+              "label": "k"
+            },
+            {
+              "label": "x"
+            },
+            {
+              "label": "b"
+            },
+            {
+              "label": "m"
+            },
+            {
+              "label": "w"
+            },
+            {
+              "label": "v"
+            },
+            {
+              "label": "⌫",
+              "action": {
+                "type": "delete"
+              },
+              "width": 1.5
+            }
+          ],
+          [
+            {
+              "label": "?123",
+              "action": {
+                "type": "symbols"
+              },
+              "width": 1.5
+            },
+            {
+              "label": ",",
+              "longPress": [
+                "!",
+                "?"
+              ],
+              "role": "Comma"
+            },
+            {
+              "label": "🌐",
+              "action": {
+                "type": "language_switch"
+              }
+            },
+            {
+              "label": " ",
+              "action": {
+                "type": "space"
+              },
+              "width": 4
+            },
+            {
+              "label": ".",
+              "longPress": [
+                "…",
+                ",",
+                "?",
+                "!",
+                ":",
+                ";"
+              ],
+              "role": "Period"
+            },
+            {
+              "label": "⏎",
+              "action": {
+                "type": "enter"
+              },
+              "width": 1.5
+            }
+          ]
+        ]
+      }
+    }
+  }
+}

@@ -245,6 +245,26 @@ data class Key(
      * Additive and defaulted, so no format-version bump.
      */
     val kanaVariantWhileComposing: Boolean = false,
+    /**
+     * What tapping this key again types in place of what the last tap typed —
+     * the feature-phone multi-tap a Korean 천지인 (Cheonjiin) pad cycles its
+     * consonants with (ㄱ → ㅋ → ㄲ) and Samsung's `.,?!` key its punctuation
+     * with (discussion #372).
+     *
+     * KeymanWeb's shape: the first tap types the key itself ([output], falling
+     * back to [label]), the second `multitap[0]`, and so on, wrapping back to the
+     * key after the last entry. A tap only continues the cycle when it is the same
+     * key, soon enough after the one before it, with the caret where that tap
+     * left it; anything else starts over, which is how the same letter is typed
+     * twice in a row. See `MultitapCycle` in `:core:input`.
+     *
+     * On a Keyman key these are the caps of the cycle's keys, and
+     * [KeyAction.KeymanKey.multitap] holds the keys themselves in the same order.
+     *
+     * Empty, the normal case, is an ordinary key: every tap types it again.
+     * Additive and defaulted, so no format-version bump.
+     */
+    val multitap: List<String> = emptyList(),
 )
 
 /** What a [Key.kanaVariantWhileComposing] key draws while it is the 小゛゜ key. */
@@ -472,6 +492,19 @@ fun Key.flickKey(direction: FlickDirection): Key? {
 }
 
 /**
+ * The key tap [step] of a multitap run presses: this key for step 0, else the
+ * cycle's entry. On a Keyman key that is the entry's own Keyman key, typing its
+ * [KeymanTarget.text] with no rules loaded; otherwise this key typing the
+ * entry's text. Either way the result carries no cycle of its own.
+ */
+fun Key.multitapKey(step: Int): Key {
+    val text = multitap.getOrNull(step - 1) ?: return this
+    val target = (action as? KeyAction.KeymanKey)?.multitap?.takeIf { it.size == multitap.size }?.get(step - 1)
+        ?: return copy(output = text, shiftLabel = null, multitap = emptyList())
+    return Key(label = text, output = target.text, action = target.toAction(), width = width)
+}
+
+/**
  * What a [Key.labelScale] is honoured at.
  *
  * The floor is below the corner-hint size, so a layout can genuinely annotate a
@@ -527,6 +560,12 @@ data class KeyboardLayout(
      * field opens by looking at the grid it is showing, not at the spec.
      */
     val persistent: Boolean = false,
+    /**
+     * Whether the Bottom row settings leave this grid alone; see
+     * [LayerSpec.bottomRowAsLaidOut]. On the compiled grid because
+     * [arrangedBy] is handed the grid, not the spec.
+     */
+    val bottomRowAsLaidOut: Boolean = false,
     /**
      * The theme this grid asks to be drawn in: the layer's own, else the
      * layout's, else null for "whatever is set" (issue #61). Resolved here so

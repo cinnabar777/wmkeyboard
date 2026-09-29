@@ -555,12 +555,15 @@ val compileBundledDictionaries =
     }
 
 // Writes assets/layouts-index.tsv: one line per shipped JSON layout, in file
-// order — `id<TAB>name<TAB>langId<TAB>keymanId<TAB>keymanVersion`. The keyboard
+// order — `id<TAB>name<TAB>langId<TAB>keymanId<TAB>keymanVersion<TAB>desktop`. The keyboard
 // reads this instead of the layouts themselves (see AssetLayouts): there are
 // over fifteen hundred of them and a user has a handful on, so parsing the rest
 // at every process start only filled the heap and held up the first settings
 // frame. Names, languages and Keyman bindings are what the lists and the
-// search need without opening a grid.
+// search need without opening a grid. `desktop` is 1 for a grid shaped like a
+// desktop keyboard (a row of 13 or more keys: the whole number row with its
+// backquote and equals), which the More layouts page lists after the ones
+// drawn for a phone.
 abstract class GenerateLayoutIndexTask : DefaultTask() {
     @get:InputDirectory
     @get:PathSensitive(PathSensitivity.RELATIVE)
@@ -586,12 +589,17 @@ abstract class GenerateLayoutIndexTask : DefaultTask() {
                 fun clean(value: Any?) = (value as? String).orEmpty().replace('\t', ' ').replace('\n', ' ')
                 @Suppress("UNCHECKED_CAST")
                 val keyman = layout["keyman"] as? Map<String, Any?>
+                @Suppress("UNCHECKED_CAST")
+                val layers = layout["layers"] as? Map<String, Map<String, Any?>>
+                val base = layers?.get("letters") ?: layers?.values?.firstOrNull()
+                val widest = (base?.get("rows") as? List<*>).orEmpty().maxOfOrNull { (it as? List<*>)?.size ?: 0 } ?: 0
                 listOf(
                     id,
                     clean(layout["name"]),
                     clean(layout["langId"]),
                     clean(keyman?.get("keyboardId")),
                     clean(keyman?.get("version")),
+                    if (widest >= 13) "1" else "",
                 ).joinToString("\t")
             }
         val out = outputDir.get().asFile

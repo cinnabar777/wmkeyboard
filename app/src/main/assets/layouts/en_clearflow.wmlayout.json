@@ -1,0 +1,176 @@
+{
+  "format": "wmkeyboard-layout",
+  "version": 1,
+  "layout": {
+    "id": "asset_en_clearflow",
+    "name": "ClearFlow",
+    "langId": "en",
+    "version": 2,
+    "layers": {
+      "letters": {
+        "rows": [
+          [
+            {
+              "label": "⇧",
+              "action": {
+                "type": "shift"
+              },
+              "width": 1.5,
+              "rowSpan": 2
+            },
+            {
+              "label": "!"
+            },
+            {
+              "label": "q"
+            },
+            {
+              "label": "w"
+            },
+            {
+              "label": "c"
+            },
+            {
+              "label": "j"
+            },
+            {
+              "label": "?"
+            },
+            {
+              "label": "⌫",
+              "action": {
+                "type": "delete"
+              },
+              "width": 1.5,
+              "rowSpan": 2
+            }
+          ],
+          [
+            {
+              "label": "y"
+            },
+            {
+              "label": "o"
+            },
+            {
+              "label": "h"
+            },
+            {
+              "label": "e"
+            },
+            {
+              "label": "v"
+            },
+            {
+              "label": "u"
+            }
+          ],
+          [
+            {
+              "label": " ",
+              "action": {
+                "type": "space"
+              },
+              "width": 1.5,
+              "rowSpan": 2
+            },
+            {
+              "label": "x"
+            },
+            {
+              "label": "r"
+            },
+            {
+              "label": "t"
+            },
+            {
+              "label": "a"
+            },
+            {
+              "label": "l"
+            },
+            {
+              "label": "b"
+            },
+            {
+              "label": " ",
+              "action": {
+                "type": "space"
+              },
+              "width": 1.5,
+              "rowSpan": 2
+            }
+          ],
+          [
+            {
+              "label": "f"
+            },
+            {
+              "label": "s"
+            },
+            {
+              "label": "i"
+            },
+            {
+              "label": "n"
+            },
+            {
+              "label": "d"
+            },
+            {
+              "label": "z"
+            }
+          ],
+          [
+            {
+              "label": "?123",
+              "action": {
+                "type": "symbols"
+              },
+              "width": 1.5
+            },
+            {
+              "label": ",",
+              "longPress": [
+                "!",
+                "?"
+              ],
+              "role": "Comma"
+            },
+            {
+              "label": "p"
+            },
+            {
+              "label": "m"
+            },
+            {
+              "label": "g"
+            },
+            {
+              "label": "k"
+            },
+            {
+              "label": ".",
+              "longPress": [
+                "…",
+                ",",
+                "?",
+                "!",
+                ":",
+                ";"
+              ],
+              "role": "Period"
+            },
+            {
+              "label": "⏎",
+              "action": {
+                "type": "enter"
+              },
+              "width": 1.5
+            }
+          ]
+        ]
+      }
+    }
+  }
+}

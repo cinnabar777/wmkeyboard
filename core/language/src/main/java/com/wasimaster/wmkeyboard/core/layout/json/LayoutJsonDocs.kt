@@ -73,6 +73,8 @@ object LayoutJsonDocs {
             "This layer's own label size, in place of the layout's. Useful for a symbols page that stays small while the letters grow.",
         "LayerSpec.persistent" to
             "Keeps this layer on screen when the keyboard closes and opens again, instead of going back to the letters.",
+        "LayerSpec.bottomRowAsLaidOut" to
+            "Draws the bottom row exactly as it is here. The Bottom row settings do not hide, move, swap or change its keys.",
         "LayerSpec.themeId" to "A theme for while this layer is on screen, over the layout's theme and the settings.",
 
         "LayoutAppearance.fontId" to
@@ -102,6 +104,7 @@ object LayoutJsonDocs {
         "Key.hideHint" to "Draws no corner hint on this key, even when it has alternates.",
         "Key.forceHint" to "Draws this key's corner hint even when hints are off in the settings. hideHint wins when both are on.",
         "Key.flick" to "What a flick in each direction types, for a 12-key kana pad.",
+        "Key.multitap" to "What tapping the key again types in place of the last tap, in order. After the last entry the cycle goes back to the key itself.",
         "Key.labelScale" to "This key's label size, as a multiple of a letter's. Leave it out and the keyboard decides.",
         "Key.letters" to "Every letter this key stands for, such as \"abc\" on a T9 key. The prediction works out which one you meant.",
         "Key.repeatOnHold" to
@@ -165,6 +168,7 @@ object LayoutJsonDocs {
         "action:keyman_key.text" to "What a long-press or flick key types when no rules are loaded.",
         "action:keyman_key.longPress" to "The Keyman keys behind the key's long-press entries, in the same order.",
         "action:keyman_key.flick" to "The Keyman keys behind the key's flicks, by direction.",
+        "action:keyman_key.multitap" to "The Keyman keys that later taps of the key press, in the same order as the key's multitap list.",
         "action:none" to "A gap in the grid. It draws as empty space and does nothing.",
         "action:field" to "A panel cell that holds a live component, such as the emoji grid. Only a panel layout can hold one.",
         "action:field.kind" to "Which component the cell holds.",

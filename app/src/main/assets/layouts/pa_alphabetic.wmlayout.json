@@ -1,0 +1,249 @@
+{
+  "format": "wmkeyboard-layout",
+  "version": 1,
+  "layout": {
+    "id": "asset_pa_alphabetic",
+    "name": "ਗੁਰਮੁਖੀ ਵਰਣਮਾਲਾ (Gurmukhi alphabetic)",
+    "langId": "pa",
+    "version": 2,
+    "layers": {
+      "letters": {
+        "rows": [
+          [
+            {
+              "label": "੍",
+              "shiftLabel": "ਅ",
+              "longPress": [
+                "ਃ"
+              ]
+            },
+            {
+              "label": "ਾ",
+              "shiftLabel": "ਆ"
+            },
+            {
+              "label": "ਿ",
+              "shiftLabel": "ਇ"
+            },
+            {
+              "label": "ੀ",
+              "shiftLabel": "ਈ"
+            },
+            {
+              "label": "ੁ",
+              "shiftLabel": "ਉ"
+            },
+            {
+              "label": "ੂ",
+              "shiftLabel": "ਊ"
+            },
+            {
+              "label": "ੇ",
+              "shiftLabel": "ਏ"
+            },
+            {
+              "label": "ੈ",
+              "shiftLabel": "ਐ"
+            },
+            {
+              "label": "ੋ",
+              "shiftLabel": "ਓ"
+            },
+            {
+              "label": "ੌ",
+              "shiftLabel": "ਔ"
+            }
+          ],
+          [
+            {
+              "label": "ੳ",
+              "longPress": [
+                "ੴ"
+              ]
+            },
+            {
+              "label": "ੲ"
+            },
+            {
+              "label": "ਸ"
+            },
+            {
+              "label": "ਹ"
+            },
+            {
+              "label": "ਕ"
+            },
+            {
+              "label": "ਖ"
+            },
+            {
+              "label": "ਗ"
+            },
+            {
+              "label": "ਘ"
+            },
+            {
+              "label": "ੰ"
+            },
+            {
+              "label": "ਂ"
+            }
+          ],
+          [
+            {
+              "label": "ਚ"
+            },
+            {
+              "label": "ਛ"
+            },
+            {
+              "label": "ਜ"
+            },
+            {
+              "label": "ਝ"
+            },
+            {
+              "label": "ਟ"
+            },
+            {
+              "label": "ਠ"
+            },
+            {
+              "label": "ਡ"
+            },
+            {
+              "label": "ਢ"
+            },
+            {
+              "label": "ਣ"
+            },
+            {
+              "label": "ੱ"
+            }
+          ],
+          [
+            {
+              "label": "ਤ"
+            },
+            {
+              "label": "ਥ"
+            },
+            {
+              "label": "ਦ"
+            },
+            {
+              "label": "ਧ"
+            },
+            {
+              "label": "ਨ"
+            },
+            {
+              "label": "ਪ"
+            },
+            {
+              "label": "ਫ"
+            },
+            {
+              "label": "ਬ"
+            },
+            {
+              "label": "ਭ"
+            },
+            {
+              "label": "ਮ"
+            }
+          ],
+          [
+            {
+              "label": "⇧",
+              "action": {
+                "type": "shift"
+              },
+              "width": 1.5
+            },
+            {
+              "label": "ਯ"
+            },
+            {
+              "label": "ਰ"
+            },
+            {
+              "label": "ਲ"
+            },
+            {
+              "label": "ਵ"
+            },
+            {
+              "label": "ੜ"
+            },
+            {
+              "label": "੍ਰ"
+            },
+            {
+              "label": "੍ਹ"
+            },
+            {
+              "label": "਼"
+            },
+            {
+              "label": "⌫",
+              "action": {
+                "type": "delete"
+              },
+              "width": 1.5
+            }
+          ],
+          [
+            {
+              "label": "?123",
+              "action": {
+                "type": "symbols"
+              },
+              "width": 1.5
+            },
+            {
+              "label": ",",
+              "longPress": [
+                "!",
+                "?"
+              ],
+              "role": "Comma"
+            },
+            {
+              "label": "🌐",
+              "action": {
+                "type": "language_switch"
+              }
+            },
+            {
+              "label": " ",
+              "action": {
+                "type": "space"
+              },
+              "width": 4
+            },
+            {
+              "label": ".",
+              "longPress": [
+                "…",
+                ",",
+                "?",
+                "!",
+                ":",
+                ";"
+              ],
+              "role": "Period"
+            },
+            {
+              "label": "⏎",
+              "action": {
+                "type": "enter"
+              },
+              "width": 1.5
+            }
+          ]
+        ]
+      }
+    }
+  }
+}

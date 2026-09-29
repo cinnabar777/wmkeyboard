@@ -1,0 +1,371 @@
+{
+  "format": "wmkeyboard-layout",
+  "version": 1,
+  "layout": {
+    "id": "asset_bn_akkhor",
+    "name": "অক্ষর (Akkhor)",
+    "langId": "bn",
+    "version": 2,
+    "layers": {
+      "letters": {
+        "rows": [
+          [
+            {
+              "label": "ধ",
+              "longPress": [
+                "১",
+                "ধ্ব",
+                "ধ্য",
+                "ধ্র"
+              ],
+              "shiftLabel": "ঢ"
+            },
+            {
+              "label": "থ",
+              "longPress": [
+                "২",
+                "থ্য",
+                "থ্র"
+              ],
+              "shiftLabel": "ঠ"
+            },
+            {
+              "label": "ে",
+              "longPress": [
+                "৩",
+                "এ"
+              ],
+              "shiftLabel": "ৈ"
+            },
+            {
+              "label": "র",
+              "longPress": [
+                "৪"
+              ],
+              "shiftLabel": "ড়"
+            },
+            {
+              "label": "ত",
+              "longPress": [
+                "৫",
+                "ৎ",
+                "ত্ত",
+                "ত্ন",
+                "ত্ব",
+                "ত্ম"
+              ],
+              "shiftLabel": "ট"
+            },
+            {
+              "label": "য়",
+              "longPress": [
+                "৬"
+              ],
+              "shiftLabel": "ঞ"
+            },
+            {
+              "label": "ু",
+              "longPress": [
+                "৭",
+                "উ"
+              ],
+              "shiftLabel": "ূ"
+            },
+            {
+              "label": "ি",
+              "longPress": [
+                "৮",
+                "ই"
+              ],
+              "shiftLabel": "ী"
+            },
+            {
+              "label": "ো",
+              "longPress": [
+                "৯",
+                "ও"
+              ],
+              "shiftLabel": "ৌ"
+            },
+            {
+              "label": "প",
+              "longPress": [
+                "০",
+                "প্ত",
+                "প্ন",
+                "প্প",
+                "প্য",
+                "প্র",
+                "প্ল",
+                "প্স"
+              ],
+              "shiftLabel": "ফ"
+            },
+            {
+              "label": "আ",
+              "shiftLabel": "ঋ"
+            }
+          ],
+          [
+            {
+              "label": "া",
+              "longPress": [
+                "আ"
+              ],
+              "shiftLabel": "অ"
+            },
+            {
+              "label": "স",
+              "longPress": [
+                "স্ব",
+                "স্ত",
+                "স্ট",
+                "স্ক",
+                "স্প"
+              ],
+              "shiftLabel": "শ"
+            },
+            {
+              "label": "দ",
+              "longPress": [
+                "দ্দ",
+                "দ্ধ",
+                "দ্ব",
+                "দ্ভ",
+                "দ্ম",
+                "দ্য",
+                "দ্র"
+              ],
+              "shiftLabel": "ড"
+            },
+            {
+              "label": "ৃ",
+              "longPress": [
+                "ঋ"
+              ],
+              "shiftLabel": "ঢ়"
+            },
+            {
+              "label": "গ",
+              "longPress": [
+                "গ্ধ",
+                "গ্র",
+                "গ্ল",
+                "গ্ন"
+              ],
+              "shiftLabel": "ঘ"
+            },
+            {
+              "label": "্",
+              "shiftLabel": "হ"
+            },
+            {
+              "label": "জ",
+              "longPress": [
+                "জ্ঞ",
+                "জ্জ",
+                "জ্য",
+                "জ্ব",
+                "জ্র"
+              ],
+              "shiftLabel": "ঝ"
+            },
+            {
+              "label": "ক",
+              "longPress": [
+                "ক্ষ",
+                "ক্ক",
+                "ক্ট",
+                "ক্ত",
+                "ক্র",
+                "ক্স",
+                "ক্ল"
+              ],
+              "shiftLabel": "খ"
+            },
+            {
+              "label": "ল",
+              "longPress": [
+                "ল্ক",
+                "ল্গ",
+                "ল্ট",
+                "ল্ড",
+                "ল্ত",
+                "ল্দ",
+                "ল্ধ",
+                "ল্প",
+                "ল্ফ",
+                "ল্ব",
+                "ল্ম",
+                "ল্ল"
+              ],
+              "shiftLabel": "ৎ"
+            },
+            {
+              "label": "ই",
+              "shiftLabel": "ঈ"
+            },
+            {
+              "label": "উ",
+              "shiftLabel": "ঊ"
+            }
+          ],
+          [
+            {
+              "label": "⇧",
+              "action": {
+                "type": "shift"
+              },
+              "width": 1.5
+            },
+            {
+              "label": "য",
+              "longPress": [
+                "্য"
+              ],
+              "shiftLabel": "।"
+            },
+            {
+              "label": "ষ",
+              "longPress": [
+                "ষ্ক",
+                "ষ্ট",
+                "ষ্ঠ",
+                "ষ্ণ",
+                "ষ্প",
+                "ষ্ফ",
+                "ষ্ম"
+              ],
+              "shiftLabel": "ঙ"
+            },
+            {
+              "label": "চ",
+              "longPress": [
+                "চ্চ",
+                "চ্ছ"
+              ],
+              "shiftLabel": "ছ"
+            },
+            {
+              "label": "ভ",
+              "longPress": [
+                "ভ্য",
+                "ভ্র",
+                "ভ্ল"
+              ],
+              "shiftLabel": "ঃ"
+            },
+            {
+              "label": "ব",
+              "longPress": [
+                "্ব",
+                "ব্র",
+                "ব্জ",
+                "ব্দ",
+                "ব্ধ",
+                "ব্ব",
+                "ব্ল",
+                "ৱ",
+                "ৰ"
+              ],
+              "shiftLabel": "ঁ"
+            },
+            {
+              "label": "ন",
+              "longPress": [
+                "ন্ত",
+                "ন্থ",
+                "ন্ট",
+                "ন্দ",
+                "ন্ধ",
+                "ন্ড",
+                "ন্ন",
+                "ন্ব",
+                "ন্ম",
+                "ন্স"
+              ],
+              "shiftLabel": "ণ"
+            },
+            {
+              "label": "ম",
+              "longPress": [
+                "ম্ন",
+                "ম্প",
+                "ম্ব",
+                "ম্ভ",
+                "ম্ম",
+                "ম্র",
+                "ম্ল"
+              ],
+              "shiftLabel": "ং"
+            },
+            {
+              "label": "এ",
+              "shiftLabel": "ঐ"
+            },
+            {
+              "label": "ও",
+              "shiftLabel": "ঔ"
+            },
+            {
+              "label": "⌫",
+              "action": {
+                "type": "delete"
+              },
+              "width": 1.5
+            }
+          ],
+          [
+            {
+              "label": "?123",
+              "action": {
+                "type": "symbols"
+              },
+              "width": 1.5
+            },
+            {
+              "label": ",",
+              "longPress": [
+                "!",
+                "?"
+              ],
+              "role": "Comma"
+            },
+            {
+              "label": "🌐",
+              "action": {
+                "type": "language_switch"
+              }
+            },
+            {
+              "label": " ",
+              "action": {
+                "type": "space"
+              },
+              "width": 4
+            },
+            {
+              "label": ".",
+              "longPress": [
+                "…",
+                ",",
+                "?",
+                "!",
+                ":",
+                ";"
+              ],
+              "role": "Period"
+            },
+            {
+              "label": "⏎",
+              "action": {
+                "type": "enter"
+              },
+              "width": 1.5
+            }
+          ]
+        ]
+      }
+    }
+  }
+}

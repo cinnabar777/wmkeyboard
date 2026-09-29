@@ -1,0 +1,219 @@
+{
+  "format": "wmkeyboard-layout",
+  "version": 1,
+  "layout": {
+    "id": "asset_ckb_phonetic",
+    "name": "کوردی دەنگی (Kurdish Sorani phonetic)",
+    "langId": "ckb",
+    "version": 2,
+    "layers": {
+      "letters": {
+        "rows": [
+          [
+            {
+              "label": "ق",
+              "longPress": [
+                "ٯ"
+              ]
+            },
+            {
+              "label": "و",
+              "longPress": [
+                "وو"
+              ]
+            },
+            {
+              "label": "ە",
+              "longPress": [
+                "ة"
+              ]
+            },
+            {
+              "label": "ر",
+              "longPress": [
+                "ڕ"
+              ]
+            },
+            {
+              "label": "ت",
+              "longPress": [
+                "ط"
+              ]
+            },
+            {
+              "label": "ی"
+            },
+            {
+              "label": "ێ"
+            },
+            {
+              "label": "ئ",
+              "longPress": [
+                "ء"
+              ]
+            },
+            {
+              "label": "ۆ"
+            },
+            {
+              "label": "پ",
+              "longPress": [
+                "ث"
+              ]
+            }
+          ],
+          [
+            {
+              "label": "ا"
+            },
+            {
+              "label": "س"
+            },
+            {
+              "label": "ش"
+            },
+            {
+              "label": "د",
+              "longPress": [
+                "ذ"
+              ]
+            },
+            {
+              "label": "ف",
+              "longPress": [
+                "ڤ"
+              ]
+            },
+            {
+              "label": "ھ"
+            },
+            {
+              "label": "ژ",
+              "longPress": [
+                "━"
+              ]
+            },
+            {
+              "label": "ل",
+              "longPress": [
+                "ڵ"
+              ]
+            },
+            {
+              "label": "ک"
+            },
+            {
+              "label": "گ",
+              "longPress": [
+                "غ"
+              ]
+            }
+          ],
+          [
+            {
+              "label": "⇧",
+              "action": {
+                "type": "shift"
+              },
+              "width": 1.5
+            },
+            {
+              "label": "ز",
+              "longPress": [
+                "ظ"
+              ]
+            },
+            {
+              "label": "خ"
+            },
+            {
+              "label": "ج"
+            },
+            {
+              "label": "چ"
+            },
+            {
+              "label": "ح"
+            },
+            {
+              "label": "ع"
+            },
+            {
+              "label": "ب"
+            },
+            {
+              "label": "ن"
+            },
+            {
+              "label": "م"
+            },
+            {
+              "label": "⌫",
+              "action": {
+                "type": "delete"
+              },
+              "width": 1.5
+            }
+          ],
+          [
+            {
+              "label": "?123",
+              "action": {
+                "type": "symbols"
+              },
+              "width": 1.5
+            },
+            {
+              "label": "،",
+              "longPress": [
+                "؟",
+                "؛",
+                "ـ",
+                ",",
+                "!",
+                "?"
+              ],
+              "role": "Comma"
+            },
+            {
+              "label": "🌐",
+              "action": {
+                "type": "language_switch"
+              }
+            },
+            {
+              "label": " ",
+              "action": {
+                "type": "space"
+              },
+              "width": 4
+            },
+            {
+              "label": ".",
+              "longPress": [
+                "…",
+                "؟",
+                "،",
+                "؛",
+                "٪",
+                ",",
+                "?",
+                "!",
+                ":",
+                ";"
+              ],
+              "role": "Period"
+            },
+            {
+              "label": "⏎",
+              "action": {
+                "type": "enter"
+              },
+              "width": 1.5
+            }
+          ]
+        ]
+      }
+    }
+  }
+}

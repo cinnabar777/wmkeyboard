@@ -10,10 +10,6 @@
         <item quantity="one">%1$d Taste gibt das darauf abgedruckte Zeichen ein. Die ursprüngliche Tastatur verwendete eine Regel, um zu entscheiden, was sie eingibt.</item>
         <item quantity="other">%1$d Tasten geben die darauf abgedruckten Zeichen ein. Die ursprüngliche Tastatur verwendete Regeln, um zu entscheiden, was sie eingeben.</item>
     </plurals>
-    <plurals name="core_keyman_multitap_dropped">
-        <item quantity="one">Diese Tastatur hat %1$d Taste, die du wiederholt antippst, um durch die Zeichen zu blättern. Diese Tastatur-App hat keine solche Taste, daher ist nur das erste Zeichen verfügbar.</item>
-        <item quantity="other">Diese Tastatur hat %1$d Tasten, die du wiederholt antippst, um durch die Zeichen zu blättern. Diese Tastatur-App hat keine solchen Tasten, daher ist nur das erste Zeichen jeder Taste verfügbar.</item>
-    </plurals>
     <string name="core_keyman_rules_missing">Diese Tastatur verwendet Regeln, um zu entscheiden, welche Zeichen ihre Tasten eingeben. Die App verfügt nicht über diese Regeln, daher gibt jede Taste das darauf abgebildete Zeichen ein.</string>
     <plurals name="core_keyman_special_keys_dropped">
         <item quantity="one">Die App hat %1$d Taste entfernt. Diese Tastatur hat keine Taste, die dasselbe bewirkt.</item>

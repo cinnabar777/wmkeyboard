@@ -10,10 +10,6 @@
         <item quantity="one">%1$d tecla escriu el caràcter imprès. El teclat original utilitzava una regla per decidir què escriu.</item>
         <item quantity="other">%1$d tecles escriuen els caràcters impresos. El teclat original utilitzava regles per decidir què escriuen.</item>
     </plurals>
-    <plurals name="core_keyman_multitap_dropped">
-        <item quantity="one">Aquest teclat té %1$d tecla que es prem repetidament per alternar entre caràcters. Aquesta aplicació de teclat no té cap tecla així, per la qual cosa només està disponible el primer caràcter.</item>
-        <item quantity="other">Aquest teclat té %1$d tecles que es premen repetidament per alternar entre caràcters. Aquesta aplicació de teclat no té aquestes tecles, per la qual cosa només està disponible el primer caràcter de cadascuna.</item>
-    </plurals>
     <string name="core_keyman_rules_missing">Aquest teclat utilitza regles per decidir què escriuen les seves tecles. L\'aplicació no té aquestes regles, així que cada tecla escriu el caràcter imprès a sobre.</string>
     <plurals name="core_keyman_special_keys_dropped">
         <item quantity="one">L\'aplicació ha eliminat %1$d tecla. Aquest teclat no té cap tecla que faci el mateix.</item>

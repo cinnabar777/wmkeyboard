@@ -177,10 +177,41 @@ internal fun SearchQueryText(
 ) {
     val handle = LocalCaptureCaret.current
     val caret = if (active) handle.at.coerceIn(0, query.length) else -1
-    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+    // Empty field: no text to press on, so the whole box takes the long press
+    // that offers Paste at the caret (#434). Otherwise the one-line text
+    // below does, where the press can also land on a word.
+    val emptyActive = caret >= 0 && query.isEmpty()
+    val overlay = LocalSelectionOverlay.current
+    val owner = remember { SelectionAnchor() }
+    var caretBar by remember(query, active) { mutableStateOf(false) }
+    Row(
+        modifier = if (emptyActive) {
+            modifier
+                .onGloballyPositioned {
+                    owner.coordinates = it
+                    overlay?.moved(owner)
+                }
+                .pointerInput(query, active) {
+                    detectTapGestures(onLongPress = { caretBar = true }, onTap = { caretBar = false })
+                }
+        } else {
+            modifier
+        },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        PublishFieldSelection(
+            owner = owner,
+            text = "",
+            active = emptyActive,
+            handle = handle,
+            coordinates = { owner.coordinates },
+            layout = { null },
+            caretBar = caretBar,
+            onCaretBarDismiss = { caretBar = false },
+        )
         // Empty field: the caret sits in front of the placeholder, where the
         // first character will land. Nothing to scroll and nowhere to tap.
-        if (caret >= 0 && query.isEmpty()) {
+        if (emptyActive) {
             SearchCaret(textColor, fontSize, query)
             Spacer(Modifier.width(4.dp))
         }
@@ -235,14 +266,19 @@ private fun CaretQueryText(
     val active = caret >= 0
     val selecting = active && handle.hasSelection
     val latestHandle by androidx.compose.runtime.rememberUpdatedState(handle)
+    // Paste offered at the caret by a long press on no word (#434).
+    var caretBar by remember(query) { mutableStateOf(false) }
     Box(
         modifier = modifier
             .horizontalScroll(scroll)
             .pointerInput(query, active) {
                 if (!active) return@pointerInput
                 detectTapGestures(
-                    onLongPress = { position -> fieldLongPress(query, layout, position, latestHandle) },
+                    onLongPress = { position ->
+                        caretBar = !fieldLongPress(query, layout, position, latestHandle)
+                    },
                 ) { position ->
+                    caretBar = false
                     layout?.takeIf { it.layoutInput.text.text == query }?.let {
                         latestHandle.onCaretTap(it.getOffsetForPosition(position))
                     }
@@ -279,6 +315,8 @@ private fun CaretQueryText(
             handle = handle,
             coordinates = { owner.coordinates },
             layout = { layout?.takeIf { it.layoutInput.text.text == query } },
+            caretBar = caretBar,
+            onCaretBarDismiss = { caretBar = false },
         )
         // Only a layout of *this* text can say where the caret goes. `Text`
         // reports its layout during the layout phase, which runs after the

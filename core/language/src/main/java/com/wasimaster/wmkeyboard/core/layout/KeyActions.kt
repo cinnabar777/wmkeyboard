@@ -323,6 +323,11 @@ sealed interface KeyAction {
      * one rather than as the text on its cap. Each carries its own fallback in
      * [text].
      *
+     * [multitap] is the same for the key's repeated-tap cycle, parallel to
+     * [Key.multitap]: each later tap is a Keyman key of its own, which the
+     * service runs through the rules after taking the previous tap's output
+     * back, the way KeymanWeb rewinds to the text before the first tap.
+     *
      * Carried on the action rather than as a field on [Key] because [Key] is
      * serialised with `encodeDefaults`, so a new field there writes into every
      * key of every stored layout, and because [Key] is a Compose parameter under
@@ -338,6 +343,7 @@ sealed interface KeyAction {
         val text: String? = null,
         val longPress: List<KeymanTarget> = emptyList(),
         val flick: Map<FlickDirection, KeymanTarget> = emptyMap(),
+        val multitap: List<KeymanTarget> = emptyList(),
     ) : KeyAction {
         /** A key that only switches layers: no virtual key and no name to type. */
         val isLayerSwitch: Boolean get() = vkey == 0 && id == null && nextLayer != null

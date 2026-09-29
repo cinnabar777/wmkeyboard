@@ -6,9 +6,10 @@
       not survive rather than whether anything did, because "converted with
       warnings" tells the user nothing they can act on.
     -->
-    <plurals name="core_keyman_multitap_dropped">
-        <item quantity="one">This keyboard has %1$d key you tap repeatedly to cycle through characters. This keyboard app has no such key, so only the first character is available.</item>
-        <item quantity="other">This keyboard has %1$d keys you tap repeatedly to cycle through characters. This keyboard app has no such keys, so only the first character of each is available.</item>
+    <!-- %1$d: how many keys lost their cycle. Keys that type keep their cycle; these are mostly keys that cycle through the symbol pages. -->
+    <plurals name="core_keyman_multitap_unconverted">
+        <item quantity="one">This keyboard has %1$d key you tap repeatedly to cycle through pages or characters. The app cannot copy this cycle, so each tap acts as the first tap.</item>
+        <item quantity="other">This keyboard has %1$d keys you tap repeatedly to cycle through pages or characters. The app cannot copy these cycles, so each tap acts as the first tap.</item>
     </plurals>
 
     <plurals name="core_keyman_diagonal_flicks_dropped">

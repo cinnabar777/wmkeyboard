@@ -19,6 +19,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
@@ -60,7 +62,6 @@ import com.wasimaster.wmkeyboard.core.layout.script
 import com.wasimaster.wmkeyboard.core.settings.DeviceForm
 import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.OneHandedMode
-import com.wasimaster.wmkeyboard.core.settings.isTelevision
 import com.wasimaster.wmkeyboard.ime.FieldKind
 import com.wasimaster.wmkeyboard.ime.KeyboardUiState
 import com.wasimaster.wmkeyboard.ime.LayoutSet
@@ -80,6 +81,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlin.math.roundToInt
 
 /**
@@ -106,7 +108,10 @@ import kotlin.math.roundToInt
  * for every card a carousel scrolls back into view. The state and the cache key
  * are worked out off the main thread; only the composition itself is not, and
  * the cards take turns at it ([BoardRenderGate]) so a screen of them spreads
- * over frames instead of stalling one. Until a card's turn comes it shows a
+ * over frames instead of stalling one, and none of them starts while the list
+ * holding them scrolls ([LocalLayoutPreviewScrolling]). A card scrolled back
+ * into view with nothing changed finds its picture on the main thread, in the
+ * frame it appears. Until a card's turn comes it shows a
  * skeleton, or, when the settings changed under a picture it already has, that
  * picture, repainted in place once the new one is taken.
  *
@@ -126,13 +131,17 @@ fun LayoutKeyboardPreview(
     val form = remember(configuration.smallestScreenWidthDp) {
         DeviceForm.of(configuration.smallestScreenWidthDp)
     }
-    val television = remember(context) { context.isTelevision() }
+    // Both asked once per process and per configuration rather than once per
+    // card: a card scrolling into view is a first composition, and a binder
+    // call and five colour lookups each time are frames a fling cannot spare.
+    val television = remember(context) { LayoutPreviewCache.television(context) }
     val density = LocalDensity.current
     val systemDark = isSystemInDarkTheme()
     val darkSlot = rememberAutoThemeDarkSlot(settings, systemDark)
     val environment = remember(context, configuration, density, systemDark, darkSlot) {
-        previewEnvironment(context, configuration, density, systemDark, darkSlot)
+        LayoutPreviewCache.environment(context, configuration, density, systemDark, darkSlot)
     }
+    val scrolling = LocalLayoutPreviewScrolling.current
     // What the card shows: the picture for these settings once there is one,
     // and until then the last picture of this layout, if this process has
     // taken one.
@@ -148,20 +157,49 @@ fun LayoutKeyboardPreview(
 
     LaunchedEffect(settings, layoutId, form, television, environment, widthPx) {
         if (widthPx == 0) return@LaunchedEffect
-        val (state, key) = withContext(Dispatchers.Default) {
-            val state = layoutPreviewState(settings, layoutId, form, television)
-            state to LayoutPreviewCache.keyOf(context, settings, state, form, television, environment, widthPx)
-        }
-        val cached = LayoutPreviewCache.get(key) ?: LayoutPreviewCache.load(context, key)
-        if (cached != null) {
-            LayoutPreviewCache.put(layoutId, key, cached)
-            fade = render == null || picture != null
-            picture = cached
+        val inputs = PreviewInputs(settings, form, television, environment, widthPx)
+        // A card scrolled back into view with nothing changed since its
+        // picture was taken: the picture is known without leaving the main
+        // thread, and nothing more is worked out for it.
+        LayoutPreviewCache.knownKey(layoutId, inputs)?.let { LayoutPreviewCache.get(it) }?.let { known ->
+            if (picture !== known) {
+                fade = picture != null
+                picture = known
+            }
             render = null
             return@LaunchedEffect
         }
-        val job = BoardRender(state)
+        // The key needs only the settings the card is drawn with; the grids,
+        // which for a Keyman layout are the costly part, only a render needs.
+        val (spec, shown, key) = withContext(Dispatchers.Default) {
+            val (spec, shown) = layoutPreviewShown(settings, layoutId)
+            Triple(
+                spec,
+                shown,
+                LayoutPreviewCache.keyOf(context, settings, spec.id, shown, form, television, environment, widthPx),
+            )
+        }
+        LayoutPreviewCache.noteKey(layoutId, inputs, key)
+        val cached = LayoutPreviewCache.get(key) ?: LayoutPreviewCache.load(context, key)
+        if (cached != null) {
+            LayoutPreviewCache.put(layoutId, key, cached)
+            if (picture !== cached) {
+                fade = render == null || picture != null
+                picture = cached
+            }
+            render = null
+            return@LaunchedEffect
+        }
+        val job = BoardRender(
+            withContext(Dispatchers.Default) { layoutPreviewState(spec, shown, form, television) },
+        )
+        // Not while the row or the grid is moving: composing a keyboard takes
+        // a frame or more of the main thread, and a fling drops every one of
+        // them. The cards passed over on the way wait, and the ones that are
+        // still in view when the scroll settles take their turn then.
+        snapshotFlow { scrolling() }.first { !it }
         BoardRenderGate.mutex.withLock {
+            snapshotFlow { scrolling() }.first { !it }
             render = job
             // Held until the board has composed and drawn, and a frame or two
             // past that for whatever it recomposes on its first frame; then
@@ -237,6 +275,13 @@ fun LayoutKeyboardPreview(
         }
     }
 }
+
+/**
+ * Whether the list holding the cards is scrolling, read by every card before
+ * it composes a board: the carousel and the More layouts grid provide their
+ * own state's `isScrollInProgress`. Outside either, never.
+ */
+val LocalLayoutPreviewScrolling = staticCompositionLocalOf<() -> Boolean> { { false } }
 
 /** A board waiting to be composed and captured. */
 private class BoardRender(val state: KeyboardUiState) {
@@ -402,18 +447,35 @@ internal fun layoutPreviewState(
     form: DeviceForm,
     television: Boolean,
 ): KeyboardUiState {
+    val (spec, shown) = layoutPreviewShown(settings, layoutId)
+    return layoutPreviewState(spec, shown, form, television)
+}
+
+/** The layout [layoutId] resolves to, and the settings its card is drawn with. */
+private fun layoutPreviewShown(
+    settings: KeyboardSettings,
+    layoutId: String,
+): Pair<LayoutSpec, KeyboardSettings> {
     val spec = resolveLayout(settings.customLayouts, layoutId)
     val enabled = if (spec.id in settings.enabledLayoutIds) {
         settings.enabledLayoutIds
     } else {
         settings.enabledLayoutIds + spec.id
     }
-    val shown = settings.copy(
+    return spec to settings.copy(
         activeLayoutId = spec.id,
         enabledLayoutIds = enabled,
         floatingKeyboard = false,
         oneHandedMode = OneHandedMode.OFF,
     )
+}
+
+private fun layoutPreviewState(
+    spec: LayoutSpec,
+    shown: KeyboardSettings,
+    form: DeviceForm,
+    television: Boolean,
+): KeyboardUiState {
     val script = spec.script()
     return KeyboardUiState(
         settings = shown,

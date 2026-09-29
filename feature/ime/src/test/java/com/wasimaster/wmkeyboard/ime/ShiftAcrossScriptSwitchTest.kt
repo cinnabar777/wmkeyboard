@@ -1,6 +1,7 @@
 package com.wasimaster.wmkeyboard.ime
 
 import com.wasimaster.wmkeyboard.core.layout.BuiltInLayouts
+import com.wasimaster.wmkeyboard.core.layout.script
 import com.wasimaster.wmkeyboard.core.script.ScriptId
 import com.wasimaster.wmkeyboard.core.settings.HapticSettings
 import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
@@ -71,4 +72,37 @@ class ShiftAcrossScriptSwitchTest {
         assertEquals(ScriptId.CYRILLIC, state.script.id)
         assertEquals(ShiftState.CAPS_LOCK, state.shiftState)
     }
+
+    @Test
+    fun `switch to custom Thai layout`() {
+        val thaiSpec = com.wasimaster.wmkeyboard.core.layout.LayoutSpec(
+            id = "custom_thai",
+            name = "Thai",
+            langId = "th",
+        )
+        val service = keyboardOn(ShiftState.ON)
+        val repo = SettingsRepository(RuntimeEnvironment.getApplication())
+        // Seed customLayouts
+        val stateWithCustom = service.uiState.value.copy(
+            settings = service.uiState.value.settings.copy(
+                customLayouts = listOf(thaiSpec)
+            )
+        )
+        val field = WMKeyboardService::class.java.getDeclaredField("_uiState")
+        field.isAccessible = true
+        @Suppress("UNCHECKED_CAST")
+        (field.get(service) as kotlinx.coroutines.flow.MutableStateFlow<KeyboardUiState>).value = stateWithCustom
+
+        service.onLayoutSelected("custom_thai")
+        val state = service.uiState.value
+        println("custom layoutId: ${state.layoutId}")
+        println("custom script: ${state.script.id}")
+        println("custom shiftState: ${state.shiftState}")
+    }
 }
+
+
+
+
+
+

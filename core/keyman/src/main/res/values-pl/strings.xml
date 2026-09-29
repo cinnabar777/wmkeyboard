@@ -10,10 +10,6 @@
         <item quantity="one">%1$d klawisz wpisuje znak na nim nadrukowany. Oryginalna klawiatura używała reguły do określenia, co wpisuje.</item>
         <item quantity="other">%1$d klawiszy wpisuje znaki na nich nadrukowane. Oryginalna klawiatura używała reguł do określenia, co wpisują.</item>
     </plurals>
-    <plurals name="core_keyman_multitap_dropped">
-        <item quantity="one">Ta klawiatura ma %1$d klawisz, który naciskasz wielokrotnie, aby przełączać znaki. Ta aplikacja klawiatury nie posiada takiego klawisza, więc dostępny jest tylko pierwszy znak.</item>
-        <item quantity="other">Ta klawiatura ma %1$d klawiszy, które naciskasz wielokrotnie, aby przełączać znaki. Ta aplikacja klawiatury nie posiada takich klawiszy, więc dostępny jest tylko pierwszy znak każdego z nich.</item>
-    </plurals>
     <string name="core_keyman_rules_missing">Ta klawiatura używa reguł do decydowania, co wpisują jej klawisze. Aplikacja nie posiada tych reguł, więc każdy klawisz wpisuje znak na nim nadrukowany.</string>
     <plurals name="core_keyman_special_keys_dropped">
         <item quantity="one">Aplikacja usunęła %1$d klawisz. Ta klawiatura nie ma klawisza, który wykonuje to samo działanie.</item>

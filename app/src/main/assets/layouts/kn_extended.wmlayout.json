@@ -1,0 +1,236 @@
+{
+  "format": "wmkeyboard-layout",
+  "version": 1,
+  "layout": {
+    "id": "asset_kn_extended",
+    "name": "ಕನ್ನಡ ವಿಸ್ತೃತ (Kannada extended)",
+    "langId": "kn",
+    "version": 2,
+    "layers": {
+      "letters": {
+        "rows": [
+          [
+            {
+              "label": "ಅ"
+            },
+            {
+              "label": "ಆ"
+            },
+            {
+              "label": "ಇ"
+            },
+            {
+              "label": "ಈ"
+            },
+            {
+              "label": "ಉ"
+            },
+            {
+              "label": "ಊ"
+            },
+            {
+              "label": "ಋ"
+            },
+            {
+              "label": "ಎ"
+            },
+            {
+              "label": "ಏ"
+            },
+            {
+              "label": "ಐ"
+            }
+          ],
+          [
+            {
+              "label": "ಒ"
+            },
+            {
+              "label": "ಓ"
+            },
+            {
+              "label": "ಔ"
+            },
+            {
+              "label": "ಂ"
+            },
+            {
+              "label": "ಕ"
+            },
+            {
+              "label": "ಖ"
+            },
+            {
+              "label": "ಗ"
+            },
+            {
+              "label": "ಘ"
+            },
+            {
+              "label": "ಙ"
+            },
+            {
+              "label": "ಚ"
+            }
+          ],
+          [
+            {
+              "label": "ಛ"
+            },
+            {
+              "label": "ಜ"
+            },
+            {
+              "label": "ಝ"
+            },
+            {
+              "label": "ಞ"
+            },
+            {
+              "label": "ಟ"
+            },
+            {
+              "label": "ಠ"
+            },
+            {
+              "label": "ಡ"
+            },
+            {
+              "label": "ಢ"
+            },
+            {
+              "label": "ಣ"
+            },
+            {
+              "label": "ತ"
+            }
+          ],
+          [
+            {
+              "label": "ಥ"
+            },
+            {
+              "label": "ದ"
+            },
+            {
+              "label": "ಧ"
+            },
+            {
+              "label": "ನ"
+            },
+            {
+              "label": "ಪ"
+            },
+            {
+              "label": "ಫ"
+            },
+            {
+              "label": "ಬ"
+            },
+            {
+              "label": "ಭ"
+            },
+            {
+              "label": "ಮ"
+            },
+            {
+              "label": "ಯ"
+            }
+          ],
+          [
+            {
+              "label": "⇧",
+              "action": {
+                "type": "shift"
+              },
+              "width": 1.5
+            },
+            {
+              "label": "್"
+            },
+            {
+              "label": "ರ"
+            },
+            {
+              "label": "ಲ"
+            },
+            {
+              "label": "ವ"
+            },
+            {
+              "label": "ಶ"
+            },
+            {
+              "label": "ಷ"
+            },
+            {
+              "label": "ಸ"
+            },
+            {
+              "label": "ಹ"
+            },
+            {
+              "label": "ಳ"
+            },
+            {
+              "label": "⌫",
+              "action": {
+                "type": "delete"
+              },
+              "width": 1.5
+            }
+          ],
+          [
+            {
+              "label": "?123",
+              "action": {
+                "type": "symbols"
+              },
+              "width": 1.5
+            },
+            {
+              "label": ",",
+              "longPress": [
+                "!",
+                "?"
+              ],
+              "role": "Comma"
+            },
+            {
+              "label": "🌐",
+              "action": {
+                "type": "language_switch"
+              }
+            },
+            {
+              "label": " ",
+              "action": {
+                "type": "space"
+              },
+              "width": 4
+            },
+            {
+              "label": ".",
+              "longPress": [
+                "…",
+                ",",
+                "?",
+                "!",
+                ":",
+                ";"
+              ],
+              "role": "Period"
+            },
+            {
+              "label": "⏎",
+              "action": {
+                "type": "enter"
+              },
+              "width": 1.5
+            }
+          ]
+        ]
+      }
+    }
+  }
+}

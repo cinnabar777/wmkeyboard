@@ -10,10 +10,6 @@
         <item quantity="one">%1$d tecla escribe el carácter impreso en ella. El teclado original usaba una regla para decidir qué escribir.</item>
         <item quantity="other">%1$d teclas escriben los caracteres impresos en ellas. El teclado original usaba reglas para decidir qué escribir.</item>
     </plurals>
-    <plurals name="core_keyman_multitap_dropped">
-        <item quantity="one">Este teclado tiene %1$d tecla que presionas repetidamente para recorrer los caracteres. Esta aplicación de teclado no tiene dicha tecla, por lo que solo está disponible el primer carácter.</item>
-        <item quantity="other">Este teclado tiene %1$d teclas que presionas repetidamente para recorrer los caracteres. Esta aplicación de teclado no tiene dichas teclas, por lo que solo está disponible el primer carácter de cada una.</item>
-    </plurals>
     <string name="core_keyman_rules_missing">Este teclado utiliza reglas para decidir qué escriben sus teclas. La aplicación no dispone de esas reglas, por lo que cada tecla escribe el carácter impreso en ella.</string>
     <plurals name="core_keyman_special_keys_dropped">
         <item quantity="one">La aplicación eliminó %1$d tecla. Este teclado no tiene ninguna tecla que haga lo mismo.</item>

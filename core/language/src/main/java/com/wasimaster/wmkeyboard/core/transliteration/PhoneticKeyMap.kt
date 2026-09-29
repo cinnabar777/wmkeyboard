@@ -31,7 +31,9 @@ data class KeyMapEntry(
 )
 
 /** When an entry only holds in some places; see [KeyMapEntry.where]. */
-enum class KeyMapWhere { AFTER_CONSONANT, ELSEWHERE, BEFORE_CONSONANT, BEFORE_VOWEL, AFTER_T, BETWEEN_CONSONANTS }
+enum class KeyMapWhere {
+    AFTER_CONSONANT, ELSEWHERE, BEFORE_CONSONANT, BEFORE_VOWEL, AFTER_T, BETWEEN_CONSONANTS, WORD_START,
+}
 
 object PhoneticKeyMaps {
 
@@ -56,7 +58,7 @@ object PhoneticKeyMaps {
             v("o", text = "অ", sign = ""),
             v("a", "A", text = "আ", sign = "া"),
             v("i", text = "ই", sign = "ি"),
-            v("I", text = "ঈ", sign = "ী"),
+            v("I", "ee", text = "ঈ", sign = "ী"),
             v("u", "oo", text = "উ", sign = "ু"),
             v("U", text = "ঊ", sign = "ূ"),
             v("rri", text = "ঋ", sign = "ৃ"),
@@ -74,16 +76,20 @@ object PhoneticKeyMaps {
             e("m", text = "ম"), e("z", text = "য"), e("r", text = "র"), e("l", text = "ল"),
             e("sh", "S", text = "শ"), e("Sh", text = "ষ"), e("s", text = "স"), e("h", text = "হ"),
             e("R", text = "\u09DC"), e("Rh", text = "\u09DD"), e("Y", text = "\u09DF"), e("J", text = "\u099C\u09BC"),
-            e("x", text = "ক্স"), e("kkh", text = "ক্ষ"), e("gg", text = "জ্ঞ"), e("nj", text = "ঞ্জ"),
+            e("kkh", "kx", text = "ক্ষ"), e("gg", text = "জ্ঞ"), e("nj", text = "ঞ্জ"),
         ),
         signs = listOf(
             KeyMapEntry(listOf("y"), "্য", where = KeyMapWhere.AFTER_CONSONANT, example = "shyam" to "শ্যাম"),
+            KeyMapEntry(listOf("y"), "ই\u09DF", where = KeyMapWhere.WORD_START, example = "yes" to "ই\u09DFেস"),
             KeyMapEntry(listOf("y"), "\u09DF", where = KeyMapWhere.ELSEWHERE, example = "meye" to "মে\u09DFে"),
             KeyMapEntry(listOf("w"), "্ব", where = KeyMapWhere.AFTER_CONSONANT, example = "swasthyo" to "স্বাস্থ্য"),
             KeyMapEntry(listOf("w"), "ও", where = KeyMapWhere.ELSEWHERE, example = "wasi" to "ও\u09DFাসি"),
             KeyMapEntry(listOf("rr"), "র্", where = KeyMapWhere.BEFORE_CONSONANT, example = "dhorrmo" to "ধর্ম"),
+            KeyMapEntry(listOf("x"), "এক্স", where = KeyMapWhere.WORD_START, example = "xre" to "এক্সরে"),
+            KeyMapEntry(listOf("x"), "ক্স", where = KeyMapWhere.ELSEWHERE, example = "bax" to "বাক্স"),
+            KeyMapEntry(listOf("aZ", "AZ"), "অ্যা", example = "aZp" to "অ্যাপ"),
             KeyMapEntry(listOf("ng"), "ং", example = "bangla" to "বাংলা"),
-            KeyMapEntry(listOf("ng"), "ঙ", where = KeyMapWhere.BEFORE_VOWEL, example = "bangali" to "বাঙালি"),
+            KeyMapEntry(listOf("ng"), "ঙ্গ", where = KeyMapWhere.BEFORE_VOWEL, example = "songe" to "সঙ্গে"),
             KeyMapEntry(listOf("^", "qq", "cb"), "ঁ", example = "ca^d" to "চাঁদ"),
             KeyMapEntry(listOf(":", "HH"), "ঃ", example = "du:kho" to "দুঃখ"),
             KeyMapEntry(listOf(",,", "hs"), "্", where = KeyMapWhere.AFTER_CONSONANT, example = "m,," to "ম্"),

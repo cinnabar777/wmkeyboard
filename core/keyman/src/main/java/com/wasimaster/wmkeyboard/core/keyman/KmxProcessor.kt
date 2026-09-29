@@ -123,6 +123,12 @@ class KmxProcessor(
         }
     }
 
+    override fun saveContext(): SavedContext = SavedContext(context.snapshot())
+
+    override fun restoreContext(saved: SavedContext) {
+        context.restore(saved.raw)
+    }
+
     override fun onTextTyped(text: CharSequence) {
         context.append(text)
     }

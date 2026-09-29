@@ -75,7 +75,8 @@ internal fun PermissionsSettings() {
                 PermissionDisclosures.CALENDAR,
             )
         }
-        item {
+        // Not declared in the Play build at all; see [ChannelFeatures].
+        item(visible = ChannelFeatures.SCREENSHOT_CLIPS) {
             RuntimePermissionRow(
                 R.string.privacy_permissions_images_title,
                 R.string.privacy_permissions_images_subtitle,
@@ -110,7 +111,7 @@ internal fun PermissionsSettings() {
                 ::hasUsageAccess,
             )
         }
-        item {
+        item(visible = ChannelFeatures.GESTURE_PASSTHROUGH) {
             SpecialAccessRow(
                 R.string.privacy_permissions_accessibility_title,
                 R.string.privacy_permissions_accessibility_subtitle,

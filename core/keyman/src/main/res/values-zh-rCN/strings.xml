@@ -10,10 +10,6 @@
         <item quantity="one">%1$d 个按键输入其上印有的字符。原始键盘使用规则来决定其输入内容。</item>
         <item quantity="other">%1$d 个按键输入其上印有的字符。原始键盘使用规则来决定其输入内容。</item>
     </plurals>
-    <plurals name="core_keyman_multitap_dropped">
-        <item quantity="one">此键盘有 %1$d 个按键，您可以通过重复点击来循环切换字符。此键盘应用没有此类按键，因此仅提供第一个字符。</item>
-        <item quantity="other">此键盘有 %1$d 个按键，您可以通过重复点击来循环切换字符。此键盘应用没有此类按键，因此每个按键仅提供第一个字符。</item>
-    </plurals>
     <string name="core_keyman_rules_missing">此键盘使用规则来决定按键输入的内容。该应用缺少这些规则，因此每个按键将输入其上印有的字符。</string>
     <plurals name="core_keyman_special_keys_dropped">
         <item quantity="one">应用移除了 %1$d 个按键。此键盘没有具备相同功能的按键。</item>

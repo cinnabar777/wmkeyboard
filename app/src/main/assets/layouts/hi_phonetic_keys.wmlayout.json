@@ -1,0 +1,189 @@
+{
+  "format": "wmkeyboard-layout",
+  "version": 1,
+  "layout": {
+    "id": "asset_hi_phonetic_keys",
+    "name": "हिन्दी ध्वन्यात्मक कुंजियाँ (Hindi phonetic keys)",
+    "langId": "hi",
+    "version": 2,
+    "layers": {
+      "letters": {
+        "rows": [
+          [
+            {
+              "label": "ट",
+              "shiftLabel": "ठ"
+            },
+            {
+              "label": "ड",
+              "shiftLabel": "ढ"
+            },
+            {
+              "label": "े",
+              "shiftLabel": "ै"
+            },
+            {
+              "label": "र",
+              "shiftLabel": "ृ"
+            },
+            {
+              "label": "त",
+              "shiftLabel": "थ"
+            },
+            {
+              "label": "य",
+              "shiftLabel": "य़"
+            },
+            {
+              "label": "ु",
+              "shiftLabel": "ू"
+            },
+            {
+              "label": "ि",
+              "shiftLabel": "ी"
+            },
+            {
+              "label": "ो",
+              "shiftLabel": "ौ"
+            },
+            {
+              "label": "प",
+              "shiftLabel": "फ़"
+            }
+          ],
+          [
+            {
+              "label": "ा",
+              "shiftLabel": "अ"
+            },
+            {
+              "label": "स",
+              "shiftLabel": "श"
+            },
+            {
+              "label": "द",
+              "shiftLabel": "ध"
+            },
+            {
+              "label": "फ",
+              "shiftLabel": " ़"
+            },
+            {
+              "label": "ग",
+              "shiftLabel": "घ"
+            },
+            {
+              "label": "ह",
+              "shiftLabel": "ः"
+            },
+            {
+              "label": "ज",
+              "shiftLabel": "झ"
+            },
+            {
+              "label": "क",
+              "shiftLabel": "ख"
+            },
+            {
+              "label": "ल",
+              "shiftLabel": "ळ"
+            }
+          ],
+          [
+            {
+              "label": "⇧",
+              "action": {
+                "type": "shift"
+              },
+              "width": 1.5
+            },
+            {
+              "label": "ज्ञ",
+              "shiftLabel": "ज़"
+            },
+            {
+              "label": "क्ष",
+              "shiftLabel": "ष"
+            },
+            {
+              "label": "च",
+              "shiftLabel": "छ"
+            },
+            {
+              "label": "व",
+              "shiftLabel": "्"
+            },
+            {
+              "label": "ब",
+              "shiftLabel": "भ"
+            },
+            {
+              "label": "न",
+              "shiftLabel": "ण"
+            },
+            {
+              "label": "म",
+              "shiftLabel": "ं"
+            },
+            {
+              "label": "⌫",
+              "action": {
+                "type": "delete"
+              },
+              "width": 1.5
+            }
+          ],
+          [
+            {
+              "label": "?123",
+              "action": {
+                "type": "symbols"
+              },
+              "width": 1.5
+            },
+            {
+              "label": ",",
+              "longPress": [
+                "!",
+                "?"
+              ],
+              "role": "Comma"
+            },
+            {
+              "label": "🌐",
+              "action": {
+                "type": "language_switch"
+              }
+            },
+            {
+              "label": " ",
+              "action": {
+                "type": "space"
+              },
+              "width": 4
+            },
+            {
+              "label": ".",
+              "longPress": [
+                "…",
+                "।",
+                "॥",
+                ",",
+                "?",
+                "!"
+              ],
+              "role": "Period"
+            },
+            {
+              "label": "⏎",
+              "action": {
+                "type": "enter"
+              },
+              "width": 1.5
+            }
+          ]
+        ]
+      }
+    }
+  }
+}

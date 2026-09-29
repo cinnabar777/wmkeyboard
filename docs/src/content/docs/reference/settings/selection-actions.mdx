@@ -18,7 +18,7 @@ The Selection actions screen is the switch and two choices, then three doors: th
 | Selection actions | Toggle | Off |
 | Where it appears | Choice of 2 | **Own row** |
 | Read what is selected | Toggle | On |
-| Actions | Screen | 28 of 45 on |
+| Actions | Screen | 33 of 48 on |
 | AI buttons | Screen | None |
 | Time zones | Screen | UTC and the device's zone |
 
@@ -60,7 +60,7 @@ The list is an allow list, not a guarantee: an action that is on is drawn only w
 | Base64 | Convert | Off | Base64 text |
 | Decode | Convert | Off | A percent-encoded link |
 | Remove trackers | Convert | On | A link with tracking parameters |
-| Translate | Language | Off | Plain text, with the Translate tool on |
+| Translate | Language | On | Plain text, with the Translate tool on |
 | Grammar | Language | On | Plain text, with the Grammar tool on |
 | DeepL Write | Language | On | Plain text up to 2,500 characters, with a DeepL key and DeepL Write on under Tools / Translate |
 | AI | Language | On | Plain text, with the AI tool on and set up |
@@ -80,13 +80,13 @@ The list is an allow list, not a guarantee: an action that is on is drawn only w
 | Map | Open in | Off | Coordinates or an address |
 | Calendar | Open in | Off | A date or time |
 
-Search and Translate are off to start with, because both are a round trip to a network service and neither is what a selection usually means. The chat markers, the programmer's cases, Speak, Zones, Map, Calendar and the decoders are off because each is a taste rather than a need, and the row is long enough already.
+Search is off to start with, because it is a round trip to a network service and not what a selection usually means. Translate is on: it only opens the Translate tool, which can translate on the device, and a selection in a language you can't read is the text you could not have typed into that tool yourself. It was off before; a list you had already picked yourself keeps its choices, so switch it on here. The chat markers, the programmer's cases, Speak, Zones, Map, Calendar and the decoders are off because each is a taste rather than a need, and the row is long enough already.
 
 ## AI buttons
 
 <SettingsPath path="Advanced / Selection actions / AI buttons" />
 
-A checkbox per AI action, in the AI tool's own order. Each picked action gets a chip beside the AI chip that runs it on the selection at once, with the result landing in the AI panel ready to apply. An action that asks for its prompt each run (Custom) is not offered, since it cannot be a one-tap button. **Manage AI actions** opens the [AI actions](/tools/ai/#your-own-actions) list itself. The chips only appear while the AI tool is switched on and a provider is set up.
+A checkbox per AI action, in the AI tool's own order. Each picked action gets a chip beside the AI chip that runs it on the selection at once, with the result landing in the AI panel ready to apply. The Translate action's chip reads **AI translate**, so it can't be mistaken for the Translate action, which opens the Translate tool. An action that asks for its prompt each run (Custom) is not offered, since it cannot be a one-tap button. **Manage AI actions** opens the [AI actions](/tools/ai/#your-own-actions) list itself. The chips only appear while the AI tool is switched on and a provider is set up.
 
 ## Time zones
 

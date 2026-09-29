@@ -1488,14 +1488,20 @@ internal fun ClipEditText(
     val owner = remember { SelectionAnchor() }
     val selecting = handle.hasSelection && handle.selectionEnd <= text.length
     val latestHandle by rememberUpdatedState(handle)
+    // Paste offered at the caret by a long press on no word, or on the empty
+    // draft (#434).
+    var caretBar by remember(text) { mutableStateOf(false) }
     Box(modifier = modifier.verticalScroll(scroll)) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .pointerInput(text) {
                     detectTapGestures(
-                        onLongPress = { position -> fieldLongPress(text, layout, position, latestHandle) },
+                        onLongPress = { position ->
+                            caretBar = !fieldLongPress(text, layout, position, latestHandle)
+                        },
                     ) { position ->
+                        caretBar = false
                         layout?.takeIf { it.layoutInput.text.text == text }
                             ?.let { latestHandle.onCaretTap(it.getOffsetForPosition(position)) }
                     }
@@ -1529,6 +1535,8 @@ internal fun ClipEditText(
                 handle = handle,
                 coordinates = { owner.coordinates },
                 layout = { layout?.takeIf { it.layoutInput.text.text == text } },
+                caretBar = caretBar,
+                onCaretBarDismiss = { caretBar = false },
             )
             if (text.isEmpty()) {
                 Text(

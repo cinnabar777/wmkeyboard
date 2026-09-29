@@ -1,0 +1,285 @@
+{
+  "format": "wmkeyboard-layout",
+  "version": 1,
+  "layout": {
+    "id": "asset_ml_alphabetic",
+    "name": "മലയാളം അക്ഷരമാല (Malayalam alphabetic)",
+    "langId": "ml",
+    "version": 2,
+    "layers": {
+      "letters": {
+        "rows": [
+          [
+            {
+              "label": "്",
+              "longPress": [
+                "അ"
+              ]
+            },
+            {
+              "label": "ാ",
+              "longPress": [
+                "ആ"
+              ]
+            },
+            {
+              "label": "ി",
+              "longPress": [
+                "ഇ"
+              ]
+            },
+            {
+              "label": "ീ",
+              "longPress": [
+                "ഈ"
+              ]
+            },
+            {
+              "label": "ു",
+              "longPress": [
+                "ഉ"
+              ]
+            },
+            {
+              "label": "ൂ",
+              "longPress": [
+                "ഊ"
+              ]
+            },
+            {
+              "label": "ൃ",
+              "longPress": [
+                "ഋ"
+              ]
+            },
+            {
+              "label": "െ",
+              "longPress": [
+                "എ",
+                "ഐ",
+                "ൈ"
+              ]
+            },
+            {
+              "label": "േ",
+              "longPress": [
+                "ഏ"
+              ]
+            },
+            {
+              "label": "ൊ",
+              "longPress": [
+                "ഒ"
+              ]
+            },
+            {
+              "label": "ോ",
+              "longPress": [
+                "ഓ",
+                "ഔ",
+                "ൗ"
+              ]
+            }
+          ],
+          [
+            {
+              "label": "ക",
+              "longPress": [
+                "ഖ"
+              ]
+            },
+            {
+              "label": "ഗ",
+              "longPress": [
+                "ഘ"
+              ]
+            },
+            {
+              "label": "ങ",
+              "longPress": [
+                "ഞ"
+              ]
+            },
+            {
+              "label": "ച",
+              "longPress": [
+                "ഛ"
+              ]
+            },
+            {
+              "label": "ജ",
+              "longPress": [
+                "ഝ"
+              ]
+            },
+            {
+              "label": "ട",
+              "longPress": [
+                "ഠ"
+              ]
+            },
+            {
+              "label": "ഡ",
+              "longPress": [
+                "ഢ"
+              ]
+            },
+            {
+              "label": "ണ",
+              "longPress": [
+                "ൺ"
+              ]
+            },
+            {
+              "label": "ത",
+              "longPress": [
+                "ഥ"
+              ]
+            },
+            {
+              "label": "ദ",
+              "longPress": [
+                "ധ"
+              ]
+            },
+            {
+              "label": "ന",
+              "longPress": [
+                "ൻ"
+              ]
+            }
+          ],
+          [
+            {
+              "label": "⇧",
+              "action": {
+                "type": "shift"
+              },
+              "width": 1.5
+            },
+            {
+              "label": "പ",
+              "longPress": [
+                "ഫ"
+              ]
+            },
+            {
+              "label": "ബ",
+              "longPress": [
+                "ഭ"
+              ]
+            },
+            {
+              "label": "മ",
+              "longPress": [
+                "ം"
+              ]
+            },
+            {
+              "label": "യ",
+              "longPress": [
+                "്യ"
+              ]
+            },
+            {
+              "label": "ര",
+              "longPress": [
+                "്ര",
+                "ർ",
+                "റ"
+              ]
+            },
+            {
+              "label": "ല",
+              "longPress": [
+                "ൽ"
+              ]
+            },
+            {
+              "label": "വ",
+              "longPress": [
+                "്വ"
+              ]
+            },
+            {
+              "label": "ശ",
+              "longPress": [
+                "ഷ",
+                "സ"
+              ]
+            },
+            {
+              "label": "ഹ",
+              "longPress": [
+                "ഃ"
+              ]
+            },
+            {
+              "label": "ള",
+              "longPress": [
+                "ൾ",
+                "ഴ"
+              ]
+            },
+            {
+              "label": "⌫",
+              "action": {
+                "type": "delete"
+              },
+              "width": 1.5
+            }
+          ],
+          [
+            {
+              "label": "?123",
+              "action": {
+                "type": "symbols"
+              },
+              "width": 1.5
+            },
+            {
+              "label": ",",
+              "longPress": [
+                "!",
+                "?"
+              ],
+              "role": "Comma"
+            },
+            {
+              "label": "🌐",
+              "action": {
+                "type": "language_switch"
+              }
+            },
+            {
+              "label": " ",
+              "action": {
+                "type": "space"
+              },
+              "width": 4
+            },
+            {
+              "label": ".",
+              "longPress": [
+                "…",
+                ",",
+                "?",
+                "!",
+                ":",
+                ";"
+              ],
+              "role": "Period"
+            },
+            {
+              "label": "⏎",
+              "action": {
+                "type": "enter"
+              },
+              "width": 1.5
+            }
+          ]
+        ]
+      }
+    }
+  }
+}

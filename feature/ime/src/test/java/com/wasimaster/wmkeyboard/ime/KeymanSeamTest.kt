@@ -3,10 +3,14 @@ package com.wasimaster.wmkeyboard.ime
 import com.wasimaster.wmkeyboard.core.keyman.KeyProcessor
 import com.wasimaster.wmkeyboard.core.keyman.KeymanFault
 import com.wasimaster.wmkeyboard.core.keyman.KeymanLayers
+import com.wasimaster.wmkeyboard.core.keyman.KeymanResult
+import com.wasimaster.wmkeyboard.core.keyman.KmxParser
+import com.wasimaster.wmkeyboard.core.keyman.KmxProcessor
 import com.wasimaster.wmkeyboard.core.keyman.KmxModifiers
 import com.wasimaster.wmkeyboard.core.keyman.ProcessorKey
 import com.wasimaster.wmkeyboard.core.keyman.ProcessorResult
 import com.wasimaster.wmkeyboard.core.keyman.SyncDecision
+import java.io.File
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -221,5 +225,110 @@ class KeymanSeamTest {
         assertEquals("numeric", layer(LayoutMode.SYMBOLS, ShiftState.OFF))
         assertEquals("symbol", layer(LayoutMode.SYMBOLS_SHIFTED, ShiftState.OFF))
         assertEquals("rightalt", layer(LayoutMode.NAMED, ShiftState.OFF, named = "k:rightalt"))
+    }
+
+    // --- multitap take-back ---
+
+    @Test
+    fun `a multitap undo deletes what the tap added and puts back what it deleted`() {
+        assertEquals(edit(1, ""), KeymanSeam.multitapUndo("abc", listOf(edit(0, "d"))))
+        assertEquals(edit(2, "x"), KeymanSeam.multitapUndo("abx", listOf(edit(1, "yz"))))
+        // A deadkey press changes nothing in the field, so neither does its undo.
+        assertEquals(edit(0, ""), KeymanSeam.multitapUndo("ab", listOf(edit(0, ""))))
+        assertEquals(edit(1, "c"), KeymanSeam.multitapUndo("abc", listOf(edit(1, "d"), edit(1, "e"))))
+    }
+
+    /** Half a surrogate pair is never kept as common text: U+104B0 and U+104B1 share their high half. */
+    @Test
+    fun `a multitap undo never splits a surrogate pair`() {
+        assertEquals(edit(2, "𐒰"), KeymanSeam.multitapUndo("a𐒰", listOf(edit(2, "𐒱"))))
+    }
+
+    @Test
+    fun `a multitap undo refuses an edit that deleted more than there was`() {
+        assertNull(KeymanSeam.multitapUndo("a", listOf(edit(2, ""))))
+    }
+
+    /** What an editor holds, driven through [session] the way the service drives the field. */
+    private class Typist(val session: KeymanSession) {
+        val field = StringBuilder()
+
+        fun apply(edit: ProcessorResult.Edit) {
+            field.setLength(field.length - edit.deleteBefore)
+            field.append(edit.insert)
+            session.onEdited(edit)
+        }
+
+        fun press(vkey: Int) {
+            val result = session.process(ProcessorKey(vkey, 0))
+            assertTrue("key $vkey: $result", result is ProcessorResult.Edit)
+            apply(result as ProcessorResult.Edit)
+        }
+    }
+
+    private fun khmer(): KeymanSession {
+        val bytes = File("../../core/keyman/src/test/resources/kmx/khmer_angkor.kmx").readBytes()
+        val keyboard = (KmxParser.parse(bytes) as KeymanResult.Success).value
+        return KeymanSession(KmxProcessor(keyboard)).apply { reset("", 0) }
+    }
+
+    private fun typed(vararg keys: Int): String = Typist(khmer()).apply { keys.forEach(::press) }.field.toString()
+
+    /**
+     * A later tap of a Keyman multitap key acts as if it were the first thing
+     * typed after the text before the run, as KeymanWeb's does. On Khmer
+     * Angkor, `x j` leaves ខ and a coeng waiting for the next consonant, so
+     * the step has to see that state again, not the base tap's ្ម.
+     */
+    @Test
+    fun `a multitap step runs its rules on the context before the run`() {
+        val typist = Typist(khmer())
+        typist.press(VK_X)
+        typist.press(VK_J)
+        val beforeRun = typist.field.toString()
+
+        assertTrue(typist.session.beginTap())
+        typist.press(VK_M)
+        val tap = checkNotNull(typist.session.endTap())
+        assertEquals(typed(VK_X, VK_J, VK_M), typist.field.toString())
+
+        val undo = checkNotNull(typist.session.takeBack(tap, typist.session.anchor) { typist.field })
+        typist.apply(undo)
+        assertEquals(beforeRun, typist.field.toString())
+        assertEquals("the context came back with its deadkeys", tap.before, typist.session.processor.saveContext())
+
+        assertTrue(typist.session.beginTap())
+        typist.press(VK_K)
+        typist.session.endTap()
+        assertEquals(typed(VK_X, VK_J, VK_K), typist.field.toString())
+    }
+
+    /** Text typed after the tap means the tap is not behind the caret any more. */
+    @Test
+    fun `a multitap step is not taken back once something else was typed`() {
+        val typist = Typist(khmer())
+        typist.session.beginTap()
+        typist.press(VK_M)
+        val tap = checkNotNull(typist.session.endTap())
+        typist.press(VK_K)
+        val context = typist.session.processor.saveContext()
+
+        assertNull(typist.session.takeBack(tap, typist.session.anchor) { typist.field })
+        assertEquals(context, typist.session.processor.saveContext())
+    }
+
+    /** A processor that keeps no context has nothing to rewind to, so it records nothing. */
+    @Test
+    fun `a processor with no context cannot record a tap`() {
+        val session = KeymanSession(FakeProcessor(edit(0, "a")))
+        assertFalse(session.beginTap())
+        assertNull(session.endTap())
+    }
+
+    private companion object {
+        const val VK_J = 74
+        const val VK_K = 75
+        const val VK_M = 77
+        const val VK_X = 88
     }
 }
