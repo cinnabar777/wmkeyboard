@@ -316,7 +316,7 @@ class GlideBeam(private val tuning: Tuning = Tuning()) {
          * off.
          */
         val learnedShapeGain: Double = 0.35,
-        val shapeSeeding: Boolean = true,
+        val shapeSeeding: Boolean = false,
         /**
          * How much the whole stroke's *shape* counts, once its size and position
          * are taken out of it.
