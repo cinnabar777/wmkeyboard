@@ -725,6 +725,22 @@ internal fun TypingSuggestionsSettings(
             ) { scope.launch { repository.setNewWordSightings(it.toInt()) } }
         }
         item {
+            val immediate = stringResource(R.string.typing_learning_buffer_settlement_immediate)
+            val minsFormat = stringResource(R.string.typing_learning_buffer_settlement_minutes)
+            SliderSetting(
+                R.string.typing_learning_buffer_settlement_title,
+                subtitle = stringResource(R.string.typing_learning_buffer_settlement_subtitle),
+                value = settings.watch { it.suggestionStrip.learningBufferSettlementMinutes }.toFloat(),
+                range = 0f..30f,
+                display = { v ->
+                    val mins = v.toInt()
+                    if (mins <= 0) immediate else String.format(minsFormat, mins)
+                },
+                info = stringResource(R.string.typing_learning_buffer_settlement_info),
+                default = 0f,
+            ) { scope.launch { repository.setLearningBufferSettlementMinutes(it.toInt()) } }
+        }
+        item {
             ToggleSetting(
                 R.string.typing_suggestions_all_fields_title,
                 stringResource(R.string.typing_suggestions_all_fields_subtitle),
@@ -898,25 +914,6 @@ internal fun TypingSuggestionsSettings(
                 route = "dictionary",
                 onClick = onOpenDictionary,
             )
-        }
-        item {
-            val minutes = settings.watch { it.learningBufferSettlementMinutes }
-            val immediateText = stringResource(R.string.typing_settlement_timer_immediate)
-            val minutesFormat = stringResource(R.string.typing_settlement_timer_minutes)
-            SliderSetting(
-                R.string.typing_settlement_timer_title,
-                subtitle = stringResource(R.string.typing_settlement_timer_subtitle),
-                value = minutes.toFloat(),
-                range = 0f..30f,
-                steps = 29,
-                display = { v ->
-                    val min = v.toInt()
-                    if (min == 0) immediateText else minutesFormat.format(min)
-                },
-                default = SettingsDefaults.learningBufferSettlementMinutes.toFloat(),
-            ) { v ->
-                scope.launch { repository.setLearningBufferSettlementMinutes(v.toInt()) }
-            }
         }
         item {
             NavRow(

@@ -297,10 +297,6 @@
 
     <string name="typing_personal_dictionary_title">Personal dictionary</string>
     <string name="typing_personal_dictionary_subtitle">Review, delete or add the words that the keyboard learned</string>
-    <string name="typing_settlement_timer_title">Word cache settlement timer</string>
-    <string name="typing_settlement_timer_subtitle">How long un-settled words wait before committing to history after exiting an app</string>
-    <string name="typing_settlement_timer_immediate">Learn immediately upon closing keyboard or exiting app</string>
-    <string name="typing_settlement_timer_minutes">%d min delay</string>
 
     <string name="typing_custom_dictionaries_title">Custom dictionaries</string>
     <string name="typing_custom_dictionaries_subtitle">Import your own word lists for each language</string>
@@ -842,6 +838,12 @@
 
     <string name="typing_ask_before_learning_title">Ask before saving new words</string>
     <string name="typing_ask_before_learning_subtitle">Offer a chip instead of counting how often you type the word</string>
+
+    <string name="typing_learning_buffer_settlement_title">Proofreading delay timer</string>
+    <string name="typing_learning_buffer_settlement_subtitle">Delay settling typed text into personal dictionary after leaving an app</string>
+    <string name="typing_learning_buffer_settlement_info">When typing in an app, uncorrected words are held in a proofreading buffer. Setting a delay keeps text editable or discardable before it is permanently learned into your personal dictionary when you close the keyboard or switch apps. 0 minutes settles words immediately upon app switch or keyboard close.</string>
+    <string name="typing_learning_buffer_settlement_immediate">Immediate (0 min)</string>
+    <string name="typing_learning_buffer_settlement_minutes">%1$d min</string>
     <string name="typing_word_menu_title">Word menu</string>
     <string name="typing_word_menu_subtitle">What pressing and holding a suggested word offers</string>
     <string name="typing_word_menu_info">Press and hold a word on the suggestion strip to open a menu about it. "Edit" is always there: it opens a card that spells, weights and ranks the word, shows where it comes from, and carries the Never suggest, Add and Delete actions, so you can turn those off to keep the menu short. "Add" only appears while you type a word that is not in your personal dictionary, and "Delete" only for a word the keyboard can forget. "Synonyms" lists words with the same meaning, and tapping one puts it in place of the word. It appears for English words.</string>
