@@ -507,7 +507,7 @@ private class Context(
     private fun editedPanel(): PanelKind? {
         if (root == LayoutJsonRoot.PANEL) {
             val name = ((document.root as? JsonObjectNode)?.member("panel")?.value as? JsonScalarNode)?.text ?: return null
-            return PanelKind.entries.getOrNull(PanelKind.serializer().descriptor.getElementIndex(name).coerceAtLeast(-1))
+            return PanelKind.entries.firstOrNull { it.name.equals(name, ignoreCase = true) }
         }
         return location.path.firstNotNullOfOrNull { step -> (step as? JsonPathStep.Key)?.name?.let(::panelKindForLayerKey) }
     }
