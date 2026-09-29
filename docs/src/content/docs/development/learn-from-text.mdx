@@ -1,0 +1,87 @@
+---
+title: "Learn from text architecture"
+description: "Technical architecture of the Learn from text scanner, candidate filtering, N-gram extraction, and UI integration."
+sidebar:
+  order: 10
+---
+
+import SettingsPath from '@components/SettingsPath.astro';
+
+The **Learn from text** feature allows users to scan selected text or an entire field to extract unknown words and teach them to the personal dictionary in bulk. This document details the technical implementation, scanning algorithms, candidate filtering, N-gram plan generation, and UI state management.
+
+## Overview and components
+
+The architecture is split into four distinct layers across `:core:prediction` and `:feature:ime`:
+
+| Component | File Path | Responsibility |
+| --- | --- | --- |
+| `TextWordScan` | `core/prediction/.../TextWordScan.kt` | Pure text scanner that tokenizes input text, calculates surface spelling frequency, and extracts N-gram relationships. |
+| `LearnFromText` | `feature/ime/.../LearnFromText.kt` | Domain model and pure rules for row conversion, filtering, sorting, rename mapping, and N-gram plan building. |
+| `LearnFromTextPanel` | `feature/ime/.../ui/LearnFromTextPanel.kt` | Jetpack Compose UI panel rendering word rows, sorting controls, row editing, and action buttons. |
+| `WMKeyboardService` | `feature/ime/.../WMKeyboardService.kt` | Input method controller managing text selection reads, async state emissions, and dictionary commits. |
+
+## Text scanning and tokenization
+
+`TextWordScan.scan(text, enders)` processes input text without modifying the cursor or field state.
+
+### Chunk and address filtering
+
+The scanner iterates through the input `CharSequence`, breaking token runs at whitespace and line breaks (`\n`, `\r`). Before tokenizing a whitespace-delimited block, `looksLikeAddress` checks whether the chunk represents non-prose data:
+- Web URLs containing `://`
+- Email addresses containing `@`
+- Domain names starting with `www.`
+
+Chunks matching these patterns are skipped entirely to prevent web addresses, handles, and URLs from polluting candidate lists.
+
+### Token extraction and word joiners
+
+Tokens are extracted by scanning characters that satisfy `WordContext.isWordChar` or `Char.isDigit()`. Single internal joiners defined in `WordContext.WORD_JOINERS` (apostrophe `'`, hyphen `-`, and zero-width joiner `\u200D`) are allowed when surrounded by valid word characters.
+
+Tokens are rejected if:
+- They do not satisfy `WordContext.isLearnableWord` (such as standalone numbers or single-character tokens).
+- They contain characters from scripts written without spaces between words (`isSpaceless`), including Han (Chinese), Hiragana, Katakana, Thai, Lao, Khmer, Myanmar, Tibetan, and Javanese.
+
+### Sentence start and casing evidence
+
+To determine the canonical surface spelling for a word, `TextWordScan` tracks whether a token occurred at the beginning of a sentence (following sentence enders such as `.`, `?`, `!`, or line breaks) or mid-sentence.
+
+- Surface spellings seen mid-sentence are tallied in `Tally.midSentence`.
+- The most frequent mid-sentence surface spelling is selected as `Word.spelling`.
+- If a word only appears at the start of a sentence, its lowercase form (`tally.key`) is used, ensuring that automatic initial capitalization does not force capitalized entries into the personal dictionary.
+
+## Candidate filtering and row generation
+
+`LearnFromText.rowsFor` converts the raw `TextWordScan.Result` into a list of displayable `LearnRow` objects:
+
+1. **Length filtering:** Words must have length between 2 and `UserLexicon.MAX_WORD_LENGTH` (32 characters).
+2. **Blacklist filtering:** Words present in `settings.suggestionSources.blacklisted` are removed.
+3. **Knowledge checks:** Words recognized by any enabled word source (`isKnown`) are excluded. This checks bundled dictionaries, imported custom dictionaries, personal dictionary entries, contact names, app names, and the system dictionary.
+4. **Sighting counts:** Existing sightings stored in `PendingLearn` are queried via `sightings(key)` and displayed on the row as `seen N`.
+5. **Capping:** To maintain smooth UI rendering, candidate row lists are capped at `LearnFromText.MAX_ROWS` (2,000 rows).
+
+## N-gram learning plan
+
+When the user taps **Add N**, `LearnFromText.plan` generates a `LearnPlan` to teach associated word relationships:
+
+- **Adjacent pairs (`pairs`):** Consecutive word pairs within the same sentence.
+- **Triples (`triples`):** Consecutive three-word sequences within the same sentence.
+- **1-skip bigrams (`skips`):** Word pairs separated by one intervening word.
+- **2-skip bigrams (`skips2`):** Word pairs separated by two intervening words.
+
+### Rename mapping
+
+If the user edits a word row in the panel (for example, correcting `teh` to `the`), `LearnFromText.renamesOf` creates a mapping from original key to edited key. `LearnFromText.plan` applies these renames across all extracted N-grams so that corrected spellings are taught in context.
+
+### Validation gate
+
+Every word in an N-gram must be a valid known word (either previously known or newly added) and not blacklisted. An unchecked candidate word is excluded from N-gram plans, preventing unverified words from becoming next-word predictions.
+
+## UI state and service integration
+
+The panel state is held in `LearnFromTextUi`:
+- `scanning`: Indicates background scanning progress.
+- `rows`: List of candidate `LearnRow` items.
+- `editing`: Key of the row currently open in the inline speller.
+- `result`: Summary counts (`LearnResult`) displayed after an add operation.
+
+When checked words are committed, `WMKeyboardService` adds each word to `UserLexicon` at hand-added weight, registers learned N-grams, updates system dictionaries if enabled, and clears the added rows from the panel state.

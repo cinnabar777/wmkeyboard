@@ -34,7 +34,7 @@ A word needs at least two letters to be auto-learned this way. Adding one yourse
 
 ## Words wait their turn
 
-Nothing you type is written to your dictionary while you're still typing it. Every committed word is held first, and only counted once the text it landed in has stopped moving. That's what gives you a chance to read back what you wrote: a word you fix, delete or re-pick was never learned in the first place. Only what you actually do to a word counts against it. Backspacing through it, sweeping it away with a delete swipe or typing a fix over it drops it; simply putting the cursor on it, or walking the cursor back through it with a spacebar swipe, leaves it waiting, and it is counted with the rest when you move on.
+Nothing you type is written to your dictionary while you're still typing it. Every committed word is held first in an in-memory word cache (the proofreading buffer), and only counted once the text it landed in has stopped moving. That's what gives you a chance to read back what you wrote: a word you fix, delete or re-pick was never learned in the first place. Only what you actually do to a word counts against it. Backspacing through it, sweeping it away with a delete swipe or typing a fix over it drops it; simply putting the cursor on it, or walking the cursor back through it with a spacebar swipe, leaves it waiting, and it is counted with the rest when you move on.
 
 What differs between words is how many settled uses they need.
 
@@ -42,12 +42,14 @@ A word something already recognises, whether that's the bundled dictionary, a wo
 
 A word *nothing* recognises has to be typed **three times** before it joins your dictionary, and each of those has to settle. Change that count with **Remember a new word after** under <SettingsPath path="Typing / Suggestions" />, anywhere from 1 up to 10. A sighting that's undoing an autocorrect counts double, so one undo plus one ordinary use is enough at the default.
 
-Settling is what stops your slips being counted at all. A word you've just typed isn't evidence of anything yet, because half the time you're about to fix it, and a glide gives you the wrong real word often enough that counting it on the spot slowly turned the personal dictionary into a copy of the wordlist. So a word is held, unwritten, until one of these happens:
+Settling is what stops your slips being counted at all. A word you've just typed isn't evidence of anything yet, because half the time you're about to fix it, and a glide gives you the wrong real word often enough that counting it on the spot slowly turned the personal dictionary into a copy of the wordlist. So a word is held in the word cache, unwritten, until one of these happens:
 
-- You close the keyboard.
+- You close or hide the keyboard.
 - You send or clear the field.
-- You move to a different field.
+- You move to a different field or switch to another app.
 - You keep typing far enough past it (about 500 words) that you're clearly not coming back.
+
+Whenever you close the keyboard or switch apps, the word cache immediately flushes and settles all valid words in the queue to disk, ensuring per-app session persistence with zero lost learning. Furthermore, next-word prediction associations (word pairs, triples, and skip-grams) are deferred to this same settlement moment rather than recorded upon commit, preventing uncorrected typos or rejected suggestions from polluting phrase prediction models.
 
 If you go back into that text before any of that, the word you *change* is dropped and counts for nothing: backspacing over it, deleting it with a delete swipe, or typing a fix on top of it. The word you merely land in is not decided by that alone. Tapping into it, or walking the cursor back through it with the spacebar, leaves it waiting, and it settles with the rest once you move on, so proofreading a sentence does not unlearn it and a word the cursor happens to sit on when you close the keyboard is still counted. The rest of the text you moved past is text you left alone, so tapping up to fix the first line of a note settles everything below it rather than throwing the whole session away. Re-picking a swiped word from the strip drops it too, because you just overruled the guess. So does deleting the word from your dictionary while it's still waiting.
 
@@ -244,5 +246,6 @@ The dictionary screen itself has no settings beyond the word list, its sort orde
 - **A word arrives with the count it earned.** A new word that took three sightings to get in reads "Seen 3 times" on the list, not "Seen once", because the sightings it collected on the way in come with it.
 - **Turning learning off empties the waiting room too.** Switching off "Learn from typing", or switching on incognito while it's set to pause learning, throws away the words that were queued but not yet counted. They were typed while it was allowed, but none of them had been written anywhere.
 - **A language with no dictionary of its own is slower to learn from.** Nothing recognises any of those words, so every one of them waits its three sightings. Set **Remember a new word after** to 1 if you type mostly in a language the keyboard has no wordlist for.
+- **Technical architecture.** For full technical details on `LearningBuffer` queueing, `onDeleted` range tracking, deferred N-gram learning, and lifecycle persistence, see the [Word cache architecture](/development/word-cache/) technical guide.
 
 For the rest of the suggestion strip (completions, corrections and next-word prediction), see [Suggestions & prediction](/smart/suggestions/). To keep a word out of suggestions entirely instead of teaching it, see the [suggestion blacklist](/smart/blacklist/). For how contact names interact with this same learning path, see [Contact-aware typing](/smart/contacts/).

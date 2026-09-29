@@ -1,0 +1,92 @@
+---
+title: "Word cache and learning buffer architecture"
+description: "Technical architecture of the proofreading word cache, deferred N-gram learning, lifecycle persistence, and gesture shape learning."
+sidebar:
+  order: 11
+---
+
+import SettingsPath from '@components/SettingsPath.astro';
+
+The **word cache** (implemented via `LearningBuffer`) acts as a proofreading staging area for committed words. Rather than immediately writing committed words and phrase associations to disk, words wait in memory until surrounding text settles. This document details the proofreading buffer mechanics, deletion tracking, deferred N-gram learning, lifecycle persistence, and gesture shape integration.
+
+## Design motivation and problem statement
+
+When users type or gesture-swipe, a notable portion of committed words are edited, backspaced, or re-picked from the suggestion strip shortly after landing in the input field.
+
+If an input method learns words or N-gram associations immediately upon commit:
+- Uncorrected typos and mistyped swipes permanently pollute user vocabulary models.
+- Re-picked gesture candidates leave unwanted word associations in the language model.
+- Proofreading and editing a sentence un-learns valid words if caret movements drop text prematurely.
+
+The word cache solves this by holding committed entries in a proofreading queue. Words only settle into permanent language models, `UserLexicon`, `PendingLearn`, and N-gram association stores after the user moves past them or leaves the field.
+
+## LearningBuffer mechanics
+
+`LearningBuffer` (`core/prediction/src/main/java/com/wasimaster/wmkeyboard/core/prediction/LearningBuffer.kt`) is an in-memory queue with a default capacity of 500 entries.
+
+### Entry metadata
+
+Each queued `LearningBuffer.Entry` holds:
+- `word`: The committed spelling.
+- `langId`: The language active when committed.
+- `weight`: Commit confidence weight based on commit method (typed, strip pick, autocorrect revert).
+- `caseTrusted`: Whether capitalization was explicitly typed by the user rather than forced by auto-capitalization or caps lock.
+- `known`: Whether the word was recognized by dictionaries at commit time.
+- `origin`: Commit origin enum (`TYPED`, `GLIDE`, `PICK`, `OCTOPUS`).
+- `anchor`: Character cursor offset in the input field following the commit selection echo (-1 when unanchored).
+- `typed`: The raw typed prefix or composing string.
+- `taps`: Touch point sequence for key-touch model learning.
+- `glideShape`: Associated gesture stroke sample (`GlideShapeSample`), if committed via glide typing.
+
+### Caret and deletion tracking
+
+1. **Caret moves (`onCaret`):**
+   - When the cursor moves, `LearningBuffer` compares the caret position against entry anchors.
+   - A caret landing inside or against the edge of a word marks the entry as `suspended`. The word remains in the queue undecided while the user interacts with it.
+   - Caret jumps cleanly past a word settle the entry, removing it from the queue and delivering it for learning.
+
+2. **Deletion handling (`onDeleted`):**
+   - Called directly by keyboard deletion actions (backspace, word delete swipe, selection delete/replacement) before editor selection echoes arrive.
+   - Any entry touched by the deleted character range `[start, end)` is immediately removed (`dropped`) from the queue.
+   - Entries located after the deleted range have their anchor offsets decremented by the deleted length.
+   - Dropped entries are placed in a recent dropped buffer (`RECENT_CAPACITY = 8`).
+
+3. **Correction pairing (`pairWithDropped`):**
+   - When a fresh entry is anchored near the anchor of a recently dropped word, `pairWithDropped` pairs the replacement with the dropped spelling.
+   - The new entry records `replaces` and `suspect = true`, allowing manual revisions to be taught as autocorrect corrections when the entry settles.
+
+## Deferred N-gram and lexicon learning
+
+`WMKeyboardService.settleLearned` processes entries drained from `LearningBuffer`.
+
+N-gram learning (bigrams, trigrams, skip-grams, and 2-skip bigrams) is strictly deferred to settlement time rather than execution at commit time.
+
+When `settleLearned` runs:
+1. **Blacklist re-check:** Entries blacklisted by the user while sitting in the queue are discarded.
+2. **Known words:** Settled known words call `learnSettledWord`, updating `UserLexicon` counts, registering N-gram phrase associations, updating tap-touch models via `observeTaps`, and persisting gesture shapes via `learnGlideShape`.
+3. **Unknown words:** Settled unknown words call `pendingLearn.sight()`. When sighting counts reach `newWordSightings` threshold (default 3), the word is promoted to `UserLexicon`.
+
+## Lifecycle persistence and session isolation
+
+To guarantee zero learning loss when users switch apps or dismiss the keyboard, `WMKeyboardService` manages buffer flushing and storage persistence across Android service lifecycle events:
+
+- **Window hide (`onWindowHidden`):** When the keyboard window hides, `WMKeyboardService` executes `flushLearningBuffer()`.
+- **Service destruction (`onDestroy`):** When the IME service is destroyed, `flushLearningBuffer()` runs, followed by a blocking execution of `saveLearningStores()`.
+
+### Immediate lifecycle flushing
+
+`flushLearningBuffer()` executes the following steps:
+1. `settleLearned(learningBuffer.drain(), verify)`: Drains all queued entries and processes learning updates.
+2. `judgeCorrections(correctionWatch.drain(), verify)`: Drains and evaluates active correction watchers against a field text window (`correctionJudgementWindow()`).
+3. Clears active gesture readings (`glideReadings.clear()`).
+4. Asynchronously writes `UserLexicon`, `PendingLearn`, `GlideShapeStore`, and N-gram stores to disk via `saveLearningStores()`.
+
+Per-app session persistence ensures that un-settled words in the buffer are flushed and saved cleanly per application session without leaking memory or state across app switches.
+
+## Gesture shape learning and seeding
+
+Glide shape learning is tied directly to `LearningBuffer` settlement:
+
+1. **Shape attachment:** When a gesture swipe commits a candidate, `LearningBuffer.attachGlide` binds the `GlideShapeSample` to the queued entry.
+2. **Settlement into `GlideShapeStore`:** `learnGlideShape` persists the stroke shape to `GlideShapeStore` only when the entry settles. If the user backspaces or re-picks the gesture word, the entry drops and the shape sample is discarded.
+3. **Shape seeding in `GlideBeam`:** Learned shapes are stored in `GlideShapeStore` as 32-byte hex point vectors using key-width spatial coordinates (`QUANT = 10f`). `GlideBeam` uses `shapeSeeding` to query learned shapes within a spatial radius, promoting matching learned words directly into gesture candidate beam scoring.
