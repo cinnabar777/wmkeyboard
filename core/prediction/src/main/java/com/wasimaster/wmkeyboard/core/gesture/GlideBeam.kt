@@ -316,6 +316,7 @@ class GlideBeam(private val tuning: Tuning = Tuning()) {
          * off.
          */
         val learnedShapeGain: Double = 0.15,
+        val shapeSeeding: Boolean = true,
         /**
          * How much the whole stroke's *shape* counts, once its size and position
          * are taken out of it.
@@ -571,6 +572,19 @@ class GlideBeam(private val tuning: Tuning = Tuning()) {
             val rootBound = src.logWeight + ln1p(src.walker.maxSubtree(src.walker.root))
             if (rootBound < floor - EPS) continue
             floor = searchOne(src, keys, ws, k, results, floor, ahead, budget)
+        }
+
+        // Inject learned words whose saved shape matches the drawn stroke,
+        // even if trie pruning or anchor mismatch filtered them from results.
+        if (shapes != null && tuning.shapeSeeding && tuning.learnedShapeGain > 0.0) {
+            quantise(ws.pathX, ws.pathY, ws.drawnShape8)
+            val nearWords = shapes.wordsNear(ws.drawnShape8, radius = 0.50f, limit = limit)
+            val minScore = results.values.minOfOrNull { it.score } ?: 0.0
+            for (word in nearWords) {
+                if (!results.containsKey(word)) {
+                    results[word] = Candidate(word, minScore - 0.5, 0.0, FuzzyBeamSearch.Tier.DICTIONARY)
+                }
+            }
         }
 
         val ranked = results.values.sortedWith(
