@@ -579,23 +579,30 @@ class GlideBeam(private val tuning: Tuning = Tuning()) {
         )
         var read = rescoreShape(ranked, keys, ws, shapes).take(limit)
 
-        // Inject learned words whose saved shape matches the drawn stroke,
-        // even if trie pruning or anchor mismatch filtered them from results.
+        // Inject or promote learned words whose saved shape matches the drawn stroke,
+        // even if trie pruning or anchor mismatch filtered or demoted them in results.
         if (shapes != null && tuning.shapeSeeding && tuning.learnedShapeGain > 0.0) {
             quantise(ws.pathX, ws.pathY, ws.drawnShape8)
             val nearWords = shapes.wordsNear(ws.drawnShape8, radius = 0.35f, limit = limit)
             if (nearWords.isNotEmpty()) {
-                val minRescoredScore = read.minOfOrNull { it.score } ?: 0.0
+                val maxRescoredScore = read.maxOfOrNull { it.score } ?: 0.0
+                val updatedRead = read.map { candidate ->
+                    if (candidate.word in nearWords) {
+                        Candidate(candidate.word, maxOf(candidate.score, maxRescoredScore), candidate.shapeCost, candidate.tier, candidate.ahead)
+                    } else {
+                        candidate
+                    }
+                }.toMutableList()
+
                 val readWords = read.mapTo(HashSet()) { it.word }
-                val seeded = mutableListOf<Candidate>()
                 for (word in nearWords) {
                     if (word !in readWords) {
-                        seeded.add(Candidate(word, minRescoredScore - 2.0, 0.0, FuzzyBeamSearch.Tier.DICTIONARY))
+                        updatedRead.add(Candidate(word, maxRescoredScore, 0.0, FuzzyBeamSearch.Tier.DICTIONARY))
                     }
                 }
-                if (seeded.isNotEmpty()) {
-                    read = (read + seeded).take(limit)
-                }
+                read = updatedRead.sortedWith(
+                    compareByDescending<Candidate> { it.score }.thenBy { it.word }
+                ).take(limit)
             }
         }
         if (ahead.isNullOrEmpty()) return read
