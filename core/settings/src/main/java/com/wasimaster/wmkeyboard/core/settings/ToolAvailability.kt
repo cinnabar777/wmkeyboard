@@ -6,9 +6,10 @@ import com.wasimaster.wmkeyboard.config.BuildConfig
 
 /**
  * Whether the two search tools have somewhere to search: a SearXNG instance the
- * user named, or a Brave key — theirs or the one baked into this build.
+ * user named, a Tavily key of theirs, or a Brave key — theirs or the one baked
+ * into this build.
  *
- * Either will do, and neither excludes the other. The F-Droid build ships no
+ * Any one will do, and none excludes the others. The F-Droid build ships no
  * Brave key, so in practice its answer comes from the instance; but a user of
  * that build who has their own key is not stopped from using it. The tools
  * module resolves the same pair for the request itself
@@ -18,6 +19,7 @@ import com.wasimaster.wmkeyboard.config.BuildConfig
  */
 fun hasSearchKey(settings: KeyboardSettings): Boolean =
     settings.selfHosted.searxUrl.isNotBlank() ||
+        settings.webSearch.tavilyApiKey.isNotBlank() ||
         settings.webSearch.braveApiKey.isNotBlank() ||
         BuildConfig.BRAVE_API_KEY.isNotBlank()
 

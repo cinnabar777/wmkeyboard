@@ -382,6 +382,16 @@
     <string name="tooldetail_translate_key_hint">Without a key, translation uses the free public endpoint of Google</string>
     <string name="tooldetail_translate_info">The keyboard sends the text that you translate to Google either way, and only while the translate panel is open. The free endpoint is unofficial and rate limited. A Cloud Translation key makes it official and reliable. If you set up DeepL below, DeepL gets the text instead, and Google gets only the languages that DeepL does not have.</string>
 
+    <!-- The user's own translation server (issue #435). llama.cpp, Ollama, LM Studio, vLLM, LocalAI and OpenAI are names. -->
+    <string name="tooldetail_translate_server_group">Your translation server</string>
+    <string name="tooldetail_translate_server_info">Optional. For a server that you run, or a service that you pay for, that answers OpenAI chat completion requests: llama.cpp, Ollama, LM Studio, vLLM, LocalAI and others. With an address here, the Online engine sends all translations to this server, and to no other service, even when the server fails. On Automatic, the translations that do not happen on the device go to it. The keyboard asks the model to translate and sends the text.</string>
+    <string name="tooldetail_translate_server_url_label">Server address</string>
+    <string name="tooldetail_translate_server_url_hint">For example http://192.168.1.10:8080/v1. Keep empty to use the usual service.</string>
+    <string name="tooldetail_translate_server_model_label">Model (optional)</string>
+    <string name="tooldetail_translate_server_model_hint">The name of the model on the server. Keep empty if the server has only one model.</string>
+    <string name="tooldetail_translate_server_key_label">Server API key (optional)</string>
+    <string name="tooldetail_translate_server_key_hint">Only for a server that asks for a key</string>
+
     <!-- DeepL (issue #331): the user's own key, for Translate and for DeepL Write. DeepL, DeepL Write, API Free and API Pro are names. -->
     <string name="tooldetail_deepl_group">DeepL</string>
     <string name="tooldetail_deepl_info">DeepL is optional. Nothing changes until you add a DeepL API key or a server address. Get a key in your DeepL account. The Free plan includes 500,000 characters each month. The keyboard sends text to DeepL only when you translate or when you tap DeepL Write.</string>
@@ -476,6 +486,11 @@
     <string name="tooldetail_search_key_label">Brave API key</string>
     <string name="tooldetail_search_key_hint">From api-dashboard.search.brave.com, with a free monthly credit</string>
     <string name="tooldetail_search_info">Web search and image search share everything here. They search the whole web. The Brave plan includes a free monthly credit of about a thousand searches. Brave asks for attribution, so the panel shows \"via Brave\".</string>
+    <!-- Tavily is a brand name: keep it as it is. -->
+    <string name="tooldetail_tavily_group">Tavily</string>
+    <string name="tooldetail_tavily_key_label">Tavily API key</string>
+    <string name="tooldetail_tavily_key_hint">From app.tavily.com, with 1,000 free credits a month</string>
+    <string name="tooldetail_tavily_info">Another search service, made for AI tools. The free plan gives 1,000 credits a month, and each search uses one. With a key here, web search and image search use Tavily instead of Brave. Image search shows the pictures that Tavily found on the pages of its results, so it finds fewer pictures than Brave.</string>
     <string name="tooldetail_search_results_group">Results</string>
     <string name="tooldetail_search_safe_title">SafeSearch</string>
     <string name="tooldetail_search_safe_subtitle">Filter explicit results</string>

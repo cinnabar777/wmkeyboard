@@ -139,10 +139,21 @@ object SyncRunner {
             return Outcome.Failed(reason)
         }
 
+        // A phone that synced the statistics as one shared total, before
+        // they synced per device (#447), holds a blend of every device's
+        // counts as its own. Counted beside the others' own, that blend would
+        // count everything twice, so it moves aside once, under a shared name.
+        if (ConfigBackup.Section.STATISTICS in sections &&
+            remembered?.get(ConfigBackup.Section.STATISTICS.id)?.isNotEmpty() == true &&
+            remembered?.containsKey(SyncStatistics.SECTION_ID) != true
+        ) {
+            repository.retireSharedStatistics()
+        }
+
         // Read here, after the downloads rather than before them: whatever
         // changed on this phone while those ran is in it, and the gap before
         // [apply] writes is as short as it can be.
-        val local = localEntries(repository, sections, filter)
+        val local = localEntries(repository, sections, filter, me)
 
         // Only what this phone would sync itself, from either side. A setting
         // that is per-device here, one the user keeps on this device, or a key
@@ -166,13 +177,14 @@ object SyncRunner {
             rejoining = { section, key ->
                 section == ConfigBackup.Section.SETTINGS.id && !lastFilter.syncable(key) && filter.syncable(key)
             },
+            owned = { section, key -> SyncStatistics.owned(section, key, me) },
         )
-        val applied = apply(repository, result, local)
+        val applied = apply(repository, result, local, me)
 
         // What is remembered is what this phone holds after applying, so the
         // next pass does not mistake a store's own formatting of a value it was
         // just given for a change made here.
-        val after = if (applied > 0) localEntries(repository, sections, filter) else local
+        val after = if (applied > 0) localEntries(repository, sections, filter, me) else local
         val nextState = result.remembered.mapValues { (section, entries) ->
             val now = after[section].orEmpty()
             entries.mapValues { (key, r) ->
@@ -203,23 +215,36 @@ object SyncRunner {
         return Outcome.Done(applied, remotes.size, failed)
     }
 
+    /**
+     * The name a section syncs under. The statistics sync per device, under
+     * a name of their own; see [SyncStatistics.SECTION_ID].
+     */
+    private fun syncId(section: ConfigBackup.Section): String =
+        if (section == ConfigBackup.Section.STATISTICS) SyncStatistics.SECTION_ID else section.id
+
     /** Each synced section on this phone, as entries. A section with nothing in it is empty, not absent. */
     private suspend fun localEntries(
         repository: SettingsRepository,
         sections: Set<ConfigBackup.Section>,
         filter: SyncFilter,
+        me: String,
     ): Map<String, Map<String, JsonElement>> {
-        val bundle = repository.exportConfig(sections, filter.includeSecrets, appVersion = 0, appVersionName = "")
+        val exported = sections - ConfigBackup.Section.STATISTICS
+        val bundle = repository.exportConfig(exported, filter.includeSecrets, appVersion = 0, appVersionName = "")
         val parsed = ConfigBackup.decode(bundle)?.sections.orEmpty()
         return sections.associate { section ->
             val element = parsed[section]
             val entries = when {
+                // One entry per device, compared whole: only its own device
+                // ever changes one, so no two phones write the same entry.
+                section == ConfigBackup.Section.STATISTICS ->
+                    SyncEntries.explode(repository.statisticsByDevice(me), deep = false)
                 element == null -> emptyMap()
                 section == ConfigBackup.Section.SETTINGS ->
                     (element as? JsonObject).orEmpty().filterKeys(filter::syncable)
                 else -> SyncEntries.explode(element)
             }
-            section.id to entries
+            syncId(section) to entries
         }
     }
 
@@ -233,11 +258,12 @@ object SyncRunner {
         repository: SettingsRepository,
         result: SyncMerge.Result,
         local: Map<String, Map<String, JsonElement>>,
+        me: String,
     ): Int {
         var count = 0
         val bundleSections = LinkedHashMap<ConfigBackup.Section, JsonElement>()
         for ((sectionId, changes) in result.changes) {
-            val section = ConfigBackup.Section.entries.firstOrNull { it.id == sectionId } ?: continue
+            val section = ConfigBackup.Section.entries.firstOrNull { syncId(it) == sectionId } ?: continue
             count += changes.size
             if (section == ConfigBackup.Section.SETTINGS) {
                 val put = JsonObject(changes.filterValues { it != null }.mapValues { it.value!! })
@@ -253,7 +279,15 @@ object SyncRunner {
                 // pass read as fresh edits here and sent straight back.
                 val element = SyncEntries.implode(entries, rootIsArray)
                     ?: if (rootIsArray) JsonArray(emptyList()) else JsonObject(emptyMap())
-                if (section == ConfigBackup.Section.CLIPBOARD) {
+                if (section == ConfigBackup.Section.STATISTICS) {
+                    // Only the other devices' counts are written; this one's
+                    // belong to the keyboard, which is still counting.
+                    repository.applySyncedStatistics(
+                        element as? JsonObject ?: JsonObject(emptyMap()),
+                        me = me,
+                        hadOwn = local[sectionId]?.containsKey(me) == true,
+                    )
+                } else if (section == ConfigBackup.Section.CLIPBOARD) {
                     // Merged into the clipboard rather than written over it:
                     // the synced view is text clips only, and images, files and
                     // sensitive clips never leave this phone.

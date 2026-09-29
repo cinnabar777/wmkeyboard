@@ -34,6 +34,7 @@
     <string name="core_settings_ai_provider_lm_studio_label" translatable="false">LM Studio</string>
     <string name="core_settings_ai_provider_xai_label" translatable="false">Grok</string>
     <string name="core_settings_ai_provider_deepseek_label" translatable="false">DeepSeek</string>
+    <string name="core_settings_ai_provider_brave_label" translatable="false">Brave</string>
     <!-- Any other service that speaks the same request shape as OpenAI. -->
     <string name="core_settings_ai_provider_compatible_label">Other service</string>
     <!-- The model runs on the phone itself, with no service behind it. -->

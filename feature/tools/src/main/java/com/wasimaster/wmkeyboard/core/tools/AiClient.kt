@@ -23,8 +23,8 @@ import kotlinx.serialization.json.putJsonObject
 
 /**
  * One-shot chat completion against the AI tool's configured provider —
- * Anthropic, OpenAI, Gemini, or a self-hosted Ollama / LM Studio server
- * (OpenAI-compatible). Bring-your-own-key: keys and base URLs live in the
+ * Anthropic, OpenAI, Gemini, Brave's web-grounded answers, or a self-hosted
+ * Ollama / LM Studio server (OpenAI-compatible). Bring-your-own-key: keys and base URLs live in the
  * tool's settings; nothing is sent anywhere until the user runs an action.
  */
 object AiClient {
@@ -68,6 +68,9 @@ object AiClient {
         const val OLLAMA = "qwen3"
         const val XAI = "grok-4.5"
         const val DEEPSEEK = "deepseek-v4-flash"
+
+        /** Brave's Answers API has one model, and this is its name. */
+        const val BRAVE = "brave"
     }
 
     /**
@@ -129,6 +132,13 @@ object AiClient {
         AiProvider.DEEPSEEK -> Config(
             AiProvider.DEEPSEEK, settings.deepSeekKey,
             settings.deepSeekModel.ifBlank { DefaultModels.DEEPSEEK }, "",
+        )
+        // The key of the web search tool stands in when this one is blank:
+        // one Brave account can hold both plans, and the issue that asked for
+        // this provider asked for exactly that.
+        AiProvider.BRAVE -> Config(
+            AiProvider.BRAVE, settings.braveKey.ifBlank { settings.braveSearchKey },
+            DefaultModels.BRAVE, "",
         )
         AiProvider.OPENAI_COMPATIBLE -> Config(
             AiProvider.OPENAI_COMPATIBLE, settings.compatibleKey,
@@ -241,6 +251,12 @@ object AiClient {
                 AiProvider.LM_STUDIO -> settings.lmStudioUrl.isNotBlank()
                 AiProvider.XAI -> settings.xaiKey.isNotBlank()
                 AiProvider.DEEPSEEK -> settings.deepSeekKey.isNotBlank()
+                // The web search key counts only once Brave is the chosen
+                // provider. Otherwise everyone with their own search key would
+                // find a Brave chip in the pickers they never asked for, and a
+                // key with only the Search plan cannot answer anyway.
+                AiProvider.BRAVE -> settings.braveKey.isNotBlank() ||
+                    (settings.provider == AiProvider.BRAVE && settings.braveSearchKey.isNotBlank())
                 AiProvider.OPENAI_COMPATIBLE ->
                     settings.compatibleUrl.isNotBlank() && settings.compatibleModel.isNotBlank()
                 AiProvider.ON_DEVICE -> false
@@ -298,6 +314,8 @@ object AiClient {
                 geminiStream(config, system, chat, maxTokens, onPhase, onPartial, isActive)
             AiProvider.OLLAMA ->
                 ollamaStream(config, system, chat, maxTokens, onPhase, onPartial, isActive)
+            AiProvider.BRAVE ->
+                braveStream(config, system, chat, maxTokens, onPhase, onPartial, isActive)
             AiProvider.OPENAI, AiProvider.LM_STUDIO, AiProvider.XAI,
             AiProvider.DEEPSEEK, AiProvider.OPENAI_COMPATIBLE,
             -> openAiCompatibleStream(
@@ -664,7 +682,7 @@ object AiClient {
     internal fun applyOpenAiEvent(data: String, buffer: StreamBuffer) {
         val event = data.asJsonObject() ?: return
         event["error"]?.jsonObject?.let { error ->
-            throw streamFailure(error.text("message"))
+            throw streamFailure(error.text("message").ifEmpty { error.text("detail") })
         }
         val delta = event["choices"]?.jsonArray?.firstOrNull()
             ?.jsonObject?.get("delta")?.jsonObject ?: return
@@ -829,6 +847,167 @@ object AiClient {
         val message = event["message"]?.jsonObject ?: return
         buffer.reasoning(message.text("thinking"))
         buffer.answer(message.text("content"))
+    }
+
+    // ---- Brave ----
+
+    /**
+     * Brave's Answers API speaks the OpenAI chat-completions shape, with three
+     * differences that matter here. It searches the web before it answers, so
+     * every request costs a search as well as tokens. It takes exactly one user
+     * message: no system role and no history, so both are folded into that one
+     * message by [braveFoldedPrompt]. And it writes metadata into the answer
+     * text itself as `<usage>…</usage>` (and `<citation>…</citation>` when
+     * citations are on), which [BraveTagFilter] strips before anyone sees it.
+     */
+    private fun braveStream(
+        config: Config,
+        system: String,
+        turns: List<ChatTurn>,
+        maxTokens: Int?,
+        onPhase: (AiPhase) -> Unit,
+        onPartial: (String) -> Unit,
+        isActive: () -> Boolean,
+    ): Completion {
+        val filter = BraveTagFilter()
+        return runStream(
+            source = config.netSource,
+            url = ServiceEndpoints.base(ServiceEndpoint.BRAVE_SEARCH) + "/res/v1/chat/completions",
+            body = braveBody(system, turns, maxTokens),
+            headers = mapOf("X-Subscription-Token" to config.apiKey),
+            timeoutMs = 120_000,
+            onPhase = onPhase,
+            onPartial = onPartial,
+            isActive = isActive,
+            apply = { line, buffer ->
+                // A tag prefix held back at the very end is released here.
+                if (line.startsWith("data:") && line.removePrefix("data:").trim() == "[DONE]") {
+                    buffer.answer(filter.flush())
+                }
+                sseData(line)?.let { applyBraveEvent(it, filter, buffer) }
+            },
+            fallback = { Completion(stripBraveTags(parseOpenAi(it)).trim(), openAiTruncated(it)) },
+        )
+    }
+
+    internal fun braveBody(
+        system: String,
+        turns: List<ChatTurn>,
+        maxTokens: Int?,
+    ): String = buildJsonObject {
+        put("model", DefaultModels.BRAVE)
+        put("stream", true)
+        // Brave's spelling; it does not read max_tokens.
+        if (maxTokens != null) put("max_completion_tokens", maxTokens)
+        put("messages", buildJsonArray {
+            add(buildJsonObject {
+                put("role", "user")
+                put("content", braveFoldedPrompt(system, turns))
+            })
+        })
+    }.toString()
+
+    /**
+     * The whole exchange as the single user message Brave accepts. A one-turn
+     * request is the instructions followed by the text; a longer chat is laid
+     * out as a transcript, so the model can still tell what was already said
+     * from what it is being asked now.
+     */
+    internal fun braveFoldedPrompt(system: String, turns: List<ChatTurn>): String {
+        val last = turns.last().text
+        val earlier = turns.dropLast(1)
+        return buildString {
+            if (system.isNotBlank()) append(system.trim()).append("\n\n")
+            if (earlier.isNotEmpty()) {
+                append("Conversation so far:\n\n")
+                for (turn in earlier) {
+                    append(if (turn.role == ChatRole.USER) "User: " else "Assistant: ")
+                    append(turn.text).append("\n\n")
+                }
+                append("Reply to this latest message:\n\n")
+            }
+            append(last)
+        }
+    }
+
+    /** Folds one Brave SSE payload into [buffer], through [filter]. */
+    internal fun applyBraveEvent(data: String, filter: BraveTagFilter, buffer: StreamBuffer) {
+        val event = data.asJsonObject() ?: return
+        event["error"]?.jsonObject?.let { error ->
+            throw streamFailure(error.text("message").ifEmpty { error.text("detail") })
+        }
+        val choice = event["choices"]?.jsonArray?.firstOrNull()?.jsonObject ?: return
+        choice["delta"]?.jsonObject?.let { buffer.answer(filter.feed(it.text("content"))) }
+        val finish = choice.text("finish_reason")
+        if (finish.isNotEmpty()) buffer.answer(filter.flush())
+        if (finish == "length") buffer.markTruncated()
+    }
+
+    /** The tags Brave writes into the answer text that are not answer. */
+    private val BRAVE_TAGS = listOf("usage", "citation")
+
+    internal fun stripBraveTags(text: String): String {
+        val filter = BraveTagFilter()
+        return filter.feed(text) + filter.flush()
+    }
+
+    /**
+     * Removes Brave's inline metadata tags from a stream whose chunks can cut
+     * a tag anywhere, `<us` in one event and `age>{…}</usage>` in the next.
+     * Text that might still turn into a tag is held back until it either does
+     * or cannot; everything else passes through at once, so the answer still
+     * appears as it streams.
+     */
+    internal class BraveTagFilter {
+        private val pending = StringBuilder()
+
+        /** Takes the next chunk, returns the text now known to be answer. */
+        fun feed(chunk: String): String {
+            pending.append(chunk)
+            return drain(final = false)
+        }
+
+        /**
+         * The end of the stream: a partial tag name is released as text, and a
+         * tag that never closed is dropped, because what it held is metadata.
+         */
+        fun flush(): String = drain(final = true)
+
+        private fun drain(final: Boolean): String {
+            val out = StringBuilder()
+            var i = 0
+            while (i < pending.length) {
+                val open = pending.indexOf("<", i)
+                if (open < 0) {
+                    out.append(pending, i, pending.length)
+                    i = pending.length
+                    break
+                }
+                out.append(pending, i, open)
+                i = open
+                val tag = BRAVE_TAGS.firstOrNull { pending.startsWith("<$it>", i) }
+                if (tag != null) {
+                    val close = pending.indexOf("</$tag>", i)
+                    if (close < 0) {
+                        if (final) i = pending.length
+                        break
+                    }
+                    i = close + tag.length + CLOSING_TAG_EXTRA
+                    continue
+                }
+                val rest = pending.substring(i)
+                if (!final && BRAVE_TAGS.any { "<$it>".startsWith(rest) }) break
+                out.append('<')
+                i++
+            }
+            pending.delete(0, i)
+            return out.toString()
+        }
+
+        private companion object {
+            /** The `</` and `>` around a tag name. */
+            const val CLOSING_TAG_EXTRA = 3
+        }
     }
 
     /**

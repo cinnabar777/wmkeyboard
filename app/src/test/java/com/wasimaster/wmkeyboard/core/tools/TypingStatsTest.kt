@@ -217,6 +217,34 @@ class TypingStatsTest {
         assertEquals(7, months.sumOf { it.chars })
     }
 
+    @Test
+    fun `other devices' counts add to this one's and are never saved as its own`() {
+        val own = store()
+        own.type("hi there ")
+        own.onKeyTap("qwerty", "English", 1f, 1f, emptyList())
+        own.save()
+
+        val day = TypingStatsMath.localEpochDay(noon, utc)
+        val devices = """{
+            "bbbbbbbb": {"days": {"$day": {"chars": 100, "words": 20}}, "totalChars": 100, "totalWords": 20,
+                         "hourHistogram": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5],
+                         "heatmaps": {"qwerty": {"taps": 4, "cells": {"7": 4}}}},
+            "legacy": {"totalChars": 1000, "glideWords": 3}
+        }"""
+        val view = store().also { it.absorbDevices(devices) }
+        val totals = view.lifetime()
+        assertEquals(9L + 100 + 1000, totals.chars)
+        assertEquals(2L + 20, totals.words)
+        assertEquals(3L, totals.glideWords)
+        assertEquals("seven letters here at noon, five there", 7L + 5, totals.hourHistogram[12])
+        assertEquals(9L + 100, view.dayEntries().single().chars)
+        assertEquals("one board, both devices' taps", 5L, view.heatmaps().single().taps)
+
+        assertEquals("the file still holds only this device's", 9L, store().lifetime().chars)
+        view.absorbDevices("not json")
+        assertEquals("a broken file adds nothing", totals, view.lifetime())
+    }
+
     private companion object {
         const val DAY = 86_400_000L
         const val HOUR = 3_600_000L

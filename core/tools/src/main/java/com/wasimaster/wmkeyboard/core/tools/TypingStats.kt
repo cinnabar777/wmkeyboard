@@ -462,31 +462,51 @@ class TypingStats(
     private fun load() {
         val file = storageFile ?: return
         if (!file.exists()) return
-        runCatching {
-            val snapshot = json.decodeFromString<Snapshot>(file.readText())
-            for ((key, stat) in snapshot.days) {
-                days[key] = DayAcc(stat.chars, stat.words, stat.backspaces, stat.activeMs)
-            }
-            totalChars = snapshot.totalChars
-            totalWords = snapshot.totalWords
-            totalBackspaces = snapshot.totalBackspaces
-            totalActiveMs = snapshot.totalActiveMs
-            snapshot.hourHistogram.take(HOURS).forEachIndexed { hour, count ->
-                hourHistogram[hour] = count
-            }
-            keystrokesSaved = snapshot.keystrokesSaved
-            wordsPredicted = snapshot.wordsPredicted
-            wordsCompleted = snapshot.wordsCompleted
-            glideWords = snapshot.glideWords
-            glideDistanceMm = snapshot.glideDistanceMm
-            for ((id, stat) in snapshot.heatmaps) {
-                heatmaps[id] = HeatAcc(
-                    name = stat.name,
-                    taps = stat.taps,
-                    cells = HashMap(stat.cells),
-                    keys = stat.keys.map { HeatKey(it.label, it.x, it.y) },
-                )
-            }
+        runCatching { add(json.decodeFromString<Snapshot>(file.readText())) }
+    }
+
+    /**
+     * Adds the other devices' counts from [DEVICES_FILE_PATH] to
+     * this store's own, for a view of the whole: what the Statistics screen
+     * shows once sync is on. A store that saves must never be given them, or
+     * the next save would write every device's counts in as this one's.
+     */
+    @Synchronized
+    fun absorbDevices(text: String?) {
+        if (text.isNullOrBlank()) return
+        runCatching { json.decodeFromString<Map<String, Snapshot>>(text) }
+            .getOrNull()
+            ?.values
+            ?.forEach(::add)
+    }
+
+    /** Adds [snapshot] to what is held: every count summed, day by day and cell by cell. */
+    private fun add(snapshot: Snapshot) {
+        for ((key, stat) in snapshot.days) {
+            val day = days.getOrPut(key) { DayAcc() }
+            day.chars += stat.chars
+            day.words += stat.words
+            day.backspaces += stat.backspaces
+            day.activeMs += stat.activeMs
+        }
+        totalChars += snapshot.totalChars
+        totalWords += snapshot.totalWords
+        totalBackspaces += snapshot.totalBackspaces
+        totalActiveMs += snapshot.totalActiveMs
+        snapshot.hourHistogram.take(HOURS).forEachIndexed { hour, count ->
+            hourHistogram[hour] += count
+        }
+        keystrokesSaved += snapshot.keystrokesSaved
+        wordsPredicted += snapshot.wordsPredicted
+        wordsCompleted += snapshot.wordsCompleted
+        glideWords += snapshot.glideWords
+        glideDistanceMm += snapshot.glideDistanceMm
+        for ((id, stat) in snapshot.heatmaps) {
+            val map = heatmaps.getOrPut(id) { HeatAcc() }
+            if (map.name.isEmpty()) map.name = stat.name
+            if (map.keys.isEmpty()) map.keys = stat.keys.map { HeatKey(it.label, it.x, it.y) }
+            map.taps += stat.taps
+            for ((cell, count) in stat.cells) map.cells.merge(cell, count, Long::plus)
         }
     }
 
@@ -494,6 +514,14 @@ class TypingStats(
         /** Where the file lives under filesDir — shared by the keyboard and
          * the Statistics screen so the two can never drift apart. */
         const val FILE_PATH = "stats/typing_stats.json"
+
+        /**
+         * The other devices' counts, as sync brought them: installation id to
+         * a snapshot in this store's own format. Only sync and a restore write
+         * it; the keyboard never reads it, so what it holds can never be saved
+         * back as this device's typing (#447).
+         */
+        const val DEVICES_FILE_PATH = "stats/typing_stats_devices.json"
 
         /** A gap between keystrokes longer than this is a pause, not typing. */
         const val BURST_GAP_MS = 5_000L

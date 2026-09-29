@@ -493,7 +493,6 @@ import com.wasimaster.wmkeyboard.ime.CaptureVoiceAction
 import com.wasimaster.wmkeyboard.ime.PanelMode
 import com.wasimaster.wmkeyboard.core.tools.SmartSuggest
 import com.wasimaster.wmkeyboard.core.tools.SymbolCatalog
-import com.wasimaster.wmkeyboard.core.tools.ToolApiKeys
 import com.wasimaster.wmkeyboard.ime.PwSettingAction
 import com.wasimaster.wmkeyboard.ime.TypingTestAction
 import com.wasimaster.wmkeyboard.ime.VoiceBarAction
@@ -10813,8 +10812,7 @@ private fun KeyboardBody(
                             placeholder = stringResource(R.string.ime_web_search_hint),
                             onQueryTap = onMediaQueryTap,
                             onClear = onMediaQueryClear,
-                            attribution = stringResource(R.string.ime_search_attribution_brave)
-                                .takeIf { ToolApiKeys.hasSearchProvider(state.settings) },
+                            attribution = searchAttribution(state.settings),
                         )
                     },
                 ) {
@@ -10836,8 +10834,7 @@ private fun KeyboardBody(
                             placeholder = stringResource(R.string.ime_image_search_hint),
                             onQueryTap = onMediaQueryTap,
                             onClear = onMediaQueryClear,
-                            attribution = stringResource(R.string.ime_search_attribution_brave)
-                                .takeIf { ToolApiKeys.hasSearchProvider(state.settings) },
+                            attribution = searchAttribution(state.settings),
                         )
                         SearchByPhotoButton { onPanelChange(PanelMode.CAMERA) }
                     },

@@ -90,12 +90,14 @@ import coil3.gif.GifDecoder
 import coil3.memory.MemoryCache
 import com.wasimaster.wmkeyboard.common.R as CommonR
 import com.wasimaster.wmkeyboard.core.settings.GifSourceMode
+import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.icons.IconSlots
 import com.wasimaster.wmkeyboard.core.settings.ToolbarTool
 import com.wasimaster.wmkeyboard.core.tools.GifItem
 import com.wasimaster.wmkeyboard.core.tools.GifSource
 import com.wasimaster.wmkeyboard.core.tools.GifSources
 import com.wasimaster.wmkeyboard.core.tools.MediaCategory
+import com.wasimaster.wmkeyboard.core.tools.SearchBackend
 import com.wasimaster.wmkeyboard.core.tools.ToolApiKeys
 import com.wasimaster.wmkeyboard.core.tools.ToolHttp
 import com.wasimaster.wmkeyboard.core.tools.ImageResult
@@ -747,6 +749,19 @@ private fun gifAttribution(state: KeyboardUiState, stickers: Boolean = false): S
 
 private fun gifSourcesFor(state: KeyboardUiState, stickers: Boolean): List<GifSource> =
     if (stickers) ToolApiKeys.stickerSources(state.settings) else ToolApiKeys.gifSources(state.settings)
+
+/**
+ * "via Brave" or "via Tavily" in the web and image search bars, for whichever
+ * service answers. Brave's terms ask for the credit. A SearXNG instance is the
+ * user's own server, so it gets none.
+ */
+@Composable
+internal fun searchAttribution(settings: KeyboardSettings): String? =
+    when (ToolApiKeys.searchBackend(settings)) {
+        SearchBackend.BRAVE -> stringResource(R.string.ime_search_attribution_brave)
+        SearchBackend.TAVILY -> stringResource(R.string.ime_search_attribution_tavily)
+        SearchBackend.SEARXNG, null -> null
+    }
 
 /** The GIF/sticker search box sized for a [FullBleedTool] header row. */
 @Composable

@@ -195,6 +195,7 @@
     <string name="search_kw_typing_wrap_selection">surround parentheses quotes auto braces</string>
     <string name="search_kw_update_row_check">upgrade latest release</string>
     <string name="search_kw_voice_engine">offline whisper device model server transcription selfhosted hosted speaches remote</string>
+    <string name="search_kw_translate_server">openai compatible selfhosted hosted local llm ai model ollama llama studio vllm localai chat completions</string>
     <string name="search_kw_deepl">write rephrase rewrite improve polish style tone translation</string>
     <string name="search_kw_sticker_suggest">suggestions suggest tray prediction autocomplete</string>
     <string name="search_kw_sticker_suggest_magnify">magnify zoom enlarge preview peek large long press</string>

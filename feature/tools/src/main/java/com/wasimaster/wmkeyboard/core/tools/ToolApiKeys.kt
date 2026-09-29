@@ -52,6 +52,23 @@ object ToolApiKeys {
     fun brave(settings: KeyboardSettings): String =
         settings.webSearch.braveApiKey.ifBlank { BuildConfig.BRAVE_API_KEY }
 
+    /** The user's Tavily key; there is no built-in one (#439). */
+    fun tavily(settings: KeyboardSettings): String = settings.webSearch.tavilyApiKey
+
+    /**
+     * Which service the web and image search tools ask, or null when none is
+     * set up. A named SearXNG instance wins, then a Tavily key, then Brave:
+     * the more deliberate the setup, the earlier it comes. Tavily goes before
+     * Brave because only the user can have put its key there, while a Brave
+     * key may be the one this build ships.
+     */
+    fun searchBackend(settings: KeyboardSettings): SearchBackend? = when {
+        settings.selfHosted.searxUrl.isNotBlank() -> SearchBackend.SEARXNG
+        tavily(settings).isNotBlank() -> SearchBackend.TAVILY
+        brave(settings).isNotBlank() -> SearchBackend.BRAVE
+        else -> null
+    }
+
     /**
      * Whether the web/image search tools have a usable Brave key. Delegates to
      * `hasSearchKey`, which is where the toolbar and the settings screens ask
@@ -99,3 +116,6 @@ object ToolApiKeys {
     val builtInUnsplash: Boolean get() = BuildConfig.UNSPLASH_API_KEY.isNotBlank()
     val builtInPexels: Boolean get() = BuildConfig.PEXELS_API_KEY.isNotBlank()
 }
+
+/** The services behind the web and image search tools; see [ToolApiKeys.searchBackend]. */
+enum class SearchBackend { SEARXNG, TAVILY, BRAVE }

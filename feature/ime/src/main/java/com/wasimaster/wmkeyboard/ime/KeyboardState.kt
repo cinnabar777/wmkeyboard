@@ -1258,6 +1258,8 @@ data class TranslateUi(
     val onDevice: Boolean = false,
     /** [translated] came from DeepL, the user's own opt-in service (#331). */
     val viaDeepL: Boolean = false,
+    /** [translated] came from the user's own translation server (#435). */
+    val viaServer: Boolean = false,
     /**
      * Model codes the on-device engine needs before it can translate the
      * current query. Non-empty is what puts the download offer on screen.

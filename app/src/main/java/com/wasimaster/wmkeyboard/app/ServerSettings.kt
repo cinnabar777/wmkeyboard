@@ -301,6 +301,7 @@ internal val ServiceEndpoint.labelRes: Int
         ServiceEndpoint.TRANSLATE_GOOGLE -> R.string.servers_translate_google
         ServiceEndpoint.TRANSLATE_CLOUD -> R.string.servers_translate_cloud
         ServiceEndpoint.BRAVE_SEARCH -> R.string.servers_brave_search
+        ServiceEndpoint.TAVILY -> R.string.servers_tavily
         ServiceEndpoint.KLIPY -> R.string.servers_klipy
         ServiceEndpoint.GIPHY -> R.string.servers_giphy
         ServiceEndpoint.SIGNAL_STICKER_CDN -> R.string.servers_signal_sticker_cdn

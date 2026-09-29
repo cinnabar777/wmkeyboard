@@ -67,7 +67,7 @@
     <string name="clipboard_pinned_last_title">Pinned entries last</string>
     <string name="clipboard_clear_button_title">Clear button</string>
     <string name="clipboard_clear_button_subtitle">Show a bin beside the search bar that deletes all unpinned clips</string>
-    <string name="clipboard_clear_button_info">The bin asks before it deletes. Pinned clips always stay. When Undo a deleted clip is on, the Undo bar gives all of the clips back. This setting is off by default.</string>
+    <string name="clipboard_clear_button_info">The bin asks before it deletes. Pinned clips always stay. It also empties the system clipboard, unless that holds a pinned clip. When Undo a deleted clip is on, the Undo bar gives all of the clips back. This setting is off by default.</string>
     <string name="clipboard_pinned_tabs_title">Pinned and unpinned tabs</string>
     <string name="clipboard_pinned_tabs_subtitle">Show unpinned clips and pinned clips on two different tabs</string>
     <string name="clipboard_pinned_tabs_info">The panel opens on the Unpinned tab. When you pin a clip, it moves to the Pinned tab. A search looks through the two tabs. With the tabs on, Pinned entries last has no effect. This setting is off by default.</string>

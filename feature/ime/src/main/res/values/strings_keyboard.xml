@@ -506,6 +506,8 @@
     <string name="ime_image_search_by_photo_desc">Search with a photo</string>
     <!-- Names the search service. Brave is a brand name: keep it as it is. -->
     <string name="ime_search_attribution_brave">via Brave</string>
+    <!-- Names the search service. Tavily is a brand name: keep it as it is. -->
+    <string name="ime_search_attribution_tavily">via Tavily</string>
     <string name="ime_unit_convert_title">Unit converter</string>
     <string name="ime_password_tab_passphrase">Passphrase</string>
     <string name="ime_typing_test_restart">Restart</string>

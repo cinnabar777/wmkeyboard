@@ -411,9 +411,17 @@ private fun TranslateLanguageRow(
         // Says which service answered only when it is the one the user
         // brought (#331): DeepL falls back to the usual service for a
         // language it does not have, and that switch should not be silent.
-        if (translate.viaDeepL && translate.translated.isNotEmpty()) {
+        // The user's own server (#435) never falls back, but the engine chip
+        // still reads "Online", so it says where the text went.
+        val via = when {
+            translate.translated.isEmpty() -> null
+            translate.viaServer -> R.string.ime_translate_server_label
+            translate.viaDeepL -> R.string.ime_translate_deepl_label
+            else -> null
+        }
+        if (via != null) {
             Text(
-                stringResource(R.string.ime_translate_deepl_label),
+                stringResource(via),
                 color = kb.secondaryText,
                 fontSize = 11.sp,
                 maxLines = 1,

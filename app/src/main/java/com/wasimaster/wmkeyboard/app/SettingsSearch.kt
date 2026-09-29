@@ -1367,6 +1367,11 @@ private fun SearchStrings.toolPageRowsA(): List<SettingsSearchEntry> = listOf(
     ),
     toolEntry(ToolbarTool.TRANSLATE, R.string.tooldetail_translate_key_label, R.string.tooldetail_translate_key_hint),
     toolEntry(ToolbarTool.TRANSLATE, R.string.tooldetail_deepl_key_label, R.string.tooldetail_deepl_key_hint),
+    toolEntry(
+        ToolbarTool.TRANSLATE,
+        R.string.tooldetail_translate_server_url_label,
+        R.string.tooldetail_translate_server_group,
+    ),
 )
 
 /** Rows on the tool pages, from Translate through the AI tool. */
@@ -1390,6 +1395,8 @@ private fun SearchStrings.toolPageRowsB(): List<SettingsSearchEntry> = listOf(
     toolEntry(ToolbarTool.STICKER, R.string.tooldetail_media_limit_title, R.string.tooldetail_media_limit_subtitle),
     toolEntry(ToolbarTool.WEB_SEARCH, R.string.tooldetail_search_key_label, R.string.tooldetail_search_key_hint),
     toolEntry(ToolbarTool.IMAGE_SEARCH, R.string.tooldetail_search_key_label, R.string.tooldetail_search_key_hint),
+    toolEntry(ToolbarTool.WEB_SEARCH, R.string.tooldetail_tavily_key_label, R.string.tooldetail_tavily_key_hint),
+    toolEntry(ToolbarTool.IMAGE_SEARCH, R.string.tooldetail_tavily_key_label, R.string.tooldetail_tavily_key_hint),
     toolEntry(ToolbarTool.WEB_SEARCH, R.string.tooldetail_search_safe_title, R.string.tooldetail_search_safe_subtitle),
     toolEntry(ToolbarTool.IMAGE_SEARCH, R.string.tooldetail_search_safe_title, R.string.tooldetail_search_safe_subtitle),
     toolEntry(ToolbarTool.WEB_SEARCH, R.string.tooldetail_search_count_title, R.string.tooldetail_search_count_subtitle),
@@ -1491,6 +1498,7 @@ private fun SearchStrings.toolPageRowsB(): List<SettingsSearchEntry> = listOf(
         R.string.toolai_ai_deepseek_key_label,
         R.string.toolai_ai_deepseek_key_hint,
     ),
+    toolEntry(ToolbarTool.AI, R.string.toolai_ai_brave_key_label, R.string.toolai_ai_brave_key_hint),
     toolEntry(
         ToolbarTool.AI,
         R.string.toolai_ai_compatible_url_label,

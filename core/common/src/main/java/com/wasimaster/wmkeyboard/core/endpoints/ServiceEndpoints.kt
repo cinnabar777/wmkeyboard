@@ -38,6 +38,7 @@ enum class ServiceEndpoint(
     TRANSLATE_GOOGLE("translate_google", "https://translate.googleapis.com", ServiceGroup.TRANSLATE),
     TRANSLATE_CLOUD("translate_cloud", "https://translation.googleapis.com", ServiceGroup.TRANSLATE),
     BRAVE_SEARCH("brave_search", "https://api.search.brave.com", ServiceGroup.SEARCH),
+    TAVILY("tavily", "https://api.tavily.com", ServiceGroup.SEARCH),
     KLIPY("klipy", "https://api.klipy.com", ServiceGroup.MEDIA),
     GIPHY("giphy", "https://api.giphy.com", ServiceGroup.MEDIA),
 

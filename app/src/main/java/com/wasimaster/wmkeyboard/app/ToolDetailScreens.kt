@@ -1885,6 +1885,7 @@ internal fun ToolDetailSettings(
                     ) { repository.setTranslateApiKey(it) }
                 }
             }
+            TranslateServerSettingsGroup(repository, settings)
             DeepLSettingsGroup(repository, settings)
         }
         ToolbarTool.GIF, ToolbarTool.STICKER -> {
@@ -2164,6 +2165,22 @@ internal fun ToolDetailSettings(
                         builtInAvailable = ToolApiKeys.builtInBrave,
                         emptyHint = stringResource(R.string.tooldetail_search_key_hint),
                     ) { repository.setBraveApiKey(it) }
+                }
+            }
+            SettingsGroup(
+                stringResource(R.string.tooldetail_tavily_group),
+                info = stringResource(R.string.tooldetail_tavily_info),
+            ) {
+                if (BuildConfig.ENABLE_FDROID) {
+                    serverItems(repository, settings, endpoints = listOf(ServiceEndpoint.TAVILY))
+                }
+                item {
+                    ApiKeyField(
+                        label = stringResource(R.string.tooldetail_tavily_key_label),
+                        value = settings.watch { it.webSearch.tavilyApiKey },
+                        builtInAvailable = false,
+                        emptyHint = stringResource(R.string.tooldetail_tavily_key_hint),
+                    ) { repository.setTavilyApiKey(it) }
                 }
             }
             SettingsGroup(stringResource(R.string.tooldetail_search_results_group)) {
@@ -3286,6 +3303,44 @@ private fun ToolKeywordSetting(
         StateBanner(stringResource(R.string.toolai_keyword_off_info))
     }
 }
+/**
+ * A translation server the user runs that answers OpenAI chat-completions
+ * requests (#435). The address is the switch: blank, the tool is as it was.
+ */
+@Composable
+private fun TranslateServerSettingsGroup(repository: SettingsRepository, settings: LiveSettings) {
+    val defaults = SettingsDefaults.translate.server
+    SettingsGroup(
+        stringResource(R.string.tooldetail_translate_server_group),
+        info = stringResource(R.string.tooldetail_translate_server_info),
+    ) {
+        item {
+            TextFieldSetting(
+                label = stringResource(R.string.tooldetail_translate_server_url_label),
+                value = settings.watch { it.translate.server.url },
+                hint = stringResource(R.string.tooldetail_translate_server_url_hint),
+                default = defaults.url,
+            ) { repository.setTranslateServerUrl(it) }
+        }
+        item {
+            TextFieldSetting(
+                label = stringResource(R.string.tooldetail_translate_server_model_label),
+                value = settings.watch { it.translate.server.model },
+                hint = stringResource(R.string.tooldetail_translate_server_model_hint),
+                default = defaults.model,
+            ) { repository.setTranslateServerModel(it) }
+        }
+        item {
+            ApiKeyField(
+                label = stringResource(R.string.tooldetail_translate_server_key_label),
+                value = settings.watch { it.translate.server.apiKey },
+                builtInAvailable = false,
+                emptyHint = stringResource(R.string.tooldetail_translate_server_key_hint),
+            ) { repository.setTranslateServerKey(it) }
+        }
+    }
+}
+
 /**
  * DeepL, the user's own opt-in service (#331): a key or a server, and then
  * what to use it for. Until one of the two fields is filled in the switches

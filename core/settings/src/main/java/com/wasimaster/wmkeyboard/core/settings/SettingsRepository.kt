@@ -99,6 +99,7 @@ import com.wasimaster.wmkeyboard.core.tools.AiActionCodec
 import com.wasimaster.wmkeyboard.core.tools.AiActionSpec
 import com.wasimaster.wmkeyboard.core.tools.BuiltInAiActions
 import com.wasimaster.wmkeyboard.core.tools.BuiltInSymbolSets
+import com.wasimaster.wmkeyboard.core.settings.sync.SyncStatistics
 import com.wasimaster.wmkeyboard.core.tools.TypingStats
 import com.wasimaster.wmkeyboard.core.tools.mergeLegacyAiPrompts
 import com.wasimaster.wmkeyboard.core.tools.DefaultToolLetters
@@ -566,6 +567,13 @@ enum class AiProvider(@StringRes val labelRes: Int) {
     DEEPSEEK(R.string.core_settings_ai_provider_deepseek_label),
 
     /**
+     * Brave's Answers API: every answer is grounded in a web search it runs
+     * first. One fixed model, and it takes a single message, so the client
+     * folds the instructions and any chat history into it.
+     */
+    BRAVE(R.string.core_settings_ai_provider_brave_label),
+
+    /**
      * Any other server that speaks the OpenAI chat-completions shape: the user
      * gives the address, the model and (if the service wants one) a key. This
      * is what covers OpenRouter, Groq, Together, Mistral and the rest without a
@@ -582,7 +590,7 @@ enum class AiProvider(@StringRes val labelRes: Int) {
          * appended and would land after ON_DEVICE.
          */
         val displayOrder: List<AiProvider> = listOf(
-            ANTHROPIC, OPENAI, GEMINI, XAI, DEEPSEEK,
+            ANTHROPIC, OPENAI, GEMINI, XAI, DEEPSEEK, BRAVE,
             OLLAMA, LM_STUDIO, OPENAI_COMPATIBLE, ON_DEVICE,
         )
     }
@@ -670,7 +678,31 @@ data class TranslateSettings(
     val onlyDownloaded: Boolean = true,
     /** DeepL, the user's own opt-in service (see [DeepLSettings]). Issue #331. */
     val deepl: DeepLSettings = DeepLSettings(),
+    /** A translation server the user runs (see [TranslateServerSettings]). Issue #435. */
+    val server: TranslateServerSettings = TranslateServerSettings(),
 )
+
+/**
+ * A server the user runs, or a service they pay for, that answers OpenAI's
+ * chat-completions requests: llama.cpp's llama-server, Ollama, LM Studio,
+ * vLLM, LocalAI, a gateway (issue #435). The online engine sends each
+ * translation there as a chat with a translating instruction, in place of
+ * DeepL, Google or LibreTranslate. Blank [url] leaves everything as it was.
+ */
+data class TranslateServerSettings(
+    /**
+     * The server's address, as pasted: a bare `host:port`, the API root
+     * (`…/v1`) or the whole `…/chat/completions` path.
+     */
+    val url: String = "",
+    /** The model to ask for. Blank sends none, for a server that runs one model. */
+    val model: String = "",
+    /** Sent as a bearer token when set. A server on the user's own network often wants none. */
+    val apiKey: String = "",
+) {
+    /** An address to reach: the one thing that turns the server on. */
+    val configured: Boolean get() = url.isNotBlank()
+}
 
 /**
  * How DeepL Write should rewrite the text. DeepL's `prefer_` values: a
@@ -2435,6 +2467,11 @@ data class WebSearchSettings(
      * means "use the built-in key" (which may itself be blank).
      */
     val braveApiKey: String = "",
+    /**
+     * The user's Tavily key (#439). There is no built-in one, so blank means
+     * Tavily is not used; set, it wins over Brave (see `ToolApiKeys.searchBackend`).
+     */
+    val tavilyApiKey: String = "",
     /** SafeSearch for the web and image search tools. */
     val safe: Boolean = true,
     /** Results per web/image search (the API caps a page at 10). */
@@ -3810,6 +3847,16 @@ data class AiSettings(
     val xaiModel: String = "",
     val deepSeekKey: String = "",
     val deepSeekModel: String = "",
+    /** Key for Brave's Answers API. Blank = [braveSearchKey]. */
+    val braveKey: String = "",
+    /**
+     * The key the user gave the web search tool, read here so the AI client
+     * can fall back to it without the whole settings object. Never written
+     * through this class: its preference belongs to [WebSearchSettings]. The
+     * key baked into a build is deliberately not included, since it pays for
+     * searches, not for answers.
+     */
+    val braveSearchKey: String = "",
     /**
      * Address of any other OpenAI-compatible service, up to and including the
      * version segment: the client adds `/chat/completions`. The key is optional,
@@ -8362,6 +8409,9 @@ class SettingsRepository(private val context: Context) {
         private val DEEPL_TRANSLATE = booleanPreferencesKey("deepl_translate")
         private val DEEPL_WRITE = booleanPreferencesKey("deepl_write")
         private val DEEPL_WRITE_STYLE = stringPreferencesKey("deepl_write_style")
+        private val TRANSLATE_SERVER_URL = stringPreferencesKey("translate_server_url")
+        private val TRANSLATE_SERVER_MODEL = stringPreferencesKey("translate_server_model")
+        private val TRANSLATE_SERVER_KEY = stringPreferencesKey("translate_server_key")
         private val GRAMMAR_DIALECT = stringPreferencesKey("grammar_dialect")
         private val GRAMMAR_HIDDEN_KINDS = stringSetPreferencesKey("grammar_hidden_kinds")
         private val SPELL_CHECKER_NO_SUGGESTIONS =
@@ -8369,6 +8419,7 @@ class SettingsRepository(private val context: Context) {
         private val TRANSLATE_API_KEY = stringPreferencesKey("translate_api_key")
         private val KLIPY_API_KEY = stringPreferencesKey("klipy_api_key")
         private val BRAVE_API_KEY = stringPreferencesKey("brave_api_key")
+        private val TAVILY_API_KEY = stringPreferencesKey("tavily_api_key")
         private val GIPHY_API_KEY = stringPreferencesKey("giphy_api_key")
         private val GIF_SOURCE_MODE = stringPreferencesKey("gif_source_mode")
         private val GIF_CONTENT_FILTER = stringPreferencesKey("gif_content_filter")
@@ -8522,6 +8573,7 @@ class SettingsRepository(private val context: Context) {
         private val AI_XAI_MODEL = stringPreferencesKey("ai_xai_model")
         private val AI_DEEPSEEK_KEY = stringPreferencesKey("ai_deepseek_key")
         private val AI_DEEPSEEK_MODEL = stringPreferencesKey("ai_deepseek_model")
+        private val AI_BRAVE_KEY = stringPreferencesKey("ai_brave_key")
         private val AI_COMPATIBLE_URL = stringPreferencesKey("ai_compatible_url")
         private val AI_COMPATIBLE_KEY = stringPreferencesKey("ai_compatible_key")
         private val AI_COMPATIBLE_MODEL = stringPreferencesKey("ai_compatible_model")
@@ -10197,6 +10249,11 @@ class SettingsRepository(private val context: Context) {
                     ?.let { name -> DeepLWriteStyle.entries.firstOrNull { it.name == name } }
                     ?: defaults.translate.deepl.writeStyle,
             ),
+            server = TranslateServerSettings(
+                url = p[TRANSLATE_SERVER_URL] ?: defaults.translate.server.url,
+                model = p[TRANSLATE_SERVER_MODEL] ?: defaults.translate.server.model,
+                apiKey = p[TRANSLATE_SERVER_KEY] ?: defaults.translate.server.apiKey,
+            ),
         )
 
     private fun readGrammarHiddenKinds(p: Preferences, defaults: KeyboardSettings) =
@@ -10209,6 +10266,7 @@ class SettingsRepository(private val context: Context) {
     private fun readWebSearch(p: Preferences, defaults: KeyboardSettings) =
         WebSearchSettings(
             braveApiKey = p[BRAVE_API_KEY] ?: defaults.webSearch.braveApiKey,
+            tavilyApiKey = p[TAVILY_API_KEY] ?: defaults.webSearch.tavilyApiKey,
             safe = p[SEARCH_SAFE] ?: defaults.webSearch.safe,
             resultCount = p[SEARCH_RESULT_COUNT] ?: defaults.webSearch.resultCount,
             wikiLanguage = p[WIKI_LANGUAGE] ?: defaults.webSearch.wikiLanguage,
@@ -10314,6 +10372,8 @@ class SettingsRepository(private val context: Context) {
             xaiModel = p[AI_XAI_MODEL] ?: defaults.ai.xaiModel,
             deepSeekKey = p[AI_DEEPSEEK_KEY] ?: defaults.ai.deepSeekKey,
             deepSeekModel = p[AI_DEEPSEEK_MODEL] ?: defaults.ai.deepSeekModel,
+            braveKey = p[AI_BRAVE_KEY] ?: defaults.ai.braveKey,
+            braveSearchKey = p[BRAVE_API_KEY].orEmpty(),
             compatibleUrl = p[AI_COMPATIBLE_URL] ?: defaults.ai.compatibleUrl,
             compatibleKey = p[AI_COMPATIBLE_KEY] ?: defaults.ai.compatibleKey,
             compatibleModel = p[AI_COMPATIBLE_MODEL] ?: defaults.ai.compatibleModel,
@@ -12719,6 +12779,52 @@ class SettingsRepository(private val context: Context) {
         writeStore(path, JsonObject(local + ("items" to JsonArray(incoming + stays))))
     }
 
+    private fun ownStatistics(): JsonObject? = readStore(TypingStats.FILE_PATH) as? JsonObject
+
+    private fun otherStatistics(): JsonObject? = readStore(TypingStats.DEVICES_FILE_PATH) as? JsonObject
+
+    /** Replaces the other devices' counts; none left removes the file. */
+    private fun writeOtherStatistics(others: JsonObject): Boolean =
+        if (others.isEmpty()) {
+            val file = storeFile(TypingStats.DEVICES_FILE_PATH)
+            !file.exists() || file.delete()
+        } else {
+            writeStore(TypingStats.DEVICES_FILE_PATH, others)
+        }
+
+    /** The typing statistics as sync carries them, one entry per device; see [SyncStatistics]. */
+    fun statisticsByDevice(me: String): JsonObject =
+        SyncStatistics.byDevice(ownStatistics(), otherStatistics(), me)
+
+    /**
+     * Writes the other devices' counts a sync pass agreed on. This device's
+     * own are never taken from elsewhere, since the keyboard is still adding
+     * to them; the one exception is Delete all statistics pressed on another
+     * device, which clears them here too. [hadOwn]: see [SyncStatistics.received].
+     */
+    suspend fun applySyncedStatistics(byDevice: JsonObject, me: String, hadOwn: Boolean) {
+        val received = SyncStatistics.received(byDevice, me, hadOwn)
+        writeOtherStatistics(received.others)
+        if (received.clearOwn) {
+            storeFile(TypingStats.FILE_PATH).delete()
+            bumpStatsVersion()
+        }
+    }
+
+    /**
+     * Moves the counts this device held while it synced one shared total
+     * aside, once, the first time it syncs them per device: see
+     * [SyncStatistics.retire]. The keyboard starts this device's own counts
+     * again from zero, and the total the screen shows stays what it was.
+     */
+    suspend fun retireSharedStatistics() {
+        val others = SyncStatistics.retire(ownStatistics(), otherStatistics()) ?: return
+        if (writeOtherStatistics(others)) {
+            storeFile(TypingStats.FILE_PATH).delete()
+            bumpStatsVersion()
+        }
+    }
+
     /** Relative path of the sticker manifest, the one file that isn't binary. */
     private val stickerManifestPath =
         "${StickerPackStore.DIR_NAME}/packs.json"
@@ -13197,7 +13303,8 @@ class SettingsRepository(private val context: Context) {
             readStore("learning/emoji_usage.json")?.let { out[ConfigBackup.Section.EMOJI] = it }
         }
         if (ConfigBackup.Section.STATISTICS in sections) {
-            readStore(TypingStats.FILE_PATH)?.let { out[ConfigBackup.Section.STATISTICS] = it }
+            SyncStatistics.backup(ownStatistics(), otherStatistics(), BackupInstall.id(context))
+                ?.let { out[ConfigBackup.Section.STATISTICS] = it }
         }
         if (ConfigBackup.Section.VOCAB in sections) {
             vocabSection()?.let { out[ConfigBackup.Section.VOCAB] = it }
@@ -13356,12 +13463,14 @@ class SettingsRepository(private val context: Context) {
             }
         }
         (parsed.sections[ConfigBackup.Section.STATISTICS] as? JsonObject)?.let { obj ->
-            if (writeStore(TypingStats.FILE_PATH, obj)) {
+            val counts = SyncStatistics.restore(obj, BackupInstall.id(context), otherStatistics())
+            val ownWritten = counts.own?.let { writeStore(TypingStats.FILE_PATH, it) }
+            if (ownWritten != false && writeOtherStatistics(counts.others)) {
                 restored.add(ConfigBackup.Section.STATISTICS)
-                // The keyboard holds the counters in memory; without this it
-                // saves its own numbers over the ones just restored.
-                bumpStatsVersion()
             }
+            // The keyboard holds the counters in memory; without this it
+            // saves its own numbers over the ones just restored.
+            if (ownWritten == true) bumpStatsVersion()
         }
 
         (parsed.sections[ConfigBackup.Section.VOCAB] as? JsonObject)?.let { obj ->
@@ -15614,6 +15723,15 @@ class SettingsRepository(private val context: Context) {
     suspend fun setDeepLWriteStyle(value: DeepLWriteStyle) =
         editPrefs { it[DEEPL_WRITE_STYLE] = value.name }
 
+    suspend fun setTranslateServerUrl(value: String) =
+        editPrefs { it[TRANSLATE_SERVER_URL] = value.trim() }
+
+    suspend fun setTranslateServerModel(value: String) =
+        editPrefs { it[TRANSLATE_SERVER_MODEL] = value.trim() }
+
+    suspend fun setTranslateServerKey(value: String) =
+        editPrefs { it[TRANSLATE_SERVER_KEY] = value.trim() }
+
     suspend fun setGrammarDialect(value: GrammarDialect) =
         editPrefs { it[GRAMMAR_DIALECT] = value.name }
 
@@ -15647,6 +15765,9 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setBraveApiKey(value: String) =
         editPrefs { it[BRAVE_API_KEY] = value.trim() }
+
+    suspend fun setTavilyApiKey(value: String) =
+        editPrefs { it[TAVILY_API_KEY] = value.trim() }
 
     suspend fun setGiphyApiKey(value: String) =
         editPrefs { it[GIPHY_API_KEY] = value.trim() }
@@ -16170,6 +16291,9 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setAiDeepSeekModel(value: String) =
         editPrefs { it[AI_DEEPSEEK_MODEL] = value.trim() }
+
+    suspend fun setAiBraveKey(value: String) =
+        editPrefs { it[AI_BRAVE_KEY] = value.trim() }
 
     suspend fun setAiCompatibleUrl(value: String) =
         editPrefs { it[AI_COMPATIBLE_URL] = value.trim().trimEnd('/') }

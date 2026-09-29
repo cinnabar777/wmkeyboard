@@ -89,7 +89,8 @@ more than the in-app dialog's one-line summary suggests:
 | Dictionary, clipboard, snippets | **Replaces.** The on-device copy is overwritten by what's in the file. |
 | Sticker packs, icon packs, custom word lists | **Replaces.** The whole local collection is cleared and rebuilt from the file. |
 | Addon repositories | **Merges.** Incoming addresses are added to your existing list rather than replacing it (duplicates are skipped). |
-| Emoji history, typing statistics | **Replaces.** The counts in the file overwrite the ones on the device. |
+| Emoji history | **Replaces.** The counts in the file overwrite the ones on the device. |
+| Typing statistics | **Replaces this device's counts** when the file was made on this device. A file from another device adds that device's counts next to the ones here, so nothing you typed on either one is lost. |
 | Vocabulary | **Replaces.** Your own word lists and progress are rebuilt from the file; packs downloaded from the catalogue are untouched, since the bundle never carried them. |
 | Swipe style | **Replaces.** All three files come from the bundle, and a keyboard already running picks them up rather than saving its own copies back over them. |
 
@@ -107,8 +108,8 @@ apply even if the settings portion rolls back.
 
 Every secret is excluded from an export unless you turn on **Include API
 keys**, which only appears while the Settings section itself is included.
-That's more than the tool keys: Translate, Klipy, GIPHY, Brave, Unsplash,
-Pexels, every AI provider key including Grok, DeepSeek and the
+That's more than the tool keys: Translate, Klipy, GIPHY, Brave, Tavily, Unsplash,
+Pexels, every AI provider key including Grok, DeepSeek, Brave and the
 OpenAI-compatible one, the Hugging Face token, and the passwords and tokens
 for your backup locations (WebDAV, S3, SFTP, SMB, FTP, Git, IMAP, Dropbox,
 OneDrive) plus your backup passphrase.
@@ -245,6 +246,12 @@ locations, and nothing else. Each device keeps one sync file at every location
 you tick under **Sync through**, and reads the files of the others. For each
 setting, and for each theme, snippet or learned word, the newest change wins,
 and a deletion spreads like any other change.
+
+Typing statistics are different, because they're counts. Each device syncs
+its own counts, and <SettingsPath path="About / Statistics" /> adds up every device's. If you
+type on your phone and your tablet before they sync, both counts stay.
+Syncing again replaces a device's counts; it never adds them a second time.
+**Delete all statistics** on one device clears the counts on all of them.
 
 - **When:** **Soon after a change** (about a minute after you stop changing
   things, plus a check every hour and when the app starts), **On a schedule**,

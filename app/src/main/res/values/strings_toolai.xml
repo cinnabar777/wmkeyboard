@@ -83,6 +83,7 @@
     <!-- Group heading. Product names. -->
     <string name="toolai_ai_xai_group_title" translatable="false">Grok (xAI)</string>
     <string name="toolai_ai_deepseek_group_title" translatable="false">DeepSeek</string>
+    <string name="toolai_ai_brave_group_title" translatable="false">Brave Answers</string>
     <!-- Group heading for any other service with the same request shape as OpenAI. -->
     <string name="toolai_ai_compatible_group_title">Other service</string>
 
@@ -104,6 +105,12 @@
     <string name="toolai_ai_deepseek_key_label">DeepSeek API key</string>
     <!-- Helper text under an empty key field. Do not translate the web address. -->
     <string name="toolai_ai_deepseek_key_hint">Get the key from platform.deepseek.com on the API keys page</string>
+    <!-- Field label. Brave is a product name. -->
+    <string name="toolai_ai_brave_key_label">Brave API key</string>
+    <!-- Helper text under an empty key field. Do not translate the web address. "Answers" is the name of a Brave plan. -->
+    <string name="toolai_ai_brave_key_hint">Get the key from api-dashboard.search.brave.com. The key needs the Answers plan</string>
+    <!-- Helper text under an empty key field when the web search tool already has a Brave key. -->
+    <string name="toolai_ai_brave_key_search_hint">Leave this blank to use the key of the web search tool</string>
 
     <string name="toolai_ai_compatible_key_label">API key</string>
     <string name="toolai_ai_compatible_key_hint">Leave this blank if the service does not need a key</string>
@@ -112,6 +119,8 @@
     <string name="toolai_ai_compatible_url_hint">For example https://openrouter.ai/api/v1. The app adds /chat/completions to the end.</string>
     <string name="toolai_ai_compatible_model_hint">Give the model name that the service uses</string>
     <!-- Caption below the fields of the other service. -->
+    <!-- "Answers" and "Search" are the names of Brave plans. -->
+    <string name="toolai_ai_brave_info">Brave searches the web before it writes each answer, so it is good for questions about facts and recent events. Your key needs the Answers plan. A key with only the Search plan does not work. Brave accepts one message only, so the app sends the instructions and the earlier chat together with your text.</string>
     <string name="toolai_ai_compatible_info">Use this for a service that has the same request shape as OpenAI, for example OpenRouter, Groq, Together or Mistral. A plain HTTP address stays on your network, so keep the server on a network that you trust.</string>
 
     <string name="toolai_ai_model_label">Model</string>

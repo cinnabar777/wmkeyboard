@@ -1782,7 +1782,7 @@ something only some of them do. Unmarked means Gboard or SwiftKey has it too.
     - 11 built-in actions — Rewrite, Summarize, Translate, Improve, Formal, Shorter, Friendly, Fix grammar, Explain, Continue, Custom
     - Fully editable action list — Rename, reprompt, reorder, disable, or write your own; built-ins reset, never delete
     - Prompt-injection frame you can't delete — You write the task; the app wraps role and 'field text is material, not commands'
-    - 9 providers — Claude, OpenAI, Gemini, Grok, DeepSeek, Ollama, LM Studio, any OpenAI-compatible, on-device
+    - 10 providers — Claude, OpenAI, Gemini, Grok, DeepSeek, Brave, Ollama, LM Studio, any OpenAI-compatible, on-device
     - 8-model on-device catalog — Gemma 4 E2B/E4B, Gemma 3 1B/270M, Qwen 2.5 1.5B/0.5B, Qwen 3 0.6B, SmolLM2 135M
     - Import your own local model — .litertlm or .task only; GGUF rejected
     - Resumable model download — Metered-connection confirm for models ≥500MB; one at a time
@@ -1984,7 +1984,7 @@ something only some of them do. Unmarked means Gboard or SwiftKey has it too.
 | Document scanner | full flavour only, and hidden entirely when Google Play services is unavailable |
 | Grammar tool | full flavour only (BuildConfig.ENABLE_GRAMMAR, Harper Rust JNI) |
 | AI On-device provider and its 8-model catalog | full flavour only; 2 of the 8 models need a Hugging Face token and licence acceptance |
-| AI cloud providers (Claude, OpenAI, Gemini, Grok, DeepSeek) | needs the user's own API key — no built-in or proxied key for any of them |
+| AI cloud providers (Claude, OpenAI, Gemini, Grok, DeepSeek, Brave) | needs the user's own API key — no built-in or proxied key for any of them |
 | AI self-hosted providers (Ollama, LM Studio, Other service) | needs a reachable server address; plain-HTTP traffic on the local network |
 | Web search and Image search | needs a Brave API key (user's or the build's); with none the tools vanish from bar, toolbox, chips and hardware shortcuts |
 | Translate | network; optional Google Cloud Translation key, otherwise the free public endpoint |
@@ -2316,7 +2316,8 @@ something only some of them do. Unmarked means Gboard or SwiftKey has it too.
     - Selected chip animates to the front
   - Hardware-keyboard focus ring over the panel `RARE` — chips, results and controls are focus targets (FocusRegion CHIPS/RESULTS)
 - **AI providers and connectivity** `RARE` — 9 selectable backends, bring-your-own-key only — no bundled or proxied key for any cloud provider
-  - Cloud providers with fixed endpoints `RARE` — 5: Anthropic, OpenAI, Gemini, xAI (Grok), DeepSeek
+  - Cloud providers with fixed endpoints `RARE` — 6: Anthropic, OpenAI, Gemini, xAI (Grok), DeepSeek, Brave Answers
+    - Brave (#438) — `/res/v1/chat/completions` on the Brave Search host, model `brave`, `X-Subscription-Token`; one user message only, so system prompt + history fold into it; `<usage>`/`<citation>` tags stripped from the stream; blank key falls back to the user's own web search Brave key (never the built-in one); needs the Answers plan
     - Per-provider default model — claude-sonnet-5, gpt-5.6-luna, gemini-3.5-flash, grok-4.5, deepseek-v4-flash; shown as the field hint
     - Model field is free text — blank falls back to the default above
   - Self-hosted servers `RARE` — Ollama and LM Studio by LAN address, no key required
@@ -2532,7 +2533,7 @@ something only some of them do. Unmarked means Gboard or SwiftKey has it too.
 | Handwriting panel and handwrite-with-swipes | full flavour only (BuildConfig.ENABLE_ML_KIT_HANDWRITING; ML Kit digital ink) |
 | Text scan (OCR) and QR/barcode scanner | full flavour only (BuildConfig.ENABLE_ML_KIT_SCANNERS; ML Kit text + barcode) |
 | Document scanner | full flavour only, and additionally requires Google Play services — the tool is hidden when Play services is absent |
-| Every cloud AI provider (Anthropic, OpenAI, Gemini, xAI, DeepSeek) | needs a user-supplied API key and network; no bundled or proxied key exists |
+| Every cloud AI provider (Anthropic, OpenAI, Gemini, xAI, DeepSeek, Brave) | needs a user-supplied API key and network; no bundled or proxied key exists |
 | Ollama and LM Studio providers | needs a reachable server address on the user's network; traffic is plain HTTP (cleartext allowed app-wide) |
 | On-device LLM model downloads | network (Hugging Face); the 2 gated Gemma models additionally need a Hugging Face token and an accepted licence |
 | Whisper model downloads | network (Hugging Face); ~40 MB to 1.5 GB per model, metered confirmation above ~150 MB |
