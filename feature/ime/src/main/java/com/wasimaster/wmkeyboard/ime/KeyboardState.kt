@@ -1261,6 +1261,11 @@ data class TranslateUi(
     /** [translated] came from the user's own translation server (#435). */
     val viaServer: Boolean = false,
     /**
+     * [translated] came from the on-device engine standing in for the online
+     * one, because there was no connection or the service did not answer (#452).
+     */
+    val offlineStandIn: Boolean = false,
+    /**
      * Model codes the on-device engine needs before it can translate the
      * current query. Non-empty is what puts the download offer on screen.
      */

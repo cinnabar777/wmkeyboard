@@ -37,6 +37,8 @@
     <string name="ime_translate_deepl_label">DeepL</string>
     <!-- Beside the translate panel's engine chip when the user's own translation server made the translation on screen. -->
     <string name="ime_translate_server_label">Your server</string>
+    <string name="ime_translate_offline_standin_label">On device, offline</string>
+    <string name="ime_offline_fallback_toast">No connection. The on-device model answers instead.</string>
     <string name="ime_grammar_unavailable_info">This build of the app does not include the grammar engine. The file <xliff:g id="library_file" example="libharper_jni.so">libharper_jni.so</xliff:g> is missing.</string>
 
     <!-- AI panel: one tap actions that run on the text in the field. -->

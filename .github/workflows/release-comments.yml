@@ -25,6 +25,10 @@ on:
       tag:
         type: string
         required: true
+      stores:
+        type: string
+        required: false
+        default: 'F-Droid,Google Play'
   release:
     types: [published]
   workflow_dispatch:
@@ -86,7 +90,9 @@ jobs:
           ONLY: ${{ github.event_name == 'workflow_dispatch' && inputs.only || '' }}
           # Prefixed with `=` so an input deliberately left empty ("no
           # stores") is not mistaken for no input and replaced by the default.
-          STORES: ${{ github.event_name == 'workflow_dispatch' && format('={0}', inputs.stores) || '' }}
+          # A call passes it too (a `[skip play]` release names F-Droid alone);
+          # only a hand-published release has no inputs and takes the default.
+          STORES: ${{ github.event_name != 'release' && format('={0}', inputs.stores) || '' }}
         run: |
           args=(--repo "$REPO" --tag "$TAG" --only "$ONLY")
           if [ -n "$STORES" ]; then

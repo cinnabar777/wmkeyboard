@@ -196,6 +196,20 @@ internal fun DataSaverSettingsScreen(
             ) { scope.launch { repository.setDataSaverCloudVoice(it) } }
         }
     }
+
+    // Not data saving: what the server-backed tools do with no connection at
+    // all (#452). Shown whether or not data saving is on.
+    SettingsGroup(stringResource(R.string.datasaver_offline_group)) {
+        item {
+            ToggleSetting(
+                R.string.datasaver_offline_fallback_title,
+                stringResource(R.string.datasaver_offline_fallback_subtitle),
+                settings.watch { it.dataSaver.offlineFallback },
+                info = stringResource(R.string.datasaver_offline_fallback_info),
+                default = SettingsDefaults.dataSaver.offlineFallback,
+            ) { scope.launch { repository.setOfflineFallback(it) } }
+        }
+    }
 }
 
 /**

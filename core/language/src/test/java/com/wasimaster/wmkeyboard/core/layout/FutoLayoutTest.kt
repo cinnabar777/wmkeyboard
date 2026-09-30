@@ -38,7 +38,8 @@ class FutoLayoutTest {
             """.trimIndent(),
         )
         assertEquals(listOf("q", "w", "e"), converted.letters()[0].map { it.label })
-        assertEquals(2, converted.letters().size)
+        // Two rows in the file, and the bottom row every import is given.
+        assertEquals(3, converted.letters().size)
     }
 
     @Test
@@ -118,6 +119,167 @@ class FutoLayoutTest {
     }
 
     @Test
+    fun `a case key's manual shift is the shift layer when it has no other`() {
+        // How a caseless script writes its second layer: the file does not
+        // auto-shift, so the manual state is the only shifted one it has.
+        val converted = converted(
+            """
+            name: x
+            rows:
+              - letters:
+                  - {type: case, normal: ["ㅂ", "ㅃ"], shiftedManually: ["ㅃ"]}
+                  - {type: case, normal: ["ㅈ"], shiftedManually: "ㅉ"}
+                  - ㅁ
+            """.trimIndent(),
+        )
+        val bieup = converted.keys().first { it.label == "ㅂ" }
+        assertEquals("ㅃ", bieup.shiftLabel)
+        // The resting branch's own popup list is untouched by it.
+        assertEquals(listOf("ㅃ"), bieup.longPress)
+        assertEquals("ㅉ", converted.keys().first { it.label == "ㅈ" }.shiftLabel)
+        assertNull(converted.keys().first { it.label == "ㅁ" }.shiftLabel)
+        // Two branches, both kept: nothing was flattened.
+        assertFalse(
+            converted.notes.any { it.pluralsRes == R.plurals.core_lang_foreign_selectors_flattened },
+        )
+    }
+
+    @Test
+    fun `a case key's automatic shift wins over its manual one`() {
+        val converted = converted(
+            """
+            name: x
+            rows:
+              - letters:
+                  - {type: case, normal: "ə", shifted: "Ə", shiftedManually: "ʔ"}
+            """.trimIndent(),
+        )
+        // Ə is the plain uppercase, which a null shiftLabel already gives.
+        assertNull(converted.keys().first { it.label == "ə" }.shiftLabel)
+        // The third branch has nowhere to go and is said to be lost.
+        assertTrue(
+            converted.notes.any { it.pluralsRes == R.plurals.core_lang_foreign_selectors_flattened },
+        )
+    }
+
+    // ---- the frame every import is given ----
+
+    @Test
+    fun `a file with no functional keys gets the house frame`() {
+        val converted = converted(
+            """
+            name: x
+            rows:
+              - letters: q w e r t y u i o p
+              - letters: a s d f g h j k l
+              - letters: z x c v b n m
+            """.trimIndent(),
+        )
+        val rows = converted.letters()
+        assertEquals(4, rows.size)
+        // The last letter row is `⇧ … ⌫`, both keys 1.5 wide.
+        val last = rows[2]
+        assertEquals(KeyAction.Shift, last.first().action)
+        assertEquals(1.5f, last.first().width, 0f)
+        assertEquals(KeyAction.Delete, last.last().action)
+        assertEquals(1.5f, last.last().width, 0f)
+        assertEquals("zxcvbnm", last.drop(1).dropLast(1).joinToString("") { it.label })
+        assertEquals(HOUSE_BOTTOM_ROW, rows[3].map { it.action to it.role })
+        assertEquals(listOf(1.5f, 1f, 1f, 4f, 1f, 1.5f), rows[3].map { it.width })
+        // Nothing left for repair to add, so nothing is said about it.
+        assertTrue(converted.layout.repair().repairNotes.isEmpty())
+        assertFalse(converted.notes.any { it.stringRes == R.string.core_lang_repair_delete_key_added })
+    }
+
+    @Test
+    fun `a bottom row the file wrote becomes the house one, keeping its punctuation`() {
+        val converted = converted(
+            """
+            name: x
+            rows:
+              - letters: ب پ ت
+              - letters: ${'$'}shift ج چ ${'$'}delete
+              - bottom:
+                  - ${'$'}symbols
+                  - {type: contextual, fallbackKey: "،"}
+                  - ${'$'}action
+                  - ${'$'}space
+                  - "ʼ"
+                  - {type: base, spec: "۔", moreKeys: "؟,!"}
+                  - ${'$'}enter
+            """.trimIndent(),
+        )
+        val rows = converted.letters()
+        assertEquals(3, rows.size)
+        val bottom = rows.last()
+        assertEquals(HOUSE_BOTTOM_ROW, bottom.map { it.action to it.role })
+        // The file's comma and full stop, with the full stop's own letters.
+        assertEquals("،", bottom[1].label)
+        assertEquals("۔", bottom[4].label)
+        assertEquals(listOf("؟", "!"), bottom[4].longPress)
+        // The letter that sat by the spacebar moves up rather than vanishing,
+        // and lands before the delete key the file put there.
+        assertEquals(listOf("ج", "چ", "ʼ"), rows[1].filter { it.action == KeyAction.Text }.map { it.label })
+        assertEquals(KeyAction.Delete, rows[1].last().action)
+        // The file's own shift and delete keep their width.
+        assertEquals(1.25f, rows[1].first().width, 0f)
+    }
+
+    @Test
+    fun `a delete key the file placed means no shift key is added`() {
+        // FUTO's own rule: placing either key turns off the automatic pair,
+        // so a grid with a delete and no shift asked for no shift.
+        val converted = converted(
+            """
+            name: x
+            rows:
+              - letters: a b c ${'$'}delete
+              - letters: d e f
+            """.trimIndent(),
+        )
+        val actions = converted.keys().map { it.action }
+        assertFalse(KeyAction.Shift in actions)
+        assertEquals(1, actions.count { it == KeyAction.Delete })
+        assertEquals(KeyAction.Delete, converted.letters()[0].last().action)
+        assertEquals(HOUSE_BOTTOM_ROW, converted.letters().last().map { it.action to it.role })
+    }
+
+    @Test
+    fun `a key the letter rows already have is not added to the bottom row again`() {
+        val converted = converted(
+            """
+            name: x
+            rows:
+              - letters: q w e ${'$'}enter
+              - letters: ${'$'}shift z x ${'$'}delete
+            """.trimIndent(),
+        )
+        assertEquals(1, converted.keys().count { it.action == KeyAction.Enter })
+        assertEquals(KeyAction.Enter, converted.letters()[0].last().action)
+        assertEquals(KeyRole.Period, converted.letters().last().last().role)
+    }
+
+    @Test
+    fun `a comma and full stop on the letter rows are not added again`() {
+        // A PC-style grid carries both by the letters; the bottom row keeps
+        // its other keys and gives the spacebar the room.
+        val converted = converted(
+            """
+            name: x
+            rows:
+              - letters: q w e r
+              - letters: ${'$'}shift z x , . ${'$'}delete
+            """.trimIndent(),
+        )
+        assertEquals(1, converted.keys().count { it.label == "," })
+        assertEquals(1, converted.keys().count { it.label == "." })
+        assertEquals(
+            listOf(KeyAction.Symbols, KeyAction.LanguageSwitch, KeyAction.Space, KeyAction.Enter),
+            converted.letters().last().map { it.action },
+        )
+    }
+
+    @Test
     fun `the template keys become the keys they name`() {
         val converted = converted(
             """
@@ -158,7 +320,10 @@ class FutoLayoutTest {
         // A whole second grid this app has no slot for. A key that switched to
         // nothing would strand the user on it.
         val converted = converted("name: x\nrows:\n  - letters: a ${'$'}alt0 b")
-        assertEquals(listOf("a", "b"), converted.letters()[0].take(2).map { it.label })
+        assertEquals(
+            listOf("a", "b"),
+            converted.letters()[0].filter { it.action == KeyAction.Text }.map { it.label },
+        )
         assertTrue(
             converted.notes.any { it.pluralsRes == R.plurals.core_lang_foreign_labels_dropped },
         )
@@ -222,7 +387,9 @@ class FutoLayoutTest {
               - letters: q w e
             """.trimIndent(),
         )
-        assertEquals(1, converted.letters().size)
+        // The letter row, and the bottom row every import is given.
+        assertEquals(2, converted.letters().size)
+        assertTrue(converted.keys().none { it.label == "1" })
         assertTrue(
             converted.notes.any {
                 it.stringRes == R.string.core_lang_foreign_number_row_dropped
@@ -241,7 +408,7 @@ class FutoLayoutTest {
               - letters: q w e
             """.trimIndent(),
         )
-        assertEquals(2, converted.letters().size)
+        assertEquals(3, converted.letters().size)
         assertEquals("`", converted.letters()[0].first().label)
     }
 
@@ -290,6 +457,16 @@ class FutoLayoutTest {
     }
 
     private companion object {
+        /** `?123 , 🌐 ␣ . ⏎`, as the shipped grids end. */
+        val HOUSE_BOTTOM_ROW = listOf(
+            KeyAction.Symbols to null,
+            KeyAction.Text to KeyRole.Comma,
+            KeyAction.LanguageSwitch to null,
+            KeyAction.Space to null,
+            KeyAction.Text to KeyRole.Period,
+            KeyAction.Enter to null,
+        )
+
         /** A key code naming one of the other keyboard's own internal actions. */
         const val INTERNAL_ACTION_CODE = "!code/action_"
 

@@ -138,8 +138,8 @@ object ForeignLayouts {
      *
      * The format has no way to spell a delete, space or enter key, so every
      * file is missing all three. That is not a defect in the file — the app
-     * that reads it draws its own bottom row — and [LayoutSpec.repair] adding
-     * them back is exactly the right outcome.
+     * that reads it draws its own bottom row — and [withHouseStructure] adding
+     * this app's is exactly the right outcome.
      */
     fun fromSimpleText(text: String, name: String): ConvertedLayout? {
         val rows = mutableListOf<List<Key>>()
@@ -242,7 +242,9 @@ object ForeignLayouts {
             id = "foreign_${System.currentTimeMillis()}",
             name = layoutNameFrom(name),
             langId = "",
-            layers = mapOf(LayoutLayer.LETTERS.key to LayerSpec(rows = scaled)),
+            // After the widths are in this app's unit, since the keys it adds
+            // are written in it. See [withHouseStructure].
+            layers = mapOf(LayoutLayer.LETTERS.key to LayerSpec(rows = withHouseStructure(scaled))),
         )
         val repaired = layout.repair()
         return ConvertedLayout(
@@ -335,6 +337,19 @@ object ForeignLayouts {
         return resting.copy(shiftLabel = shifted)
     }
 
+    /**
+     * Whether [this] is an `auto_text_key`, whose case follows shift.
+     *
+     * Over there that key draws and types the lowercase of its code and label
+     * until shift is down, whatever case they are written in. FlorisBoard's own
+     * Rusyn grid writes ї with the code of Ї (and ы, ё likewise), which is
+     * harmless on that keyboard and typed the capital on this one, where the
+     * code is the output as written. Taking the resting case here is what the
+     * file means; shift still gets the capital, from the null shiftLabel.
+     */
+    private fun JsonObject.isAutoCase(): Boolean =
+        string(CLASS_FIELD)?.lowercase()?.filter { it.isLetterOrDigit() } == AUTO_TEXT_KEY
+
     /** The label a selector branch draws, without converting the whole key. */
     private fun branchLabel(element: JsonElement): String? = when (element) {
         is JsonPrimitive -> element.content.takeIf { element.isString }
@@ -411,8 +426,12 @@ object ForeignLayouts {
         report: Report,
         obj: JsonObject? = null,
     ): Key? {
-        val cleanLabel = normalizeForScript(label).also { if (it != label) report.normalized++ }
+        val restingCase = obj?.isAutoCase() == true
+        val cleanLabel = normalizeForScript(label)
+            .also { if (it != label) report.normalized++ }
+            .let { if (restingCase) it.lowercaseByCodePoint() else it }
         val cleanOutput = output?.let { normalizeForScript(it) }
+            ?.let { if (restingCase) it.lowercaseByCodePoint() else it }
         if (cleanLabel.isEmpty() && cleanOutput.isNullOrEmpty()) return null
         val flags = obj?.labelFlags(report) ?: LabelFlags.None
         val popups = obj?.let { popupsOf(it, report) } ?: Popups.None
@@ -676,6 +695,9 @@ object ForeignLayouts {
 
     /** The field naming a key's class, which is also what marks a selector. */
     private const val CLASS_FIELD = "$"
+
+    /** `auto_text_key`, normalized the way [selectorKindOf] matches class names. */
+    private const val AUTO_TEXT_KEY = "autotextkey"
 
     /** The two automatic popup sets that are punctuation slots on this side. */
     private const val COMMA_GROUP = 1
@@ -942,6 +964,15 @@ internal fun normalizeForScript(text: String): String {
         }
     }
     return out.toString()
+}
+
+/**
+ * Lowercase, one code point at a time. Not [String.lowercase]: that one maps
+ * İ to two characters (i and a combining dot), and a key's resting case has to
+ * stay the one character the file wrote.
+ */
+private fun String.lowercaseByCodePoint(): String = buildString(length) {
+    this@lowercaseByCodePoint.codePoints().forEach { appendCodePoint(Character.toLowerCase(it)) }
 }
 
 /**

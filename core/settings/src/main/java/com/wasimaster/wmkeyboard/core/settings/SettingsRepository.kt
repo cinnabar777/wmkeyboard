@@ -2115,6 +2115,13 @@ data class AutocorrectSettings(
     val undoMemory: UndoMemory = UndoMemory.NORMAL,
     /** Never autocorrect a word typed all in capitals (acronyms, shouting). */
     val skipAllCaps: Boolean = true,
+    /**
+     * Whether Enter ends a word the way space does, correction included
+     * (issue #457). Off, the word before Enter goes in as typed: a search
+     * query or a name sent with Enter is the one place a correction is sent
+     * before anyone reads it. Space and punctuation still correct.
+     */
+    val onEnter: Boolean = true,
 )
 
 /**
@@ -6138,6 +6145,14 @@ data class GestureSettings(
      */
     val searchAllChip: Boolean = false,
     /**
+     * Backspace right after a glide takes the whole swiped word back, and
+     * the space it typed, in one press (#455). On by default: a wrong swipe
+     * is usually wrong as a whole. Off, the glided word is ordinary text and
+     * backspace deletes one character, for a hand whose swipes come out one
+     * or two letters off and are quicker to mend than to redraw.
+     */
+    val backspaceUndoesGlide: Boolean = true,
+    /**
      * Bumped by the gestures screen's "forget" so a running keyboard drops
      * its in-memory copies of the swipe-style stores — the contract of
      * [KeyboardSettings.lexiconVersion], on a counter of its own so
@@ -6237,6 +6252,13 @@ data class LayoutBehaviorSettings(
      * drag never closes the keyboard mid-type.
      */
     val spaceSwipeDownHide: Boolean = false,
+    /**
+     * A swipe in from the left or right edge of the keyboard is Back: it
+     * closes an open panel, or else the keyboard (#437). For phones that keep
+     * the system's back gesture off the keyboard. Off by default, because a
+     * glide that starts right at the edge and heads inward reads the same way.
+     */
+    val edgeSwipeBack: Boolean = false,
     /**
      * A short, quick swipe down on a key types its corner hint — the first of
      * its long-press characters — without waiting out the hold (issue #178).
@@ -7642,6 +7664,7 @@ class SettingsRepository(private val context: Context) {
             booleanPreferencesKey("revert_autocorrect_on_backspace")
         private val AUTOCORRECT_SKIP_ALL_CAPS =
             booleanPreferencesKey("autocorrect_skip_all_caps")
+        private val AUTOCORRECT_ON_ENTER = booleanPreferencesKey("autocorrect_on_enter")
         private val AUTO_CAPITALIZE = booleanPreferencesKey("auto_capitalize")
         private val DOUBLE_SPACE_PERIOD = booleanPreferencesKey("double_space_period")
         private val DOUBLE_SPACE_TAB = booleanPreferencesKey("double_space_tab")
@@ -7797,6 +7820,8 @@ class SettingsRepository(private val context: Context) {
         private val GESTURE_LEARN_SWIPE_STYLE = booleanPreferencesKey("gesture_learn_swipe_style")
         private val GESTURE_SHAPES_PER_WORD = intPreferencesKey("gesture_shapes_per_word")
         private val GESTURE_SEARCH_ALL_CHIP = booleanPreferencesKey("gesture_search_all_chip")
+        private val GESTURE_BACKSPACE_UNDOES_GLIDE =
+            booleanPreferencesKey("gesture_backspace_undoes_glide")
         private val GESTURE_SWIPE_STYLE_VERSION = intPreferencesKey("gesture_swipe_style_version")
         // Legacy boolean, read only to migrate into SPACE_LONG_SWIPE.
         private val SPACEBAR_CURSOR = booleanPreferencesKey("spacebar_cursor")
@@ -7807,6 +7832,7 @@ class SettingsRepository(private val context: Context) {
         private val SYMBOLS_LONGPRESS_NUMPAD = booleanPreferencesKey("symbols_longpress_numpad")
         private val ENTER_LONGPRESS_EMOJI = booleanPreferencesKey("enter_longpress_emoji")
         private val SPACE_SWIPE_DOWN_HIDE = booleanPreferencesKey("space_swipe_down_hide")
+        private val EDGE_SWIPE_BACK = booleanPreferencesKey("edge_swipe_back")
         private val GLOBE_IN_ONE_PLACE = booleanPreferencesKey("globe_in_one_place")
         private val HINT_FLICK = booleanPreferencesKey("hint_flick")
         private val CAPITAL_FLICK = booleanPreferencesKey("capital_flick")
@@ -7915,6 +7941,7 @@ class SettingsRepository(private val context: Context) {
         private val DS_DOWNLOADS = stringPreferencesKey("data_saver_downloads")
         private val DS_CLOUD_AI = stringPreferencesKey("data_saver_cloud_ai")
         private val DS_CLOUD_VOICE = stringPreferencesKey("data_saver_cloud_voice")
+        private val OFFLINE_FALLBACK = booleanPreferencesKey("offline_fallback")
         private val BACKSPACE_SWIPE_DELETE = booleanPreferencesKey("backspace_swipe_delete")
         private val HARDWARE_KEYBOARD_INPUT = booleanPreferencesKey("hardware_keyboard_input")
         private val HW_SHORTCUTS_ENABLED = booleanPreferencesKey("hw_shortcuts_enabled")
@@ -9198,6 +9225,7 @@ class SettingsRepository(private val context: Context) {
                 ?.let { runCatching { UndoMemory.valueOf(it) }.getOrNull() }
                 ?: defaults.correction.undoMemory,
             skipAllCaps = p[AUTOCORRECT_SKIP_ALL_CAPS] ?: defaults.correction.skipAllCaps,
+            onEnter = p[AUTOCORRECT_ON_ENTER] ?: defaults.correction.onEnter,
         )
 
     private fun readAutoText(p: Preferences, defaults: KeyboardSettings) =
@@ -9313,6 +9341,8 @@ class SettingsRepository(private val context: Context) {
             shapesPerWord = (p[GESTURE_SHAPES_PER_WORD] ?: defaults.gesture.shapesPerWord)
                 .coerceIn(GlideShapesPerWordRange),
             searchAllChip = p[GESTURE_SEARCH_ALL_CHIP] ?: defaults.gesture.searchAllChip,
+            backspaceUndoesGlide = p[GESTURE_BACKSPACE_UNDOES_GLIDE]
+                ?: defaults.gesture.backspaceUndoesGlide,
             swipeStyleVersion = p[GESTURE_SWIPE_STYLE_VERSION] ?: defaults.gesture.swipeStyleVersion,
         )
 
@@ -9747,6 +9777,7 @@ class SettingsRepository(private val context: Context) {
                 p[ENTER_LONGPRESS_EMOJI] ?: defaults.layoutBehavior.enterLongPressEmoji,
             spaceSwipeDownHide =
                 p[SPACE_SWIPE_DOWN_HIDE] ?: defaults.layoutBehavior.spaceSwipeDownHide,
+            edgeSwipeBack = p[EDGE_SWIPE_BACK] ?: defaults.layoutBehavior.edgeSwipeBack,
             globeInOnePlace = p[GLOBE_IN_ONE_PLACE] ?: defaults.layoutBehavior.globeInOnePlace,
             hintFlick = p[HINT_FLICK] ?: defaults.layoutBehavior.hintFlick,
             capitalFlick = p[CAPITAL_FLICK] ?: defaults.layoutBehavior.capitalFlick,
@@ -12611,6 +12642,7 @@ class SettingsRepository(private val context: Context) {
             downloads = p.policy(DS_DOWNLOADS, legacyDownloads),
             cloudAi = p.policy(DS_CLOUD_AI, d.cloudAi),
             cloudVoice = p.policy(DS_CLOUD_VOICE, d.cloudVoice),
+            offlineFallback = p[OFFLINE_FALLBACK] ?: d.offlineFallback,
         )
     }
 
@@ -13873,6 +13905,9 @@ class SettingsRepository(private val context: Context) {
     suspend fun setAutocorrectSkipAllCaps(value: Boolean) =
         editPrefs { it[AUTOCORRECT_SKIP_ALL_CAPS] = value }
 
+    suspend fun setAutocorrectOnEnter(value: Boolean) =
+        editPrefs { it[AUTOCORRECT_ON_ENTER] = value }
+
     suspend fun setAutoCapitalize(value: Boolean) =
         editPrefs { it[AUTO_CAPITALIZE] = value }
 
@@ -14368,6 +14403,9 @@ class SettingsRepository(private val context: Context) {
     suspend fun setGestureSearchAllChip(value: Boolean) =
         editPrefs { it[GESTURE_SEARCH_ALL_CHIP] = value }
 
+    suspend fun setGestureBackspaceUndoesGlide(value: Boolean) =
+        editPrefs { it[GESTURE_BACKSPACE_UNDOES_GLIDE] = value }
+
     /**
      * Deletes everything a swipe style is made of — where the finger lands,
      * and the readings the user corrected — and tells a running keyboard to
@@ -14561,6 +14599,9 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setSpaceSwipeDownHide(value: Boolean) =
         editPrefs { it[SPACE_SWIPE_DOWN_HIDE] = value }
+
+    suspend fun setEdgeSwipeBack(value: Boolean) =
+        editPrefs { it[EDGE_SWIPE_BACK] = value }
 
     suspend fun setGlobeInOnePlace(value: Boolean) =
         editPrefs { it[GLOBE_IN_ONE_PLACE] = value }
@@ -14771,6 +14812,10 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setDataSaverCloudVoice(value: MeteredPolicy) =
         editPrefs { it[DS_CLOUD_VOICE] = value.name }
+
+    /** @see DataSaverSettings.offlineFallback */
+    suspend fun setOfflineFallback(value: Boolean) =
+        editPrefs { it[OFFLINE_FALLBACK] = value }
 
     /**
      * Picks [value] as [langId]'s numeral system. [NumeralSystem.AUTO] drops the

@@ -46,6 +46,12 @@
     <string name="datasaver_voice_title">Transcription server</string>
     <string name="datasaver_voice_subtitle">Voice typing that sends each phrase to your transcription server. About a megabyte for every 30 seconds of speech.</string>
 
+    <!-- Issue #452: what the server-backed tools do with no connection. -->
+    <string name="datasaver_offline_group">With no connection</string>
+    <string name="datasaver_offline_fallback_title">Use on-device models offline</string>
+    <string name="datasaver_offline_fallback_subtitle">Voice typing, AI actions and Translate use a downloaded model when your server cannot be reached</string>
+    <string name="datasaver_offline_fallback_info">Voice typing with a transcription server, AI actions with a cloud or server provider, and Translate with the Online engine all need a connection. With this setting on, each one uses the on-device model you downloaded when the phone has no connection, or when the server does not answer. Voice typing uses a Whisper model for your language, or else the voice typing of your phone. AI actions use your on-device AI model. Translate uses the on-device languages you downloaded. A short message tells you when the keyboard changes to the on-device model. Translate also shows \"On device, offline\" next to the result. Nothing changes for a feature that has no model downloaded, and nothing changes while the connection works.</string>
+
     <string name="datasaver_info">Data saving never changes your settings. It hides features while the connection costs money, and everything you chose is back the moment you are on Wi-Fi again.</string>
 
     <!-- Asked before a download starts on a metered connection. Android also

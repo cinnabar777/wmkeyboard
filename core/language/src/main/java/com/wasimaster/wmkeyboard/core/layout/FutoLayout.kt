@@ -231,11 +231,20 @@ object FutoLayouts {
             // The shift states of one key. This keyboard holds two, so the
             // resting one and the shifted one are kept and the rest counted,
             // exactly as the FlorisBoard reader does for its selectors.
+            //
+            // `shiftedManually` is the shifted one when `shifted` is absent.
+            // It is how a caseless script writes its second layer (Korean ㅂ
+            // over ㅃ, Khmer, Myanmar, Bengali Akkhor): a layout that does not
+            // auto-shift has only the manual state, and reading `shifted`
+            // alone lost that whole layer.
             TYPE_CASE -> {
                 val resting = CaseBranches.firstNotNullOfOrNull { obj[it] }
                     ?: return null
                 val key = keyOf(resting, report, overrides, attributes) ?: return null
-                val shifted = obj[CASE_SHIFTED]?.let { keyOf(it, report, overrides, attributes) }
+                val shifted = (obj[CASE_SHIFTED] ?: obj[CASE_SHIFTED_MANUALLY])
+                    ?.takeIf { it !== resting }
+                    ?.let { keyOf(it, report, overrides, attributes) }
+                    ?.takeIf { it.action == KeyAction.Text }
                 if (obj.keys.count { it != "type" && it != "attributes" } > CASE_KEPT_BRANCHES) {
                     report.selectors++
                 }
@@ -503,9 +512,10 @@ object FutoLayouts {
     private const val TYPE_ALT = "alt"
     private const val FIELD_FALLBACK_KEY = "fallbackKey"
     private const val CASE_SHIFTED = "shifted"
-    private val CaseBranches = listOf("normal", "shifted", "shiftedManually", "shiftLocked")
+    private const val CASE_SHIFTED_MANUALLY = "shiftedManually"
+    private val CaseBranches = listOf("normal", CASE_SHIFTED, CASE_SHIFTED_MANUALLY, "shiftLocked")
 
-    /** `normal` and `shifted` both land, so only a third branch is a loss. */
+    /** The resting branch and one shifted one both land, so only a third is a loss. */
     private const val CASE_KEPT_BRANCHES = 2
 
     private const val NUMBER_ROW_ALWAYS = "AlwaysEnabled"

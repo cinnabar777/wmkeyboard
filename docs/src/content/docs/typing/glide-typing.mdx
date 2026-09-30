@@ -84,7 +84,7 @@ The moment you lift your finger, the best-scoring word commits to the field. The
   {/* shot: typing/glide-alternates */}
 </PhoneFrame>
 
-Tap-to-replace only works while your cursor is still sitting exactly where the glide left it. Move the caret away, or type something else first, and the alternates for that word retire. The same guard governs a plain backspace: press it right after a glide and it deletes the **whole swiped word** in one go rather than a character at a time, since a wrong swipe shouldn't cost a letter-by-letter cleanup. That takes the trailing space with it, so one press puts the cursor back where the swipe found it.
+Tap-to-replace only works while your cursor is still sitting exactly where the glide left it. Move the caret away, or type something else first, and the alternates for that word retire. The same guard governs a plain backspace: press it right after a glide and it deletes the **whole swiped word** in one go rather than a character at a time, since a wrong swipe shouldn't cost a letter-by-letter cleanup. That takes the trailing space with it, so one press puts the cursor back where the swipe found it. If your swipes tend to come out one or two letters off, turn off **Backspace removes a glided word** (see [Options](#options)) and backspace after a glide deletes one character at a time, the same as after a word typed on the keys.
 
 ## When a swipe is a genuine toss-up
 
@@ -223,6 +223,7 @@ This is also the one way a swipe can teach a capital. A capital the *keyboard* c
 | Learn my swipe style | On | The keyboard learns where your finger really lands on each key, how you draw each word, and which words you take over a swipe's reading, and reads later swipes by it. See [What a swipe teaches](#what-a-swipe-teaches). Off freezes what has been learned. |
 | Forget my swipe style | | Deletes what the switch above learned, after a confirm. Learned words are not affected. |
 | Space after a glided word | On | Only shown while glide typing is the active swipe mode. A glided word is followed by a space; punctuation typed next takes it back. Turn off to commit the word bare. |
+| Backspace removes a glided word | On | Only shown while glide typing is the active swipe mode. One backspace right after a glide deletes the whole word and its space. Turn off to delete one character at a time instead. |
 | Swipe start distance | 2.0× | How far a touch has to travel, as a multiple of the system's touch slop, before it's read as the start of a glide rather than a tap. Range 0.5×–4×; lower is more sensitive but can mistake a stationary tap for a glide. |
 | Delay after typing | 160 ms | A brief window right after a tap where a glide needs to travel further before it takes over, so fast tapping doesn't misfire into an accidental swipe. Range 0–500 ms; 0 turns it off. |
 | Trail width | 10 dp | Thickness of the trail at the head (the tail tapers to about 30% of this). Range 2–24 dp. |

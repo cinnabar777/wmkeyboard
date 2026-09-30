@@ -436,6 +436,19 @@ object ToolHttp {
             ?: context.getString(CommonR.string.common_error_generic)
     }
 
+    /**
+     * Whether [t] says the server could not be reached at all: no connection,
+     * no such host, nothing listening, no answer in time, or a gateway in front
+     * of it reporting the same (#452). A server that answered with a refusal
+     * was reached, so that is not this.
+     */
+    fun isUnreachable(t: Throwable): Boolean = when (t) {
+        is ToolHttpException -> t.status in HttpURLConnection.HTTP_BAD_GATEWAY..HttpURLConnection.HTTP_GATEWAY_TIMEOUT
+        is NoInternetPermissionException -> false
+        is UnknownHostException, is SocketTimeoutException, is java.net.SocketException -> true
+        else -> false
+    }
+
     /** The provider's own words, or our wording for the status it answered with. */
     private fun httpText(context: Context, t: ToolHttpException): String {
         t.apiMessage?.takeIf { it.isNotBlank() }?.let { return it }

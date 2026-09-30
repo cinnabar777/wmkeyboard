@@ -260,6 +260,13 @@ inside a fence long enough that no backtick run in it can escape.
    warning if the `PLAY_SERVICE_ACCOUNT_JSON` secret is not set. Promoting to
    production stays a decision you make by hand.
 
+   To release to GitHub and F-Droid alone, put `[skip play]` in the message of
+   the commit the tag points at. The `play` job then stands down, and the
+   issue comments name F-Droid as the only store to wait for. This is for a
+   version Play already has under an older versionCode: uploading the new
+   code would send production back through review for nothing. 0.5.13 did
+   this, as versionCode 28 on GitHub and F-Droid and 27 on Play.
+
 6. **Pull the settings-link refresh.** Pushing the tag also starts the
    **Settings links** workflow (`.github/workflows/settings-links.yml`). It
    reruns `scripts/extract_settings_links.sh` and
