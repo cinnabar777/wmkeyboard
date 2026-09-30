@@ -56,7 +56,7 @@ class TabletExpansionCorpusTest {
 
     @Test
     fun `the corpus is the whole shipped set`() {
-        assertEquals("built-ins plus hand-authored assets", 22 + 824, handAuthored.size)
+        assertEquals("built-ins plus hand-authored assets", 22 + 825, handAuthored.size)
         assertTrue(
             "converted Keyman grids are missing from the corpus",
             corpus.size - handAuthored.size > 800,
@@ -106,6 +106,8 @@ class TabletExpansionCorpusTest {
                 "ipa_qwerty", "ipa_qwerty_g",
                 // Toki Pona's fourteen letters fit on two short rows.
                 "tok_compact",
+                // Arabic as Gboard and AOSP draw it (#427): no shift key to mirror.
+                "ar_letters",
             ) + keypads,
             declined,
         )

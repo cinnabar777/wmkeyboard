@@ -75,7 +75,7 @@ For bugs in the keyboard itself rather than something a model wrote, use the **F
 
 ## Choosing where it runs
 
-A row of provider chips sits at the top of the tool's settings: **Claude**, **OpenAI**, **Gemini**, **Grok**, **DeepSeek**, **Ollama**, **LM Studio**, **Other service**, and **On-device**. The pick isn't for life. Switching providers is another tap.
+A row of provider chips sits at the top of the tool's settings: **Claude**, **OpenAI**, **Gemini**, **Grok**, **DeepSeek**, **Brave**, **Ollama**, **LM Studio**, **Other service**, and **On-device**. The pick isn't for life. Switching providers is another tap.
 
 <PhoneFrame side caption="The provider row and a cloud provider's API key and model fields.">
   <Shot id="tools/ai-settings-providers" alt="The provider row and a cloud provider's API key and model fields." />
@@ -94,6 +94,16 @@ Claude (Anthropic), OpenAI, Gemini, Grok, and DeepSeek are bring-your-own-key on
 Each provider also has a **Model** field. Leave it blank and the app falls back to a built-in default, shown right in the field's hint: `claude-sonnet-5` for Claude, `gpt-5.6-luna` for OpenAI, `gemini-3.5-flash` for Gemini, `grok-4.5` for Grok, `deepseek-v4-flash` for DeepSeek. Type a model name here to use something else.
 
 DeepSeek's reasoning models stream their thinking on a separate field. The app folds that into the same `<think>` handling everything else uses, so **Show model reasoning** and the reasoning progress readout behave there exactly as they do elsewhere.
+
+### Brave
+
+**Brave** uses Brave's Answers API, which runs a web search before it writes each answer. That makes it the provider to pick for questions about facts, prices or recent events, and a poor fit for pure writing jobs like Proofread, where the search adds cost and nothing else.
+
+- **API key**: from `api-dashboard.search.brave.com`. The key needs Brave's **Answers** plan. A key that only has the **Search** plan is refused, and the panel shows Brave's own reason.
+- **Leave the key blank to reuse the web search key.** If you already gave the [web search tool](/tools/search/) your own Brave key, the AI tool uses that one. The key built into some builds is never used for answers, only for searches. A reused key puts Brave in the panel's model picker and the chat's model list only while Brave is the selected provider; paste the key into the Brave field to keep it there.
+- **No Model field.** Brave has one model, so there's nothing to pick.
+- **One message per request.** Brave doesn't accept a system prompt or earlier turns, so the app sends the action's instructions, and in a [chat](#chatting-instead-of-transforming) the earlier messages as a transcript, together with your text as one message.
+- Brave bills each answer for the search it ran plus the tokens in and out. The usage and citation markers it writes into the stream are removed before you see the answer.
 
 ### Any other OpenAI-compatible service
 
@@ -280,5 +290,5 @@ The panel itself sends nothing until you actually tap an action chip: opening th
 - **The changes view can't spot moved text.** A paragraph the model relocated reads as a deletion where it was and an insertion where it went. Detecting moves properly needs a second pass that git only does on request. The actions that move text, Summarize and Rewrite, reword it at the same time, so that pass would fire rarely and mislead when it did.
 - **Comparisons drop to whole characters for scripts without spaces** (Chinese, Japanese, Thai, and others). Word-sized pieces would make an entire sentence a single highlight there. Mixed text uses characters throughout, which is noisier but never wrong.
 - **Local models are advisory about RAM, never a hard gate.** A phone under a model's stated minimum can still download and run it. You get a warning in the catalog first.
-- **No shared or built-in key for any cloud provider.** Claude, OpenAI, Gemini, Grok, and DeepSeek each need your own API key. There's no free built-in quota here, the way some of the other network tools offer one.
+- **No shared or built-in key for any cloud provider.** Claude, OpenAI, Gemini, Grok, DeepSeek and Brave each need your own API key. There's no free built-in quota here, the way some of the other network tools offer one.
 - **A model download dies with the app's process.** It resumes rather than restarting, but it isn't a foreground service, so backgrounding the app for long enough can stop it. That hasn't changed. The panel just shows you it's happening now.

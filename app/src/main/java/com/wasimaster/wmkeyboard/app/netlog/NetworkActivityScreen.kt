@@ -884,6 +884,7 @@ private fun ownHosts(settings: KeyboardSettings): Set<String> {
         }
         add(settings.whisper.serverUrl)
         add(settings.translate.deepl.endpoint)
+        add(settings.translate.server.url)
         // Every backup location's server, not only the one the screen had
         // before there could be several.
         for (location in settings.autoBackup.locations) {

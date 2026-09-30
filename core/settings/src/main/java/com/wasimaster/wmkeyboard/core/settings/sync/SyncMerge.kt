@@ -81,6 +81,11 @@ object SyncMerge {
      *   device, or a key once keys sync. It joins the way a section does,
      *   taking what the other devices have rather than pushing this phone's
      *   copy over theirs.
+     * @param owned whether an entry is one only this phone writes, such as
+     *   its own typing counts. Another device's copy of it can only be an
+     *   old one (a restored backup carries one), so this phone's value wins
+     *   and is stamped again to say so. A deletion still wins: that is the
+     *   user clearing it from another device.
      */
     fun merge(
         local: Map<String, Map<String, JsonElement>>,
@@ -90,6 +95,7 @@ object SyncMerge {
         nowMs: Long,
         firstSync: Boolean,
         rejoining: (section: String, key: String) -> Boolean = { _, _ -> false },
+        owned: (section: String, key: String) -> Boolean = { _, _ -> false },
     ): Result {
         val seen = maxOf(
             remotes.maxOfOrNull { table -> table.values.maxOfOrNull { s -> s.values.maxOfOrNull { it.t } ?: 0L } ?: 0L } ?: 0L,
@@ -136,6 +142,11 @@ object SyncMerge {
                     val ours = winners[key]
                     if (ours == null || beats(theirs, ours)) winners[key] = theirs
                 }
+            }
+            for ((key, ours) in mine) {
+                if (ours.deleted || !owned(section, key)) continue
+                val won = winners.getValue(key)
+                if (!won.deleted && hash(won.value) != hash(ours.value)) winners[key] = Stamped(ours.value, stamp, me)
             }
             val kept = winners.filterValues { !it.deleted || nowMs - it.t < TOMBSTONE_TTL_MS }
             merged[section] = kept

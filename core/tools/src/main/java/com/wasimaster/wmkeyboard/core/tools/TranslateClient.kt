@@ -15,6 +15,8 @@ data class Translation(
     val detectedSource: String,
     /** DeepL answered, rather than the tool's usual service. */
     val viaDeepL: Boolean = false,
+    /** The user's own translation server answered (issue #435). */
+    val viaServer: Boolean = false,
 )
 
 /**

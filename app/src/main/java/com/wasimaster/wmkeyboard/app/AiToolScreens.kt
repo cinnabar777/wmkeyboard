@@ -73,6 +73,7 @@ internal fun AiToolSettings(
     val setupNote = when (aiProvider) {
         AiProvider.OLLAMA, AiProvider.LM_STUDIO -> stringResource(R.string.toolai_ai_local_server_info)
         AiProvider.OPENAI_COMPATIBLE -> stringResource(R.string.toolai_ai_compatible_info)
+        AiProvider.BRAVE -> stringResource(R.string.toolai_ai_brave_info)
         else -> null
     }
     val privacyNote = stringResource(
@@ -83,7 +84,7 @@ internal fun AiToolSettings(
         stringResource(R.string.toolai_ai_provider_title),
         info = listOfNotNull(setupNote, privacyNote).joinToString("\n\n"),
     )
-    // Nine providers no longer fit a segmented row; chips wrap instead. The
+    // Ten providers no longer fit a segmented row; chips wrap instead. The
     // order is displayOrder, not the enum's own: new entries can only be
     // appended there, which would put them after "On your device".
     FlowRow(
@@ -262,6 +263,23 @@ internal fun AiToolSettings(
                 ) { repository.setAiDeepSeekModel(it) }
             }
         }
+        AiProvider.BRAVE -> SettingsGroup(
+            stringResource(R.string.toolai_ai_brave_group_title),
+        ) {
+            item {
+                // No model field: Brave's Answers API has exactly one model.
+                val hasSearchKey = settings.watch { it.webSearch.braveApiKey.isNotBlank() }
+                ApiKeyField(
+                    label = stringResource(R.string.toolai_ai_brave_key_label),
+                    value = settings.watch { it.ai.braveKey },
+                    builtInAvailable = false,
+                    emptyHint = stringResource(
+                        if (hasSearchKey) R.string.toolai_ai_brave_key_search_hint
+                        else R.string.toolai_ai_brave_key_hint,
+                    ),
+                ) { repository.setAiBraveKey(it) }
+            }
+        }
         AiProvider.OPENAI_COMPATIBLE -> SettingsGroup(
             stringResource(R.string.toolai_ai_compatible_group_title),
         ) {
@@ -299,7 +317,7 @@ internal fun AiToolSettings(
         settings,
         endpoints = listOf(
             ServiceEndpoint.ANTHROPIC, ServiceEndpoint.OPENAI, ServiceEndpoint.GEMINI,
-            ServiceEndpoint.XAI, ServiceEndpoint.DEEPSEEK,
+            ServiceEndpoint.XAI, ServiceEndpoint.DEEPSEEK, ServiceEndpoint.BRAVE_SEARCH,
         ),
     )
     SettingsGroup(stringResource(R.string.toolai_ai_output_title)) {

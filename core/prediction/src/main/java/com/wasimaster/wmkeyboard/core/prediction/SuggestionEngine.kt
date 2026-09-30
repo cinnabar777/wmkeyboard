@@ -3465,6 +3465,13 @@ class SuggestionEngine(
      * spelling in the strip, by [CONTRACTION_LEAD], exactly as it overrides
      * it at commit. A strip that disagreed with the space bar would be the
      * bug this fixes.
+     *
+     * Certain in English, that is. The table only knows which spellings are
+     * English words; `im` is not one, but it is one of the commonest German
+     * words there are. So where the field is being written in another
+     * language of the mix and that language has the typed spelling, the
+     * contraction drops to an offer behind it, exactly as an ambiguous
+     * English form does (#425).
      */
     private fun contractionReading(lower: String, langId: String): ElisionReading? {
         if (!Apostrophes.servesLanguage(langId)) return null
@@ -3472,13 +3479,36 @@ class SuggestionEngine(
         // A repair the user took back with backspace is held back the way any
         // undone correction is (#402): offered on the strip behind what was
         // typed, never committed over it, for as long as the undo memory says.
+        // One undo is enough. An ordinary correction's first undo is a
+        // handicap on its score, but a table repair has no score to weigh
+        // against anything, so a handicap would leave it firing exactly as
+        // before once the in-process block ran out (#425).
         val undone = when (correctionStats.penalty(lower, fixed)) {
-            CorrectionStats.Penalty.PROBATION, CorrectionStats.Penalty.BLOCKED -> true
-            CorrectionStats.Penalty.NONE, CorrectionStats.Penalty.PENALIZED -> false
+            CorrectionStats.Penalty.PENALIZED,
+            CorrectionStats.Penalty.PROBATION,
+            CorrectionStats.Penalty.BLOCKED,
+            -> true
+            CorrectionStats.Penalty.NONE -> false
         }
-        if (undone) return declaredReading(lower, fixed)
+        if (undone || wordOfWrittenLanguage(lower)) return declaredReading(lower, fixed)
         val scored = maxOf(finiteScore(fixed.lowercase()), finiteScore(lower))
         return ElisionReading(fixed, scored + CONTRACTION_LEAD, shadowed = true)
+    }
+
+    /**
+     * Whether [lower] is a word of the language the field is being written
+     * in, when that language is not English: `im` typed into German (#425).
+     *
+     * The written language rather than every language of the mix, so an
+     * English keyboard carrying German as a secondary still repairs `im`
+     * while its field is English, and stops the moment detection sees the
+     * field has turned German. Only that language's own words count — the
+     * classification the field mix itself makes ([languagesOwning]).
+     */
+    private fun wordOfWrittenLanguage(lower: String): Boolean {
+        val written = detectedLanguageId()
+        if (written.isEmpty() || Apostrophes.servesLanguage(written)) return false
+        return written in languagesOwning(lower)
     }
 
     /**

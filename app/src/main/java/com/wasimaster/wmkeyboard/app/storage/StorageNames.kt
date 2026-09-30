@@ -74,6 +74,7 @@ internal object StorageNames {
         "learning/glide_shapes.json" to R.string.storage_file_glide_shapes_label,
 
         "stats/typing_stats.json" to R.string.storage_file_typing_stats_label,
+        "stats/typing_stats_devices.json" to R.string.storage_file_typing_stats_devices_label,
         "netlog/rows.jsonl" to R.string.storage_file_netlog_rows_label,
         "netlog/days.json" to R.string.storage_file_netlog_days_label,
         "clipboard/history.json" to R.string.storage_file_clip_history_label,

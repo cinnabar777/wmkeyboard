@@ -93,6 +93,11 @@ internal fun StatisticsScreen(repository: SettingsRepository, settings: LiveSett
     LaunchedEffect(settings.watch { it.statsVersion }) {
         val read = withContext(Dispatchers.IO) {
             val stats = TypingStats(File(context.filesDir, TypingStats.FILE_PATH))
+            // With sync on, every other device's counts are added in (#447).
+            // Only read here, never saved: this instance is a reader.
+            stats.absorbDevices(
+                runCatching { File(context.filesDir, TypingStats.DEVICES_FILE_PATH).readText() }.getOrNull(),
+            )
             Triple(stats.dayEntries(), stats.lifetime(), stats.heatmaps())
         }
         entries = read.first
@@ -163,6 +168,9 @@ internal fun StatisticsScreen(repository: SettingsRepository, settings: LiveSett
                 confirmDelete = false
                 scope.launch(Dispatchers.IO) {
                     TypingStats(File(context.filesDir, TypingStats.FILE_PATH)).clear()
+                    // The other devices' counts too: the screen shows the
+                    // total, and sync carries the deletion to them.
+                    File(context.filesDir, TypingStats.DEVICES_FILE_PATH).delete()
                     // The keyboard's cue not to save the old numbers back —
                     // and this screen's own cue to re-read, via the effect.
                     repository.bumpStatsVersion()

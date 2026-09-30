@@ -17,8 +17,9 @@ import java.net.URL
 import java.net.URLEncoder
 import java.net.UnknownHostException
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
 import com.wasimaster.wmkeyboard.common.R as CommonR
 
 /**
@@ -453,13 +454,20 @@ object ToolHttp {
 
     /**
      * The provider's own error text, when the response body carried any.
-     * Google APIs return `{"error": {"message": …}}`; anything else reads as
-     * no message at all.
+     * Google APIs return `{"error": {"message": …}}` and Brave
+     * `{"error": {"detail": …}}`; Tavily returns `{"detail": {"error": …}}`,
+     * or `{"error": …}` when rate-limited. Anything else reads as no message
+     * at all.
      */
     fun apiErrorText(body: String?): String? = body?.let {
         runCatching {
-            Json.parseToJsonElement(it).jsonObject["error"]?.jsonObject
-                ?.get("message")?.jsonPrimitive?.content
+            val root = Json.parseToJsonElement(it).jsonObject
+            val error = root["error"]
+            (error as? JsonObject)?.let { e -> e["message"] ?: e["detail"] }
+                ?.let { m -> (m as? JsonPrimitive)?.content }
+                ?: (error as? JsonPrimitive)?.takeIf { e -> e.isString }?.content
+                ?: ((root["detail"] as? JsonObject)?.get("error") as? JsonPrimitive)
+                    ?.takeIf { e -> e.isString }?.content
         }.getOrNull()
     }?.takeIf { it.isNotBlank() }
 

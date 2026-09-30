@@ -496,6 +496,7 @@ internal object ChoiceOptionIcons {
         put(AiProvider.GEMINI) { Icons.Outlined.Cloud }
         put(AiProvider.XAI) { Icons.Outlined.Cloud }
         put(AiProvider.DEEPSEEK) { Icons.Outlined.Cloud }
+        put(AiProvider.BRAVE) { Icons.Outlined.Cloud }
         put(AiProvider.OPENAI_COMPATIBLE) { Icons.Outlined.Dns }
         put(AiProvider.OLLAMA) { Icons.Outlined.Computer }
         put(AiProvider.LM_STUDIO) { Icons.Outlined.Computer }

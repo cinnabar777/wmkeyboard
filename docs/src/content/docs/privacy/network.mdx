@@ -39,6 +39,7 @@ it.
 |---|---|---|---|
 | Translate | `translate.googleapis.com` (no key) or `translation.googleapis.com` (with a key) | the text you typed into the panel, up to 2,500 characters, plus the target language | as you type, about 400ms after you stop, only while the panel is open |
 | Translate and DeepL Write, with your DeepL key | `api-free.deepl.com` (Free keys), `api.deepl.com` (other keys), or the DeepL server you entered | Translate: the same as above. DeepL Write: the text in the field or the selection, up to 2,500 characters. Both send your key in a header | only after you add a DeepL key under Tools / Translate. Translate as you type in its panel; DeepL Write only when you tap it |
+| Translate, with your own translation server | the server address you entered | the same as Translate above, inside a chat request with an instruction to translate, plus your key in a header if you set one | only after you enter a server address under Tools / Translate. Then as you type in the panel, in place of every other translation service |
 | Translate, on-device models | `dl.google.com` (through Android's download manager), full edition only | nothing you typed: the request names the language model | when you press Download for a language, in the panel or under Tools / Translate |
 | GIF search | `api.klipy.com`, `api.giphy.com` | your search text, or nothing for the trending feed | immediately when you open the panel (trending), then live as you type |
 | Sticker search | same clients as GIF search | same | same |
@@ -53,7 +54,7 @@ it.
 | Currency converter | `open.er-api.com`, falling back to `api.frankfurter.dev`. The F-Droid edition starts from `cdn.jsdelivr.net` (currency-api, which uses `latest.currency-api.pages.dev` when jsDelivr fails) and falls back to `api.frankfurter.dev`. The source is yours to pick from those and `api.coinbase.com` | nothing identifying: it fetches the whole rate table, converted locally | on panel open, or the first time a smart chip sees an amount. In the F-Droid edition that chip waits for your tap unless **Fetch rates as you type** is on. Cached for hours, not fetched per conversion |
 | Cryptocurrency prices | `api.coinbase.com`, falling back to `cdn.jsdelivr.net`; the F-Droid edition uses `cdn.jsdelivr.net` alone. `api.coingecko.com` is the other choice | nothing identifying: it fetches prices for the coins you have turned on, converted locally | only when you type a coin amount or select a coin on the panel, never on a plain panel open. In the F-Droid edition a typed amount waits for a tap on its chip. Cached for a few minutes |
 | Weather | `api.open-meteo.com`, `geocoding-api.open-meteo.com` | the location you typed or searched, or nothing beyond a saved lat/long | on panel open, cached for a while, or when a weather chip needs a forecast (in the F-Droid edition that chip waits for your tap unless **Fetch the forecast as you type** is on); geocoding only fires while you're editing the location |
-| AI (cloud provider) | the provider you picked, on its own API: Anthropic, OpenAI, Gemini, Grok (xAI) or DeepSeek | the text you ran the action on, plus a system prompt | only when you tap an action, never in the background |
+| AI (cloud provider) | the provider you picked, on its own API: Anthropic, OpenAI, Gemini, Grok (xAI), DeepSeek, or Brave (`api.search.brave.com`, which runs a web search with your text before it answers) | the text you ran the action on, plus a system prompt | only when you tap an action, never in the background |
 | AI (any other OpenAI-compatible service) | whatever address you type in, for instance OpenRouter, Groq, Together or Mistral | same | same |
 | AI (self-hosted Ollama or LM Studio) | a server address you enter on your own network | same | same, over plain HTTP |
 | AI (on-device) <Flavor edition="full" /> | none | nothing leaves the phone | never: this provider has no network path at all |
@@ -211,9 +212,9 @@ without you, and only to the destination you chose yourself.
 
 Each tool that needs a key has its own field, all blank by default:
 Translate's Cloud Translation and DeepL keys, GIF search's Klipy and GIPHY keys, Web
-and Image search's Brave key, photo backgrounds' Unsplash and Pexels keys,
+and Image search's Brave and Tavily keys, photo backgrounds' Unsplash and Pexels keys,
 and the AI tool's per-provider keys
-(Anthropic, OpenAI, Gemini, Grok, DeepSeek, and whatever key the
+(Anthropic, OpenAI, Gemini, Grok, DeepSeek, Brave, and whatever key the
 OpenAI-compatible service you pointed it at wants) plus its Hugging Face
 token for gated on-device models, and Voice typing's transcription server
 key. Leave any of them blank and that tool

@@ -10,7 +10,7 @@ import SettingsPath from '@components/SettingsPath.astro';
 import KeyCap from '@components/KeyCap.astro';
 import Shot from '@components/Shot.astro';
 
-This page covers four separate tools, each with its own panel and its own settings screen: **Web search** and **Image search** (backed by Brave, or by a SearXNG server you name on the F-Droid build), a three-tab **Wikipedia** reader, and an **English dictionary**. Web search, Image search, and Wikipedia never read what's already in your field. You type a query into the panel's own search bar, and nothing out of the field you're typing in is sent anywhere. Dictionary is the one exception. With its auto-lookup setting on, which is the default, opening the tool reads your current selection or the word at the cursor and looks that up. See [Looking up definitions](#looking-up-definitions) below.
+This page covers four separate tools, each with its own panel and its own settings screen: **Web search** and **Image search** (backed by Brave, by Tavily with a key of your own, or by a SearXNG server you name on the F-Droid build), a three-tab **Wikipedia** reader, and an **English dictionary**. Web search, Image search, and Wikipedia never read what's already in your field. You type a query into the panel's own search bar, and nothing out of the field you're typing in is sent anywhere. Dictionary is the one exception. With its auto-lookup setting on, which is the default, opening the tool reads your current selection or the word at the cursor and looks that up. See [Looking up definitions](#looking-up-definitions) below.
 
 <PhoneFrame caption="Web search results. Tap a row to insert its link, or tap the open icon to launch it in your browser.">
 <Shot id="tools/web-search-results" alt="Web search results — tap a row to insert its link, or tap the open icon to launch it in your browser." />
@@ -20,7 +20,7 @@ This page covers four separate tools, each with its own panel and its own settin
 
 Open **Web search** or **Image search** from the toolbar, or from the toolbox if you haven't pinned them. Neither is pinned by default. On a hardware keyboard, double-tap <KeyCap>Ctrl</KeyCap> for the [leader key](/reference/shortcuts/), then press <KeyCap>W</KeyCap> for web search or <KeyCap>I</KeyCap> for image search.
 
-Both tools run on the Brave Search API by default, or on a SearXNG instance you name on the F-Droid build. Typing routes into the panel's own header search bar rather than your field, the same key-rerouting trick the GIF, sticker, and Wikipedia panels use. Unlike GIFs and stickers, neither search runs live as you type. Both wait for you to press the search action before firing a request.
+Both tools run on the Brave Search API by default. Paste a [Tavily](#searching-with-tavily) key and they use Tavily instead, and on the F-Droid build a SearXNG instance you name comes before either. Typing routes into the panel's own header search bar rather than your field, the same key-rerouting trick the GIF, sticker, and Wikipedia panels use. Unlike GIFs and stickers, neither search runs live as you type. Both wait for you to press the search action before firing a request.
 
 <PhoneFrame side caption="Image search: tap a thumbnail to insert the image itself, or long-press to insert its link instead.">
 <Shot id="tools/image-search-grid" alt="Image search — tap a thumbnail to insert the image itself; long-press to insert its link instead." />
@@ -49,11 +49,21 @@ Web search and image search are two separate tool screens, reached from **Tools 
 - **Icon colour**: only shown if [colorful tool icons](/reference/settings/tools/) are turned on globally.
 - **SearXNG instance**: F-Droid build only, blank by default. Paste the address of a SearXNG server, your own or one you trust, and both tools search it instead of Brave, even if a Brave key is also set. See [Servers](/reference/settings/servers/) for the same field shared across tools.
 - **Brave API key**: blank by default. Paste a key from `api-dashboard.search.brave.com` to use your own quota. Leave it blank and the app falls back to a key baked into the build, if this build ships one. The field saves as you type, with no separate save button. Under it you'll read "The app uses your key", "This field is blank. The app uses the key that is built into the app.", or "From api-dashboard.search.brave.com, with a free monthly credit", depending on which applies.
-- **SafeSearch**: on by default. It filters explicit results. Web search maps it to Brave's "moderate" filter. Image search only offers strict or off, so the same toggle maps to "strict" there.
-- **Results for each search**: a slider from 1 to 10, defaulting to **8**. ("Each search uses one API request either way," the app notes.) The Brave API itself allows up to 20 results per request. The app's slider stops lower, at 10.
+- **Tavily API key**: blank by default, in its own **Tavily** group under the Brave one. No build ships a Tavily key, so this is the only way to use it. Paste one and both tools search Tavily instead of Brave. Under it you'll read "The app uses your key" or "From app.tavily.com, with 1,000 free credits a month". On the F-Droid build a SearXNG instance still comes first.
+- **SafeSearch**: on by default. It filters explicit results. Web search maps it to Brave's "moderate" filter. Image search only offers strict or off, so the same toggle maps to "strict" there. Tavily has one level, on or off.
+- **Results for each search**: a slider from 1 to 10, defaulting to **8**. ("Each search uses one API request either way," the app notes.) The Brave and Tavily APIs both allow up to 20 results per request. The app's slider stops lower, at 10.
 - **Results per row**: image search only, and 3 by default. How many image results sit side by side, from 2 to 5. Fewer columns means bigger previews, which is easier to judge before you send one.
 
-The settings page's own caption: "Web and image search share everything here. They search the whole web. The Brave plan includes a free monthly credit of about a thousand searches. Brave asks for attribution, so the panel shows 'via Brave'." That attribution is a small **"via Brave"** label inside the search bar, at its right end (just before the **✕** when there's a search to clear), shown whenever a usable key exists.
+The settings page's own caption: "Web and image search share everything here. They search the whole web. The Brave plan includes a free monthly credit of about a thousand searches. Brave asks for attribution, so the panel shows 'via Brave'." That attribution is a small **"via Brave"** label inside the search bar, at its right end (just before the **✕** when there's a search to clear). It reads **"via Tavily"** while Tavily answers, and a SearXNG instance, being your own server, gets no label.
+
+### Searching with Tavily
+
+[Tavily](https://tavily.com) is a search API built for AI tools, and it works as a third backend for both tools. Sign up at `app.tavily.com` for a key. The free plan gives 1,000 credits a month, and each search the keyboard makes uses one: it always asks for Tavily's `basic` search, never the two-credit `advanced` one, and never for Tavily's AI-written answer.
+
+- **Web search** looks the same as with Brave: a title, the site, and a snippet. The snippet is the passages Tavily picked from the page, joined with "…".
+- **Image search** has no image index of its own behind it. Tavily sends back the pictures it found on the pages of its results, so a search usually finds fewer pictures than Brave, with no title under them. Tapping and long-pressing work as they do with Brave.
+- With both a Brave key and a Tavily key set, Tavily answers. Clear the Tavily field to go back to Brave.
+- When your credits run out, or the key is wrong, the panel shows Tavily's own message for it.
 
 ## Reading Wikipedia
 
@@ -135,10 +145,10 @@ The settings page's caption: "Definitions come from the sources below, in their 
 
 ## Details & edge cases
 
-- **Only two of the four need to be unlocked.** Web search and image search need a Brave key, yours or the one baked into this build. On the F-Droid build, a SearXNG instance address unlocks them instead. Wikipedia and Dictionary work out of the box against free, keyless public APIs.
+- **Only two of the four need to be unlocked.** Web search and image search need a Brave key, yours or the one baked into this build, or a Tavily key of your own. On the F-Droid build, a SearXNG instance address unlocks them too. Wikipedia and Dictionary work out of the box against free, keyless public APIs.
 - **Default hardware letters:** <KeyCap>W</KeyCap> for web search, <KeyCap>I</KeyCap> for image search, <KeyCap>D</KeyCap> for dictionary. Wikipedia has no letter of its own out of the box, so reach it through the toolbox (<KeyCap>T</KeyCap>), or [rebind a letter to it yourself](/reference/shortcuts/).
 - **Discoverable by typing.** Typing "search", "images", "wiki"/"wikipedia", or "define"/"dict" as the last word before your cursor offers a [smart chip](/smart/chips/) that opens the matching tool. The keyword list is editable per tool, and only shows while that tool is enabled.
 - **None of these four are edition-gated.** Full and lite behave identically across all four tools here.
-- **Attribution.** Brave Search results, Wikipedia's article text, Wiktionary's entries, and the Free Dictionary API's definitions are all credited under "Online services" on the app's About → Open-source licences screen, alongside the terms each service is used under. Wikipedia's and Wiktionary's text is CC BY-SA, which keeps its own license independent of the app's.
+- **Attribution.** Brave Search and Tavily results, Wikipedia's article text, Wiktionary's entries, and the Free Dictionary API's definitions are all credited under "Online services" on the app's About → Open-source licences screen, alongside the terms each service is used under. Wikipedia's and Wiktionary's text is CC BY-SA, which keeps its own license independent of the app's.
 
 For what leaves your device and when, across every network tool, see [network policy](/privacy/network/). For the GIF and sticker tools' different, search-as-you-type behavior, see [GIFs](/emoji/gifs/).

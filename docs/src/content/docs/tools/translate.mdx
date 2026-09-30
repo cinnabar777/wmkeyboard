@@ -49,7 +49,7 @@ Hardware-keyboard focus-ring navigation reaches the whole panel: <KeyCap>Tab</Ke
 
 <Flavor edition="full" /> The Full edition can translate on the phone with Google's ML Kit, with no connection and without the text leaving the device. Pick the engine from the chip on the panel or under Options:
 
-- **Online** (the default) is what Translate has always done: Google's endpoint, your Cloud key, or your LibreTranslate server. It knows the most languages and gives the best translations.
+- **Online** (the default) is what Translate has always done: Google's endpoint, your Cloud key, or your LibreTranslate server, unless you set up [DeepL](#deepl) or [your own translation server](#your-own-translation-server). It knows the most languages and gives the best translations.
 - **On device** never sends the text anywhere. It needs a model for each language, about 30 MB each, downloaded once.
 - **Automatic** uses the device whenever the languages are downloaded, and the online service for everything else: a language with no model, a pair you have not downloaded, text the device cannot read. The engine chip's icon shows which one produced the result on screen.
 
@@ -64,6 +64,17 @@ Hardware-keyboard focus-ring navigation reaches the whole panel: <KeyCap>Tab</Ke
 **Detecting the source.** ML Kit's translator has to be told what it is reading, so a separate on-device language identifier (bundled, no download) does the detecting. It is reliable on a sentence and shaky on a word or two. When it is not sure, the keyboard falls back on the languages you type in, the active one first, and shows the source with a question mark, as in "French?". Tap the chip to correct it. Hindi, Japanese, Russian, Arabic, Greek, Bulgarian or Chinese typed in Latin letters is recognised for what it is and refused on the device, because no model reads it; Automatic sends it online instead.
 
 **What to expect.** On-device translation is good for messages and short text and noticeably less exact than the online service on long, technical or idiomatic text. Line breaks and blank lines survive: each line is translated on its own. The translators are unloaded when you close the panel, since a loaded language pair holds tens of megabytes of memory.
+
+## Your own translation server
+
+You can send translations to a server that you run, or to a service that you pay for, as long as it answers OpenAI chat completion requests (`/v1/chat/completions`). llama.cpp's `llama-server`, Ollama, LM Studio, vLLM and LocalAI all do, and so do most hosted gateways. The keyboard itself then does no translating work: the phone only sends the text and shows the answer.
+
+- **Turning it on.** Type the server's address under [Options](#options). Nothing changes until you do. The **Online** engine then sends every translation to your server. On **Automatic**, only the translations that the device cannot do go to it. **On device** never uses it.
+- **Nothing else gets the text.** With an address set, the server replaces DeepL, Google and LibreTranslate for all languages. When the server fails (it is off, the address is wrong, the model is missing), the panel shows the error and the text goes nowhere else. A small **Your server** label beside the engine chip says where the translation on screen came from.
+- **What the server gets.** A chat with two messages: an instruction to translate into the target language (and from the source language, if you picked one in the panel), then your text as the second message. The instruction tells the model to reply with the translation only and to translate questions and requests rather than answer them. The answer comes back as it is written, and the keyboard removes a `<think>` block and a pair of quotation marks around the whole answer, if the model adds them.
+- **The address.** A bare `host:port`, the API root (`http://192.168.1.10:8080/v1`, `https://openrouter.ai/api/v1`) or the whole `…/chat/completions` address all work. With no path, the keyboard adds `/v1`. With no `http://` or `https://`, it uses `https://`, so type `http://` for a server on your home network.
+- **Which language it read.** The server does not say what language the text was in, so the source chip shows a language only when you picked one.
+- **Speed.** A language model is slower than a translation service. On a small model, expect a second or more for a sentence; a model that reasons first takes longer.
 
 ## DeepL
 
@@ -87,6 +98,9 @@ DeepL is an optional online service that you bring yourself, with your own DeepL
 - **Only downloaded languages**: <Flavor edition="full" /> on by default. On **On device**, the panel's language menus show the downloaded languages, the languages you type in and the current selection, with **All languages** at the end for the rest. Off lists every language.
 - **Languages on the device**: <Flavor edition="full" /> the on-device models. The list starts with English (built in), the language you translate into, the languages you type in, and anything already downloaded or on its way. **More languages** below it folds out the rest. Each row downloads, cancels or deletes one model and shows its progress. A download started here shows as running in the panel, and the other way round.
 - **LibreTranslate server**: F-Droid build only, blank by default. Paste the address of a LibreTranslate server, your own or one you trust. Translation goes there instead of Google, even if a Cloud Translation key is also set. An optional key field sits below it, for instances that ask for one. See [Servers](/reference/settings/servers/) for the same field shared across tools.
+- **Server address**: blank by default, and the switch that turns [your own translation server](#your-own-translation-server) on.
+- **Model (optional)**: blank by default, which sends no model name, for a server that has one model. Type the model's name as the server knows it (for example `qwen3:4b` on Ollama) when it has several.
+- **Server API key (optional)**: blank by default. Sent as a bearer token, for a server or a service that asks for a key.
 - **DeepL API key**: blank by default, and the switch that turns DeepL on. See [DeepL](#deepl). The key rows below it show only once a key or a server is set.
 - **DeepL server (optional)**: blank by default, which means DeepL's own server for your kind of key. Paste an address to send DeepL requests to a proxy instead.
 - **Translate with DeepL**: on by default. Off keeps the key for DeepL Write only, and translation goes to the usual service.
@@ -98,12 +112,13 @@ This screen also shows the caption WM Keyboard displays right on the settings pa
 
 > The keyboard sends the text that you translate to Google either way, and only while the translate panel is open. The free endpoint is unofficial and rate limited. A Cloud Translation key makes it official and reliable. If you set up DeepL below, DeepL gets the text instead, and Google gets only the languages that DeepL does not have.
 
-If you back up your settings with **Include API keys** turned on, a Translate key or DeepL key you've pasted in travels with the backup along with your GIF, search, and AI keys. Without that switch, neither leaves the phone in a backup.
+If you back up your settings with **Include API keys** turned on, a Translate key, DeepL key or translation server key you've pasted in travels with the backup along with your GIF, search, and AI keys. Without that switch, none of them leaves the phone in a backup.
 
 ## Details & edge cases
 
 - **On the device, nothing is sent.** With the engine on **On device**, the text you type is translated by ML Kit on the phone and goes nowhere. The only network use is the model downloads, which come from Google's servers (`dl.google.com`) through Android's download manager, plus ML Kit's own [diagnostics](/privacy/network/). On **Automatic**, text goes online only when the device cannot translate it.
 - **Google, or LibreTranslate on the F-Droid build.** On the online engine, with no key, WM Keyboard calls Google's free public translation endpoint. It's the same unofficial one browser translate extensions use: fine for personal typing volumes, with no uptime guarantee and its own rate limits. With a key, it calls the official Cloud Translation v2 API instead, billed to your Google Cloud project and reliable. The F-Droid build adds a third path: paste a LibreTranslate server's address under Options. Every translation then goes there instead of either Google option, even with a Cloud Translation key also set. Whichever is active, only the text in the panel's box is sent: what you typed, pasted, or had selected when you opened it. Nothing else in the field is.
+- **Your own server, when you set it up.** With a server address, every online translation goes to that server and to nothing else, errors included (see [Your own translation server](#your-own-translation-server)). It receives the text as the user message of a chat request, in a POST body, with the instruction as the system message and your key, if any, in a request header.
 - **DeepL, when you set it up.** With a DeepL key, translations go to DeepL first (see [DeepL](#deepl)). A pair that DeepL turns down goes to Google or LibreTranslate as above, and DeepL is not asked about that pair again until the keyboard restarts. Any other DeepL error (a wrong key, a used-up month) shows in the panel and is not sent anywhere else.
 - **Sent, precisely:** the text currently in the panel's search box (truncated to 2,500 characters), the target language code, the source language code if you picked one, and your key where one applies. DeepL receives the text in a POST body and the key in a request header. The free Google endpoint receives the text as part of the request URL. The official Google API and a configured LibreTranslate server both send it in a POST body, LibreTranslate's carrying its optional key alongside.
 - **When it's sent:** automatically ~400ms after you stop typing, immediately on return or retry, and immediately again if you change the target language, all only while the panel is open. Closing the panel cancels any translation in flight.

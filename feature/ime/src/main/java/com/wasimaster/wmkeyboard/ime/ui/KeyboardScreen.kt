@@ -493,7 +493,6 @@ import com.wasimaster.wmkeyboard.ime.CaptureVoiceAction
 import com.wasimaster.wmkeyboard.ime.PanelMode
 import com.wasimaster.wmkeyboard.core.tools.SmartSuggest
 import com.wasimaster.wmkeyboard.core.tools.SymbolCatalog
-import com.wasimaster.wmkeyboard.core.tools.ToolApiKeys
 import com.wasimaster.wmkeyboard.ime.PwSettingAction
 import com.wasimaster.wmkeyboard.ime.TypingTestAction
 import com.wasimaster.wmkeyboard.ime.VoiceBarAction
@@ -10813,8 +10812,7 @@ private fun KeyboardBody(
                             placeholder = stringResource(R.string.ime_web_search_hint),
                             onQueryTap = onMediaQueryTap,
                             onClear = onMediaQueryClear,
-                            attribution = stringResource(R.string.ime_search_attribution_brave)
-                                .takeIf { ToolApiKeys.hasSearchProvider(state.settings) },
+                            attribution = searchAttribution(state.settings),
                         )
                     },
                 ) {
@@ -10836,8 +10834,7 @@ private fun KeyboardBody(
                             placeholder = stringResource(R.string.ime_image_search_hint),
                             onQueryTap = onMediaQueryTap,
                             onClear = onMediaQueryClear,
-                            attribution = stringResource(R.string.ime_search_attribution_brave)
-                                .takeIf { ToolApiKeys.hasSearchProvider(state.settings) },
+                            attribution = searchAttribution(state.settings),
                         )
                         SearchByPhotoButton { onPanelChange(PanelMode.CAMERA) }
                     },
@@ -14675,7 +14672,9 @@ private fun KeyRows(
                     // is a `var` holding a mutable buffer on purpose.
                     @Suppress("DoubleMutabilityForCollection")
                     var seg = ArrayList<GesturePoint>()
-                    var wasOverSpace = false
+                    // Which samples the spacebar takes out of the word, and
+                    // which of them end it (#428).
+                    val crossings = SpacebarCrossings()
                     // The shift key's cell, read once as the stroke starts, and
                     // whether the finger is inside it now. Drawing through it
                     // capitalizes the word (#115): one crossing for a capital,
@@ -14758,7 +14757,7 @@ private fun KeyRows(
                         // Only an unfrozen stroke off the spacebar is on a
                         // clock: a finger resting on the spacebar mid-phrase
                         // is thinking, not asking.
-                        val timeout = if (isGesture && !picker.isOpen && !wasOverSpace) {
+                        val timeout = if (isGesture && !picker.isOpen && !crossings.overBar) {
                             dwell.timeout(SystemClock.uptimeMillis(), closeCall, holdToAsk, dwellMs)
                         } else {
                             null
@@ -14862,12 +14861,28 @@ private fun KeyRows(
                             // begins the next, so a stroke can chain words
                             // without lifting. Spacebar points anchor no letter,
                             // so they are dropped from the word's shape rather
-                            // than added to either side.
+                            // than added to either side — bar a shallow dip
+                            // that comes straight back up, which was the
+                            // finger overshooting a bottom-row letter and is
+                            // handed back to the word (#428, see
+                            // [SpacebarCrossings]).
                             // spaceRect is in root space; lift the box-local
                             // touch point into root space to test it.
-                            val overSpace = spaceGlide &&
-                                liveSpace.value.value
-                                    ?.contains(change.position + boxOrigin) == true
+                            val point = GesturePoint(
+                                change.position.x,
+                                change.position.y,
+                                change.uptimeMillis,
+                            )
+                            val space = if (spaceGlide) {
+                                crossings.step(point, change.position + boxOrigin, liveSpace.value.value)
+                            } else {
+                                SpacebarCrossings.Step.KEEP
+                            }
+                            // A dip's held-back samples come home before
+                            // anything else is counted against the word: they
+                            // are older than this sample, and older than a
+                            // shift crossing registered at it.
+                            if (space == SpacebarCrossings.Step.KEEP) crossings.drain(seg)
                             // Crossing the shift key asks for a capital. Its
                             // points are dropped from the word for the same
                             // reason the spacebar's are: the detour is an
@@ -14880,8 +14895,8 @@ private fun KeyRows(
                                 shiftCuts.add(seg.size)
                             }
                             wasOverShift = overShift
-                            if (overSpace) {
-                                if (!wasOverSpace && seg.size >= 3) {
+                            when (space) {
+                                SpacebarCrossings.Step.CROSSED -> if (seg.size >= 3) {
                                     val (points, case) = glideSegment(
                                         seg, shiftCuts, shiftCenter, keyWidth.value, letterGlide.value,
                                         endedOnShift = false,
@@ -14892,16 +14907,9 @@ private fun KeyRows(
                                     seg = ArrayList()
                                     previewedSeg = false
                                 }
-                            } else if (!overShift) {
-                                seg.add(
-                                    GesturePoint(
-                                        change.position.x,
-                                        change.position.y,
-                                        change.uptimeMillis,
-                                    ),
-                                )
+                                SpacebarCrossings.Step.HELD -> Unit
+                                SpacebarCrossings.Step.KEEP -> if (!overShift) seg.add(point)
                             }
-                            wasOverSpace = overSpace
                             // The picker's clock: a finger that stops moving is
                             // asking to be asked. Restarted only by a move past
                             // the still radius, so a finger resting on glass —
@@ -14946,8 +14954,8 @@ private fun KeyRows(
                                 keyList?.let { keys ->
                                     previewedSeg = true
                                     val (points, case) = glideSegment(
-                                        seg, shiftCuts, shiftCenter, keyWidth.value, letterGlide.value,
-                                        endedOnShift = wasOverShift,
+                                        crossings.withHeld(seg), shiftCuts, shiftCenter, keyWidth.value,
+                                        letterGlide.value, endedOnShift = wasOverShift,
                                     )
                                     onGesturePreview(
                                         points, keys, keyWidth.value,

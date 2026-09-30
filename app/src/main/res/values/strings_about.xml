@@ -185,6 +185,7 @@
 
     <!-- What the app uses each online service for. -->
     <string name="about_service_brave_used">The web and image search results</string>
+    <string name="about_service_tavily_used">The web and image search results, when you add a Tavily key</string>
     <string name="about_service_gif_used">The GIFs and the stickers</string>
     <string name="about_service_wikipedia_used">The article search and the summaries</string>
     <string name="about_service_translate_used">The translation tool</string>

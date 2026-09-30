@@ -170,6 +170,7 @@
 
     <!-- your own data -->
     <string name="storage_file_typing_stats_label">Your typing counts</string>
+    <string name="storage_file_typing_stats_devices_label">Typing counts from your other devices</string>
     <string name="storage_file_clip_history_label">Clip history</string>
     <string name="storage_file_clip_images_label">Images you copied</string>
     <string name="storage_file_snippets_label">Saved phrases</string>
