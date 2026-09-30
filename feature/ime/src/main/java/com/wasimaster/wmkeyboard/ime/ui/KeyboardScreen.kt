@@ -506,6 +506,7 @@ import com.wasimaster.wmkeyboard.ime.displayCaseForShift
 import com.wasimaster.wmkeyboard.ime.shiftForGlide
 import com.wasimaster.wmkeyboard.core.layout.BottomRowRules
 import com.wasimaster.wmkeyboard.core.layout.BuiltInLayouts
+import com.wasimaster.wmkeyboard.core.layout.PAD_SPACE_LABEL
 import com.wasimaster.wmkeyboard.core.layout.arrangedBy
 import com.wasimaster.wmkeyboard.core.layout.asEmojiKey
 import com.wasimaster.wmkeyboard.core.layout.LayoutSpec
@@ -20130,9 +20131,19 @@ private fun KeyContent(visual: KeyVisual, settings: KeyboardSettings, contentCol
         ) {
             // Split-spacebar left halves carry an empty label: no language name.
             // A named icon takes the name's place, or sits before it when the
-            // key asks for both (issue #187).
-            val showText = key.label.isNotEmpty() && (namedIcon == null || key.iconBesideLabel)
-            if (showText || namedIcon != null) {
+            // key asks for both (issue #187). A keypad's space key draws its
+            // open-box legend as a glyph, like any other key on the pad (#459).
+            val padGlyph = key.label == PAD_SPACE_LABEL && namedIcon == null
+            val showText = !padGlyph && key.label.isNotEmpty() && (namedIcon == null || key.iconBesideLabel)
+            if (padGlyph) {
+                Text(
+                    text = PAD_SPACE_LABEL,
+                    fontSize = (LetterLabelSp * (visual.drawnLabelScale() ?: 1f) * fontScale).sp,
+                    color = contentColor,
+                    maxLines = 1,
+                    softWrap = false,
+                )
+            } else if (showText || namedIcon != null) {
                 val showArrows = visual.spaceArrows
                 Row(
                     verticalAlignment = Alignment.CenterVertically,

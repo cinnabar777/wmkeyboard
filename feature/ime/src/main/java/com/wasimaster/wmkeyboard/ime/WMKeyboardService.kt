@@ -536,6 +536,7 @@ import com.wasimaster.wmkeyboard.core.layout.commitsNoText
 import com.wasimaster.wmkeyboard.core.layout.opensAlternatesPopup
 import com.wasimaster.wmkeyboard.core.layout.LayoutSpec
 import com.wasimaster.wmkeyboard.core.input.composer.composerFor
+import com.wasimaster.wmkeyboard.core.input.composer.Composer
 import com.wasimaster.wmkeyboard.core.input.composer.KhiproComposer
 import com.wasimaster.wmkeyboard.core.input.composer.CjkConfig
 import com.wasimaster.wmkeyboard.core.input.composer.CjkDictCatalog
@@ -1980,21 +1981,22 @@ open class WMKeyboardService : InputMethodService() {
         _uiState.value.settings.enabledLanguages.mapTo(HashSet()) { it.id }
 
     /**
-     * The offensive-word set for [langIds], unioned.
+     * The offensive-word lists for [langIds], by language.
      *
      * One asset per language under `dictionaries/offensive/`, and a language
-     * with no list contributes nothing rather than failing the read. Unioned
-     * rather than kept per language because the strip mixes languages — a
-     * secondary language's words reach it too — and a candidate is offered or
-     * it is not; there is no per-candidate language to consult at the point
-     * [SuggestionEngine.suppressed] asks.
+     * with no list contributes nothing rather than failing the read. The
+     * engine gets them unioned for the quick check and apart for the second
+     * look: one language's list flags plain words of another (English's holds
+     * Dutch `wel`, `nog` and `ging`, #465), so a flag only stands where the
+     * word is not simply a word of a language that does not flag it.
      *
      * Assets, so this works at a locked boot and with no network. The lists
      * hold only entries spelled in letters; see the header on any of them.
      */
-    private fun readOffensiveWords(langIds: Set<String>): Set<String> {
-        val words = HashSet<String>()
+    private fun readOffensiveWords(langIds: Set<String>): Map<String, Set<String>> {
+        val byLanguage = HashMap<String, Set<String>>()
         for (langId in langIds) {
+            val words = HashSet<String>()
             runCatching {
                 assets.open("dictionaries/offensive/$langId.txt").bufferedReader()
                     .useLines { lines ->
@@ -2005,8 +2007,15 @@ open class WMKeyboardService : InputMethodService() {
                         }
                     }
             }
+            if (words.isNotEmpty()) byLanguage[langId] = words
         }
-        return words
+        return byLanguage
+    }
+
+    /** Hands [byLanguage] to the engine, unioned for the fast check and kept apart for #465. */
+    private fun SuggestionEngine.applyOffensiveWords(byLanguage: Map<String, Set<String>>) {
+        offensiveWords = byLanguage.values.flatMapTo(HashSet()) { it }
+        offensiveByLanguage = byLanguage
     }
 
     /** Languages reading the user's imported lists alone (issue #28). */
@@ -3709,7 +3718,7 @@ open class WMKeyboardService : InputMethodService() {
                     val widened = withContext(Dispatchers.Default) {
                         readOffensiveWords(offensiveLangs)
                     }
-                    suggestionEngine?.offensiveWords = widened
+                    suggestionEngine?.applyOffensiveWords(widened)
                     loadedOffensiveLangs = offensiveLangs
                 }
                 // Imported word lists are per language, so the active one
@@ -4102,7 +4111,7 @@ open class WMKeyboardService : InputMethodService() {
                 glideOutcomes = this@WMKeyboardService.glideOutcomes
                 blacklist = _uiState.value.let { it.settings.suggestionSources.blacklistFor(it.language.id) }
                 rankOffsets = wordRanks.snapshot()
-                offensiveWords = offensiveSet
+                applyOffensiveWords(offensiveSet)
                 blockOffensiveWords = _uiState.value.settings.suggestionStrip.blockOffensiveWords
                 skipAllCapsAutocorrect = _uiState.value.settings.correction.skipAllCaps
                 learnedWordMinCount =
@@ -4325,6 +4334,8 @@ open class WMKeyboardService : InputMethodService() {
         // The keyboard keeps the params the input frame gives an input view:
         // full width, its own height.
         return StableMeasureFrame(this).apply {
+            edgeSwipeBackEnabled = { _uiState.value.settings.layoutBehavior.edgeSwipeBack }
+            onEdgeSwipeBack = ::onEdgeSwipeBack
             addView(
                 view,
                 android.widget.FrameLayout.LayoutParams(
@@ -5993,6 +6004,10 @@ open class WMKeyboardService : InputMethodService() {
     private fun onScreenAgain() {
         windowOnScreen = true
         _shownState.value = _uiState.value
+        // Ask for the window's insets afresh (#463): the navigation bar the
+        // keyboard pads itself clear of is read from them, and a window coming
+        // back from another keyboard must not keep the ones it left with.
+        inputRootView?.requestApplyInsets()
     }
 
     /**
@@ -6888,6 +6903,8 @@ open class WMKeyboardService : InputMethodService() {
      * neither place; otherwise whether it came out of the field.
      */
     private fun takeBackMultitapStep(wrote: String): Boolean? {
+        // A keyboard-owned field has the keys, so the step is in its buffer.
+        if (_uiState.value.captureTarget() != null) return takeBackCaptureMultitapStep(wrote)
         val ic = currentInputConnection ?: return null
         if (composing.isNotEmpty()) {
             if (!composing.endsWith(wrote)) return null
@@ -7566,6 +7583,14 @@ open class WMKeyboardService : InputMethodService() {
         }
         if (kdeTypedUnderModifiers(target, text)) return true
         val before = state.captureCaretText() ?: return false
+        // A key a transliterator spells with (Hangul jamo, a Telex letter)
+        // joins the word it is composing here as it would in the app's field
+        // (#454), rather than landing as the bare key.
+        val run = if (composesInCapture(state.composer)) liveCaptureComposition(state, before) else null
+        if (capturesComposingKey(state.composer, target, text, run)) {
+            rewriteCaptureComposition(state, target, before, run, run?.keys.orEmpty() + text)
+            return true
+        }
         // What each field will take of what was typed. The two numeric ones
         // filter rather than accept, and the cluster-shaping scripts need to
         // know the character the new one lands *after* — which, with a caret,
@@ -7606,9 +7631,118 @@ open class WMKeyboardService : InputMethodService() {
             if (target == CaptureTarget.KDE_REMOTE) kdeSendSpecial(KdeSpecialKey.BACKSPACE)
             return true
         }
+        // Inside a word a transliterator is composing, backspace takes back
+        // the last key rather than the whole syllable it helped build (#454).
+        val run = if (composesInCapture(state.composer)) liveCaptureComposition(state, before) else null
+        if (run != null) {
+            rewriteCaptureComposition(state, target, before, run, run.keys.dropLast(1))
+            return true
+        }
         val length = charDeleteLength(before.text.substring(0, before.at))
         captureWrite(target, before, before.deletedBackward(length))
         return true
+    }
+
+    /**
+     * A word a transliterating composer is spelling in a keyboard-owned field
+     * (#454): the [keys] typed so far and where their rendering starts in the
+     * buffer named [key]. The app's field keeps the same thing in its composing
+     * region; these fields have none, so the service holds it here.
+     */
+    private data class CaptureComposition(val key: String, val start: Int, val keys: String)
+
+    /** The word [CaptureComposition] describes, while there is one. */
+    private var captureComposition: CaptureComposition? = null
+
+    /**
+     * Whether [composer] turns its keys into script text by itself, which is
+     * what a keyboard-owned field can show: Hangul, Cheonjiin, Telex and VNI,
+     * Khipro. Not a converter, whose output is a pick off the strip, and not a
+     * phonetic one like Avro, whose buffer stays roman here and is converted
+     * by the field's own suggestions.
+     */
+    private fun composesInCapture(composer: Composer): Boolean =
+        composer.isTransliterating && !composer.isConversion && composer.phoneticLanguage == null
+
+    /**
+     * Whether [text] is a key [composer] spells with and so joins the word it
+     * composes in [target], by the rule the app's field uses for its buffer.
+     */
+    private fun capturesComposingKey(
+        composer: Composer,
+        target: CaptureTarget,
+        text: String,
+        run: CaptureComposition?,
+    ): Boolean {
+        if (!composesInCapture(composer) || !target.takesWords || text.length != 1) return false
+        val c = text[0]
+        val keys = run?.keys.orEmpty()
+        return c.isLetter() || composer.buffersChar(c, keys) ||
+            (composer.bufferDigits && c.isDigit() && (keys.isNotEmpty() || composer.digitsStartBuffer))
+    }
+
+    /**
+     * The composing word, while the buffer still shows it where it was left
+     * with the caret at its end; else null, and the word is let go. Anything
+     * that moved the caret or changed the text around it ends the word, as a
+     * tap elsewhere ends composing in the app's field.
+     */
+    private fun liveCaptureComposition(state: KeyboardUiState, before: CaretText): CaptureComposition? {
+        val run = captureComposition ?: return null
+        val shown = state.composer.composeBuffer(run.keys)
+        val live = run.key == state.captureKey() && !before.hasSelection &&
+            before.at == run.start + shown.length &&
+            before.text.regionMatches(run.start, shown, 0, shown.length)
+        if (!live) captureComposition = null
+        return captureComposition
+    }
+
+    /**
+     * Puts the rendering of [keys] where [run]'s was, or at the caret (in place
+     * of any selection) when no word is being composed, and keeps composing
+     * from there. Empty [keys] take the word out and end it.
+     */
+    private fun rewriteCaptureComposition(
+        state: KeyboardUiState,
+        target: CaptureTarget,
+        before: CaretText,
+        run: CaptureComposition?,
+        keys: String,
+    ) {
+        val composer = state.composer
+        val base = if (run == null) before.withoutSelection() else before
+        val start = run?.start ?: base.at
+        val oldLength = run?.let { composer.composeBuffer(it.keys).length } ?: 0
+        val shown = composer.composeBuffer(keys)
+        val text = base.text.substring(0, start) + shown + base.text.substring(start + oldLength)
+        captureWrite(target, before, CaretText(text, start + shown.length))
+        // After the write, which lets every other edit's word go.
+        captureComposition = if (keys.isEmpty()) {
+            null
+        } else {
+            state.captureKey()?.let { CaptureComposition(it, start, keys) }
+        }
+    }
+
+    /**
+     * [takeBackMultitapStep] for a keyboard-owned field: the step comes off the
+     * composing word or from in front of the caret there, never off the app's
+     * field behind the keyboard.
+     */
+    private fun takeBackCaptureMultitapStep(wrote: String): Boolean? {
+        val state = _uiState.value
+        val target = state.captureTarget() ?: return null
+        if (target == CaptureTarget.TYPING_TEST || target.ownsCaret) return null
+        val before = state.captureCaretText() ?: return null
+        val run = if (composesInCapture(state.composer)) liveCaptureComposition(state, before) else null
+        if (run != null) {
+            if (!run.keys.endsWith(wrote)) return null
+            rewriteCaptureComposition(state, target, before, run, run.keys.dropLast(wrote.length))
+            return false
+        }
+        if (before.hasSelection || !before.text.substring(0, before.at).endsWith(wrote)) return null
+        captureWrite(target, before, before.deletedBackward(wrote.length))
+        return false
     }
 
     /** Forward delete in a keyboard-owned field; see [captureBackspace]. */
@@ -7884,6 +8018,9 @@ open class WMKeyboardService : InputMethodService() {
      * asked for, and a caret past the end of the text would draw outside it.
      */
     private fun captureWrite(target: CaptureTarget, before: CaretText, after: CaretText) {
+        // Any edit ends a transliterated word; the one that continues it sets
+        // it again straight after (see [rewriteCaptureComposition]).
+        captureComposition = null
         val key = _uiState.value.captureKey()
         if (after.text != before.text) {
             when (target) {
@@ -9215,7 +9352,15 @@ open class WMKeyboardService : InputMethodService() {
             return
         }
         // Backspace straight after a glide removes the whole swiped word —
-        // a wrong swipe shouldn't cost a letter-by-letter cleanup.
+        // a wrong swipe shouldn't cost a letter-by-letter cleanup. Unless the
+        // user turned that off (#455): a swipe that got a letter or two wrong
+        // is fixed faster by deleting those letters than by redrawing it, so
+        // the word stops being one unit and this press deletes like any other.
+        if (lastGestureWord != null && !state.settings.gesture.backspaceUndoesGlide) {
+            lastGestureWord = null
+            lastGestureStroke = null
+            pendingWordSpace = false
+        }
         lastGestureWord?.let { word ->
             lastGestureWord = null
             val stroke = lastGestureStroke
@@ -10621,10 +10766,12 @@ open class WMKeyboardService : InputMethodService() {
         // word the same way a space does, autocorrect included. A word ended
         // by Enter was typed exactly like one ended by space, and committing
         // it as typed sent `juz` where the strip already showed `już` (#200).
+        // Unless the user asked Enter to leave the word alone (#457): a query
+        // sent with Enter is sent before the correction can be read.
         recordStat { onSeparator(System.currentTimeMillis(), SystemClock.uptimeMillis()) }
         commitComposing(
             ic,
-            autocorrect = state.settings.correction.enabled,
+            autocorrect = state.settings.correction.enabled && state.settings.correction.onEnter,
             fixApostrophes = state.settings.autoText.apostrophe,
             expandPatterns = true,
         )
@@ -10739,7 +10886,7 @@ open class WMKeyboardService : InputMethodService() {
         val settings = _uiState.value.settings
         commitComposing(
             ic,
-            autocorrect = settings.correction.enabled,
+            autocorrect = settings.correction.enabled && settings.correction.onEnter,
             fixApostrophes = settings.autoText.apostrophe,
             expandPatterns = true,
         )
@@ -19969,7 +20116,7 @@ open class WMKeyboardService : InputMethodService() {
             fail(VoiceStatus.NEED_PERMISSION)
             return
         }
-        val server = serverVoiceSelected()
+        var server = serverVoiceSelected()
         if (server && _uiState.value.settings.whisper.serverFor(_uiState.value.language.id).url.isBlank()) {
             // The server engine is chosen but has no address: say so, with the
             // same way out the missing Whisper model gets.
@@ -19984,6 +20131,12 @@ open class WMKeyboardService : InputMethodService() {
             }
             return
         }
+        // No connection, and the user asked for the device to stand in (#452):
+        // a downloaded Whisper model for this language, else the system
+        // recognizer, instead of a clip nobody can send.
+        val offlineVoice = server && offlineFallbackNow()
+        if (offlineVoice) server = false
+        if (offlineVoice) noteOfflineFallback(OFFLINE_FALLBACK_VOICE, true)
         voiceMeteredAsked = false
         if (server) {
             val decision = dataSaverStatus.decide(MeteredFeature.CLOUD_VOICE)
@@ -20002,7 +20155,7 @@ open class WMKeyboardService : InputMethodService() {
                 return
             }
         }
-        val whisperModel = whisperModel()
+        val whisperModel = if (offlineVoice) fallbackWhisperModel() else whisperModel()
         val whisperSelected = isWhisperEnabled() && _uiState.value.settings.whisper.engine == "whisper"
         if (whisperSelected && whisperModel == null) {
             // Whisper is chosen but no model is downloaded — prompt for one
@@ -20205,6 +20358,69 @@ open class WMKeyboardService : InputMethodService() {
     /** The transcription server is the chosen engine (#286). Every flavour has it. */
     private fun serverVoiceSelected(): Boolean =
         _uiState.value.settings.whisper.engine == "server"
+
+    /**
+     * Whether a request that would go to a server goes to the device instead
+     * before it is even tried (#452): the user asked for that, and there is no
+     * connection to send it over.
+     */
+    private fun offlineFallbackNow(): Boolean =
+        _uiState.value.settings.dataSaver.offlineFallback && !networkWatcher.state.value.online
+
+    /** The features [noteOfflineFallback] has already told the user about. */
+    private val offlineFallbackNoted = HashSet<String>()
+
+    /**
+     * Tells the user, once, that [feature] has moved to the on-device model
+     * (#452) when [fellBack], or forgets that it had when the server answered
+     * again, so the next move is told too. Once rather than per request: a
+     * continuous dictation or a translation typed a letter at a time would
+     * otherwise put a message up for every phrase. Main thread.
+     */
+    private fun noteOfflineFallback(feature: String, fellBack: Boolean) {
+        if (!fellBack) {
+            offlineFallbackNoted -= feature
+            return
+        }
+        if (!offlineFallbackNoted.add(feature)) return
+        Toast.makeText(this, getString(R.string.ime_offline_fallback_toast), Toast.LENGTH_SHORT).show()
+    }
+
+    /**
+     * The downloaded Whisper model for the language being typed in, whichever
+     * engine is picked, for dictation to fall back on (#452). Null when there is
+     * none, or no runtime to run it with yet.
+     */
+    private fun fallbackWhisperModel(): WhisperModel? {
+        if (!isWhisperEnabled() || !WhisperEngine.ready) return null
+        val s = _uiState.value.settings
+        return WhisperStore.modelForLanguage(
+            filesDir,
+            _uiState.value.language.id,
+            s.whisper.modelId,
+            s.whisper.modelByLang,
+        )
+    }
+
+    /**
+     * [pcm] transcribed by [model] the way [finishWhisper] does it, for a clip
+     * recorded for the server that could not be sent (#452). Blocking; call off
+     * the main thread.
+     */
+    private fun transcribeOnDevice(model: WhisperModel, pcm: FloatArray, languageId: String): String {
+        val langToken = model.langTokenFor(languageId)
+        val translate = _uiState.value.settings.whisper.translate && model.supportsTranslate
+        val text = WhisperEngine.transcribe(
+            WhisperStore.modelFile(filesDir, model),
+            WhisperStore.vocabFile(filesDir, model),
+            pcm,
+            translate,
+            langToken,
+        ).trim()
+        // As in [finishWhisper]: only a graph left to detect the language can
+        // answer in the wrong script.
+        return if (langToken == null && model.fixedLang == null) WhisperScript.rescue(text, languageId) else text
+    }
 
     /**
      * What the system recognizer is told to listen for (#305): the user's own
@@ -20521,9 +20737,24 @@ open class WMKeyboardService : InputMethodService() {
                     )
                 }
             }
+            // The server could not be reached, and the user asked for the
+            // device to stand in (#452): the clip is already recorded, so a
+            // downloaded Whisper model transcribes it here rather than the
+            // phrase being lost to an error line.
+            val failure = result.exceptionOrNull()
+            val local = if (failure != null && ToolHttp.isUnreachable(failure) &&
+                _uiState.value.settings.dataSaver.offlineFallback
+            ) {
+                fallbackWhisperModel()
+            } else {
+                null
+            }
+            val heard = if (local != null) runCatching { transcribeOnDevice(local, pcm, languageId) } else result
             withContext(Dispatchers.Main) {
                 if (gen != voiceGeneration) return@withContext
-                result
+                // Told on the move, and forgotten once the server answers again.
+                if (local != null || heard.isSuccess) noteOfflineFallback(OFFLINE_FALLBACK_VOICE, local != null)
+                heard
                     .map { VoiceClipGate.clean(it, faint) }
                     .onSuccess { commitWhisperResult(it, tag, userStopped) }
                     .onFailure { e ->
@@ -23618,6 +23849,15 @@ open class WMKeyboardService : InputMethodService() {
         _uiState.update { if (it.aiHasText == hasText) it else it.copy(aiHasText = hasText) }
     }
 
+    /**
+     * Whether the AI actions have an on-device model to fall back on when the
+     * server they are set to cannot be reached (#452): the user asked for it,
+     * the provider is a server, and a local model is downloaded.
+     */
+    private fun aiOfflineStandIn(settings: KeyboardSettings): Boolean =
+        settings.dataSaver.offlineFallback && BuildConfig.ENABLE_LOCAL_LLM &&
+            settings.ai.provider != AiProvider.ON_DEVICE && effectiveLocalModelFile(settings) != null
+
     /** What the AI panel should show before any action runs. */
     private fun aiInitialState(settings: KeyboardSettings): AiUi = when {
         settings.ai.provider == AiProvider.ON_DEVICE && BuildConfig.ENABLE_LOCAL_LLM &&
@@ -24053,10 +24293,15 @@ open class WMKeyboardService : InputMethodService() {
         fromSelection: Boolean = false,
     ) {
         aiJob?.cancel()
+        // A downloaded on-device model the user asked to stand in for the
+        // server (#452): tried first with no connection, and again if the
+        // server turns out not to answer.
+        val localStandIn = aiOfflineStandIn(_uiState.value.settings)
+        val offlineFirst = localStandIn && !networkWatcher.state.value.online
         // Data saving, for the providers that are a request over the network.
         // An on-device model costs nothing to reach, so it is never held.
         val aiSettings = _uiState.value.settings.ai
-        if (aiSettings.provider != AiProvider.ON_DEVICE) {
+        if (aiSettings.provider != AiProvider.ON_DEVICE && !offlineFirst) {
             val decision = dataSaverStatus.decide(MeteredFeature.CLOUD_AI)
             if (decision != MeteredDecision.ALLOWED) {
                 _uiState.update {
@@ -24100,18 +24345,26 @@ open class WMKeyboardService : InputMethodService() {
                 else -> AiPrompts.systemPrompt(action, settings.ai.translateTo)
             }
             val config = AiClient.config(settings.ai)
+            var fellBack = offlineFirst
             val result = withContext(Dispatchers.IO) {
                 runCatching {
-                    if (config.provider == AiProvider.ON_DEVICE) {
+                    if (config.provider == AiProvider.ON_DEVICE || offlineFirst) {
                         runAiOnDevice(seq, action, source, system, settings, generated, fromSelection)
                     } else {
                         runAiRemote(seq, action, source, system, settings, config, startedAt, generated, fromSelection)
                     }
+                }.recoverCatching { e ->
+                    // Only a server that could not be reached, and only when a
+                    // run on the device was not already the one that failed.
+                    if (!localStandIn || fellBack || seq != aiRunSeq || !ToolHttp.isUnreachable(e)) throw e
+                    fellBack = true
+                    runAiOnDevice(seq, action, source, system, settings, generated, fromSelection)
                 }
             }
             // A superseded or cancelled run never gets past here, so it is
             // never recorded either.
             if (seq != aiRunSeq) return@launch
+            if (localStandIn && (fellBack || result.isSuccess)) noteOfflineFallback(OFFLINE_FALLBACK_AI, fellBack)
             val next = result.fold(
                 onSuccess = { completion ->
                     val raw = completion.text
@@ -26095,7 +26348,7 @@ open class WMKeyboardService : InputMethodService() {
             val outcome: (TranslateUi) -> TranslateUi =
                 when (engineOverride ?: translateEngine(state.settings)) {
                     TranslateEngine.ONLINE ->
-                        onlineTranslateUi(source, translateOnline(state.settings, source, target, sourceLang))
+                        onlineOrStandInTranslateUi(state, source, target, sourceLang)
                     TranslateEngine.ON_DEVICE ->
                         offlineTranslateUi(source, translateOnDevice(state, source, target, sourceLang))
                     TranslateEngine.AUTO -> {
@@ -26214,6 +26467,42 @@ open class WMKeyboardService : InputMethodService() {
         )
     }
 
+    /**
+     * The online engine's answer, or the on-device engine's when the user asked
+     * it to stand in (#452) and there is no connection or the service could not
+     * be reached. Only a finished on-device translation replaces the online
+     * result: a pair with no models downloaded keeps the online error, which
+     * says what is actually wrong. Text that goes to the device goes nowhere,
+     * so this keeps the promise of the user's own server (#435) too.
+     */
+    private suspend fun onlineOrStandInTranslateUi(
+        state: KeyboardUiState,
+        source: String,
+        target: String,
+        sourceLang: String,
+    ): (TranslateUi) -> TranslateUi {
+        val standIn = state.settings.dataSaver.offlineFallback && OnDeviceTranslator.AVAILABLE
+        // Runs on the main thread (the translate job is the service's), so the
+        // notice can be put up from here.
+        if (standIn && !networkWatcher.state.value.online) {
+            val local = translateOnDevice(state, source, target, sourceLang)
+            if (local is OfflineTranslateResult.Success) noteOfflineFallback(OFFLINE_FALLBACK_TRANSLATE, true)
+            return offlineTranslateUi(source, local, standIn = true)
+        }
+        val online = translateOnline(state.settings, source, target, sourceLang)
+        val failure = online.exceptionOrNull()
+        if (standIn && failure != null && ToolHttp.isUnreachable(failure)) {
+            val local = translateOnDevice(state, source, target, sourceLang)
+            if (local is OfflineTranslateResult.Success) {
+                noteOfflineFallback(OFFLINE_FALLBACK_TRANSLATE, true)
+                return offlineTranslateUi(source, local, standIn = true)
+            }
+        } else if (standIn && online.isSuccess) {
+            noteOfflineFallback(OFFLINE_FALLBACK_TRANSLATE, false)
+        }
+        return onlineTranslateUi(source, online)
+    }
+
     private fun onlineTranslateUi(source: String, result: Result<Translation>): (TranslateUi) -> TranslateUi =
         { current ->
             result.fold(
@@ -26237,7 +26526,11 @@ open class WMKeyboardService : InputMethodService() {
             )
         }
 
-    private fun offlineTranslateUi(source: String, result: OfflineTranslateResult): (TranslateUi) -> TranslateUi =
+    private fun offlineTranslateUi(
+        source: String,
+        result: OfflineTranslateResult,
+        standIn: Boolean = false,
+    ): (TranslateUi) -> TranslateUi =
         { current ->
             val base = current.cleared().copy(sourceText = source)
             when (result) {
@@ -26246,6 +26539,7 @@ open class WMKeyboardService : InputMethodService() {
                     detectedSource = result.source,
                     sourceGuessed = result.guessed,
                     onDevice = true,
+                    offlineStandIn = standIn,
                 )
                 is OfflineTranslateResult.NeedsModels -> base.copy(
                     detectedSource = result.source,
@@ -31115,6 +31409,21 @@ open class WMKeyboardService : InputMethodService() {
      * keyboard. It used to be written out twice, and the two copies had already
      * drifted on which layer they checked first.
      */
+    /**
+     * A swipe in from a side edge of the keyboard (#437), for phones that keep
+     * the system's back gesture off it: Back, as that gesture would have done.
+     * An open layer closes first, a dictation panel with its microphone, and
+     * with nothing open the keyboard goes down.
+     */
+    private fun onEdgeSwipeBack() {
+        vibrate()
+        if (backClosesLayer()) {
+            dismissTopLayer(fromBack = true)
+        } else {
+            requestHideSelf(0)
+        }
+    }
+
     private fun dismissTopLayer(fromBack: Boolean = false): Boolean {
         // Above everything else, and for the same reason the layer peek's popup
         // closes before the layer it is on: it is the newest thing the user
@@ -33193,6 +33502,11 @@ open class WMKeyboardService : InputMethodService() {
          */
         private const val VOICE_SILENT_RETRIES = 2
         private const val VOICE_SILENT_RETRIES_INTERACTIVE = 12
+
+        /** What [noteOfflineFallback] tells the user about, one feature each (#452). */
+        private const val OFFLINE_FALLBACK_VOICE = "voice"
+        private const val OFFLINE_FALLBACK_AI = "ai"
+        private const val OFFLINE_FALLBACK_TRANSLATE = "translate"
 
         /** The [VoiceBarSettings.typingMode] tokens the Voice tool's hold menu may hand back (#173). */
         private val VoiceTypingModes = setOf(

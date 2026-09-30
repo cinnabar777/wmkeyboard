@@ -114,6 +114,9 @@
 
     <string name="typing_skip_all_caps_title">Skip words in capital letters</string>
     <string name="typing_skip_all_caps_subtitle">Leave words typed in capital letters alone</string>
+    <string name="typing_autocorrect_on_enter_title">Correct the word before Enter</string>
+    <string name="typing_autocorrect_on_enter_subtitle">Enter corrects the last word, as space does</string>
+    <string name="typing_autocorrect_on_enter_info">Enter ends a word the same way space does, so autocorrect can change the word before it. In a search box or a chat, Enter also sends the text, and you cannot see the correction before it goes. Turn this off to send the last word as you typed it. Space and punctuation still correct words.</string>
     <string name="typing_skip_all_caps_info">You usually type acronyms, or words in capital letters for emphasis, on purpose. Examples: ASAP, OFC, NOOO. Autocorrect leaves every word in capital letters alone. Turn this off to correct these words like any other word.</string>
 
     <string name="typing_block_offensive_title">Block offensive words</string>
@@ -484,6 +487,9 @@
     <string name="typing_glide_commit_scope_subtitle">The suggestion strip, the word above your finger, or the words on the keys</string>
     <string name="typing_glide_commit_scope_info">The suggestion strip is where the autocorrect color already lives, so it always shows the color. The word pill rides above your fingertip and is what most people watch while they glide, so it carries the color as well by default. The words drawn on the keys can carry it too, which makes the whole board answer at a glance but is a lot of color at once.</string>
 
+    <string name="typing_glide_backspace_undo_title">Backspace removes a glided word</string>
+    <string name="typing_glide_backspace_undo_subtitle">One backspace after a glide deletes the whole word</string>
+    <string name="typing_glide_backspace_undo_info">This setting is on by default. Right after you glide a word, one backspace deletes the whole word and its space, and the suggestion strip shows other words for the same glide. Turn this off to delete one letter at a time, as for a word you typed on the keys. Use this when your glides are usually correct except for one or two letters.</string>
     <string name="typing_space_after_glide_title">Space after a glided word</string>
     <string name="typing_space_after_glide_subtitle">Add a space when you lift your finger at the end of a glide</string>
     <string name="typing_space_after_glide_info">This setting is on by default. The keyboard types a space after a glided word, so the next word does not join it. You can glide the next word, or type it on the keys. Type . , ? ! ; : or a closing bracket next, and the keyboard removes the space first. A press on the spacebar counts as the space that is already there. Backspace takes back the glided word and its space together. The keyboard adds no space in a password, an email address, a web address, a number pad or a phone pad.</string>
@@ -640,6 +646,9 @@
     <string name="typing_space_swipe_cursor_desc">Move the cursor through the text</string>
     <string name="typing_space_swipe_numpad_desc">Open the number pad</string>
 
+    <string name="typing_edge_swipe_back_title">Swipe in from the edge to go back</string>
+    <string name="typing_edge_swipe_back_subtitle">A swipe in from the left or right edge of the keyboard closes a panel or the keyboard</string>
+    <string name="typing_edge_swipe_back_info">Some phones do not let the back gesture of the system start over the keyboard, so you must start it above the keyboard. With this setting on, a swipe that starts at the left or right edge of the keyboard and moves in does the same thing. It closes the panel that is open, for example the voice panel, which also stops the recording. When no panel is open, it closes the keyboard. This setting is off by default, because a glide that starts at the very edge and moves in looks the same. Start glides a little in from the edge.</string>
     <string name="typing_space_swipe_down_hide_title">Swipe down to hide the keyboard</string>
     <string name="typing_space_swipe_down_hide_subtitle">A swipe down on the spacebar closes the keyboard</string>
     <string name="typing_space_swipe_down_hide_info">Swipe straight down on the spacebar to close the keyboard. This setting is off by default, so an accidental swipe down never closes the keyboard. When the 2-D cursor touchpad is on, a swipe down moves the cursor instead. The touchpad has priority.</string>

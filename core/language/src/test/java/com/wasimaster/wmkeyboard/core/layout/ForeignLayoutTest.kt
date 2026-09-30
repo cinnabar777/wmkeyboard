@@ -28,14 +28,18 @@ class ForeignLayoutTest {
 
     private fun ConvertedLayout.keys(): List<Key> = letters().flatten()
 
+    /** The first row's keys the file wrote, without the ⇧ and ⌫ the import frames them with. */
+    private fun ConvertedLayout.firstRowText(): List<Key> =
+        letters()[0].filter { it.action == KeyAction.Text }
+
     // ---- the text format ----
 
     @Test
     fun `a blank line starts a new row`() {
         val converted = checkNotNull(ForeignLayouts.fromSimpleText(fixture("heliboard_qwerty.txt"), "q.txt"))
-        // Three rows in the file. Repair appends the missing delete, space and
-        // enter keys, which land on the last row rather than making a fourth.
-        assertEquals(3, converted.letters().size)
+        // Three rows in the file, and the bottom row this app gives every
+        // import as a fourth.
+        assertEquals(4, converted.letters().size)
         assertEquals(listOf("q", "w", "e"), converted.letters()[0].map { it.label })
     }
 
@@ -282,16 +286,29 @@ class ForeignLayoutTest {
     fun `the missing bottom row is added back, once`() {
         val converted = checkNotNull(ForeignLayouts.fromSimpleText(fixture("heliboard_qwerty.txt"), "q.txt"))
         // The text format cannot spell these three, so every file is missing
-        // all of them and repair is expected to supply them.
+        // all of them and the import is expected to supply them.
         val actions = converted.keys().map { it.action }
         assertEquals(1, actions.count { it == KeyAction.Delete })
         assertEquals(1, actions.count { it == KeyAction.Space })
         assertEquals(1, actions.count { it == KeyAction.Enter })
-        assertTrue(converted.notes.any { it.stringRes == R.string.core_lang_repair_delete_key_added })
+        // Where the shipped grids have them, so repair has nothing to add at
+        // the end of the last row.
+        assertEquals(KeyAction.Delete, converted.letters()[2].last().action)
+        assertFalse(converted.notes.any { it.stringRes == R.string.core_lang_repair_delete_key_added })
     }
 
     private companion object {
         val FIXTURES = listOf("heliboard_qwerty.txt", "floris_qwerty.json", "heliboard_bengali.json")
+
+        /** `?123 , 🌐 ␣ . ⏎`, as the shipped grids end. */
+        val HOUSE_BOTTOM_ROW = listOf(
+            KeyAction.Symbols to null,
+            KeyAction.Text to KeyRole.Comma,
+            KeyAction.LanguageSwitch to null,
+            KeyAction.Space to null,
+            KeyAction.Text to KeyRole.Period,
+            KeyAction.Enter to null,
+        )
 
         const val KEYCODE_TAB = 61
     }
@@ -299,7 +316,7 @@ class ForeignLayoutTest {
     @Test
     fun `a bare string is a key`() {
         val converted = checkNotNull(ForeignLayouts.fromFlorisJson("""[["a","b"]]""", "x.json"))
-        assertEquals(listOf("a", "b"), converted.letters()[0].take(2).map { it.label })
+        assertEquals(listOf("a", "b"), converted.firstRowText().take(2).map { it.label })
     }
 
     @Test
@@ -313,7 +330,9 @@ class ForeignLayoutTest {
     /** Converts one key object and hands back the key it became. */
     private fun oneKey(json: String): Key {
         val converted = checkNotNull(ForeignLayouts.fromFlorisJson("""[[$json]]""", "x.json"))
-        return converted.letters()[0].first()
+        // A one-row file's row is its last letter row, so it comes back framed
+        // as `⇧ … ⌫`; the key under test is the one that is not the shift key.
+        return converted.letters()[0].first { it.action != KeyAction.Shift }
     }
 
     private fun scaleOf(json: String): Float = checkNotNull(oneKey(json).labelScale)
@@ -362,7 +381,7 @@ class ForeignLayoutTest {
         val converted = checkNotNull(
             ForeignLayouts.fromFlorisJson("""[[{"label":"a","labelFlags":32}]]""", "x.json"),
         )
-        assertNull(converted.letters()[0].first().labelScale)
+        assertNull(converted.firstRowText().first().labelScale)
         assertTrue(converted.notes.any { it.pluralsRes == R.plurals.core_lang_foreign_labels_restyled })
     }
 
@@ -414,7 +433,7 @@ class ForeignLayoutTest {
                 "x.json",
             ),
         )
-        assertEquals("a", converted.keys().first().label)
+        assertEquals("a", converted.firstRowText().first().label)
         assertTrue(
             converted.notes.any { it.pluralsRes == R.plurals.core_lang_foreign_selectors_flattened },
         )
@@ -436,7 +455,7 @@ class ForeignLayoutTest {
                 "x.json",
             ),
         )
-        assertEquals(listOf("q", "w", "e"), converted.letters()[0].take(3).map { it.label })
+        assertEquals(listOf("q", "w", "e"), converted.firstRowText().take(3).map { it.label })
     }
 
     // ---- label sugar ----
@@ -463,7 +482,7 @@ class ForeignLayoutTest {
     @Test
     fun `a backslash escapes a functional label`() {
         val converted = checkNotNull(ForeignLayouts.fromSimpleText("""\space""", "x.txt"))
-        val key = converted.letters()[0].first()
+        val key = converted.firstRowText().first()
         assertEquals("space", key.label)
         assertEquals(KeyAction.Text, key.action)
     }
@@ -509,6 +528,111 @@ class ForeignLayoutTest {
         )
     }
 
+    // ---- case ----
+
+    @Test
+    fun `an auto_text_key rests in lowercase whatever case its code is written in`() {
+        // FlorisBoard's own Rusyn grid gives ї the code of Ї. That keyboard
+        // lowercases an auto_text_key until shift is down; typed as written
+        // here, the key put a capital in the middle of every word.
+        val converted = checkNotNull(
+            ForeignLayouts.fromFlorisJson(
+                """
+                [[
+                  { "$": "auto_text_key", "code": 1031, "label": "ї" },
+                  { "$": "auto_text_key", "code": 1067, "label": "Ы" },
+                  { "$": "auto_text_key", "code": 1081, "label": "й" }
+                ]]
+                """.trimIndent(),
+                "rusyn.json",
+            ),
+        )
+        val keys = converted.firstRowText()
+        assertEquals(listOf("ї", "ы", "й"), keys.map { it.label })
+        // Nothing left to type but the label, and shift still reaches the
+        // capital through the null shift label.
+        assertTrue(keys.all { it.output == null && it.shiftLabel == null })
+    }
+
+    @Test
+    fun `a text_key types what its code says`() {
+        // Only the auto key follows shift. A plain one committing a different
+        // case from its label is the file's own statement.
+        val key = oneKey("""{"$":"text_key","code":1031,"label":"ї"}""")
+        assertEquals("ї", key.label)
+        assertEquals("Ї", key.output)
+    }
+
+    // ---- the frame every import is given ----
+
+    @Test
+    fun `a character grid gets the house frame`() {
+        // FlorisBoard's character grids hold letters and nothing else: shift,
+        // delete and the whole bottom row are that keyboard's to draw.
+        val converted = checkNotNull(
+            ForeignLayouts.fromFlorisJson(
+                """
+                [
+                  [ { "code": 1081, "label": "й" }, { "code": 1094, "label": "ц" }, { "code": 1091, "label": "у" } ],
+                  [ { "code": 1092, "label": "ф" }, { "code": 1110, "label": "і" }, { "code": 1074, "label": "в" } ],
+                  [ { "code": 1103, "label": "я" }, { "code": 1095, "label": "ч" }, { "code": 1089, "label": "с" } ]
+                ]
+                """.trimIndent(),
+                "grid.json",
+            ),
+        )
+        val rows = converted.letters()
+        assertEquals(4, rows.size)
+        assertEquals(
+            listOf(KeyAction.Shift, KeyAction.Text, KeyAction.Text, KeyAction.Text, KeyAction.Delete),
+            rows[2].map { it.action },
+        )
+        assertEquals(listOf(1.5f, 1.5f), listOf(rows[2].first().width, rows[2].last().width))
+        assertEquals(HOUSE_BOTTOM_ROW, rows[3].map { it.action to it.role })
+        assertEquals(listOf("?123", ",", "🌐", " ", ".", "⏎"), rows[3].map { it.label })
+        assertEquals(4f, rows[3][3].width, 0f)
+        assertTrue(converted.layout.repair().repairNotes.isEmpty())
+    }
+
+    @Test
+    fun `a text layout gets the house frame`() {
+        val converted = checkNotNull(ForeignLayouts.fromSimpleText(fixture("heliboard_qwerty.txt"), "q.txt"))
+        val rows = converted.letters()
+        assertEquals(listOf("⇧", "z", "x", "c", "⌫"), rows[2].map { it.label })
+        assertEquals(HOUSE_BOTTOM_ROW, rows[3].map { it.action to it.role })
+    }
+
+    @Test
+    fun `a bottom row key the house row has no slot for keeps its seat by the spacebar`() {
+        // The fixture's bottom row is `?123 voice ␣ tab ⏎`. Voice is dropped as
+        // before; tab has no house slot and stays, one key wide, taking that
+        // off the spacebar so the row keeps its length.
+        val bottom = checkNotNull(
+            ForeignLayouts.fromFlorisJson(fixture("floris_qwerty.json"), "f.json"),
+        ).letters().last()
+        val tab = bottom.indexOfFirst { it.action is KeyAction.SendKey }
+        assertEquals(KeyAction.Space, bottom[tab + 1].action)
+        assertEquals(KeyAction.LanguageSwitch, bottom[tab - 1].action)
+        assertEquals(3f, bottom[tab + 1].width, 0.01f)
+        assertEquals(1, bottom.count { it.action == KeyAction.Symbols })
+    }
+
+    @Test
+    fun `a grid with a key spanning rows is left as it was laid out`() {
+        // Moving keys under a tall one would slide them beneath it. Repair
+        // still guarantees the grid types.
+        val converted = checkNotNull(
+            ForeignLayouts.fromFlorisJson("""[["a","b"],["c","d"]]""", "x.json"),
+        )
+        val spanned = listOf(
+            listOf(Key("a", rowSpan = 2), Key("b")),
+            listOf(Key("c")),
+        )
+        assertEquals(spanned, withHouseStructure(spanned))
+        // And the plain grid beside it is framed, so the difference is the span.
+        assertEquals(3, converted.letters().size)
+    }
+
     // ---- popup markers ----
 
     @Test
@@ -527,7 +651,7 @@ class ForeignLayoutTest {
     @Test
     fun `a marker in the text format is read too`() {
         val converted = checkNotNull(ForeignLayouts.fromSimpleText("a b !fixedColumnOrder!3", "x.txt"))
-        val key = converted.letters()[0].first()
+        val key = converted.firstRowText().first()
         assertEquals(listOf("b"), key.longPress)
         assertEquals(3, key.alternateColumns)
     }

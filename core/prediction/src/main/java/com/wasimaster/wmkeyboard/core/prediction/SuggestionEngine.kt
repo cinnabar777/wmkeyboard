@@ -527,6 +527,16 @@ class SuggestionEngine(
     var offensiveWords: Set<String> = emptySet()
 
     /**
+     * The same words by the language whose list flags them, so a flag can be
+     * weighed against the language a word actually belongs to (#465). English's
+     * list holds `wel`, `nog` and `ging`, which are harmless everyday Dutch;
+     * unioned, they vanished from a Dutch keyboard that had English on too.
+     * Empty means every flag counts, as before.
+     */
+    @Volatile
+    var offensiveByLanguage: Map<String, Set<String>> = emptyMap()
+
+    /**
      * When on, a word typed entirely in capitals (SHOUTING, or an acronym like
      * ASAP, OFC) is never autocorrected — those are deliberate, and "fixing"
      * them to a lowercase dictionary word is almost always wrong. Off treats
@@ -660,8 +670,32 @@ class SuggestionEngine(
         blacklist.isNotEmpty() && word.lowercase() in blacklist
 
     /** True when the offensive filter is on and [word] is a blocked word. */
-    private fun offensive(word: String): Boolean =
-        blockOffensiveWords && offensiveWords.isNotEmpty() && word.lowercase() in offensiveWords
+    private fun offensive(word: String): Boolean {
+        if (!blockOffensiveWords || offensiveWords.isEmpty()) return false
+        val lower = word.lowercase()
+        if (lower !in offensiveWords) return false
+        // A word the user added by hand is one they asked for by name.
+        if (userLexicon.isAddedByHand(lower)) return false
+        return !clearedByItsLanguage(lower)
+    }
+
+    /**
+     * Whether [lower], flagged by some language's list, is really a word of a
+     * language that does not flag it (#465): the mix knows it, and none of the
+     * languages that flag it does. A flagging language outside the mix cannot
+     * be asked, so its flag stands, and so does the flag on a word nobody's
+     * list knows.
+     */
+    private fun clearedByItsLanguage(lower: String): Boolean {
+        val byLanguage = offensiveByLanguage
+        if (byLanguage.isEmpty()) return false
+        val owners = languagesOwning(lower)
+        if (owners.isEmpty()) return false
+        val mix = mixLanguageIds()
+        return byLanguage.none { (langId, words) ->
+            lower in words && (langId in owners || langId !in mix)
+        }
+    }
 
     /**
      * True when [word] must not be offered or used as an autocorrect target,

@@ -172,6 +172,16 @@ data class DataSaverSettings(
      * stops working on mobile data reads as broken.
      */
     val cloudVoice: MeteredPolicy = MeteredPolicy.ALLOW,
+
+    /**
+     * With no connection, or with the server not answering, dictation, the AI
+     * actions and the Translate tool use the on-device model instead of the
+     * server they are set to (#452), where one is downloaded. Not a data-saving
+     * policy but the other half of the same question, what the keyboard does
+     * about the network, so it lives here. Off by default: it changes which
+     * engine answers, and the user picked the server on purpose.
+     */
+    val offlineFallback: Boolean = false,
 ) {
     /** Whether data saving should be in force given the device's [state]. */
     fun appliesTo(state: DeviceNetworkState): Boolean {

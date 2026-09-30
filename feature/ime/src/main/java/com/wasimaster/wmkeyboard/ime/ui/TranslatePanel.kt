@@ -413,8 +413,11 @@ private fun TranslateLanguageRow(
         // language it does not have, and that switch should not be silent.
         // The user's own server (#435) never falls back, but the engine chip
         // still reads "Online", so it says where the text went.
+        // The on-device engine standing in while offline (#452) says so too:
+        // the chip still reads "Online".
         val via = when {
             translate.translated.isEmpty() -> null
+            translate.offlineStandIn -> R.string.ime_translate_offline_standin_label
             translate.viaServer -> R.string.ime_translate_server_label
             translate.viaDeepL -> R.string.ime_translate_deepl_label
             else -> null

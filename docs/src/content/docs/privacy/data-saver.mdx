@@ -74,6 +74,18 @@ free.
 | Cloud AI | chat and AI actions that run on a provider's servers. Allowed by default: small payloads, and the roaming trigger is the place to say no. On-device models are never held, because reaching them costs nothing |
 | Transcription server | voice typing that sends each phrase to your [transcription server](/tools/transcription-server/), about a megabyte for every 30 seconds of speech. Allowed by default. At **Ask each time** the voice panel explains, and pressing the microphone again is the yes |
 
+## With no connection
+
+<SettingsPath path="Advanced / Data saver / Use on-device models offline" /> is a separate question from data saving: not what the keyboard may spend, but what it does when nothing can be sent at all. It is off by default. Turn it on, and three tools that use a server change to the on-device model you downloaded when the phone has no connection, or when the server does not answer:
+
+| Tool | Set to | Uses instead |
+|---|---|---|
+| Voice typing | a [transcription server](/tools/transcription-server/) | a [Whisper model](/tools/whisper/) for the language you type in, or else your phone's own voice typing. A phrase already recorded when the server fails is transcribed by the Whisper model, so it is not lost |
+| AI actions | a cloud provider or a server | your [on-device model](/tools/ai/#local-models) |
+| Translate | the Online engine | the [on-device languages](/tools/translate/) you downloaded |
+
+A short message tells you the first time a tool changes to the on-device model, and again after the server has answered in between. Translate also shows **On device, offline** next to the result. A tool with no model downloaded does what it did before: it shows its own error. AI chat always uses the provider you picked.
+
 ## Where the old switches went
 
 Two settings used to say a smaller version of this, and both moved here:
@@ -113,8 +125,10 @@ screen. Either one holding is enough to skip the automatic refresh.
   network reading lands, nothing is held. It's better to fetch one photo too
   many than to have every panel come up refusing to work on a cold start.
 - **Offline is not the same as metered.** With no connection at all, the
-  panels show their own offline errors. Data saver doesn't claim credit for
-  a fetch the radio was never going to make.
+  panels show their own offline errors, unless
+  [Use on-device models offline](#with-no-connection) gives them a model to
+  use. Data saver doesn't claim credit for a fetch the radio was never going
+  to make.
 
 See [Network policy](/privacy/network/) for the full list of what each
 feature fetches and where it goes.

@@ -406,6 +406,15 @@ internal fun TypingCorrectionsSettings(
             }
             item {
                 ToggleSetting(
+                    R.string.typing_autocorrect_on_enter_title,
+                    stringResource(R.string.typing_autocorrect_on_enter_subtitle),
+                    settings.watch { it.correction.onEnter },
+                    info = stringResource(R.string.typing_autocorrect_on_enter_info),
+                    default = SettingsDefaults.correction.onEnter,
+                ) { scope.launch { repository.setAutocorrectOnEnter(it) } }
+            }
+            item {
+                ToggleSetting(
                     R.string.typing_block_offensive_title,
                     stringResource(R.string.typing_block_offensive_subtitle),
                     settings.watch { it.suggestionStrip.blockOffensiveWords },
@@ -1803,6 +1812,15 @@ internal fun TypingGesturesSettings(
                         default = SettingsDefaults.gesture.autoSpaceAfterGlide,
                     ) { scope.launch { repository.setGestureAutoSpace(it) } }
                 }
+                item {
+                    ToggleSetting(
+                        R.string.typing_glide_backspace_undo_title,
+                        stringResource(R.string.typing_glide_backspace_undo_subtitle),
+                        settings.watch { it.gesture.backspaceUndoesGlide },
+                        info = stringResource(R.string.typing_glide_backspace_undo_info),
+                        default = SettingsDefaults.gesture.backspaceUndoesGlide,
+                    ) { scope.launch { repository.setGestureBackspaceUndoesGlide(it) } }
+                }
                 // Which key a glide reads as an apostrophe, so "it's" can be
                 // drawn rather than guessed at. One key, never several.
                 item {
@@ -2125,6 +2143,15 @@ internal fun TypingGesturesSettings(
                 info = stringResource(R.string.typing_space_swipe_down_hide_info),
                 default = SettingsDefaults.layoutBehavior.spaceSwipeDownHide,
             ) { scope.launch { repository.setSpaceSwipeDownHide(it) } }
+        }
+        item {
+            ToggleSetting(
+                R.string.typing_edge_swipe_back_title,
+                stringResource(R.string.typing_edge_swipe_back_subtitle),
+                settings.watch { it.layoutBehavior.edgeSwipeBack },
+                info = stringResource(R.string.typing_edge_swipe_back_info),
+                default = SettingsDefaults.layoutBehavior.edgeSwipeBack,
+            ) { scope.launch { repository.setEdgeSwipeBack(it) } }
         }
         item {
             // Issue #178: a quick flick down on a key types its corner hint.

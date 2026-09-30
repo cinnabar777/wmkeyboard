@@ -58,7 +58,7 @@ jobs:
     needs: verify
     if: needs.verify.outputs.buildable == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
 
@@ -108,20 +108,20 @@ jobs:
           WMKB_PEXELS_API_KEY: ${{ secrets.WMKB_PEXELS_API_KEY }}
           WMKB_DROPBOX_APP_KEY: ${{ secrets.WMKB_DROPBOX_APP_KEY }}
           WMKB_ONEDRIVE_CLIENT_ID: ${{ secrets.WMKB_ONEDRIVE_CLIENT_ID }}
-        # All four flavour combinations compile at once and share one Kotlin
-        # daemon, whose 2 GB heap (gradle.properties) is sized for a 16 GB
-        # laptop next to an IDE. The runner has nothing else on it, so give the
-        # daemon room.
+        # One variant per Gradle call. All four at once shared one Kotlin
+        # daemon and ran it out of heap at 4 GB (0.5.13, compileFullEnRelease
+        # and compileLiteEnRelease side by side), after 0.5.8 had already
+        # needed the 4 GB. In turn, each compile and R8 pass has the daemons to
+        # itself; the daemons stay warm between calls, and the modules below
+        # :app are built once.
         #
         # The `languages` flavour changes only which res/values-xx are packaged,
-        # but Gradle still gives each variant its own Kotlin compilation, so
-        # this is roughly twice the work the two-flavour build was. It ran in
-        # about 12 minutes; the timeout above has the room.
+        # but Gradle still gives each variant its own Kotlin compilation of :app.
         run: |
-          ./gradlew \
-            assembleFullIntlRelease assembleFullEnRelease \
-            assembleLiteIntlRelease assembleLiteEnRelease \
-            -Pkotlin.daemon.jvmargs=-Xmx4g --stacktrace
+          for variant in FullIntl FullEn LiteIntl LiteEn; do
+            ./gradlew "assemble${variant}Release" \
+              -Pkotlin.daemon.jvmargs=-Xmx4g --stacktrace
+          done
 
       # Versioned filenames (wmkeyboard-0.3.0-vc7-full-arm64-v8a.apk) so APKs
       # from different releases can sit in the same Downloads folder without
@@ -504,10 +504,13 @@ jobs:
   # android promote`, or the Console). Skips itself with a warning when the
   # service-account secret is absent, so tagging a release still works before
   # Play API access is configured.
+  # A release commit carrying `[skip play]` goes to GitHub and F-Droid only:
+  # a version Play already has under an older versionCode, where a new upload
+  # would only send production back through review for nothing.
   play:
     name: Upload to Play (internal track)
     needs: [verify, bundle]
-    if: github.ref_type == 'tag' && !inputs.dry_run
+    if: github.ref_type == 'tag' && !inputs.dry_run && !contains(github.event.head_commit.message, '[skip play]')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -674,6 +677,9 @@ jobs:
     uses: ./.github/workflows/release-comments.yml
     with:
       tag: ${{ github.ref_name }}
+      # Play is not told about a `[skip play]` release, so the comments
+      # must not promise it there either.
+      stores: ${{ contains(github.event.head_commit.message, '[skip play]') && 'F-Droid' || 'F-Droid,Google Play' }}
 
   # Points the bug report form at the version just published, so reporters
   # are asked to confirm they are on it. Runs after publish, so a failed or

@@ -1144,8 +1144,16 @@ private fun numpad(
     listOf(bottomLeft, zero, bottomRight, Key("⏎", action = KeyAction.Enter)),
 )
 
-/** A keypad space key: blank label so no language name is drawn on it. */
-private fun padSpace() = Key("", action = KeyAction.Space)
+/**
+ * The legend a keypad's space key wears (issue #459): the open box keycaps use
+ * for a visible space. A spacebar with a label draws the language name, which a
+ * key a quarter of the pad wide has no room for, and a blank one drew nothing
+ * at all, so the renderer draws this one as the key's glyph instead.
+ */
+const val PAD_SPACE_LABEL = "\u2423"
+
+/** A keypad space key, labelled [PAD_SPACE_LABEL] rather than the language name. */
+private fun padSpace() = Key(PAD_SPACE_LABEL, action = KeyAction.Space)
 
 /**
  * TYPE_CLASS_NUMBER. The minus and decimal keys are always present — fields that

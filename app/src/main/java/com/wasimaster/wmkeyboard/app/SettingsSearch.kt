@@ -278,6 +278,7 @@ private fun SearchStrings.typingCorrectionsRows(): List<SettingsSearchEntry> {
         row(R.string.typing_learn_corrections_title, R.string.typing_learn_corrections_subtitle),
         row(R.string.typing_adapt_taps_title, R.string.typing_adapt_taps_subtitle),
         row(R.string.typing_skip_all_caps_title, R.string.typing_skip_all_caps_subtitle),
+        row(R.string.typing_autocorrect_on_enter_title, R.string.typing_autocorrect_on_enter_subtitle),
         row(R.string.typing_block_offensive_title, R.string.typing_block_offensive_subtitle),
         row(R.string.typing_context_rerank_title, R.string.typing_context_rerank_subtitle),
         row(R.string.typing_autocorrect_splits_title, R.string.typing_autocorrect_splits_subtitle),
@@ -455,6 +456,7 @@ private fun SearchStrings.typingGesturesRows(): List<SettingsSearchEntry> {
         row(R.string.typing_shift_glide_capitals_title, R.string.typing_shift_glide_capitals_subtitle),
         row(R.string.typing_shift_glide_mode_title, R.string.typing_shift_glide_mode_subtitle),
         row(R.string.typing_space_after_glide_title, R.string.typing_space_after_glide_subtitle),
+        row(R.string.typing_glide_backspace_undo_title, R.string.typing_glide_backspace_undo_subtitle),
         row(R.string.typing_glide_apostrophe_title, R.string.typing_glide_apostrophe_subtitle),
         row(R.string.typing_swipe_start_distance_title, R.string.typing_swipe_start_distance_subtitle),
         row(R.string.typing_gesture_cooldown_title, R.string.typing_gesture_cooldown_subtitle),
@@ -507,6 +509,7 @@ private fun SearchStrings.typingGesturesRows(): List<SettingsSearchEntry> {
         row(R.string.typing_space_cursor_magnifier_title, R.string.typing_space_cursor_magnifier_subtitle),
         row(R.string.typing_space_cursor_2d_title, R.string.typing_space_cursor_2d_subtitle),
         row(R.string.typing_space_swipe_down_hide_title, R.string.typing_space_swipe_down_hide_subtitle),
+        row(R.string.typing_edge_swipe_back_title, R.string.typing_edge_swipe_back_subtitle),
         row(R.string.typing_hint_flick_title, R.string.typing_hint_flick_subtitle),
         row(R.string.typing_capital_flick_title, R.string.typing_capital_flick_subtitle),
         row(R.string.typing_possessive_swipe_title, R.string.typing_possessive_swipe_subtitle),
@@ -1736,6 +1739,7 @@ private fun SearchStrings.otherRows(): List<SettingsSearchEntry> {
         dataSaver(R.string.datasaver_downloads_title, R.string.datasaver_downloads_subtitle),
         dataSaver(R.string.datasaver_ai_title, R.string.datasaver_ai_subtitle),
         dataSaver(R.string.datasaver_voice_title, R.string.datasaver_voice_subtitle),
+        dataSaver(R.string.datasaver_offline_fallback_title, R.string.datasaver_offline_fallback_subtitle),
         // The four kinds of notification, each one a thing someone will come
         // looking for by name the first time it arrives or stops arriving.
         notifications(R.string.notify_downloads_title, R.string.notify_downloads_subtitle),

@@ -10,6 +10,7 @@ import androidx.compose.material.icons.outlined.Phonelink
 import androidx.compose.material.icons.outlined.SwipeVertical
 import androidx.compose.material.icons.outlined.Sync
 import androidx.compose.material.icons.outlined.CloudQueue
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.Article
 import androidx.compose.material.icons.automirrored.outlined.Backspace
 import androidx.compose.material.icons.automirrored.outlined.Chat
@@ -822,6 +823,7 @@ internal object SettingsRowIcons {
         put(R.string.typing_learned_corrections_clear_title) { Icons.Outlined.DeleteSweep }
         put(R.string.typing_adapt_taps_title) { Icons.Outlined.TouchApp }
         put(R.string.typing_skip_all_caps_title) { Icons.Outlined.KeyboardCapslock }
+        put(R.string.typing_autocorrect_on_enter_title) { Icons.AutoMirrored.Outlined.KeyboardReturn }
         put(R.string.typing_skip_typed_word_title) { Icons.Outlined.FilterList }
         put(R.string.typing_number_prediction_title) { Icons.Outlined.Numbers }
         put(R.string.typing_block_offensive_title) { Icons.Outlined.Block }
@@ -914,6 +916,7 @@ internal object SettingsRowIcons {
         put(R.string.typing_shift_glide_capitals_title) { Icons.Outlined.KeyboardCapslock }
         put(R.string.typing_shift_glide_mode_title) { Icons.Outlined.KeyboardCapslock }
         put(R.string.typing_space_after_glide_title) { Icons.Outlined.SpaceBar }
+        put(R.string.typing_glide_backspace_undo_title) { Icons.AutoMirrored.Outlined.Backspace }
         put(R.string.appearance_toolbar_placement_title) { Icons.Outlined.ViewAgenda }
         put(R.string.appearance_toolbar_show_strip_title) { Icons.AutoMirrored.Outlined.ShortText }
         put(R.string.tooldetail_hold_title) { Icons.Outlined.TouchApp }
@@ -957,6 +960,7 @@ internal object SettingsRowIcons {
         put(R.string.typing_space_cursor_top_speed_title) { Icons.Outlined.Speed }
         put(R.string.typing_space_cursor_magnifier_title) { Icons.Outlined.ZoomIn }
         put(R.string.typing_space_swipe_down_hide_title) { Icons.Outlined.SwipeDown }
+        put(R.string.typing_edge_swipe_back_title) { Icons.AutoMirrored.Outlined.ArrowBack }
         put(R.string.typing_hint_flick_title) { Icons.Outlined.SwipeDownAlt }
         put(R.string.typing_capital_flick_title) { Icons.Outlined.KeyboardCapslock }
         put(R.string.typing_space_hold_keys_label) { Icons.Outlined.TouchApp }
@@ -1179,6 +1183,7 @@ internal object SettingsRowIcons {
         put(R.string.datasaver_downloads_title) { Icons.Outlined.CloudDownload }
         put(R.string.datasaver_ai_title) { Icons.Outlined.AutoAwesome }
         put(R.string.datasaver_voice_title) { Icons.Outlined.Dns }
+        put(R.string.datasaver_offline_fallback_title) { Icons.Outlined.CloudOff }
         // The signpost left behind on the languages screen, where the metered
         // download confirmation used to live.
         put(R.string.langemoji_lang_metered_title) { Icons.Outlined.DataSaverOn }

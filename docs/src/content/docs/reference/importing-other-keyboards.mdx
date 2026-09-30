@@ -6,6 +6,7 @@ sidebar:
 ---
 
 import SettingsPath from '@components/SettingsPath.astro';
+import KeyCap from '@components/KeyCap.astro';
 
 Switching keyboards usually means leaving your layouts, themes and dictionaries behind. WM Keyboard reads FlorisBoard, HeliBoard, LeanType and FUTO files directly and converts them into its own, so the grid you built, the theme you picked and the word list you collected come with you.
 
@@ -44,11 +45,22 @@ The FlorisBoard and HeliBoard formats do not record one. There a layout is a gri
 
 That matters more here than it sounds. The language picks the dictionary, the autocorrect, the script rules, dictation, and how the shift key behaves. The app guesses from the letters on the keys and shows you the guess, and you can change it before you import. There is no silent default.
 
-### It adds the bottom row
+### It adds the shift key and the bottom row
 
 A foreign layout file carries one grid, and the keyboard that reads it draws the symbols and number layers itself. So the app supplies those, and the imported layout uses WM Keyboard's built-in symbols and number grids.
 
-The bottom row gets the same treatment, one key at a time. A delete, space or enter key the file did spell out converts like any other key. Any of the three the file left out is added back, and the dialog names the ones it added. HeliBoard's text format has no way to write any of them, so a `.txt` layout always gets all three.
+The frame around the letters gets the same treatment, so an imported layout ends the way the built-in ones do:
+
+- The last letter row gets <KeyCap>⇧</KeyCap> at the start and <KeyCap>⌫</KeyCap> at the end, both one and a half keys wide.
+- Below it goes the usual bottom row: <KeyCap>?123</KeyCap>, comma, <KeyCap>🌐</KeyCap>, a spacebar four keys wide, full stop and <KeyCap>⏎</KeyCap>.
+
+What the file says still wins where it says something:
+
+- A delete key the file placed stays where it is. The layout then gets no shift key added either, because placing the delete key yourself is how a FUTO layout says it wants no automatic shift key.
+- A bottom row the file wrote is read, not thrown away. Its comma and full stop keep their own characters and press-and-hold letters, so a Bengali `।`, an Urdu `۔` or an Arabic `،` comes across. A key the usual row has no place for, such as a tab key, keeps a place next to the spacebar. A letter on that row, such as an apostrophe or a ZWNJ key, moves up to the end of the last letter row.
+- A key the letter rows already have is not added twice. A PC-style grid with its enter key on the home row, or its comma and full stop beside the letters, gets no second one.
+
+HeliBoard's text format and FlorisBoard's character grids have no way to write any of these keys, so those layouts always get the whole frame. A layout with a key taller than one row keeps the shape its author gave it, because moving keys would slide them under the tall one. It still gets a delete, space and enter key if it has none, and the dialog names the ones it added.
 
 ### Keys that cannot come across
 
@@ -82,6 +94,8 @@ One slot here holds one key, so the app keeps the resting branch: unshifted, an 
 
 `case_selector` is the exception and loses nothing. Its two branches are exactly this keyboard's key and shift-label pair, so both cases come across, and a shifted letter that is only the plain uppercase is left for the keyboard to produce on its own.
 
+An `auto_text_key` changes case with the shift key over there, whatever case its code is written in. The app takes the lowercase as the key's own and leaves the capital to the shift key. Some published grids write a lowercase label on the code of the capital letter (FlorisBoard's Rusyn grid does this for ї, ы and ё), and those keys would otherwise type the capital with no shift.
+
 ### Press-and-hold options
 
 The other keyboard writes a popup's *options* inside the popup list, wrapped in exclamation marks. `!fixedColumnOrder!4` and `!autoColumnOrder!4` become that key's **Alternate columns**, which you can change afterwards in the layout editor. `!hasLabels!`, `!needsDividers!` and `!noPanelAutoPopupKey!` ask for drawings this keyboard decides for itself and are dropped. None of them is a letter, so none ends up as a key you can type.
@@ -109,13 +123,13 @@ The rest of the flags ask for a text style this keyboard has no form of, such as
 
 FUTO Keyboard writes its layouts in YAML, and publishes its own as a repository of them. Pick one with the same **Import from another keyboard** button; the app tells a YAML layout from a JSON one by the document itself, not by the file name. Tapping one in a file manager works too — `.yaml` is not claimed by name, because that would offer WM Keyboard for every YAML file on your phone, but the YAML content types are, and the same `name:`-and-`rows:` test recognizes the file. Either way the language is confirmed before the layout is saved.
 
-Most of that format reads straight across, because FUTO's keyboard descends from AOSP's and so its key specs are the ones already read here: `a|b`, `!code/`, `!icon/` and the same `!autoColumnOrder!4` popup markers. A row written as `q w e r t`, as `[[a, ą], b]`, or as a list of `{type: base, spec: …}` objects all work, and so does `type: case`, which keeps both cases the way a FlorisBoard case selector does.
+Most of that format reads straight across, because FUTO's keyboard descends from AOSP's and so its key specs are the ones already read here: `a|b`, `!code/`, `!icon/` and the same `!autoColumnOrder!4` popup markers. A row written as `q w e r t`, as `[[a, ą], b]`, or as a list of `{type: base, spec: …}` objects all work, and so does `type: case`, which keeps both cases the way a FlorisBoard case selector does. When the key has no `shifted` branch, its `shiftedManually` one is the shifted letter. That is how a script with no capital letters writes its second layer: Korean ㅂ over ㅃ, and the Khmer, Myanmar and Bengali layouts.
 
 Four things are worth knowing:
 
 - **It is the one format that states its language.** `languages: [lt]` seeds the language picker with a fact rather than a guess from the letters. A language this app does not have falls back to the guess.
 - **The number row is dropped**, because this app adds one from a setting and keeping the file's would give the layout two. A layout that sets `numberRowMode: AlwaysEnabled`, which is how the PC-style arrangements carry their backtick and bracket keys, keeps its own.
-- **`$space` takes what is left of its row**, measured against the widest row of ordinary keys in the same layout, so a ten-key grid and a twelve-key one both end up with a spacebar spanning the middle.
+- **Its bottom row becomes this app's**, as [above](#it-adds-the-shift-key-and-the-bottom-row), keeping the file's own comma and full stop. The `$action` key, which the user sets in FUTO's own settings, is dropped and named.
 - **The alternate pages are dropped and named.** `$alt0` and its siblings switch to a whole second grid, which has no slot here, and a key that switched to nothing would strand you on it. The symbols and number layers are this app's own for the same reason, and `layoutSetOverrides` names layouts by ids that mean nothing here.
 
 `$contextual` becomes the comma slot, which does the same job from the same signal: `/` in a web address, `@` in an email field.

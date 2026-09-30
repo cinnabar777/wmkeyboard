@@ -47,6 +47,14 @@ Set a slot to **Cursor** and the drag moves the text cursor instead of typing. T
 
 The same drag **selects** text instead of moving through it while selection mode is on, on either axis. Turn the mode on from the toolbar's [Selection mode](/tools/text-editing/#selection-mode) tool, or hold that tool down and scrub the spacebar with your other thumb. A Shift you pressed yourself does it too, lock included, exactly as [Shift+Arrow](/tools/text-editing/#hold-shift-to-select) would: lock Shift, then scrub. A Shift the keyboard armed by itself at a sentence start doesn't count, so an ordinary drag never selects behind your back.
 
+## Swiping in from the edge to go back
+
+<SettingsPath path="Typing / Gestures / Swipe in from the edge to go back" />
+
+Android's own back gesture, a swipe in from the side of the screen, works over the keyboard on most phones. Some phones keep it off the keyboard, so it has to start above it, which is half a screen up. With this setting on, a swipe that starts within the outer 16&nbsp;dp of the keyboard's left or right edge and moves at least 40&nbsp;dp inward, more across than up or down, does what Back does: it closes the open panel (the voice panel with its recording, a search, the emoji panel), or the keyboard when nothing is open. It acts when you lift your finger, and the key it started on types nothing.
+
+It's off by default. A glide that starts right at the edge and heads inward looks exactly the same, so with this on, start glides on the edge keys a little way in. A second finger on the keys while the swipe starts means typing, and the swipe is left alone.
+
 ## Swiping down to hide the keyboard
 
 <SettingsPath path="Typing / Gestures / Swipe down to hide the keyboard" />
@@ -250,6 +258,7 @@ A printable table of every gesture on one page lives at [Gesture cheat sheet](/r
 | Speed up long cursor swipes | Off |
 | Top cursor speed | 4× (2–8×) |
 | Cursor magnifier | On |
+| Swipe in from the edge to go back | Off |
 | Swipe down to hide the keyboard | Off |
 | Swipe down to type the hint | Off |
 | Swipe up for a capital | Off |
