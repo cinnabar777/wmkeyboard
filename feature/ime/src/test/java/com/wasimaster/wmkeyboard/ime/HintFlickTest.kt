@@ -1,5 +1,6 @@
 package com.wasimaster.wmkeyboard.ime
 
+import androidx.compose.ui.geometry.Rect
 import com.wasimaster.wmkeyboard.core.gesture.GesturePoint
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -120,5 +121,39 @@ class HintFlickTest {
     @Test
     fun `a single point has no direction`() {
         assertFalse(flick(listOf(GesturePoint(200f, 400f, 0L))))
+    }
+
+    // ---- swipe to spacebar center ----
+
+    @Test
+    fun `swipe ending in spacebar center is accepted`() {
+        val spaceCell = Rect(left = 100f, top = 500f, right = 400f, bottom = 600f) // center at (250, 550)
+        val points = listOf(
+            GesturePoint(200f, 200f, 0L),
+            GesturePoint(225f, 375f, 50L),
+            GesturePoint(250f, 550f, 100L),
+        )
+        assertTrue(hintFlickToSpacebarCenter(points, spaceCell))
+    }
+
+    @Test
+    fun `swipe ending far from spacebar center is rejected`() {
+        val spaceCell = Rect(left = 100f, top = 500f, right = 400f, bottom = 600f) // center at (250, 550)
+        val points = listOf(
+            GesturePoint(200f, 200f, 0L),
+            GesturePoint(100f, 300f, 50L),
+            GesturePoint(50f, 400f, 100L),
+        )
+        assertFalse(hintFlickToSpacebarCenter(points, spaceCell))
+    }
+
+    @Test
+    fun `upward swipe is rejected for spacebar center`() {
+        val spaceCell = Rect(left = 100f, top = 100f, right = 400f, bottom = 200f) // center at (250, 150)
+        val points = listOf(
+            GesturePoint(250f, 300f, 0L),
+            GesturePoint(250f, 150f, 100L),
+        )
+        assertFalse(hintFlickToSpacebarCenter(points, spaceCell))
     }
 }

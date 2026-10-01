@@ -6275,6 +6275,11 @@ data class LayoutBehaviorSettings(
      */
     val hintFlick: Boolean = false,
     /**
+     * When [hintFlick] is enabled, requires the swipe gesture to travel from the key with
+     * the hint to the center-ish of the spacebar instead of a short straight down flick.
+     */
+    val hintFlickSpacebarCenter: Boolean = false,
+    /**
      * The upward twin of [hintFlick]: a short, quick swipe up on a letter
      * types its capital, or on a key with a shifted character of its own
      * ([com.wasimaster.wmkeyboard.core.layout.Key.shiftLabel]) that character,
@@ -7835,6 +7840,7 @@ class SettingsRepository(private val context: Context) {
         private val EDGE_SWIPE_BACK = booleanPreferencesKey("edge_swipe_back")
         private val GLOBE_IN_ONE_PLACE = booleanPreferencesKey("globe_in_one_place")
         private val HINT_FLICK = booleanPreferencesKey("hint_flick")
+        private val HINT_FLICK_SPACEBAR_CENTER = booleanPreferencesKey("hint_flick_spacebar_center")
         private val CAPITAL_FLICK = booleanPreferencesKey("capital_flick")
         private val GLOBE_TYPING_GUARD_MS = intPreferencesKey("globe_typing_guard_ms")
         private val GLOBE_DRAG_SHORTCUTS = booleanPreferencesKey("globe_drag_shortcuts")
@@ -9780,6 +9786,8 @@ class SettingsRepository(private val context: Context) {
             edgeSwipeBack = p[EDGE_SWIPE_BACK] ?: defaults.layoutBehavior.edgeSwipeBack,
             globeInOnePlace = p[GLOBE_IN_ONE_PLACE] ?: defaults.layoutBehavior.globeInOnePlace,
             hintFlick = p[HINT_FLICK] ?: defaults.layoutBehavior.hintFlick,
+            hintFlickSpacebarCenter = p[HINT_FLICK_SPACEBAR_CENTER]
+                ?: defaults.layoutBehavior.hintFlickSpacebarCenter,
             capitalFlick = p[CAPITAL_FLICK] ?: defaults.layoutBehavior.capitalFlick,
             globeTypingGuardMs = p[GLOBE_TYPING_GUARD_MS]?.coerceIn(GlobeTypingGuardMsRange)
                 ?: defaults.layoutBehavior.globeTypingGuardMs,
@@ -14608,6 +14616,9 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setHintFlick(value: Boolean) =
         editPrefs { it[HINT_FLICK] = value }
+
+    suspend fun setHintFlickSpacebarCenter(value: Boolean) =
+        editPrefs { it[HINT_FLICK_SPACEBAR_CENTER] = value }
 
     suspend fun setCapitalFlick(value: Boolean) =
         editPrefs { it[CAPITAL_FLICK] = value }

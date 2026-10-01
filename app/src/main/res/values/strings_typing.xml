@@ -653,6 +653,10 @@
     <string name="typing_hint_flick_subtitle">A quick swipe down on a key types its small corner character</string>
     <string name="typing_hint_flick_info">Each key shows its first press-and-hold character in the corner, such as 1 on q. A short, quick swipe straight down on the key types that character with no hold. This works on any key that has press-and-hold characters, on every layer. The spacebar, backspace and the shift and modifier keys keep their own swipes. The swipe must be short, straight down and fast. A longer or slower drag is a glide, as before. With glide typing on, a very fast glide of a short word that goes straight down, such as \"ed\", can type the hint instead. This setting is off by default.</string>
 
+    <string name="typing_hint_flick_spacebar_center_title">Swipe to spacebar center to type hint</string>
+    <string name="typing_hint_flick_spacebar_center_subtitle">Swipe from a key to spacebar center to output its hint character</string>
+    <string name="typing_hint_flick_spacebar_center_info">When enabled, instead of a short downward swipe, swipe from a key with a hint to the center of the spacebar to type its hint character. This avoids conflicts with gesture typing.</string>
+
     <string name="typing_capital_flick_title">Swipe up for a capital</string>
     <string name="typing_capital_flick_subtitle">A quick swipe up on a letter types it as a capital</string>
     <string name="typing_capital_flick_info">A short, quick swipe straight up on a letter types its capital, with no need to press shift first. On a key that has its own shifted character, such as a number key with a symbol above it, the swipe types that character. The swipe must be short, straight up and fast, like the swipe down for the hint. A longer or slower drag is a glide, as before. If Words on the keys shows a word on the key, a swipe up still takes that word. With glide typing on, a very fast glide of a short word that goes straight up, such as \"de\", can type a capital instead. This setting is off by default.</string>

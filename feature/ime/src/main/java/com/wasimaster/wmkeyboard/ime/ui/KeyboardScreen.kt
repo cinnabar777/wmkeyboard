@@ -329,6 +329,7 @@ import com.wasimaster.wmkeyboard.ime.top
 import com.wasimaster.wmkeyboard.ime.glideAnchor
 import com.wasimaster.wmkeyboard.ime.HINT_FLICK_MIN_TRAVEL_HEIGHTS
 import com.wasimaster.wmkeyboard.ime.hintFlick
+import com.wasimaster.wmkeyboard.ime.hintFlickToSpacebarCenter
 import com.wasimaster.wmkeyboard.core.clipboard.clipPreviewText
 import com.wasimaster.wmkeyboard.ime.KeyFlickDirection
 import com.wasimaster.wmkeyboard.ime.keyFlick
@@ -14122,6 +14123,7 @@ private fun KeyRows(
     // never claimed — glide off, a symbol layer, a punctuation key — by the
     // loop of its own further down.
     val hintFlickOn = state.settings.layoutBehavior.hintFlick
+    val hintFlickSpacebarCenterOn = state.settings.layoutBehavior.hintFlickSpacebarCenter
     // Its upward twin: a short flick up off a letter types the capital. Judged
     // at the same two places, and it gives way to an octopus word on the key,
     // whose flick is also upward.
@@ -14974,16 +14976,26 @@ private fun KeyRows(
                         // decode. A preview it managed to send is retired the way
                         // a cancelled stroke's is, and the hint is typed as a
                         // popup's pick would be.
-                        if (hintTarget != null && segments.isEmpty() && !picker.isOpen &&
-                            hintFlick(
-                                points = seg,
-                                keyHeightPx = hintTarget.second.height,
-                                minTravelPx = maxOf(
-                                    hintTarget.second.height * HINT_FLICK_MIN_TRAVEL_HEIGHTS,
-                                    slop * effectiveSlop * OCTOPUS_SLOP_CLEARANCE,
-                                ),
-                            )
-                        ) {
+                        val isHintValid = if (hintTarget != null && segments.isEmpty() && !picker.isOpen) {
+                            if (hintFlickSpacebarCenterOn) {
+                                hintFlickToSpacebarCenter(
+                                    points = seg,
+                                    spaceCell = liveRects.value.cellOf(KeyAction.Space),
+                                )
+                            } else {
+                                hintFlick(
+                                    points = seg,
+                                    keyHeightPx = hintTarget.second.height,
+                                    minTravelPx = maxOf(
+                                        hintTarget.second.height * HINT_FLICK_MIN_TRAVEL_HEIGHTS,
+                                        slop * effectiveSlop * OCTOPUS_SLOP_CLEARANCE,
+                                    ),
+                                )
+                            }
+                        } else {
+                            false
+                        }
+                        if (isHintValid && hintTarget != null) {
                             trail.release()
                             if (previewedSeg) {
                                 keyList?.let { onGesture(seg, it, keyWidth.value, GlideVerdict.Cancel) }
@@ -15196,8 +15208,20 @@ private fun KeyRows(
                         if (change.isConsumed || alternatesGate.open) return@awaitEachGesture
                         points.add(GesturePoint(change.position.x, change.position.y, change.uptimeMillis))
                         if (!change.pressed) {
+                            val isHint = if (hint != null) {
+                                if (hintFlickSpacebarCenterOn) {
+                                    hintFlickToSpacebarCenter(
+                                        points = points,
+                                        spaceCell = liveRects.value.cellOf(KeyAction.Space),
+                                    )
+                                } else {
+                                    hintFlick(points, cell.height, minTravel)
+                                }
+                            } else {
+                                false
+                            }
                             val typed = when {
-                                hint != null && hintFlick(points, cell.height, minTravel) ->
+                                isHint && hint != null ->
                                     hint.first.longPress.first()
                                 capital != null &&
                                     keyFlick(points, cell.height, minTravel, KeyFlickDirection.UP) ->

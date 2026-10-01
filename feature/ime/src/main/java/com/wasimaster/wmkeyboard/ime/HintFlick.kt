@@ -51,6 +51,36 @@ internal fun hintFlick(
     minTravelPx: Float,
 ): Boolean = keyFlick(points, keyHeightPx, minTravelPx, KeyFlickDirection.DOWN)
 
+/**
+ * Whether a stroke starting on a key with a hint travels to and ends near the
+ * center of the spacebar key cell.
+ *
+ * @param points the stroke points, relative to boxOrigin (same coordinate space as spaceCell)
+ * @param spaceCell the bounding rectangle of the spacebar key cell, or null if no spacebar cell is present
+ */
+internal fun hintFlickToSpacebarCenter(
+    points: List<GesturePoint>,
+    spaceCell: androidx.compose.ui.geometry.Rect?,
+): Boolean {
+    if (spaceCell == null || points.size < 2) return false
+    val first = points.first()
+    val last = points.last()
+
+    // Must start outside or near top of spacebar and end inside or near center of spacebar
+    val spaceCenter = spaceCell.center
+    val distToCenter = hypot(last.x - spaceCenter.x, last.y - spaceCenter.y)
+
+    // The gesture ends within a generous target zone around spacebar center (e.g. half height or width radius of spacebar)
+    val maxRadius = maxOf(spaceCell.width * 0.4f, spaceCell.height * 0.8f)
+    if (distToCenter > maxRadius) return false
+
+    // Total travel from first touch to last touch must show downward progression toward spacebar
+    val dy = last.y - first.y
+    if (dy <= 0f) return false
+
+    return true
+}
+
 /** Which way a [keyFlick] goes: down for the corner hint, up for the capital. */
 internal enum class KeyFlickDirection { UP, DOWN }
 

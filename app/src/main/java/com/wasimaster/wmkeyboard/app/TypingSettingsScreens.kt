@@ -2144,15 +2144,25 @@ internal fun TypingGesturesSettings(
                 default = SettingsDefaults.layoutBehavior.edgeSwipeBack,
             ) { scope.launch { repository.setEdgeSwipeBack(it) } }
         }
+        val hintFlickOn = settings.watch { it.layoutBehavior.hintFlick }
         item {
             // Issue #178: a quick flick down on a key types its corner hint.
             ToggleSetting(
                 R.string.typing_hint_flick_title,
                 stringResource(R.string.typing_hint_flick_subtitle),
-                settings.watch { it.layoutBehavior.hintFlick },
+                hintFlickOn,
                 info = stringResource(R.string.typing_hint_flick_info),
                 default = SettingsDefaults.layoutBehavior.hintFlick,
             ) { scope.launch { repository.setHintFlick(it) } }
+        }
+        item(visible = hintFlickOn) {
+            ToggleSetting(
+                R.string.typing_hint_flick_spacebar_center_title,
+                stringResource(R.string.typing_hint_flick_spacebar_center_subtitle),
+                settings.watch { it.layoutBehavior.hintFlickSpacebarCenter },
+                info = stringResource(R.string.typing_hint_flick_spacebar_center_info),
+                default = SettingsDefaults.layoutBehavior.hintFlickSpacebarCenter,
+            ) { scope.launch { repository.setHintFlickSpacebarCenter(it) } }
         }
         item {
             // The hint flick's upward twin: a quick flick up types the capital.
