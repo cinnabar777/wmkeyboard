@@ -1623,6 +1623,7 @@ internal fun TypingGesturesSettings(
     val spaceLanguage = settings.watch {
         it.spaceShortSwipe == SpaceSwipeAction.LANGUAGE || it.spaceLongSwipe == SpaceSwipeAction.LANGUAGE
     }
+    val hintFlickOn = settings.watch { it.layoutBehavior.hintFlick }
     SettingsGroup(stringResource(R.string.typing_group_glide_title)) {
         item {
             ToggleSetting(
@@ -2144,7 +2145,6 @@ internal fun TypingGesturesSettings(
                 default = SettingsDefaults.layoutBehavior.edgeSwipeBack,
             ) { scope.launch { repository.setEdgeSwipeBack(it) } }
         }
-        val hintFlickOn = settings.watch { it.layoutBehavior.hintFlick }
         item {
             // Issue #178: a quick flick down on a key types its corner hint.
             ToggleSetting(
