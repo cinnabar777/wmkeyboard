@@ -14980,7 +14980,7 @@ private fun KeyRows(
                             if (hintFlickSpacebarCenterOn) {
                                 hintFlickToSpacebarCenter(
                                     points = seg,
-                                    spaceCell = liveRects.value.cellOf(KeyAction.Space),
+                                    spaceCell = liveRects.value.cellOf(KeyAction.Space)?.translate(-boxOrigin),
                                 )
                             } else {
                                 hintFlick(
@@ -15212,7 +15212,7 @@ private fun KeyRows(
                                 if (hintFlickSpacebarCenterOn) {
                                     hintFlickToSpacebarCenter(
                                         points = points,
-                                        spaceCell = liveRects.value.cellOf(KeyAction.Space),
+                                        spaceCell = liveRects.value.cellOf(KeyAction.Space)?.translate(-boxOrigin),
                                     )
                                 } else {
                                     hintFlick(points, cell.height, minTravel)

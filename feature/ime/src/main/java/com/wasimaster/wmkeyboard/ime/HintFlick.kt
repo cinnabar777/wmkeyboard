@@ -66,19 +66,17 @@ internal fun hintFlickToSpacebarCenter(
     val first = points.first()
     val last = points.last()
 
-    // Must start outside or near top of spacebar and end inside or near center of spacebar
-    val spaceCenter = spaceCell.center
-    val distToCenter = hypot(last.x - spaceCenter.x, last.y - spaceCenter.y)
-
-    // The gesture ends within a generous target zone around spacebar center (e.g. half height or width radius of spacebar)
-    val maxRadius = maxOf(spaceCell.width * 0.4f, spaceCell.height * 0.8f)
-    if (distToCenter > maxRadius) return false
-
-    // Total travel from first touch to last touch must show downward progression toward spacebar
     val dy = last.y - first.y
     if (dy <= 0f) return false
 
-    return true
+    val spaceCenter = spaceCell.center
+    val distX = abs(last.x - spaceCenter.x)
+    val distY = abs(last.y - spaceCenter.y)
+
+    val maxDistX = spaceCell.width * 0.4f
+    val maxDistY = spaceCell.height * 0.8f
+
+    return distX <= maxDistX && distY <= maxDistY
 }
 
 /** Which way a [keyFlick] goes: down for the corner hint, up for the capital. */
