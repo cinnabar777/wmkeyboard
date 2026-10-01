@@ -59,12 +59,11 @@ internal fun hintFlick(
  * @param spaceCell the bounding rectangle of the spacebar key cell, or null if no spacebar cell is present
  */
 internal fun hintFlickToSpacebarCenter(
-    points: List<GesturePoint>,
+    first: GesturePoint,
+    last: GesturePoint,
     spaceCell: androidx.compose.ui.geometry.Rect?,
 ): Boolean {
-    if (spaceCell == null || points.size < 2) return false
-    val first = points.first()
-    val last = points.last()
+    if (spaceCell == null) return false
 
     // Must be a downward movement toward the spacebar
     val dy = last.y - first.y
@@ -79,6 +78,15 @@ internal fun hintFlickToSpacebarCenter(
     val maxDistY = spaceCell.height * 0.8f
 
     return distX <= maxDistX && distY <= maxDistY
+}
+
+/** Overload accepting a point sequence. */
+internal fun hintFlickToSpacebarCenter(
+    points: List<GesturePoint>,
+    spaceCell: androidx.compose.ui.geometry.Rect?,
+): Boolean {
+    if (points.size < 2) return false
+    return hintFlickToSpacebarCenter(points.first(), points.last(), spaceCell)
 }
 
 /** Which way a [keyFlick] goes: down for the corner hint, up for the capital. */

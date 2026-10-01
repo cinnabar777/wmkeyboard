@@ -128,11 +128,10 @@ class HintFlickTest {
     @Test
     fun `swipe ending in spacebar center is accepted`() {
         val spaceCell = Rect(left = 100f, top = 500f, right = 400f, bottom = 600f) // center at (250, 550)
-        val points = listOf(
-            GesturePoint(200f, 200f, 0L),
-            GesturePoint(225f, 375f, 50L),
-            GesturePoint(250f, 550f, 100L),
-        )
+        val first = GesturePoint(200f, 200f, 0L)
+        val last = GesturePoint(250f, 550f, 100L)
+        val points = listOf(first, GesturePoint(225f, 375f, 50L), last)
+        assertTrue(hintFlickToSpacebarCenter(first, last, spaceCell))
         assertTrue(hintFlickToSpacebarCenter(points, spaceCell))
     }
 

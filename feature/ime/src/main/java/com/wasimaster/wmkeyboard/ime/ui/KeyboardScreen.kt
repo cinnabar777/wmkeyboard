@@ -14976,21 +14976,21 @@ private fun KeyRows(
                         // decode. A preview it managed to send is retired the way
                         // a cancelled stroke's is, and the hint is typed as a
                         // popup's pick would be.
-                        val isHintValid = if (hintTarget != null && segments.isEmpty() && !picker.isOpen) {
-                            (hintFlickSpacebarCenterOn && hintFlickToSpacebarCenter(
-                                points = seg,
-                                spaceCell = liveRects.value.cellOf(KeyAction.Space)?.translate(-boxOrigin),
-                            )) || (hintFlickOn && hintFlick(
-                                points = seg,
-                                keyHeightPx = hintTarget.second.height,
-                                minTravelPx = maxOf(
-                                    hintTarget.second.height * HINT_FLICK_MIN_TRAVEL_HEIGHTS,
-                                    slop * effectiveSlop * OCTOPUS_SLOP_CLEARANCE,
-                                ),
-                            ))
-                        } else {
-                            false
-                        }
+                        val spaceCellTrans = liveRects.value.cellOf(KeyAction.Space)?.translate(-boxOrigin)
+                        val isSpacebarHint = hintTarget != null && !picker.isOpen && hintFlickSpacebarCenterOn && seg.isNotEmpty() && hintFlickToSpacebarCenter(
+                            first = GesturePoint(down.position.x, down.position.y, down.uptimeMillis),
+                            last = seg.last(),
+                            spaceCell = spaceCellTrans,
+                        )
+                        val isShortHint = hintTarget != null && segments.isEmpty() && !picker.isOpen && hintFlickOn && hintFlick(
+                            points = seg,
+                            keyHeightPx = hintTarget.second.height,
+                            minTravelPx = maxOf(
+                                hintTarget.second.height * HINT_FLICK_MIN_TRAVEL_HEIGHTS,
+                                slop * effectiveSlop * OCTOPUS_SLOP_CLEARANCE,
+                            ),
+                        )
+                        val isHintValid = isSpacebarHint || isShortHint
                         if (isHintValid && hintTarget != null) {
                             trail.release()
                             if (previewedSeg) {
