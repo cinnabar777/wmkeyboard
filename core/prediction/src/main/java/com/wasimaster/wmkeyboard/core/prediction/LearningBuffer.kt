@@ -1,6 +1,10 @@
 package com.wasimaster.wmkeyboard.core.prediction
 
 import com.wasimaster.wmkeyboard.core.gesture.GlideShapeSample
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import kotlin.io.encoding.Base64
 import kotlin.math.abs
 
 /**
@@ -486,8 +490,158 @@ class LearningBuffer(private val capacity: Int = DEFAULT_CAPACITY) {
     private fun near(anchor: Int, oldAnchor: Int, lengthDelta: Int): Boolean =
         abs(anchor - oldAnchor) <= abs(lengthDelta) + ANCHOR_SLACK
 
+    /**
+     * Serializes the active entries and recent dropped entries into a JSON snapshot string.
+     */
+    fun snapshotToJson(): String {
+        val entryDtos = entries.map { e ->
+            EntryDto(
+                word = e.word,
+                langId = e.langId,
+                weight = e.weight,
+                caseTrusted = e.caseTrusted,
+                known = e.known,
+                origin = e.origin.name,
+                replaces = e.replaces,
+                typed = e.typed,
+                taps = e.taps?.map { t -> t?.let { TouchPointDto(it.x, it.y) } },
+                keys = e.keys?.let { k ->
+                    val centersMap = mutableMapOf<String, TouchPointDto>()
+                    for (ch in e.typed) {
+                        if (k.knows(ch)) {
+                            k.center(ch)?.let { pt -> centersMap[ch.toString()] = TouchPointDto(pt.x, pt.y) }
+                        }
+                    }
+                    if (centersMap.isNotEmpty()) KeyTouchModelDto(centersMap) else null
+                },
+                replacesOrigin = e.replacesOrigin.name,
+                revised = e.revised,
+                pushIndex = e.pushIndex,
+                anchor = e.anchor,
+                suspect = e.suspect,
+                suspended = e.suspended,
+                glideLayoutKey = e.glideShape?.layoutKey,
+                glideShapeBase64 = e.glideShape?.shape?.let { Base64.encode(it) },
+            )
+        }
+        val recentDtos = recent.map { d ->
+            DroppedDto(
+                word = d.word,
+                anchor = d.anchor,
+                origin = d.origin.name,
+                replaces = d.replaces,
+                droppedAt = d.droppedAt,
+            )
+        }
+        val snapshot = SnapshotDto(
+            capacity = capacity,
+            pushes = pushes,
+            entries = entryDtos,
+            recent = recentDtos,
+        )
+        return jsonCodec.encodeToString(snapshot)
+    }
+
+    /**
+     * Restores queued entries and recent dropped items from a JSON snapshot string.
+     */
+    fun restoreFromJson(json: String) {
+        clear()
+        val snapshot = runCatching { jsonCodec.decodeFromString<SnapshotDto>(json) }.getOrNull() ?: return
+        pushes = snapshot.pushes
+        snapshot.entries.forEach { dto ->
+            val origin = runCatching { WordOrigin.valueOf(dto.origin) }.getOrDefault(WordOrigin.TYPED)
+            val replacesOrigin = runCatching { WordOrigin.valueOf(dto.replacesOrigin) }.getOrDefault(WordOrigin.TYPED)
+            val taps = dto.taps?.map { t -> t?.let { TouchPoint(it.x, it.y) } }
+            val keys = dto.keys?.let { kDto ->
+                val centers = kDto.centers.mapNotNull { (chStr, ptDto) ->
+                    chStr.singleOrNull()?.let { ch -> ch to TouchPoint(ptDto.x, ptDto.y) }
+                }.toMap()
+                if (centers.isNotEmpty()) KeyTouchModel(centers) else null
+            }
+            val entry = Entry(
+                word = dto.word,
+                langId = dto.langId,
+                weight = dto.weight,
+                caseTrusted = dto.caseTrusted,
+                known = dto.known,
+                origin = origin,
+                replaces = dto.replaces,
+                typed = dto.typed,
+                taps = taps,
+                keys = keys,
+                replacesOrigin = replacesOrigin,
+                revised = dto.revised,
+                pushIndex = dto.pushIndex,
+            )
+            entry.anchor = dto.anchor
+            entry.suspect = dto.suspect
+            entry.suspended = dto.suspended
+            if (dto.glideLayoutKey != null && dto.glideShapeBase64 != null) {
+                runCatching { Base64.decode(dto.glideShapeBase64) }.getOrNull()?.let { bytes ->
+                    entry.glideShape = GlideShapeSample(dto.glideLayoutKey, bytes)
+                }
+            }
+            entries.addLast(entry)
+        }
+        snapshot.recent.forEach { dDto ->
+            val origin = runCatching { WordOrigin.valueOf(dDto.origin) }.getOrDefault(WordOrigin.TYPED)
+            recent.addLast(Dropped(dDto.word, dDto.anchor, origin, dDto.replaces, dDto.droppedAt))
+        }
+    }
+
+    @Serializable
+    private data class SnapshotDto(
+        val capacity: Int,
+        val pushes: Long,
+        val entries: List<EntryDto>,
+        val recent: List<DroppedDto>,
+    )
+
+    @Serializable
+    private data class EntryDto(
+        val word: String,
+        val langId: String,
+        val weight: Int,
+        val caseTrusted: Boolean,
+        val known: Boolean,
+        val origin: String,
+        val replaces: String? = null,
+        val typed: String,
+        val taps: List<TouchPointDto?>? = null,
+        val keys: KeyTouchModelDto? = null,
+        val replacesOrigin: String,
+        val revised: String? = null,
+        val pushIndex: Long,
+        val anchor: Int,
+        val suspect: Boolean,
+        val suspended: Boolean,
+        val glideLayoutKey: Long? = null,
+        val glideShapeBase64: String? = null,
+    )
+
+    @Serializable
+    private data class DroppedDto(
+        val word: String,
+        val anchor: Int,
+        val origin: String,
+        val replaces: String? = null,
+        val droppedAt: Long,
+    )
+
+    @Serializable
+    private data class TouchPointDto(val x: Float, val y: Float)
+
+    @Serializable
+    private data class KeyTouchModelDto(val centers: Map<String, TouchPointDto>)
+
     companion object {
         internal const val UNANCHORED = -1
+
+        private val jsonCodec = Json {
+            ignoreUnknownKeys = true
+            encodeDefaults = true
+        }
 
         /**
          * Words held before the oldest is settled by distance. Long enough to

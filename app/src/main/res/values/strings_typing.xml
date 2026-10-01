@@ -301,6 +301,13 @@
     <string name="typing_personal_dictionary_title">Personal dictionary</string>
     <string name="typing_personal_dictionary_subtitle">Review, delete or add the words that the keyboard learned</string>
 
+    <string name="typing_learning_buffer_settlement_title">Proofreading queue settlement delay</string>
+    <string name="typing_learning_buffer_settlement_subtitle">Delay before un-settled words commit to history after closing keyboard or leaving app</string>
+    <string name="typing_learning_buffer_settlement_info">When you close the keyboard or leave an app, un-settled words wait in a proofreading queue. If you return within this time, your proofreading queue and gesture strokes are retained live. When the timer expires, queued words settle into user history. 0 minutes settles words immediately upon leaving.</string>
+    <string name="typing_learning_buffer_settlement_immediate">Immediate (0 min)</string>
+    <string name="typing_learning_buffer_settlement_one_min">1 minute</string>
+    <string name="typing_learning_buffer_settlement_plural_min">%1$d minutes</string>
+
     <string name="typing_custom_dictionaries_title">Custom dictionaries</string>
     <string name="typing_custom_dictionaries_subtitle">Import your own word lists for each language</string>
 
@@ -572,6 +579,10 @@
     <string name="typing_glide_shapes_per_word_title">Shapes kept per word</string>
     <string name="typing_glide_shapes_per_word_subtitle">How many ways of swiping one word are remembered</string>
     <string name="typing_glide_shapes_per_word_info">Learn my swipe style keeps your own shapes for each word you swipe, and a swipe is read against the nearest of them. Swipe a word the same way and the shape settles in; swipe it a clearly different way and that is kept as another shape, up to this many, the least used making room. Raise it if you swipe some words several different ways and the keyboard keeps forgetting one of them. The shapes travel in a backup under Swipe style, so you can see how many your words really use. Lowering it takes the extras out of use at once, and they are only deleted when that word next learns a new shape. Used only while Learn my swipe style is on.</string>
+
+    <string name="typing_glide_shape_seeding_title">Seed candidates from learned shapes</string>
+    <string name="typing_glide_shape_seeding_subtitle">Allows imprecise or off-target gestures to suggest learned words</string>
+    <string name="typing_glide_shape_seeding_info">When enabled, any gesture that closely matches a learned shape in your swipe style store will be directly promoted into the candidate suggestions, even if the gesture started or ended far off the word\'s target keys. Leave disabled if you prefer standard key-anchor decoding without candidate seeding.</string>
     <string name="typing_glide_wiggle_extent_info">Measured in key widths. Keep this under the width of one key, or a word that goes from one key to the key next door and back reads as a rub on one key. Used only while the switch above is on.</string>
 
     <string name="typing_swipe_start_distance_title">Swipe start distance</string>
