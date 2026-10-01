@@ -14640,7 +14640,7 @@ private fun KeyRows(
                     // The key a flick down would type the hint of (#178), fixed
                     // at the down the way the octopus anchor is: the stroke is
                     // judged at the lift, but the key it began on cannot change.
-                    val hintTarget = if (hintFlickOn) {
+                    val hintTarget = if (hintFlickOn || hintFlickSpacebarCenterOn) {
                         liveRects.value.hintFlickTarget(down.position + boxOrigin)
                     } else {
                         null
@@ -14977,21 +14977,17 @@ private fun KeyRows(
                         // a cancelled stroke's is, and the hint is typed as a
                         // popup's pick would be.
                         val isHintValid = if (hintTarget != null && segments.isEmpty() && !picker.isOpen) {
-                            if (hintFlickSpacebarCenterOn) {
-                                hintFlickToSpacebarCenter(
-                                    points = seg,
-                                    spaceCell = liveRects.value.cellOf(KeyAction.Space)?.translate(-boxOrigin),
-                                )
-                            } else {
-                                hintFlick(
-                                    points = seg,
-                                    keyHeightPx = hintTarget.second.height,
-                                    minTravelPx = maxOf(
-                                        hintTarget.second.height * HINT_FLICK_MIN_TRAVEL_HEIGHTS,
-                                        slop * effectiveSlop * OCTOPUS_SLOP_CLEARANCE,
-                                    ),
-                                )
-                            }
+                            (hintFlickSpacebarCenterOn && hintFlickToSpacebarCenter(
+                                points = seg,
+                                spaceCell = liveRects.value.cellOf(KeyAction.Space)?.translate(-boxOrigin),
+                            )) || (hintFlickOn && hintFlick(
+                                points = seg,
+                                keyHeightPx = hintTarget.second.height,
+                                minTravelPx = maxOf(
+                                    hintTarget.second.height * HINT_FLICK_MIN_TRAVEL_HEIGHTS,
+                                    slop * effectiveSlop * OCTOPUS_SLOP_CLEARANCE,
+                                ),
+                            ))
                         } else {
                             false
                         }
@@ -15176,12 +15172,12 @@ private fun KeyRows(
             // lift against whichever of the two its key takes. An upward stroke
             // off a key carrying an octopus word is left for the octopus loop,
             // which runs on the Main pass after this one.
-            .pointerInput(hintFlickOn, capitalFlickOn, octopusFlickWanted) {
-                if (!hintFlickOn && !capitalFlickOn) return@pointerInput
+            .pointerInput(hintFlickOn, hintFlickSpacebarCenterOn, capitalFlickOn, octopusFlickWanted) {
+                if (!hintFlickOn && !hintFlickSpacebarCenterOn && !capitalFlickOn) return@pointerInput
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
                     val at = down.position + boxOrigin
-                    val hint = if (hintFlickOn) liveRects.value.hintFlickTarget(at) else null
+                    val hint = if (hintFlickOn || hintFlickSpacebarCenterOn) liveRects.value.hintFlickTarget(at) else null
                     val capital = if (capitalFlickOn) {
                         liveRects.value.capitalFlickTarget(at)?.takeUnless {
                             octopusFlickWanted &&
@@ -15209,14 +15205,10 @@ private fun KeyRows(
                         points.add(GesturePoint(change.position.x, change.position.y, change.uptimeMillis))
                         if (!change.pressed) {
                             val isHint = if (hint != null) {
-                                if (hintFlickSpacebarCenterOn) {
-                                    hintFlickToSpacebarCenter(
-                                        points = points,
-                                        spaceCell = liveRects.value.cellOf(KeyAction.Space)?.translate(-boxOrigin),
-                                    )
-                                } else {
-                                    hintFlick(points, cell.height, minTravel)
-                                }
+                                (hintFlickSpacebarCenterOn && hintFlickToSpacebarCenter(
+                                    points = points,
+                                    spaceCell = liveRects.value.cellOf(KeyAction.Space)?.translate(-boxOrigin),
+                                )) || (hintFlickOn && hintFlick(points, cell.height, minTravel))
                             } else {
                                 false
                             }

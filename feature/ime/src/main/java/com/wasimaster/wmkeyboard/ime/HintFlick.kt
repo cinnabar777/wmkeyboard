@@ -66,14 +66,16 @@ internal fun hintFlickToSpacebarCenter(
     val first = points.first()
     val last = points.last()
 
+    // Must be a downward movement toward the spacebar
     val dy = last.y - first.y
     if (dy <= 0f) return false
 
+    // Target zone centered on spacebar cell
     val spaceCenter = spaceCell.center
     val distX = abs(last.x - spaceCenter.x)
     val distY = abs(last.y - spaceCenter.y)
 
-    val maxDistX = spaceCell.width * 0.4f
+    val maxDistX = spaceCell.width * 0.45f
     val maxDistY = spaceCell.height * 0.8f
 
     return distX <= maxDistX && distY <= maxDistY

@@ -2155,7 +2155,7 @@ internal fun TypingGesturesSettings(
                 default = SettingsDefaults.layoutBehavior.hintFlick,
             ) { scope.launch { repository.setHintFlick(it) } }
         }
-        item(visible = hintFlickOn) {
+        item {
             ToggleSetting(
                 R.string.typing_hint_flick_spacebar_center_title,
                 stringResource(R.string.typing_hint_flick_spacebar_center_subtitle),
