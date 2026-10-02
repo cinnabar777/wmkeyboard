@@ -834,6 +834,31 @@ open class WMKeyboardService : InputMethodService() {
             }
             file.delete()
         }
+        lastGestureWord = null
+        lastGestureStroke = null
+    }
+
+    private fun flushAllSessionSnapshots() {
+        settlementTimerJobs.values.forEach { it.cancel() }
+        settlementTimerJobs.clear()
+        flushLearningBuffer(verifyCorrections = false)
+        val dir = File(filesDir, "learning/sessions")
+        if (dir.exists()) {
+            dir.listFiles()?.forEach { file ->
+                if (file.isFile && file.extension == "json") {
+                    val json = runCatching { file.readText() }.getOrNull()
+                    if (!json.isNullOrBlank()) {
+                        val tempBuffer = LearningBuffer()
+                        tempBuffer.restoreFromJson(json)
+                        val drained = tempBuffer.drain()
+                        settleLearned(drained, verify = false)
+                    }
+                    file.delete()
+                }
+            }
+        }
+        lastGestureWord = null
+        lastGestureStroke = null
     }
 
     /**
@@ -5183,7 +5208,9 @@ open class WMKeyboardService : InputMethodService() {
             } else if (oldPkg.isNullOrBlank() && newPkg.isNotBlank()) {
                 restoreSessionSnapshot(newPkg)
             } else {
-                flushLearningBuffer(verifyCorrections = false)
+                if (_uiState.value.settings.learningBufferSettlementMinutes <= 0) {
+                    flushLearningBuffer(verifyCorrections = false)
+                }
             }
             // A different field is a different run of typing, and the blocks an
             // undo puts on a correction are scoped to the run that earned them.
@@ -6337,7 +6364,7 @@ open class WMKeyboardService : InputMethodService() {
         KdeConnectHub.release(KdeConnectHub.Reason.KEYBOARD)
         KdeConnectHub.release(KdeConnectHub.Reason.SERVICE)
         finishRevisionOnLeave()
-        flushLearningBuffer()
+        flushAllSessionSnapshots()
         // Blocking, and on the same queue as the hide's saves: the process is
         // going, so this waits for a hide's save still in flight and then
         // writes whatever changed since.
@@ -14267,6 +14294,8 @@ open class WMKeyboardService : InputMethodService() {
         // So is any stroke still waiting to be told what it meant: the answer
         // would have to have been in this text (issue #213).
         undoneGlide = null
+        lastGestureWord = null
+        lastGestureStroke = null
 
         // Persist learning stores to disk when new items have been settled.
         if (drainedLearning.isNotEmpty() || drainedCorrections.isNotEmpty()) {
