@@ -521,7 +521,7 @@ class LearningBuffer(private val capacity: Int = DEFAULT_CAPACITY) {
                 suspect = e.suspect,
                 suspended = e.suspended,
                 glideLayoutKey = e.glideShape?.layoutKey,
-                glideShapeBase64 = e.glideShape?.shape?.let { Base64.encode(it) },
+                glideShapeHex = e.glideShape?.shape?.joinToString("") { "%02x".format(it) },
             )
         }
         val recentDtos = recent.map { d ->
@@ -577,8 +577,14 @@ class LearningBuffer(private val capacity: Int = DEFAULT_CAPACITY) {
             entry.anchor = dto.anchor
             entry.suspect = dto.suspect
             entry.suspended = dto.suspended
-            if (dto.glideLayoutKey != null && dto.glideShapeBase64 != null) {
-                runCatching { Base64.decode(dto.glideShapeBase64) }.getOrNull()?.let { bytes ->
+            val hex = dto.glideShapeHex ?: dto.glideShapeBase64
+            if (dto.glideLayoutKey != null && hex != null) {
+                runCatching {
+                    val bytes = if (dto.glideShapeHex != null) {
+                        hex.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
+                    } else {
+                        Base64.decode(hex)
+                    }
                     entry.glideShape = GlideShapeSample(dto.glideLayoutKey, bytes)
                 }
             }
@@ -618,6 +624,7 @@ class LearningBuffer(private val capacity: Int = DEFAULT_CAPACITY) {
         val suspended: Boolean,
         val glideLayoutKey: Long? = null,
         val glideShapeBase64: String? = null,
+        val glideShapeHex: String? = null,
     )
 
     @Serializable

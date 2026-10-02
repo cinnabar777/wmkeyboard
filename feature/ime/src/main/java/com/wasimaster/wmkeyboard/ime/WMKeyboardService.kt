@@ -5200,13 +5200,22 @@ open class WMKeyboardService : InputMethodService() {
                 }
                 activeSessionPackage = null
                 learningBuffer.clear()
-            } else if (newPkg.isNotBlank() && newPkg != oldPkg) {
-                if (!oldPkg.isNullOrBlank()) {
-                    scheduleOrSettleSession(oldPkg)
+            } else if (newPkg.isNotBlank()) {
+                if (newPkg != oldPkg) {
+                    if (!oldPkg.isNullOrBlank()) {
+                        scheduleOrSettleSession(oldPkg)
+                    }
+                    restoreSessionSnapshot(newPkg)
+                } else {
+                    val sessionFile = File(File(filesDir, "learning/sessions"), "${newPkg.replace('/', '_')}.json")
+                    if (sessionFile.exists()) {
+                        restoreSessionSnapshot(newPkg)
+                    } else if (oldPkg.isNullOrBlank()) {
+                        restoreSessionSnapshot(newPkg)
+                    } else if (_uiState.value.settings.learningBufferSettlementMinutes <= 0) {
+                        flushLearningBuffer(verifyCorrections = false)
+                    }
                 }
-                restoreSessionSnapshot(newPkg)
-            } else if (oldPkg.isNullOrBlank() && newPkg.isNotBlank()) {
-                restoreSessionSnapshot(newPkg)
             } else {
                 if (_uiState.value.settings.learningBufferSettlementMinutes <= 0) {
                     flushLearningBuffer(verifyCorrections = false)
