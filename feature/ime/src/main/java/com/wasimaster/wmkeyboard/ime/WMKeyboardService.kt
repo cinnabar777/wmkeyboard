@@ -5156,10 +5156,19 @@ open class WMKeyboardService : InputMethodService() {
             // Handle session switching or field change
             val newPkg = attribute?.packageName.orEmpty()
             val oldPkg = activeSessionPackage
+            val inputType = attribute?.inputType ?: 0
+            val fieldClass = inputType and InputType.TYPE_MASK_CLASS
+            val fieldVariation = inputType and InputType.TYPE_MASK_VARIATION
+            val actionMask = attribute?.imeOptions?.let { it and EditorInfo.IME_MASK_ACTION } ?: EditorInfo.IME_ACTION_NONE
+            val isSearchOrUri = fieldVariation == InputType.TYPE_TEXT_VARIATION_URI ||
+                fieldVariation == InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT ||
+                actionMask == EditorInfo.IME_ACTION_SEARCH
             val isSecure = attribute != null && (
-                hidesTypedText(attribute.inputType) ||
+                hidesTypedText(inputType) ||
                 (attribute.imeOptions and EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING != 0) ||
-                _uiState.value.incognitoOn
+                _uiState.value.incognitoOn ||
+                fieldClass != InputType.TYPE_CLASS_TEXT ||
+                isSearchOrUri
             )
 
             if (isSecure) {
