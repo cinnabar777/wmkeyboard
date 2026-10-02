@@ -820,21 +820,19 @@ open class WMKeyboardService : InputMethodService() {
     private fun flushSession(pkg: String) {
         if (activeSessionPackage == pkg) {
             flushLearningBuffer(verifyCorrections = false)
-            clearSessionSnapshotFile(pkg)
-        } else {
-            val dir = File(filesDir, "learning/sessions")
-            val file = File(dir, "${pkg.replace('/', '_')}.json")
-            if (file.exists()) {
-                val json = runCatching { file.readText() }.getOrNull()
-                if (!json.isNullOrBlank()) {
-                    val tempBuffer = LearningBuffer()
-                    tempBuffer.restoreFromJson(json)
-                    val drained = tempBuffer.drain()
-                    settleLearned(drained, verify = false)
-                    if (drained.isNotEmpty()) saveLearningStores()
-                }
-                file.delete()
+        }
+        val dir = File(filesDir, "learning/sessions")
+        val file = File(dir, "${pkg.replace('/', '_')}.json")
+        if (file.exists()) {
+            val json = runCatching { file.readText() }.getOrNull()
+            if (!json.isNullOrBlank()) {
+                val tempBuffer = LearningBuffer()
+                tempBuffer.restoreFromJson(json)
+                val drained = tempBuffer.drain()
+                settleLearned(drained, verify = false)
+                if (drained.isNotEmpty()) saveLearningStores()
             }
+            file.delete()
         }
     }
 
@@ -843,16 +841,12 @@ open class WMKeyboardService : InputMethodService() {
      */
     private fun saveActiveSessionSnapshot() {
         val pkg = activeSessionPackage ?: return
-        if (pkg.isBlank() || learningBuffer.isEmpty()) {
-            clearSessionSnapshotFile(pkg)
-            return
-        }
+        if (pkg.isBlank()) return
+        if (learningBuffer.isEmpty()) return
         val snapshot = learningBuffer.snapshotToJson()
-        serviceScope.launch(persistDispatcher) {
-            runCatching {
-                val dir = File(filesDir, "learning/sessions").apply { mkdirs() }
-                File(dir, "${pkg.replace('/', '_')}.json").writeText(snapshot)
-            }
+        runCatching {
+            val dir = File(filesDir, "learning/sessions").apply { mkdirs() }
+            File(dir, "${pkg.replace('/', '_')}.json").writeText(snapshot)
         }
     }
 
@@ -866,6 +860,7 @@ open class WMKeyboardService : InputMethodService() {
         val file = File(dir, "${pkg.replace('/', '_')}.json")
         if (file.exists()) {
             val json = runCatching { file.readText() }.getOrNull()
+            file.delete()
             if (!json.isNullOrBlank()) {
                 learningBuffer.restoreFromJson(json)
                 return
