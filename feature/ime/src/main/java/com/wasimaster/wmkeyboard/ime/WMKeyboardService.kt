@@ -798,35 +798,43 @@ open class WMKeyboardService : InputMethodService() {
         val delayMinutes = _uiState.value.settings.learningBufferSettlementMinutes
         if (delayMinutes <= 0) {
             cancelSettlementTimer(pkg)
-            flushLearningBuffer(verifyCorrections = false)
-            clearSessionSnapshotFile(pkg)
+            flushSession(pkg)
         } else {
             saveActiveSessionSnapshot()
+            if (activeSessionPackage == pkg) {
+                learningBuffer.clear()
+            }
             cancelSettlementTimer(pkg)
             val job = serviceScope.launch {
                 delay(delayMinutes * 60 * 1000L)
                 settlementTimerJobs.remove(pkg)
-                if (activeSessionPackage == pkg) {
-                    flushLearningBuffer(verifyCorrections = false)
-                    clearSessionSnapshotFile(pkg)
-                } else {
-                    // Flush background session snapshot from file
-                    val dir = File(filesDir, "learning/sessions")
-                    val file = File(dir, "${pkg.replace('/', '_')}.json")
-                    if (file.exists()) {
-                        val json = runCatching { file.readText() }.getOrNull()
-                        if (!json.isNullOrBlank()) {
-                            val tempBuffer = LearningBuffer()
-                            tempBuffer.restoreFromJson(json)
-                            val drained = tempBuffer.drain()
-                            settleLearned(drained, verify = false)
-                            if (drained.isNotEmpty()) saveLearningStores()
-                        }
-                        file.delete()
-                    }
-                }
+                flushSession(pkg)
             }
             settlementTimerJobs[pkg] = job
+        }
+    }
+
+    /**
+     * Flushes and settles session data for [pkg] (either from memory if active, or from snapshot file).
+     */
+    private fun flushSession(pkg: String) {
+        if (activeSessionPackage == pkg) {
+            flushLearningBuffer(verifyCorrections = false)
+            clearSessionSnapshotFile(pkg)
+        } else {
+            val dir = File(filesDir, "learning/sessions")
+            val file = File(dir, "${pkg.replace('/', '_')}.json")
+            if (file.exists()) {
+                val json = runCatching { file.readText() }.getOrNull()
+                if (!json.isNullOrBlank()) {
+                    val tempBuffer = LearningBuffer()
+                    tempBuffer.restoreFromJson(json)
+                    val drained = tempBuffer.drain()
+                    settleLearned(drained, verify = false)
+                    if (drained.isNotEmpty()) saveLearningStores()
+                }
+                file.delete()
+            }
         }
     }
 
@@ -5159,16 +5167,11 @@ open class WMKeyboardService : InputMethodService() {
             val inputType = attribute?.inputType ?: 0
             val fieldClass = inputType and InputType.TYPE_MASK_CLASS
             val fieldVariation = inputType and InputType.TYPE_MASK_VARIATION
-            val actionMask = attribute?.imeOptions?.let { it and EditorInfo.IME_MASK_ACTION } ?: EditorInfo.IME_ACTION_NONE
-            val isSearchOrUri = fieldVariation == InputType.TYPE_TEXT_VARIATION_URI ||
-                fieldVariation == InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT ||
-                actionMask == EditorInfo.IME_ACTION_SEARCH
             val isSecure = attribute != null && (
                 hidesTypedText(inputType) ||
                 (attribute.imeOptions and EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING != 0) ||
                 _uiState.value.incognitoOn ||
-                fieldClass != InputType.TYPE_CLASS_TEXT ||
-                isSearchOrUri
+                fieldClass != InputType.TYPE_CLASS_TEXT
             )
 
             if (isSecure) {
@@ -6272,7 +6275,9 @@ open class WMKeyboardService : InputMethodService() {
         clearLearnOffer()
         clearCorrectionOffer()
         finishRevisionOnLeave()
-        flushLearningBuffer()
+        activeSessionPackage?.let { pkg ->
+            scheduleOrSettleSession(pkg)
+        } ?: flushLearningBuffer()
         // Where the user was, for the keyboard that comes back — which is
         // usually a new process, this one having been stopped in the meantime
         // (issue #227). Read after the closes above, so nothing that did not
