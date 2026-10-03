@@ -863,11 +863,6 @@ open class WMKeyboardService : InputMethodService() {
             file.delete()
             if (!json.isNullOrBlank()) {
                 learningBuffer.restoreFromJson(json)
-                for (entry in learningBuffer.queuedEntries) {
-                    entry.readings?.let { readings ->
-                        glideReadings.remember(entry.word, readings)
-                    }
-                }
                 return
             }
         }
@@ -5180,22 +5175,13 @@ open class WMKeyboardService : InputMethodService() {
                 }
                 activeSessionPackage = null
                 learningBuffer.clear()
-            } else if (newPkg.isNotBlank()) {
-                if (newPkg != oldPkg) {
-                    if (!oldPkg.isNullOrBlank()) {
-                        scheduleOrSettleSession(oldPkg)
-                    }
-                    restoreSessionSnapshot(newPkg)
-                } else {
-                    val sessionFile = File(File(filesDir, "learning/sessions"), "${newPkg.replace('/', '_')}.json")
-                    if (sessionFile.exists()) {
-                        restoreSessionSnapshot(newPkg)
-                    } else if (oldPkg.isNullOrBlank()) {
-                        restoreSessionSnapshot(newPkg)
-                    } else if (_uiState.value.settings.learningBufferSettlementMinutes <= 0) {
-                        flushLearningBuffer(verifyCorrections = false)
-                    }
+            } else if (newPkg.isNotBlank() && newPkg != oldPkg) {
+                if (!oldPkg.isNullOrBlank()) {
+                    scheduleOrSettleSession(oldPkg)
                 }
+                restoreSessionSnapshot(newPkg)
+            } else if (oldPkg.isNullOrBlank() && newPkg.isNotBlank()) {
+                restoreSessionSnapshot(newPkg)
             } else {
                 if (_uiState.value.settings.learningBufferSettlementMinutes <= 0) {
                     flushLearningBuffer(verifyCorrections = false)
@@ -6175,9 +6161,6 @@ open class WMKeyboardService : InputMethodService() {
     override fun onFinishInputView(finishingInput: Boolean) {
         super.onFinishInputView(finishingInput)
         keyboardVisible = false
-        activeSessionPackage?.let { pkg ->
-            scheduleOrSettleSession(pkg)
-        }
         // The drag that put it up cannot finish with the keyboard gone.
         caretMagnifier.stop()
         // The ring belongs to the board that is going away: a new session gets
@@ -6286,9 +6269,6 @@ open class WMKeyboardService : InputMethodService() {
         clearLearnOffer()
         clearCorrectionOffer()
         finishRevisionOnLeave()
-        activeSessionPackage?.let { pkg ->
-            scheduleOrSettleSession(pkg)
-        } ?: flushLearningBuffer()
         // Where the user was, for the keyboard that comes back — which is
         // usually a new process, this one having been stopped in the meantime
         // (issue #227). Read after the closes above, so nothing that did not

@@ -539,7 +539,6 @@ class LearningBuffer(private val capacity: Int = DEFAULT_CAPACITY) {
                 suspended = e.suspended,
                 glideLayoutKey = e.glideShape?.layoutKey,
                 glideShapeBase64 = e.glideShape?.shape?.let { Base64.encode(it) },
-                readings = e.readings,
             )
         }
         val recentDtos = recent.map { d ->
@@ -595,7 +594,6 @@ class LearningBuffer(private val capacity: Int = DEFAULT_CAPACITY) {
             entry.anchor = dto.anchor
             entry.suspect = dto.suspect
             entry.suspended = dto.suspended
-            entry.readings = dto.readings
             if (dto.glideLayoutKey != null && dto.glideShapeBase64 != null) {
                 runCatching { Base64.decode(dto.glideShapeBase64) }.getOrNull()?.let { bytes ->
                     entry.glideShape = GlideShapeSample(dto.glideLayoutKey, bytes)
