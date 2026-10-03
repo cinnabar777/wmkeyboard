@@ -196,6 +196,14 @@ class LearningBuffer(private val capacity: Int = DEFAULT_CAPACITY) {
     fun isEmpty(): Boolean = entries.isEmpty()
 
     /**
+     * Resets the anchor of all queued entries to [UNANCHORED] so subsequent
+     * deletions (such as a Cut action) do not drop them from the queue.
+     */
+    fun unanchor() {
+        entries.forEach { it.anchor = UNANCHORED }
+    }
+
+    /**
      * Queues a freshly committed [word].
      *
      * Returns whatever had to be pushed out to stay inside [capacity] —

@@ -28845,7 +28845,6 @@ open class WMKeyboardService : InputMethodService() {
                 if (!privateCopy(ic, cut = false)) ic.performContextMenuAction(android.R.id.copy)
                 maybeToastCopied()
                 _uiState.update { it.copy(textEditSelecting = false) }
-                flushLearningBuffer(verifyCorrections = false)
             }
             TextEditAction.PASTE -> {
                 if (!isClipboardAccessible()) return
@@ -28864,12 +28863,11 @@ open class WMKeyboardService : InputMethodService() {
                 sendEditorKey(KeyEvent.KEYCODE_MOVE_END, selecting, ctrl = true)
             // Like copy, it ends the panel's select mode: the selection is gone.
             TextEditAction.CUT -> {
-                flushLearningBuffer(verifyCorrections = false)
+                learningBuffer.unanchor()
                 if (!privateCopy(ic, cut = true)) ic.performContextMenuAction(android.R.id.cut)
                 _uiState.update { it.copy(textEditSelecting = false) }
             }
             TextEditAction.COPY -> {
-                flushLearningBuffer(verifyCorrections = false)
                 ic.performContextMenuAction(android.R.id.copy)
             }
         }
@@ -29021,13 +29019,12 @@ open class WMKeyboardService : InputMethodService() {
                 if (!privateCopy(ic, cut = false)) ic.performContextMenuAction(android.R.id.copy)
                 maybeToastCopied()
                 _uiState.update { it.copy(textEditSelecting = false) }
-                flushLearningBuffer(verifyCorrections = false)
             }
             ClipboardKeyAction.CUT -> {
+                learningBuffer.unanchor()
                 if (!hasSelection && selectAllIfEmpty) ic.performContextMenuAction(android.R.id.selectAll)
                 if (!privateCopy(ic, cut = true)) ic.performContextMenuAction(android.R.id.cut)
                 _uiState.update { it.copy(textEditSelecting = false) }
-                flushLearningBuffer(verifyCorrections = false)
             }
             ClipboardKeyAction.PASTE -> {
                 if (!isClipboardAccessible()) return
