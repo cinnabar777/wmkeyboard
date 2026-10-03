@@ -14012,9 +14012,11 @@ open class WMKeyboardService : InputMethodService() {
         // lexicon: [UserLexicon.learnWord] would refuse the count anyway, and
         // queuing it would only take a slot from a word that means something.
         if (reinforcement <= 0) return
+        val following = followingWordFromField()
         val queued = learningBuffer.push(
             word, learnLanguageId(word, state), reinforcement, caseTrusted, known = true,
             origin = origin, replaces = replaces, typed = typed, taps = taps, keys = keys,
+            followingWord = following,
         )
         // Between the push and the settle, for the reason [noteUnknownWord]
         // spells out. Here too because the word a misread swipe is corrected
@@ -14059,9 +14061,11 @@ open class WMKeyboardService : InputMethodService() {
             offerToLearn(word, caseTrusted)
             return
         }
+        val following = followingWordFromField()
         val queued = learningBuffer.push(
             word, learnLanguageId(word, state), reinforcement, caseTrusted,
             origin = origin, replaces = replaces, typed = typed, taps = taps, keys = keys,
+            followingWord = following,
         )
         // Between the push and the settle: the stroke a backspaced glide left
         // waiting needs this word's entry to exist before it can ride it, and
@@ -14138,6 +14142,15 @@ open class WMKeyboardService : InputMethodService() {
                         userLexicon.learnSkip2gram(p3, word)
                     }
                 }
+                entry.followingWord?.let { f ->
+                    if (isKnownWord(f)) {
+                        userLexicon.learnBigram(word, f)
+                        prevWord?.let { p ->
+                            userLexicon.learnTrigram(p, word, f)
+                            userLexicon.learnSkip1gram(p, f)
+                        }
+                    }
+                }
                 prevWord3 = prevWord2
                 prevWord2 = prevWord
                 prevWord = word
@@ -14145,18 +14158,6 @@ open class WMKeyboardService : InputMethodService() {
                 prevWord3 = null
                 prevWord2 = null
                 prevWord = null
-            }
-        }
-
-        // Connect N-grams to the word immediately following the insertion point if editing inline
-        if (prevWord != null) {
-            val following = followingWordFromField()
-            if (!following.isNullOrEmpty() && isKnownWord(following)) {
-                userLexicon.learnBigram(prevWord!!, following)
-                prevWord2?.let { p2 ->
-                    userLexicon.learnTrigram(p2, prevWord!!, following)
-                    userLexicon.learnSkip1gram(p2, following)
-                }
             }
         }
     }

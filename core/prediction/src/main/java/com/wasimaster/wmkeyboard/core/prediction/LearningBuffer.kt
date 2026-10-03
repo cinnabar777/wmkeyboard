@@ -117,6 +117,7 @@ class LearningBuffer(private val capacity: Int = DEFAULT_CAPACITY) {
         replacesOrigin: WordOrigin = WordOrigin.TYPED,
         revised: String? = null,
         internal val pushIndex: Long = 0L,
+        followingWord: String? = null,
     ) {
         var anchor: Int = UNANCHORED
             internal set
@@ -149,6 +150,9 @@ class LearningBuffer(private val capacity: Int = DEFAULT_CAPACITY) {
             internal set
 
         var readings: List<String>? = null
+            internal set
+
+        var followingWord: String? = followingWord
             internal set
 
         /**
@@ -229,10 +233,11 @@ class LearningBuffer(private val capacity: Int = DEFAULT_CAPACITY) {
         replacesOrigin: WordOrigin = WordOrigin.TYPED,
         /** What [replaces] became when that is more than [word]: a two-word repair. */
         revised: String? = null,
+        followingWord: String? = null,
     ): List<Entry> {
         val entry = Entry(
             word, langId, weight, caseTrusted, known, origin, replaces, typed, taps, keys,
-            replacesOrigin, revised, pushIndex = ++pushes,
+            replacesOrigin, revised, pushIndex = ++pushes, followingWord = followingWord,
         )
         if (anchor >= 0) entry.anchor = anchor
         // A caller that knows what this word replaced has just watched the
@@ -539,6 +544,7 @@ class LearningBuffer(private val capacity: Int = DEFAULT_CAPACITY) {
                 suspended = e.suspended,
                 glideLayoutKey = e.glideShape?.layoutKey,
                 glideShapeBase64 = e.glideShape?.shape?.let { Base64.encode(it) },
+                followingWord = e.followingWord,
             )
         }
         val recentDtos = recent.map { d ->
@@ -594,6 +600,7 @@ class LearningBuffer(private val capacity: Int = DEFAULT_CAPACITY) {
             entry.anchor = dto.anchor
             entry.suspect = dto.suspect
             entry.suspended = dto.suspended
+            entry.followingWord = dto.followingWord
             if (dto.glideLayoutKey != null && dto.glideShapeBase64 != null) {
                 runCatching { Base64.decode(dto.glideShapeBase64) }.getOrNull()?.let { bytes ->
                     entry.glideShape = GlideShapeSample(dto.glideLayoutKey, bytes)
@@ -636,6 +643,7 @@ class LearningBuffer(private val capacity: Int = DEFAULT_CAPACITY) {
         val glideLayoutKey: Long? = null,
         val glideShapeBase64: String? = null,
         val readings: List<String>? = null,
+        val followingWord: String? = null,
     )
 
     @Serializable
