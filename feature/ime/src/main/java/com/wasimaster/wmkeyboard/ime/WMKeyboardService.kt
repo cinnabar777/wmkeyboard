@@ -14147,6 +14147,30 @@ open class WMKeyboardService : InputMethodService() {
                 prevWord = null
             }
         }
+
+        // Connect N-grams to the word immediately following the insertion point if editing inline
+        if (prevWord != null) {
+            val following = followingWordFromField()
+            if (!following.isNullOrEmpty() && isKnownWord(following)) {
+                userLexicon.learnBigram(prevWord!!, following)
+                prevWord2?.let { p2 ->
+                    userLexicon.learnTrigram(p2, prevWord!!, following)
+                    userLexicon.learnSkip1gram(p2, following)
+                }
+            }
+        }
+    }
+
+    /**
+     * Reads the immediate word standing after the cursor in the input field,
+     * if available, to connect forward N-grams when editing text inline.
+     */
+    private fun followingWordFromField(): String? {
+        val ic = currentInputConnection ?: return null
+        val after = ic.getTextAfterCursor(64, 0) ?: return null
+        val cleaned = after.toString().takeWhile { WordContext.isWordChar(it) || it == ' ' }.trimStart()
+        val word = cleaned.takeWhile { WordContext.isWordChar(it) }
+        return word.takeIf { WordContext.isLearnableWord(it) }
     }
 
     /**
