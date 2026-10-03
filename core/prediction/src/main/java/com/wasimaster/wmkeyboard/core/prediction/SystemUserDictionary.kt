@@ -57,7 +57,7 @@ object SystemUserDictionary {
      */
     fun add(context: Context, word: String) {
         val cleaned = word.trim()
-        if (cleaned.isEmpty()) return
+        if (cleaned.length < 2) return
         val key = cleaned.lowercase()
         synchronized(this) {
             seed(context)
@@ -185,7 +185,7 @@ object SystemUserDictionary {
             val singleWord = parts.size == 1
             for (trimmed in parts) {
                 val key = WordKey.of(trimmed)
-                if (key.isEmpty()) continue
+                if (key.length < 2) continue
                 keys.add(key)
                 // The capital the user typed into the platform's dictionary is
                 // the whole reason they went there ("Boston", "AOSP", an email
@@ -265,7 +265,7 @@ object SystemUserDictionary {
         var written = 0
         for (word in words) {
             val cleaned = word.trim()
-            if (cleaned.isEmpty()) continue
+            if (cleaned.length < 2) continue
             val key = cleaned.lowercase()
             val fresh = synchronized(this) {
                 seed(context)

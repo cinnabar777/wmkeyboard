@@ -172,7 +172,7 @@ class UserLexicon(private val storageFile: File?) {
         listedInLowerCase: Boolean = false,
     ): Boolean {
         val key = WordKey.of(word)
-        if (key.isEmpty() || key.length > MAX_WORD_LENGTH || count <= 0) return false
+        if (key.length < 2 || key.length > MAX_WORD_LENGTH || count <= 0) return false
         if (!WordContext.isLearnableWord(key)) return false
         // Only the caller knows whether the capital it is holding is the
         // user's or the keyboard's, so the vote is cast on its say-so (#44).

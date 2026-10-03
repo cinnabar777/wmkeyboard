@@ -148,6 +148,9 @@ class LearningBuffer(private val capacity: Int = DEFAULT_CAPACITY) {
         var glideShape: GlideShapeSample? = null
             internal set
 
+        var readings: List<String>? = null
+            internal set
+
         /**
          * The caret has been back inside this word since it was committed
          * (#159, #160). Not a verdict: a caret put on a word is as often a
@@ -194,6 +197,9 @@ class LearningBuffer(private val capacity: Int = DEFAULT_CAPACITY) {
     val size: Int get() = entries.size
 
     fun isEmpty(): Boolean = entries.isEmpty()
+
+    /** All queued entries in order. */
+    val queuedEntries: List<Entry> get() = entries.toList()
 
     /**
      * Queues a freshly committed [word].
@@ -404,6 +410,17 @@ class LearningBuffer(private val capacity: Int = DEFAULT_CAPACITY) {
     }
 
     /**
+     * Ties [readings], what the gesture stroke that committed [word] had to
+     * offer, to the newest copy of the word waiting here.
+     */
+    fun attachReadings(word: String, readings: List<String>): Boolean {
+        val key = WordKey.of(word)
+        val entry = entries.lastOrNull { WordKey.of(it.word) == key } ?: return false
+        entry.readings = readings
+        return true
+    }
+
+    /**
      * Drops [word] outright — the user took the commit back by hand (undoing
      * an autocorrect, re-picking from the strip), which is a statement about
      * the word rather than about the text around it.
@@ -521,7 +538,8 @@ class LearningBuffer(private val capacity: Int = DEFAULT_CAPACITY) {
                 suspect = e.suspect,
                 suspended = e.suspended,
                 glideLayoutKey = e.glideShape?.layoutKey,
-                glideShapeHex = e.glideShape?.shape?.joinToString("") { "%02x".format(it) },
+                glideShapeBase64 = e.glideShape?.shape?.let { Base64.encode(it) },
+                readings = e.readings,
             )
         }
         val recentDtos = recent.map { d ->
@@ -577,14 +595,9 @@ class LearningBuffer(private val capacity: Int = DEFAULT_CAPACITY) {
             entry.anchor = dto.anchor
             entry.suspect = dto.suspect
             entry.suspended = dto.suspended
-            val hex = dto.glideShapeHex ?: dto.glideShapeBase64
-            if (dto.glideLayoutKey != null && hex != null) {
-                runCatching {
-                    val bytes = if (dto.glideShapeHex != null) {
-                        hex.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
-                    } else {
-                        Base64.decode(hex)
-                    }
+            entry.readings = dto.readings
+            if (dto.glideLayoutKey != null && dto.glideShapeBase64 != null) {
+                runCatching { Base64.decode(dto.glideShapeBase64) }.getOrNull()?.let { bytes ->
                     entry.glideShape = GlideShapeSample(dto.glideLayoutKey, bytes)
                 }
             }
@@ -624,7 +637,7 @@ class LearningBuffer(private val capacity: Int = DEFAULT_CAPACITY) {
         val suspended: Boolean,
         val glideLayoutKey: Long? = null,
         val glideShapeBase64: String? = null,
-        val glideShapeHex: String? = null,
+        val readings: List<String>? = null,
     )
 
     @Serializable

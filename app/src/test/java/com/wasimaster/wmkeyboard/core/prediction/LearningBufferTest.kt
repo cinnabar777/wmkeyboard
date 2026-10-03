@@ -497,20 +497,4 @@ class LearningBufferTest {
         assertEquals(TouchPoint(1.2f, 3.4f), restored.keys!!.center('t'))
 
     }
-
-    @Test
-    fun singleLetterWordsAreBufferedAndRestored() {
-        val buffer = LearningBuffer()
-        buffer.push("I", "en", 1, caseTrusted = true, known = true)
-        buffer.push("a", "en", 1, caseTrusted = true, known = true)
-
-        val json = buffer.snapshotToJson()
-        val restoredBuffer = LearningBuffer()
-        restoredBuffer.restoreFromJson(json)
-
-        val entries = restoredBuffer.drain()
-        assertEquals(2, entries.size)
-        assertEquals("I", entries[0].word)
-        assertEquals("a", entries[1].word)
-    }
 }

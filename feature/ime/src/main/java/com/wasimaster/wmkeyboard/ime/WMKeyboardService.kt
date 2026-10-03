@@ -834,31 +834,6 @@ open class WMKeyboardService : InputMethodService() {
             }
             file.delete()
         }
-        lastGestureWord = null
-        lastGestureStroke = null
-    }
-
-    private fun flushAllSessionSnapshots() {
-        settlementTimerJobs.values.forEach { it.cancel() }
-        settlementTimerJobs.clear()
-        flushLearningBuffer(verifyCorrections = false)
-        val dir = File(filesDir, "learning/sessions")
-        if (dir.exists()) {
-            dir.listFiles()?.forEach { file ->
-                if (file.isFile && file.extension == "json") {
-                    val json = runCatching { file.readText() }.getOrNull()
-                    if (!json.isNullOrBlank()) {
-                        val tempBuffer = LearningBuffer()
-                        tempBuffer.restoreFromJson(json)
-                        val drained = tempBuffer.drain()
-                        settleLearned(drained, verify = false)
-                    }
-                    file.delete()
-                }
-            }
-        }
-        lastGestureWord = null
-        lastGestureStroke = null
     }
 
     /**
@@ -888,6 +863,11 @@ open class WMKeyboardService : InputMethodService() {
             file.delete()
             if (!json.isNullOrBlank()) {
                 learningBuffer.restoreFromJson(json)
+                for (entry in learningBuffer.queuedEntries) {
+                    entry.readings?.let { readings ->
+                        glideReadings.remember(entry.word, readings)
+                    }
+                }
                 return
             }
         }
@@ -6373,7 +6353,7 @@ open class WMKeyboardService : InputMethodService() {
         KdeConnectHub.release(KdeConnectHub.Reason.KEYBOARD)
         KdeConnectHub.release(KdeConnectHub.Reason.SERVICE)
         finishRevisionOnLeave()
-        flushAllSessionSnapshots()
+        flushLearningBuffer()
         // Blocking, and on the same queue as the hide's saves: the process is
         // going, so this waits for a hide's save still in flight and then
         // writes whatever changed since.
@@ -14303,8 +14283,6 @@ open class WMKeyboardService : InputMethodService() {
         // So is any stroke still waiting to be told what it meant: the answer
         // would have to have been in this text (issue #213).
         undoneGlide = null
-        lastGestureWord = null
-        lastGestureStroke = null
 
         // Persist learning stores to disk when new items have been settled.
         if (drainedLearning.isNotEmpty() || drainedCorrections.isNotEmpty()) {
@@ -18646,6 +18624,7 @@ open class WMKeyboardService : InputMethodService() {
             // became, so coming back to this word offers the swipe's own
             // readings instead of spellings of the word standing there (#115).
             glideReadings.remember(word, strip)
+            learningBuffer.attachReadings(word, strip)
             // The stroke's shape rides with the word in the learning buffer
             // and reaches the shape store only when the word settles; the
             // hand model learns on the spot and retracts on undo instead.
@@ -19146,6 +19125,7 @@ open class WMKeyboardService : InputMethodService() {
                 // it is the one whose alternates are on the strip, and the
                 // one a proofreading pass comes back to (#115).
                 glideReadings.remember(word, lastWords)
+                learningBuffer.attachReadings(word, lastWords)
                 // And its own segment of the path, for a later full search (#135).
                 glideReadings.attach(word, stroke)
                 committedAny = true
@@ -28845,6 +28825,7 @@ open class WMKeyboardService : InputMethodService() {
                 if (!privateCopy(ic, cut = false)) ic.performContextMenuAction(android.R.id.copy)
                 maybeToastCopied()
                 _uiState.update { it.copy(textEditSelecting = false) }
+                flushLearningBuffer(verifyCorrections = false)
             }
             TextEditAction.PASTE -> {
                 if (!isClipboardAccessible()) return
@@ -28863,10 +28844,12 @@ open class WMKeyboardService : InputMethodService() {
                 sendEditorKey(KeyEvent.KEYCODE_MOVE_END, selecting, ctrl = true)
             // Like copy, it ends the panel's select mode: the selection is gone.
             TextEditAction.CUT -> {
+                flushLearningBuffer(verifyCorrections = false)
                 if (!privateCopy(ic, cut = true)) ic.performContextMenuAction(android.R.id.cut)
                 _uiState.update { it.copy(textEditSelecting = false) }
             }
             TextEditAction.COPY -> {
+                flushLearningBuffer(verifyCorrections = false)
                 ic.performContextMenuAction(android.R.id.copy)
             }
         }
@@ -29018,11 +29001,13 @@ open class WMKeyboardService : InputMethodService() {
                 if (!privateCopy(ic, cut = false)) ic.performContextMenuAction(android.R.id.copy)
                 maybeToastCopied()
                 _uiState.update { it.copy(textEditSelecting = false) }
+                flushLearningBuffer(verifyCorrections = false)
             }
             ClipboardKeyAction.CUT -> {
                 if (!hasSelection && selectAllIfEmpty) ic.performContextMenuAction(android.R.id.selectAll)
                 if (!privateCopy(ic, cut = true)) ic.performContextMenuAction(android.R.id.cut)
                 _uiState.update { it.copy(textEditSelecting = false) }
+                flushLearningBuffer(verifyCorrections = false)
             }
             ClipboardKeyAction.PASTE -> {
                 if (!isClipboardAccessible()) return
