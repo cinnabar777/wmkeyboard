@@ -434,4 +434,67 @@ class LearningBufferTest {
         assertEquals(WordOrigin.GLIDE, dropped.origin)
         assertEquals(WordOrigin.GLIDE, buffer.originOf("hello"))
     }
+
+    @Test
+    fun snapshotToJsonAndRestoreFromJsonPreservesBufferState() {
+        val buffer = LearningBuffer(capacity = 300)
+        val taps = listOf(TouchPoint(1.2f, 3.4f), null, TouchPoint(5.6f, 7.8f))
+        val keys = KeyTouchModel(mapOf('t' to TouchPoint(1.2f, 3.4f), 'e' to TouchPoint(5.6f, 7.8f)))
+        val glideSample = GlideShapeSample(42L, byteArrayOf(10, 20, 30, 40))
+
+        buffer.push(
+            word = "testing",
+            langId = "en",
+            weight = 2,
+            caseTrusted = true,
+            known = false,
+            origin = WordOrigin.GLIDE,
+            replaces = "tasting",
+            anchor = 10,
+            typed = "tstng",
+            taps = taps,
+            keys = keys,
+            replacesOrigin = WordOrigin.TYPED,
+            revised = "testing now",
+        )
+        buffer.attachGlide("testing", glideSample)
+
+        // Drop an entry into recent
+        buffer.push("oldword", "en", 1)
+        buffer.onCaret(17)
+        buffer.onDeleted(10, 17)
+
+        val json = buffer.snapshotToJson()
+        assertTrue(json.isNotBlank())
+
+        val restoredBuffer = LearningBuffer()
+        restoredBuffer.restoreFromJson(json)
+
+        // Verify recent dropped item origin BEFORE draining entries, since drain() clears recent
+        assertEquals(WordOrigin.TYPED, restoredBuffer.originOf("oldword"))
+
+        val entries = restoredBuffer.drain()
+        assertEquals(1, entries.size)
+        val restored = entries.single()
+
+        assertEquals("testing", restored.word)
+        assertEquals("en", restored.langId)
+        assertEquals(2, restored.weight)
+        assertTrue(restored.caseTrusted)
+        assertFalse(restored.known)
+        assertEquals(WordOrigin.GLIDE, restored.origin)
+        assertEquals("tasting", restored.replaces)
+        assertEquals("tstng", restored.typed)
+        assertEquals(WordOrigin.TYPED, restored.replacesOrigin)
+        assertEquals("testing now", restored.revised)
+        assertEquals(10, restored.anchor)
+        assertEquals(glideSample.layoutKey, restored.glideShape?.layoutKey)
+        assertEquals(glideSample.shape.toList(), restored.glideShape?.shape?.toList())
+
+        // Check key touch model restored
+        assertTrue(restored.keys != null)
+        assertTrue(restored.keys!!.knows('t'))
+        assertEquals(TouchPoint(1.2f, 3.4f), restored.keys!!.center('t'))
+
+    }
 }

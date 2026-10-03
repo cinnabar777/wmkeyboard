@@ -130,7 +130,7 @@ object WordContext {
      * Only medial: a quote around a word, or the one a possessive ends on,
      * is punctuation and still ends it.
      */
-    private fun isWordCharAt(text: CharSequence, i: Int): Boolean {
+    fun isWordCharAt(text: CharSequence, i: Int): Boolean {
         val c = text[i]
         if (isWordChar(c)) return true
         if (!isApostrophe(c)) return false
