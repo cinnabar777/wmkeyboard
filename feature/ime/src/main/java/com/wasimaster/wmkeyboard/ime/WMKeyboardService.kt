@@ -14012,12 +14012,9 @@ open class WMKeyboardService : InputMethodService() {
         // lexicon: [UserLexicon.learnWord] would refuse the count anyway, and
         // queuing it would only take a slot from a word that means something.
         if (reinforcement <= 0) return
-        val preceding = precedingWordFromField()
-        val following = followingWordFromField()
         val queued = learningBuffer.push(
             word, learnLanguageId(word, state), reinforcement, caseTrusted, known = true,
             origin = origin, replaces = replaces, typed = typed, taps = taps, keys = keys,
-            precedingWord = preceding, followingWord = following,
         )
         // Between the push and the settle, for the reason [noteUnknownWord]
         // spells out. Here too because the word a misread swipe is corrected
@@ -14062,12 +14059,9 @@ open class WMKeyboardService : InputMethodService() {
             offerToLearn(word, caseTrusted)
             return
         }
-        val preceding = precedingWordFromField()
-        val following = followingWordFromField()
         val queued = learningBuffer.push(
             word, learnLanguageId(word, state), reinforcement, caseTrusted,
             origin = origin, replaces = replaces, typed = typed, taps = taps, keys = keys,
-            precedingWord = preceding, followingWord = following,
         )
         // Between the push and the settle: the stroke a backspaced glide left
         // waiting needs this word's entry to exist before it can ride it, and
@@ -14134,22 +14128,12 @@ open class WMKeyboardService : InputMethodService() {
 
             // Learn N-grams for settled words across the final corrected sequence
             if (known || isKnownWord(word)) {
-                val p = entry.precedingWord ?: prevWord
-                p?.let { prev ->
+                prevWord?.let { prev ->
                     if (isKnownWord(prev)) {
                         userLexicon.learnBigram(prev, word)
                         prevWord2?.let { p2 ->
                             userLexicon.learnTrigram(p2, prev, word)
                             userLexicon.learnSkip1gram(p2, word)
-                        }
-                    }
-                }
-                entry.followingWord?.let { f ->
-                    if (isKnownWord(f)) {
-                        userLexicon.learnBigram(word, f)
-                        p?.let { prev ->
-                            userLexicon.learnTrigram(prev, word, f)
-                            userLexicon.learnSkip1gram(prev, f)
                         }
                     }
                 }
@@ -14162,36 +14146,6 @@ open class WMKeyboardService : InputMethodService() {
                 prevWord = null
             }
         }
-    }
-
-    /**
-     * Reads the immediate word standing before the cursor in the input field,
-     * if available, to connect backward N-grams when editing text inline.
-     */
-    private fun precedingWordFromField(): String? {
-        val ic = currentInputConnection ?: return null
-        val before = ic.getTextBeforeCursor(128, 0) ?: return null
-        return WordContext.completedWordBefore(before, charArrayOf('.', '!', '?', '\n'))
-    }
-
-    /**
-     * Reads the immediate word standing after the cursor in the input field,
-     * if available, to connect forward N-grams when editing text inline.
-     */
-    private fun followingWordFromField(): String? {
-        val ic = currentInputConnection ?: return null
-        val after = ic.getTextAfterCursor(128, 0) ?: return null
-        val s = after.toString()
-        var i = 0
-        while (i < s.length && !WordContext.isWordCharAt(s, i)) {
-            if (s[i] in charArrayOf('.', '!', '?', '\n')) return null
-            i++
-        }
-        if (i >= s.length) return null
-        val start = i
-        while (i < s.length && WordContext.isWordCharAt(s, i)) i++
-        val word = WordKey.of(s.substring(start, i)).ifEmpty { null } ?: return null
-        return word.takeIf { WordContext.isLearnableWord(it) }
     }
 
     /**
