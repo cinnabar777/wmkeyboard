@@ -28863,7 +28863,6 @@ open class WMKeyboardService : InputMethodService() {
                 sendEditorKey(KeyEvent.KEYCODE_MOVE_END, selecting, ctrl = true)
             // Like copy, it ends the panel's select mode: the selection is gone.
             TextEditAction.CUT -> {
-                learningBuffer.unanchor()
                 if (!privateCopy(ic, cut = true)) ic.performContextMenuAction(android.R.id.cut)
                 _uiState.update { it.copy(textEditSelecting = false) }
             }
@@ -29021,7 +29020,6 @@ open class WMKeyboardService : InputMethodService() {
                 _uiState.update { it.copy(textEditSelecting = false) }
             }
             ClipboardKeyAction.CUT -> {
-                learningBuffer.unanchor()
                 if (!hasSelection && selectAllIfEmpty) ic.performContextMenuAction(android.R.id.selectAll)
                 if (!privateCopy(ic, cut = true)) ic.performContextMenuAction(android.R.id.cut)
                 _uiState.update { it.copy(textEditSelecting = false) }
