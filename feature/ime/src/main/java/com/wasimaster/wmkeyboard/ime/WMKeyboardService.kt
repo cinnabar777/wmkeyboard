@@ -14685,12 +14685,8 @@ open class WMKeyboardService : InputMethodService() {
         ) {
             // An empty field that a moment ago was a selection from the top
             // was cut or typed over, not sent: nothing in it stands (#160).
-            // The keyboard's own deletes have already been reported to the
-            // buffer; this is the app's or a hardware keyboard's.
+            // Clear the old buffer so a new run of typing starts fresh.
             if (oldSelStart == 0 && oldSelEnd > 0) learningBuffer.clear()
-            // Before the caret is handed on, so a send does not read as the
-            // user going back in front of every word in the message.
-            flushLearningBuffer()
             return
         }
         val moved = learningBuffer.onCaret(selStart)
