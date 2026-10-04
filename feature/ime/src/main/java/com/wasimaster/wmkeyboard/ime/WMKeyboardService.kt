@@ -17024,12 +17024,12 @@ open class WMKeyboardService : InputMethodService() {
         // (#100). A pick with nothing typed (a next-word prediction) carries
         // no case evidence at all.
         if ('@' !in suggestion) {
-            // A word the user came back to, then finished from the strip: the
-            // pick is what the word became.
+            // A word the user came back to, or a strip pick replacing a gesture/field word:
+            // the pick is what the word became, replacing the old spelling in-place.
             val replaces = revision?.takeIf { it.mode == WordRevision.Mode.COMPOSING }?.let { r ->
                 revision = null
                 r.finish(suggestion)?.let { resolveRevision(it) }
-            }
+            } ?: replacedWord ?: resumedWord
             learn(
                 suggestion,
                 reinforcement = 2,
@@ -17303,7 +17303,6 @@ open class WMKeyboardService : InputMethodService() {
     /** The user took [chosen] in place of [rejected], the word a stroke was read as (issue #52). */
     private fun noteGlidePreference(rejected: String, chosen: String) {
         if (swipeStyleLearning) glideOutcomes.observeAlternative(rejected, chosen)
-        learningBuffer.drop(rejected)
         pushRecentWord(chosen)
         previousWord = chosen
     }
