@@ -66,7 +66,7 @@ class PendingLearn(private val storageFile: File?) {
     @Synchronized
     fun sight(word: String, langId: String = "", weight: Int = 1): Int {
         val key = WordKey.of(word)
-        if (key.isEmpty() || key.length > MAX_WORD_LENGTH || weight <= 0) return 0
+        if (key.length < 2 || key.length > MAX_WORD_LENGTH || weight <= 0) return 0
         // The waiting room takes what the lexicon would (#185): a token with
         // a symbol glued on is not a candidate however often it is seen.
         if (!WordContext.isLearnableWord(key)) return 0
