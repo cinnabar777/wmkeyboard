@@ -236,21 +236,25 @@ class LearningBuffer(private val capacity: Int = DEFAULT_CAPACITY) {
         )
         if (anchor >= 0) entry.anchor = anchor
         // A caller that knows what this word replaced has just watched the
-        // old spelling be rewritten; the copy of it waiting here, the one the
-        // caret went back into, is that spelling and must not settle (#160).
+        // old spelling be rewritten. The copy of it waiting here is replaced
+        // in-place to preserve exact sentence word order (#160).
+        var replacedIndex = -1
         if (replaces != null) {
             val key = WordKey.of(replaces)
-            val iterator = entries.iterator()
-            while (iterator.hasNext()) {
-                val old = iterator.next()
-                if (!old.suspended || WordKey.of(old.word) != key) continue
-                // Dated before this push: the replacement is pushed after
-                // the drop, as [pairWithDropped]'s two-word rule expects.
-                remember(Dropped(old.word, old.anchor, old.origin, old.replaces, pushes - 1))
-                iterator.remove()
+            for (i in entries.indices.reversed()) {
+                val old = entries[i]
+                if (WordKey.of(old.word) == key) {
+                    replacedIndex = i
+                    remember(Dropped(old.word, old.anchor, old.origin, old.replaces, pushes - 1))
+                    break
+                }
             }
         }
-        entries.addLast(entry)
+        if (replacedIndex >= 0) {
+            entries[replacedIndex] = entry
+        } else {
+            entries.addLast(entry)
+        }
         if (entries.size <= capacity) return emptyList()
         val overflow = ArrayList<Entry>(entries.size - capacity)
         while (entries.size > capacity) overflow.add(entries.removeFirst())

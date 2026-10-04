@@ -176,6 +176,22 @@ class LearningBufferTest {
         assertFalse(entry.suspect)
     }
 
+    @Test
+    fun replacesReplacesWordInPlacePreservingSentenceOrder() {
+        val buffer = LearningBuffer()
+        buffer.commit("what", 4)
+        buffer.commit("ia", 7)
+        buffer.commit("this", 12)
+        buffer.commit("going", 18)
+        buffer.commit("to", 21)
+        buffer.commit("do", 24)
+
+        // Replace "ia" with "is"
+        buffer.push("is", "en", 1, known = true, replaces = "ia")
+
+        assertEquals(listOf("what", "is", "this", "going", "to", "do"), buffer.words())
+    }
+
     /**
      * The same move, with the caret nowhere near any of them: a tap into text
      * typed before the keyboard even opened settles the lot.
