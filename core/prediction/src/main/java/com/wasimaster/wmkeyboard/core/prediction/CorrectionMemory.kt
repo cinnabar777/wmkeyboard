@@ -386,7 +386,7 @@ class CorrectionMemory(private val storageFile: File?) {
         const val HABIT_WINDOW = 400
 
         /** Autocorrect never touches shorter words; nor does this. */
-        const val MIN_TYPED_LENGTH = 3
+        const val MIN_TYPED_LENGTH = 2
         const val MAX_WORD_LENGTH = 32
         const val MIN_HALF_LENGTH = 2
         const val MAX_EDITS = 2

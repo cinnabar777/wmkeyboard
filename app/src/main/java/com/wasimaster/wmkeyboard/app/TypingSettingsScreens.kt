@@ -909,6 +909,27 @@ internal fun TypingSuggestionsSettings(
             )
         }
         item {
+            val immediate = stringResource(R.string.typing_learning_buffer_settlement_immediate)
+            val minutesOne = stringResource(R.string.typing_learning_buffer_settlement_one_min)
+            val minutesFormat = stringResource(R.string.typing_learning_buffer_settlement_plural_min)
+            SliderSetting(
+                R.string.typing_learning_buffer_settlement_title,
+                subtitle = stringResource(R.string.typing_learning_buffer_settlement_subtitle),
+                value = settings.watch { it.learningBufferSettlementMinutes }.toFloat(),
+                range = 0f..30f,
+                display = {
+                    val min = it.toInt()
+                    when (min) {
+                        0 -> immediate
+                        1 -> minutesOne
+                        else -> minutesFormat.format(min)
+                    }
+                },
+                info = stringResource(R.string.typing_learning_buffer_settlement_info),
+                default = SettingsDefaults.learningBufferSettlementMinutes.toFloat(),
+            ) { scope.launch { repository.setLearningBufferSettlementMinutes(it.toInt()) } }
+        }
+        item {
             NavRow(
                 R.string.typing_custom_dictionaries_title,
                 stringResource(R.string.typing_custom_dictionaries_subtitle),
@@ -1922,6 +1943,15 @@ internal fun TypingGesturesSettings(
                     info = stringResource(R.string.typing_glide_shapes_per_word_info),
                     default = SettingsDefaults.gesture.shapesPerWord.toFloat(),
                 ) { scope.launch { repository.setGestureShapesPerWord(it.roundToInt()) } }
+            }
+            item(visible = learnSwipeStyle) {
+                ToggleSetting(
+                    title = stringResource(R.string.typing_glide_shape_seeding_title),
+                    subtitle = stringResource(R.string.typing_glide_shape_seeding_subtitle),
+                    checked = settings.watch { it.gesture.shapeSeeding },
+                    info = stringResource(R.string.typing_glide_shape_seeding_info),
+                    default = SettingsDefaults.gesture.shapeSeeding,
+                ) { scope.launch { repository.setGestureShapeSeeding(it) } }
             }
         }
     }

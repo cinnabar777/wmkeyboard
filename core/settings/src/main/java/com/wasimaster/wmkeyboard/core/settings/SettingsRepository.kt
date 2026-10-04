@@ -2830,6 +2830,8 @@ data class KeyboardSettings(
     /** Per-orientation one-handed width, height scale and dock side. */
     val oneHanded: OneHandedSettings = OneHandedSettings(),
     val learnFromTyping: Boolean = true,
+    /** Delay in minutes before un-settled words in the learning buffer settle into user history after leaving an app or closing the keyboard. 0 = immediate. */
+    val learningBufferSettlementMinutes: Int = 0,
     /**
      * Also add words the keyboard learns to Android's system personal
      * dictionary, so other keyboards and spell checkers know them too. Off by
@@ -6134,6 +6136,7 @@ data class GestureSettings(
      * word next learns a new way. Range [GlideShapesPerWordRange].
      */
     val shapesPerWord: Int = GlideShapeStore.DEFAULT_SHAPES_PER_WORD,
+    val shapeSeeding: Boolean = false,
     /**
      * Offer the full search as a chip on the suggestion strip whenever the
      * caret lands inside a word a swipe wrote and whose path is still kept
@@ -6186,6 +6189,7 @@ fun GestureSettings.glideTuning(): GlideBeam.Tuning = GlideBeam.Tuning.DEFAULT.c
     loopRadius = loopRadius,
     wiggleExtent = if (wiggleDouble) wiggleExtent else 0f,
     wiggleWeight = if (wiggleDouble) wiggleWeight else 0f,
+    shapeSeeding = shapeSeeding,
 )
 
 /**
@@ -7819,6 +7823,7 @@ class SettingsRepository(private val context: Context) {
             stringPreferencesKey("gesture_commit_color_scope")
         private val GESTURE_LEARN_SWIPE_STYLE = booleanPreferencesKey("gesture_learn_swipe_style")
         private val GESTURE_SHAPES_PER_WORD = intPreferencesKey("gesture_shapes_per_word")
+        private val GESTURE_SHAPE_SEEDING = booleanPreferencesKey("gesture_shape_seeding")
         private val GESTURE_SEARCH_ALL_CHIP = booleanPreferencesKey("gesture_search_all_chip")
         private val GESTURE_BACKSPACE_UNDOES_GLIDE =
             booleanPreferencesKey("gesture_backspace_undoes_glide")
@@ -8027,6 +8032,7 @@ class SettingsRepository(private val context: Context) {
         private fun oneHandedSideKey(landscape: Boolean) =
             stringPreferencesKey("one_handed_side_${if (landscape) "landscape" else "portrait"}")
         private val LEARN_FROM_TYPING = booleanPreferencesKey("learn_from_typing")
+        private val LEARNING_BUFFER_SETTLEMENT_MINUTES = intPreferencesKey("learning_buffer_settlement_minutes")
         private val ADD_WORDS_TO_SYSTEM_DICTIONARY =
             booleanPreferencesKey("add_words_to_system_dictionary")
         private val CLIPBOARD_HISTORY = booleanPreferencesKey("clipboard_history")
@@ -8914,6 +8920,7 @@ class SettingsRepository(private val context: Context) {
                 ?: defaults.oneHandedMode,
             oneHanded = readOneHanded(p, defaults),
             learnFromTyping = p[LEARN_FROM_TYPING] ?: defaults.learnFromTyping,
+            learningBufferSettlementMinutes = p[LEARNING_BUFFER_SETTLEMENT_MINUTES] ?: defaults.learningBufferSettlementMinutes,
             addWordsToSystemDictionary =
                 p[ADD_WORDS_TO_SYSTEM_DICTIONARY] ?: defaults.addWordsToSystemDictionary,
             clipboard = readClipboard(p, defaults),
@@ -9340,6 +9347,7 @@ class SettingsRepository(private val context: Context) {
             learnSwipeStyle = p[GESTURE_LEARN_SWIPE_STYLE] ?: defaults.gesture.learnSwipeStyle,
             shapesPerWord = (p[GESTURE_SHAPES_PER_WORD] ?: defaults.gesture.shapesPerWord)
                 .coerceIn(GlideShapesPerWordRange),
+            shapeSeeding = p[GESTURE_SHAPE_SEEDING] ?: defaults.gesture.shapeSeeding,
             searchAllChip = p[GESTURE_SEARCH_ALL_CHIP] ?: defaults.gesture.searchAllChip,
             backspaceUndoesGlide = p[GESTURE_BACKSPACE_UNDOES_GLIDE]
                 ?: defaults.gesture.backspaceUndoesGlide,
@@ -14400,6 +14408,9 @@ class SettingsRepository(private val context: Context) {
     suspend fun setGestureShapesPerWord(value: Int) =
         editPrefs { it[GESTURE_SHAPES_PER_WORD] = value.coerceIn(GlideShapesPerWordRange) }
 
+    suspend fun setGestureShapeSeeding(value: Boolean) =
+        editPrefs { it[GESTURE_SHAPE_SEEDING] = value }
+
     suspend fun setGestureSearchAllChip(value: Boolean) =
         editPrefs { it[GESTURE_SEARCH_ALL_CHIP] = value }
 
@@ -15131,6 +15142,9 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setLearnFromTyping(value: Boolean) =
         editPrefs { it[LEARN_FROM_TYPING] = value }
+
+    suspend fun setLearningBufferSettlementMinutes(value: Int) =
+        editPrefs { it[LEARNING_BUFFER_SETTLEMENT_MINUTES] = value.coerceIn(0, 30) }
 
     suspend fun setAddWordsToSystemDictionary(value: Boolean) =
         editPrefs { it[ADD_WORDS_TO_SYSTEM_DICTIONARY] = value }
