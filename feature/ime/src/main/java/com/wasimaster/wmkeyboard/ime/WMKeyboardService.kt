@@ -795,6 +795,8 @@ open class WMKeyboardService : InputMethodService() {
     }
 
     private fun scheduleOrSettleSession(pkg: String) {
+        // Learn gesture shapes immediately upon leaving an app session
+        learningBuffer.queuedEntries.forEach { learnGlideShape(it) }
         val delayMinutes = _uiState.value.settings.learningBufferSettlementMinutes
         if (delayMinutes <= 0) {
             cancelSettlementTimer(pkg)
@@ -14148,11 +14150,15 @@ open class WMKeyboardService : InputMethodService() {
                     if (isKnownWord(prev)) {
                         userLexicon.learnBigram(prev, word)
                         prevWord2?.let { p2 ->
-                            userLexicon.learnTrigram(p2, prev, word)
-                            userLexicon.learnSkip1gram(p2, word)
+                            if (isKnownWord(p2)) {
+                                userLexicon.learnTrigram(p2, prev, word)
+                                userLexicon.learnSkip1gram(p2, word)
+                            }
                         }
                         prevWord3?.let { p3 ->
-                            userLexicon.learnSkip2gram(p3, word)
+                            if (isKnownWord(p3)) {
+                                userLexicon.learnSkip2gram(p3, word)
+                            }
                         }
                     }
                 }
