@@ -14141,6 +14141,9 @@ open class WMKeyboardService : InputMethodService() {
                             userLexicon.learnTrigram(p2, prev, word)
                             userLexicon.learnSkip1gram(p2, word)
                         }
+                        prevWord3?.let { p3 ->
+                            userLexicon.learnSkip2gram(p3, word)
+                        }
                     }
                 }
                 prevWord3 = prevWord2
