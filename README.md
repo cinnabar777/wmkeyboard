@@ -463,3 +463,34 @@ If AI-assisted code is a boundary you are unwilling to cross, I completely respe
 ## License
 
 MIT. See [LICENSE](LICENSE).
+
+## 本地运行与测试 / Run and test locally
+
+Every command below exists in a repository file, and that file is named next to the command.
+Android/Gradle has no separate dependency-install step: the wrapper bootstraps Gradle and
+resolves the Maven dependencies on the first build. You need a JDK 17 or newer and the Android
+SDK with compileSdk 36.1, as described in [Build it yourself](#build-it-yourself).
+
+### 安装依赖 / Install dependencies
+
+| Command | Source |
+|---|---|
+| `cd docs && npm ci` — install the documentation site's dependencies | `docs/package.json`, `docs/package-lock.json`, `.github/workflows/ci.yml` |
+| `cd native/harper-jni && cargo fetch` — only when rebuilding the Rust grammar bridge | `native/harper-jni/Cargo.toml` |
+
+### 运行 / Run
+
+| Command | Source |
+|---|---|
+| `scripts/emu.sh run` — boot the `wmphone` AVD, build `fullEnDebug`, install it and enable the IME | `scripts/emu.sh` |
+| `cd docs && npm run dev` — Astro dev server for the documentation site | `docs/package.json` (`scripts.dev`) |
+
+### 测试 / Test
+
+| Command | Source |
+|---|---|
+| `./gradlew unitTests` — the whole JVM unit-test suite (about 7,000 tests) | `build.gradle.kts` (task `unitTests`) |
+| `./gradlew staticAnalysis` — detekt plus Android Lint | `build.gradle.kts` (task `staticAnalysis`) |
+| `./gradlew koverHtmlReportUnit` — merged unit-test coverage report | `build.gradle.kts` (Kover configuration) |
+| `cd native/harper-jni && cargo test` — host-side grammar engine tests | `native/harper-jni/Cargo.toml` |
+| `cd docs && npm run check` — build the docs with link checking on | `docs/package.json` (`scripts.check`) |
