@@ -14717,13 +14717,8 @@ open class WMKeyboardService : InputMethodService() {
         }
         val moved = learningBuffer.onCaret(selStart)
         if (moved.dropped.isNotEmpty()) lastDropped = moved.dropped
-        // Words the caret jumped clean over on its way back are settled
-        // immediately only when immediate settlement (0 minutes) is configured.
-        // With a settlement delay active, words remain in learningBuffer so the entire
-        // text sequence is scanned from start to end upon timer expiration or session leave.
-        if (_uiState.value.settings.learningBufferSettlementMinutes <= 0) {
-            settleLearned(moved.settled)
-        }
+        // Words remain in learningBuffer while typing so no words or N-grams are
+        // written to the personal dictionary until the session finishes or leaves the app.
         correctionWatch.onCaret(selStart)
     }
 
