@@ -14562,6 +14562,7 @@ open class WMKeyboardService : InputMethodService() {
     private fun resolveRevision(rev: Revision): String? {
         if (!revisionsWanted()) return null
         var original = rev.original
+        if (WordKey.of(original) == WordKey.of(rev.revised)) return null
         // Where the original word ended, which is where the watch anchored it.
         val originalEnd = rev.anchor - rev.revised.length + rev.original.length
         correctionWatch.find(original, originalEnd)?.let { fired ->
