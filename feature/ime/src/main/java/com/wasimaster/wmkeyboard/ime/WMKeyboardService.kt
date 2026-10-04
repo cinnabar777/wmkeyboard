@@ -14098,9 +14098,19 @@ open class WMKeyboardService : InputMethodService() {
             }
             return window
         }
-        var prevWord: String? = null
-        var prevWord2: String? = null
-        var prevWord3: String? = null
+        val firstAnchor = entries.firstOrNull()?.anchor ?: -1
+        val (initPrev1, initPrev2, initPrev3) = if (firstAnchor >= 0) {
+            val ic = currentInputConnection
+            val headLen = entries.first().word.length
+            val contextText = ic?.let { readSpan(it, expectedSelStart, 0, firstAnchor - headLen) }
+            WordContext.lastThreeWords(contextText, SENTENCE_ENDERS)
+        } else {
+            Triple(previousWord, previousWord2, previousWord3)
+        }
+
+        var prevWord: String? = initPrev1
+        var prevWord2: String? = initPrev2
+        var prevWord3: String? = initPrev3
 
         for (entry in entries) {
             // Blacklisted since the commit: the user has just taken this word
@@ -27674,7 +27684,7 @@ open class WMKeyboardService : InputMethodService() {
                     // Learn unigrams for known words in the scanned text (excluding newly added words)
                     for (word in scan.words) {
                         if (word.key !in chosenKeys &&
-                            word.key.length in 2..UserLexicon.MAX_WORD_LENGTH &&
+                            word.key.length in 1..UserLexicon.MAX_WORD_LENGTH &&
                             word.key !in blacklist &&
                             isKnownWord(word.key)
                         ) {
