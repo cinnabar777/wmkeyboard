@@ -797,6 +797,9 @@ open class WMKeyboardService : InputMethodService() {
     private fun scheduleOrSettleSession(pkg: String) {
         // Learn gesture shapes immediately upon leaving an app session
         learningBuffer.queuedEntries.forEach { learnGlideShape(it) }
+        // Purge associated suggestion words (readings) when leaving the app session,
+        // leaving typed words, gesture shapes, and tapped data.
+        learningBuffer.purgeReadings()
         val delayMinutes = _uiState.value.settings.learningBufferSettlementMinutes
         if (delayMinutes <= 0) {
             cancelSettlementTimer(pkg)
@@ -14110,10 +14113,6 @@ open class WMKeyboardService : InputMethodService() {
             Triple(previousWord, previousWord2, previousWord3)
         }
 
-        var prevWord: String? = initPrev1
-        var prevWord2: String? = initPrev2
-        var prevWord3: String? = initPrev3
-
         for (entry in entries) {
             // Blacklisted since the commit: the user has just taken this word
             // out of their dictionary, and the queue must not put it back (#48).
@@ -14144,32 +14143,34 @@ open class WMKeyboardService : InputMethodService() {
                 }
             }
 
-            // Learn N-grams for settled words across the final corrected sequence
-            if (known || isKnownWord(word)) {
-                prevWord?.let { prev ->
-                    if (isKnownWord(prev)) {
-                        userLexicon.learnBigram(prev, word)
-                        prevWord2?.let { p2 ->
-                            if (isKnownWord(p2)) {
-                                userLexicon.learnTrigram(p2, prev, word)
-                                userLexicon.learnSkip1gram(p2, word)
-                            }
-                        }
-                        prevWord3?.let { p3 ->
-                            if (isKnownWord(p3)) {
-                                userLexicon.learnSkip2gram(p3, word)
-                            }
-                        }
-                    }
-                }
-                prevWord3 = prevWord2
-                prevWord2 = prevWord
-                prevWord = word
-            } else {
-                prevWord3 = null
-                prevWord2 = null
-                prevWord = null
-            }
+        }
+
+        // Scan the text from start to end (including initial preceding context) using TextWordScan,
+        // exactly matching how Learn from text tabulates word pairs and N-grams.
+        val contextHead = listOfNotNull(initPrev3, initPrev2, initPrev1).joinToString(" ")
+        val bufferText = entries.joinToString(" ") { it.word }
+        val fullText = if (contextHead.isNotBlank()) "$contextHead $bufferText" else bufferText
+
+        val scan = TextWordScan.scan(fullText, SENTENCE_ENDERS)
+        val blacklist = settings.suggestionSources.blacklistFor(languageId)
+        val plan = LearnFromText.plan(
+            scan = scan,
+            renames = emptyMap(),
+            isKnown = ::isKnownWord,
+            blacklist = blacklist,
+        )
+
+        for ((pair, count) in plan.pairCounts) {
+            repeat(count) { userLexicon.learnBigram(pair.first, pair.second) }
+        }
+        for ((triple, count) in plan.tripleCounts) {
+            repeat(count) { userLexicon.learnTrigram(triple.first, triple.second, triple.third) }
+        }
+        for ((skip, count) in plan.skipCounts) {
+            repeat(count) { userLexicon.learnSkip1gram(skip.first, skip.second) }
+        }
+        for ((skip2, count) in plan.skip2Counts) {
+            repeat(count) { userLexicon.learnSkip2gram(skip2.first, skip2.second) }
         }
     }
 

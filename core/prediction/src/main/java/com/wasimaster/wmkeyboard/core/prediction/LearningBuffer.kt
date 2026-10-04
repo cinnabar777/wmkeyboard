@@ -421,6 +421,17 @@ class LearningBuffer(private val capacity: Int = DEFAULT_CAPACITY) {
     }
 
     /**
+     * Purges associated gesture candidate readings from all queued entries.
+     * Called when leaving an app session so associated suggested words are discarded
+     * while preserving typed words, gesture shapes, and touch data.
+     */
+    fun purgeReadings() {
+        for (entry in entries) {
+            entry.readings = null
+        }
+    }
+
+    /**
      * Drops [word] outright — the user took the commit back by hand (undoing
      * an autocorrect, re-picking from the strip), which is a statement about
      * the word rather than about the text around it.
