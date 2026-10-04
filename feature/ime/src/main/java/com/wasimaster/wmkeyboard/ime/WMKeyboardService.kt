@@ -14717,13 +14717,13 @@ open class WMKeyboardService : InputMethodService() {
         }
         val moved = learningBuffer.onCaret(selStart)
         if (moved.dropped.isNotEmpty()) lastDropped = moved.dropped
-        // Words the caret jumped clean over on its way back are not being
-        // edited: the user has left them and is working somewhere else in the
-        // same text, so they count now rather than being thrown away with the
-        // one word that is actually being looked at (#115). Unverified, because
-        // this is a caret move and a positional suspect is not worth a blocking
-        // read of the field here — see [settleLearned].
-        settleLearned(moved.settled)
+        // Words the caret jumped clean over on its way back are settled
+        // immediately only when immediate settlement (0 minutes) is configured.
+        // With a settlement delay active, words remain in learningBuffer so the entire
+        // text sequence is scanned from start to end upon timer expiration or session leave.
+        if (_uiState.value.settings.learningBufferSettlementMinutes <= 0) {
+            settleLearned(moved.settled)
+        }
         correctionWatch.onCaret(selStart)
     }
 

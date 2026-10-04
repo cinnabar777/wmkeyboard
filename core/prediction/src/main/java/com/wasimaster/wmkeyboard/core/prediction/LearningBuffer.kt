@@ -188,6 +188,7 @@ class LearningBuffer(private val capacity: Int = DEFAULT_CAPACITY) {
         val origin: WordOrigin,
         val replaces: String?,
         internal val droppedAt: Long,
+        internal val droppedIndex: Int = -1,
     )
 
     private val entries = ArrayDeque<Entry>()
@@ -235,23 +236,32 @@ class LearningBuffer(private val capacity: Int = DEFAULT_CAPACITY) {
             replacesOrigin, revised, pushIndex = ++pushes,
         )
         if (anchor >= 0) entry.anchor = anchor
-        // A caller that knows what this word replaced has just watched the
-        // old spelling be rewritten. The copy of it waiting here is replaced
-        // in-place to preserve exact sentence word order (#160).
+        // Attempt positional pairing with recent dropped items if not explicitly set
+        pairWithDropped(entry)
+
         var replacedIndex = -1
-        if (replaces != null) {
-            val key = WordKey.of(replaces)
+        val effectiveReplaces = entry.replaces
+        if (effectiveReplaces != null) {
+            val key = WordKey.of(effectiveReplaces)
             for (i in entries.indices.reversed()) {
                 val old = entries[i]
                 if (WordKey.of(old.word) == key) {
                     replacedIndex = i
-                    remember(Dropped(old.word, old.anchor, old.origin, old.replaces, pushes - 1))
+                    remember(Dropped(old.word, old.anchor, old.origin, old.replaces, pushes - 1, droppedIndex = i))
                     break
                 }
             }
+            if (replacedIndex < 0) {
+                val d = recent.lastOrNull { WordKey.of(it.word) == key }
+                if (d != null && d.droppedIndex in 0..entries.size) {
+                    replacedIndex = d.droppedIndex
+                }
+            }
         }
-        if (replacedIndex >= 0) {
+        if (replacedIndex in entries.indices) {
             entries[replacedIndex] = entry
+        } else if (replacedIndex >= 0 && replacedIndex <= entries.size) {
+            entries.add(replacedIndex, entry)
         } else {
             entries.addLast(entry)
         }
@@ -335,15 +345,20 @@ class LearningBuffer(private val capacity: Int = DEFAULT_CAPACITY) {
         if (start < 0 || end <= start || entries.isEmpty()) return emptyList()
         val length = end - start
         val dropped = ArrayList<Dropped>()
+        var index = 0
         val iterator = entries.iterator()
         while (iterator.hasNext()) {
             val entry = iterator.next()
-            if (entry.anchor == UNANCHORED || start >= entry.anchor) continue
-            if (end <= entry.anchor - entry.word.length - ANCHOR_SLACK) {
-                entry.anchor -= length
+            if (entry.anchor == UNANCHORED || start >= entry.anchor) {
+                index++
                 continue
             }
-            val d = Dropped(entry.word, entry.anchor, entry.origin, entry.replaces, pushes)
+            if (end <= entry.anchor - entry.word.length - ANCHOR_SLACK) {
+                entry.anchor -= length
+                index++
+                continue
+            }
+            val d = Dropped(entry.word, entry.anchor, entry.origin, entry.replaces, pushes, droppedIndex = index)
             dropped.add(d)
             remember(d)
             iterator.remove()
@@ -383,16 +398,23 @@ class LearningBuffer(private val capacity: Int = DEFAULT_CAPACITY) {
     private fun dropUnder(entry: Entry): List<Dropped> {
         val start = entry.anchor - entry.word.length
         var dropped: ArrayList<Dropped>? = null
+        var index = 0
         val iterator = entries.iterator()
         while (iterator.hasNext()) {
             val old = iterator.next()
-            if (old === entry || !old.suspended || old.anchor == UNANCHORED) continue
+            if (old === entry || !old.suspended || old.anchor == UNANCHORED) {
+                index++
+                continue
+            }
             val oldStart = old.anchor - old.word.length
-            if (start < oldStart - ANCHOR_SLACK || start >= old.anchor) continue
+            if (start < oldStart - ANCHOR_SLACK || start >= old.anchor) {
+                index++
+                continue
+            }
             // Dated before the entry that landed on it was pushed, which is
             // when a drop-on-touch would have happened: the two-word rule in
             // [pairWithDropped] wants the halves pushed after the drop.
-            val d = Dropped(old.word, old.anchor, old.origin, old.replaces, entry.pushIndex - 1)
+            val d = Dropped(old.word, old.anchor, old.origin, old.replaces, entry.pushIndex - 1, droppedIndex = index)
             (dropped ?: ArrayList<Dropped>().also { dropped = it }).add(d)
             remember(d)
             iterator.remove()
