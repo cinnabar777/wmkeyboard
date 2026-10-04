@@ -986,6 +986,9 @@ open class WMKeyboardService : InputMethodService() {
     /** Where [resumedWord] starts in the field, to find its glide's readings by. */
     private var resumedWordStart = -1
 
+    /** Whether the active composing buffer was resumed from existing field text without edits. */
+    private var isResumedFromField = false
+
     /**
      * The word the "add to dictionary?" chip is currently asking about, when
      * `askBeforeLearning` is on. Held here as well as in the UI state so the
@@ -10304,6 +10307,7 @@ open class WMKeyboardService : InputMethodService() {
                 ) {
                     composing = StringBuilder(word)
                     composingCaseTrusted = false
+                    isResumedFromField = true
                     // Went back to this word: if a glide wrote it, the strip
                     // offers that stroke's other readings (#115).
                     resumedWord = word
@@ -12272,7 +12276,9 @@ open class WMKeyboardService : InputMethodService() {
         // it earns no personal-dictionary reinforcement, only the bigram.
         // Conversion-IME output (Hanzi/Kanji) is never learned into the lexicon,
         // and neither is a fragment glued onto an existing word.
-        if (!state.composer.isConversion && !gluedToWord) {
+        val resumedUnchanged = isResumedFromField && typed == output
+        isResumedFromField = false
+        if (!state.composer.isConversion && !gluedToWord && !resumedUnchanged) {
             // An autocorrected word is the engine's spelling, not the user's,
             // so it teaches no casing either — it arrives at reinforcement 0,
             // which already keeps it out of the lexicon.
