@@ -129,6 +129,12 @@ internal object AppLockTargets {
             "screen_storage", R.string.about_storage_title,
             LockKind.SCREEN, LockGroup.DESTRUCTIVE, route = "storage",
         ),
+        // Off by default: notes are the user's deliberate writing, and a
+        // note that wants hiding has a lock of its own (#560).
+        LockTarget(
+            "screen_notes", R.string.notes_title,
+            LockKind.SCREEN, LockGroup.CONTENT, route = "notes",
+        ),
 
         // ---- actions ----
         LockTarget(
@@ -165,6 +171,14 @@ internal object AppLockTargets {
         ),
         LockTarget(
             "action_forget_app_languages", R.string.langemoji_lang_forget_apps_title,
+            LockKind.ACTION, LockGroup.DESTRUCTIVE,
+        ),
+        LockTarget(
+            "action_delete_notes", R.string.tooldetail_notes_clear_title,
+            LockKind.ACTION, LockGroup.DESTRUCTIVE, onByDefault = true,
+        ),
+        LockTarget(
+            "action_empty_notes_trash", R.string.notes_empty_trash_action,
             LockKind.ACTION, LockGroup.DESTRUCTIVE,
         ),
     )

@@ -62,6 +62,8 @@ import com.wasimaster.wmkeyboard.core.settings.DEFAULT_LONG_PRESS_LETTERS
 import com.wasimaster.wmkeyboard.core.layout.resolveLayoutName
 import com.wasimaster.wmkeyboard.core.settings.KeySoundSettings
 import com.wasimaster.wmkeyboard.core.settings.LongPressLetterActions
+import com.wasimaster.wmkeyboard.core.settings.ACTION_POSITION_LAST
+import com.wasimaster.wmkeyboard.core.settings.ACTION_POSITION_MAX
 import com.wasimaster.wmkeyboard.core.theme.popupOnKeyOrNull
 import com.wasimaster.wmkeyboard.core.settings.SettingsRepository
 import kotlin.math.roundToInt
@@ -879,6 +881,15 @@ internal fun KeyPressSettings(
                 default = SettingsDefaults.textEditing.forwardDeleteSwipe,
             ) { scope.launch { repository.setForwardDeleteSwipe(it) } }
         }
+        item {
+            ToggleSetting(
+                R.string.typing_web_backspace_key_title,
+                stringResource(R.string.typing_web_backspace_key_subtitle),
+                settings.watch { it.textEditing.webBackspaceKeyEvents },
+                info = stringResource(R.string.typing_web_backspace_key_info),
+                default = SettingsDefaults.textEditing.webBackspaceKeyEvents,
+            ) { scope.launch { repository.setWebBackspaceKeyEvents(it) } }
+        }
     }
 
     // The alternates ("more keys") get their own group rather than joining the
@@ -1558,13 +1569,9 @@ internal fun KeyPressShortcutsSettings(
             holdActions.cut || holdActions.undo || holdActions.redo
         if (anyHoldAction) {
             item {
-                ToggleSetting(
-                    R.string.keypress_hold_action_first_title,
-                    stringResource(R.string.keypress_hold_action_first_subtitle),
-                    holdActions.actionFirst,
-                    info = stringResource(R.string.keypress_hold_action_first_info),
-                    default = SettingsDefaults.longPressLetterActions.actionFirst,
-                ) { scope.launch { repository.setLongPressActionFirst(it) } }
+                HoldActionPositionSetting(holdActions.actionPosition) {
+                    scope.launch { repository.setLongPressActionPosition(it) }
+                }
             }
         }
         item {
@@ -1583,6 +1590,46 @@ internal fun KeyPressShortcutsSettings(
         }
     }
 }
+/**
+ * Where the hold shortcut goes in its key's popup (issue #570): first, after a
+ * number of characters, or last.
+ *
+ * A stepper rather than the on/off switch this started as, because the two ends
+ * were not what was asked for. At the front a plain hold runs the shortcut but
+ * the corner hint names an accent the hold no longer types; at the back the
+ * shortcut is past every accent. One or two along keeps the hold and the hint
+ * agreeing and puts the shortcut a short slide from the key.
+ */
+@Composable
+private fun HoldActionPositionSetting(position: Int, onChange: (Int) -> Unit) {
+    val first = stringResource(R.string.keypress_hold_action_position_first)
+    val last = stringResource(R.string.keypress_hold_action_position_last)
+    // Resolved up front: `display` is a plain lambda and plurals need a
+    // composition.
+    val after = (1..ACTION_POSITION_MAX).map {
+        pluralStringResource(R.plurals.keypress_hold_action_position_after, it, it)
+    }
+    StepperSetting(
+        title = R.string.keypress_hold_action_position_title,
+        subtitle = stringResource(R.string.keypress_hold_action_position_subtitle),
+        value = position,
+        range = HoldActionPositionSteps,
+        display = { at ->
+            when (at) {
+                ACTION_POSITION_LAST -> last
+                0 -> first
+                else -> after[at - 1]
+            }
+        },
+        info = stringResource(R.string.keypress_hold_action_position_info),
+        default = SettingsDefaults.longPressLetterActions.actionPosition,
+        onChange = onChange,
+    )
+}
+
+/** First, then one step per character, then last: the order the popup reads in. */
+private val HoldActionPositionSteps: List<Int> = (0..ACTION_POSITION_MAX).toList() + ACTION_POSITION_LAST
+
 /**
  * Which key each hold shortcut sits on.
  *

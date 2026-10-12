@@ -31,6 +31,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -43,7 +44,11 @@ import com.wasimaster.wmkeyboard.app.SectionHeader
 import com.wasimaster.wmkeyboard.app.SettingsGroup
 import com.wasimaster.wmkeyboard.app.ToggleSetting
 import com.wasimaster.wmkeyboard.app.WmRow
-import com.wasimaster.wmkeyboard.app.rememberGrowIn
+import com.wasimaster.wmkeyboard.app.ChartIntroScope
+import com.wasimaster.wmkeyboard.app.CountingText
+import com.wasimaster.wmkeyboard.app.chartEntrance
+import com.wasimaster.wmkeyboard.app.rememberChartEntrance
+import com.wasimaster.wmkeyboard.app.rememberValuesMorph
 import com.wasimaster.wmkeyboard.app.storage.ConfirmDeleteDialog
 import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.SettingsDefaults
@@ -81,6 +86,13 @@ import com.wasimaster.wmkeyboard.app.ChoiceDetail
  */
 @Composable
 internal fun StatisticsScreen(repository: SettingsRepository, settings: LiveSettings) {
+    // The charts and figures fill in when the screen opens, and are simply
+    // there when it is composed again for the same visit.
+    ChartIntroScope { StatisticsBody(repository, settings) }
+}
+
+@Composable
+private fun StatisticsBody(repository: SettingsRepository, settings: LiveSettings) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var confirmDelete by remember { mutableStateOf(false) }
@@ -180,17 +192,20 @@ internal fun StatisticsScreen(repository: SettingsRepository, settings: LiveSett
     }
 }
 
-/** The five all-time numbers, three to a row. */
+/**
+ * The five all-time numbers, three to a row. Each counts up to itself the
+ * first time the tiles are on screen, a beat after the one before it.
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun TotalsTiles(totals: TypingStats.Totals) {
     val numbers = remember { NumberFormat.getIntegerInstance() }
-    val wpm = TypingStatsMath.wpm(totals.chars, totals.activeMs)
-    val speed = if (totals.activeMs >= TypingStats.MIN_ACTIVE_MS) {
-        stringResource(R.string.statistics_wpm_value, wpm.toInt())
-    } else {
-        stringResource(R.string.statistics_value_none)
-    }
+    val timed = totals.activeMs >= TypingStats.MIN_ACTIVE_MS
+    val wpm = TypingStatsMath.wpm(totals.chars, totals.activeMs).toLong()
+    val none = stringResource(R.string.statistics_value_none)
+    // Only for knowing when the tiles are on screen: the counting is theirs.
+    val entrance = rememberChartEntrance(ready = true)
+    val seen = entrance.seen
     SettingsGroup {
         item {
             FlowRow(
@@ -199,25 +214,45 @@ private fun TotalsTiles(totals: TypingStats.Totals) {
                 maxItemsInEachRow = 3,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                    .padding(horizontal = 16.dp, vertical = 16.dp)
+                    .chartEntrance(entrance),
             ) {
-                StatTile(numbers.format(totals.chars), stringResource(R.string.statistics_chars_label))
-                StatTile(numbers.format(totals.words), stringResource(R.string.statistics_words_label))
-                StatTile(speed, stringResource(R.string.statistics_speed_label))
-                StatTile(formatDuration(totals.activeMs), stringResource(R.string.statistics_active_label))
-                StatTile(
-                    numbers.format(totals.backspaces),
-                    stringResource(R.string.statistics_backspaces_label),
-                )
+                StatTile(totals.chars, stringResource(R.string.statistics_chars_label), seen, 0) {
+                    numbers.format(it)
+                }
+                StatTile(totals.words, stringResource(R.string.statistics_words_label), seen, 1) {
+                    numbers.format(it)
+                }
+                StatTile(wpm, stringResource(R.string.statistics_speed_label), seen, 2) {
+                    if (timed) stringResource(R.string.statistics_wpm_value, it.toInt()) else none
+                }
+                StatTile(totals.activeMs, stringResource(R.string.statistics_active_label), seen, 3) {
+                    formatDuration(it)
+                }
+                StatTile(totals.backspaces, stringResource(R.string.statistics_backspaces_label), seen, 4) {
+                    numbers.format(it)
+                }
             }
         }
     }
 }
 
 @Composable
-private fun StatTile(value: String, label: String) {
+private fun StatTile(
+    value: Long,
+    label: String,
+    seen: Boolean,
+    order: Int,
+    format: @Composable (Long) -> String,
+) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(value, style = MaterialTheme.typography.titleLarge)
+        CountingText(
+            target = value,
+            format = format,
+            style = MaterialTheme.typography.titleLarge,
+            start = seen,
+            delayMs = order * TILE_STAGGER_MS,
+        )
         Text(
             label,
             style = MaterialTheme.typography.bodySmall,
@@ -386,6 +421,11 @@ private fun DeleteStatistics(enabled: Boolean, onClick: () -> Unit) {
  * A plain bar per bucket, the newest (or [highlight]ed) one in the accent and
  * the rest faded — the same shape the typing test draws its history with.
  * Hidden from screen readers; the rows and text below restate the numbers.
+ *
+ * The bars grow up from their ticks the first time the chart is on screen,
+ * left to right a little apart. Another period or metric after that slides
+ * each bar to its new height — see [rememberValuesMorph] — rather than
+ * throwing them all back to the floor.
  */
 @Composable
 private fun HistoryBars(
@@ -394,23 +434,26 @@ private fun HistoryBars(
     highlight: Int = values.lastIndex,
 ) {
     val accent = MaterialTheme.colorScheme.primary
-    // Grows in once, the first time there is a bar to draw, including when the
-    // numbers are already there on the first frame; switching period after
-    // that moves the bars rather than growing them again.
-    val grown by rememberGrowIn(ready = values.any { it > 0.0 })
+    val heights = remember(values) {
+        val peak = (values.maxOrNull() ?: 0.0).coerceAtLeast(1.0)
+        values.map { (it / peak).toFloat() }
+    }
+    val morph = rememberValuesMorph(heights)
+    val entrance = rememberChartEntrance(ready = values.any { it > 0.0 })
     Canvas(
         modifier = modifier
             .fillMaxWidth()
             .height(ChartHeight)
+            .chartEntrance(entrance)
             .clearAndSetSemantics {},
     ) {
-        if (values.isEmpty()) return@Canvas
-        val peak = values.max().coerceAtLeast(1.0)
+        val count = morph.size
+        if (count == 0) return@Canvas
         val gap = BarGap.toPx()
-        val barWidth = (size.width - gap * (values.size - 1)) / values.size
+        val barWidth = (size.width - gap * (count - 1)) / count
         val radius = CornerRadius(barWidth / 3f)
-        values.forEachIndexed { index, value ->
-            val height = (value / peak * size.height).toFloat() * grown
+        for (index in 0 until count) {
+            val height = morph[index] * size.height * entrance.at(index, count, BAR_SPREAD)
             // A quiet bucket still leaves a tick, so the axis reads as a run
             // of days rather than a chart with holes in it.
             val drawn = height.coerceAtLeast(FLOOR_PX)
@@ -424,34 +467,59 @@ private fun HistoryBars(
     }
 }
 
-/** The speed trend as a line — the typing test's graph, one line, Material ink. */
+/**
+ * The speed trend as a line — the typing test's graph, one line, Material ink.
+ *
+ * Draws itself on from the left the first time it is on screen, a dot leading
+ * the line like a pen; another period after that slides the points to their
+ * new heights, as the bars do.
+ */
 @Composable
 private fun SpeedLine(values: List<Double>, modifier: Modifier = Modifier) {
     val accent = MaterialTheme.colorScheme.primary
     val grid = MaterialTheme.colorScheme.surfaceVariant
-    // Rises from the floor once, the same way the bars grow. See [HistoryBars].
-    val grown by rememberGrowIn(ready = values.any { it > 0.0 })
+    val heights = remember(values) {
+        val peak = (values.maxOrNull() ?: 0.0).coerceAtLeast(10.0)
+        values.map { (it / peak).toFloat() }
+    }
+    val morph = rememberValuesMorph(heights)
+    val entrance = rememberChartEntrance(ready = values.any { it > 0.0 })
     Canvas(
         modifier = modifier
             .fillMaxWidth()
             .height(ChartHeight)
+            .chartEntrance(entrance)
             .clearAndSetSemantics {},
     ) {
-        val peak = values.max().coerceAtLeast(10.0)
         for (line in 1..GRID_LINES) {
             val y = size.height * line / (GRID_LINES + 1)
             drawLine(grid, Offset(0f, y), Offset(size.width, y), strokeWidth = 1.dp.toPx())
         }
-        if (values.size < 2) return@Canvas
-        fun x(index: Int) = size.width * index / (values.size - 1)
-        fun y(value: Double) = size.height * (1f - (value / peak * grown).toFloat())
+        val count = morph.size
+        if (count < 2) return@Canvas
+        fun x(index: Int) = size.width * index / (count - 1)
+        fun y(height: Float) = size.height * (1f - height)
         val path = Path().apply {
-            moveTo(x(0), y(values[0]))
-            for (index in 1 until values.size) lineTo(x(index), y(values[index]))
+            moveTo(x(0), y(morph[0]))
+            for (index in 1 until count) lineTo(x(index), y(morph[index]))
         }
-        drawPath(path, accent, style = Stroke(2.dp.toPx(), cap = StrokeCap.Round))
-        values.forEachIndexed { index, value ->
-            if (value > 0.0) drawCircle(accent, radius = 2.5.dp.toPx(), center = Offset(x(index), y(value)))
+        val reveal = entrance.at(0f, spread = 0f)
+        val dot = 2.5.dp.toPx()
+        clipRect(right = size.width * reveal + dot) {
+            drawPath(path, accent, style = Stroke(2.dp.toPx(), cap = StrokeCap.Round))
+            for (index in 0 until count) {
+                // The dots mark the buckets that have a speed at all. Read off
+                // the morph, so a dot leaves with its bucket on a switch.
+                if (morph[index] > 0f) drawCircle(accent, radius = dot, center = Offset(x(index), y(morph[index])))
+            }
+        }
+        if (reveal in 0.001f..0.999f) {
+            // The pen: where the line has got to, between two buckets.
+            val along = reveal * (count - 1)
+            val low = along.toInt().coerceIn(0, count - 2)
+            val t = along - low
+            val height = morph[low] * (1f - t) + morph[low + 1] * t
+            drawCircle(accent, radius = dot * PEN_SCALE, center = Offset(size.width * reveal, y(height)))
         }
     }
 }
@@ -490,6 +558,15 @@ private val ChartHeight = 96.dp
 private val BarGap = 3.dp
 
 private const val FADED_ALPHA = 0.35f
+
+/** How much of the bars' entrance is spent staggering them, left to right. */
+private const val BAR_SPREAD = 0.4f
+
+/** The pen dot at the head of the speed line, against a bucket's dot. */
+private const val PEN_SCALE = 1.4f
+
+/** Each total tile starts counting this long after the one before it. */
+private const val TILE_STAGGER_MS = 40
 private const val FLOOR_PX = 2f
 private const val GRID_LINES = 3
 private const val DAY_MS = 86_400_000L

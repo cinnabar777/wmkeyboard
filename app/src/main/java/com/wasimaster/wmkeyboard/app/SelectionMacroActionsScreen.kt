@@ -244,6 +244,7 @@ internal fun macroDescription(macro: SelectionMacro): Int = when (macro) {
     SelectionMacro.PASTE -> R.string.selection_macros_desc_paste
     SelectionMacro.DELETE -> R.string.selection_macros_desc_delete
     SelectionMacro.SHARE -> R.string.selection_macros_desc_share
+    SelectionMacro.SAVE_NOTE -> R.string.selection_macros_desc_save_note
     SelectionMacro.FORMAT -> R.string.selection_macros_desc_format
     SelectionMacro.FIND -> R.string.selection_macros_desc_find
     SelectionMacro.REPLACE -> R.string.selection_macros_desc_replace

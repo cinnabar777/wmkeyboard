@@ -1,0 +1,42 @@
+---
+title: "Find & replace"
+description: "Search the text you are writing and replace what you find, with match case, whole words, regular expressions and your recent searches."
+sidebar:
+  order: 17.6
+---
+
+import SettingsPath from '@components/SettingsPath.astro';
+
+Plenty of apps have no search of their own, or one that only finds. **Find & replace** works in any text field: it searches what you have written, steps through the matches, and replaces one or all of them.
+
+## Opening it
+
+Tap **Find & replace** on the toolbar, or in the toolbox if it isn't pinned (see [the toolbar](/tools/overview/)). Tap it again to close it. If you have a few words selected on one line, they become the search, the way Ctrl+F works on a computer. Otherwise it opens empty.
+
+The same panel opens from the [selection actions bar](/smart/selection-actions/#find-and-replace)'s **Replace** chip, already holding what you selected.
+
+Password fields can't be searched; the tool says so and opens nothing.
+
+## Searching
+
+The panel has two fields, **Find** and **Replace with**. Tap one and type into it; the keys go to the panel, not to the app. The count beside the arrows says which match you are on and how many there are (**3 of 12**). **‹** and **›** step through them and wrap round at the ends. Enter in the Find field goes to the next match.
+
+The current match is selected in the field itself, and also shown in its line at the bottom of the panel with the match marked, so you can see it even when the keyboard covers that part of the text.
+
+Three toggles change how the search reads:
+
+- **Aa** matches case.
+- **[ab]** matches whole words only, in any script.
+- **.\*** reads the Find field as a regular expression. `$1` in the replacement stands for the first group. A pattern that isn't valid says so, and one that takes too long on the text is stopped rather than left to hang.
+
+## Replacing
+
+**Replace** swaps the current match and moves on to the next one. Enter in the Replace with field does the same. **All** replaces every match at once, and **Undo** takes it back in one go too. A field that doesn't report where its text is (a few web views) still lets you find, but not replace in place.
+
+## Recent searches
+
+While the Find field is empty, the bottom of the panel offers your last ten searches. Tap one to search for it again, or **Clear** to forget them. A search is remembered once you use it, by stepping to a match or replacing, not while you type it.
+
+Nothing is remembered in [incognito](/privacy/incognito/), in a field that asks not to be learned from, or in a password field. To stop remembering searches altogether, or to clear them from Settings:
+
+<SettingsPath path="Tools / Find & replace / Remember searches" />

@@ -2240,9 +2240,6 @@
     <string name="keypress_haptics_title">Haptische feedback bij toetsaanslag</string>
     <string name="keypress_hold_action_copy_label">Kopiëren</string>
     <string name="keypress_hold_action_cut_label">Knippen</string>
-    <string name="keypress_hold_action_first_info">De actie staat meestal aan het einde van de pop-up, dus een gewone druk en vasthouden geeft je het eerste accent. Hiermee verplaatst het naar voren, en een druk en vasthouden op een van de sneltoetsen voert de actie direct uit. De accenten zijn er nog steeds: houd je vinger ingedrukt en schuif naar degene die je wilt. Dit vereist \'Vasthouden om te selecteren\', onder \'Alternatieve toetsen\'.</string>
-    <string name="keypress_hold_action_first_subtitle">Ingedrukt houden voert de actie uit in plaats van de accenten te tonen</string>
-    <string name="keypress_hold_action_first_title">Actie eerst</string>
     <string name="keypress_hold_action_paste_label">Plakken</string>
     <string name="keypress_hold_action_redo_label">Opnieuw</string>
     <string name="keypress_hold_action_select_all_label">Alles selecteren</string>
@@ -2548,8 +2545,6 @@
     <string name="languages_cjk_region_info">Taiwan en Hong Kong gebruiken vaak andere woorden voor hetzelfde, niet alleen andere karakters.</string>
     <string name="languages_cjk_region_taiwan_title">Taiwan (臺灣)</string>
     <string name="languages_cjk_region_title">Regionale bewoordingen</string>
-    <string name="languages_cjk_traditional_info">Het toetsenbord converteert elke kandidaat van Vereenvoudigd (简体) naar Traditioneel (繁體) voordat de kandidaat wordt getoond. De conversie leest één teken per keer. Sommige Vereenvoudigde tekens hebben meer dan één Traditionele vorm, en het toetsenbord schrijft altijd de meest gebruikelijke vorm. 发 wordt 發, wat correct is in 發展 maar fout in 頭髮. Corrigeer deze woorden handmatig.</string>
-    <string name="languages_cjk_traditional_subtitle">Het toetsenbord zet kandidaten om naar Traditioneel (繁體). Het zet één teken tegelijk om, dus sommige vormen die afhankelijk zijn van de context zijn onjuist (发 → 發 / 髮).</string>
     <string name="languages_cjk_traditional_title">Traditionele karakters</string>
     <string name="languages_clusters_title">Clusters</string>
     <string name="languages_conjunct_backspace_info">Backspace verwijdert meestal één codepunt tegelijk. Dit laat soms halfgevormde clusters op het scherm achter. Met deze instelling aan verwijdert één druk op de knop het hele cluster terwijl je %1$s typt. Andere talen behouden hun eigen instelling.</string>

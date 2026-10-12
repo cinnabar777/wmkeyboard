@@ -146,6 +146,15 @@ class OnboardingGraphTest {
     }
 
     @Test
+    fun `a restored backup leaves only the welcome page`() {
+        val power = OnboardingSettings(personaDepth = PersonaDepth.POWER, personaLanguages = PersonaLanguages.MANY)
+        val restored = onboardingPages(
+            power, ToolbarTool.entries, 3, replay = false, imeReady = false, askAppLanguage = true, restored = true,
+        )
+        assertEquals(listOf(OnboardingPage.WELCOME), restored)
+    }
+
+    @Test
     fun `resolvePageIndex finds the current page`() {
         val list = pages()
         assertEquals(2, resolvePageIndex(list, OnboardingPage.LANGUAGES))

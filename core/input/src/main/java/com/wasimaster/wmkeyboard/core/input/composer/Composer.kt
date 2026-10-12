@@ -194,6 +194,18 @@ interface Composer {
     val isConversion: Boolean get() = false
 
     /**
+     * Whether this conversion composer reads its readings straight off the
+     * Latin letter keys — full pinyin, romaji, Jyutping — so that the keys
+     * spelling a reading could just as well be spelling an English word.
+     *
+     * What lets the candidate strip put English words beside the conversions
+     * when English is one of the language's secondaries (#633). False for
+     * every pad whose keys are not the alphabet: T9's digits, Zhuyin's
+     * bopomofo, Cangjie's radicals and the strokes.
+     */
+    val readsLatinLetters: Boolean get() = false
+
+    /**
      * The [CjkDictCatalog] pack this composer converts with, when that pack is
      * not loaded — else null, which is also the answer for every composer that
      * needs no pack at all.
@@ -264,6 +276,22 @@ interface Composer {
     fun learnChoice(buffer: String, index: Int) {
         // Nothing to learn: the default composer has no candidate list to reorder.
     }
+
+    /**
+     * The readings the next undecided part of [buffer] could be, best first, for
+     * a keypad whose keys each stand for several letters: a 九宫格 pinyin `9426`
+     * could be xiao, zhan, xi, yi… (issue #635). The keyboard lists them beside
+     * the keys, and a pick goes through [pickReading]. Empty for every composer
+     * whose keys already say which reading they spell.
+     */
+    fun readings(buffer: String): List<String> = emptyList()
+
+    /**
+     * [buffer] with its next undecided part settled as [reading], one of
+     * [readings] — still a buffer, so the candidates re-convert from it and the
+     * list moves on to the part after. Null when [reading] does not fit there.
+     */
+    fun pickReading(buffer: String, reading: String): String? = null
 
     /** A transliterator's buffer (roman, or jamo) rendered as script text. */
     fun composeBuffer(buffer: String): String = buffer
@@ -337,6 +365,7 @@ fun composerFor(script: ScriptDef, type: ComposerType, langId: String? = null): 
     }
     ComposerType.HANGUL -> HangulComposer
     ComposerType.CHEONJIIN -> CheonjiinComposer
+    ComposerType.NARATGEUL -> NaratgeulComposer
     ComposerType.TELEX -> VietnameseTelexComposer
     ComposerType.VNI -> VietnameseVniComposer
     ComposerType.ROMAJI -> JapaneseComposer
@@ -347,7 +376,8 @@ fun composerFor(script: ScriptDef, type: ComposerType, langId: String? = null): 
     ComposerType.CANGJIE -> CangjieComposer
     ComposerType.CANGJIE_QUICK -> CangjieQuickComposer
     ComposerType.JYUTPING -> JyutpingComposer
-    ComposerType.KHIPRO -> if (script.id == ScriptId.BENGALI) KhiproComposer else NoComposer
+    ComposerType.KHIPRO -> if (script.id == ScriptId.BENGALI) KhiproComposer.CLASSIC else NoComposer
+    ComposerType.KHIPRO_DARK -> if (script.id == ScriptId.BENGALI) KhiproComposer.DARK else NoComposer
 }
 
 /**

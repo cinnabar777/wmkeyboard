@@ -48,6 +48,8 @@ Each padding is claimed at its own edge before **Keyboard position** gets a say,
 
 **Bottom padding** raises the whole keyboard away from the bottom edge and the gesture navigation bar, from 0dp to 160dp. Until you move it, the keyboard picks the amount itself: **32dp** on Android 15 and up with gesture navigation, where the keyboard reaches down to the thin gesture handle, and **8dp** with three-button navigation or on older versions, where the bar below is already tall enough to keep your thumb off the edge. The padding is counted from the top of the navigation bar, which the keyboard always keeps clear of on its own, so 0dp puts the space bar right on the bar, never under it or a row above it. Raise it if the bottom row feels cramped against the screen edge, or if you keep triggering system navigation by mistake. The slider runs so high because the inline **Resize** tool moves the same value, and that can push the keyboard a long way up the screen.
 
+**Hide the system keyboard bar** removes the bar Android draws under the keyboard with gesture navigation, the one with a chevron that hides the keyboard and a button that switches to another keyboard. If the keys still sit higher than you like afterwards, lower **Bottom padding**. The keyboard already has both buttons' jobs covered: Back hides it, and the 🌐 key switches keyboards. It needs Android 16 or later, the first version that lets a keyboard ask for this; on older versions the switch is greyed out, and some phones may keep the bar even on 16. It is off by default.
+
 **Round top corners** and **Round bottom corners** cut rounded corners out of the docked keyboard, from square (the default) up to 40dp, and the app shows through the cut. The top and bottom are set apart, and **Which corners**, shown once either one is round, picks which of the four corners they apply to. All four by default, so rounding only the top two means leaving the bottom at Square. Round bottom corners suit gesture navigation and a phone whose screen corners are round too. With the older three-button navigation bar, the bar sits below the keyboard and the bottom corners open onto the app above it. The floating keyboard and the television card have round corners of their own and ignore these.
 
 ## Sizing each screen shape
@@ -69,9 +71,10 @@ Tap a shape's row to expand its editor:
 - **Keyboard scale**, a whole-keyboard multiplier from 50% to 150%. It exists only on these three override shapes; portrait has no base scale of its own. It multiplies key height and number row height together, so a foldable's roomy inner display can run a smaller keyboard than its cover screen, or the reverse, without re-dialing each height by hand.
 - **Key height**, **Number row height** (if the number row is on), **Bottom padding**, **Keyboard width**, **Font size**, **Key spacing**, **Left padding**, **Right padding**, **Bottom row height**, and, when width is under 100%, **Keyboard position**. Same ranges as their portrait counterparts above.
 - **Number row**, the one override that isn't a number at all. Landscape is what it's there for: it has the least room for a sixth row and the most need for the keys underneath it, which is why sideways starts without it unless you've set the digit row by hand.
+- **One-handed mode on this screen** and **Split keyboard on this screen**, which say whether this shape shows those modes at all. They default to the shared **Portrait only** and **Split only on wide screens** rules, and setting either one here wins over that rule for this shape alone.
 - **Follow portrait again**, which appears only once a shape has at least one override set. It clears every override for that shape in one tap. On landscape that returns it to the landscape defaults below, not to your portrait numbers.
 
-Everything in [one-handed, split and floating](#one-handed-mode) below is global instead. It applies the same whichever screen shape you're on.
+Everything in [one-handed, split and floating](#one-handed-mode) below is set apart from these shapes. One-handed tuning and floating go by orientation only, portrait or landscape, and split is one switch for every shape.
 
 ## What landscape starts at
 
@@ -151,6 +154,8 @@ Pin the **One-handed** tool to your toolbar and tapping it toggles one-handed on
 
 **Split only on wide screens** is the second one, off by default. Split is a single global switch, so turning it on in landscape leaves the keyboard split after you rotate back, where half a phone-width keyboard is close to unusable. Turn this on and the split only happens in landscape or on an unfolded screen. Portrait on an ordinary phone stays whole.
 
+Both of these are shared rules. For a finer answer, each shape under [per-screen sizing](#sizing-each-screen-shape) has its own **One-handed mode on this screen** and **Split keyboard on this screen** toggles. On a foldable, turning split off for **Portrait, unfolded** means the opened screen held upright gets one-handed mode alone instead of a one-handed split keyboard, while both landscape shapes stay split.
+
 <PhoneFrame caption="Split keyboard: each row divided into left and right halves with a center gap.">
   <Shot id="typing/size-position-split" alt="Split keyboard: each row divided into left and right halves with a center gap." />
 </PhoneFrame>
@@ -163,13 +168,17 @@ Pin the **One-handed** tool to your toolbar and tapping it toggles one-handed on
   <Shot id="typing/size-position-floating" alt="The floating panel's handle bar: dock button, drag pill, and resize grip." />
 </PhoneFrame>
 
-**Floating keyboard** detaches the keyboard from the bottom of the screen into a small, movable panel that hovers over whatever app is open. It's off by default. Turn it on and two sliders appear: **Floating keyboard width**, 240dp to 500dp, default **320dp**, and **Floating keyboard height**, 60% to 160% of the keyboard's normal height, default **100%**. The resize grip on the panel drives the same two values, and shares the 240dp floor and the 60–160% height range. It doesn't share the width ceiling: see the edge case below. A **Reset the floating panel** row appears below the sliders once you've moved or resized the panel, and puts its size and position back.
+**Floating keyboard** detaches the keyboard from the bottom of the screen into a small, movable panel that hovers over whatever app is open. It's off by default.
 
-The panel's handle bar carries three controls, left to right:
+Portrait and landscape each remember their own answer, the way Gboard does. **Floating keyboard** is the portrait switch and **Floating in landscape** the sideways one, so you can float the keyboard sideways and keep it docked upright: turn the phone and it changes on its own. The **Floating** tool on the toolbar and the panel's dock button change only the orientation the phone is held in. Until you change either one, landscape follows the portrait switch, so a keyboard that already floated before this setting existed still floats both ways.
+
+With either one on, two sliders appear: **Floating keyboard width**, 240dp to 500dp, default **320dp**, and **Floating keyboard height**, 60% to 160% of the keyboard's normal height, default **100%**. The resize grip on the panel drives the same two values, and shares the 240dp floor and the 60–160% height range. It doesn't share the width ceiling: see the edge case below. A **Reset the floating panel** row appears below the sliders once you've moved or resized the panel, and puts its size and position back.
+
+**Handle bar position** puts the handle bar **Under the keys**, the default, where your thumb already is, or **Above the keys**. The handle bar carries three controls, left to right:
 
 - **Dock button**, a fullscreen icon that returns the keyboard to its normal, docked position.
 - **Drag pill**. Dragging anywhere across the middle of the handle bar moves the panel, not just the small pill drawn there. Its position is saved as a fraction of the free space around it rather than as a pixel coordinate, so it survives rotation. By default that's centered horizontally and pinned to the bottom of the available space. The panel stays where you let go of it.
-- **Resize grip**, drawn as two short diagonal lines rather than a diagonal-arrows icon, deliberately, so it doesn't read as another fullscreen button. Dragging it resizes width and height together: width tracks your finger directly, height tracks it inverted, because the grip sits on the panel's *top* bar. Drag up to grow the panel and down to shrink it. The panel's top-left corner stays put while you resize, so the panel grows and shrinks from there instead of wandering across the screen.
+- **Resize grip**, drawn as two short diagonal lines rather than a diagonal-arrows icon, deliberately, so it doesn't read as another fullscreen button. Dragging it resizes width and height together, and width tracks your finger directly. With the bar under the keys, drag down to make the panel taller and up to shrink it. With the bar above the keys it runs the other way: drag up to grow the panel and down to shrink it. The panel's top-left corner stays put while you resize, so the panel grows and shrinks from there instead of wandering across the screen.
 
 Floating mode replaces the normal layout logic rather than combining with it. While it's on:
 
@@ -177,7 +186,7 @@ Floating mode replaces the normal layout logic rather than combining with it. Wh
 - Keyboard width, keyboard position and bottom padding from the sections above don't apply either. The panel's size and position come entirely from its own width slider, drag position and resize grip.
 - **Split keyboard still works while floating.** The two features aren't mutually exclusive, since split rendering happens inside the same keyboard body the floating panel wraps.
 
-Touches outside the panel pass straight through to the app underneath, and the keyboard forces full-screen (extract) mode off for as long as it's floating. Pin the **Floating** tool to your toolbar and tapping it toggles floating on or off directly.
+Touches outside the panel pass straight through to the app underneath, and the keyboard forces full-screen (extract) mode off for as long as it's floating. The panel also keeps clear of the navigation bar, so a handle bar parked at the bottom of the screen never sits on the gesture strip. Pin the **Floating** tool to your toolbar and tapping it toggles floating on or off for the orientation you're in.
 
 ## Keeping the keyboard on screen
 
@@ -190,6 +199,21 @@ The point of it is apps that read keys without a text field. A notes app that as
 Closing it is deliberate rather than automatic. The **Hide keyboard** tool, a swipe down on the toolbar, and the Back button all put it away, and it stays away until you next tap a text field, at which point it comes up and sticks again. The keyboard never follows you onto the lock screen. An app that forces the keyboard closed every time it appears gets a few tries and then wins, so a badly behaved app can't leave the keyboard flickering.
 
 Pin the **Keep on screen** tool to your toolbar to toggle this directly. That tool and this row write the same setting.
+
+## Opening the keyboard without a text field
+
+<SettingsPath path="Layout & size / One-handed, split and floating / Floating keyboard button" />
+
+Keeping the keyboard on screen only helps once it's open. To open it on a screen that has no text field to tap (a game, a terminal, a remote-desktop app, your home screen), turn on **Floating keyboard button**. Off by default.
+
+While the keyboard is closed, a small round button with a keyboard on it floats over every app. Tap it and the keyboard opens right there, field or not, and stays open on that app's screens until you close it the usual way (the **Hide keyboard** tool, a swipe down on the toolbar, or Back). Keys reach the app as key presses, the same as with **Keep the keyboard on screen**. Switch to another app and the keyboard goes back to opening for text fields only. The button steps aside while the keyboard is open and comes back when it closes.
+
+- **Drag** the button to move it. It settles against the nearer side of the screen and stays where you left it.
+- **Press and hold** it to hide it until the keyboard next opens, for when it covers something you need.
+
+The button needs Android's **Display over other apps** permission. Turning the switch on explains why and then opens Android's page for it; until you allow it there, a row under the switch says what's missing. The button is the only thing the keyboard draws with that permission, and it reads nothing from the screen. See [Permissions](/privacy/permissions/).
+
+The **Keyboard controls** notification (Settings › Notifications) does the same job from the notification shade, without the permission: tap it, or its **Show** button, and the keyboard opens over the app you were in once the shade closes. On Android 14 and later, where a swipe can clear even a permanent notification, the controls come straight back; turn them off in Settings › Notifications instead. The floating button is the more dependable of the two, because pulling the shade down briefly takes the screen's focus away from the app, and a few apps answer that by closing the keyboard again.
 
 ## Options
 

@@ -1,5 +1,6 @@
 package com.wasimaster.wmkeyboard.core.layout
 
+import com.wasimaster.wmkeyboard.config.BuildConfig
 import com.wasimaster.wmkeyboard.core.util.JsonPretty
 import com.wasimaster.wmkeyboard.core.util.firstJsonDocument
 import kotlinx.serialization.SerialName
@@ -16,9 +17,11 @@ import kotlinx.serialization.json.jsonArray
  * semantics editing a built-in typing layout already has. Serialized by the
  * lowercase name so a stored list reads `"panel":"emoji"`.
  *
- * [shipped] is whether the panel's tool exists in this build. Every panel's
- * does now; the flag stays so the next panel can define its layout ahead of
- * its tool, as the trackpad's was (issue #39), with the gallery hiding it.
+ * [shipped] is whether the panel's tool exists in this build. Handwriting is
+ * the one that can be missing: lite builds have no recognizer, so its panel
+ * hides from the gallery and the layout editor's tabs there. The flag also lets
+ * the next panel define its layout ahead of its tool, as the trackpad's was
+ * (issue #39).
  */
 @Serializable
 enum class PanelKind(val shipped: Boolean = true) {
@@ -32,6 +35,8 @@ enum class PanelKind(val shipped: Boolean = true) {
     @SerialName("trackpad") TRACKPAD,
     /** The Numpad tool's pad: keys only, like the text-editing pad. */
     @SerialName("numpad") NUMPAD,
+    /** The handwriting panel (#568): the writing canvas plus the keys around it. */
+    @SerialName("handwriting") HANDWRITING(shipped = BuildConfig.ENABLE_ML_KIT_HANDWRITING),
     ;
 
     /**
@@ -53,6 +58,7 @@ enum class PanelKind(val shipped: Boolean = true) {
             STICKER -> PanelFieldKind.STICKER_BROWSER
             CLIPBOARD -> PanelFieldKind.CLIPBOARD_LIST
             TRACKPAD -> PanelFieldKind.TRACKPAD
+            HANDWRITING -> PanelFieldKind.HANDWRITING_CANVAS
             TEXT_EDIT, NUMPAD -> null
         }
 }

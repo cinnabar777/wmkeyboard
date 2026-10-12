@@ -56,6 +56,7 @@
     <string name="selection_macros_desc_paste">Paste over the selection, while the clipboard holds text</string>
     <string name="selection_macros_desc_delete">Remove the selection</string>
     <string name="selection_macros_desc_share">Send the selection to another app</string>
+    <string name="selection_macros_desc_save_note">Keep the selection as a note in the Notes tool</string>
     <string name="selection_macros_desc_format">Tidy a number, link or address; the case options on text</string>
     <string name="selection_macros_desc_find">Jump to the next place the selection appears</string>
     <string name="selection_macros_desc_replace">Find and replace across the field</string>

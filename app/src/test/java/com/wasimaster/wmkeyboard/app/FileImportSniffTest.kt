@@ -104,10 +104,28 @@ class FileImportSniffTest {
     fun `an Espanso match file is snippets`() {
         val yaml = "matches:\n  - trigger: \":sig\"\n    replace: \"Wasi Master\""
         val opened = WMFileTypes.textKindFor(yaml, "base.yml")
-        assertTrue("an Espanso file was not recognised", opened is WMFileTypes.Opened.EspansoSnippets)
-        val parsed = (opened as WMFileTypes.Opened.EspansoSnippets).parsed
+        assertTrue("an Espanso file was not recognised", opened is WMFileTypes.Opened.ForeignSnippets)
+        val parsed = (opened as WMFileTypes.Opened.ForeignSnippets).parsed
         assertEquals(1, parsed.snippets.size)
         assertTrue("an Espanso file was read as one of ours", parsed.isEspanso)
+    }
+
+    @Test
+    fun `a Gboard dictionary is its own kind, not snippets`() {
+        val text = "# Gboard Dictionary version:1\nomw\ton my way\ten-US\n\tWasimaster\t\n"
+        val opened = WMFileTypes.textKindFor(text, "dictionary.txt")
+        assertTrue("a Gboard dictionary was not recognised", opened is WMFileTypes.Opened.GboardDictionaryFile)
+        assertEquals(listOf("Wasimaster"), (opened as WMFileTypes.Opened.GboardDictionaryFile).contents.words)
+    }
+
+    @Test
+    fun `a snippet table needs a header or a csv name`() {
+        val headed = WMFileTypes.textKindFor("trigger,text\nomw,on my way\n", "export")
+        assertTrue("a headed table was not recognised", headed is WMFileTypes.Opened.ForeignSnippets)
+        val named = WMFileTypes.textKindFor("omw,on my way\n", "replies.csv")
+        assertTrue("a .csv was not recognised", named is WMFileTypes.Opened.ForeignSnippets)
+        assertEquals(WMFileTypes.Opened.Unrecognized, WMFileTypes.textKindFor("omw,on my way\n", "notes.txt"))
+        assertEquals(WMFileTypes.Opened.Unrecognized, WMFileTypes.textKindFor("Name,Phone\nAda,555\n", "people.csv"))
     }
 
     @Test
@@ -155,6 +173,73 @@ class FileImportSniffTest {
         val blob = "QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVowMTIzNDU2Nzg5YWJjZGVmZ2hpamts"
         assertEquals(WMFileTypes.Opened.Unrecognized, WMFileTypes.textKindFor(blob, "x.kcf"))
         assertTrue(WMFileTypes.isEditableText(blob))
+    }
+
+    // ---- Desktop layouts ----
+
+    @Test
+    fun `an XKB symbols file is a desktop layout, told by its contents`() {
+        val xkb = """
+            |default partial alphanumeric_keys
+            |xkb_symbols "basic" {
+            |    include "us(basic)"
+            |    name[Group1] = "Mine";
+            |    key <AC10> { [ odiaeresis, Odiaeresis ] };
+            |};
+        """.trimMargin()
+        // No extension at all, as XKB files have none.
+        val opened = WMFileTypes.textKindFor(xkb, "mine")
+        assertTrue("an XKB file was not recognised", opened is WMFileTypes.Opened.DesktopLayoutFile)
+        assertEquals("Mine", (opened as WMFileTypes.Opened.DesktopLayoutFile).layouts.single().layout.name)
+    }
+
+    @Test
+    fun `a keylayout is a desktop layout, not an Unexpected Keyboard one`() {
+        // Both are XML with a <keyboard> and <key>s; the desktop reader goes first.
+        val keys = "qwertyuiopasdfghjklzxcvbnm".mapIndexed { i, c ->
+            val code = listOf(12, 13, 14, 15, 17, 16, 32, 34, 31, 35, 0, 1, 2, 3, 5, 4, 38, 40, 37, 6, 7, 8, 9, 11, 45, 46)[i]
+            """<key code="$code" output="$c"/>"""
+        }.joinToString("\n")
+        val xml = """<?xml version="1.1" encoding="UTF-8"?>
+            |<keyboard group="126" id="-5" name="Mac Mine" maxout="1">
+            |<layouts><layout first="0" last="17" mapSet="m" modifiers="f"/></layouts>
+            |<modifierMap id="f" defaultIndex="0"><keyMapSelect mapIndex="0"><modifier keys=""/></keyMapSelect></modifierMap>
+            |<keyMapSet id="m"><keyMap index="0">
+            |$keys
+            |</keyMap></keyMapSet>
+            |</keyboard>
+        """.trimMargin()
+        val opened = WMFileTypes.textKindFor(xml, "mine.keylayout")
+        assertTrue("a keylayout was not recognised", opened is WMFileTypes.Opened.DesktopLayoutFile)
+        assertEquals("Mac Mine", (opened as WMFileTypes.Opened.DesktopLayoutFile).layouts.single().layout.name)
+    }
+
+    // ---- Multiling O ----
+
+    @Test
+    fun `a Multiling O DIY layout is told by its onScreen object`() {
+        val diy = """{"title":"Pad","onScreen":{"main":["qwe","[SHIFT]asd[DEL]","[SYM:.][SPACE][ENTER]"]}}"""
+        val opened = WMFileTypes.textKindFor(diy, "pad.json")
+        assertTrue("a DIY layout was not recognised", opened is WMFileTypes.Opened.MultilingFile)
+        opened as WMFileTypes.Opened.MultilingFile
+        assertEquals("Pad", opened.layouts.single().layout.name)
+        assertEquals(null, opened.theme)
+    }
+
+    @Test
+    fun `a Multiling O theme alone is a theme with no layouts`() {
+        val theme = "OK_Settings_Begin\n__V.co0::ff000000::X\n__V.co1::ff333333::X\nOK_Settings_End"
+        val opened = WMFileTypes.textKindFor(theme, "theme.txt")
+        assertTrue(opened is WMFileTypes.Opened.MultilingFile)
+        opened as WMFileTypes.Opened.MultilingFile
+        assertTrue(opened.layouts.isEmpty())
+        assertEquals(0xFF000000, opened.theme?.theme?.boardBackground)
+    }
+
+    @Test
+    fun `a page that only mentions the Multiling markers is not claimed`() {
+        val prose = "Copy the text from OK_Layout_Begin to OK_Layout_End and paste it."
+        assertEquals(WMFileTypes.Opened.Unrecognized, WMFileTypes.textKindFor(prose, "notes.txt"))
     }
 
     // ---- archives ----

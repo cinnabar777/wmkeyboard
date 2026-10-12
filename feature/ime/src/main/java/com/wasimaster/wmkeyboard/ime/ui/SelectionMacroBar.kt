@@ -1,11 +1,17 @@
 package com.wasimaster.wmkeyboard.ime.ui
 
 import android.text.format.DateFormat
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationVector1D
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,7 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items as lazyRowItems
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -59,6 +65,7 @@ import com.wasimaster.wmkeyboard.core.icons.symbols.outlined.QrCode2
 import com.wasimaster.wmkeyboard.core.icons.symbols.outlined.Search
 import com.wasimaster.wmkeyboard.core.icons.symbols.outlined.SelectAll
 import com.wasimaster.wmkeyboard.core.icons.symbols.outlined.Share
+import com.wasimaster.wmkeyboard.core.icons.symbols.outlined.StickyNote2
 import com.wasimaster.wmkeyboard.core.icons.symbols.outlined.Sms
 import com.wasimaster.wmkeyboard.core.icons.symbols.outlined.SortByAlpha
 import com.wasimaster.wmkeyboard.core.icons.symbols.outlined.Spellcheck
@@ -70,6 +77,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -78,8 +86,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -177,32 +188,48 @@ internal fun SelectionMacroBar(
     val feedback = LocalKeyPressFeedback.current
     val context = LocalContext.current
     val linkApp = rememberMacroLinkApp(offer.kind, offer.text, wanted = SelectionMacro.OPEN in offer.macros)
+    // Accessibility › Animate text selection. The bar slides up into its row
+    // when a selection first offers it, and each face of it (the macros, or a
+    // ladder) brings its chips in one after another. Keyed like the ladder: a
+    // pick that rewrites the selection keeps the bar where it is.
+    val motion = LocalKbTheme.current.motion.selection
+    val arrival = remember(offer.kind) { Animatable(if (motion) 0f else 1f) }
+    LaunchedEffect(arrival) { arrival.animateTo(1f, tween(BarArrivalMs, easing = FastOutSlowInEasing)) }
+    val chips = remember(offer.kind, ladder) { Animatable(if (motion) 0f else 1f) }
+    LaunchedEffect(chips) { chips.animateTo(1f, tween(ChipClockMs.toInt(), easing = LinearEasing)) }
+    val rise = with(LocalDensity.current) { BarRise.toPx() }
     Row(
         modifier = modifier
             .fillMaxWidth()
             .height(topBarHeight(state.settings))
-            .toolbarPadding(state.settings),
+            .toolbarPadding(state.settings)
+            .graphicsLayer {
+                val p = arrival.value
+                alpha = p
+                translationY = (1f - p) * rise
+                compositingStrategy = CompositingStrategy.ModulateAlpha
+            },
         verticalAlignment = Alignment.CenterVertically,
     ) {
         val open = ladder
         if (open != null) MacroBackButton(onClick = { ladder = null })
         when (open) {
             is MacroLadder.Fancy -> {
-                FancyStyleLadder(modifier = Modifier.weight(1f)) { id ->
+                FancyStyleLadder(chips, modifier = Modifier.weight(1f)) { id ->
                     feedback()
                     callbacks.onPick(SelectionMacro.FANCY, id, open.source)
                 }
                 return@Row
             }
             is MacroLadder.Colour -> {
-                PickLadder(open.choices, modifier = Modifier.weight(1f)) { arg ->
+                PickLadder(open.choices, chips, modifier = Modifier.weight(1f)) { arg ->
                     feedback()
                     callbacks.onPick(SelectionMacro.COLOUR, arg, open.source)
                 }
                 return@Row
             }
             is MacroLadder.Zones -> {
-                PickLadder(open.choices, modifier = Modifier.weight(1f)) { arg ->
+                PickLadder(open.choices, chips, modifier = Modifier.weight(1f)) { arg ->
                     feedback()
                     callbacks.onPick(SelectionMacro.TIME_ZONES, arg, open.source)
                 }
@@ -221,45 +248,47 @@ internal fun SelectionMacroBar(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             contentPadding = PaddingValues(horizontal = 6.dp),
         ) {
-            lazyRowItems(items, key = { it.key }) { item ->
-                when (item) {
-                    is BarItem.Ai -> AiChip(item.spec) {
-                        feedback()
-                        callbacks.onAiAction(item.spec.id)
-                    }
-                    is BarItem.Macro -> when (val macro = item.macro) {
-                        SelectionMacro.UNDO -> UndoChip {
+            itemsIndexed(items, key = { _, item -> item.key }) { index, item ->
+                Box(Modifier.staggerIn(chips, index)) {
+                    when (item) {
+                        is BarItem.Ai -> AiChip(item.spec) {
                             feedback()
-                            callbacks.onMacro(SelectionMacro.UNDO)
+                            callbacks.onAiAction(item.spec.id)
                         }
-                        else -> MacroChip(
-                            macro = macro,
-                            busy = offer.busy == macro,
-                            speaking = macro == SelectionMacro.READ_ALOUD && offer.speaking,
-                            swatch = if (macro == SelectionMacro.COLOUR) offer.content.colour?.let { Color(it.argb) } else null,
-                            reduceMotion = state.settings.reduceMotion,
-                            app = if (macro == SelectionMacro.OPEN) linkApp else null,
-                            onClick = {
+                        is BarItem.Macro -> when (val macro = item.macro) {
+                            SelectionMacro.UNDO -> UndoChip {
                                 feedback()
-                                // The doors the service never sees: on prose
-                                // there is nothing to reformat, and a colour,
-                                // a style or a zone is a pick, not an action.
-                                when {
-                                    macro == SelectionMacro.FORMAT && offer.kind == SelectionKind.TEXT -> ladder = MacroLadder.Case
-                                    macro == SelectionMacro.FANCY -> ladder = MacroLadder.Fancy(offer.text)
-                                    macro == SelectionMacro.COLOUR -> offer.content.colour?.let { colour ->
-                                        ladder = MacroLadder.Colour(offer.text, colourChoices(colour))
+                                callbacks.onMacro(SelectionMacro.UNDO)
+                            }
+                            else -> MacroChip(
+                                macro = macro,
+                                busy = offer.busy == macro,
+                                speaking = macro == SelectionMacro.READ_ALOUD && offer.speaking,
+                                swatch = if (macro == SelectionMacro.COLOUR) offer.content.colour?.let { Color(it.argb) } else null,
+                                reduceMotion = !motion,
+                                app = if (macro == SelectionMacro.OPEN) linkApp else null,
+                                onClick = {
+                                    feedback()
+                                    // The doors the service never sees: on prose
+                                    // there is nothing to reformat, and a colour,
+                                    // a style or a zone is a pick, not an action.
+                                    when {
+                                        macro == SelectionMacro.FORMAT && offer.kind == SelectionKind.TEXT -> ladder = MacroLadder.Case
+                                        macro == SelectionMacro.FANCY -> ladder = MacroLadder.Fancy(offer.text)
+                                        macro == SelectionMacro.COLOUR -> offer.content.colour?.let { colour ->
+                                            ladder = MacroLadder.Colour(offer.text, colourChoices(colour))
+                                        }
+                                        macro == SelectionMacro.TIME_ZONES -> offer.content.dateTime?.let { hit ->
+                                            ladder = MacroLadder.Zones(
+                                                offer.text,
+                                                zoneChoices(hit, state.settings, DateFormat.is24HourFormat(context)),
+                                            )
+                                        }
+                                        else -> callbacks.onMacro(macro)
                                     }
-                                    macro == SelectionMacro.TIME_ZONES -> offer.content.dateTime?.let { hit ->
-                                        ladder = MacroLadder.Zones(
-                                            offer.text,
-                                            zoneChoices(hit, state.settings, DateFormat.is24HourFormat(context)),
-                                        )
-                                    }
-                                    else -> callbacks.onMacro(macro)
-                                }
-                            },
-                        )
+                                },
+                            )
+                        }
                     }
                 }
             }
@@ -296,12 +325,17 @@ private fun zoneChoices(hit: DateTimeHit, settings: KeyboardSettings, hour24: Bo
  * marking one would suggest the two are the same setting.
  */
 @Composable
-private fun FancyStyleLadder(modifier: Modifier = Modifier, onPick: (String) -> Unit) {
+private fun FancyStyleLadder(
+    chips: Animatable<Float, AnimationVector1D>,
+    modifier: Modifier = Modifier,
+    onPick: (String) -> Unit,
+) {
     // Latin glyphs whatever the locale, so mirroring the ladder under RTL
     // would put the list order at odds with the layout — as on the fancy strip.
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
         PickLadder(
             FancyStyles.all.map { it.id to it.sample },
+            chips,
             modifier = modifier,
             // The samples are astral soup to TalkBack; speak the plain name instead.
             describe = { id -> FancyStyles.byId(id)?.name ?: id },
@@ -314,6 +348,7 @@ private fun FancyStyleLadder(modifier: Modifier = Modifier, onPick: (String) -> 
 @Composable
 private fun PickLadder(
     choices: List<Pair<String, String>>,
+    chips: Animatable<Float, AnimationVector1D>,
     modifier: Modifier = Modifier,
     describe: (String) -> String = { _ -> "" },
     onPick: (String) -> Unit,
@@ -326,11 +361,12 @@ private fun PickLadder(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         contentPadding = PaddingValues(horizontal = 6.dp),
     ) {
-        lazyRowItems(choices, key = { it.first }) { (arg, label) ->
+        itemsIndexed(choices, key = { _, choice -> choice.first }) { index, (arg, label) ->
             val description = describe(arg).ifEmpty { label }
             Text(
                 text = label,
                 modifier = Modifier
+                    .staggerIn(chips, index)
                     .clip(shape)
                     .background(kb.chipActive)
                     .chipBorder(kb, shape)
@@ -343,6 +379,31 @@ private fun PickLadder(
             )
         }
     }
+}
+
+/** The bar's way in: a short rise and fade, over a few pixels. */
+private const val BarArrivalMs = 140
+private val BarRise = 6.dp
+
+/**
+ * The chips' way in: each rises over [ChipInMs], the next [ChipStaggerMs]
+ * after the one before, the stagger capped so the whole row is in by
+ * [ChipClockMs] however long it is. Chips scrolled into view later find the
+ * clock run out and arrive in place.
+ */
+private const val ChipInMs = 90f
+private const val ChipStaggerMs = 15f
+private const val ChipStaggerCap = 4
+private const val ChipClockMs = ChipInMs + ChipStaggerMs * ChipStaggerCap
+private val ChipRise = 4.dp
+
+/** Chip [index]'s share of [clock], read in its layer so the row never recomposes for it. */
+private fun Modifier.staggerIn(clock: Animatable<Float, AnimationVector1D>, index: Int): Modifier = graphicsLayer {
+    val ms = clock.value * ChipClockMs
+    val start = minOf(index, ChipStaggerCap) * ChipStaggerMs
+    val p = FastOutSlowInEasing.transform(((ms - start) / ChipInMs).coerceIn(0f, 1f))
+    alpha = p
+    translationY = (1f - p) * ChipRise.toPx()
 }
 
 /** Back out of a ladder to the macros the selection was offered. */
@@ -542,6 +603,7 @@ fun selectionMacroIcon(macro: SelectionMacro): ImageVector? = when (macro) {
     SelectionMacro.PASTE -> Icons.Outlined.ContentPaste
     SelectionMacro.DELETE -> Icons.Outlined.DeleteOutline
     SelectionMacro.SHARE -> Icons.Outlined.Share
+    SelectionMacro.SAVE_NOTE -> Icons.Outlined.StickyNote2
     SelectionMacro.FORMAT -> Icons.Outlined.TextFormat
     SelectionMacro.FIND -> Icons.Outlined.FindInPage
     SelectionMacro.REPLACE -> Icons.Outlined.FindReplace

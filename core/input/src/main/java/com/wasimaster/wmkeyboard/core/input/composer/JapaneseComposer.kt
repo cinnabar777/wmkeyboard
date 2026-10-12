@@ -22,6 +22,7 @@ object JapaneseComposer : Composer {
     override val isTransliterating: Boolean get() = true
     override val isConversion: Boolean get() = true
     override val missingPack: String? get() = CjkDictionaries.missingJapanese
+    override val readsLatinLetters: Boolean get() = true
 
     /** Reading space for learned picks: kana readings. */
     private const val NAMESPACE = "ja_kana"

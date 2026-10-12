@@ -99,4 +99,38 @@ class DictionaryCapitalsTest {
         engine.dictionaryCapitalsEnabled = false
         assertNull(engine.shouldAutocorrect("monday"))
     }
+    private fun english(lexicon: UserLexicon = UserLexicon(null)): SuggestionEngine {
+        val list = PackedTrie.of(listOf("i" to 100, "will" to 100, "the" to 100))
+        val shipped = DictionaryCapitals.ofSpellings(sequenceOf("I", "I'm"))!!
+        return SuggestionEngine(list, BengaliPhoneticIndex(emptyList()), lexicon).apply {
+            primaryLanguageId = "en"
+            bundledCapitals = mapOf("en" to shipped)
+        }
+    }
+
+    /** #620: the lone "i" is in the bundled capitals, so autocorrect writes "I". */
+    @Test fun aLoneIIsCapitalized() {
+        assertEquals("I", english().shouldAutocorrect("i"))
+        assertNull(english().shouldAutocorrect("the"))
+    }
+
+    /** #620: adding "I" by hand pinned it, and a pinned word used to be skipped. */
+    @Test fun aCapitalAddedByHandStillCommits() {
+        val lexicon = UserLexicon(null).apply { addWord("I") }
+        assertEquals("I", english(lexicon).shouldAutocorrect("i"))
+        // A name the user added does not capitalize a word the list writes in small letters.
+        lexicon.addWord("Will")
+        assertNull(english(lexicon).shouldAutocorrect("will"))
+        // One no list knows is the user's to spell.
+        lexicon.addWord("Wasi")
+        assertEquals("Wasi", english(lexicon).shouldAutocorrect("wasi"))
+    }
+
+    @Test fun aCapitalFromAndroidsDictionaryCommitsForAnUnlistedWord() {
+        val engine = english().apply {
+            systemWordCases = mapOf("wasi" to "Wasi", "will" to "Will")
+        }
+        assertEquals("Wasi", engine.shouldAutocorrect("wasi"))
+        assertNull(engine.shouldAutocorrect("will"))
+    }
 }

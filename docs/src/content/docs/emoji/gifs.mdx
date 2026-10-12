@@ -28,6 +28,16 @@ Along the bottom sits the same row the [emoji panel](/emoji/picker/#switching-to
 
 The GIF panel is a [panel layout](/languages/custom-layouts/#panel-layouts) too, so you can lay it out yourself: <SettingsPath path="Tools / GIFs / Layout / Panel layout" />. The search box, the chips and the results are one component, **GIF search and results**, and every other cell is a key, so the panel can carry a different bottom row, a second row of keys, or the switch in a place of its own. Once you change it, it stops following the emoji panel. The panel is as tall as <SettingsPath path="Emoji / Emoji panel / Panel height" /> makes the emoji panel, so the three panels never change the keyboard's height between them.
 
+### Favourites and recent GIFs
+
+Long-press a GIF and choose **Add to favourites**. A **Favourites** chip then leads the category chips, ahead of Trending, and tapping it shows every GIF you added, the newest first. To take one out, long-press it (in Favourites or anywhere else it shows up) and choose **Remove from favourites**. The chip only appears once you have a favourite. You can keep up to 500.
+
+Turn on **Recent GIFs** and a **Recent** chip sits next to it, with the last 48 GIFs you sent from the panel, the newest first. It is off by default, because it keeps a record of what you sent. While [incognito](/privacy/incognito/) is on, sending a GIF does not add it to the list. Turning the setting off deletes the list.
+
+Favourites and recent GIFs are the provider's GIFs, so they normally load from the provider like any other result and need a connection. Turn on **Keep favourites on the phone** and the keyboard saves a copy of each favourite, so Favourites shows and sends with no connection, and a GIF stays even if the provider drops it. The copies download when you add a favourite or open Favourites, and only on a connection that [data saving](/privacy/data-saver/) allows. Turning the setting off deletes the copies. The favourites stay, and load from the provider again. Favourites and recent GIFs are for the GIF panel only. The sticker panel has [your own sticker packs](/emoji/stickers/) instead.
+
+Both chips sit in the category row, so they follow its rules: they go away while you type a search, and a short panel that has no room for the row has no room for them either.
+
 ### Making the panel taller
 
 A short bar sits across the top of the panel. Drag it up to make the panel taller, so more rows of results show at one time, and drag it down to make it shorter. When you let go, the panel keeps that height from then on. The bar sets the same **Panel height** as the emoji settings, so the emoji and sticker panels change with it, and the three still open at one height. The panel never covers more than most of the screen, and the bar is not there while you type a search, or where the screen has no room for a taller panel.
@@ -66,6 +76,7 @@ Everything about getting files onto a phone that cannot download is on [Using it
 
 Long-press a GIF instead of tapping it and a small menu opens over the grid:
 
+- **Add to favourites** puts the GIF in the [Favourites chip](#favourites-and-recent-gifs). On a GIF that is already a favourite the row reads **Remove from favourites** and takes it out.
 - **Copy** downloads the GIF and puts it on the system clipboard, so you can paste it wherever you like rather than into the field you happen to be in. It's the same thing the fallback in step 3 above does, except you asked for it instead of finding out afterwards that the field wouldn't take the file.
 - **Report** opens a mail draft to the maintainer naming the provider, your search term, and the result's id and URL, with room at the top to say what's wrong with it. Nothing is sent from the keyboard. The draft lands in your mail app, and you can read, edit, or abandon it. Klipy and GIPHY answer a search out of their own catalogues, so a result nobody vetted can come back. This is where that goes.
 
@@ -90,6 +101,8 @@ Saving to a pack is sticker-only, since a GIF can't become one. That row shows o
 | Gap between cells | 4 dp | A slider from 0 to 12 dp: the space around each result. Shared with the sticker tool. |
 | Panel height | Same as keyboard | How much taller than the keyboard the emoji, GIF and sticker panels open, up to 400 dp more. The same setting as <SettingsPath path="Emoji / Emoji panel / Panel height" /> and the [bar on top of the panel](#making-the-panel-taller). |
 | Hide the search when you scroll | Off | Scrolling down folds the search box and the chips away, scrolling up brings them back. See [Hiding the search while you scroll](#hiding-the-search-while-you-scroll). Shared with the sticker tool. |
+| Recent GIFs | Off | A **Recent** chip with the last 48 GIFs you sent. Turning it off deletes the list. See [Favourites and recent GIFs](#favourites-and-recent-gifs). |
+| Keep favourites on the phone | Off | Saves a copy of each favourite, so it shows and sends with no connection. Turning it off deletes the copies and keeps the favourites. |
 | Panel layout | Standard | The keys around the results. **Standard** ends the way the emoji panel ends. See [Panel layouts](/languages/custom-layouts/#panel-layouts). |
 | Send GIFs as | Image | Whether a tap tries to land the result as a sticker-style MIME first or always as a plain image. See the sticker-limitation note above. |
 | Multiple sources | Tabs | **Tabs**: one chip per configured provider once you have more than one, to switch between them. **Mixed**: a single grid interleaving results from every provider evenly, with an **Online** chip for it and an **Offline** chip for your offline GIF packs once one is installed. Without an offline pack the Mixed panel shows no chip row at all. |

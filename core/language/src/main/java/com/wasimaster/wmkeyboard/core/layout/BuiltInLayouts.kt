@@ -31,6 +31,7 @@ object BuiltInLayouts {
     const val HALMAK_ID = "builtin_halmak"
     const val AVRO_ID = "builtin_avro"
     const val KHIPRO_ID = "builtin_khipro"
+    const val KHIPRO_DARK_ID = "builtin_khipro_dark"
     const val PROBHAT_ID = "builtin_probhat"
     const val JATIYA_ID = "builtin_jatiya"
     const val FRENCH_ID = "builtin_french"
@@ -174,6 +175,21 @@ object BuiltInLayouts {
         name = "Khipro",
         langId = "bn",
         composer = ComposerType.KHIPRO,
+        layers = mapOf(LayoutLayer.LETTERS.key to LayerSpec(khiproRows)),
+        tabletExpand = false,
+    )
+
+    /**
+     * Khipro Dark (issue #631): the same keys as [KHIPRO], read by Khipro's
+     * newer edition, which leaves consonants apart until `/` joins them
+     * (`lagbe` is লাগবে, `ntrz///` is ন্ত্র্য). Its own layout rather than a
+     * switch on Khipro's, so the globe key flips between the two.
+     */
+    val KHIPRO_DARK = LayoutSpec(
+        id = KHIPRO_DARK_ID,
+        name = "Khipro Dark",
+        langId = "bn",
+        composer = ComposerType.KHIPRO_DARK,
         layers = mapOf(LayoutLayer.LETTERS.key to LayerSpec(khiproRows)),
         tabletExpand = false,
     )
@@ -438,7 +454,7 @@ object BuiltInLayouts {
      * add the language tail at runtime, and both feed `findLayout`.
      */
     val all: List<LayoutSpec> = listOf(
-        QWERTY, AZERTY, DVORAK, COLEMAK, WORKMAN, HALMAK, AVRO, KHIPRO, PROBHAT, JATIYA, FRENCH,
+        QWERTY, AZERTY, DVORAK, COLEMAK, WORKMAN, HALMAK, AVRO, KHIPRO, KHIPRO_DARK, PROBHAT, JATIYA, FRENCH,
         GERMAN, SPANISH, KOREAN, RUSSIAN, ARABIC, GREEK, HEBREW, HINDI, HINDI_PHONETIC,
         URDU_PHONETIC, MARATHI_PHONETIC, GUJARATI_PHONETIC, PUNJABI_PHONETIC, ODIA_PHONETIC,
         ASSAMESE_PHONETIC, TAMIL_PHONETIC, TELUGU_PHONETIC, KANNADA_PHONETIC, MALAYALAM_PHONETIC,

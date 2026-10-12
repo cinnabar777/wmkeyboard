@@ -69,6 +69,10 @@
     <string name="common_special_access_install_updates_title">Permission to install updates</string>
     <string name="common_special_access_install_updates_body">To install a new version, Android must let this app install apps. The app uses that permission for one thing: a new version of itself that you downloaded from the project releases page and pressed Install on. Before it asks, the app compares the file against the checksum in the release and against the key this install is signed with. Android shows its own confirmation for the first update. The app never installs another app, and it never installs anything you did not press Install on.</string>
 
+    <!-- "Display over other apps", for the floating keyboard button (issue #374). -->
+    <string name="common_special_access_overlay_title">Display over other apps, for the keyboard button</string>
+    <string name="common_special_access_overlay_body">With this permission the keyboard can draw one small round button over other apps while the keyboard is closed. Tap the button and the keyboard opens, even on a screen with no text field, so you can send keys and shortcuts to that app. The button is the only thing the keyboard draws with this permission. It cannot see or read what is on screen, and it collects no data. Android\'s settings screen describes everything this permission allows. The keyboard uses it for this button and nothing else. The button is optional and stays off until you turn it on.</string>
+
     <string name="common_special_access_accessibility_title">Accessibility service for keyboard gestures</string>
     <string name="common_special_access_accessibility_body">This service keeps the keyboard gestures available while a screen reader runs. The gestures are the spacebar cursor slide, the backspace word swipe, glide typing and handwriting. Only an accessibility service can arrange this. The service subscribes to no accessibility events. It cannot read window content. It marks nothing but the keyboard\'s own key grid. It collects no data. Android\'s accessibility screen warns about the full power of this category. This service declares none of that power.</string>
 

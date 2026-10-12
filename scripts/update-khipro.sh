@@ -32,10 +32,17 @@ fetch() {
     fi
 }
 
-fetch "$RAW/rank-coder/khipro-m17n/HEAD/bn-khipro.mim" "$MAIN/bn-khipro.mim"
-fetch "$RAW/KhiproTeam/khipro-mim-touchscreen/HEAD/bn-khipro.mim" "$MAIN/bn-khipro-touchscreen.mim"
-fetch "$RAW/KhiproTeam/khipro-testcases/HEAD/khipro-testcases.tsv" "$TEST/khipro-testcases.tsv"
-fetch "$RAW/KhiproTeam/khipro-testcases-touch/HEAD/khipro-testcases.tsv" "$TEST/khipro-testcases-touch.tsv"
+# Each spec repository carries its own conformance table beside the spec.
+# Classic's files were renamed bn-khipro-classic.mim when Dark (issue #631)
+# arrived; the local names stay as they were.
+fetch "$RAW/rank-coder/khipro-m17n/HEAD/bn-khipro-classic.mim" "$MAIN/bn-khipro.mim"
+fetch "$RAW/rank-coder/khipro-m17n/HEAD/khipro-testcases.tsv" "$TEST/khipro-testcases.tsv"
+fetch "$RAW/KhiproTeam/khipro-mim-touchscreen/HEAD/bn-khipro-classic.mim" "$MAIN/bn-khipro-touchscreen.mim"
+fetch "$RAW/KhiproTeam/khipro-mim-touchscreen/HEAD/khipro-testcases.tsv" "$TEST/khipro-testcases-touch.tsv"
+fetch "$RAW/KhiproTeam/khipro-dark-m17n/HEAD/bn-khipro-dark.mim" "$MAIN/bn-khipro-dark.mim"
+fetch "$RAW/KhiproTeam/khipro-dark-m17n/HEAD/khipro-testcases.tsv" "$TEST/khipro-dark-testcases.tsv"
+fetch "$RAW/KhiproTeam/khipro-dark-mim-touchscreen/HEAD/bn-khipro-dark.mim" "$MAIN/bn-khipro-dark-touchscreen.mim"
+fetch "$RAW/KhiproTeam/khipro-dark-mim-touchscreen/HEAD/khipro-testcases.tsv" "$TEST/khipro-dark-testcases-touch.tsv"
 
 if [[ -z "${JAVA_HOME:-}" ]]; then
     export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"

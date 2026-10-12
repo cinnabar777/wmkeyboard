@@ -2241,9 +2241,6 @@
     <string name="keypress_haptics_title">ਕੁੰਜੀ ਦਬਾਉਣ \'ਤੇ ਹੈਪਟਿਕਸ</string>
     <string name="keypress_hold_action_copy_label">ਕਾਪੀ ਕਰੋ</string>
     <string name="keypress_hold_action_cut_label">ਕੱਟੋ</string>
-    <string name="keypress_hold_action_first_info">ਇਹ ਕਾਰਵਾਈ ਆਮ ਤੌਰ \'ਤੇ ਪੌਪਅੱਪ ਦੇ ਅੰਤ ਵਿੱਚ ਹੁੰਦੀ ਹੈ, ਇਸ ਲਈ ਇੱਕ ਸਧਾਰਨ ਦਬਾਉਣ ਅਤੇ ਹੋਲਡ ਕਰਨ ਨਾਲ ਤੁਹਾਨੂੰ ਪਹਿਲਾ ਲਹਿਜ਼ਾ ਮਿਲਦਾ ਹੈ। ਇਸਦੇ ਚਾਲੂ ਹੋਣ ਨਾਲ ਇਹ ਅੱਗੇ ਵੱਲ ਵਧਦਾ ਹੈ, ਅਤੇ ਸ਼ਾਰਟਕੱਟ ਕੁੰਜੀਆਂ ਵਿੱਚੋਂ ਇੱਕ \'ਤੇ ਦਬਾਉਣ ਅਤੇ ਹੋਲਡ ਕਰਨ ਨਾਲ ਕਾਰਵਾਈ ਤੁਰੰਤ ਚੱਲਦੀ ਹੈ। ਲਹਿਜ਼ੇ ਅਜੇ ਵੀ ਉੱਥੇ ਹਨ: ਆਪਣੀ ਉਂਗਲ ਨੂੰ ਹੇਠਾਂ ਰੱਖੋ ਅਤੇ ਉਸ \'ਤੇ ਸਲਾਈਡ ਕਰੋ ਜੋ ਤੁਸੀਂ ਚਾਹੁੰਦੇ ਹੋ। ਇਸ ਲਈ ਵਿਕਲਪਕ ਕੁੰਜੀਆਂ ਦੇ ਅਧੀਨ ਚੁਣਨ ਲਈ ਹੋਲਡ ਦੀ ਲੋੜ ਹੈ।</string>
-    <string name="keypress_hold_action_first_subtitle">ਦਬਾ ਕੇ ਰੱਖਣ ਨਾਲ ਲਹਿਜ਼ੇ ਦਿਖਾਉਣ ਦੀ ਬਜਾਏ ਕਾਰਵਾਈ ਚੱਲਦੀ ਹੈ</string>
-    <string name="keypress_hold_action_first_title">ਪਹਿਲਾਂ ਕਾਰਵਾਈ</string>
     <string name="keypress_hold_action_paste_label">ਪੇਸਟ ਕਰੋ</string>
     <string name="keypress_hold_action_redo_label">ਦੁਬਾਰਾ ਕਰੋ</string>
     <string name="keypress_hold_action_select_all_label">ਸਭ ਚੁਣੋ</string>
@@ -2557,8 +2554,6 @@
     <string name="languages_cjk_region_info">ਖੇਤਰੀ ਸ਼ਬਦਾਵਲੀ। ਤਾਈਵਾਨ ਅਤੇ ਹਾਂਗਕਾਂਗ ਅਕਸਰ ਇੱਕੋ ਚੀਜ਼ ਲਈ ਵੱਖ-ਵੱਖ ਸ਼ਬਦਾਂ ਦੀ ਵਰਤੋਂ ਕਰਦੇ ਹਨ, ਨਾ ਕਿ ਸਿਰਫ਼ ਵੱਖ-ਵੱਖ ਅੱਖਰਾਂ ਦੀ।</string>
     <string name="languages_cjk_region_taiwan_title">ਤਾਈਵਾਨ (臺灣)</string>
     <string name="languages_cjk_region_title">ਖੇਤਰੀ ਸ਼ਬਦਾਵਲੀ</string>
-    <string name="languages_cjk_traditional_info">ਕੀਬੋਰਡ ਹਰੇਕ ਉਮੀਦਵਾਰ ਨੂੰ ਦਿਖਾਉਣ ਤੋਂ ਪਹਿਲਾਂ ਸਰਲੀਕ੍ਰਿਤ (Simplified) ਤੋਂ ਪਰੰਪਰਾਗਤ (Traditional) ਵਿੱਚ ਬਦਲਦਾ ਹੈ। ਇਹ ਰੂਪਾਂਤਰਣ ਇੱਕ ਸਮੇਂ ਵਿੱਚ ਇੱਕ ਅੱਖਰ ਪੜ੍ਹਦਾ ਹੈ। ਕੁਝ ਸਰਲੀਕ੍ਰਿਤ ਅੱਖਰਾਂ ਦੇ ਇੱਕ ਤੋਂ ਵੱਧ ਪਰੰਪਰਾਗਤ ਰੂਪ ਹੁੰਦੇ ਹਨ, ਅਤੇ ਕੀਬੋਰਡ ਹਮੇਸ਼ਾ ਵਧੇਰੇ ਆਮ ਰੂਪ ਲਿਖਦਾ ਹੈ। 发, 發 ਬਣ ਜਾਂਦਾ ਹੈ, ਜੋ 發展 ਵਿੱਚ ਸਹੀ ਹੈ ਪਰ 頭髮 ਵਿੱਚ ਗਲਤ ਹੈ। ਉਹਨਾਂ ਸ਼ਬਦਾਂ ਨੂੰ ਹੱਥੀਂ ਠੀਕ ਕਰੋ।</string>
-    <string name="languages_cjk_traditional_subtitle">ਕੀਬੋਰਡ ਉਮੀਦਵਾਰਾਂ ਨੂੰ ਰਵਾਇਤੀ (繁體) ਵਿੱਚ ਬਦਲਦਾ ਹੈ। ਇਹ ਇੱਕ ਸਮੇਂ ਵਿੱਚ ਇੱਕ ਅੱਖਰ ਬਦਲਦਾ ਹੈ, ਇਸ ਲਈ ਕੁਝ ਰੂਪ ਜੋ ਸੰਦਰਭ \'ਤੇ ਨਿਰਭਰ ਕਰਦੇ ਹਨ ਉਹ ਗਲਤ ਹਨ (发 → 發 / 髮)।</string>
     <string name="languages_cjk_traditional_title">ਪਰੰਪਰਾਗਤ ਅੱਖਰ</string>
     <string name="languages_clusters_title">ਕਲੱਸਟਰ</string>
     <string name="languages_conjunct_backspace_info">ਬੈਕਸਪੇਸ ਆਮ ਤੌਰ \'ਤੇ ਇੱਕ ਵਾਰ ਵਿੱਚ ਇੱਕ ਕੋਡ ਪੁਆਇੰਟ ਮਿਟਾਉਂਦਾ ਹੈ। ਇਹ ਕਈ ਵਾਰ ਸਕ੍ਰੀਨ \'ਤੇ ਅੱਧੇ-ਅਧੂਰੇ ਕਲੱਸਟਰ ਛੱਡ ਦਿੰਦਾ ਹੈ। ਇਸ ਸੈਟਿੰਗ ਦੇ ਚਾਲੂ ਹੋਣ ਨਾਲ, ਇੱਕ ਵਾਰ ਦਬਾਉਣ \'ਤੇ ਪੂਰਾ ਕਲੱਸਟਰ ਮਿਟ ਜਾਂਦਾ ਹੈ ਜਦੋਂ ਤੁਸੀਂ %1$s ਟਾਈਪ ਕਰਦੇ ਹੋ। ਹੋਰ ਭਾਸ਼ਾਵਾਂ ਆਪਣੀ ਸੈਟਿੰਗ ਬਰਕਰਾਰ ਰੱਖਦੀਆਂ ਹਨ।</string>

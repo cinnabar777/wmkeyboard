@@ -40,6 +40,8 @@ import com.wasimaster.wmkeyboard.core.settings.EmojiGridEmojiSizeRange
 import com.wasimaster.wmkeyboard.core.settings.EmojiRecentsRange
 import com.wasimaster.wmkeyboard.core.settings.MediaPanelExtraHeightRange
 import com.wasimaster.wmkeyboard.core.settings.EmojiBarMode
+import com.wasimaster.wmkeyboard.core.settings.BarRow
+import com.wasimaster.wmkeyboard.core.settings.modesOverridingRow
 import com.wasimaster.wmkeyboard.core.settings.EmojiFontChoice
 import com.wasimaster.wmkeyboard.core.settings.EmojiSkinTone
 import com.wasimaster.wmkeyboard.core.util.PlayServices
@@ -74,6 +76,7 @@ internal fun EmojiSettings(
     // What decides which rows the groups hold; each row reads its own value.
     val predictionOn = settings.watch { it.emojiPrediction }
     val barMode = settings.watch { it.emojiBarMode }
+    val emojiRowOverridden = settings.watch { it.modesOverridingRow(BarRow.EMOJI).isNotEmpty() }
     val emojiButtonOn = settings.watch { it.emojiToolbar }
     SettingsGroup(stringResource(R.string.langemoji_emoji_access_title)) {
         item {
@@ -188,6 +191,9 @@ internal fun EmojiSettings(
                 default = SettingsDefaults.emojiBarMode,
                 detail = { mode -> ChoiceDetail(stringResource(emojiBarModeDescRes(mode))) },
             ) { scope.launch { repository.setEmojiBarMode(it) } }
+        }
+        item(visible = emojiRowOverridden) {
+            ModeRowOverrides(BarRow.EMOJI, settings, onNavigate)
         }
         item(visible = barMode != EmojiBarMode.OFF) {
             ChoiceSetting(

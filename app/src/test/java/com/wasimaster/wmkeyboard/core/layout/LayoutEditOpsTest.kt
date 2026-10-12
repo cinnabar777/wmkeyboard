@@ -293,6 +293,7 @@ class LayoutEditOpsTest {
         val actions = listOf(
             KeyAction.Symbols, KeyAction.Letters, KeyAction.Fn, KeyAction.Numpad,
             KeyAction.KanaVariant, KeyAction.MorseDot, KeyAction.MorseDash,
+            KeyAction.AddStroke, KeyAction.DoubleConsonant,
             KeyAction.Mod(ModifierKey.CTRL), KeyAction.Mod(ModifierKey.ALT),
             KeyAction.Mod(ModifierKey.META),
             KeyAction.SendKey(61), KeyAction.SendKey(111), KeyAction.SendKey(19),
@@ -343,6 +344,17 @@ class LayoutEditOpsTest {
         // The flick pad's 小゛゜ key shipped with no entry here, so its sheet
         // read "Unknown action".
         assertTrue(KeyActionCatalog.any { it.matches(KeyAction.KanaVariant) })
+    }
+
+    @Test
+    fun `the action picker offers the two naratgeul keys`() {
+        assertTrue(KeyActionCatalog.any { it.matches(KeyAction.AddStroke) })
+        assertTrue(KeyActionCatalog.any { it.matches(KeyAction.DoubleConsonant) })
+    }
+
+    @Test
+    fun `the action picker offers the pinyin syllable column`() {
+        assertTrue(KeyActionCatalog.any { it.matches(KeyAction.ReadingColumn) })
     }
 
     @Test

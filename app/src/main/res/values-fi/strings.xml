@@ -2237,9 +2237,6 @@
     <string name="keypress_haptics_title">Näppäinpainallusten värinä</string>
     <string name="keypress_hold_action_copy_label">Kopioi</string>
     <string name="keypress_hold_action_cut_label">Leikkaa</string>
-    <string name="keypress_hold_action_first_info">Toiminto on yleensä ponnahdusikkunan lopussa, joten tavallinen painallus ja pito antaa ensimmäisen aksentin. Kun tämä on päällä, se siirtyy alkuun, ja pikanäppäinten painallus ja pito suorittavat toiminnon heti. Aksentit ovat yhä saatavilla: pidä sormi alhaalla ja liu\'uta haluamasi kohdalle. Tämä vaatii asetuksen \"Pito valitsee\" kohdassa Vaihtoehtoiset näppäimet.</string>
-    <string name="keypress_hold_action_first_subtitle">Paina ja pidä pohjassa suorittaaksesi toiminnon sen sijaan, että näytät aksentit</string>
-    <string name="keypress_hold_action_first_title">Toiminto ensin</string>
     <string name="keypress_hold_action_paste_label">Liitä</string>
     <string name="keypress_hold_action_redo_label">Tee uudelleen</string>
     <string name="keypress_hold_action_select_all_label">Valitse kaikki</string>
@@ -2544,8 +2541,6 @@
     <string name="languages_cjk_region_info">Taiwanissa ja Hongkongissa käytetään usein eri sanoja samoille asioille, ei vain eri merkkejä.</string>
     <string name="languages_cjk_region_taiwan_title">Taiwan (臺灣)</string>
     <string name="languages_cjk_region_title">Alueellinen sanasto</string>
-    <string name="languages_cjk_traditional_info">Näppäimistö muuntaa jokaisen ehdokkaan yksinkertaistetusta (简体) perinteiseen (繁體) ennen kuin se näyttää ehdokkaan. Muunnos lukee yhden merkin kerrallaan. Joillakin yksinkertaistetuilla merkeillä on useampi kuin yksi perinteinen muoto, ja näppäimistö kirjoittaa aina yleisemmän niistä. 发 muuttuu muotoon 發, mikä on oikein sanassa 發展, mutta väärin sanassa 頭髮. Korjaa nämä sanat käsin.</string>
-    <string name="languages_cjk_traditional_subtitle">Näppäimistö muuntaa ehdokkaat perinteisiksi (繁體). Se muuntaa yhden merkin kerrallaan, joten jotkin asiayhteydestä riippuvat muodot ovat vääriä (发 → 發 / 髮).</string>
     <string name="languages_cjk_traditional_title">Perinteiset merkit</string>
     <string name="languages_clusters_title">Ryhmät</string>
     <string name="languages_conjunct_backspace_info">Askelpalautin poistaa yleensä yhden koodipisteen kerrallaan. Tämä jättää joskus näytölle puolittain muodostuneita ryppäitä. Kun tämä asetus on päällä, yksi painallus poistaa koko rypään kirjoittaessasi %1$s. Muut kielet säilyttävät omat asetuksensa.</string>

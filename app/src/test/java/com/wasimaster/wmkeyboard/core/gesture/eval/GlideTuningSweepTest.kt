@@ -13,7 +13,7 @@ import com.wasimaster.wmkeyboard.core.prediction.Trie
 import com.wasimaster.wmkeyboard.core.prediction.eval.EvalMetrics
 import java.io.File
 import java.util.Locale
-import org.junit.Ignore
+import org.junit.Assume.assumeTrue
 import org.junit.Test
 
 /**
@@ -21,12 +21,13 @@ import org.junit.Test
  * prints the surface, so the shipped defaults are a number someone read off a
  * table rather than a number someone liked.
  *
- * `@Ignore` because it is minutes of work, not seconds, and nothing regresses
- * if it never runs. Drop the annotation (or run it by name) when a weight is
- * being re-picked:
+ * Skipped unless `WM_GLIDE_SWEEP` is set, because it is minutes of work, not
+ * seconds, and nothing regresses if it never runs. An environment variable
+ * rather than `@Ignore`, which JUnit 4 honours even for a test picked by name.
+ * Set it when a weight is being re-picked:
  *
  * ```
- * ./gradlew :app:testFullDebugUnitTest --tests "*GlideTuningSweepTest"
+ * WM_GLIDE_SWEEP=1 ./gradlew :app:testFullIntlDebugUnitTest --tests "*GlideTuningSweepTest"
  * ```
  *
  * One axis at a time is deliberate. A full grid over eight weights measures the
@@ -34,7 +35,6 @@ import org.junit.Test
  * matters — shape weight against the language model — is visible on its own
  * axis because everything else is a shape-internal detail.
  */
-@Ignore("measurement, minutes long; run by name when re-picking a weight")
 class GlideTuningSweepTest {
 
     private companion object {
@@ -56,6 +56,7 @@ class GlideTuningSweepTest {
 
     @Test
     fun sweep() {
+        assumeTrue("set WM_GLIDE_SWEEP to run this measurement", !System.getenv("WM_GLIDE_SWEEP").isNullOrBlank())
         val entries = realEntries()
         val trie = Trie().apply { entries.forEach { (word, frequency) -> insert(word, frequency) } }
         val sources = trie.walkers().map {

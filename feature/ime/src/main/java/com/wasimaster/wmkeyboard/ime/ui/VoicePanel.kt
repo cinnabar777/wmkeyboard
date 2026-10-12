@@ -3,6 +3,7 @@ package com.wasimaster.wmkeyboard.ime.ui
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -53,6 +54,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -149,6 +151,9 @@ internal fun VoicePanel(
         voice.status != VoiceStatus.TRANSCRIBING
     val micUsable = !state.secureField && voice.status != VoiceStatus.UNAVAILABLE
     val collapseVisible = !state.secureField
+    // The microphone switch (#581): there whenever there is a microphone to
+    // switch to, or a pick already made that the user may want to undo.
+    val micChipVisible = micUsable && hasPermission && state.voiceMicSwitchVisible()
     fun collapseToBar() = onRailKey(
         VoiceBarAction.SwitchSurface(VoiceBarSettings.MODE_BAR),
     )
@@ -159,6 +164,7 @@ internal fun VoicePanel(
         if (undoVisible) add { feedback(); onUndo() }
         if (languageChipVisible) add { feedback(); languageMenuOpen = true }
         if (collapseVisible) add { feedback(); collapseToBar() }
+        if (micChipVisible) add { feedback(); onRailKey(VoiceBarAction.CycleMic) }
     }
     PanelFocusTarget(
         panel = PanelMode.VOICE,
@@ -170,6 +176,7 @@ internal fun VoicePanel(
     val undoRingIndex = if (micUsable) 1 else 0
     val languageRingIndex = undoRingIndex + (if (undoVisible) 1 else 0)
     val collapseRingIndex = languageRingIndex + (if (languageChipVisible) 1 else 0)
+    val micRingIndex = collapseRingIndex + (if (collapseVisible) 1 else 0)
 
     // While the mic is open, this whole side of the panel is the stop button,
     // not only the 64dp circle in the middle of it (#283). The stop press is
@@ -321,6 +328,46 @@ internal fun VoicePanel(
                         )
                     }
                 }
+            }
+
+            // Which microphone dictation listens through (#581), in FUTO's
+            // place for it: a switch in the bottom right corner, and a toast
+            // over the bottom edge saying "Using Bluetooth mic (X7)" when a
+            // session starts on a microphone the panel has not named yet.
+            if (micChipVisible) {
+                VoiceMicSwitch(
+                    state = state,
+                    onCycle = { onRailKey(VoiceBarAction.CycleMic) },
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(4.dp)
+                        .focusRing(micRingIndex == focusedAction, RoundedCornerShape(kb.toolRadiusDp.dp)),
+                )
+            }
+            val micNotice = rememberVoiceMicNotice(state)
+            val noticeAlpha by animateFloatAsState(
+                targetValue = if (micNotice != null) 0.92f else 0f,
+                animationSpec = if (kb.reduceMotion) snap() else tween(200),
+                label = "voiceMicNotice",
+            )
+            // Kept composed through the fade-out with the last text it showed.
+            var lastNotice by remember { mutableStateOf("") }
+            if (micNotice != null) lastNotice = micNotice
+            if (noticeAlpha > 0f) {
+                Text(
+                    lastNotice,
+                    color = kb.toolbarIcon,
+                    fontSize = 12.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 8.dp, start = 48.dp, end = 48.dp)
+                        .graphicsLayer { alpha = noticeAlpha }
+                        .clip(CircleShape)
+                        .background(kb.chip)
+                        .padding(horizontal = 14.dp, vertical = 8.dp),
+                )
             }
 
             // Undo the last dictated utterance (whole, in one tap).
@@ -790,6 +837,8 @@ internal fun VoiceStripBar(
     onCollapse: () -> Unit,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
+    /** The microphone switch (#581). */
+    onCycleMic: () -> Unit = {},
 ) {
     val kb = LocalKbTheme.current
     val voice = state.voice
@@ -864,6 +913,9 @@ internal fun VoiceStripBar(
         }
         // Read outside the when: ifEmpty takes a plain lambda, not a composable one.
         val listeningLabel = stringResource(R.string.ime_voice_status_listening)
+        // No room for the panel's toast on one line: the line itself says
+        // which microphone is in use (#581), until the first words arrive.
+        val micNotice = rememberVoiceMicNotice(state)
         val statusText = when {
             state.secureField -> stringResource(R.string.ime_voice_strip_secure_field)
             voice.status == VoiceStatus.NEED_PERMISSION ->
@@ -874,6 +926,7 @@ internal fun VoiceStripBar(
                 stringResource(R.string.ime_voice_strip_mic_blocked)
             voice.whisperNeedsModel -> stringResource(R.string.ime_voice_strip_no_model)
             voice.serverNeedsSetup -> stringResource(R.string.ime_voice_strip_no_server)
+            micNotice != null && voice.partial.isEmpty() && voice.status != VoiceStatus.ERROR -> micNotice
             listening && voice.clipBased && voice.secondsLeft > 0 ->
                 pluralStringResource(R.plurals.ime_voice_status_stops_in, voice.secondsLeft, voice.secondsLeft)
             listening && voice.clipBased -> stringResource(R.string.ime_voice_strip_listening_hint)
@@ -934,6 +987,13 @@ internal fun VoiceStripBar(
                     }
                     .padding(6.dp)
                     .size(20.dp),
+            )
+        }
+        if (state.voiceMicSwitchVisible()) {
+            VoiceMicSwitch(
+                state = state,
+                onCycle = onCycleMic,
+                size = 32.dp,
             )
         }
         // Collapse to the bar: same session, small pill instead of the strip;

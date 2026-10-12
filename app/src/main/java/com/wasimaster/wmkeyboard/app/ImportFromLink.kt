@@ -5,6 +5,10 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -39,6 +43,7 @@ import com.wasimaster.wmkeyboard.core.addons.AddonStore
 import com.wasimaster.wmkeyboard.core.addons.ImportLink
 import com.wasimaster.wmkeyboard.core.addons.LinkImport
 import com.wasimaster.wmkeyboard.core.addons.SignalStickerDownloads
+import com.wasimaster.wmkeyboard.core.addons.TelegramStickerDownloads
 import com.wasimaster.wmkeyboard.core.layout.AssetLayouts
 import com.wasimaster.wmkeyboard.core.settings.DeviceForm
 import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
@@ -274,14 +279,18 @@ internal fun ImportLinkFlow(
             target = current.target,
             hasToken = remember(store) { store.forgeToken().isNotBlank() },
             onConfirm = {
-                val pack = current.target as? ImportLink.Target.SignalStickers
-                if (pack == null) {
-                    start(::lookUp)
-                } else {
-                    // A pack is looked at before it is added, and the screen
-                    // that shows it asks about data saving itself.
-                    context.startActivity(signalPackIntent(context, pack.packId, pack.packKey))
-                    onClose()
+                // A pack is looked at before it is added, and the screen
+                // that shows it asks about data saving itself.
+                when (val target = current.target) {
+                    is ImportLink.Target.SignalStickers -> {
+                        context.startActivity(signalPackIntent(context, target.packId, target.packKey))
+                        onClose()
+                    }
+                    is ImportLink.Target.TelegramStickers -> {
+                        context.startActivity(telegramSetIntent(context, target.setName))
+                        onClose()
+                    }
+                    else -> start(::lookUp)
                 }
             },
             onDismiss = onClose,
@@ -290,26 +299,7 @@ internal fun ImportLinkFlow(
         is LinkStage.Working -> AlertDialog(
             onDismissRequest = {},
             title = { Text(stringResource(R.string.import_link_progress_title)) },
-            text = {
-                if (current.total > 0L) {
-                    Column {
-                        Text(
-                            stringResource(
-                                R.string.import_link_progress_bytes,
-                                formatBytes(current.bytes),
-                                formatBytes(current.total),
-                            ),
-                        )
-                        Spacer(Modifier.height(12.dp))
-                        LinearProgressIndicator(
-                            progress = { current.bytes.toFloat() / current.total.toFloat() },
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                    }
-                } else {
-                    CircularProgressIndicator()
-                }
-            },
+            text = { WorkingBody(current) },
             confirmButton = {},
         )
 
@@ -368,7 +358,7 @@ internal fun ImportLinkFlow(
 
         // From here the link is a file like any other, and the dialog that
         // knows every format takes over.
-        is LinkStage.Ready -> ImportFileDialog(repository, current.uri, onClose)
+        is LinkStage.Ready -> ImportFileDialog(repository, current.uri, onClose = onClose)
     }
 }
 
@@ -402,6 +392,10 @@ private fun LinkConfirmDialog(
             R.string.import_link_confirm_signal,
             hostOf(SignalStickerDownloads.manifestUrl(target.packId)),
         )
+        is ImportLink.Target.TelegramStickers -> stringResource(
+            R.string.import_link_confirm_telegram,
+            hostOf(TelegramStickerDownloads.hostUrl()),
+        )
         else -> ""
     }
     // nightly.link is a service this app does not run, and an artifact cannot
@@ -433,10 +427,10 @@ private fun LinkConfirmDialog(
             TextButton(onClick = onConfirm) {
                 Text(
                     stringResource(
-                        if (target is ImportLink.Target.SignalStickers) {
-                            R.string.import_signal_open_pack
-                        } else {
-                            CommonR.string.common_download
+                        when (target) {
+                            is ImportLink.Target.SignalStickers -> R.string.import_signal_open_pack
+                            is ImportLink.Target.TelegramStickers -> R.string.import_telegram_open_set
+                            else -> CommonR.string.common_download
                         },
                     ),
                 )
@@ -467,8 +461,10 @@ private fun PickDialog(
                     Spacer(Modifier.height(8.dp))
                 }
                 names.forEachIndexed { index, name ->
-                    TextButton(onClick = { onPick(index) }, modifier = Modifier.fillMaxWidth()) {
-                        Text(name)
+                    StaggerIn(index) {
+                        TextButton(onClick = { onPick(index) }, modifier = Modifier.fillMaxWidth()) {
+                            Text(name)
+                        }
                     }
                 }
             }
@@ -478,6 +474,50 @@ private fun PickDialog(
             TextButton(onClick = onDismiss) { Text(stringResource(CommonR.string.common_cancel)) }
         },
     )
+}
+
+/**
+ * The wait while a link is looked up or fetched: a spinner until the transfer
+ * knows its size, then the bytes and a bar.
+ *
+ * The spinner hands over to the bar rather than being swapped out in a frame,
+ * and the bar glides between the download's reports instead of stepping. The
+ * box keeps the bigger of the two sizes until the swap is done: it is a
+ * dialog's, and resizing a window every frame costs more than one step.
+ */
+@Composable
+private fun WorkingBody(stage: LinkStage.Working) {
+    val reduceMotion = LocalReduceMotion.current
+    val fraction = if (stage.total > 0L) (stage.bytes.toFloat() / stage.total.toFloat()).coerceIn(0f, 1f) else 0f
+    val shown by animateFloatAsState(
+        targetValue = fraction,
+        animationSpec = if (reduceMotion) snap<Float>() else tween<Float>(durationMillis = LINK_PROGRESS_GLIDE_MS),
+        label = "linkProgress",
+    )
+    AnimatedContent(
+        targetState = stage.total > 0L,
+        transitionSpec = { stateSwapTransform(reduceMotion, animateSize = false) },
+        label = "linkWorking",
+    ) { sized ->
+        if (sized) {
+            Column {
+                Text(
+                    stringResource(
+                        R.string.import_link_progress_bytes,
+                        formatBytes(stage.bytes),
+                        formatBytes(stage.total),
+                    ),
+                )
+                Spacer(Modifier.height(12.dp))
+                LinearProgressIndicator(
+                    progress = { shown },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        } else {
+            CircularProgressIndicator()
+        }
+    }
 }
 
 @Composable
@@ -498,6 +538,13 @@ internal fun signalPackIntent(context: android.content.Context, packId: String, 
     Intent(context, MainActivity::class.java)
         .setAction(Intent.ACTION_VIEW)
         .setData(Uri.parse(AddonDeepLink.signalPackLink(packId, packKey)))
+        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+/** Opens the preview of a Telegram set in the settings app. Nothing is fetched until it is on screen. */
+internal fun telegramSetIntent(context: android.content.Context, setName: String): Intent =
+    Intent(context, MainActivity::class.java)
+        .setAction(Intent.ACTION_VIEW)
+        .setData(Uri.parse(AddonDeepLink.telegramSetLink(setName)))
         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
 /** The `wmkeyboard://repo` link that opens the add-repository dialog. */
@@ -615,6 +662,7 @@ private fun extract(context: android.content.Context, archive: File, entry: Stri
 }
 
 private const val MAX_NAME_CHARS = 120
+private const val LINK_PROGRESS_GLIDE_MS = 200
 private const val MAX_ARCHIVE_ENTRIES = 2_000
 private const val BUFFER_BYTES = 64 * 1024
 

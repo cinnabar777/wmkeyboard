@@ -96,6 +96,20 @@ object SnippetMatcher {
     fun isTriggerWordChar(c: Char): Boolean = c.isLetterOrDigit() || c == '\''
 
     /**
+     * True when the keyboard could actually watch for [trigger]: a plain word,
+     * a word behind a lead-in ([splitPrefix]), or a symbol-ended trigger
+     * ([isSuffixTrigger]). Every importer asks this before it keeps a trigger,
+     * because a stored trigger that can never fire is a snippet that silently
+     * does nothing.
+     */
+    fun isMatchableTrigger(trigger: String): Boolean =
+        trigger.isNotEmpty() && (
+            trigger.all(::isTriggerWordChar) ||
+                splitPrefix(trigger) != null ||
+                isSuffixTrigger(trigger)
+            )
+
+    /**
      * True for a trigger that ends in a symbol — `js:`, `->`, `gr db:` — and
      * so fires the moment that symbol is typed, matched by reading the field
      * back rather than by looking the composing word up (#471). The symbol

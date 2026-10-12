@@ -138,6 +138,7 @@
     <string name="about_bundled_bouncycastle_used">The cryptography for the SFTP and SMB backup locations that Android does not have</string>
     <!-- APNG is an image format. Keep it as it is. -->
     <string name="about_bundled_apng_used">Reads animated PNG stickers</string>
+    <string name="about_bundled_lottie_used">Draws animated Telegram stickers</string>
     <string name="about_bundled_zxing_used">Makes the QR codes</string>
     <string name="about_bundled_luaj_used">The Lua interpreter that runs the plugins in their sandbox</string>
     <string name="about_bundled_harper_used">Checks the grammar and the style offline (native library)</string>
@@ -154,6 +155,8 @@
     <string name="about_bundled_unicode_used">The emoji catalogue, names, keywords and skin tone sequences</string>
     <!-- :tada: is one of the shortcodes and stays exactly as it is. -->
     <string name="about_bundled_gemoji_used">The emoji shortcodes, the :tada: names that GitHub, Discord and Slack use</string>
+    <!-- X11 is the window system of Linux; keysym is its word for a key's character. -->
+    <string name="about_bundled_keysyms_used">The table of X11 keysym names, to read Linux keyboard layouts</string>
     <string name="about_bundled_keyman_used">The key grids for 862 layouts, mostly for languages no other keyboard covers</string>
     <string name="about_bundled_avro_used">Desktop Avro\'s dictionary, suffixes, autocorrect and search rules, behind the Avro candidate list</string>
     <string name="about_bundled_khipro_used">The rules of the Khipro Bangla layout</string>

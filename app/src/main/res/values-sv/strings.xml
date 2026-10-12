@@ -2239,9 +2239,6 @@
     <string name="keypress_haptics_title">Haptisk feedback vid tangenttryck</string>
     <string name="keypress_hold_action_copy_label">Kopiera</string>
     <string name="keypress_hold_action_cut_label">Klipp ut</string>
-    <string name="keypress_hold_action_first_info">Åtgärden ligger vanligtvis i slutet av popup-fönstret, så ett vanligt tryck och håll ger dig den första accenten. Med detta aktiverat flyttas den till början, och ett tryck och håll på en av genvägstangenterna kör åtgärden direkt. Accenterna finns fortfarande kvar: håll fingret nedtryckt och glid till den du vill ha. Detta kräver Håll för att välja, under Alternativa tangenter.</string>
-    <string name="keypress_hold_action_first_subtitle">Tryck och håll ned kör åtgärden istället för att visa accenter</string>
-    <string name="keypress_hold_action_first_title">Åtgärd först</string>
     <string name="keypress_hold_action_paste_label">Klistra in</string>
     <string name="keypress_hold_action_redo_label">Gör om</string>
     <string name="keypress_hold_action_select_all_label">Markera allt</string>
@@ -2548,8 +2545,6 @@
     <string name="languages_cjk_region_info">Taiwan och Hongkong använder ofta olika ord för samma sak, inte bara olika tecken.</string>
     <string name="languages_cjk_region_taiwan_title">Taiwan (臺灣)</string>
     <string name="languages_cjk_region_title">Regional ordalydelse</string>
-    <string name="languages_cjk_traditional_info">Tangentbordet konverterar varje kandidat från förenklad (简体) till traditionell (繁體) innan det visar kandidaten. Konverteringen läser ett tecken i taget. Ett fåtal förenklade tecken har mer än en traditionell form, och tangentbordet skriver alltid den vanligaste. 发 blir 發, vilket är korrekt i 發展 men fel i 頭髮. Korrigera dessa ord för hand.</string>
-    <string name="languages_cjk_traditional_subtitle">Tangentbordet konverterar kandidater till traditionell kinesiska (繁體). Det konverterar ett tecken i taget, så några former som beror på sammanhanget blir fel (发 → 發 / 髮).</string>
     <string name="languages_cjk_traditional_title">Traditionella tecken</string>
     <string name="languages_clusters_title">Kluster</string>
     <string name="languages_conjunct_backspace_info">Backsteg tar vanligtvis bort ett tecken i taget. Detta lämnar ibland ofullständiga kluster på skärmen. Med denna inställning aktiverad tar ett tryck bort hela klustret medan du skriver %1$s. Andra språk behåller sina egna inställningar.</string>

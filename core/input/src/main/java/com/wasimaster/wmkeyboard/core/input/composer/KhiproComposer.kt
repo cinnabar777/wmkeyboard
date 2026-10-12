@@ -18,28 +18,18 @@ import com.wasimaster.wmkeyboard.core.transliteration.Khipro
  * Latin), the danda (`।f` is ॥ and `।ff` is ৺, issue #488) and, inside a
  * word, `,` (`,,` is the nukta).
  *
- * Two specs ship. A phone keyboard already has keys for Bengali digits and the
- * danda, so soft keys read against the touchscreen spec, which leaves those
- * alone. A hardware keyboard has only ASCII, so a word typed on one reads
- * against the desktop spec, where `1` is ১, `.` is । and `$` is ৳. [variant]
- * is chosen when a word starts and kept until it is committed, so one word is
- * never read half one way and half the other.
+ * Two editions ship as two layouts: [CLASSIC], which joins consonants into
+ * conjuncts as they are typed, and [DARK] (issue #631), which leaves them apart
+ * until `/` is pressed after them, once more for each extra consonant to join.
+ *
+ * Each edition has two specs. A phone keyboard already has keys for Bengali
+ * digits and the danda, so soft keys read against the touchscreen spec, which
+ * leaves those alone. A hardware keyboard has only ASCII, so a word typed on
+ * one reads against the desktop spec, where `1` is ১, `.` is । and `$` is ৳.
+ * [variant] is chosen when a word starts ([startWord]) and kept until it is
+ * committed, so one word is never read half one way and half the other.
  */
-object KhiproComposer : Composer {
-
-    /**
-     * Everything the touchscreen spec gives a meaning to, besides letters. The
-     * danda is the full stop key's own output on this board, and the spec
-     * builds ॥ and ৺ on it, so it stays in the word for the `f` that may follow.
-     */
-    private const val TOUCH_KEYS = "/;?\\।"
-
-    /** What the desktop spec adds: the danda, currency, arithmetic, ZWNJ/ZWJ. */
-    private const val DESKTOP_KEYS = "/;?\\.\$+-=`"
-
-    private const val HASANT = '্'
-    private const val ZWNJ = '‌'
-    private const val ZWJ = '‍'
+class KhiproComposer private constructor(private val dark: Boolean) : Composer {
 
     /**
      * Which spec the word being composed reads against. Set by the service
@@ -47,7 +37,18 @@ object KhiproComposer : Composer {
      * keyboard.
      */
     @Volatile
-    var variant: Khipro.Variant = Khipro.Variant.TOUCHSCREEN
+    var variant: Khipro.Variant = Khipro.Variant.of(dark, desktop = false)
+
+    /** Picks this edition's desktop or touchscreen spec for the word a key starts. */
+    fun startWord(hardwareKeyboard: Boolean) {
+        variant = Khipro.Variant.of(dark, desktop = hardwareKeyboard)
+    }
+
+    /** Parses both of this edition's specs now rather than on the first keystroke. */
+    fun warm() {
+        Khipro.warm(Khipro.Variant.of(dark, desktop = false))
+        Khipro.warm(Khipro.Variant.of(dark, desktop = true))
+    }
 
     override val isTransliterating: Boolean get() = true
 
@@ -58,12 +59,12 @@ object KhiproComposer : Composer {
     override val glideKeys: Set<Int> = setOf('/'.code)
 
     /** The desktop spec turns digits into Bengali ones, so they belong to the word there. */
-    override val bufferDigits: Boolean get() = variant == Khipro.Variant.DESKTOP
+    override val bufferDigits: Boolean get() = variant.desktop
 
-    override val digitsStartBuffer: Boolean get() = variant == Khipro.Variant.DESKTOP
+    override val digitsStartBuffer: Boolean get() = variant.desktop
 
     override fun buffersChar(c: Char): Boolean =
-        c in (if (variant == Khipro.Variant.DESKTOP) DESKTOP_KEYS else TOUCH_KEYS)
+        c in (if (variant.desktop) DESKTOP_KEYS else TOUCH_KEYS)
 
     /**
      * A comma only joins a word already being composed: `j,,` is জ়, but a
@@ -104,4 +105,26 @@ object KhiproComposer : Composer {
         word.any { BengaliGraphemes.isBengali(it) && it.isLetter() } &&
             word.none { it in 'a'..'z' || it in 'A'..'Z' } &&
             word.last() != HASANT && word.last() != ZWNJ && word.last() != ZWJ
+
+    companion object {
+        /** Khipro Classic, the Khipro layout. */
+        val CLASSIC = KhiproComposer(dark = false)
+
+        /** Khipro Dark, the Khipro Dark layout. */
+        val DARK = KhiproComposer(dark = true)
+
+        /**
+         * Everything the touchscreen spec gives a meaning to, besides letters. The
+         * danda is the full stop key's own output on this board, and the spec
+         * builds ॥ and ৺ on it, so it stays in the word for the `f` that may follow.
+         */
+        private const val TOUCH_KEYS = "/;?\\।"
+
+        /** What the desktop spec adds: the danda, currency, arithmetic, ZWNJ/ZWJ. */
+        private const val DESKTOP_KEYS = "/;?\\.\$+-=`"
+
+        private const val HASANT = '্'
+        private const val ZWNJ = '‌'
+        private const val ZWJ = '‍'
+    }
 }

@@ -2235,9 +2235,6 @@
     <string name="keypress_haptics_title">Hàptica de premsada de tecla</string>
     <string name="keypress_hold_action_copy_label">Copia</string>
     <string name="keypress_hold_action_cut_label">Retalla</string>
-    <string name="keypress_hold_action_first_info">L\'acció sol aparèixer al final del menú emergent, de manera que prémer i mantenir premut us proporciona el primer accent. Si activeu aquesta opció, passa al davant i, en prémer i mantenir premuda una de les tecles de drecera, l\'acció s\'executa immediatament. Els accents encara hi són: mantingueu el dit premut i llisqueu-lo sobre el que vulgueu. Això requereix l\'opció Mantenir premut per seleccionar, dins de Tecles alternatives.</string>
-    <string name="keypress_hold_action_first_subtitle">Mantenir premut executa l\'acció en lloc de mostrar els accents</string>
-    <string name="keypress_hold_action_first_title">Acció primer</string>
     <string name="keypress_hold_action_paste_label">Enganxa</string>
     <string name="keypress_hold_action_redo_label">Refer</string>
     <string name="keypress_hold_action_select_all_label">Seleccionar tot</string>
@@ -2544,8 +2541,6 @@
     <string name="languages_cjk_region_info">Taiwan i Hong Kong sovint utilitzen paraules diferents per a la mateixa cosa, no només caràcters diferents.</string>
     <string name="languages_cjk_region_taiwan_title">Taiwan (臺灣)</string>
     <string name="languages_cjk_region_title">Terminologia regional</string>
-    <string name="languages_cjk_traditional_info">El teclat converteix cada candidat de simplificat (简体) a tradicional (繁體) abans de mostrar-lo. La conversió llegeix un caràcter a la vegada. Alguns caràcters simplificats tenen més d\'una forma tradicional, i el teclat sempre escriu la més comuna. 发 esdevé 發, la qual cosa és correcta a 發展 però incorrecta a 頭髮. Corregeix aquestes paraules a mà.</string>
-    <string name="languages_cjk_traditional_subtitle">El teclat converteix els candidats a tradicional (繁體). Converteix un caràcter alhora, per la qual cosa algunes formes que depenen del context són incorrectes (发 → 發 / 髮).</string>
     <string name="languages_cjk_traditional_title">Caràcters tradicionals</string>
     <string name="languages_clusters_title">Clústers</string>
     <string name="languages_conjunct_backspace_info">El retrocés normalment esborra un punt de codi cada vegada. Això a vegades deixa clústers mal formats a la pantalla. Amb aquesta configuració activada, una sola pulsació esborra tot el clúster mentre escrius %1$s. Altres idiomes mantenen la seva pròpia configuració.</string>

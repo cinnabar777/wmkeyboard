@@ -1,5 +1,7 @@
 package com.wasimaster.wmkeyboard.core.transliteration
 
+import java.util.concurrent.ConcurrentHashMap
+
 /**
  * Khipro (ক্ষিপ্র): Bengali typed compositionally from lowercase Latin keys
  * (issue #400, https://khipro.khiproteam.com).
@@ -11,36 +13,52 @@ package com.wasimaster.wmkeyboard.core.transliteration
  * one reading and there is nothing to rank: what [convert] returns is what the
  * user typed.
  *
+ * Two editions exist. Classic joins consonants into conjuncts as they are
+ * typed and uses `/` to break one apart. Dark (issue #631) leaves consonants
+ * apart and joins them on demand: one, two or three `/` after a run of
+ * consonants fuse its last two, three or four (`ntrz///` is ন্ত্র্য), which
+ * is faster on a phone, where most everyday words have no conjunct at all.
+ *
  * The method is defined as an m17n input method (`bn-khipro.mim`), a small
  * state machine over maps of key sequences. Rather than transcribe its ~200
  * conjunct rules into Kotlin, where they would drift from every upstream fix,
- * this runs the official spec itself: the two `.mim` files ship verbatim under
+ * this runs the official spec itself: the `.mim` files ship verbatim under
  * `resources/khipro/` and [KhiproSpec] interprets them. The interpreter follows
  * KhiproTeam's own `khipro-library`, whose engine does the same thing — it
  * re-runs the whole roman tape through the spec on every key — and is
  * conformance-tested against the same `khipro-testcases` this module's tests
  * replay.
  *
- * Upstream: rank-coder/khipro-m17n (MIT, © 2024 rank_coder) and
- * KhiproTeam/khipro-mim-touchscreen, as of v36.5.0 plus later commits on their
- * main branches; `scripts/update-khipro.sh` refreshes them. Interpreter
- * semantics from KhiproTeam/khipro-library (MIT, © 2026 KhiproTeam).
+ * Upstream: rank-coder/khipro-m17n, KhiproTeam/khipro-mim-touchscreen,
+ * KhiproTeam/khipro-dark-m17n and KhiproTeam/khipro-dark-mim-touchscreen (all
+ * MIT, © 2024 rank_coder); `scripts/update-khipro.sh` refreshes them.
+ * Interpreter semantics from KhiproTeam/khipro-library (MIT, © 2026
+ * KhiproTeam), and m17n-lib's own for the marker commands only Dark uses.
  */
 object Khipro {
 
     /**
-     * Which spec a keystroke is read against. The two differ only in what a
-     * phone keyboard already has keys for: the desktop spec turns digits into
-     * Bengali digits, `.` into the danda and `$` into ৳, the touchscreen one
-     * leaves all of that to the keys and spells ॥ as `।f`.
+     * Which spec a keystroke is read against: the edition, and whether the key
+     * came from a touchscreen or a hardware keyboard. Within an edition the two
+     * differ only in what a phone keyboard already has keys for: the desktop
+     * spec turns digits into Bengali digits, `.` into the danda and `$` into ৳,
+     * the touchscreen one leaves all of that to the keys and spells ॥ as `।f`.
      */
-    enum class Variant(internal val resource: String) {
-        TOUCHSCREEN("khipro/bn-khipro-touchscreen.mim"),
-        DESKTOP("khipro/bn-khipro.mim"),
+    enum class Variant(internal val resource: String, val dark: Boolean, val desktop: Boolean) {
+        TOUCHSCREEN("khipro/bn-khipro-touchscreen.mim", dark = false, desktop = false),
+        DESKTOP("khipro/bn-khipro.mim", dark = false, desktop = true),
+        DARK_TOUCHSCREEN("khipro/bn-khipro-dark-touchscreen.mim", dark = true, desktop = false),
+        DARK_DESKTOP("khipro/bn-khipro-dark.mim", dark = true, desktop = true),
+        ;
+
+        companion object {
+            /** The spec of edition [dark] for a key typed on a hardware keyboard or not. */
+            fun of(dark: Boolean, desktop: Boolean): Variant =
+                entries.first { it.dark == dark && it.desktop == desktop }
+        }
     }
 
-    @Volatile private var touchscreen: KhiproSpec? = null
-    @Volatile private var desktop: KhiproSpec? = null
+    private val specs = ConcurrentHashMap<Variant, KhiproSpec>()
 
     /** The Bengali [roman] spells under [variant]. Empty in, empty out. */
     fun convert(roman: String, variant: Variant = Variant.TOUCHSCREEN): String =
@@ -54,10 +72,7 @@ object Khipro {
         spec(variant)
     }
 
-    private fun spec(variant: Variant): KhiproSpec = when (variant) {
-        Variant.TOUCHSCREEN -> touchscreen ?: load(variant).also { touchscreen = it }
-        Variant.DESKTOP -> desktop ?: load(variant).also { desktop = it }
-    }
+    private fun spec(variant: Variant): KhiproSpec = specs.getOrPut(variant) { load(variant) }
 
     private fun load(variant: Variant): KhiproSpec {
         val stream = checkNotNull(Khipro::class.java.classLoader?.getResourceAsStream(variant.resource)) {
@@ -72,10 +87,17 @@ object Khipro {
  * through it.
  *
  * Only the subset of m17n the Khipro specs use: `map` blocks of
- * `(keys actions… "output")` entries, and `state` blocks whose rules name a map
- * and list actions to run when one of its keys matches. Actions are `set`,
- * `insert`, `delete @-N`, `move @-/@>`, `shift`, `cond` over `=`/`&`/`|`,
+ * `(keys actions… "output")` entries, `state` blocks whose rules name a map
+ * and list actions to run when one of its keys matches, and `macro` blocks of
+ * named action lists, expanded where they are called. Actions are `set`,
+ * `insert`, `delete` and `move` to a position (`@-N`, `@+N`, `@<`, `@>` or a
+ * marker), `mark`, `shift`, `cond` over `=`/`<`/`>`/`<=`/`>=`/`&`/`|`,
  * `commit` (a no-op here: the composing buffer is the whole word) and `undo`.
+ *
+ * Markers move with the text the way m17n-lib moves them: an insertion shifts
+ * every marker after the insertion point (one exactly at it stays put, which
+ * is what lets Dark mark the boundary before the next consonant), and a
+ * deletion pulls the markers inside it to its start.
  */
 internal class KhiproSpec private constructor(
     private val maps: Map<String, List<Entry>>,
@@ -88,12 +110,22 @@ internal class KhiproSpec private constructor(
 
     private class State(val entry: List<Action>, val rules: List<Rule>)
 
+    /** Where a `move` or `delete` goes. */
+    internal sealed interface Position {
+        /** [by] characters from the cursor, negative to the left. */
+        class Relative(val by: Int) : Position
+        data object Start : Position
+        data object End : Position
+        class Marker(val name: String) : Position
+    }
+
     internal sealed interface Action {
         class SetVar(val name: String, val value: String) : Action
         class Insert(val text: String) : Action
-        class Delete(val count: Int) : Action
-        /** [toEnd] moves to the end of the text, else by [by] (negative is left). */
-        class Move(val by: Int, val toEnd: Boolean) : Action
+        /** Deletes from the cursor to [to], on whichever side of it that is. */
+        class Delete(val to: Position) : Action
+        class Move(val to: Position) : Action
+        class Mark(val name: String) : Action
         class Shift(val state: String) : Action
         data object Commit : Action
         data object Undo : Action
@@ -102,7 +134,8 @@ internal class KhiproSpec private constructor(
 
     internal sealed interface Condition {
         data object Always : Condition
-        class Equals(val variable: String, val value: Int) : Condition
+        /** [variable] against [value], a number or another variable, by [op]. */
+        class Compare(val op: String, val variable: String, val value: String) : Condition
         class And(val left: Condition, val right: Condition) : Condition
         class Or(val left: Condition, val right: Condition) : Condition
     }
@@ -112,6 +145,7 @@ internal class KhiproSpec private constructor(
         val out = StringBuilder()
         var cursor = 0
         val vars = HashMap<String, Int>()
+        val marks = HashMap<String, Int>()
         var state = INITIAL
 
         fun enter(name: String) {
@@ -119,30 +153,49 @@ internal class KhiproSpec private constructor(
             states[name]?.let { execute(it.entry) }
         }
 
+        fun value(operand: String): Int = operand.toIntOrNull() ?: vars[operand] ?: 0
+
+        fun resolve(position: Position): Int = when (position) {
+            is Position.Relative -> cursor + position.by
+            Position.Start -> 0
+            Position.End -> out.length
+            is Position.Marker -> marks[position.name] ?: 0
+        }.coerceIn(0, out.length)
+
+        fun insert(text: String) {
+            if (text.isEmpty()) return
+            cursor = cursor.coerceAtMost(out.length)
+            out.insert(cursor, text)
+            for (entry in marks.entries) if (entry.value > cursor) entry.setValue(entry.value + text.length)
+            cursor += text.length
+        }
+
+        fun delete(to: Int) {
+            val from = minOf(cursor, to).coerceIn(0, out.length)
+            val end = maxOf(cursor, to).coerceIn(0, out.length)
+            if (from == end) return
+            out.delete(from, end)
+            for (entry in marks.entries) {
+                if (entry.value > end) {
+                    entry.setValue(entry.value - (end - from))
+                } else if (entry.value > from) {
+                    entry.setValue(from)
+                }
+            }
+            cursor = from
+        }
+
         fun execute(actions: List<Action>) {
             for (action in actions) {
                 when (action) {
-                    is Action.SetVar -> vars[action.name] = vars[action.value] ?: action.value.toIntOrNull() ?: 0
-                    is Action.Insert -> {
-                        out.insert(cursor, action.text)
-                        cursor += action.text.length
-                    }
-                    is Action.Delete -> if (cursor > 0 && action.count > 0) {
-                        val start = (cursor - action.count).coerceAtLeast(0)
-                        out.delete(start, cursor.coerceAtMost(out.length))
-                        cursor = start
-                    }
-                    is Action.Move -> cursor = if (action.toEnd) {
-                        out.length
-                    } else {
-                        (cursor + action.by).coerceIn(0, out.length)
-                    }
+                    is Action.SetVar -> vars[action.name] = value(action.value)
+                    is Action.Insert -> insert(action.text)
+                    is Action.Delete -> delete(resolve(action.to))
+                    is Action.Move -> cursor = resolve(action.to)
+                    is Action.Mark -> marks[action.name] = cursor.coerceIn(0, out.length)
                     is Action.Shift -> enter(action.state)
                     Action.Commit -> Unit
-                    Action.Undo -> if (cursor > 0 && out.isNotEmpty()) {
-                        out.deleteCharAt(cursor - 1)
-                        cursor--
-                    }
+                    Action.Undo -> if (cursor > 0 && out.isNotEmpty()) delete(cursor - 1)
                     is Action.Cond -> action.branches.firstOrNull { holds(it.first) }?.let { execute(it.second) }
                 }
             }
@@ -150,7 +203,17 @@ internal class KhiproSpec private constructor(
 
         fun holds(condition: Condition): Boolean = when (condition) {
             Condition.Always -> true
-            is Condition.Equals -> (vars[condition.variable] ?: 0) == condition.value
+            is Condition.Compare -> {
+                val left = vars[condition.variable] ?: 0
+                val right = value(condition.value)
+                when (condition.op) {
+                    "=" -> left == right
+                    "<" -> left < right
+                    ">" -> left > right
+                    "<=" -> left <= right
+                    else -> left >= right
+                }
+            }
             is Condition.And -> holds(condition.left) && holds(condition.right)
             is Condition.Or -> holds(condition.left) || holds(condition.right)
         }
@@ -159,21 +222,12 @@ internal class KhiproSpec private constructor(
     fun convert(input: String): String {
         val run = Run()
         run.enter(INITIAL)
-        val blinders = maps[BLINDER].orEmpty()
         var i = 0
         while (i < input.length) {
+            // A blinder (`?`, `\`) and what it leaves Latin are the spec's
+            // own `blind_state`, as in the library since it dropped its
+            // hard-coded collapse of a doubled blinder.
             val state = states[run.state] ?: break
-            // A doubled blinder ("??", "\\") is one literal blinder, and
-            // composing carries on in the state it was in. The library does
-            // this for every blinder key, not only the backslash the desktop
-            // spec spells out.
-            val escape = blinders.firstOrNull { input.startsWith(it.key + it.key, i) }
-            if (escape != null) {
-                run.execute(escape.actions)
-                run.cursor = run.cursor.coerceAtMost(run.out.length)
-                i += escape.key.length * 2
-                continue
-            }
             var best: Entry? = null
             var bestRule: Rule? = null
             for (rule in state.rules) {
@@ -192,8 +246,7 @@ internal class KhiproSpec private constructor(
                 // Nothing in this state reads the character: it is written as
                 // itself and the method starts afresh after it.
                 val length = Character.charCount(input.codePointAt(i))
-                run.out.insert(run.cursor, input, i, i + length)
-                run.cursor += length
+                run.insert(input.substring(i, i + length))
                 i += length
                 if (run.state != INITIAL) run.enter(INITIAL)
                 continue
@@ -208,24 +261,49 @@ internal class KhiproSpec private constructor(
 
     companion object {
         private const val INITIAL = "init"
-        private const val BLINDER = "blinder"
 
         fun parse(text: String): KhiproSpec {
+            val nodes = Sexp.parseAll(text).filterIsInstance<Sexp.Node>()
+            // Macros first: the specs define them after the states that call them.
+            val macros = HashMap<String, List<Sexp>>()
+            for (node in nodes) {
+                if (node.head() != "macro") continue
+                for (macro in node.items.drop(1)) {
+                    val list = macro as? Sexp.Node ?: continue
+                    val name = list.head() ?: continue
+                    macros[name] = list.items.drop(1)
+                }
+            }
+            val parser = Parser(macros)
             val maps = HashMap<String, List<Entry>>()
             val states = HashMap<String, State>()
-            for (node in Sexp.parseAll(text)) {
-                val list = node as? Sexp.Node ?: continue
-                when ((list.items.firstOrNull() as? Sexp.Atom)?.text) {
-                    "map" -> for (map in list.items.drop(1)) parseMap(map)?.let { (name, entries) -> maps[name] = entries }
-                    "state" -> for (state in list.items.drop(1)) parseState(state)?.let { (name, def) -> states[name] = def }
+            for (node in nodes) {
+                when (node.head()) {
+                    "map" -> for (map in node.items.drop(1)) parser.map(map)?.let { (name, entries) -> maps[name] = entries }
+                    "state" -> for (state in node.items.drop(1)) parser.state(state)?.let { (name, def) -> states[name] = def }
                 }
             }
             return KhiproSpec(maps, states)
         }
 
-        private fun parseMap(node: Sexp): Pair<String, List<Entry>>? {
+        private fun Sexp.Node.head(): String? = (items.firstOrNull() as? Sexp.Atom)?.text
+
+        private fun position(text: String): Position = when {
+            text == "@<" -> Position.Start
+            text == "@>" -> Position.End
+            text == "@-" -> Position.Relative(-1)
+            text == "@+" -> Position.Relative(1)
+            text.startsWith("@-") -> Position.Relative(-(text.drop(2).toIntOrNull() ?: 1))
+            text.startsWith("@+") -> Position.Relative(text.drop(2).toIntOrNull() ?: 1)
+            else -> Position.Marker(text)
+        }
+    }
+
+    private class Parser(private val macros: Map<String, List<Sexp>>) {
+
+        fun map(node: Sexp): Pair<String, List<Entry>>? {
             val list = node as? Sexp.Node ?: return null
-            val name = (list.items.firstOrNull() as? Sexp.Atom)?.text ?: return null
+            val name = list.head() ?: return null
             val entries = list.items.drop(1).mapNotNull { item ->
                 val entry = item as? Sexp.Node ?: return@mapNotNull null
                 val key = when (val head = entry.items.firstOrNull()) {
@@ -235,88 +313,98 @@ internal class KhiproSpec private constructor(
                     null -> return@mapNotNull null
                 }
                 if (key.isEmpty()) return@mapNotNull null
-                var output = ""
+                // In the order written: Dark's `zf` resets its markers before
+                // its text goes in.
                 val actions = ArrayList<Action>()
                 for (part in entry.items.drop(1)) {
                     when (part) {
-                        is Sexp.Atom -> output = part.text
-                        is Sexp.Node -> parseAction(part)?.let(actions::add)
+                        is Sexp.Atom -> if (part.text.isNotEmpty()) actions += Action.Insert(part.text)
+                        is Sexp.Node -> actions += action(part)
                     }
                 }
-                if (output.isNotEmpty()) actions += Action.Insert(output)
                 Entry(key, actions)
             }
             // Stable, so equal lengths keep the spec's own order.
             return name to entries.sortedByDescending { it.key.length }
         }
 
-        private fun parseState(node: Sexp): Pair<String, State>? {
+        fun state(node: Sexp): Pair<String, State>? {
             val list = node as? Sexp.Node ?: return null
-            val name = (list.items.firstOrNull() as? Sexp.Atom)?.text ?: return null
+            val name = list.head() ?: return null
             val entry = ArrayList<Action>()
             val rules = ArrayList<Rule>()
             for (item in list.items.drop(1)) {
                 val rule = item as? Sexp.Node ?: continue
-                val head = (rule.items.firstOrNull() as? Sexp.Atom)?.text ?: continue
-                val actions = rule.items.drop(1).mapNotNull(::parseAction)
+                val head = rule.head() ?: continue
+                val actions = rule.items.drop(1).flatMap { action(it) }
                 if (head == "t") entry += actions else rules += Rule(head, actions)
             }
             return name to State(entry, rules)
         }
 
-        private fun parseAction(node: Sexp): Action? {
-            val list = node as? Sexp.Node ?: return null
-            val head = (list.items.firstOrNull() as? Sexp.Atom)?.text ?: return null
+        /** [node] as actions: one, none for what this subset skips, or a macro's whole body. */
+        private fun action(node: Sexp, depth: Int = 0): List<Action> {
+            val list = node as? Sexp.Node ?: return emptyList()
+            val head = list.head() ?: return emptyList()
             val first = (list.items.getOrNull(1) as? Sexp.Atom)?.text
-            return when (head) {
+            val single: Action? = when (head) {
                 "set" -> {
-                    val value = (list.items.getOrNull(2) as? Sexp.Atom)?.text ?: return null
-                    Action.SetVar(first ?: return null, value)
+                    val value = (list.items.getOrNull(2) as? Sexp.Atom)?.text
+                    if (first != null && value != null) Action.SetVar(first, value) else null
                 }
                 // `?্` is m17n's character literal: the character itself.
-                "insert" -> Action.Insert((first ?: return null).removePrefix("?"))
-                "delete" -> first?.takeIf { it.startsWith("@-") }
-                    ?.let { Action.Delete(it.drop(2).ifEmpty { "1" }.toIntOrNull() ?: 1) }
-                "move" -> when {
-                    first == "@>" -> Action.Move(0, toEnd = true)
-                    first == "@-" -> Action.Move(-1, toEnd = false)
-                    first != null && first.startsWith("@-") ->
-                        Action.Move(-(first.drop(2).toIntOrNull() ?: 1), toEnd = false)
-                    else -> null
-                }
-                "shift" -> Action.Shift(first ?: return null)
+                "insert" -> first?.let { Action.Insert(it.removePrefix("?")) }
+                "delete" -> first?.let { Action.Delete(position(it)) }
+                "move" -> first?.let { Action.Move(position(it)) }
+                "mark" -> first?.let { Action.Mark(it) }
+                "shift" -> first?.let { Action.Shift(it) }
                 "commit" -> Action.Commit
                 "undo" -> Action.Undo
                 "cond" -> list.items.drop(1).mapNotNull { branch ->
                     val parts = (branch as? Sexp.Node)?.items ?: return@mapNotNull null
-                    val condition = parseCondition(parts.firstOrNull() ?: return@mapNotNull null)
+                    val condition = condition(parts.firstOrNull() ?: return@mapNotNull null)
                         ?: return@mapNotNull null
-                    condition to parts.drop(1).mapNotNull(::parseAction)
+                    condition to parts.drop(1).flatMap { action(it, depth) }
                 }.takeIf { it.isNotEmpty() }?.let(Action::Cond)
-                else -> null
+                else -> {
+                    val body = macros[head]
+                    // A macro calling itself would never end; the specs never do.
+                    return if (body == null || depth > MAX_MACRO_DEPTH) {
+                        emptyList()
+                    } else {
+                        body.flatMap { action(it, depth + 1) }
+                    }
+                }
             }
+            return listOfNotNull(single)
         }
 
-        private fun parseCondition(node: Sexp): Condition? {
+        private fun condition(node: Sexp): Condition? {
             if (node is Sexp.Atom) return if (node.text == "1") Condition.Always else null
             val list = (node as Sexp.Node).items
             val head = (list.firstOrNull() as? Sexp.Atom)?.text ?: return null
             return when (head) {
                 "1" -> Condition.Always
-                "=" -> {
+                "=", "<", ">", "<=", ">=" -> {
                     val variable = (list.getOrNull(1) as? Sexp.Atom)?.text ?: return null
-                    val value = (list.getOrNull(2) as? Sexp.Atom)?.text?.toIntOrNull() ?: 0
-                    Condition.Equals(variable, value)
+                    val value = (list.getOrNull(2) as? Sexp.Atom)?.text ?: "0"
+                    Condition.Compare(head, variable, value)
                 }
                 // The specs chain three or more operands under one `|`; fold
                 // them left, as m17n does.
-                "&", "|" -> list.drop(1).map { parseCondition(it) ?: return null }
+                "&", "|" -> list.drop(1).map { condition(it) ?: return null }
                     .takeIf { it.size >= 2 }
                     ?.reduce { left, right ->
                         if (head == "&") Condition.And(left, right) else Condition.Or(left, right)
                     }
                 else -> null
             }
+        }
+
+        private fun Sexp.Node.head(): String? = (items.firstOrNull() as? Sexp.Atom)?.text
+
+        companion object {
+            private const val MAX_MACRO_DEPTH = 8
         }
     }
 }

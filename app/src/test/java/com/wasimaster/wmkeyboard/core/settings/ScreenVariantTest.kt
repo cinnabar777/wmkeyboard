@@ -30,9 +30,11 @@ class ScreenVariantTest {
      * The service reads one-handed settings straight off its own raw state while
      * the keyboard composable reads them through [resolvedFor] — the two must
      * agree, or the toolbar's one-handed button and its hardware shortcut would
-     * dock the keyboard to different sides. They agree because sizing overrides
-     * carry nothing about one-handed mode; this pins that, so a new
-     * [SizingOverride] field cannot quietly break it.
+     * dock the keyboard to different sides. They agree because the sizing
+     * fields carry nothing about one-handed mode; this pins that, so a new
+     * [SizingOverride] field cannot quietly break it. The one exception is the
+     * per-shape gate (#611), which the service asks through the same
+     * [oneHandedAllowedOn].
      */
     @Test fun sizingOverridesNeverTouchOneHandedSettings() {
         val settings = KeyboardSettings(
@@ -193,5 +195,86 @@ class ScreenVariantTest {
         assertEquals(80, landscape.keyboardWidthPercent)
         assertEquals(0.9f, landscape.fontScale, 0.001f)
         assertEquals(KeyboardAlignment.RIGHT, landscape.keyboardAlignment)
+    }
+
+    /** #584: landscape follows portrait until it has a value of its own. */
+    @Test fun landscapeFloatingFollowsPortraitUntilSet() {
+        val legacy = KeyboardSettings(floatingKeyboard = true)
+        assertTrue(legacy.floatingFor(landscape = false))
+        assertTrue(legacy.floatingFor(landscape = true))
+        val apart = KeyboardSettings(floatingKeyboard = false, floatingKeyboardLandscape = true)
+        assertFalse(apart.floatingFor(landscape = false))
+        assertTrue(apart.floatingFor(landscape = true))
+    }
+
+    /** The frame reads `floatingKeyboard` and never learns there are two. */
+    @Test fun resolvingFoldsInTheOrientationsFloating() {
+        val settings = KeyboardSettings(floatingKeyboard = false, floatingKeyboardLandscape = true)
+        assertTrue(settings.resolvedFor(ScreenVariant.LANDSCAPE).floatingKeyboard)
+        assertTrue(settings.resolvedFor(ScreenVariant.LANDSCAPE_UNFOLDED).floatingKeyboard)
+        assertFalse(settings.resolvedFor(ScreenVariant.PORTRAIT).floatingKeyboard)
+        assertSame(settings, settings.resolvedFor(ScreenVariant.PORTRAIT))
+        val docked = KeyboardSettings(floatingKeyboard = true, floatingKeyboardLandscape = false)
+        assertFalse(docked.resolvedFor(ScreenVariant.LANDSCAPE).floatingKeyboard)
+        assertTrue(docked.resolvedFor(ScreenVariant.PORTRAIT_UNFOLDED).floatingKeyboard)
+    }
+
+    /** #611: an unfolded portrait screen can drop split and keep one-handed. */
+    @Test fun aShapeCanHoldSplitBackAndKeepOneHanded() {
+        val settings = KeyboardSettings(
+            splitKeyboard = true,
+            oneHandedMode = OneHandedMode.LEFT,
+            sizingOverrides = mapOf(
+                ScreenVariant.PORTRAIT_UNFOLDED to SizingOverride(allowSplit = false),
+            ),
+        )
+        val unfolded = settings.resolvedFor(ScreenVariant.PORTRAIT_UNFOLDED)
+        assertFalse(unfolded.splitKeyboard)
+        assertEquals(OneHandedMode.LEFT, unfolded.oneHandedMode)
+        val landscape = settings.resolvedFor(ScreenVariant.LANDSCAPE_UNFOLDED)
+        assertTrue(landscape.splitKeyboard)
+    }
+
+    @Test fun aShapeCanHoldOneHandedBack() {
+        val settings = KeyboardSettings(
+            oneHandedMode = OneHandedMode.RIGHT,
+            sizingOverrides = mapOf(
+                ScreenVariant.PORTRAIT_UNFOLDED to SizingOverride(allowOneHanded = false),
+            ),
+        )
+        assertEquals(
+            OneHandedMode.OFF,
+            settings.resolvedFor(ScreenVariant.PORTRAIT_UNFOLDED).oneHandedModeFor(landscape = false),
+        )
+        assertEquals(OneHandedMode.RIGHT, settings.resolvedFor(ScreenVariant.PORTRAIT).oneHandedMode)
+    }
+
+    /** Unset, the gates are the shared rules; set, they win over them. */
+    @Test fun gatesDefaultToTheSharedRulesAndBeatThem() {
+        val shared = KeyboardSettings(
+            splitKeyboard = true,
+            oneHandedMode = OneHandedMode.LEFT,
+            oneHanded = OneHandedSettings(portraitOnly = true),
+            layoutBehavior = KeyboardSettings().layoutBehavior.copy(splitOnlyOnLargeScreens = true),
+        )
+        assertFalse(shared.splitAllowedOn(ScreenVariant.PORTRAIT))
+        assertTrue(shared.splitAllowedOn(ScreenVariant.PORTRAIT_UNFOLDED))
+        assertFalse(shared.oneHandedAllowedOn(ScreenVariant.LANDSCAPE))
+        assertTrue(shared.oneHandedAllowedOn(ScreenVariant.PORTRAIT_UNFOLDED))
+        assertEquals(
+            OneHandedMode.OFF,
+            shared.resolvedFor(ScreenVariant.LANDSCAPE).oneHandedModeFor(landscape = true),
+        )
+
+        val allowed = shared.copy(
+            sizingOverrides = mapOf(
+                ScreenVariant.LANDSCAPE_UNFOLDED to SizingOverride(allowOneHanded = true),
+            ),
+        )
+        assertEquals(
+            OneHandedMode.LEFT,
+            allowed.resolvedFor(ScreenVariant.LANDSCAPE_UNFOLDED).oneHandedModeFor(landscape = true),
+        )
+        assertFalse(allowed.sizingOverrides.getValue(ScreenVariant.LANDSCAPE_UNFOLDED).isEmpty)
     }
 }

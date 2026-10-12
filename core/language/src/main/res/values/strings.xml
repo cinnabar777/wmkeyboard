@@ -232,6 +232,48 @@
         <item quantity="one">%1$d key has different press-and-hold letters while shift is down in the other keyboard. The app kept the unshifted ones.</item>
         <item quantity="other">%1$d keys have different press-and-hold letters while shift is down in the other keyboard. The app kept the unshifted ones.</item>
     </plurals>
+    <!-- A Multiling O key can do one thing on a tap and others on a swipe.
+         Here a delete key and a space bar use their swipes for other jobs. -->
+    <plurals name="core_lang_foreign_gestures_dropped">
+        <item quantity="one">%1$d swipe on a key has no place here, because this keyboard uses that swipe for another job. The app removed it.</item>
+        <item quantity="other">%1$d swipes on keys have no place here, because this keyboard uses those swipes for other jobs. The app removed them.</item>
+    </plurals>
+    <plurals name="core_lang_foreign_shifted_pages_dropped">
+        <item quantity="one">%1$d shifted page in the file has its keys in other places than the page it shifts. The app uses capital letters there instead.</item>
+        <item quantity="other">%1$d shifted pages in the file have their keys in other places than the pages they shift. The app uses capital letters there instead.</item>
+    </plurals>
+    <string name="core_lang_foreign_pages_kept">The file\'s extra pages, such as AltGr, are pages of this layout. Swipe from the key that opened them in the other keyboard to open them here.</string>
+
+    <!-- A layout made for a computer keyboard (Windows .klc, macOS .keylayout,
+         Linux XKB). AltGr is the key right of the space bar that types a third
+         character on each key. -->
+    <string name="core_lang_foreign_desktop_altgr_on_hold">The characters that the AltGr key types on a computer are on press and hold of the same keys.</string>
+    <!-- A dead key types nothing on a computer. It puts an accent on the next
+         letter. %1$d is the number of dead keys, and picks the wording. -->
+    <plurals name="core_lang_foreign_desktop_dead_keys">
+        <item quantity="one">%1$d dead key puts an accent on the next letter on a computer. Here, the letters with that accent are on press and hold of each letter.</item>
+        <item quantity="other">%1$d dead keys put accents on the next letter on a computer. Here, the letters with those accents are on press and hold of each letter.</item>
+    </plurals>
+    <!-- Keys with punctuation only are not on a phone grid. Characters from
+         them that the symbol pages do not have go on the full stop key.
+         %1$d is the number of characters, and picks the wording. -->
+    <plurals name="core_lang_foreign_desktop_symbols_on_period">
+        <item quantity="one">%1$d character from a key with no letters on it is on press and hold of the full stop.</item>
+        <item quantity="other">%1$d characters from keys with no letters on them are on press and hold of the full stop.</item>
+    </plurals>
+    <!-- A Linux layout names each character, such as "Cyrillic_a". %1$d is the
+         number of names, and picks the wording. %2$s is the list of names. -->
+    <plurals name="core_lang_foreign_desktop_unknown_symbols">
+        <item quantity="one">The app does not know %1$d character name in the file, so it left it out: <xliff:g id="names" example="mystery_sym">%2$s</xliff:g>.</item>
+        <item quantity="other">The app does not know %1$d character names in the file, so it left them out: <xliff:g id="names" example="mystery_sym, other_sym">%2$s</xliff:g>.</item>
+    </plurals>
+    <!-- A Linux layout can start from a layout in another file, such as
+         "in(eng)". Only the one file was opened. %1$d is the number of files,
+         and picks the wording. %2$s is the list of them. -->
+    <plurals name="core_lang_foreign_desktop_includes_missing">
+        <item quantity="one">The file builds on %1$d other file (<xliff:g id="files" example="in(eng)">%2$s</xliff:g>) that you did not open. Keys that only that file sets are missing.</item>
+        <item quantity="other">The file builds on %1$d other files (<xliff:g id="files" example="in(eng), latin">%2$s</xliff:g>) that you did not open. Keys that only those files set are missing.</item>
+    </plurals>
 
     <!-- ================================================================== -->
     <!-- Numerals. Settings > Languages > a language > Numerals picks which  -->

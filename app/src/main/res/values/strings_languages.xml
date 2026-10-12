@@ -198,7 +198,7 @@
     <string name="languages_picker_hidden_group">Language switcher</string>
     <string name="languages_picker_hidden_title">Do not show in the language switcher</string>
     <string name="languages_picker_hidden_subtitle">Keep this language for its suggestions only</string>
-    <string name="languages_picker_hidden_info"><xliff:g id="language" example="Bangla (Romanized)">%1$s</xliff:g> stays on, but the globe key, the spacebar swipe and the language list do not stop at it. Its words continue to show on each keyboard that has it below Also suggest from. Use this to type it on your English keyboard and have one keyboard less to switch through.</string>
+    <string name="languages_picker_hidden_info"><xliff:g id="language" example="Bangla (Romanized)">%1$s</xliff:g> stays on, but the globe key, the spacebar swipe and the language list do not stop at it. Its words continue to show on each keyboard that has it below Also suggest from. Use this when you want a language only for its words, such as English suggestions on a Swedish keyboard, and one keyboard less to switch through.</string>
     <string name="languages_phonetic_english_group">English words</string>
     <string name="languages_phonetic_english_title">Type English words as English</string>
     <string name="languages_phonetic_english_subtitle">On the phonetic layout, hello stays hello</string>
@@ -387,11 +387,11 @@
     <string name="languages_cjk_delete_desc">Delete <xliff:g id="pack" example="Pinyin">%1$s</xliff:g></string>
 
     <string name="languages_cjk_traditional_title">Traditional characters</string>
-    <string name="languages_cjk_traditional_subtitle">The keyboard converts candidates to Traditional (繁體). It converts one character at a time, so a few forms that depend on context are wrong (发 → 發 / 髮).</string>
+    <string name="languages_cjk_traditional_subtitle">The keyboard converts candidates to Traditional (繁體). With the phrase table pack, it converts word by word, so 头发 becomes 頭髮.</string>
     <!-- Info text for the Traditional characters toggle. The Chinese characters
          are examples and stay as they are. 发 is the Simplified form, 發 means
          "to send" and 髮 means "hair". -->
-    <string name="languages_cjk_traditional_info">The keyboard converts each candidate from Simplified (简体) to Traditional (繁體) before it shows the candidate. The conversion reads one character at a time. A few Simplified characters have more than one Traditional form, and the keyboard always writes the more common one. 发 becomes 發, which is correct in 發展 but wrong in 頭髮. Correct those words by hand.</string>
+    <string name="languages_cjk_traditional_info">The keyboard converts each candidate from Simplified (简体) to Traditional (繁體) before it shows the candidate. Some Simplified characters have more than one Traditional form, and the word decides which one is correct: 发 is 發 in 發展 but 髮 in 頭髮, and 后 is 後 in 後來 but 后 in 皇后. With the phrase table pack downloaded, the keyboard reads whole words, so it writes the correct form. Without the pack, or for a word that is in no table, it converts one character at a time.</string>
     <string name="languages_cjk_region_title">Regional wording</string>
     <string name="languages_cjk_region_info">Taiwan and Hong Kong often use different words for the same thing, not only different characters.</string>
     <string name="languages_cjk_region_generic_title">Standard</string>

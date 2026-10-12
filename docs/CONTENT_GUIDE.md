@@ -125,9 +125,9 @@ roughly in order of value:
    framework needed).
 2. **Layout explorer**: render a keyboard layout as HTML from its data file so
    readers can hover keys to see long-press popups. Worth building once,
-   reusable for all 1,715 layouts + notation layouts.
+   reusable for all 1,732 layouts + notation layouts.
 3. **Theme preview**: swatch grid that live-recolours an HTML keyboard mockup.
-4. **Searchable tables**: the 333-wordlist list and 867-language matrix
+4. **Searchable tables**: the 333-wordlist list and 826-language matrix
    should be filterable (a `<script>` in the MDX is fine at this scale).
 5. Mermaid/diagram embeds for the developer section (addon install pipeline,
    IME lifecycle).
@@ -151,10 +151,10 @@ widget needs a framework, question it first.
   full rule set and the term glossary live in `../config/i18n/STRINGS.md`, which
   the app's own strings already follow. Descriptive prose stays warm and normal,
   up to 25 words a sentence.
-- Numbers are features. Write "867 languages" and "29 Whisper models", and
+- Numbers are features. Write "826 languages" and "29 Whisper models", and
   verify the number in code before you write it. Headline counts were
-  code-verified on 2026-09-29: 867 registered languages (386 hand-written +
-  481 generated from Keyman), 1,715 layouts (22 built-in + 1,693 asset, of
+  code-verified on 2026-10-11: 826 registered languages (386 hand-written +
+  440 generated from Keyman), 1,732 layouts (35 built-in + 1,697 asset, of
   which 862 are converted Keyman grids), 333 wordlists, 72 toolbar tools (67
   on Lite), 14 addon types, 107 replaceable icon slots, 12 registered file
   extensions, 31 fancy-text styles plus Normal. Verified on 2026-08-12 and not

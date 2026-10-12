@@ -1,5 +1,8 @@
 package com.wasimaster.wmkeyboard.ime.ui
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -62,7 +65,8 @@ internal class KdePadCallbacks(
  *   button held, and let go to drop
  *
  * Nothing here reads touch state in composition. The finger's dot is two floats
- * and a version the draw lambda alone observes.
+ * and a version the draw lambda alone observes; so is the ring a tap-click
+ * throws out from where it landed, the pad's word that the click went out.
  */
 @Composable
 internal fun KdeRemotePad(
@@ -82,6 +86,11 @@ internal fun KdeRemotePad(
     val fingerY = remember { mutableFloatStateOf(0f) }
     val held = remember { mutableIntStateOf(0) }
     val accent = kb.accent
+    // The click ripple: where, and how far through (1 = spent, nothing drawn).
+    val motion = rememberUpdatedState(kb.motion.any)
+    val rippleX = remember { mutableFloatStateOf(0f) }
+    val rippleY = remember { mutableFloatStateOf(0f) }
+    val ripple = remember { Animatable(1f) }
     Box(
         modifier = modifier
             .background(kb.modifierKey.copy(alpha = 0.35f), kb.keyShape())
@@ -189,6 +198,14 @@ internal fun KdeRemotePad(
                             }
                             if (settings.padHaptics) tick()
                             current.value.onClick(click)
+                            if (motion.value) {
+                                rippleX.floatValue = last.x
+                                rippleY.floatValue = last.y
+                                scope.launch {
+                                    ripple.snapTo(0f)
+                                    ripple.animateTo(1f, tween(RIPPLE_MS, easing = LinearOutSlowInEasing))
+                                }
+                            }
                             if (click == KdeClick.LEFT) lastTapUpMs = android.os.SystemClock.uptimeMillis()
                         }
                     }
@@ -197,7 +214,15 @@ internal fun KdeRemotePad(
             .drawWithCache {
                 val ring = Stroke(width = 2.dp.toPx())
                 val radius = 18.dp.toPx()
+                val rippleReach = RIPPLE_REACH.dp.toPx()
                 onDrawBehind {
+                    val p = ripple.value
+                    if (p < 1f) {
+                        val at = Offset(rippleX.floatValue, rippleY.floatValue)
+                        val r = radius + (rippleReach - radius) * p
+                        drawCircle(accent.copy(alpha = 0.22f * (1f - p)), r, at)
+                        drawCircle(accent.copy(alpha = 0.6f * (1f - p)), r, at, style = ring)
+                    }
                     val x = fingerX.floatValue
                     if (x.isNaN()) return@onDrawBehind
                     val center = Offset(x, fingerY.floatValue)
@@ -281,6 +306,10 @@ internal fun KdePointerPad(
 }
 
 private const val POINTER_KEEPALIVE_MS = 250L
+
+/** The tap-click ripple: how long it runs, and how far (dp) it spreads. */
+private const val RIPPLE_MS = 380
+private const val RIPPLE_REACH = 56
 
 /** The pad is a fraction of the phone; one sweep of it should cross most of the screen. */
 private const val POINTER_GAIN = 1.2

@@ -44,7 +44,7 @@ class TabletExpansionCorpusTest {
      *
      * The shape checks below run over the whole corpus, generated grids
      * included — a row that overflows on a tablet is a real defect wherever it
-     * came from. But the decline set is a list of *our* twelve, named one by
+     * came from. But the decline set is a list of *our* grids, named one by
      * one so a transform that silently started rejecting Bengali would fail;
      * folding 862 converted Keyman grids into it would turn that precise
      * assertion into a number nobody can check.
@@ -56,7 +56,7 @@ class TabletExpansionCorpusTest {
 
     @Test
     fun `the corpus is the whole shipped set`() {
-        assertEquals("built-ins plus hand-authored assets", 22 + 825, handAuthored.size)
+        assertEquals("built-ins plus hand-authored assets", 35 + 835, handAuthored.size)
         assertTrue(
             "converted Keyman grids are missing from the corpus",
             corpus.size - handAuthored.size > 800,
@@ -67,7 +67,7 @@ class TabletExpansionCorpusTest {
      * The exact set of layouts that decline, spelled out.
      *
      * An assertion on the count alone would pass while the transform silently
-     * started rejecting Bengali and accepting braille. These twelve are the
+     * started rejecting Bengali and accepting braille. These are the
      * grids where a wide alphabetic layout is not what the user is looking at:
      * the T9 keypad is four columns of letter *groups* and widening it would
      * make it a keyboard with nothing to type on, kana flick pads and braille
@@ -92,7 +92,7 @@ class TabletExpansionCorpusTest {
         assertEquals(
             setOf(
                 // Khipro's shift key is its slicer, so there is none to mirror.
-                "builtin_khipro",
+                "builtin_khipro", "builtin_khipro_dark",
                 "builtin_t9",
                 "braille_chord", "ja_flick", "ja_kana_jis", "morse", "zh_stroke",
                 // The English 3×3 flick board (#410): every letter key carries
@@ -103,6 +103,8 @@ class TabletExpansionCorpusTest {
                 "zh_cangjie", "zh_cangjie_quick", "zh_pinyin_t9", "zh_zhuyin",
                 // The 천지인 pad (#372): a 12-key keypad with no shift key.
                 "ko_cheonjiin",
+                // The 나랏글 pad (#599), the same shape.
+                "ko_naratgeul",
                 // FUTO's ClearFlow and KASROZ: shift, delete and space are keys
                 // two rows tall, and the transform declines any grid with a span.
                 "en_clearflow", "en_kasroz",
@@ -112,6 +114,13 @@ class TabletExpansionCorpusTest {
                 "tok_compact",
                 // Arabic as Gboard and AOSP draw it (#427): no shift key to mirror.
                 "ar_letters",
+                // Persian as Gboard draws it, and the alphabetical Devanagari
+                // pages: every letter on its own key, so no shift key either.
+                "fa_gboard", "hi_devanagari",
+                // Klingon in pIqaD, which has no case.
+                "tlh_piqad",
+                // Handwriting pads are a drawing surface, not a key grid.
+                "ja_handwriting", "ko_handwriting", "zh_handwriting",
             ) + keypads,
             declined,
         )

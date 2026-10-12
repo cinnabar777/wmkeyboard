@@ -48,6 +48,13 @@ enum class ServiceEndpoint(
      * own authority, which only Signal's apps trust.
      */
     SIGNAL_STICKER_CDN("signal_sticker_cdn", "https://cdn-ca.signal.org", ServiceGroup.MEDIA),
+
+    /**
+     * Telegram's Bot API, which is the one way to a sticker set without a
+     * Telegram account: it takes the user's own bot token. Swappable for a
+     * self-hosted `telegram-bot-api` server, which answers the same paths.
+     */
+    TELEGRAM_BOT_API("telegram_bot_api", "https://api.telegram.org", ServiceGroup.MEDIA),
     UNSPLASH("unsplash", "https://api.unsplash.com", ServiceGroup.PHOTOS),
     PEXELS("pexels", "https://api.pexels.com", ServiceGroup.PHOTOS),
     WIKIPEDIA("wikipedia", "https://{lang}.wikipedia.org", ServiceGroup.WIKIPEDIA),

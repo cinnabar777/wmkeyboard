@@ -21,6 +21,7 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -268,7 +269,62 @@ data class KbTheme(
      * otherwise see settings.
      */
     val reduceMotion: Boolean,
+    /**
+     * Which of the optional keyboard animations are on, already folded with
+     * [reduceMotion]: every flag reads false while motion is reduced, so a
+     * caller checks one boolean and never both. Carried here for the same
+     * reason [reduceMotion] is.
+     */
+    val motion: KbMotion = KbMotion(),
 )
+
+/**
+ * The optional keyboard animations, each already gated on reduce motion (see
+ * [KbTheme.motion]). [any] is plain "motion allowed at all" for the surfaces
+ * that have no switch of their own and only follow reduce motion.
+ */
+@Immutable
+data class KbMotion(
+    /** Motion allowed at all: the inverse of [KbTheme.reduceMotion]. */
+    val any: Boolean = true,
+    /** Panels grow from their opener and fold back into it. */
+    val panels: Boolean = true,
+    /** Selection overlay and selection bar animate. */
+    val selection: Boolean = true,
+    /** A language switch flips the keys whose label changes. */
+    val languageSwitch: Boolean = false,
+    /** Autopilot's visual overlay eases between sizes. */
+    val autopilot: Boolean = false,
+    /** Grammar fixes and translations animate into place. Opt-in. */
+    val toolResults: Boolean = false,
+) {
+    companion object {
+        /** Everything still. */
+        val None = KbMotion(
+            any = false,
+            panels = false,
+            selection = false,
+            languageSwitch = false,
+            autopilot = false,
+            toolResults = false,
+        )
+
+        /** The flags [settings] asks for, all off under reduce motion. */
+        fun of(settings: KeyboardSettings): KbMotion =
+            if (settings.reduceMotion) {
+                None
+            } else {
+                KbMotion(
+                    any = true,
+                    panels = settings.accessibility.panelMotion,
+                    selection = settings.accessibility.selectionMotion,
+                    languageSwitch = settings.accessibility.languageSwitchMotion,
+                    autopilot = settings.layoutBehavior.autopilotAnimate,
+                    toolResults = settings.accessibility.toolResultMotion,
+                )
+            }
+    }
+}
 
 /**
  * The resolved outline every key draws with.
@@ -661,6 +717,7 @@ internal fun defaultKbTheme(
         animation = ThemeAnimation.NONE,
         animationSpeed = 1f,
         reduceMotion = settings.reduceMotion,
+        motion = KbMotion.of(settings),
     )
 }
 
@@ -829,6 +886,7 @@ private fun specKbTheme(spec: ThemeSpec, settings: KeyboardSettings): KbTheme {
         animation = spec.animation,
         animationSpeed = spec.animationSpeed,
         reduceMotion = settings.reduceMotion,
+        motion = KbMotion.of(settings),
     )
 }
 
@@ -1475,6 +1533,7 @@ private fun lerpKbTheme(a: KbTheme, b: KbTheme, t: Float): KbTheme {
         animation = if (past) b.animation else a.animation,
         animationSpeed = lerpF(a.animationSpeed, b.animationSpeed, t),
         reduceMotion = b.reduceMotion,
+        motion = b.motion,
     )
 }
 

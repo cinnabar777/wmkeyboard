@@ -2236,9 +2236,6 @@
     <string name="keypress_haptics_title">Тактильный отклик при нажатии клавиш</string>
     <string name="keypress_hold_action_copy_label">Копировать</string>
     <string name="keypress_hold_action_cut_label">Вырезать</string>
-    <string name="keypress_hold_action_first_info">Это действие обычно находится в конце всплывающего окна, поэтому простое нажатие и удержание дает вам первый акцент. Если включить эту опцию, оно переместится в начало, и нажатие с удержанием на одной из клавиш быстрого доступа сразу выполнит действие. Акценты по-прежнему доступны: удерживайте палец и проведите к нужному символу. Для этого требуется включить «Удержание для выбора» в разделе «Альтернативные клавиши».</string>
-    <string name="keypress_hold_action_first_subtitle">Долгое нажатие выполняет действие вместо отображения акцентов</string>
-    <string name="keypress_hold_action_first_title">Сначала действие</string>
     <string name="keypress_hold_action_paste_label">Вставить</string>
     <string name="keypress_hold_action_redo_label">Повторить</string>
     <string name="keypress_hold_action_select_all_label">Выбрать все</string>
@@ -2549,8 +2546,6 @@
     <string name="languages_cjk_region_info">Региональная лексика. На Тайване и в Гонконге часто используются разные слова для обозначения одного и того же, а не только разные иероглифы.</string>
     <string name="languages_cjk_region_taiwan_title">Тайвань (臺灣)</string>
     <string name="languages_cjk_region_title">Региональное написание</string>
-    <string name="languages_cjk_traditional_info">Клавиатура преобразует каждый вариант из упрощенного (简体) в традиционный (繁體) перед отображением. Преобразование выполняется по одному символу. Некоторые упрощенные символы имеют более одной традиционной формы, и клавиатура всегда выбирает наиболее распространенную. 发 становится 發, что правильно в 發展, но неправильно в 頭髮. Исправляйте такие слова вручную.</string>
-    <string name="languages_cjk_traditional_subtitle">Клавиатура преобразует кандидатов в традиционные иероглифы (繁體). Преобразование происходит по одному символу за раз, поэтому некоторые формы, зависящие от контекста, могут быть неверными (发 → 發 / 髮).</string>
     <string name="languages_cjk_traditional_title">Традиционные иероглифы</string>
     <string name="languages_clusters_title">Кластеры</string>
     <string name="languages_conjunct_backspace_info">Backspace обычно удаляет по одному кодовому символу за раз. Это иногда оставляет на экране частично сформированные кластеры. При включении этой настройки одно нажатие удаляет весь кластер во время ввода %1$s. Другие языки сохраняют свои собственные настройки.</string>

@@ -146,6 +146,7 @@ fun ThemeKeyboardPreview(
             keyboardThemeId = theme.id,
             autoTheme = settings.autoTheme.copy(enabled = false),
             floatingKeyboard = false,
+            floatingKeyboardLandscape = false,
             oneHandedMode = OneHandedMode.OFF,
         )
     }

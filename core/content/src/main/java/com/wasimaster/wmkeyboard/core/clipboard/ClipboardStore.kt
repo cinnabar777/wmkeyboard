@@ -78,6 +78,12 @@ data class ClipItem(
      * tracking is off, unavailable, or the source couldn't be determined.
      */
     val sourceApp: String? = null,
+    /**
+     * When the user last changed this clip's text in the panel's editor, in
+     * epoch millis (#576); null for a clip that was never edited. Separate
+     * from [timestamp], which an edit leaves alone so the clip keeps its place.
+     */
+    val editedAt: Long? = null,
 )
 
 /**
@@ -517,12 +523,15 @@ class ClipboardStore(
      * the way copying the same text twice never makes two entries, keeping
      * the other's pin if it had one.
      *
+     * A change stamps [ClipItem.editedAt] with [now], so the panel can say the
+     * clip is no longer what was copied (#576).
+     *
      * Returns the clip as stored, or null when there is nothing to edit: no
      * such clip, a clip that is not text, or blank text — deleting is what
      * the delete button is for.
      */
     @Synchronized
-    fun editText(id: Long, text: String): ClipItem? {
+    fun editText(id: Long, text: String, now: Long = System.currentTimeMillis()): ClipItem? {
         val index = items.indexOfFirst { it.id == id }
         if (index < 0) return null
         val item = items[index]
@@ -540,6 +549,7 @@ class ClipboardStore(
             linkPreview = null,
             pinned = item.pinned || duplicate?.pinned == true,
             sensitive = item.sensitive || duplicate?.sensitive == true,
+            editedAt = now,
         )
         items[index] = edited
         if (duplicate != null) removeWhere { it === duplicate }

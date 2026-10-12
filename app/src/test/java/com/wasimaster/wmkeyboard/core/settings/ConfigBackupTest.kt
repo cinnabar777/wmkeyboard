@@ -66,6 +66,22 @@ class ConfigBackupTest {
     }
 
     @Test
+    fun `notes is the last section and encodes after swipe`() {
+        // Sections encode in declaration order and older builds read bundles
+        // positionally, so a new section may only ever be appended.
+        assertEquals(ConfigBackup.Section.NOTES, ConfigBackup.Section.entries.last())
+        val payload = buildJsonObject { put("a", JsonPrimitive(1)) }
+        val text = ConfigBackup.encode(
+            1,
+            "x",
+            linkedMapOf(ConfigBackup.Section.NOTES to payload, ConfigBackup.Section.SWIPE to payload),
+        )
+        assertTrue(text.indexOf("\"swipe\"") < text.indexOf("\"notes\""))
+        val parsed = requireNotNull(ConfigBackup.decode(text))
+        assertTrue(parsed.has(ConfigBackup.Section.NOTES))
+    }
+
+    @Test
     fun `something else entirely is not a bundle`() {
         assertNull(ConfigBackup.decode("not json at all"))
         assertNull(ConfigBackup.decode("{}"))

@@ -245,6 +245,32 @@ class LayoutCodecTest {
     }
 
     @Test
+    fun `round trips the naratgeul keys under their file names`() {
+        // Issue #599: an add-on layout spells them add_stroke and double_consonant.
+        val original = spec(
+            listOf(
+                Key("획추가", action = KeyAction.AddStroke),
+                Key("쌍자음", action = KeyAction.DoubleConsonant),
+            ),
+        )
+        val encoded = LayoutCodec.encode(original)
+        assertTrue(encoded.contains("\"add_stroke\""))
+        assertTrue(encoded.contains("\"double_consonant\""))
+        assertEquals(original, LayoutCodec.decode(encoded))
+    }
+
+    @Test
+    fun `round trips the reading column under its file name`() {
+        // Issue #635: the T9 pinyin pad's left column, two rows tall here.
+        val original = spec(
+            listOf(Key("拼音", action = KeyAction.ReadingColumn, rowSpan = 2, longPress = listOf("，", "。"))),
+        )
+        val encoded = LayoutCodec.encode(original)
+        assertTrue(encoded.contains("\"reading_column\""))
+        assertEquals(original, LayoutCodec.decode(encoded))
+    }
+
+    @Test
     fun `round trips the corner flick arms under their snake-case names`() {
         // Issue #410: the diagonals are spelled up_left and so on in the file.
         val original = spec(
@@ -604,6 +630,8 @@ class LayoutCodecTest {
             KeyAction.Emoji,
             KeyAction.InputMethodPicker,
             KeyAction.KanaVariant,
+            KeyAction.AddStroke,
+            KeyAction.DoubleConsonant,
         )) {
             assertFalse(action.toString(), action.commitsNoText())
         }

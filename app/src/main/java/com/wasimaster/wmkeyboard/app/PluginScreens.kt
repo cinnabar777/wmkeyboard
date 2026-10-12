@@ -152,7 +152,7 @@ internal fun PluginsScreen(onNavigate: (String) -> Unit) {
                 item { CaptionText(stringResource(R.string.plugins_installed_empty)) }
             } else {
                 for (plugin in plugins) {
-                    item {
+                    item(key = plugin.id) {
                         val subtitle = when {
                             plugin.author.isNotBlank() && !plugin.enabled -> stringResource(
                                 R.string.plugins_row_version_author_off,

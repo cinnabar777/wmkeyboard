@@ -24,7 +24,7 @@ class CjkLatticeTest {
         CjkConfig.jianpin = true
         CjkConfig.doublePinyin = DoublePinyinScheme.OFF
         CjkConfig.traditionalOutput = false
-        HanVariant.s2t = emptyMap()
+        HanVariant.s2t = HanPhraseTable.EMPTY
         CjkDictionaries.pinyin = ConversionDictionary.EMPTY
         CjkDictionaries.ngrams = CjkNgrams.EMPTY
         PinyinSyllables.valid = emptySet()

@@ -41,6 +41,15 @@
     <!-- Only used by the optional voice input tool; audio goes to the
          device's speech recognizer while dictating, never stored. -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- Voice typing through a Bluetooth headset (#581) on Android 11 and
+         older: the headset's microphone only opens while the keyboard holds
+         its voice link, and startBluetoothSco is checked against this. From
+         Android 12 setCommunicationDevice needs nothing (FUTO's keyboard
+         does the same without it), so it is not declared there. A normal
+         permission, granted at install. -->
+    <uses-permission
+        android:name="android.permission.MODIFY_AUDIO_SETTINGS"
+        android:maxSdkVersion="30" />
     <!-- Only used by the optional contact-name suggestions setting; names
          are read into memory for the suggestion strip, never stored. -->
     <uses-permission android:name="android.permission.READ_CONTACTS" />
@@ -94,6 +103,14 @@
          asked for at the moment one of those would first have been useful
          rather than on launch. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- "Display over other apps", for one optional feature: the floating
+         keyboard button (issue #374), a small button drawn over other apps
+         while the keyboard is closed that brings it up, text field or not.
+         The button is the only window drawn with it; nothing on screen is
+         read. A special grant on a system Settings screen, asked for only
+         when the user turns the button on, after a disclosure. -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.camera.front" android:required="false" />
@@ -417,7 +434,8 @@
         <!--
              Where an opened .wmtheme.json / .wmlayout.json / .wmsettings.json /
              .wmconfig.json / .wmsnippets.json / .wmstickers / .wmicons lands, and
-             the foreign ones (.flex, .kmp, .wastickers, .kcf) beside them:
+             the foreign ones (.flex, .kmp, .wastickers, .kcf, .klc, .keylayout)
+             beside them:
              one confirm dialog, the import, a result. Deliberately not
              MainActivity — tapping a theme in a file manager should not drop
              anyone into the settings app.
@@ -516,6 +534,14 @@
                 <data android:pathPattern=".*\\..*\\.kcf" />
                 <data android:pathPattern=".*\\..*\\..*\\.kcf" />
                 <data android:pathPattern=".*\\..*\\..*\\..*\\.kcf" />
+                <data android:pathPattern=".*\\.klc" />
+                <data android:pathPattern=".*\\..*\\.klc" />
+                <data android:pathPattern=".*\\..*\\..*\\.klc" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.klc" />
+                <data android:pathPattern=".*\\.keylayout" />
+                <data android:pathPattern=".*\\..*\\.keylayout" />
+                <data android:pathPattern=".*\\..*\\..*\\.keylayout" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.keylayout" />
             </intent-filter>
 
             <intent-filter android:label="@string/import_file_label">
@@ -583,6 +609,14 @@
                 <data android:pathPattern=".*\\..*\\.kcf" />
                 <data android:pathPattern=".*\\..*\\..*\\.kcf" />
                 <data android:pathPattern=".*\\..*\\..*\\..*\\.kcf" />
+                <data android:pathPattern=".*\\.klc" />
+                <data android:pathPattern=".*\\..*\\.klc" />
+                <data android:pathPattern=".*\\..*\\..*\\.klc" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.klc" />
+                <data android:pathPattern=".*\\.keylayout" />
+                <data android:pathPattern=".*\\..*\\.keylayout" />
+                <data android:pathPattern=".*\\..*\\..*\\.keylayout" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.keylayout" />
             </intent-filter>
 
             <!--
@@ -714,6 +748,25 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="sgnl" android:host="addstickers" />
+            </intent-filter>
+
+            <!--
+                 The same for a Telegram sticker set: tg://addstickers?set=…,
+                 and tg://addemoji?set=… for a set of custom emoji. It is what
+                 the "Open in Telegram" button on a t.me/addstickers page
+                 fires. Beside Telegram the system asks which app to use.
+
+                 Only these two hosts. The rest of tg:// (chats, logins,
+                 proxies, payments) is Telegram's. The https form on t.me is
+                 not claimed, for the reason given above for signal.art.
+            -->
+            <intent-filter android:label="@string/import_telegram_chooser_label">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="tg" />
+                <data android:host="addstickers" />
+                <data android:host="addemoji" />
             </intent-filter>
         </activity>
 

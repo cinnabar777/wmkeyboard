@@ -10,7 +10,16 @@ package com.wasimaster.wmkeyboard.core.prediction
  * live layout and per-keystroke tap positions; when either is missing the
  * engine falls back to the discrete [KeyProximity] adjacency weights.
  */
-data class TouchPoint(val x: Float, val y: Float)
+data class TouchPoint(
+    val x: Float,
+    val y: Float,
+    /**
+     * When the finger went down, in uptime milliseconds, or 0 where unknown.
+     * The typo model never reads it; it is what places a tap among the other
+     * thumb's gestures in a two-thumb word (issue #638).
+     */
+    val t: Long = 0L,
+)
 
 /**
  * Per-key 2D Gaussian likelihood. [centers] maps each committed character to

@@ -2238,9 +2238,6 @@
     <string name="keypress_haptics_title">Haptisches Feedback beim Tastendruck</string>
     <string name="keypress_hold_action_copy_label">Kopieren</string>
     <string name="keypress_hold_action_cut_label">Ausschneiden</string>
-    <string name="keypress_hold_action_first_info">Die Aktion befindet sich normalerweise am Ende des Popups, sodass ein einfaches Drücken und Halten Ihnen den ersten Akzent gibt. Wenn dies aktiviert ist, bewegt sie sich an den Anfang, und ein Drücken und Halten auf einer der Verknüpfungstasten führt die Aktion sofort aus. Die Akzente sind immer noch da: Halten Sie Ihren Finger gedrückt und gleiten Sie auf den gewünschten. Dies erfordert \"Halten zum Auswählen\" unter \"Alternative Tasten\".</string>
-    <string name="keypress_hold_action_first_subtitle">Drücken und Halten führt die Aktion aus, anstatt die Akzente anzuzeigen</string>
-    <string name="keypress_hold_action_first_title">Aktion zuerst</string>
     <string name="keypress_hold_action_paste_label">Einfügen</string>
     <string name="keypress_hold_action_redo_label">Wiederholen</string>
     <string name="keypress_hold_action_select_all_label">Alles auswählen</string>
@@ -2548,8 +2545,6 @@
     <string name="languages_cjk_region_info">Regionale Wortwahl. Taiwan und Hongkong verwenden oft unterschiedliche Wörter für dieselbe Sache, nicht nur unterschiedliche Schriftzeichen.</string>
     <string name="languages_cjk_region_taiwan_title">Taiwan (臺灣)</string>
     <string name="languages_cjk_region_title">Regionale Wortwahl</string>
-    <string name="languages_cjk_traditional_info">Die Tastatur konvertiert jeden Kandidaten von vereinfachtem (简体) zu traditionellem Chinesisch (繁體), bevor sie ihn anzeigt. Die Konvertierung erfolgt zeichenweise. Einige vereinfachte Zeichen haben mehr als eine traditionelle Form, und die Tastatur schreibt immer die gebräuchlichere. 发 wird zu 發, was in 發展 korrekt ist, aber in 頭髮 falsch. Korrigieren Sie diese Wörter manuell.</string>
-    <string name="languages_cjk_traditional_subtitle">Die Tastatur konvertiert Kandidaten in traditionelles Chinesisch (繁體). Da die Konvertierung Zeichen für Zeichen erfolgt, sind einige kontextabhängige Formen falsch (发 → 發 / 髮).</string>
     <string name="languages_cjk_traditional_title">Traditionelle Schriftzeichen</string>
     <string name="languages_clusters_title">Cluster</string>
     <string name="languages_conjunct_backspace_info">Die Rücktaste löscht normalerweise ein Zeichen nach dem anderen. Dies hinterlässt manchmal halb gebildete Cluster auf dem Bildschirm. Wenn diese Einstellung aktiviert ist, löscht ein Tastendruck den gesamten Cluster, während Sie %1$s eingeben. Andere Sprachen behalten ihre eigene Einstellung bei.</string>

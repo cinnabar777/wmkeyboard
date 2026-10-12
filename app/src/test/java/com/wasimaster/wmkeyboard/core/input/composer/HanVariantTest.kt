@@ -17,10 +17,13 @@ class HanVariantTest {
     fun reset() {
         CjkConfig.traditionalOutput = false
         HanVariant.region = HanVariant.HanRegion.GENERIC
-        HanVariant.s2t = emptyMap()
-        HanVariant.twPhrases = emptyMap()
-        HanVariant.twVariants = emptyMap()
-        HanVariant.hkVariants = emptyMap()
+        HanVariant.s2t = HanPhraseTable.EMPTY
+        HanVariant.s2tPhrases = HanPhraseTable.EMPTY
+        HanVariant.twPhrases = HanPhraseTable.EMPTY
+        HanVariant.twVariantsPhrases = HanPhraseTable.EMPTY
+        HanVariant.twVariants = HanPhraseTable.EMPTY
+        HanVariant.hkVariantsPhrases = HanPhraseTable.EMPTY
+        HanVariant.hkVariants = HanPhraseTable.EMPTY
         PinyinSyllables.valid = emptySet()
         CjkDictionaries.pinyin = ConversionDictionary.EMPTY
         CjkDictionaries.ngrams = CjkNgrams.EMPTY
@@ -30,29 +33,114 @@ class HanVariantTest {
     @After
     fun tearDown() = reset()
 
+    private fun table(name: String) = HanPhraseTable.parse(asset(name))
+
+    /**
+     * Rows of the downloadable `s2t_phrases` pack, verbatim. The pack lives in
+     * the data repository, not the APK, so the tests carry the rows they need.
+     */
+    private val phrasePack = sequenceOf(
+        "头发\t頭髮",
+        "发展\t發展",
+        "皇后\t皇后",
+        "后来\t後來",
+        "干净\t乾淨",
+        "干部\t幹部",
+        "出租车\t出租車",
+    )
+
     private fun loadShipped() {
-        HanVariant.s2t = HanVariant.parse(asset("s2t.txt"))
-        HanVariant.twPhrases = HanVariant.parsePhrases(asset("tw_phrases.txt"))
-        HanVariant.twVariants = HanVariant.parse(asset("tw_variants.txt"))
-        HanVariant.hkVariants = HanVariant.parse(asset("hk_variants.txt"))
-        assertTrue("s2t missing", HanVariant.s2t.size > 2000)
+        HanVariant.s2t = table("s2t.txt")
+        HanVariant.s2tPhrases = HanPhraseTable.parse(phrasePack)
+        HanVariant.twPhrases = table("tw_phrases.txt")
+        HanVariant.twVariantsPhrases = table("tw_variants_phrases.txt")
+        HanVariant.twVariants = table("tw_variants.txt")
+        HanVariant.hkVariantsPhrases = table("hk_variants_phrases.txt")
+        HanVariant.hkVariants = table("hk_variants.txt")
+        assertTrue("s2t missing", HanVariant.s2t.size > 3000)
         assertTrue("tw phrases missing", HanVariant.twPhrases.size > 500)
-        assertTrue("tw variants missing", HanVariant.twVariants.isNotEmpty())
-        assertTrue("hk variants missing", HanVariant.hkVariants.isNotEmpty())
+        assertTrue("tw variants missing", !HanVariant.twVariants.isEmpty())
+        assertTrue("hk variants missing", !HanVariant.hkVariants.isEmpty())
     }
 
     @Test
-    fun `parsePhrases keeps the multi-character rows parse drops`() {
-        val lines = sequenceOf("# comment", "", "出租車\t計程車", "僞\t偽", "同\t同", "junk")
-        val phrases = HanVariant.parsePhrases(lines)
-        assertEquals("計程車", phrases["出租車"])
-        // Single-character rows are phrases too as far as this parser cares.
-        assertEquals("偽", phrases["僞"])
-        // Identity and malformed rows are skipped by both.
-        assertEquals(null, phrases["同"])
-        assertEquals(null, phrases["junk"])
-        // The character parser is the one that refuses multi-character rows.
-        assertEquals(null, HanVariant.parse(lines)['出'])
+    fun `the longest key wins, and a key needs the whole of itself`() {
+        val t = HanPhraseTable.of(mapOf("a" to "1", "ab" to "2", "abcd" to "4", "b" to "5"))
+        assertEquals(1, t.keyLength(t.matchPrefix("abcx", 0, 4)))
+        assertEquals(2, t.keyLength(t.matchPrefix("abc", 0, 3)))
+        assertEquals(4, t.keyLength(t.matchPrefix("abcde", 0, 5)))
+        // The end bound is respected: "abcd" is there, but only "ab" fits.
+        assertEquals(2, t.keyLength(t.matchPrefix("abcd", 0, 2)))
+        assertEquals(1, t.keyLength(t.matchPrefix("xb", 1, 2)))
+        assertEquals(-1, t.matchPrefix("xyz", 0, 3))
+        assertEquals(-1, HanPhraseTable.EMPTY.matchPrefix("a", 0, 1))
+    }
+
+    @Test
+    fun `the word decides the character`() {
+        loadShipped()
+        CjkConfig.traditionalOutput = true
+        for (region in HanVariant.HanRegion.entries) {
+            HanVariant.region = region
+            // The three the issue reports, and the words that want the other form.
+            assertEquals("$region", "頭髮", HanVariant.toTraditional("头发"))
+            assertEquals("$region", "發展", HanVariant.toTraditional("发展"))
+            assertEquals("$region", "皇后", HanVariant.toTraditional("皇后"))
+            assertEquals("$region", "後來", HanVariant.toTraditional("后来"))
+            assertEquals("$region", "乾淨", HanVariant.toTraditional("干净"))
+            assertEquals("$region", "幹部", HanVariant.toTraditional("干部"))
+        }
+    }
+
+    @Test
+    fun `without the phrase pack it converts one character at a time`() {
+        loadShipped()
+        HanVariant.s2tPhrases = HanPhraseTable.EMPTY
+        CjkConfig.traditionalOutput = true
+        // The bundled character table alone: the most common form, right or not.
+        assertEquals("發展", HanVariant.toTraditional("发展"))
+        assertEquals("頭發", HanVariant.toTraditional("头发"))
+    }
+
+    @Test
+    fun `a stitched candidate is segmented, not looked up whole`() {
+        // No table has 头发干净 as one word; the lattice stitches it from two.
+        loadShipped()
+        CjkConfig.traditionalOutput = true
+        assertEquals("頭髮乾淨", HanVariant.toTraditional("头发干净"))
+        assertEquals("皇后後來", HanVariant.toTraditional("皇后后来"))
+        HanVariant.region = HanVariant.HanRegion.TAIWAN
+        assertEquals("計程車光碟", HanVariant.toTraditional("出租车光盘"))
+    }
+
+    @Test
+    fun `characters outside the basic plane pass through whole`() {
+        loadShipped()
+        CjkConfig.traditionalOutput = true
+        assertEquals("𠀀發展", HanVariant.toTraditional("𠀀发展"))
+    }
+
+    @Test
+    fun `regional character preferences follow the region`() {
+        loadShipped()
+        CjkConfig.traditionalOutput = true
+        // 为 → 爲 in OpenCC's standard set; Taiwan and Hong Kong both write 為.
+        assertEquals("爲", HanVariant.toTraditional("为"))
+        HanVariant.region = HanVariant.HanRegion.TAIWAN
+        assertEquals("為", HanVariant.toTraditional("为"))
+        HanVariant.region = HanVariant.HanRegion.HONG_KONG
+        assertEquals("為", HanVariant.toTraditional("为"))
+        // Hong Kong's own: 说 → 說 → 説. Taiwan keeps 說.
+        assertEquals("説", HanVariant.toTraditional("说"))
+        HanVariant.region = HanVariant.HanRegion.TAIWAN
+        assertEquals("說", HanVariant.toTraditional("说"))
+    }
+
+    @Test
+    fun `a table assignment invalidates cached candidates`() {
+        val before = CjkDictionaries.generation
+        HanVariant.s2tPhrases = HanPhraseTable.of(mapOf("a" to "b"))
+        assertTrue(CjkDictionaries.generation != before)
     }
 
     @Test

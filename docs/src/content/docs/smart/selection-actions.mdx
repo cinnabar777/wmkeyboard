@@ -11,7 +11,7 @@ import Shot from '@components/Shot.astro';
 
 Selecting a phone number in a chat and then dialling it usually means copying it, leaving the app, opening the dialler and pasting. The keyboard already knows what you selected, so it can offer the things that shape of text is for, and a good deal more: the everyday edits, a find and replace, line tools, case and chat formatting, conversions, and a way to hand the text to your contacts, maps or calendar.
 
-Select `01712345678` and the bar reads **Select all, Call, Message, WhatsApp, Contact, Copy, Cut, Paste, Delete, Share, Format, Find, Replace**. Select a sentence and it reads **Select all, Copy, Cut, Paste, Delete, Share, Format, Find, Replace, Grammar, AI, Bangla, Fancy** and so on, with the actions that only make sense for what you selected (Sort on several lines, Colour on `#336699`, Zones on `5pm`) appearing when they do.
+Select `01712345678` and the bar reads **Select all, Call, Message, WhatsApp, Contact, Copy, Cut, Paste, Delete, Share, Format, Find, Replace**. Select a sentence and it reads **Select all, Copy, Cut, Paste, Delete, Share, Save as note, Format, Find, Replace, Grammar, AI, Bangla, Fancy** and so on, with the actions that only make sense for what you selected (Sort on several lines, Colour on `#336699`, Zones on `5pm`) appearing when they do.
 
 This is **off by default**. It adds a bar that appears out of a gesture you already make for other reasons, so you have to ask for it.
 
@@ -53,6 +53,7 @@ Two things sit outside the order. **Undo** is always first while there is someth
 | Undo | Anything, after the bar changed it | On |
 | Select all | Anything not already the whole field | On |
 | Copy, Cut, Delete, Share | Anything | On |
+| Save as note | Anything, once the phone has been unlocked; never a password field | On |
 | Paste | Anything, while the clipboard holds text | On |
 | Format | A number, link or address the rewrite would change; any text | On |
 | Find | Anything, when the field could hold another copy | On |
@@ -93,13 +94,13 @@ The memory ends with the selection. Move it onto other text, clear it, or leave 
 
 ## Editing
 
-**Select all** selects the whole field. A long press usually selects only one word, so this is the fast way to act on everything you wrote. **Copy**, **Cut** and **Paste** are the editor's own; Paste replaces the selection and only appears while the clipboard holds text. **Delete** removes the selection. **Share** opens the system chooser with the selected text.
+**Select all** selects the whole field. A long press usually selects only one word, so this is the fast way to act on everything you wrote. **Copy**, **Cut** and **Paste** are the editor's own; Paste replaces the selection and only appears while the clipboard holds text. **Delete** removes the selection. **Share** opens the system chooser with the selected text. **Save as note** keeps the selection in the [Notes tool](/tools/notes/) as a new note, or adds it to the note you edited last when <SettingsPath path="Tools / Notes / Save as note from a selection" /> says so; a toast says which. It appears only while the Notes tool is enabled.
 
 ## Find and replace
 
 **Find** jumps to the next place the selected text appears, wrapping round to the top, and keeps it selected so the bar stays and a second tap walks on.
 
-**Replace** opens a panel above the keys with two fields: what to find, already holding the selection, and what to replace it with. Tap a field and type into it; the keys go to the panel, not to the app. The current match is selected in the field itself, where you can see it, and the panel says which one of how many. Enter in the find field goes to the next match; Enter in the replace field replaces the current one.
+**Replace** opens the [Find & replace](/tools/find-replace/) panel above the keys, the same one its toolbar tool opens, with two fields: what to find, already holding the selection, and what to replace it with. Tap a field and type into it; the keys go to the panel, not to the app. The current match is selected in the field itself, where you can see it, and the panel says which one of how many. Enter in the find field goes to the next match; Enter in the replace field replaces the current one.
 
 <PhoneFrame caption="The Find and replace panel: two fields, the toggles, the buttons and the count.">
   <Shot id="smart/selection-actions-replace" alt="The Find and replace panel: two fields, the toggles, the buttons and the count." />

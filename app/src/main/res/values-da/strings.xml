@@ -2238,9 +2238,6 @@
     <string name="keypress_haptics_title">Haptisk feedback ved tastetryk</string>
     <string name="keypress_hold_action_copy_label">Kopiér</string>
     <string name="keypress_hold_action_cut_label">Klip</string>
-    <string name="keypress_hold_action_first_info">Handlingen er normalt placeret for enden af pop op-vinduet, så et almindeligt tryk og hold giver dig den første accent. Med denne indstilling flyttes den til starten, og et tryk og hold på en af genvejstasterne udfører handlingen med det samme. Accenterne er stadig tilgængelige: hold fingeren nede og glid hen til den, du ønsker. Dette kræver Hold for at vælge, under Alternative taster.</string>
-    <string name="keypress_hold_action_first_subtitle">Tryk og hold nede for at udføre handlingen i stedet for at vise accenter</string>
-    <string name="keypress_hold_action_first_title">Handling først</string>
     <string name="keypress_hold_action_paste_label">Indsæt</string>
     <string name="keypress_hold_action_redo_label">Annuller fortryd</string>
     <string name="keypress_hold_action_select_all_label">Vælg alt</string>
@@ -2548,8 +2545,6 @@
     <string name="languages_cjk_region_info">Taiwan og Hong Kong bruger ofte forskellige ord for den samme ting, ikke kun forskellige tegn.</string>
     <string name="languages_cjk_region_taiwan_title">Taiwan (臺灣)</string>
     <string name="languages_cjk_region_title">Regional ordlyd</string>
-    <string name="languages_cjk_traditional_info">Tastaturet konverterer hvert kandidatord fra forenklet (简体) til traditionelt (繁體), før det viser kandidaten. Konverteringen læser ét tegn ad gangen. Nogle få forenklede tegn har mere end én traditionel form, og tastaturet skriver altid den mest almindelige. 发 bliver til 發, hvilket er korrekt i 發展, men forkert i 頭髮. Ret disse ord manuelt.</string>
-    <string name="languages_cjk_traditional_subtitle">Tastaturet konverterer kandidater til traditionelt kinesisk (繁體). Det konverterer ét tegn ad gangen, så nogle få former, der afhænger af kontekst, er forkerte (发 → 發 / 髮).</string>
     <string name="languages_cjk_traditional_title">Traditionelle tegn</string>
     <string name="languages_clusters_title">Klynger</string>
     <string name="languages_conjunct_backspace_info">Backspace sletter normalt ét tegn ad gangen. Dette efterlader nogle gange halvformede klynger på skærmen. Med denne indstilling aktiveret sletter ét tryk hele klyngen, mens du skriver %1$s. Andre sprog beholder deres egen indstilling.</string>

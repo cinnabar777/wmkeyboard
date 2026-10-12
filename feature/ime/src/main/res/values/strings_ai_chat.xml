@@ -106,4 +106,19 @@
     <string name="ime_ai_chat_tool_hide_desc">Hide the searches and pages used</string>
     <string name="ime_ai_chat_tool_open_desc">Open the page</string>
     <string name="ime_ai_chat_tool_copy_desc">Copy the address</string>
+
+    <!-- A tool from an MCP server the user added (#573). %1$s is the tool's
+         name as the server gives it, %2$s is the name the user gave the server. -->
+    <string name="ime_ai_chat_tool_mcp_running">Using %1$s on %2$s…</string>
+    <string name="ime_ai_chat_tool_mcp_done">Used %1$s on %2$s</string>
+    <string name="ime_ai_chat_tool_mcp_failed">%1$s on %2$s did not work</string>
+    <string name="ime_ai_chat_tool_mcp_waiting">%1$s on %2$s is waiting for you</string>
+    <!-- The question on the card before the call runs. -->
+    <string name="ime_ai_chat_tool_mcp_ask">Allow %1$s on %2$s?</string>
+    <!-- On the card when the call sends no values at all. -->
+    <string name="ime_ai_chat_tool_mcp_ask_no_values">It sends no values.</string>
+    <string name="ime_ai_chat_tool_mcp_deny">Deny</string>
+    <string name="ime_ai_chat_tool_mcp_allow_once">Allow once</string>
+    <!-- Allows this call, and lets the tool run without asking from now on. -->
+    <string name="ime_ai_chat_tool_mcp_allow_always">Always allow</string>
 </resources>

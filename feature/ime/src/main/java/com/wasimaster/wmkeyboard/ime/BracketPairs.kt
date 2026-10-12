@@ -65,3 +65,21 @@ fun deletesEmptyPair(before: CharSequence, after: CharSequence?): Boolean {
     val closer = AUTO_CLOSE_PAIRS[opener] ?: return false
     return after?.firstOrNull() == closer[0]
 }
+
+/**
+ * The closing bracket that the automatic space after punctuation follows, the
+ * way it follows a comma: "(see below)" then a word reads "(see below) word"
+ * (#617). Only `)`. A `]` is as often half of a Markdown link, where
+ * "[text](url)" must not come apart at the space, and `}` is code.
+ */
+const val SPACED_CLOSER: Char = ')'
+
+/**
+ * Whether a [SPACED_CLOSER] landing in front of [after] — the text after the
+ * caret — ends the run of text it closes, so a space may follow it. Anything
+ * but a blank, a line break or the end of the text means the closer is landing
+ * mid-text: in front of another closer ("((a))"), a mark ("(a).") or a word,
+ * none of which wants a space pushed in.
+ */
+fun closerTakesSpace(after: CharSequence?): Boolean =
+    after.isNullOrEmpty() || after[0].isWhitespace()

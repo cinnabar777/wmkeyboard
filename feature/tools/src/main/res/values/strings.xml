@@ -47,4 +47,39 @@
     <string name="ftools_ai_tool_reason_missing">The model left out the %1$s</string>
     <!-- The model asked to read something that is not an http or https address. -->
     <string name="ftools_ai_tool_reason_bad_url">Not a web address the keyboard will open</string>
+
+    <!-- MCP servers the user added to the AI tool (#573). For the model:
+         handed back as the result of a call. -->
+    <!-- The user pressed Deny on the approval card. -->
+    <string name="ftools_mcp_declined">The user did not allow this call. Do not call this tool again in this answer. Answer without it, and say what you could not do.</string>
+    <!-- The run was stopped while the approval card was showing. -->
+    <string name="ftools_mcp_stopped">The call was cancelled before it ran.</string>
+    <!-- The tool sent back pictures, sound or files; %1$s lists their kinds, such as "image, audio". -->
+    <string name="ftools_mcp_omitted">[the tool also sent back content you cannot read here: %1$s]</string>
+    <!-- The tool's answer was cut at the character budget. -->
+    <string name="ftools_mcp_truncated">[the answer continues past this point and was cut]</string>
+    <!-- The tool ran but sent back nothing. -->
+    <string name="ftools_mcp_empty">The tool ran and sent back nothing.</string>
+    <!-- The tool itself reported a failure; %1$s is what it said. -->
+    <string name="ftools_mcp_tool_error">The tool reported an error: %1$s</string>
+
+    <!-- MCP failures for the user: under an answer, and on the server's settings page. -->
+    <!-- The user pressed Deny. -->
+    <string name="ftools_mcp_reason_declined">You did not allow it</string>
+    <!-- The run was stopped while the card asked. -->
+    <string name="ftools_mcp_reason_stopped">Stopped before it ran</string>
+    <!-- The server needs an OAuth sign-in. -->
+    <string name="ftools_mcp_error_sign_in">This server needs you to sign in, and the keyboard cannot do that yet. If the server gives out tokens or keys, add one as a header.</string>
+    <!-- The address answered, but not like an MCP server. -->
+    <string name="ftools_mcp_error_not_mcp">This address did not answer like an MCP server. Check the address and the type.</string>
+    <!-- The server answered with an error; %1$s is its own words. -->
+    <string name="ftools_mcp_error_server">The server sent an error: %1$s</string>
+    <!-- The server wants an answer from the user or a model before it can finish. -->
+    <string name="ftools_mcp_error_needs_input">The server asked for more input, and the keyboard cannot give it yet.</string>
+    <!-- The server only speaks versions of the protocol this keyboard does not. -->
+    <string name="ftools_mcp_error_no_version">This server uses a newer version of MCP than the keyboard knows.</string>
+    <!-- The server was removed or turned off after the model saw its tool. -->
+    <string name="ftools_mcp_error_gone">This server is turned off or was removed</string>
+    <!-- The tool reported a failure of its own. -->
+    <string name="ftools_mcp_reason_tool_error">The tool reported an error</string>
 </resources>

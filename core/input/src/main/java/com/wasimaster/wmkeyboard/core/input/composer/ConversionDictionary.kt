@@ -174,6 +174,126 @@ class ConversionDictionary private constructor(
         readingLen[row] == key.length && readings.compare(readingAt[row], readingLen[row], key) == 0
 
     /**
+     * The frequency below which [quantile] of the rows fall (0.5 is the median),
+     * or 0 for an empty table. What an imported list is scaled against: the
+     * packs count on very different scales — pinyin tops out at 1000, kana at
+     * 30000 — and a row from a list has to land somewhere sensible on this one.
+     */
+    fun frequencyQuantile(quantile: Double): Int {
+        if (size == 0) return 0
+        val sorted = freqs.copyOf().also { it.sort() }
+        return sorted[((size - 1) * quantile.coerceIn(0.0, 1.0)).toInt()]
+    }
+
+    /**
+     * One row to merge in through [plus]: a reading, the word it converts to
+     * and that word's frequency on this table's scale. [raises] lets the row
+     * lift the frequency of a word the table already has, which only a list
+     * that ranks its own words should do (#633).
+     */
+    class Row(val reading: String, val word: String, val frequency: Int, val raises: Boolean = false)
+
+    /**
+     * This table with [extra] merged in: the words a user imported for the
+     * language (#633). A word the table already lists under the same reading
+     * keeps its own frequency — a list with no counts of its own would
+     * otherwise flatten the pack's ranking to one value — unless the row
+     * [Row.raises] it. A row listed twice keeps its higher frequency.
+     *
+     * Rebuilds the table rather than patching it, since rows are stored sorted
+     * by reading. Returns this table itself when nothing is new.
+     */
+    fun plus(extra: List<Row>): ConversionDictionary {
+        if (extra.isEmpty()) return this
+        val fresh = LinkedHashMap<String, Row>()
+        val raised = HashMap<Int, Int>()
+        for (row in extra) {
+            if (row.reading.isEmpty() || row.word.isEmpty()) continue
+            val held = rowOf(row.reading, row.word)
+            if (held >= 0) {
+                if (row.raises && row.frequency > (raised[held] ?: freqs[held])) raised[held] = row.frequency
+                continue
+            }
+            val key = row.reading + '\t' + row.word
+            val known = fresh[key]
+            if (known == null || row.frequency > known.frequency) fresh[key] = row
+        }
+        if (fresh.isEmpty() && raised.isEmpty()) return this
+        val builder = Builder()
+        for (i in 0 until size) {
+            builder.add(readings.substring(readingAt[i], readingLen[i]), word(i), raised[i] ?: freqs[i])
+        }
+        for (row in fresh.values) builder.add(row.reading, row.word, row.frequency)
+        return builder.build()
+    }
+
+    /** The row listing [word] under [reading], or -1. */
+    private fun rowOf(reading: String, word: String): Int {
+        for (row in rowsFor(reading)) {
+            if (wordLen[row] == word.length && words.compare(wordAt[row], wordLen[row], word) == 0) return row
+        }
+        return -1
+    }
+
+    /**
+     * Collects rows into the compact layout, in any order. Shared by [parse]
+     * and [plus], so a table built either way is laid out the same.
+     */
+    private class Builder {
+        private val readings = CharStore()
+        private val words = CharStore()
+        private var rAt = IntArray(1024)
+        private var rLen = IntArray(1024)
+        private var wAt = IntArray(1024)
+        private var wLen = IntArray(1024)
+        private var freq = IntArray(1024)
+        private var n = 0
+        private var sorted = true
+        private var prev: String? = null
+
+        fun add(reading: String, word: String, frequency: Int) {
+            if (n == freq.size) {
+                val cap = n * 2
+                rAt = rAt.copyOf(cap)
+                rLen = rLen.copyOf(cap)
+                wAt = wAt.copyOf(cap)
+                wLen = wLen.copyOf(cap)
+                freq = freq.copyOf(cap)
+            }
+            val last = prev
+            if (sorted && last != null && reading < last) sorted = false
+            prev = reading
+            rAt[n] = readings.append(reading)
+            rLen[n] = reading.length
+            wAt[n] = words.append(word)
+            wLen[n] = word.length
+            freq[n] = frequency
+            n++
+        }
+
+        fun build(): ConversionDictionary {
+            if (n == 0) return EMPTY
+            val order = IntArray(n) { it }
+            if (!sorted) sortRows(order, n, readings, rAt, rLen)
+
+            val outRAt = IntArray(n)
+            val outRLen = IntArray(n)
+            val outWAt = IntArray(n)
+            val outWLen = IntArray(n)
+            val outFreq = IntArray(n)
+            for (i in 0 until n) {
+                val src = order[i]
+                outRAt[i] = rAt[src]
+                outRLen[i] = rLen[src]
+                outWAt[i] = wAt[src]
+                outWLen[i] = wLen[src]
+                outFreq[i] = freq[src]
+            }
+            return ConversionDictionary(readings, outRAt, outRLen, words, outWAt, outWLen, outFreq)
+        }
+    }
+
+    /**
      * Append-only character arena. Text goes into fixed-size chunks so growing it
      * never reallocates what is already stored — the point on a table this size,
      * where a doubling `StringBuilder` would spike to twice the finished table's
@@ -254,17 +374,7 @@ class ConversionDictionary private constructor(
          * so the sort below only does real work for a pack (or a test) that isn't.
          */
         fun parse(lines: Sequence<String>): ConversionDictionary {
-            val readings = CharStore()
-            val words = CharStore()
-            var rAt = IntArray(1024)
-            var rLen = IntArray(1024)
-            var wAt = IntArray(1024)
-            var wLen = IntArray(1024)
-            var freq = IntArray(1024)
-            var n = 0
-            var sorted = true
-            var prev: String? = null
-
+            val builder = Builder()
             for (raw in lines) {
                 val line = raw.trim()
                 if (line.isEmpty() || line.startsWith("#")) continue
@@ -276,44 +386,9 @@ class ConversionDictionary private constructor(
                 val word = (if (tab2 < 0) rest else rest.substring(0, tab2)).trim()
                 if (reading.isEmpty() || word.isEmpty()) continue
                 val f = if (tab2 < 0) 0 else rest.substring(tab2 + 1).trim().toIntOrNull() ?: 0
-
-                if (n == freq.size) {
-                    val cap = n * 2
-                    rAt = rAt.copyOf(cap)
-                    rLen = rLen.copyOf(cap)
-                    wAt = wAt.copyOf(cap)
-                    wLen = wLen.copyOf(cap)
-                    freq = freq.copyOf(cap)
-                }
-                val last = prev
-                if (sorted && last != null && reading < last) sorted = false
-                prev = reading
-                rAt[n] = readings.append(reading)
-                rLen[n] = reading.length
-                wAt[n] = words.append(word)
-                wLen[n] = word.length
-                freq[n] = f
-                n++
+                builder.add(reading, word, f)
             }
-            if (n == 0) return EMPTY
-
-            val order = IntArray(n) { it }
-            if (!sorted) sortRows(order, n, readings, rAt, rLen)
-
-            val outRAt = IntArray(n)
-            val outRLen = IntArray(n)
-            val outWAt = IntArray(n)
-            val outWLen = IntArray(n)
-            val outFreq = IntArray(n)
-            for (i in 0 until n) {
-                val src = order[i]
-                outRAt[i] = rAt[src]
-                outRLen[i] = rLen[src]
-                outWAt[i] = wAt[src]
-                outWLen[i] = wLen[src]
-                outFreq[i] = freq[src]
-            }
-            return ConversionDictionary(readings, outRAt, outRLen, words, outWAt, outWLen, outFreq)
+            return builder.build()
         }
 
         /**

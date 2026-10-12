@@ -106,6 +106,7 @@ Only single-character keys count, so a `.com` key or an emoticon key never trigg
 | Key spacing | Slider | 0–200% | 100% |
 | Extend edge keys into the gaps | Toggle | On / Off | On |
 | Bottom padding | Slider | 0–160 dp | 32 dp (Android 15+ with gesture navigation) / 8 dp (three-button navigation, or older) |
+| Hide the system keyboard bar *(Android 16 and up)* | Toggle | On / Off | Off |
 | Round top corners | Slider | Square, or 1–40 dp | Square |
 | Round bottom corners | Slider | Square, or 1–40 dp | Square |
 | Which corners *(shown once either corner slider is above Square)* | Filter chips | Top left, Top right, Bottom left, Bottom right | All four |
@@ -136,6 +137,10 @@ The Size & position values above are your portrait sizes, and the in-app caption
 | Bottom row height | 0–96 dp | base Bottom row height (0, "Follow keys") |
 | Number row | On / Off | base Number row (On); **Off** on landscape unless you set the base toggle yourself |
 | Keyboard position *(only if resolved width < 100%)* | Left / Centre / Right | base Keyboard position |
+| One-handed mode on this screen | On / Off | On, or **Off** on the two landscape shapes while **Portrait only** is on |
+| Split keyboard on this screen | On / Off | On |
+
+The last two are gates rather than switches: one-handed mode and split stay one setting each, and these say whether this screen shape shows them. Turn **Split keyboard on this screen** off on **Portrait, unfolded** and an opened foldable held upright gets one-handed mode on its own, while landscape keeps the split. They also beat **Portrait only** and **Split only on wide screens** for this shape, so a landscape shape can allow one-handed mode even with **Portrait only** on.
 
 A **Follow portrait again** row appears at the bottom of the editor once any field is set, clearing the whole override back to "Follows portrait" in one tap. On landscape that returns the shape to its own defaults rather than to your portrait numbers.
 
@@ -169,6 +174,8 @@ Landscape is also the one shape that doesn't fall back to portrait for the three
 | Floating keyboard width *(shown only when Floating keyboard is on)* | Slider | 240–500 dp | 320 dp |
 | Floating keyboard height *(shown only when Floating keyboard is on)* | Slider | 60%–160% | 100% |
 | Keep the keyboard on screen | Toggle | On / Off | Off |
+| Floating keyboard button | Toggle | On / Off | Off |
+| Allow display over other apps *(shown only when the button is on and Android hasn't allowed it yet)* | Link | Opens Android's "Display over other apps" page | |
 
 One-handed mode tunes separately per orientation. The rail's arrow inside the keyboard flips the side, and it remembers the answer here for whichever orientation you're in. **Portrait only** switches the mode off while the phone is sideways and back on when it is upright again, so a thumb-sized portrait keyboard and a split landscape one can coexist. Split divides every row into left and right halves with a gap between them, and **Split only on wide screens** holds that back until you're in landscape or on an unfolded screen, so rotating out of landscape doesn't leave a portrait phone split in two. Floating detaches the keyboard into a movable, resizable panel. While it's active it replaces the width, position and bottom-padding logic above, though split still works alongside it. **Keep the keyboard on screen** stops the keyboard from closing when a text field loses focus, so it stays up over screens with no field at all until you hide it yourself. See [Keeping the keyboard on screen](/typing/size-position/#keeping-the-keyboard-on-screen) for what reaches the app and how to close it.
 
@@ -220,6 +227,7 @@ See [Switching languages](/languages/switching/#using-the-globe-key) and [Openin
 - **"Type native digits in" is not the digit-glyph picker.** Which glyphs a language's digits use (Latin, Arabic-Indic, Bengali, Devanagari and so on) is set per language under [Languages](/languages/overview/). This screen only controls where the resulting glyphs get committed.
 - **Bottom row height's 0 value reads as "Follow keys," not "0 dp."** It's the default, and it means the space/enter row matches the letter-key height exactly.
 - **Bottom padding's default depends on your Android version and navigation mode.** It's 32 dp on Android 15 and up with gesture navigation, where the IME window draws behind the gesture bar and the system's hide-keyboard and switch-keyboard buttons, and 8 dp with three-button navigation or on older versions.
+- **Hide the system keyboard bar needs Android 16.** With gesture navigation, Android draws a bar under the keyboard with a hide-keyboard chevron and a switch-keyboard button. Android 16 is the first version that lets a keyboard ask for that bar to go, so the switch is greyed out on older versions, and a phone maker's build can still keep the bar. With it gone, Back hides the keyboard and the 🌐 key changes keyboards. Bottom padding still applies on top, so set it lower if you want the space bar nearer the gesture handle.
 - **Per-screen overrides don't reset one field at a time.** **Follow portrait again** clears a whole shape instead. **Characters that go back** has no restore button either, since it's a plain text field: empty it and the built-in `!?.,;:` comes back. Everything else on this screen has the usual [per-setting restore button](/reference/settings/#putting-one-setting-back).
 - **No edition differences.** Every control on this screen behaves the same on the full and lite builds.
 

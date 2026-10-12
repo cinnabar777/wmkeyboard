@@ -1492,6 +1492,32 @@ private fun SettingsNavGraph(
                 VocabWordScreen(packId, word, settings) { route -> navController.navigate(route) }
             }
         }
+        composable("notes") {
+            SettingsScreen(stringResource(R.string.notes_title), { navController.popBackStack() }, route = "notes") {
+                NotesListScreen(repository, settings) { route -> navController.navigate(route) }
+            }
+        }
+        composable("notes/edit/{noteId}") { backStackEntry ->
+            // 0 is "a note that does not exist yet", which the Add button opens.
+            val noteId = backStackEntry.arguments?.getString("noteId")?.toLongOrNull() ?: 0L
+            SettingsScreen(
+                stringResource(if (noteId == 0L) R.string.notes_new_title else R.string.notes_edit_title),
+                { navController.popBackStack() },
+                route = noteEditRoute(noteId),
+            ) {
+                NoteEditorScreen(settings, noteId) { navController.popBackStack() }
+            }
+        }
+        composable("notes/tags") {
+            SettingsScreen(stringResource(R.string.notes_tags_title), { navController.popBackStack() }, route = "notes/tags") {
+                NoteTagsScreen(settings)
+            }
+        }
+        composable("notes/trash") {
+            SettingsScreen(stringResource(R.string.notes_trash_title), { navController.popBackStack() }, route = "notes/trash") {
+                NotesTrashScreen(settings)
+            }
+        }
         composable("sticker_packs") {
             SettingsScreen(
                 stringResource(R.string.home_screen_sticker_packs_title),
@@ -1508,6 +1534,30 @@ private fun SettingsNavGraph(
                 route = SIGNAL_STICKERS_ROUTE,
             ) {
                 SignalStickersScreen { route -> navController.navigate(route) }
+            }
+        }
+        composable(TELEGRAM_STICKERS_ROUTE) {
+            SettingsScreen(
+                stringResource(R.string.import_telegram_row_title),
+                { navController.popBackStack() },
+                route = TELEGRAM_STICKERS_ROUTE,
+            ) {
+                TelegramStickersScreen(repository, settings) { route -> navController.navigate(route) }
+            }
+        }
+        composable("telegram_pack/{setName}") { backStackEntry ->
+            val setName = backStackEntry.arguments?.getString("setName").orEmpty()
+            SettingsScreen(
+                stringResource(R.string.import_telegram_pack_title),
+                { navController.popBackStack() },
+                route = telegramPackRoute(setName),
+            ) {
+                TelegramPackScreen(
+                    setName = setName,
+                    settings = settings,
+                    onNavigate = { route -> navController.navigate(route) },
+                    onBack = { navController.popBackStack() },
+                )
             }
         }
         composable(WHATSAPP_STICKERS_ROUTE) {
@@ -2135,6 +2185,25 @@ private fun SettingsNavGraph(
                 route = aiActionEditRoute(actionId),
             ) {
                 AiActionEditor(repository, settings, actionId) { navController.popBackStack() }
+            }
+        }
+        composable("ai_mcp") {
+            SettingsScreen(
+                stringResource(R.string.toolai_ai_mcp_screen_title),
+                { navController.popBackStack() },
+                route = "ai_mcp",
+            ) {
+                AiMcpSettings(repository, settings) { navController.navigate(it) }
+            }
+        }
+        composable("ai_mcp_edit/{serverId}") { backStackEntry ->
+            val serverId = backStackEntry.arguments?.getString("serverId").orEmpty()
+            SettingsScreen(
+                stringResource(R.string.toolai_ai_mcp_edit_screen_title),
+                { navController.popBackStack() },
+                route = aiMcpEditRoute(serverId),
+            ) {
+                AiMcpEditor(repository, settings, serverId) { navController.popBackStack() }
             }
         }
         composable("symbol_set_edit/{setId}") { backStackEntry ->
@@ -2797,14 +2866,26 @@ internal class SettingsGroupScope {
     class Entry(
         val visible: Boolean,
         val conditional: Boolean,
+        /** Who the row is, for a row in a list the user edits; see [item]. */
+        val key: Any?,
         val content: @Composable () -> Unit,
     )
 
     val items = mutableListOf<Entry>()
 
-    /** A row that is always part of the group. */
-    fun item(content: @Composable () -> Unit) {
-        items += Entry(visible = true, conditional = false, content = content)
+    /**
+     * A row that is always part of the group.
+     *
+     * Give a row of a list the user adds to and deletes from — a word, a
+     * snippet, a pack — a [key] that names what it shows (its id, its
+     * spelling). The row then keeps its own state when the rows above it
+     * change, opens into its place when it is added and closes out of it when
+     * it goes, instead of the rows under it jumping. See [GroupRows]. A keyed
+     * row is still composed for the moment it takes to close, so its body
+     * must not depend on the item still being in the list.
+     */
+    fun item(key: Any? = null, content: @Composable () -> Unit) {
+        items += Entry(visible = true, conditional = false, key = key, content = content)
     }
 
     /**
@@ -2822,8 +2903,8 @@ internal class SettingsGroupScope {
      * through a null check the condition is doing, say — wants the `if` after
      * all.
      */
-    fun item(visible: Boolean, content: @Composable () -> Unit) {
-        items += Entry(visible = visible, conditional = true, content = content)
+    fun item(visible: Boolean, key: Any? = null, content: @Composable () -> Unit) {
+        items += Entry(visible = visible, conditional = true, key = key, content = content)
     }
 }
 
@@ -2910,29 +2991,16 @@ internal fun SettingsGroup(
             // of air where a row used to be. Carried by the row, the gap goes
             // away with it.
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                val first = scope.items.indexOfFirst { it.visible }
-                val last = scope.items.indexOfLast { it.visible }
-                scope.items.forEachIndexed { index, entry ->
-                    val card: @Composable () -> Unit = {
-                        Column {
-                            if (index > 0) Spacer(Modifier.height(3.dp))
-                            GroupCard(
-                                top = if (index == first) GroupEndCorner else GroupInnerCorner,
-                                bottom = if (index == last) GroupEndCorner else GroupInnerCorner,
-                                content = entry.content,
-                            )
-                        }
-                    }
-                    when {
-                        !entry.conditional -> card()
-                        // Reduced motion has no still version of a reveal, so
-                        // the row is or is not there.
-                        LocalReduceMotion.current -> if (entry.visible) card()
-                        else -> AnimatedVisibility(
-                            visible = entry.visible,
-                            enter = expandVertically() + fadeIn(),
-                            exit = shrinkVertically() + fadeOut(),
-                            content = { card() },
+                // Which rows are drawn, and how keyed ones arrive and leave,
+                // is GroupRows' business (SettingsGroupMotion.kt); the card
+                // each one sits on is this file's.
+                GroupRows(scope.items) { modifier, gapAbove, first, last, content ->
+                    Column(modifier = modifier) {
+                        if (gapAbove) Spacer(Modifier.height(3.dp))
+                        GroupCard(
+                            top = if (first) GroupEndCorner else GroupInnerCorner,
+                            bottom = if (last) GroupEndCorner else GroupInnerCorner,
+                            content = content,
                         )
                     }
                 }

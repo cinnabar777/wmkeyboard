@@ -103,6 +103,14 @@ object ConfigBackup {
          * declaration order.
          */
         SWIPE("swipe"),
+
+        /**
+         * The Notes tool (#560): every note, its tags, and what is in the
+         * trash. Like [EMOJI], nothing here can be rebuilt. Locked notes leave
+         * only when the bundle carries secrets; see `NotesBackup`. Appended
+         * after [SWIPE] for the reason given on [VOCAB].
+         */
+        NOTES("notes"),
     }
 
     private val json = Json { prettyPrint = true }

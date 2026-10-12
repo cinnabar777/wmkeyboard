@@ -2232,9 +2232,6 @@
     <string name="keypress_haptics_title">키 누름 햅틱</string>
     <string name="keypress_hold_action_copy_label">복사</string>
     <string name="keypress_hold_action_cut_label">잘라내기</string>
-    <string name="keypress_hold_action_first_info">동작은 보통 팝업의 끝에 위치하므로, 단순히 길게 누르면 첫 번째 악센트가 입력됩니다. 이 기능을 켜면 동작이 앞으로 이동하여 바로가기 키를 길게 누르면 즉시 동작이 실행됩니다. 악센트는 여전히 사용할 수 있습니다. 손가락을 떼지 말고 원하는 악센트로 밀어 이동하세요. \'대체 키\' 설정 아래의 \'길게 눌러 선택\' 기능이 필요합니다.</string>
-    <string name="keypress_hold_action_first_subtitle">길게 누르면 악센트를 표시하는 대신 동작이 실행됩니다</string>
-    <string name="keypress_hold_action_first_title">동작 우선</string>
     <string name="keypress_hold_action_paste_label">붙여넣기</string>
     <string name="keypress_hold_action_redo_label">다시 실행</string>
     <string name="keypress_hold_action_select_all_label">전체 선택</string>
@@ -2542,8 +2539,6 @@
     <string name="languages_cjk_region_info">지역별 표현입니다. 대만과 홍콩은 단순히 글자만 다른 것이 아니라 같은 사물에 대해 서로 다른 단어를 사용하는 경우가 많습니다.</string>
     <string name="languages_cjk_region_taiwan_title">대만 (臺灣)</string>
     <string name="languages_cjk_region_title">지역별 표현</string>
-    <string name="languages_cjk_traditional_info">키보드가 후보를 표시하기 전에 간체(简体)를 번체(繁體)로 변환합니다. 변환은 한 번에 한 글자씩 수행됩니다. 일부 간체자는 여러 개의 번체자 형태를 가질 수 있으며, 키보드는 항상 더 일반적인 형태를 사용합니다. 예를 들어 发는 發로 변환되는데, 이는 發展에서는 올바르지만 頭髮에서는 틀립니다. 이러한 단어는 수동으로 수정하십시오.</string>
-    <string name="languages_cjk_traditional_subtitle">키보드가 후보를 번체(繁體)로 변환합니다. 한 번에 한 글자씩 변환하므로 문맥에 따라 달라지는 일부 형태는 잘못될 수 있습니다(发 → 發 / 髮).</string>
     <string name="languages_cjk_traditional_title">번체자</string>
     <string name="languages_clusters_title">클러스터</string>
     <string name="languages_conjunct_backspace_info">백스페이스는 일반적으로 한 번에 하나의 코드 포인트를 삭제합니다. 이로 인해 화면에 불완전한 클러스터가 남을 수 있습니다. 이 설정을 켜면 %1$s을(를) 입력하는 동안 한 번 눌러 전체 클러스터를 삭제할 수 있습니다. 다른 언어는 자체 설정을 유지합니다.</string>

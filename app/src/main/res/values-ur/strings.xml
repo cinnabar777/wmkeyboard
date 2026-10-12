@@ -2236,9 +2236,6 @@
     <string name="keypress_haptics_title">کلید دبانے پر ہیپٹکس</string>
     <string name="keypress_hold_action_copy_label">کاپی کریں</string>
     <string name="keypress_hold_action_cut_label">کٹ کریں</string>
-    <string name="keypress_hold_action_first_info">یہ عمل عام طور پر پاپ اپ کے آخر میں ہوتا ہے، لہذا ایک سادہ پریس اور ہولڈ آپ کو پہلا لہجہ دیتا ہے۔ اس کے آن ہونے پر یہ سامنے آ جاتا ہے، اور شارٹ کٹ کیز میں سے کسی ایک پر پریس اور ہولڈ کرنے سے عمل فوراً چل جاتا ہے۔ لہجے اب بھی موجود ہیں: اپنی انگلی نیچے رکھیں اور اس پر سلائیڈ کریں جسے آپ چاہتے ہیں۔ اس کے لیے \'متبادل کیز\' کے تحت \'منتخب کرنے کے لیے ہولڈ کریں\' کی ضرورت ہے۔</string>
-    <string name="keypress_hold_action_first_subtitle">دبائے رکھنے پر ایکسنٹ دکھانے کے بجائے ایکشن چلتا ہے</string>
-    <string name="keypress_hold_action_first_title">پہلے عمل</string>
     <string name="keypress_hold_action_paste_label">پیسٹ کریں</string>
     <string name="keypress_hold_action_redo_label">دوبارہ کریں</string>
     <string name="keypress_hold_action_select_all_label">سب منتخب کریں</string>
@@ -2547,8 +2544,6 @@
     <string name="languages_cjk_region_info">علاقائی الفاظ۔ تائیوان اور ہانگ کانگ اکثر ایک ہی چیز کے لیے مختلف الفاظ استعمال کرتے ہیں، نہ صرف مختلف حروف۔</string>
     <string name="languages_cjk_region_taiwan_title">تائیوان (臺灣)</string>
     <string name="languages_cjk_region_title">علاقائی الفاظ</string>
-    <string name="languages_cjk_traditional_info">کی بورڈ ہر امیدوار کو دکھانے سے پہلے آسان (简体) سے روایتی (繁體) میں تبدیل کرتا ہے۔ تبدیلی ایک وقت میں ایک حرف پڑھتی ہے۔ کچھ آسان حروف کی ایک سے زیادہ روایتی شکلیں ہوتی ہیں، اور کی بورڈ ہمیشہ زیادہ عام شکل لکھتا ہے۔ 发 بن جاتا ہے 發، جو 發展 میں درست ہے لیکن 頭髮 میں غلط ہے۔ ان الفاظ کو ہاتھ سے درست کریں۔</string>
-    <string name="languages_cjk_traditional_subtitle">کی بورڈ امیدواروں کو روایتی (繁體) میں تبدیل کرتا ہے۔ یہ ایک وقت میں ایک حرف کو تبدیل کرتا ہے، لہذا سیاق و سباق پر منحصر کچھ شکلیں غلط ہو سکتی ہیں (发 → 發 / 髮)۔</string>
     <string name="languages_cjk_traditional_title">روایتی حروف</string>
     <string name="languages_clusters_title">کلسٹرز</string>
     <string name="languages_conjunct_backspace_info">بیک اسپیس عام طور پر ایک وقت میں ایک کوڈ پوائنٹ کو حذف کرتا ہے۔ یہ کبھی کبھی اسکرین پر آدھے بنے ہوئے کلسٹرز چھوڑ دیتا ہے۔ اس سیٹنگ کے آن ہونے پر، ایک بار دبانے سے %1$s ٹائپ کرتے وقت پورا کلسٹر حذف ہو جاتا ہے۔ دوسری زبانیں اپنی سیٹنگ برقرار رکھتی ہیں۔</string>

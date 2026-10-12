@@ -2236,9 +2236,6 @@
     <string name="keypress_haptics_title">Haptyka naciśnięcia klawisza</string>
     <string name="keypress_hold_action_copy_label">Kopiuj</string>
     <string name="keypress_hold_action_cut_label">Wytnij</string>
-    <string name="keypress_hold_action_first_info">Akcja zazwyczaj znajduje się na końcu wyskakującego okienka, więc zwykłe naciśnięcie i przytrzymanie daje pierwszy akcent. Po włączeniu tej opcji przenosi się ona na początek, a naciśnięcie i przytrzymanie jednego z klawiszy skrótu uruchamia akcję natychmiast. Akcenty nadal tam są: przytrzymaj palec i przesuń na ten, który chcesz. Wymaga to włączonej opcji Przytrzymaj, aby wybrać, w sekcji Alternatywne klawisze.</string>
-    <string name="keypress_hold_action_first_subtitle">Naciśnięcie i przytrzymanie uruchamia akcję zamiast pokazywać akcenty</string>
-    <string name="keypress_hold_action_first_title">Najpierw akcja</string>
     <string name="keypress_hold_action_paste_label">Wklej</string>
     <string name="keypress_hold_action_redo_label">Ponów</string>
     <string name="keypress_hold_action_select_all_label">Zaznacz wszystko</string>
@@ -2547,8 +2544,6 @@
     <string name="languages_cjk_region_info">Tajwan i Hongkong często używają różnych słów na to samo, nie tylko różnych znaków.</string>
     <string name="languages_cjk_region_taiwan_title">Tajwan (臺灣)</string>
     <string name="languages_cjk_region_title">Słownictwo regionalne</string>
-    <string name="languages_cjk_traditional_info">Klawiatura konwertuje każdego kandydata z uproszczonego (简体) na tradycyjny (繁體) przed wyświetleniem. Konwersja odbywa się znak po znaku. Niektóre znaki uproszczone mają więcej niż jedną formę tradycyjną, a klawiatura zawsze wybiera tę częstszą. 发 staje się 發, co jest poprawne w 發展, ale błędne w 頭髮. Popraw te słowa ręcznie.</string>
-    <string name="languages_cjk_traditional_subtitle">Klawiatura konwertuje kandydatów na tradycyjny chiński (繁體). Konwertuje jeden znak na raz, więc niektóre formy zależne od kontekstu mogą być błędne (发 → 發 / 髮).</string>
     <string name="languages_cjk_traditional_title">Znaki tradycyjne</string>
     <string name="languages_clusters_title">Klastry</string>
     <string name="languages_conjunct_backspace_info">Klawisz Backspace zazwyczaj usuwa jeden punkt kodowy naraz. Czasami pozostawia to na ekranie niepełne klastry. Po włączeniu tego ustawienia jedno naciśnięcie usuwa cały klaster podczas pisania w %1$s. Inne języki zachowują własne ustawienia.</string>

@@ -1,6 +1,22 @@
 package com.wasimaster.wmkeyboard.ime.ui
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateRectAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -303,15 +319,34 @@ internal fun BoxScope.AutopilotOverlay(
     // the user never asked to see the workings of — neither should light the
     // grid up. Read here, in the leaf, so a keystroke stamp does not invalidate
     // the board on its way past.
-    if (glideActive) return
-    if (SystemClock.uptimeMillis() - lastKeyPress.longValue > AutopilotIdleMs) return
-    val claimed = autopilotAreas(centers, bounds, bias, strength, keyWidth)
-    if (claimed.isEmpty()) return
+    val idle = SystemClock.uptimeMillis() - lastKeyPress.longValue > AutopilotIdleMs
+    val claimed = if (glideActive || idle) {
+        emptyMap()
+    } else {
+        autopilotAreas(centers, bounds, bias, strength, keyWidth)
+    }
     // The exaggeration and the clamp are applied once, here, because the face
     // and the outline below have to agree down to the pixel.
     val areas = claimed.mapValues {
         it.value.drawnAt(visualScale).clampedTo(boardSize.width, boardSize.height)
     }
+    // Typing › Autopilot › Animate: the areas ease to their new size and the
+    // letters fade as they gain and lose favour, instead of jumping per key.
+    if (kb.motion.autopilot) {
+        AnimatedAutopilotAreas(
+            areas = areas,
+            // A stroke takes the board at once; only typing eases.
+            instant = glideActive,
+            label = label,
+            settings = settings,
+            palette = palette,
+            kb = kb,
+            showEffect = showEffect,
+            outline = outline,
+        )
+        return
+    }
+    if (areas.isEmpty()) return
     val density = LocalDensity.current
     val gapH = keyGapH(settings)
     val gapV = keyGapV(settings)
@@ -376,3 +411,160 @@ internal fun BoxScope.AutopilotOverlay(
         }
     }
 }
+
+/**
+ * [AutopilotOverlay] with motion: every favoured letter's area springs to its
+ * new size and place as the bias moves, and a letter fades in as it gains
+ * favour and out as it loses it.
+ *
+ * The same rectangle, inset and outline as the still drawing, drawn by boxes
+ * that take no touches: the hit test reads the bias, never these, so easing the
+ * drawing changes nothing a press lands on. The rectangle is read in the layout
+ * and draw passes only, so a frame of the spring re-lays out a box rather than
+ * recomposing the overlay.
+ */
+@Composable
+private fun AnimatedAutopilotAreas(
+    areas: Map<Char, AutopilotArea>,
+    instant: Boolean,
+    label: (Char) -> String,
+    settings: KeyboardSettings,
+    palette: KeyPalette,
+    kb: KbTheme,
+    showEffect: Boolean,
+    outline: Boolean,
+) {
+    val motion = remember { AutopilotMotion() }
+    val shown = motion.settle(areas, instant)
+    if (shown.isEmpty()) return
+    val gapH = keyGapH(settings)
+    val gapV = keyGapV(settings)
+    val shape = kb.keyShape(bleedDp = gapH.value)
+    for (entry in shown) {
+        key(entry.char) {
+            val target = entry.target
+            val leaving = entry.leaving
+            val rect = animateRectAsState(
+                target.area,
+                animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = AutopilotSpringStiffness),
+                label = "autopilotArea",
+            )
+            // Born at nothing, so a letter gaining favour never shows whole for
+            // a frame before it fades in.
+            val fade = remember { Animatable(0f) }
+            LaunchedEffect(leaving) {
+                fade.animateTo(if (leaving) 0f else 1f, tween(AutopilotFadeMs))
+                if (leaving) motion.drop(entry)
+            }
+            Box(
+                modifier = Modifier
+                    .clearAndSetSemantics { }
+                    .offset { IntOffset(rect.value.left.roundToInt(), rect.value.top.roundToInt()) }
+                    .layout { measurable, _ ->
+                        val r = rect.value
+                        val width = r.width.roundToInt().coerceAtLeast(0)
+                        val height = r.height.roundToInt().coerceAtLeast(0)
+                        val placeable = measurable.measure(Constraints.fixed(width, height))
+                        layout(width, height) { placeable.place(0, 0) }
+                    }
+                    .graphicsLayer {
+                        alpha = fade.value
+                        compositingStrategy = CompositingStrategy.ModulateAlpha
+                    }
+                    .padding(horizontal = gapH, vertical = gapV)
+                    .then(
+                        if (showEffect) {
+                            Modifier
+                                .background(palette.key, shape)
+                                .then(
+                                    kb.keyBorder
+                                        ?.takeIf { kb.keyBorderWidthDp > 0f }
+                                        ?.let { Modifier.border(kb.keyBorderWidthDp.dp, it, shape) }
+                                        ?: Modifier,
+                                )
+                        } else {
+                            Modifier
+                        },
+                    )
+                    .then(
+                        if (outline) {
+                            Modifier.drawWithContent {
+                                drawContent()
+                                drawRect(color = kb.accent, style = Stroke(width = 1.dp.toPx()))
+                            }
+                        } else {
+                            Modifier
+                        },
+                    ),
+                contentAlignment = Alignment.Center,
+            ) {
+                if (showEffect) {
+                    Text(
+                        text = label(entry.char),
+                        // Laid out at the key's own size and scaled with the
+                        // area as it moves, so the letter grows with its box
+                        // rather than stepping a size per keystroke.
+                        fontSize = (LetterLabelSp * settings.fontScale).sp,
+                        fontWeight = if (settings.accessibility.boldLabels) FontWeight.Bold else FontWeight.Medium,
+                        color = palette.keyText,
+                        maxLines = 1,
+                        softWrap = false,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.graphicsLayer {
+                            val r = rect.value
+                            val cell = target.cell
+                            if (cell.width > 0f && cell.height > 0f) {
+                                val grown = minOf(r.width / cell.width, r.height / cell.height)
+                                scaleX = grown
+                                scaleY = grown
+                            }
+                        },
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** One letter's area on screen, and whether it is on its way out. */
+private class AutopilotEntry(val char: Char, var target: AutopilotArea) {
+    var leaving = false
+}
+
+/**
+ * The letters drawn, including the ones fading out. Plain fields worked out in
+ * composition, so running it twice with the same areas changes nothing;
+ * [version] is bumped when a letter has finished fading, to drop it.
+ */
+private class AutopilotMotion {
+    private val entries = LinkedHashMap<Char, AutopilotEntry>()
+    private var version by mutableIntStateOf(0)
+
+    fun settle(areas: Map<Char, AutopilotArea>, instant: Boolean): List<AutopilotEntry> {
+        // Read, so a letter finishing its fade recomposes the overlay.
+        check(version >= 0)
+        if (instant) entries.clear()
+        for ((ch, area) in areas) {
+            val entry = entries.getOrPut(ch) { AutopilotEntry(ch, area) }
+            entry.target = area
+            entry.leaving = false
+        }
+        for (entry in entries.values) {
+            if (entry.char !in areas) entry.leaving = true
+        }
+        return entries.values.toList()
+    }
+
+    fun drop(entry: AutopilotEntry) {
+        if (entry.leaving && entries[entry.char] === entry) {
+            entries.remove(entry.char)
+            version++
+        }
+    }
+}
+
+/** Snappy enough to settle in about 120 ms, with no overshoot. */
+private const val AutopilotSpringStiffness = 2_500f
+
+/** A letter fading in as it gains favour, or out as it loses it. */
+private const val AutopilotFadeMs = 120

@@ -148,6 +148,11 @@ object VocabPacks {
     /**
      * Copies [stream] in as a pack named after [displayName].
      *
+     * Takes a `.wmvocab.json` (plain or gzipped), an Anki deck or collection
+     * (`.apkg`, `.colpkg`, told apart by the zip header rather than the
+     * name) or term/definition text — Quizlet's export, Anki's plain-text
+     * notes, a CSV or TSV — read by [FlashcardImport].
+     *
      * The size cap is enforced during the copy: a document provider may
      * report an unknown size and a URL may lie about one, but neither can
      * push more bytes through this. A file that parses to nothing is deleted
@@ -157,6 +162,13 @@ object VocabPacks {
      */
     fun import(filesDir: File, langId: String, displayName: String, stream: InputStream): ImportResult {
         val dir = languageDir(filesDir, langId).apply { mkdirs() }
+        val input = java.io.BufferedInputStream(stream)
+        input.mark(4)
+        val head = ByteArray(4)
+        val headLength = input.read(head)
+        input.reset()
+        if (headLength == 4 && AnkiPackage.isZip(head)) return importAnki(dir, langId, displayName, input)
+
         val target = uniqueFile(dir, displayName)
         val part = File(dir, target.name + PART_SUFFIX)
         var copied = 0L
@@ -164,7 +176,7 @@ object VocabPacks {
         part.outputStream().use { out ->
             val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
             while (true) {
-                val read = stream.read(buffer)
+                val read = input.read(buffer)
                 if (read < 0) break
                 copied += read
                 if (copied > VocabPackFile.MAX_BYTES) {
@@ -179,6 +191,39 @@ object VocabPacks {
             return ImportResult.TooLarge
         }
         val pack = runCatching { part.inputStream().use { VocabPackFile.decode(it) } }.getOrNull()
+            ?: runCatching {
+                val cards = FlashcardImport.cardsFromText(part.readText(), displayName)
+                if (cards.isEmpty()) null else FlashcardImport.toPack(cards, packName(displayName, null), langId)
+            }.getOrNull()
+        return finishImport(part, target, pack)
+    }
+
+    private fun importAnki(dir: File, langId: String, displayName: String, input: InputStream): ImportResult {
+        val target = uniqueFile(dir, displayName)
+        val part = File(dir, target.name + PART_SUFFIX)
+        val scratch = File(dir, target.name + ".anki$PART_SUFFIX")
+        val deck = try {
+            AnkiPackage.read(input, scratch)
+        } catch (_: AnkiPackage.TooLargeException) {
+            return ImportResult.TooLarge
+        } catch (_: Exception) {
+            null
+        }
+        val pack = deck?.let {
+            FlashcardImport.toPack(
+                FlashcardImport.cardsFromAnki(it.notes, it.fieldNames),
+                packName(displayName, it.name),
+                langId,
+            )
+        }
+        return finishImport(part, target, pack)
+    }
+
+    /** The file's own name unless it is a generic export name, then the deck's, then a default. */
+    private fun packName(displayName: String, deckName: String?): String =
+        FlashcardImport.nameFromFile(displayName) ?: deckName ?: "Flashcards"
+
+    private fun finishImport(part: File, target: File, pack: VocabPack?): ImportResult {
         if (pack == null) {
             part.delete()
             return ImportResult.NotAPack
@@ -311,6 +356,7 @@ object VocabPacks {
     private fun uniqueFile(dir: File, displayName: String): File {
         val base = displayName
             .substringAfterLast('/')
+            .replace(Regex("""\.(apkg|colpkg|csv|tsv|txt)$""", RegexOption.IGNORE_CASE), "")
             .removeSuffix(".gz")
             .removeSuffix(".json")
             .removeSuffix(".wmvocab")

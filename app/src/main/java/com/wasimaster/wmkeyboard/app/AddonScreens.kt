@@ -552,7 +552,7 @@ internal fun AddonsScreen(
         info = stringResource(R.string.addon_repos_intro_body),
     ) {
         for (ref in repos) {
-            item {
+            item(key = ref.manifestUrl) {
                 ScrollAnchor(ref.manifestUrl == returnTo) {
                     RepositoryRow(ref, store, typeFilter, onNavigate)
                 }
@@ -587,7 +587,7 @@ internal fun AddonsScreen(
         }
         SettingsGroup(stringResource(R.string.addon_installed_section_title)) {
             for ((key, record) in installed) {
-                item {
+                item(key = key) {
                     val url = record.manifestUrl
                         .ifBlank { urlByRepoId[key.substringBeforeLast('/')].orEmpty() }
                         .ifBlank { NO_REPO }

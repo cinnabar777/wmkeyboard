@@ -238,6 +238,9 @@
     <string name="privacy_permissions_usage_title">Usage access</string>
     <string name="privacy_permissions_usage_subtitle">Show which app a clipboard entry was copied from</string>
 
+    <string name="privacy_permissions_overlay_title">Display over other apps</string>
+    <string name="privacy_permissions_overlay_subtitle">The floating button that opens the keyboard without a text field</string>
+
     <string name="privacy_permissions_accessibility_title">Accessibility service</string>
     <string name="privacy_permissions_accessibility_subtitle">Keep the keyboard gestures while TalkBack is on</string>
 

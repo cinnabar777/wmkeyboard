@@ -65,6 +65,7 @@ fun KeyboardSettings.applyTelevision(television: Boolean): KeyboardSettings {
         gestureTyping = false,
         splitKeyboard = false,
         floatingKeyboard = false,
+        floatingKeyboardLandscape = false,
         oneHandedMode = OneHandedMode.OFF,
         haptics = haptics.copy(enabled = false),
         popup = popup.copy(enabled = false),

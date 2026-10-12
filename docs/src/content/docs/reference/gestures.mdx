@@ -33,6 +33,7 @@ Which action a spacebar swipe runs depends on *when* the drag starts relative to
 | Slot = Language, swipe sideways | Spacebar | Steps through enabled layouts (a flick moves one; a continued swipe steps every 44&nbsp;dp after a 200&nbsp;ms pause, 110&nbsp;dp to wrap past either end) | Either slot set to Language |
 | Slot = Cursor, swipe sideways | Spacebar | Moves the text cursor one character per 16&nbsp;dp of drag | Either slot set to Cursor |
 | Same, dragging vertically | Spacebar | Also steps the cursor a line at a time | 2-D cursor touchpad (Off) |
+| Swipe up at least 24&nbsp;dp, more up than sideways, then keep moving | Spacebar | Opens the 2-D touchpad for that drag: the cursor follows in every direction until you lift | Swipe up for the touchpad (Off) |
 | Same, while the drag moves the cursor | Spacebar | Shows the text at the cursor, enlarged, in a bubble over the text | Cursor magnifier (On) |
 | Slot = Numpad, cross the initial slop | Spacebar | Opens the numeric keypad (one-shot, so the rest of the drag does nothing) | Either slot set to Numpad |
 | Straight downward drag, steeper than it is wide | Spacebar | Dismisses the keyboard | Swipe down to hide the keyboard (Off) |
@@ -143,7 +144,7 @@ A grab-bag of drags that live on their own feature pages, linked below each row.
 | Long-press a favourited emoji, then tap Reorder favourites | Emoji picker, anywhere an emoji is drawn | Opens the drag-to-reorder list (needs two or more favourites) | None |
 | Drag a row in that list | The reorder list | Moves the favourite, saved on confirm | None |
 | Long-press a Klipy/GIPHY result | [Stickers panel](/emoji/stickers/) | Opens an action sheet: save to each of your packs (or "Save to a new pack" if you have none), Copy, Report | None |
-| Long-press a GIF result | [GIF panel](/emoji/gifs/) | Opens the same sheet with Copy and Report. Saving to a pack is sticker-only | None |
+| Long-press a GIF result | [GIF panel](/emoji/gifs/#long-pressing-a-result) | Opens the same sheet with Add to favourites (or Remove from favourites), Copy and Report. Saving to a pack is sticker-only | None |
 | Hold a sticker in the sticker tray, then slide | [Stickers as you type](/emoji/stickers/#stickers-as-you-type) | Shows the sticker large above the keyboard, and each one you slide over in turn. Lifting closes it and sends nothing | Hold to see them bigger (On) |
 | Swipe a card left or right | [Clipboard panel](/tools/clipboard/) | Deletes it once the drag passes 40% of the card's width. No confirmation, but an Undo bar offers it back for five seconds | Swipe to delete (On) |
 | Swipe the Undo bar left or right | Clipboard panel | Puts the bar away at once, and the delete is final | None |
@@ -168,6 +169,7 @@ Every default on this page, gathered in one place. "Where" is the settings scree
 | Quick swipe on the spacebar | Typing → Gestures | Language |
 | Press and hold, then swipe | Typing → Gestures | Cursor |
 | 2-D cursor touchpad | Typing → Gestures | Off |
+| Swipe up for the touchpad | Typing → Gestures | Off |
 | Cursor magnifier | Typing → Gestures | On |
 | Swipe in from the edge to go back | Typing → Gestures | Off |
 | Swipe down to hide the keyboard | Typing → Gestures | Off |

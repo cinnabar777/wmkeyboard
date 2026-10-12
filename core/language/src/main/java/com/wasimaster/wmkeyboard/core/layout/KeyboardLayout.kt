@@ -108,17 +108,16 @@ data class Key(
      */
     val actionAlternates: List<KeyAlternate> = emptyList(),
     /**
-     * Draws [actionAlternates] *before* the [longPress] characters instead of
-     * after them, which puts the first of them at entry 0 — the entry a plain
-     * hold-and-release commits when hold-to-select is on.
+     * The older spelling of [actionAlternatesAt] = 0, from before the actions
+     * could go anywhere but the front or the back (issue #570).
      *
-     * Set at resolve time from
-     * [com.wasimaster.wmkeyboard.core.settings.LongPressLetterActions.actionFirst],
-     * not authored: it is the user saying they would rather a held `c` copy
-     * than type ç. Authoring it is harmless and does the same thing.
+     * Kept so a file that wrote it still reads the same, and because every key
+     * an older build exported carries it: [Key] is written with its defaults,
+     * so dropping the field would make each of those keys an unknown property
+     * to the JSON editor. Nothing sets it any more; [actionAlternatesAt] beats
+     * it when both are there.
      *
-     * Read only through [alternateEntries] — the order lives there so the
-     * popup's draw and its commit cannot disagree about which entry is which.
+     * Read only through [alternateEntries].
      */
     val actionAlternatesFirst: Boolean = false,
     /**
@@ -322,6 +321,45 @@ data class Key(
      * Additive and defaulted, so no format-version bump.
      */
     val multitap: List<String> = emptyList(),
+    /**
+     * Where [actionAlternates] sit among the popup's entries (issue #570): the
+     * index of the first of them, so 0 puts them in front of the [longPress]
+     * characters, 1 after the first character, and so on. Null, the default,
+     * is after every character, where they have always gone.
+     *
+     * The middle positions are what the issue asked for. At the front, a plain
+     * hold-and-release runs the action and the corner hint (the first
+     * character) names something the hold no longer types. One along, the hold
+     * still types what the hint shows and the action is the next entry, a short
+     * slide away rather than past every accent.
+     *
+     * An index past the characters is the same as null, so a position chosen
+     * for a key with four accents stays meaningful on a key with two. The
+     * actions move as one block, in their own order.
+     *
+     * Authored per key, or filled at resolve time from
+     * [com.wasimaster.wmkeyboard.core.settings.LongPressLetterActions.actionPosition]
+     * on a key the hold shortcuts were added to and whose author said nothing.
+     * Read only through [alternateEntries].
+     */
+    val actionAlternatesAt: Int? = null,
+    /**
+     * An action a press and hold runs at once, with no popup: hold `x` to cut,
+     * hold `.` for forward delete. A delete or a caret move keeps running
+     * while the finger stays down, the way the same action does as a flick arm.
+     *
+     * The popup's [actionAlternates] run an action too, but only once the
+     * popup has opened and the finger has picked one, which is a second step
+     * for a key that only ever has the one. [clipboardAction] was this for six
+     * clipboard shortcuts; this is the same thing for any action an alternate
+     * may carry.
+     *
+     * It spends the hold, as [repeatOnHold] does: the popup and the corner hint
+     * are gone for as long as it is set (see [hasHoldAction]). The space bar,
+     * the keys whose hold repeats or chords and the flick keys keep their own
+     * holds, so it does nothing on those; see [canHoldAction].
+     */
+    val holdAction: KeyAlternate? = null,
 )
 
 /** What a [Key.kanaVariantWhileComposing] key draws while it is the 小゛゜ key. */
@@ -341,6 +379,7 @@ fun Key.asKanaVariantKey(): Key = copy(
     longPress = emptyList(),
     actionAlternates = emptyList(),
     clipboardAction = null,
+    holdAction = null,
     icon = null,
     iconHint = null,
     flick = emptyMap(),
@@ -445,8 +484,9 @@ fun KeyboardLayout.hasAmbiguousKeys(): Boolean =
  * tested `action == Text` — and that is what kept alternates off the enter key
  * for no reason anyone had chosen (issue #22).
  *
- * A clipboard shortcut takes the long press over outright, and the keys that
- * repeat or chord under a held finger never get one; see [holdIsSpokenFor].
+ * A clipboard shortcut or a [Key.holdAction] takes the long press over
+ * outright, and the keys that repeat or chord under a held finger never get
+ * one; see [holdIsSpokenFor].
  */
 fun Key.opensAlternatesPopup(): Boolean =
     canHoldAlternates() && (longPress.isNotEmpty() || actionAlternates.isNotEmpty())
@@ -455,7 +495,30 @@ fun Key.opensAlternatesPopup(): Boolean =
  * Whether this key *could* hold alternates, whether or not it has any — the
  * question the layout editor asks before drawing the fields that author them.
  */
-fun Key.canHoldAlternates(): Boolean = clipboardAction == null && !holdIsSpokenFor()
+fun Key.canHoldAlternates(): Boolean = clipboardAction == null && !hasHoldAction() && !holdIsSpokenFor()
+
+/**
+ * Whether a [Key.holdAction] would run on this key: the question the key sheet
+ * asks before offering one.
+ *
+ * Every key whose hold is free, less three. The space bar's hold is its
+ * language picker and its repeat, read by a gesture handler of its own; a flick
+ * key's hold belongs to its flick pad; and a hand-written [Key.clipboardAction]
+ * is already the same idea, older.
+ */
+fun Key.canHoldAction(): Boolean =
+    clipboardAction == null && action != KeyAction.Space && !holdIsSpokenFor() && !hasFlicks()
+
+/** Whether a press and hold on this key runs its [Key.holdAction]. */
+fun Key.hasHoldAction(): Boolean = holdAction != null && canHoldAction()
+
+/**
+ * The key a press and hold presses, for a key that [hasHoldAction]: built the
+ * way a popup's action entry is, so the hold does exactly what the same action
+ * does as an alternate or a flick arm.
+ */
+fun Key.holdActionKey(): Key? =
+    holdAction?.takeIf { hasHoldAction() }?.let { Key(label = it.label, action = it.action) }
 
 /**
  * [KeyAction.holdIsSpokenFor] asked of a whole key, which is the form every
@@ -517,14 +580,15 @@ sealed interface AlternateEntry {
 
 /**
  * The popup's entries in the one order everything must agree on: the characters
- * then the actions, or the reverse when [Key.actionAlternatesFirst] is set.
+ * with the actions as one block at [Key.actionAlternatesAt], which is after the
+ * last character unless the key says otherwise.
  *
  * A function rather than a rule each reader re-implements, because the index is
  * the entry's identity. Two places consume it — the popup's draw and the
  * hold-to-select commit — and when they disagreed by one the popup highlighted
  * à and committed select-all. Position 0 also matters on its own: with
- * hold-to-select on it is what a plain hold-and-release fires, which is the
- * whole point of [Key.actionAlternatesFirst].
+ * hold-to-select on it is what a plain hold-and-release fires, which is why an
+ * action put first runs on a plain hold.
  */
 fun Key.alternateEntries(): List<AlternateEntry> {
     // A Keyman key's long-press entries are keys of their own, with their own
@@ -536,7 +600,19 @@ fun Key.alternateEntries(): List<AlternateEntry> {
             ?: AlternateEntry.Character(text)
     }
     val actions = actionAlternates.map { AlternateEntry.Action(it) }
-    return if (actionAlternatesFirst) actions + characters else characters + actions
+    val at = actionsIndex(characters.size)
+    if (at >= characters.size) return characters + actions
+    return characters.subList(0, at) + actions + characters.subList(at, characters.size)
+}
+
+/**
+ * Where the action block starts among [characters] popup characters; see
+ * [Key.actionAlternatesAt]. A negative index is a broken file, read as the
+ * default rather than as the front.
+ */
+private fun Key.actionsIndex(characters: Int): Int {
+    val at = actionAlternatesAt?.takeIf { it >= 0 } ?: if (actionAlternatesFirst) 0 else characters
+    return at.coerceAtMost(characters)
 }
 
 /**

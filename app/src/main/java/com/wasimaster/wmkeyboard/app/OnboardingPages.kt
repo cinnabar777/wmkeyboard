@@ -44,6 +44,7 @@ import com.wasimaster.wmkeyboard.core.icons.symbols.outlined.Info
 import com.wasimaster.wmkeyboard.core.icons.symbols.outlined.Keyboard
 import com.wasimaster.wmkeyboard.core.icons.symbols.outlined.LightMode
 import com.wasimaster.wmkeyboard.core.icons.symbols.outlined.Mosque
+import com.wasimaster.wmkeyboard.core.icons.symbols.outlined.Restore
 import com.wasimaster.wmkeyboard.core.icons.symbols.outlined.Search
 import com.wasimaster.wmkeyboard.core.icons.symbols.outlined.SelectAll
 import com.wasimaster.wmkeyboard.core.icons.symbols.outlined.Thermostat
@@ -111,6 +112,7 @@ import com.wasimaster.wmkeyboard.core.theme.DEFAULT_THEME_ID
 import com.wasimaster.wmkeyboard.core.theme.ThemeSpec
 import com.wasimaster.wmkeyboard.core.util.PlayServices
 import com.wasimaster.wmkeyboard.ime.ui.SlotIcon
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 // The wizard's fixed pages, one composable per [OnboardingPage] entry. The
@@ -119,7 +121,14 @@ import kotlinx.coroutines.launch
 // and try pages live in their own files.
 
 @Composable
-internal fun WelcomePage(onReady: () -> Unit, onSetupChanged: (Boolean) -> Unit) {
+internal fun WelcomePage(
+    repository: SettingsRepository,
+    canRestore: Boolean,
+    restored: Boolean,
+    onRestored: () -> Unit,
+    onReady: () -> Unit,
+    onSetupChanged: (Boolean) -> Unit,
+) {
     val context = LocalContext.current
     val setup = rememberKeyboardSetup(context, onReady)
     LaunchedEffect(setup.ready) { onSetupChanged(setup.ready) }
@@ -130,7 +139,72 @@ internal fun WelcomePage(onReady: () -> Unit, onSetupChanged: (Boolean) -> Unit)
     Box(modifier = Modifier.padding(horizontal = 16.dp)) {
         SetupCard(context, setup = setup, onEnableRequested = { awaitingEnable = true })
     }
-    if (!setup.ready) CaptionText(stringResource(R.string.onboarding_welcome_required))
+    when {
+        restored && !setup.ready -> CaptionText(stringResource(R.string.onboarding_restored_info))
+        !setup.ready -> CaptionText(stringResource(R.string.onboarding_welcome_required))
+    }
+    if (canRestore) RestoreBackupButton(repository, onRestored)
+}
+
+/**
+ * Restores a backup instead of answering the wizard: one of this app's, or a
+ * whole backup from another keyboard, through the same dialog an opened file
+ * gets. [onRestored] runs once the result has been read and closed, so the
+ * wizard does not move on under the dialog that says what came across.
+ *
+ * A restored list of languages is no use without its dictionaries, so the
+ * missing ones are fetched, the way a language added on the wizard's own
+ * page is.
+ */
+@Composable
+private fun RestoreBackupButton(repository: SettingsRepository, onRestored: () -> Unit) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val notify = rememberDownloadNotifier()
+    var picked by remember { mutableStateOf<android.net.Uri?>(null) }
+    var imported by remember { mutableStateOf(false) }
+    val launcher = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.OpenDocument(),
+    ) { uri -> picked = uri }
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 16.dp),
+    ) {
+        OutlinedButton(onClick = { launcher.launch(arrayOf("*/*")) }) {
+            Icon(Icons.Outlined.Restore, contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(Modifier.width(8.dp))
+            Text(stringResource(R.string.onboarding_restore_action))
+        }
+        Spacer(Modifier.height(8.dp))
+        Text(
+            stringResource(R.string.onboarding_restore_info),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
+    }
+    picked?.let { uri ->
+        ImportFileDialog(
+            repository,
+            uri,
+            onImported = { imported = true },
+            onClose = {
+                picked = null
+                if (imported) {
+                    imported = false
+                    // The downloads start before the wizard moves on, since
+                    // moving on can close it and cancel this scope.
+                    scope.launch {
+                        val languages = repository.settings.first().enabledLanguages.map { it.id }
+                        startMissingLanguageData(context, languages, notify)
+                        onRestored()
+                    }
+                }
+            },
+        )
+    }
 }
 
 /**

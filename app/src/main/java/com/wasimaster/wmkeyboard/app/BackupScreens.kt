@@ -9,6 +9,16 @@ import android.net.Uri
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationVector1D
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -81,6 +91,9 @@ import java.util.Locale
 import kotlin.math.roundToInt
 import com.wasimaster.wmkeyboard.core.util.requireOutputStream
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
@@ -91,7 +104,7 @@ import com.wasimaster.wmkeyboard.core.icons.symbols.outlined.CloudOff
 import com.wasimaster.wmkeyboard.core.icons.symbols.outlined.CloudQueue
 import com.wasimaster.wmkeyboard.core.icons.symbols.outlined.FileDownload
 import com.wasimaster.wmkeyboard.core.icons.symbols.outlined.FileUpload
-import androidx.compose.material3.CircularProgressIndicator
+import com.wasimaster.wmkeyboard.core.icons.symbols.outlined.KeyboardAlt
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.LocalContentColor
@@ -130,6 +143,7 @@ internal fun sectionLabelRes(section: ConfigBackup.Section): Int = when (section
     ConfigBackup.Section.STATISTICS -> R.string.backup_section_statistics_label
     ConfigBackup.Section.VOCAB -> R.string.backup_section_vocab_label
     ConfigBackup.Section.SWIPE -> R.string.backup_section_swipe_label
+    ConfigBackup.Section.NOTES -> R.string.backup_section_notes_label
 }
 internal fun sectionLabel(context: Context, section: ConfigBackup.Section): String =
     context.getString(sectionLabelRes(section))
@@ -154,6 +168,7 @@ internal fun sectionLabelLowercase(context: Context, section: ConfigBackup.Secti
             ConfigBackup.Section.STATISTICS -> R.string.backup_section_statistics_label_lowercase
             ConfigBackup.Section.VOCAB -> R.string.backup_section_vocab_label_lowercase
             ConfigBackup.Section.SWIPE -> R.string.backup_section_swipe_label_lowercase
+            ConfigBackup.Section.NOTES -> R.string.backup_section_notes_label_lowercase
         },
     )
 @PluralsRes
@@ -171,6 +186,7 @@ private fun sectionCountPlural(section: ConfigBackup.Section): Int = when (secti
     ConfigBackup.Section.STATISTICS -> R.plurals.backup_section_statistics_count
     ConfigBackup.Section.VOCAB -> R.plurals.backup_section_vocab_count
     ConfigBackup.Section.SWIPE -> R.plurals.backup_section_swipe_count
+    ConfigBackup.Section.NOTES -> R.plurals.backup_section_notes_count
 }
 /** "3 themes", "1 snippet": the count line shown per section on import. */
 internal fun sectionSummary(context: Context, section: ConfigBackup.Section, count: Int): String =
@@ -423,24 +439,56 @@ private fun BackupStatusCard(
     val auto = settings.watch { it.autoBackup }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    var backingUp by remember { mutableStateOf(false) }
-    var syncing by remember { mutableStateOf(false) }
+    val reduceMotion = LocalReduceMotion.current
+    var backupPhase by remember { mutableStateOf(RunPhase.IDLE) }
+    var syncPhase by remember { mutableStateOf(RunPhase.IDLE) }
+    val backingUp = backupPhase == RunPhase.RUNNING
+    val syncing = syncPhase == RunPhase.RUNNING
+    // The tick a run that worked earns stays on its button for a moment, then
+    // the button is a button again.
+    LaunchedEffect(backupPhase) {
+        if (backupPhase == RunPhase.DONE) {
+            delay(DONE_HOLD_MS)
+            backupPhase = RunPhase.IDLE
+        }
+    }
+    LaunchedEffect(syncPhase) {
+        if (syncPhase == RunPhase.DONE) {
+            delay(DONE_HOLD_MS)
+            syncPhase = RunPhase.IDLE
+        }
+    }
+    // The cloud gives a small hop when a backup you started has worked: the
+    // card's answer to "am I safe?" changing in front of you.
+    val hop = remember { Animatable(1f) }
     val active = auto.backupTargets
     val backupOn = auto.enabled && active.isNotEmpty()
     val error = autoBackupErrorText(context, auto.lastError, active.firstOrNull()?.type ?: BackupDestination.FOLDER)
     val syncError = auto.sync.lastError.takeIf { it.isNotEmpty() }?.let { syncErrorText(context, it, auto) }
     val problem = error != null || (auto.sync.enabled && syncError != null)
     val colors = MaterialTheme.colorScheme
-    val container = when {
-        problem -> colors.errorContainer
-        backupOn || auto.sync.enabled -> colors.secondaryContainer
-        else -> colors.surfaceContainerHigh
-    }
-    val onContainer = when {
-        problem -> colors.onErrorContainer
-        backupOn || auto.sync.enabled -> colors.onSecondaryContainer
-        else -> colors.onSurface
-    }
+    // A card that goes from "off" to "on", or into a problem, changes colour
+    // over a moment rather than in a frame.
+    val tint = if (reduceMotion) snap<Color>() else tween<Color>(durationMillis = CARD_TINT_MS)
+    val container by animateColorAsState(
+        when {
+            problem -> colors.errorContainer
+            backupOn || auto.sync.enabled -> colors.secondaryContainer
+            else -> colors.surfaceContainerHigh
+        },
+        animationSpec = tint,
+        label = "backupCardContainer",
+    )
+    val onContainer by animateColorAsState(
+        when {
+            problem -> colors.onErrorContainer
+            backupOn || auto.sync.enabled -> colors.onSecondaryContainer
+            else -> colors.onSurface
+        },
+        animationSpec = tint,
+        label = "backupCardContent",
+    )
+    val buttonSize = if (reduceMotion) Modifier else Modifier.animateContentSize()
 
     Surface(
         color = container,
@@ -450,15 +498,26 @@ private fun BackupStatusCard(
     ) {
         Column(Modifier.padding(horizontal = 20.dp, vertical = 18.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    when {
+                AnimatedContent(
+                    targetState = when {
                         problem -> Icons.Outlined.CloudOff
                         backupOn -> Icons.Outlined.CloudDone
                         else -> Icons.Outlined.CloudQueue
                     },
-                    contentDescription = null,
-                    modifier = Modifier.size(32.dp),
-                )
+                    transitionSpec = { stateSwapTransform(reduceMotion, animateSize = false) },
+                    label = "backupCardIcon",
+                ) { icon ->
+                    Icon(
+                        icon,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(32.dp)
+                            .graphicsLayer {
+                                scaleX = hop.value
+                                scaleY = hop.value
+                            },
+                    )
+                }
                 Spacer(Modifier.width(16.dp))
                 Column(Modifier.weight(1f)) {
                     Text(
@@ -481,8 +540,10 @@ private fun BackupStatusCard(
                 }
             }
             Spacer(Modifier.height(12.dp))
-            Text(
-                error ?: if (auto.lastRunAtMs > 0L) {
+            // "Never" to "Just now" when the first run lands: a hand-over, not
+            // a swap in a frame.
+            AnimatedContent(
+                targetState = error ?: if (auto.lastRunAtMs > 0L) {
                     stringResource(
                         R.string.backup_auto_last_run,
                         DateUtils.getRelativeTimeSpanString(auto.lastRunAtMs).toString(),
@@ -490,8 +551,9 @@ private fun BackupStatusCard(
                 } else {
                     stringResource(R.string.backup_auto_never)
                 },
-                style = MaterialTheme.typography.bodyMedium,
-            )
+                transitionSpec = { stateSwapTransform(reduceMotion) },
+                label = "backupCardLastRun",
+            ) { line -> Text(line, style = MaterialTheme.typography.bodyMedium) }
             if (auto.sync.enabled) {
                 Text(
                     syncError ?: if (auto.sync.lastRunAtMs > 0L) {
@@ -511,23 +573,24 @@ private fun BackupStatusCard(
                 // card is the card's own colour, and reads as a text link.
                 Button(
                     enabled = active.isNotEmpty() && !backingUp,
+                    modifier = buttonSize,
                     onClick = {
-                        backingUp = true
+                        backupPhase = RunPhase.RUNNING
                         scope.launch {
                             val outcome = AutoBackupRunner.run(context, repository, force = true)
-                            backingUp = false
+                            val worked = outcome is AutoBackupRunner.Outcome.Done && outcome.failed.isEmpty()
+                            backupPhase = if (worked) RunPhase.DONE else RunPhase.IDLE
+                            if (worked && !reduceMotion) {
+                                launch { hop.celebrate() }
+                                // Long enough to see the tick land before the
+                                // dialog's scrim covers it.
+                                delay(CHECK_BEAT_MS)
+                            }
                             onMessage(autoBackupOutcomeText(context, outcome, repository.settings.first().autoBackup))
                         }
                     },
                 ) {
-                    if (backingUp) {
-                        CircularProgressIndicator(
-                            Modifier.size(16.dp),
-                            strokeWidth = 2.dp,
-                            color = LocalContentColor.current,
-                        )
-                        Spacer(Modifier.width(8.dp))
-                    }
+                    RunGlyph(backupPhase, LocalContentColor.current)
                     Text(
                         stringResource(if (backingUp) R.string.backup_auto_running else R.string.backup_auto_now_action),
                     )
@@ -535,19 +598,19 @@ private fun BackupStatusCard(
                 if (auto.sync.enabled) {
                     OutlinedButton(
                         enabled = !syncing,
+                        modifier = buttonSize,
                         onClick = {
-                            syncing = true
+                            syncPhase = RunPhase.RUNNING
                             scope.launch {
                                 val outcome = SyncRunner.run(context, repository, force = true)
-                                syncing = false
+                                val worked = outcome.syncWorked()
+                                syncPhase = if (worked) RunPhase.DONE else RunPhase.IDLE
+                                if (worked && !reduceMotion) delay(CHECK_BEAT_MS)
                                 onMessage(syncOutcomeText(context, outcome, repository.settings.first().autoBackup))
                             }
                         },
                     ) {
-                        if (syncing) {
-                            CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
-                            Spacer(Modifier.width(8.dp))
-                        }
+                        RunGlyph(syncPhase, MaterialTheme.colorScheme.primary)
                         Text(stringResource(if (syncing) R.string.backup_hub_syncing else R.string.backup_hub_sync_now))
                     }
                 }
@@ -589,10 +652,11 @@ private val SECTION_ROWS = listOf(
     SectionRow(ConfigBackup.Section.STATISTICS, R.string.backup_include_statistics_subtitle),
     SectionRow(ConfigBackup.Section.VOCAB, R.string.backup_include_vocab_subtitle),
     SectionRow(ConfigBackup.Section.SWIPE, R.string.backup_include_swipe_subtitle),
+    SectionRow(ConfigBackup.Section.NOTES, R.string.backup_include_notes_subtitle, R.string.backup_include_notes_info),
 )
 
 /**
- * The same thirteen switches for the three lists that pick sections: the
+ * The same fourteen switches for the three lists that pick sections: the
  * export, the automatic backup and sync. [sections] picks the list's sections
  * out of the settings, which each row reads for itself. [secrets] adds the
  * API-key switch under Settings where the list has one, shown while
@@ -751,6 +815,12 @@ internal fun BackupSettings(
             }
         }
     }
+    // Another keyboard's backup goes through the same dialog an opened file
+    // does, which reads it and lists what is inside before anything is written.
+    var foreignUri by remember { mutableStateOf<Uri?>(null) }
+    val foreignLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument(),
+    ) { uri -> foreignUri = uri }
     val exportGuarded = rememberLockGuard(AppLockTargets["action_export_settings"]) {
         // Datestamped, Locale.US: see the automatic backup's names.
         val stamp = SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(Date())
@@ -835,8 +905,18 @@ internal fun BackupSettings(
                 onClick = { importLauncher.launch(arrayOf("*/*")) },
             )
         }
+        item {
+            WmRow(
+                title = stringResource(R.string.backup_foreign_import_title),
+                subtitle = stringResource(R.string.backup_foreign_import_subtitle),
+                icon = Icons.Outlined.KeyboardAlt,
+                onClick = { foreignLauncher.launch(arrayOf("*/*")) },
+            )
+        }
     }
     Spacer(Modifier.height(16.dp))
+
+    foreignUri?.let { uri -> ImportFileDialog(repository, uri) { foreignUri = null } }
 
     when (val pending = confirmImport) {
         is PendingImport.Config -> {
@@ -1002,7 +1082,11 @@ internal fun BackupAutoSettings(repository: SettingsRepository, settings: LiveSe
     val locations = settings.watch { it.autoBackup.locations }
     val encryptOn = settings.watch { it.autoBackup.encrypt }
     val encrypted = settings.watch { it.autoBackup.encrypt && it.autoBackup.passphrase.isNotEmpty() }
-    val settingsIncluded = settings.watch { ConfigBackup.Section.SETTINGS in it.autoBackup.sectionSet }
+    // Locked notes ride on the same switch as the keys, so the row has to be
+    // there whenever either section is.
+    val settingsIncluded = settings.watch {
+        ConfigBackup.Section.SETTINGS in it.autoBackup.sectionSet || ConfigBackup.Section.NOTES in it.autoBackup.sectionSet
+    }
     val setKeys = rememberKeysSwitch(encrypted) { on -> scope.launch { repository.setBackupIncludeSecrets(on) } }
     val personal = settings.watch { s ->
         ConfigBackup.Section.DICTIONARY.id in s.autoBackup.sections ||
@@ -1183,14 +1267,24 @@ internal fun BackupSyncSettings(repository: SettingsRepository, settings: LiveSe
     val locations = settings.watch { it.autoBackup.locations }
     val encrypted = settings.watch { it.autoBackup.encrypt && it.autoBackup.passphrase.isNotEmpty() }
     var message by remember { mutableStateOf<String?>(null) }
-    var syncing by remember { mutableStateOf(false) }
+    val reduceMotion = LocalReduceMotion.current
+    var syncPhase by remember { mutableStateOf(RunPhase.IDLE) }
+    val syncing = syncPhase == RunPhase.RUNNING
+    LaunchedEffect(syncPhase) {
+        if (syncPhase == RunPhase.DONE) {
+            delay(DONE_HOLD_MS)
+            syncPhase = RunPhase.IDLE
+        }
+    }
     val setKeys = rememberKeysSwitch(encrypted) { on -> scope.launch { repository.setSyncIncludeSecrets(on) } }
 
     fun runNow() {
-        syncing = true
+        syncPhase = RunPhase.RUNNING
         scope.launch {
             val outcome = SyncRunner.run(context, repository, force = true)
-            syncing = false
+            val worked = outcome.syncWorked()
+            syncPhase = if (worked) RunPhase.DONE else RunPhase.IDLE
+            if (worked && !reduceMotion) delay(CHECK_BEAT_MS)
             message = syncOutcomeText(context, outcome, repository.settings.first().autoBackup)
         }
     }
@@ -1350,12 +1444,11 @@ internal fun BackupSyncSettings(repository: SettingsRepository, settings: LiveSe
             FilledTonalButton(
                 enabled = canSync && !syncing,
                 onClick = { runNow() },
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                modifier = Modifier
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .then(if (reduceMotion) Modifier else Modifier.animateContentSize()),
             ) {
-                if (syncing) {
-                    CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
-                    Spacer(Modifier.width(8.dp))
-                }
+                RunGlyph(syncPhase, MaterialTheme.colorScheme.primary)
                 Text(stringResource(if (syncing) R.string.backup_hub_syncing else R.string.backup_hub_sync_now))
             }
         }
@@ -1394,7 +1487,10 @@ internal fun BackupSyncSettings(repository: SettingsRepository, settings: LiveSe
 internal fun BackupContentsSettings(repository: SettingsRepository, settings: LiveSettings) {
     val scope = rememberCoroutineScope()
     // Decides whether the key switch is among the rows.
-    val settingsIncluded = settings.watch { ConfigBackup.Section.SETTINGS in it.autoBackup.exportSectionSet }
+    val settingsIncluded = settings.watch {
+        ConfigBackup.Section.SETTINGS in it.autoBackup.exportSectionSet ||
+            ConfigBackup.Section.NOTES in it.autoBackup.exportSectionSet
+    }
     SettingsGroup {
         sectionRows(
             settings = settings,
@@ -1415,3 +1511,23 @@ internal fun BackupContentsSettings(repository: SettingsRepository, settings: Li
 
 /** How tall a multi-line [StoredTextField] grows before it scrolls. */
 private const val MULTI_LINE_MAX = 6
+
+/** Whether a sync pass went through everywhere it was sent. */
+private fun SyncRunner.Outcome.syncWorked(): Boolean =
+    this is SyncRunner.Outcome.Done && failed.isEmpty()
+
+/** The status card's cloud hopping: up a little, and back with a bounce. */
+private suspend fun Animatable<Float, AnimationVector1D>.celebrate() {
+    animateTo(HOP_SCALE, tween(durationMillis = HOP_UP_MS, easing = FastOutSlowInEasing))
+    animateTo(1f, spring(dampingRatio = 0.45f, stiffness = Spring.StiffnessMediumLow))
+}
+
+/** How long a finished run's tick stays on its button. */
+private const val DONE_HOLD_MS = 1_800L
+
+/** How long the result waits for the tick to land: the tick's own draw, and a breath. */
+private const val CHECK_BEAT_MS = CHECK_DRAW_MS + 120L
+
+private const val CARD_TINT_MS = 300
+private const val HOP_SCALE = 1.18f
+private const val HOP_UP_MS = 140

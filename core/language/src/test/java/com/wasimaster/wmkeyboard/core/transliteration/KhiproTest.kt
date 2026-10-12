@@ -6,7 +6,8 @@ import org.junit.Test
 
 /**
  * Khipro against the Khipro team's own conformance cases
- * (KhiproTeam/khipro-testcases and khipro-testcases-touch, copied verbatim
+ * (KhiproTeam/khipro-testcases and khipro-testcases-touch, and the tables in
+ * KhiproTeam/khipro-dark-m17n and khipro-dark-mim-touchscreen, copied verbatim
  * into `resources/khipro/`), the same tables their C++ library is released
  * against. A failure here is a disagreement with upstream, not a matter of
  * taste: fix the interpreter, never the table.
@@ -38,6 +39,24 @@ class KhiproTest {
     @Test
     fun `desktop spec passes the desktop conformance cases`() =
         assertConforms("khipro-testcases.tsv", Khipro.Variant.DESKTOP)
+
+    @Test
+    fun `dark touchscreen spec passes the dark touch conformance cases`() =
+        assertConforms("khipro-dark-testcases-touch.tsv", Khipro.Variant.DARK_TOUCHSCREEN)
+
+    @Test
+    fun `dark desktop spec passes the dark desktop conformance cases`() =
+        assertConforms("khipro-dark-testcases.tsv", Khipro.Variant.DARK_DESKTOP)
+
+    @Test
+    fun `dark joins consonants only on the slash, as many as it is pressed`() {
+        val dark = Khipro.Variant.DARK_TOUCHSCREEN
+        assertEquals("লাগবে", Khipro.convert("lagbe", dark))
+        assertEquals("নতর\u200D্য", Khipro.convert("ntrz/", dark))
+        assertEquals("নত্র্য", Khipro.convert("ntrz//", dark))
+        assertEquals("ন্ত্র্য", Khipro.convert("ntrz///", dark))
+        assertEquals("চন্দ্রবিন্দু", Khipro.convert("cndr//bind/u", dark))
+    }
 
     @Test
     fun `everyday words`() {

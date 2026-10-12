@@ -1,5 +1,11 @@
 package com.wasimaster.wmkeyboard.ime.ui
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.VisibilityThreshold
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -9,6 +15,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -38,6 +45,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,11 +54,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
@@ -68,6 +79,7 @@ import com.wasimaster.wmkeyboard.ime.KeyboardUiState
 import com.wasimaster.wmkeyboard.ime.PanelMode
 import com.wasimaster.wmkeyboard.ime.R
 import com.wasimaster.wmkeyboard.ime.visibleGrammarLints
+import kotlinx.coroutines.delay
 
 /**
  * The colour dot each [GrammarCategory] wears on a card and in the filter.
@@ -156,6 +168,9 @@ internal fun GrammarPanel(
     val onDismiss = callbacks.onDismiss
     val onFocus = callbacks.onFocus
     val kb = LocalKbTheme.current
+    // Opt-in (Accessibility): an applied fix plays out on its card, the list
+    // closes up around it, and the body cross-fades between its states.
+    val animate = kb.motion.toolResults
     val grammar = state.grammar
     // Refused in a password field: the chip would send the whole field to
     // DeepL, so it is not offered there (the service refuses it too).
@@ -285,16 +300,18 @@ internal fun GrammarPanel(
             }
             if (lints.isNotEmpty()) {
                 Spacer(Modifier.width(8.dp))
-                Text(
-                    pluralStringResource(
-                        R.plurals.ime_grammar_issue_count,
-                        lints.size,
-                        lints.size,
-                    ),
-                    color = kb.secondaryText,
-                    fontSize = 11.sp,
-                    maxLines = 1,
-                )
+                MotionCrossfade(lints.size, animate, label = "grammarCount") { count ->
+                    Text(
+                        pluralStringResource(
+                            R.plurals.ime_grammar_issue_count,
+                            count,
+                            count,
+                        ),
+                        color = kb.secondaryText,
+                        fontSize = 11.sp,
+                        maxLines = 1,
+                    )
+                }
             }
             if (deeplWrite) {
                 Spacer(Modifier.width(4.dp))
@@ -357,66 +374,212 @@ internal fun GrammarPanel(
             )
             Spacer(Modifier.height(6.dp))
         }
-        when {
+        val body = when {
             // The card holds the panel's body while it is up: 146dp has no
             // room for it and the issue list both, and it is what was asked for.
-            rephrase != null && !rephrase.working -> Unit
-            !grammar.available -> GrammarHint(
-                stringResource(R.string.ime_grammar_unavailable_info),
-            )
-            grammar.sourceText.isEmpty() && !grammar.checking -> GrammarHint(
-                stringResource(R.string.ime_grammar_empty_hint),
-            )
-            lints.isEmpty() && grammar.checkedOnce && !grammar.checking -> Row(
+            rephrase != null && !rephrase.working -> GrammarBody.REPHRASE
+            !grammar.available -> GrammarBody.UNAVAILABLE
+            grammar.sourceText.isEmpty() && !grammar.checking -> GrammarBody.EMPTY
+            lints.isEmpty() && grammar.checkedOnce && !grammar.checking -> GrammarBody.CLEAR
+            else -> GrammarBody.LIST
+        }
+        if (body != GrammarBody.REPHRASE) {
+            MotionCrossfade(
+                body,
+                animate,
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Icon(
-                    if (grammar.lints.isEmpty()) Icons.Outlined.Check else Icons.Outlined.FilterList,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = kb.accent,
-                )
-                Spacer(Modifier.width(6.dp))
-                Text(
-                    stringResource(
-                        if (grammar.lints.isEmpty()) {
-                            R.string.ime_grammar_no_issues_empty
-                        } else {
-                            // Not "all clear": the issues are there, the
-                            // filter is simply not showing them.
-                            R.string.ime_grammar_all_filtered_empty
-                        },
-                    ),
-                    color = kb.secondaryText,
-                    fontSize = 13.sp,
-                )
-            }
-            else -> {
-                val listState = rememberLazyListState()
-                ScrollFocusIntoView(focusedLint) { listState.animateScrollToItem(it) }
-                LazyColumn(
-                    state = listState,
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(6.dp),
-                ) {
-                    itemsIndexed(lints) { index, lint ->
-                        GrammarLintCard(
-                            lint, onFix, onDismiss, onFocus,
-                            focused = index == focusedLint,
-                            sourceText = grammar.sourceText,
+                label = "grammarBody",
+            ) { shown ->
+                // The state on its way out still takes taps until its fade
+                // ends; a card fixed twice is two edits of the field.
+                Box(Modifier.fillMaxSize().blockTouches(shown != body)) {
+                    when (shown) {
+                        GrammarBody.REPHRASE -> Unit
+                        GrammarBody.UNAVAILABLE -> GrammarHint(
+                            stringResource(R.string.ime_grammar_unavailable_info),
                         )
+                        GrammarBody.EMPTY -> GrammarHint(
+                            stringResource(R.string.ime_grammar_empty_hint),
+                        )
+                        GrammarBody.CLEAR -> GrammarClear(filtered = grammar.lints.isNotEmpty(), animate = animate)
+                        GrammarBody.LIST -> {
+                            val listState = rememberLazyListState()
+                            ScrollFocusIntoView(focusedLint) { listState.animateScrollToItem(it) }
+                            val keys = remember(lints) { grammarLintKeys(lints) }
+                            LazyColumn(
+                                state = listState,
+                                modifier = Modifier.fillMaxSize(),
+                                verticalArrangement = Arrangement.spacedBy(6.dp),
+                            ) {
+                                itemsIndexed(lints, key = { index, _ -> keys[index] }) { index, lint ->
+                                    GrammarLintCard(
+                                        lint, onFix, onDismiss, onFocus,
+                                        focused = index == focusedLint,
+                                        sourceText = grammar.sourceText,
+                                        animate = animate,
+                                        modifier = if (animate) {
+                                            Modifier.animateItem(
+                                                fadeInSpec = tween(GrammarFadeInMs, delayMillis = GrammarFadeInDelayMs),
+                                                placementSpec = GrammarPlacement,
+                                                fadeOutSpec = tween(GrammarFadeOutMs),
+                                            )
+                                        } else {
+                                            Modifier
+                                        },
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
     }
 }
+
+/** What the grammar panel's body is showing, for the cross-fade between them. */
+private enum class GrammarBody { REPHRASE, UNAVAILABLE, EMPTY, CLEAR, LIST }
+
+/**
+ * A key for each card that survives the field changing around it. Offsets will
+ * not do: a fix early in the text shifts every issue after it, and a card keyed
+ * on its offset would leave and arrive again instead of gliding up. The kind
+ * and the words, numbered when the same pair turns up twice, stay put.
+ */
+internal fun grammarLintKeys(lints: List<GrammarLint>): List<String> {
+    val seen = HashMap<String, Int>()
+    return lints.map { lint ->
+        val base = lint.kind + "\u0000" + lint.original
+        val n = seen.getOrDefault(base, 0)
+        seen[base] = n + 1
+        "$base\u0000$n"
+    }
+}
+
+/**
+ * Nothing to show: either nothing to fix at all, or the filter hiding all of
+ * it. The tick pops in when it is the first; the funnel never does, since
+ * nothing was achieved.
+ */
+@Composable
+private fun GrammarClear(filtered: Boolean, animate: Boolean) {
+    val kb = LocalKbTheme.current
+    val pop = remember { Animatable(if (animate && !filtered) 0f else 1f) }
+    LaunchedEffect(Unit) {
+        if (pop.value < 1f) pop.animateTo(1f, spring(dampingRatio = 0.5f, stiffness = Spring.StiffnessMedium))
+    }
+    Row(
+        modifier = Modifier.fillMaxSize(),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            if (filtered) Icons.Outlined.FilterList else Icons.Outlined.Check,
+            contentDescription = null,
+            modifier = Modifier
+                .size(16.dp)
+                .graphicsLayer {
+                    val p = pop.value
+                    val s = 0.4f + 0.6f * p
+                    scaleX = s
+                    scaleY = s
+                    alpha = p.coerceIn(0f, 1f)
+                },
+            tint = kb.accent,
+        )
+        Spacer(Modifier.width(6.dp))
+        Text(
+            stringResource(
+                if (filtered) {
+                    // Not "all clear": the issues are there, the filter is
+                    // simply not showing them.
+                    R.string.ime_grammar_all_filtered_empty
+                } else {
+                    R.string.ime_grammar_no_issues_empty
+                },
+            ),
+            color = kb.secondaryText,
+            fontSize = 13.sp,
+        )
+    }
+}
+
+/** A card's fade in once the cards around it have made room, and out first. */
+private const val GrammarFadeInMs = 180
+private const val GrammarFadeInDelayMs = 60
+private const val GrammarFadeOutMs = 160
+
+/** The cards under a fixed one gliding up into its place, without a wobble. */
+private val GrammarPlacement = spring(
+    dampingRatio = 0.9f,
+    stiffness = Spring.StiffnessMediumLow,
+    visibilityThreshold = IntOffset.VisibilityThreshold,
+)
+
+/**
+ * The fix just applied, played out on its card for as long as the card is
+ * still there: the old words dim under their strike, the new ones slide in
+ * beside a tick. The next check takes the card away and the list closes up.
+ */
+@Composable
+private fun AppliedFixRow(original: String, replacement: String, color: Color) {
+    val kb = LocalKbTheme.current
+    val shown = remember { Animatable(0f) }
+    LaunchedEffect(Unit) { shown.animateTo(1f, tween(AppliedFixMs, easing = FastOutSlowInEasing)) }
+    val slide = with(LocalDensity.current) { 12.dp.toPx() }
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        if (original.isNotBlank()) {
+            Text(
+                original,
+                color = color,
+                fontSize = 13.sp,
+                textDecoration = TextDecoration.LineThrough,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .widthIn(max = 120.dp)
+                    .graphicsLayer { alpha = 1f - 0.55f * shown.value },
+            )
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.graphicsLayer {
+                val p = shown.value
+                alpha = p
+                translationX = -slide * (1f - p)
+            },
+        ) {
+            Icon(
+                Icons.Outlined.Check,
+                contentDescription = null,
+                modifier = Modifier.size(14.dp),
+                tint = kb.accent,
+            )
+            Spacer(Modifier.width(4.dp))
+            Text(
+                replacement,
+                color = kb.suggestionText,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+    }
+}
+
+private const val AppliedFixMs = 220
+
+/**
+ * How long a card holds its applied look if the next check keeps it anyway
+ * (the fix did not satisfy the engine): back to its chips after this.
+ */
+private const val AppliedFixHoldMs = 1_500L
 
 /**
  * DeepL Write's answer: its rewrite of the text sent, or why there is none.
@@ -522,15 +685,29 @@ private fun GrammarLintCard(
     focused: Boolean = false,
     /** The field text the lint is about, for Ask AI's sentence (#352). */
     sourceText: String = "",
+    animate: Boolean = false,
+    modifier: Modifier = Modifier,
 ) {
     val kb = LocalKbTheme.current
     val tools = LocalSelectionTools.current
     val category = categoryFor(lint.kind)
     val catColor = category.color(kb.dark)
     val cardShape = kb.cardShape()
+    // The label of the fix just tapped, while the card plays it out. Keyed on
+    // the lint: a re-check that hands back a different issue under the same
+    // key starts clean.
+    var applied by remember(lint) { mutableStateOf<String?>(null) }
+    LaunchedEffect(applied) {
+        if (applied != null) {
+            delay(AppliedFixHoldMs)
+            applied = null
+        }
+    }
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
+            // One fix per card: a second tap mid-play would edit the field twice.
+            .blockTouches(applied != null)
             .clip(cardShape)
             .background(kb.chip)
             .chipBorder(kb, cardShape)
@@ -609,66 +786,74 @@ private fun GrammarLintCard(
                 tint = kb.secondaryText,
             )
         }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-            if (lint.original.isNotBlank()) {
-                Text(
-                    lint.original,
-                    color = catColor,
-                    fontSize = 13.sp,
-                    textDecoration = TextDecoration.LineThrough,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.widthIn(max = 120.dp),
-                )
-                if (lint.suggestions.isNotEmpty()) {
-                    Text("→", color = kb.secondaryText, fontSize = 13.sp, maxLines = 1)
+        val appliedLabel = applied
+        if (appliedLabel != null) {
+            AppliedFixRow(lint.original, appliedLabel, catColor)
+        } else {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                if (lint.original.isNotBlank()) {
+                    Text(
+                        lint.original,
+                        color = catColor,
+                        fontSize = 13.sp,
+                        textDecoration = TextDecoration.LineThrough,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.widthIn(max = 120.dp),
+                    )
+                    if (lint.suggestions.isNotEmpty()) {
+                        Text("→", color = kb.secondaryText, fontSize = 13.sp, maxLines = 1)
+                    }
                 }
-            }
-            if (lint.suggestions.isEmpty()) {
-                Text(
-                    lint.message,
-                    color = kb.secondaryText,
-                    fontSize = 11.sp,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            } else {
-                Row(
-                    modifier = Modifier
-                        .weight(1f)
-                        .horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                ) {
-                    lint.suggestions
-                        .distinctBy { it.labelText?.trim() ?: it.labelRes }
-                        .take(5)
-                        .forEach { fix ->
-                            // A fix with no text of its own (the delete fix)
-                            // names itself with a resource instead.
-                            val labelText = fix.labelText
-                            val labelRes = fix.labelRes
-                            val fixLabel = when {
-                                !labelText.isNullOrBlank() -> labelText
-                                labelRes != null -> stringResource(labelRes)
-                                else -> stringResource(R.string.ime_grammar_fix_action)
+                if (lint.suggestions.isEmpty()) {
+                    Text(
+                        lint.message,
+                        color = kb.secondaryText,
+                        fontSize = 11.sp,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                } else {
+                    Row(
+                        modifier = Modifier
+                            .weight(1f)
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        lint.suggestions
+                            .distinctBy { it.labelText?.trim() ?: it.labelRes }
+                            .take(5)
+                            .forEach { fix ->
+                                // A fix with no text of its own (the delete fix)
+                                // names itself with a resource instead.
+                                val labelText = fix.labelText
+                                val labelRes = fix.labelRes
+                                val fixLabel = when {
+                                    !labelText.isNullOrBlank() -> labelText
+                                    labelRes != null -> stringResource(labelRes)
+                                    else -> stringResource(R.string.ime_grammar_fix_action)
+                                }
+                                Text(
+                                    fixLabel,
+                                    color = kb.chipActiveText,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    maxLines = 1,
+                                    modifier = Modifier
+                                        .clip(kb.chipShape())
+                                        .background(kb.chipActive)
+                                        .chipBorder(kb, kb.chipShape())
+                                        .clickable {
+                                            if (animate) applied = fixLabel
+                                            onFix(lint, fix)
+                                        }
+                                        .padding(horizontal = 10.dp, vertical = 4.dp),
+                                )
                             }
-                            Text(
-                                fixLabel,
-                                color = kb.chipActiveText,
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                maxLines = 1,
-                                modifier = Modifier
-                                    .clip(kb.chipShape())
-                                    .background(kb.chipActive)
-                                    .chipBorder(kb, kb.chipShape())
-                                    .clickable { onFix(lint, fix) }
-                                    .padding(horizontal = 10.dp, vertical = 4.dp),
-                            )
-                        }
+                    }
                 }
             }
         }

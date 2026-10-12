@@ -28,11 +28,13 @@ fun LayoutSpec.compile(layer: LayoutLayer): KeyboardLayout = synchronized(compil
             ?: error("The default layout has no LETTERS layer")
     // A borrowed symbols page shows the layout's own currency where the shipped
     // one has `$`, as Gboard's does: ₹ under Hindi, ৳ under Bangla. A symbols
-    // page the layout wrote itself is drawn as written.
-    val rows = if (own == null && layer == LayoutLayer.SYMBOLS) {
-        withLocalCurrency(resolved.rows, langId)
-    } else {
-        resolved.rows
+    // page the layout wrote itself is drawn as written. Japanese and Chinese
+    // also get their own punctuation on both borrowed pages (issue #610).
+    val rows = when {
+        own != null -> resolved.rows
+        layer == LayoutLayer.SYMBOLS -> withCjkPunctuation(withLocalCurrency(resolved.rows, langId), layer, langId)
+        layer == LayoutLayer.SYMBOLS_SHIFTED -> withCjkPunctuation(resolved.rows, layer, langId)
+        else -> resolved.rows
     }
     val built = KeyboardLayout(
         name = "$id/${layer.key}",

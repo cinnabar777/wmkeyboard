@@ -10,6 +10,8 @@ import android.graphics.drawable.AnimatedImageDrawable
 import android.os.Build
 import com.wasimaster.wmkeyboard.core.media.AnimatedWebpWriter
 import com.wasimaster.wmkeyboard.core.media.MediaMime
+import com.wasimaster.wmkeyboard.core.stickers.telegram.TgsFrames
+import com.wasimaster.wmkeyboard.core.stickers.telegram.WebmFrames
 import java.io.ByteArrayOutputStream
 
 /**
@@ -29,6 +31,10 @@ import java.io.ByteArrayOutputStream
  * no app takes one as a sticker. Its frames are read with [ApngFrames], each
  * is encoded as a still WebP by the platform, and [AnimatedWebpWriter] wraps
  * those into one animated WebP, which is both.
+ *
+ * Telegram's two animated kinds go the same way: a `.tgs` (a gzipped Lottie
+ * animation) is drawn frame by frame with [TgsFrames], and a `.webm` video
+ * sticker is decoded, transparency and all, with [WebmFrames].
  */
 object StickerImage {
 
@@ -114,6 +120,16 @@ object StickerImage {
             animatedFromApng(bytes)?.let { return Result.Ok(it) }
         }
 
+        // Telegram's animated (Lottie) and video (WebM) stickers. No decoder
+        // reads either as a picture, so when the frames cannot be turned into
+        // an animated WebP the first one is kept, marked as such.
+        if (TgsFrames.isTgs(bytes)) {
+            return framesToSticker { onFrame -> TgsFrames.forEach(bytes, TARGET_SIZE, MAX_ANIMATED_FRAMES, onFrame) }
+        }
+        if (WebmFrames.isWebm(bytes)) {
+            return framesToSticker { onFrame -> WebmFrames.forEach(bytes, MAX_ANIMATED_FRAMES, onFrame) }
+        }
+
         val animation = detectAnimation(bytes)
         if (animation != null) {
             if (bytes.size > MAX_ANIMATED_BYTES) return Result.TooLarge
@@ -151,9 +167,52 @@ object StickerImage {
      */
     private fun animatedFromApng(bytes: ByteArray): ProcessedSticker? {
         if (ApngFrames.frameCount(bytes) > MAX_ANIMATED_FRAMES) return null
+        return animatedFrom { onFrame -> ApngFrames.forEach(bytes, onFrame) }
+    }
+
+    /**
+     * Something that hands over the frames of an animation, each as a bitmap
+     * valid only during the call, and returns how many it handed over. Called
+     * once per quality rung, so it decodes from the start each time.
+     */
+    private fun interface FrameSource {
+        fun forEach(onFrame: (frame: Bitmap, durationMs: Int) -> Unit): Int
+    }
+
+    /**
+     * A sticker out of [frames]: animated when they can be encoded, else the
+     * first frame as a still, marked flattened when there were more.
+     */
+    private fun framesToSticker(frames: FrameSource): Result {
+        animatedFrom(frames)?.let { return Result.Ok(it) }
+        var first: Bitmap? = null
+        val count = frames.forEach { frame, _ ->
+            if (first == null) first = frame.copy(Bitmap.Config.ARGB_8888, false)
+        }
+        val still = first ?: return Result.NotAnImage
+        val canvas = square(still)
+        if (canvas !== still) still.recycle()
+        val encoded = encodeWebp(canvas)
+        canvas.recycle()
+        return if (encoded == null) Result.NotAnImage else Result.Ok(
+            ProcessedSticker(
+                bytes = encoded,
+                mime = MediaMime.WEBP,
+                animated = false,
+                aspectRatio = 1f,
+                flattened = count > 1,
+            )
+        )
+    }
+
+    /**
+     * [frames] as an animated WebP on the sticker canvas, or null when they
+     * cannot be read or do not fit under [MAX_ANIMATED_BYTES] at any quality.
+     */
+    private fun animatedFrom(frames: FrameSource): ProcessedSticker? {
         var best: ByteArray? = null
         for (quality in ANIMATED_QUALITY_LADDER) {
-            val encoded = encodeApngAt(bytes, quality) ?: return null
+            val encoded = encodeFramesAt(frames, quality) ?: return null
             best = encoded
             if (encoded.size <= ANIMATED_TARGET_BYTES) break
         }
@@ -162,11 +221,11 @@ object StickerImage {
         }
     }
 
-    /** One pass over the frames of [bytes] at [quality]. Null when any frame fails. */
-    private fun encodeApngAt(bytes: ByteArray, quality: Int): ByteArray? {
+    /** One pass over [frames] at [quality]. Null when any frame fails. */
+    private fun encodeFramesAt(frames: FrameSource, quality: Int): ByteArray? {
         val writer = AnimatedWebpWriter(TARGET_SIZE, TARGET_SIZE)
         var failed = false
-        val delivered = ApngFrames.forEach(bytes) { frame, durationMs ->
+        val delivered = frames.forEach { frame, durationMs ->
             if (failed) return@forEach
             // The frame belongs to the decoder, which draws the next one over
             // it; only a canvas made here is this function's to recycle.
@@ -184,7 +243,8 @@ object StickerImage {
      * flatten it to one frame.
      */
     fun isAnimatedSource(bytes: ByteArray): Boolean =
-        detectAnimation(bytes) != null || ApngFrames.isAnimated(bytes)
+        detectAnimation(bytes) != null || ApngFrames.isAnimated(bytes) ||
+            TgsFrames.isTgs(bytes) || WebmFrames.isWebm(bytes)
 
     /**
      * Decodes a still for the editor, at up to [maxSide] on its long edge.

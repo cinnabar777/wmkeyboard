@@ -12,6 +12,29 @@
         "rows": [
           [
             {
+              "label": "拼音",
+              "action": {
+                "type": "reading_column"
+              },
+              "rowSpan": 3,
+              "longPress": [
+                "，",
+                "。",
+                "？",
+                "！",
+                "、",
+                "：",
+                "；",
+                "…",
+                "“",
+                "”",
+                "「",
+                "」",
+                "《",
+                "》"
+              ]
+            },
+            {
               "label": "分词",
               "output": "'"
             },
@@ -32,12 +55,6 @@
           ],
           [
             {
-              "label": "?123",
-              "action": {
-                "type": "symbols"
-              }
-            },
-            {
               "label": "GHI",
               "output": "4"
             },
@@ -48,18 +65,24 @@
             {
               "label": "MNO",
               "output": "6"
-            }
-          ],
-          [
+            },
             {
               "label": "，",
               "longPress": [
                 "！",
                 "？",
-                "、"
+                "、",
+                "“",
+                "”",
+                "「",
+                "」",
+                "《",
+                "》"
               ],
               "role": "Comma"
-            },
+            }
+          ],
+          [
             {
               "label": "PQRS",
               "output": "7"
@@ -71,14 +94,6 @@
             {
               "label": "WXYZ",
               "output": "9"
-            }
-          ],
-          [
-            {
-              "label": "🌐",
-              "action": {
-                "type": "language_switch"
-              }
             },
             {
               "label": "。",
@@ -88,12 +103,27 @@
                 "；"
               ],
               "role": "Period"
+            }
+          ],
+          [
+            {
+              "label": "?123",
+              "action": {
+                "type": "symbols"
+              }
+            },
+            {
+              "label": "🌐",
+              "action": {
+                "type": "language_switch"
+              }
             },
             {
               "label": " ",
               "action": {
                 "type": "space"
-              }
+              },
+              "width": 2
             },
             {
               "label": "⏎",

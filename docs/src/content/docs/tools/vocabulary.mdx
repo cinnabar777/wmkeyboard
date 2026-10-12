@@ -22,6 +22,16 @@ Open <SettingsPath path="Tools / Vocabulary / Vocabulary packs" /> and download 
 
 Packs also come from [add-on repositories](/addons/overview/) (type `vocabulary`), from a `.wmvocab.json` file opened in a file manager (gzipped or not), or from your own lists (see below). Several packs can be on at once; a word that appears in more than one shows every list it belongs to on its card.
 
+### Bringing your flashcards
+
+**Import a pack or flashcards** at the bottom of the installed packs takes the cards you already have elsewhere, as well as `.wmvocab.json` files:
+
+- **Anki**: a deck (`.apkg`) or a whole collection (`.colpkg`), from any Anki version, including the newer exports that older readers cannot open. Only the notes are read; images and sounds stay behind.
+- **Quizlet**: the text from **Export**, with a tab or a comma between term and definition and a new line between cards. Save it as a `.txt` file and pick that.
+- **Any CSV or TSV**: a spreadsheet saved with a word column and a meaning column. Anki's **Notes in Plain Text** export works too.
+
+The front of each card becomes the word and the back its definition. When the columns or the note's fields have names, they are used: *Front*, *Word* or *Term* is the word, *Back*, *Meaning* or *Definition* the definition, and a field called *Example* or *Sentence* fills the example, *Reading* or *Pronunciation* the pronunciation. Formatting is removed. A word that is on more than one card gets one entry with each meaning as a sense. Cloze cards, and cards whose front is a sentence rather than a word (more than 64 characters), are skipped. The pack takes the file's name, or the deck's name for a whole collection, and appears with the other installed packs, where it can be switched off or deleted.
+
 Translations are separate, small downloads per pack and language. The languages your keyboard is set to are fetched on their own when a pack lands or when you add a language (a romanised layout such as Banglish reads the Bangla glosses; a Croatian keyboard takes the Serbo-Croatian sidecar when a pack has no closer one), and you can pick others under **Translation languages** on the tool's page. The full list of a pack's languages folds out under it on the packs screen. Every gloss in another script carries a romanisation, so the card can show "ghrina" beside ঘৃণা.
 
 <SettingsPath path="Tools / Vocabulary / Browse words" /> lists every word across your installed packs, searched by word or definition. Chips filter it to one pack or to all of them, and to All, New, Learning or Learnt; tap a word for its card, and a check mark shows the ones you have learnt.

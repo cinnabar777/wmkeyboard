@@ -1,6 +1,6 @@
 ---
 title: "Importing from other keyboards"
-description: "Bring layouts, themes and dictionaries over from FlorisBoard, HeliBoard, LeanType, FUTO, Samsung Keyboard (Keys Cafe) and Gboard: what converts, what doesn't, and why."
+description: "Bring layouts, themes, dictionaries and whole settings backups over from FlorisBoard, HeliBoard, LeanType, FUTO, CleverKeys, Unexpected Keyboard, AnySoftKeyboard, Samsung Keyboard (Keys Cafe), Multiling O and Gboard, plus layouts made for Windows, macOS and Linux: what converts, what doesn't, and why."
 sidebar:
   order: 6
 ---
@@ -8,7 +8,7 @@ sidebar:
 import SettingsPath from '@components/SettingsPath.astro';
 import KeyCap from '@components/KeyCap.astro';
 
-Switching keyboards usually means leaving your layouts, themes and dictionaries behind. WM Keyboard reads FlorisBoard, HeliBoard, LeanType, FUTO and Samsung Keyboard (Keys Cafe) files directly and converts them into its own, so the grid you built, the theme you picked and the word list you collected come with you.
+Switching keyboards usually means leaving your layouts, themes and dictionaries behind. WM Keyboard reads FlorisBoard, HeliBoard, LeanType, FUTO, Unexpected Keyboard, CleverKeys, Samsung Keyboard (Keys Cafe) and Multiling O files directly and converts them into its own, so the grid you built, the theme you picked and the word list you collected come with you. It also reads the layout files people make for computers (Windows `.klc`, macOS `.keylayout` and Linux XKB), which is where a lot of layouts for smaller languages live.
 
 Conversion is honest about being lossy. A layout import always ends on a confirm dialog that lists what changed and what could not be carried, and nothing is written until you accept it. A `.flex` theme opened from a file manager gets the same treatment. The **FlorisBoard** button inside Settings is the one route without a confirm step: it saves the theme straight away and then tells you what it saved. Saved is not switched on, so you still get to look first.
 
@@ -20,19 +20,107 @@ Conversion is honest about being lossy. A layout import always ends on a confirm
 | `.txt` layout | HeliBoard | A custom layout |
 | `.yaml` layout | FUTO Keyboard | A custom layout |
 | `.kcf` layout | Samsung Keyboard, shared from Keys Cafe | A custom layout, kept exactly as it was laid out |
+| DIY or DIY+ layout text, or a settings export | Multiling O Keyboard | A custom layout with its symbols and AltGr pages, or every layout in the export |
+| `.xml` layout | Unexpected Keyboard, CleverKeys | A custom layout that keeps the swipes to each key's corners |
+| `.klc` layout | Windows, made in Microsoft Keyboard Layout Creator | A custom layout, with AltGr and dead-key letters on press and hold |
+| `.keylayout` layout | macOS, made in Ukelele | A custom layout, with Option and dead-key letters on press and hold |
+| XKB `symbols` file | Linux | A custom layout for each variant in the file |
 | `.flex` theme | FlorisBoard 0.4 and later | One theme, one look per theme in the file |
+| `.zip` theme | FUTO Keyboard | One theme, with its background picture and font |
 | `.flex` language pack | FlorisBoard | A Cangjie or stroke table for Chinese |
 | Colour theme text | HeliBoard, LeanType | One theme, from a file or from the clipboard |
+| `OK_Settings_Begin` theme text or a theme link | Multiling O Keyboard | One theme, from a file or from the clipboard |
 | `.zip` theme | Gboard, the Rboard community | One theme, with a look each for key borders on and off |
 | `.zip` or `.pack` theme pack | Rboard | Any or all of the themes inside, each its own theme |
 | `.keyman-touch-layout` | Keyman | A custom layout, without the keyboard's rules |
 | `.kmp` package | Keyman | A custom layout **and** its typing rules |
 | `.combined` word list | HeliBoard, LeanType, FUTO, any AOSP keyboard | A custom dictionary |
 | `.dict` dictionary | HeliBoard, LeanType, FUTO, OpenBoard, GApps | A custom dictionary |
+| `PersonalDictionary.zip`, or the `dictionary.txt` inside it | Gboard | Words in your personal dictionary, and shortcuts as snippets: see [Gboard's personal dictionary](#gboards-personal-dictionary) |
+| Backup `.zip` | HeliBoard, LeanType, FlorisBoard, CleverKeys | A list of everything inside to pick from: see [Whole backups](#whole-backups) |
+| Backup `.backup` | FUTO Keyboard | The same list |
+| `AnySoftKeyboardPrefs.xml`, or a CleverKeys settings `.json` | AnySoftKeyboard, CleverKeys | The same list, settings only |
 
 HeliBoard's JSON layouts use FlorisBoard's format, so one reader handles both. LeanType is a HeliBoard fork, so its layouts and themes are HeliBoard's.
 
 **Keyman is a different story.** 862 Keyman key grids are already built into the app, so for most of them there's nothing to import. You can still open a `.keyman-touch-layout` file or a full `.kmp` package yourself, which is how you'd add a keyboard that isn't bundled or one you're writing. A `.kmp` brings its typing rules with it; a touch layout file does not. See [Keyman layouts](/languages/keyman/).
+
+## Whole backups
+
+Most keyboards can save everything to one file: their settings, your layouts, your themes and the words they learned. WM Keyboard reads that file whole and shows you what is in it, one row per item, before anything is written. Every row starts ticked. Untick what you don't want, then tap **Import**.
+
+Open the file from <SettingsPath path="Data / Backup & restore / Import from another keyboard" />, from a file manager, or from **Restore a backup** on the first page of the [setup wizard](/start/setup/#running-the-setup-wizard), where it also skips the rest of the wizard.
+
+To make the file on the other keyboard:
+
+| Keyboard | What to look for |
+|---|---|
+| HeliBoard, LeanType | **Backup and restore** in its settings, under Advanced. You get a `.zip` |
+| FUTO Keyboard | **Export settings** in its settings. You get a `.backup` file, which is a ZIP |
+| FlorisBoard | **Backup & Restore** in its settings, under Advanced. You get a `.zip` |
+| CleverKeys | Its backup screen. A full backup `.zip` or a settings `.json` both work |
+| AnySoftKeyboard | Its backup screen. You get `AnySoftKeyboardPrefs.xml` |
+
+Menu names differ between versions of each keyboard; look for "backup" or "export" in its settings.
+
+### What comes across
+
+| Part | HeliBoard, LeanType | FUTO | FlorisBoard | CleverKeys, AnySoftKeyboard |
+|---|---|---|---|---|
+| Your own letter layouts | Yes | Yes | Yes | CleverKeys: yes, with the language you set for each. AnySoftKeyboard: no |
+| Your colour themes | Yes, and the one in use is switched on | Yes, and the one in use is switched on | Yes, and the one in use is switched on | No |
+| Your languages | Yes, each with the closest built-in layout, or with your own layout when it is imported too | Yes | Yes | No |
+| Dictionaries you added | Yes | Yes | None in the backup | No |
+| Words learned from your typing | Yes, as a word list | Yes, as a word list | None in the backup | No |
+| Words you added by hand | None in the backup, see the note below | Yes, as words you added here | None in the backup | No |
+| Words never suggested | Yes | Yes | No | No |
+| Settings | Yes | Yes | Yes | Yes |
+
+Languages are added in front of the ones you already have, and the first becomes the one you type in. The app downloads each new language's word list and prediction data in the background, the same way the setup wizard does.
+
+A layout keeps its name. HeliBoard stores the name it was given in its file name, and that is what you see. A layout made for one language is filed under that language; a layout made for a whole script (HeliBoard's "Latin" layouts) is filed under the language its letters suggest. You can change it later in the layout editor.
+
+Learned words arrive as their own list under [Custom dictionaries](/reference/settings/dictionaries/), not mixed into this keyboard's learning, so you can switch them off or delete them in one place.
+
+### Which settings come across
+
+Only settings that mean exactly the same thing in both keyboards are offered. Each one is a row of its own, with the value it will get here.
+
+| Setting here | What the other keyboard calls it |
+|---|---|
+| Number row | Number row |
+| Key popup | Popup on key press |
+| Vibrate on key press, Vibration length | Vibration, and its length in milliseconds |
+| Sound on key press, Key sound volume | Sound, and its volume |
+| Autocorrect | Autocorrection |
+| Automatic capitals | Auto-capitalization |
+| Double space types a period | Double-space period |
+| Suggestions, Emoji suggestions | Show suggestions, emoji suggestions |
+| Glide typing | Gesture or glide input |
+| Long press delay | Long press timeout |
+| Key height | Keyboard height, from its scale (1.25 times is 60 dp here) |
+| Split keyboard | Split keyboard |
+| Light or dark | The light, dark or black colour set, or following the system |
+| Press and hold on toolbar keys | HeliBoard and LeanType's toolbar key codes: the long press you set for each toolbar key |
+
+A toolbar key's long press comes across only where you changed it in HeliBoard. The long presses HeliBoard ships with (Undo to redo, Copy to cut, Clipboard to paste and the rest) are the [pairs this app holds to already](/tools/overview/#hold-a-tool-for-a-second-action). A long press set to repeat the key is left out, since here that is the cursor tools' own setting, and so is one with no tool here, like clearing the clipboard history.
+
+Values are kept inside this app's own limits: a vibration of 100 ms becomes 60 ms, the most this app allows. A value that only means "use the system's", like HeliBoard's default vibration length, is left out, because this app already does that when nothing is set. Settings that look alike but measure something else, like each keyboard's autocorrect strength, are left out rather than guessed at.
+
+Settings are written the way a restore of this app's own backup is: the keyboard reads its settings back afterwards, and puts everything back as it was if they no longer read.
+
+### What does not come across
+
+The list ends with what the backup holds that has nowhere to go here, so nothing disappears without a word:
+
+- **Clipboard history.** Never imported. It belongs to the other keyboard and is often private.
+- **Symbol and number layouts.** This app draws those from its own.
+- **Theme files the app cannot read**, such as a damaged one.
+- **Custom fonts and background pictures** from HeliBoard.
+- **Language models and voice data** from FUTO, which are that keyboard's own engines.
+- **Shortcuts on FUTO's added words.** The words come across; the shortcuts on them do not.
+
+HeliBoard keeps the words you add by hand in Android's own personal dictionary, not in its backup. Bring those across from <SettingsPath path="Typing / Suggestions / Personal dictionary" /> with its import from Android.
 
 ## Layouts
 
@@ -149,6 +237,65 @@ This is the one format that carries the whole frame. Keys Cafe writes the shift 
 - **Widths follow the file.** A plain key is one unit, a wider shift or space bar keeps its proportion.
 - **A function key this app does not know is removed and named** by its code, the same as a HeliBoard key would be. One real export has been read, so the known codes are the delete, shift and symbols keys, space and enter. If the dialog names a code and you know what that key was, say so in an issue and it is one line to add.
 
+### Multiling O Keyboard layouts
+
+Multiling O builds its layouts out of text, and its users share them as text: in forum posts, gists and READMEs, for scripts few other keyboards ship. Copy the text into a `.txt` file and pick it with the same **Import from another keyboard** button, or open the file from a file manager. Three forms are read:
+
+- **A DIY layout**, a JSON object with a `title` and an `onScreen` object holding the rows of each page (`main`, `sym`, `altGr` and the rest). It is the whole keyboard, bottom row included, so it is kept as laid out, the way a Keys Cafe layout is. A layout copied out of a share link, with `%0A` and `%22` in it, reads the same.
+- **A DIY+ layout**, the block from `OK_Layout_Begin` to `OK_Layout_End`. Its rows come in blocks of four: the letters with a row of digits on top, the same rows shifted, then the symbols, the AltGr page, the shifted AltGr page and the shifted symbols. It has no shift, delete or bottom row of its own, so it gets this app's, as [above](#it-adds-the-shift-key-and-the-bottom-row). The row of digits becomes this layout's number row.
+- **A settings export**, the block from `OK_Settings_Begin` to `OK_Settings_End` that Multiling writes under **Misc → Import | Export**. It holds every layout you made, each filed under the language it was made for. The dialog lists them all and adds them all in one step, each with that language, or with the one its letters suggest where this app does not have the language. The colours in the export are saved as a theme beside them. Landscape copies of a layout are skipped: this app sizes one grid for both.
+
+A row is a string of keys, and each part comes across like this:
+
+- **A character is a key, and a space is a gap.** `[]` straight after a key makes it one key wider, as `[SPACE][][]` does.
+- **Named keys** (`[SHIFT]`, `[DEL]`, `[ENTER]`, the arrows, copy and paste, F1 to F12 and the rest) become the same keys here. `[WDEL]` is a plain delete key, because swiping left on delete removes whole words here.
+- **`[4D:…]`, `[1+4:…]` and `[3+2:…]`**, the swipe keys, keep their swipes. The first character is the tap and the rest are the eight directions, the way a MessagEase pad has them. A swipe that runs a key (a cursor move, copy, a page switch) keeps doing that. A swipe on a key whose own swipe is already taken here, such as the delete key or the space bar, is removed and counted.
+- **`[XK:…]`** types its first character, with the rest on its press and hold.
+- **`[MT:…]`** cycles through its characters on repeated taps.
+- **`[MC:…]`** types more than one character, under its own label when it gives one. A shortcut such as `[MC:[CTRL]z:undo]` becomes that key press. Multiling's date and time macros are removed and named.
+- **`[U+0915]`** is the character with that code.
+- **`[SYM:.]`, `[ALTGR:,]` and `[123:…]`** type their character on a tap and open their page when you swipe from them in any direction. The page is on their press and hold too.
+
+The pages come across with the layout. `sym` and `symShifted` become this layout's two symbols pages. AltGr, 123 and Edit become pages of the layout, opened from the same keys as before; on a DIY+ layout, swipe from the comma key or hold it to open AltGr. A shifted page laid out key for key like the page it shifts becomes the shifted forms of those keys. Multiling's tool key opens a menu that this app keeps on its toolbar, so it becomes <KeyCap>?123</KeyCap> on a letters page that has no other way to the symbols, and <KeyCap>ABC</KeyCap> on a page that has no other way back. A key this app has nothing for, such as `[INFO]` or `[PREDICT]`, is removed and named in the dialog.
+
+### Unexpected Keyboard and CleverKeys layouts
+
+Unexpected Keyboard has no layout editor of its own: a custom layout is a block of XML pasted into its settings, and people share them that way, in the project's community layouts repository, in gists and in issue threads. CleverKeys reads and shares the same XML. Save the XML as a `.xml` or `.txt` file and pick it with the same **Import from another keyboard** button, or open the file from a file manager. A CleverKeys backup brings its custom layouts with it; see [Whole backups](#whole-backups).
+
+- **The swipes stay swipes.** Each key's tap (`c`, or `key0` in older files) is the key, and the eight corner and edge swipes (`nw`, `ne`, `sw`, `se`, `n`, `s`, `e`, `w`, or `key1` to `key8`) become the key's [flick arms](/typing/gestures/#flick-keys), drawn on its face as they were. A swipe that types text is on the key's press and hold too. A swipe that runs a key, such as a cursor move or copy, keeps doing that. A swipe on a key whose own swipe is already taken here, such as delete's `ne="delete"` or a space bar's cursor swipes, is removed and counted.
+- **Swipe typing does not start on a key with flick arms**, because the swipe off the key is the flick. A grid with corner swipes on every letter therefore does not take swipe typing. Remove the arms in the layout editor if you want it back.
+- **Named keys** (`shift`, `backspace`, `enter`, the arrows, `copy`, `paste`, `undo`, F1 to F12 and the rest) become the same keys here. `switch_numeric` opens the <KeyCap>?123</KeyCap> page and `switch_forward` changes language. The accent keys (`accent_aigu`, `accent_grave` and the rest) become dead keys. `legend:'text'` types the text under that label, `legend:keyevent:85` sends that key code, and a macro of modifiers and one letter, such as `Cz:ctrl,z`, becomes that key press. A key this app has nothing for, such as `compose` or `switch_greekmath`, is removed and named in the dialog.
+- **A `loc` key is skipped.** Unexpected Keyboard shows those only when a setting adds them, so nothing is said about them.
+- **The bottom row** is this app's, as [above](#it-adds-the-shift-key-and-the-bottom-row), unless the file says `bottom_row="false"` and has its own space bar and delete key. Such a grid is kept as laid out, the way a Keys Cafe layout is.
+- **The number row** is this app's, unless the file says `embedded_number_row="true"`. Then its row of digits becomes this layout's own number row.
+- **Gaps and widths follow the file.** A key's `shift` becomes a gap to its left, and a row that starts with one stays aligned to the left, as it was. Row heights come across too.
+- **`<shift a="i" b="İ"/>`** in the `modmap` becomes that key's shifted form. The Fn and Ctrl mappings have no place here and are left out.
+- **The language** is the one a CleverKeys layout names in its `language` attribute, or in a backup the one you set for it there. Otherwise the picker starts from the letters on the keys.
+
+### Layouts made for a computer (Windows, macOS, Linux)
+
+Plenty of keyboard layouts for smaller languages were only ever made for a computer. Someone built one in Microsoft's Keyboard Layout Creator or in Ukelele, or wrote an XKB file for Linux, and put it on a university page or a forum. WM Keyboard reads all three. Pick the file with the same **Import from another keyboard** button, or open it from a file manager.
+
+| File | Made with | How the app knows it |
+|---|---|---|
+| `.klc` | Microsoft Keyboard Layout Creator (MSKLC), Windows | The extension, and its `KBD`, `SHIFTSTATE` and `LAYOUT` sections. MSKLC saves these files as UTF-16, and the app reads them that way |
+| `.keylayout` | Ukelele, or by hand, macOS | The extension, and its `<keyMapSet>` |
+| XKB `symbols` file | Linux, the files under `/usr/share/X11/xkb/symbols/` | Its `xkb_symbols "name" {` blocks. These files have no extension, so only the contents count |
+
+A computer keyboard has about 48 keys that type something, with four levels on each: plain, Shift, AltGr (Option on a Mac), and Shift with AltGr. A phone grid has room for about 30 keys and two levels, so the layout gets folded down:
+
+- **The 26 letter keys stay where they are**, whatever they type. The keys around them come across too when they type a letter, at the end of their row: Danish æ ø å, a Dvorak s where QWERTY has its semicolon. Keys that type only punctuation are left to this app's symbol pages.
+- **The number row** becomes a row of the grid only when five or more of its keys type letters, the way the Czech, Slovak and Lithuanian layouts are built. With fewer, each letter goes on press and hold of the letter it is built on (é on e, which is where AZERTY users reach it on a phone anyway), or onto the end of the shortest row when it is not built on one (German ß).
+- **Shift** comes across as each key's shifted form, where that is more than the capital letter.
+- **AltGr goes on press and hold** of the same key, first, so the corner hint shows what the key's AltGr level was.
+- **Dead keys go on press and hold too.** Every letter on the grid gets the accented letters the file's dead keys make of it, so a dead acute puts á on a and é on e. A dead key that sits on one of the letter keys keeps its place and works as a dead key here.
+- **Nothing is dropped without a word.** Characters on the left-out keys that are not plain ASCII or digits, such as Armenian ՝ or Ethiopic ።, go on press and hold of the full stop. The dialog says how many.
+- **Shift, delete and the bottom row** are this app's, as [above](#it-adds-the-shift-key-and-the-bottom-row).
+
+A `.klc` names its language (`LOCALENAME`), and the picker starts from it. The other two do not, so the app guesses from the letters as usual.
+
+An XKB file usually holds several variants. The import offers each one that is a whole layout, the default first, and adds them all at once; parts that only set up modifier keys are skipped. A variant often builds on another with `include "us(basic)"`. An include of a variant in the same file is followed, and so are the plain US and Latin bases, which are built in. An include of any other file cannot be, since you opened only the one file, so the dialog names it and you know which keys may be missing. Includes that only set up modifiers, such as `level3(ralt_switch)`, carry no characters and are not mentioned. An XKB dead key (`dead_acute`) puts its accent on a letter the way Unicode composes them, because the real tables live in your Linux system's Compose file, not in the layout.
+
 ### Letters are rewritten to one spelling
 
 Some letters can be written two ways in Unicode: a base letter plus a mark, or a single character that means the same thing. Bengali, Devanagari, Gurmukhi and Oriya all have letters like this. WM Keyboard's cluster shaping and its backspace rules use the single-character spelling, so the app rewrites the other one on the way in. Without it a key looks correct and then deletes half a letter at a time.
@@ -190,9 +337,22 @@ Only one shape is refused: revision 402 of version 4, which no current keyboard 
 
 See [Dictionaries & words](/reference/settings/dictionaries/) for the screen itself.
 
+### Gboard's personal dictionary
+
+<SettingsPath path="Typing / Suggestions / Personal dictionary / Import a Gboard dictionary" />
+
+In Gboard, open **Settings**, then **Dictionary**, then **Personal dictionary**, and choose **Export** from the menu. You get a `PersonalDictionary.zip`. Open it from the row above, from a file manager, or share it to WM Keyboard. The file can also be the `dictionary.txt` inside the zip, which is the shape community packs of LaTeX symbols and emoji codes ship in.
+
+Each entry in the file is a word, a shortcut for it, or both, and the two go to different places:
+
+- **A word with no shortcut** goes into your [personal dictionary](/smart/personal-dictionary/) as a word you added by hand, capitals kept. A phrase such as "New York City" comes in as its separate words, the way an entry from Android's dictionary does.
+- **A shortcut** becomes a [snippet](/tools/snippets/) in a folder called **Gboard**, so you can switch the whole set off at once. Gboard never types a shortcut out by itself: it shows the word as a suggestion. The snippet does the same, because each one is set to ask first. A shortcut Gboard maps to several words becomes one snippet that offers all of them.
+
+The dialog counts both halves before anything is written. The locale Gboard saved with each entry is not used, since the personal dictionary here is shared by every language. Picking the same file from the Text expansion import adds the shortcuts only, and says how many words it left for this screen.
+
 ## Chinese code tables
 
-<SettingsPath path="Languages / Chinese / Chinese options / Import from FlorisBoard" />
+<SettingsPath path="Languages & layouts / Chinese / Chinese options / Import from FlorisBoard" />
 
 FlorisBoard's other kind of `.flex` is a language pack: an SQLite database of the shape-based Chinese tables, where a code spells a character by how it looks rather than how it sounds. Those are the same tables this app's own **Cangjie** and **Stroke** packs hold, so a pack you already have fills one without a download.
 
@@ -277,6 +437,59 @@ The result message counts what landed: *"The app saved Midnight and used 19 of i
 
 A theme is saved rather than switched on, the same as a FlorisBoard one, so you get to look at it first. Day or night is decided from the board colour, since neither shape records it.
 
+### Multiling O themes
+
+<SettingsPath path="Appearance / Keyboard themes / Multiling O" />
+
+Multiling O has no theme file either. A theme is the colours part of its settings export, a block of lines from `OK_Settings_Begin` to `OK_Settings_End`, and themes are shared as that block or as a link to a page with the block in it. The **Multiling O** button asks where yours is: **Paste** takes the block or the link off the clipboard, **Open a file** reads a text file you saved it in. A whole settings export works too, and so does opening it from a file manager.
+
+The nineteen colours on Multiling's **Color** screen land like this:
+
+| Multiling | Here |
+|---|---|
+| Background | The board |
+| Key1, Text1 | The letter keys and their labels |
+| Key2, Text2 | The other keys (punctuation, shift, delete) and enter |
+| Highlight | A pressed key |
+| Key1 shadow | The key shadow colour, with a small lift |
+| Popup, Popup text | The key popup |
+| Suggestion bar, Suggestion bar text | The suggestion strip |
+| Sub-text1 (or Sub-text2) | The corner hint |
+| Space bar, Space bar text | The space bar's own style |
+| Suggestion highlight | The accent |
+
+A colour of `0` is how that screen says "none", so it stays unset here and this app works it out. The key corner radius, the label size and bold labels come across too. A shadow behind the key labels has no place here, and a wallpaper is only a switch in the text, never the picture; the result message says so when a theme has either.
+
+### FUTO Keyboard themes
+
+<SettingsPath path="Appearance / Keyboard themes / FUTO" />
+
+A FUTO theme is a `.zip`: a settings file and the pictures it names. Pick one with the **FUTO** button, open it from a file manager, or bring all of them at once with a FUTO backup (see [Whole backups](#whole-backups)). Both of FUTO's settings files are read: `theme.txt`, the hand-written format themes are shared in, and `config.json`, what FUTO's own theme editor saves.
+
+FUTO paints its keyboard from a handful of its colour roles, and those are the ones that come across:
+
+| FUTO role | Here |
+|---|---|
+| `keyboard_surface` | The board, and the suggestion strip |
+| `keyboard_container`, `on_keyboard_container` | The letter keys and their labels |
+| `keyboard_container_variant` | The other keys (shift, delete, symbols) |
+| `keyboard_container_pressed` | A pressed key |
+| `primary`, `on_primary` | The enter key, the accent and the swipe trail |
+| `keyboard_press` | The long-press popup |
+| `on_background` | The suggestion text |
+| `hintColor` (editor themes only) | The corner hint; otherwise the label colour at half strength, as FUTO draws it |
+| `navigationBarColor` (editor themes only) | The navigation bar |
+
+The other thirty-odd roles colour FUTO's own menus and have nothing to fill here. **Key borders off** becomes the **None** key shape, labels on the bare board. The key roundness becomes the corner radius (FUTO's 9 dp a step), and the label size and a heavy label weight come across from a `theme.txt`. A background picture comes across with its opacity, and a font in the file is installed and used.
+
+What does not come across, and the dialog lists whichever applies:
+
+- **Pictures drawn per key**, FUTO's `matchrules` key borders and icons. Those keys are drawn in the theme's colours instead.
+- **Colours from the wallpaper**, written as `system_…`. This app works out its own colours for those parts.
+- **An animated background shader.**
+
+Like the other converted themes, a FUTO theme is saved but not turned on.
+
 ### FlorisBoard 0.4 themes
 
 Both style formats are read. FlorisBoard renamed several parts in 0.5 (the board went from `keyboard` to `window`, the popup from `key-popup` to `key-popup-box`), but the colours and the way they are written did not change, so a 0.4 theme converts as well as a 0.5 one. Most themes still in circulation are the older format.
@@ -331,6 +544,7 @@ They also travel with the theme rather than with the keyboard. Switch theme and 
 - **Opening a `.flex` from a file manager** works because the app registers that extension. If FlorisBoard is installed too, Android asks which app should open it.
 - **A Gboard `.zip` opens from a file manager by what is inside it.** `.zip` is far too common to claim by name, but the app is offered for ZIP files by type, and one with a Gboard `metadata.json` or an Rboard `pack.meta` at its root is recognised. A pack opened that way has no list to pick from, so Import adds every theme in it.
 - **Size caps.** A theme or pack is read up to 48 MB inflated, 4 MB per picture, 128 themes per pack; a downloaded Rboard pack is refused past 32 MB. Entry names are only ever looked up, never used as paths.
+- **A whole backup opens from a file manager by what is inside it.** HeliBoard, LeanType, FlorisBoard and CleverKeys backups are `.zip` files and FUTO's is a ZIP named `.backup`. Neither extension is claimed, but a ZIP holding one of their settings files is recognised however it is named. Each part is read up to 32 MB, and a backup is refused past 128 MB of the parts the app keeps; FUTO's language models are counted and skipped, never read into memory.
 - **Foreign layout files are not auto-detected from a file manager.** They carry no marker that identifies them, so they go through <SettingsPath path="Layout & size / Key layouts / Import from another keyboard" />, where you have already said what the file is. This app's own `.wmlayout.json` files do open from a file manager, because they carry a format tag.
 - **A foreign layout over 4 MB is refused.** The whole file is decoded as one string, so there is a cap, and the cap is 4 MB. Past it you get the same "The app cannot read that file as a layout" message a genuinely unreadable file gets, with nothing to say the size was the problem. No real grid is anywhere near it, so in practice this only catches a file that is not a layout at all.
 - **Add-on repositories stay native.** Repository payloads are always WM Keyboard's own formats; conversion applies to files you pick yourself.

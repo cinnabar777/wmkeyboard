@@ -50,16 +50,20 @@ data class StickerPack(
      * `signal:<pack id>` for a Signal pack, which is what lets the Signal
      * browser mark the packs already added. Never the pack key. `whatsapp`
      * for a pack read out of a `.wastickers` file or WhatsApp's own sticker
-     * folder, which carry no id of their own.
+     * folder, which carry no id of their own. `telegram:<set name>` for a
+     * Telegram set.
      */
     val source: String = "",
 ) {
     companion object {
-        const val MAX_SOURCE_LENGTH = 64
+        /** Room for `telegram:` and the longest set name Telegram allows. */
+        const val MAX_SOURCE_LENGTH = 80
 
         fun signalSource(packId: String): String = "signal:$packId"
 
         fun whatsappSource(): String = "whatsapp"
+
+        fun telegramSource(setName: String): String = "telegram:${setName.lowercase()}"
     }
 }
 

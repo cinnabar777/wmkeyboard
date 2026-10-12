@@ -3,6 +3,7 @@ package com.wasimaster.wmkeyboard.app
 import android.net.Uri
 import com.wasimaster.wmkeyboard.core.addons.AddonRepoCodec
 import com.wasimaster.wmkeyboard.core.stickers.signal.SignalStickerCrypto
+import com.wasimaster.wmkeyboard.core.stickers.telegram.TelegramStickerSet
 import java.net.URI
 import java.net.URLDecoder
 
@@ -16,6 +17,7 @@ import java.net.URLDecoder
  * | `wmkeyboard://repo?url=<repo>` | Addons, with the add-repository sheet pre-filled |
  * | `wmkeyboard://addon?repo=<repo>&id=<addonId>` | that addon's detail page |
  * | `wmkeyboard://signalpack?id=<pack id>&key=<pack key>` | the preview of that Signal sticker pack |
+ * | `wmkeyboard://telegramset?name=<set name>` | the preview of that Telegram sticker set |
  *
  * A custom scheme rather than https App Links: no domain to verify, no
  * `assetlinks.json` to host, and nothing about this needs a real web page to
@@ -83,15 +85,25 @@ object AddonDeepLink {
                 signalPackRoute(id, key)
             }
 
+            // The same, for a Telegram set. Its name is all it carries.
+            TELEGRAM_SET_HOST -> {
+                val name = query.param("name")?.takeIf(TelegramStickerSet::isSetName) ?: return null
+                telegramPackRoute(name)
+            }
+
             else -> null
         }
     }
 
     private const val SIGNAL_PACK_HOST = "signalpack"
+    private const val TELEGRAM_SET_HOST = "telegramset"
 
     /** The link [routeFor] turns back into [signalPackRoute]. Both halves are hex. */
     fun signalPackLink(packId: String, packKey: String): String =
         "$SCHEME://$SIGNAL_PACK_HOST?id=$packId&key=$packKey"
+
+    /** The link [routeFor] turns back into [telegramPackRoute]. A set name needs no encoding. */
+    fun telegramSetLink(setName: String): String = "$SCHEME://$TELEGRAM_SET_HOST?name=$setName"
 
     /** One query parameter out of a raw `a=1&b=2` string, percent-decoded. */
     private fun String.param(name: String): String? = split('&')

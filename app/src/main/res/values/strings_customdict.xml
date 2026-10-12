@@ -91,6 +91,10 @@
          NAME.header and NAME.body. -->
     <string name="customdict_import_missing_body_error">This is the header of a dictionary that has two files. Its words are in the .body file that has the same name. Select the two files together.</string>
     <string name="customdict_import_missing_header_error">This is the body of a dictionary that has two files. Select it together with the .header file that has the same name.</string>
+    <!-- Import errors for Hunspell spelling dictionaries, which are two files:
+         NAME.aff (the rules) and NAME.dic (the words). -->
+    <string name="customdict_import_missing_aff_error">This is the word file of a spelling dictionary that has two files. The rules that make its words are in the .aff file. Select the .dic and the .aff files together.</string>
+    <string name="customdict_import_missing_dic_error">This is the rules file of a spelling dictionary that has two files. Its words are in the .dic file. Select the .aff and the .dic files together.</string>
     <!-- %1$d is the format version number written in the file. -->
     <string name="customdict_import_unsupported_error">This dictionary uses format version <xliff:g id="version" example="402">%1$d</xliff:g>. The app cannot read this version.</string>
 

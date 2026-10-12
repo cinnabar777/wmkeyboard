@@ -2236,9 +2236,6 @@
     <string name="keypress_haptics_title">की प्रेस हॅप्टिक्स</string>
     <string name="keypress_hold_action_copy_label">कॉपी करा</string>
     <string name="keypress_hold_action_cut_label">कट करा</string>
-    <string name="keypress_hold_action_first_info">ही क्रिया सहसा पॉपअपच्या शेवटी असते, त्यामुळे साध्या प्रेस आणि होल्डमुळे तुम्हाला पहिला ॲक्सेंट मिळतो. हे चालू केल्यावर ते समोर येते आणि शॉर्टकट कीजपैकी एकावर प्रेस आणि होल्ड केल्यास ती क्रिया त्वरित कार्यान्वित होते. ॲक्सेंट्स अजूनही तिथेच आहेत: बोट दाबून ठेवा आणि तुम्हाला हव्या असलेल्या ॲक्सेंटवर सरकवा. यासाठी \'पर्यायी कीज\' अंतर्गत \'निवडण्यासाठी होल्ड करा\' आवश्यक आहे.</string>
-    <string name="keypress_hold_action_first_subtitle">दाबून धरल्याने ॲक्सेंट दाखवण्याऐवजी कृती कार्यान्वित होते</string>
-    <string name="keypress_hold_action_first_title">कृती प्रथम</string>
     <string name="keypress_hold_action_paste_label">पेस्ट करा</string>
     <string name="keypress_hold_action_redo_label">पुन्हा करा (Redo)</string>
     <string name="keypress_hold_action_select_all_label">सर्व निवडा</string>
@@ -2548,8 +2545,6 @@
     <string name="languages_cjk_region_info">प्रादेशिक शब्दरचना. तैवान आणि हाँगकाँग अनेकदा एकाच गोष्टीसाठी भिन्न शब्द वापरतात, केवळ भिन्न अक्षरेच नाहीत.</string>
     <string name="languages_cjk_region_taiwan_title">तैवान (臺灣)</string>
     <string name="languages_cjk_region_title">प्रादेशिक शब्दरचना</string>
-    <string name="languages_cjk_traditional_info">कीबोर्ड प्रत्येक उमेदवाराला सरलीकृत (简体) कडून पारंपारिक (繁體) मध्ये रूपांतरित करतो आणि नंतर तो दाखवतो. रूपांतरण एका वेळी एक अक्षर वाचते. काही सरलीकृत अक्षरांना एकापेक्षा जास्त पारंपारिक रूपे असतात आणि कीबोर्ड नेहमी अधिक सामान्य रूप लिहितो. 发 चे 發 होते, जे 發展 मध्ये बरोबर आहे पण 頭髮 मध्ये चुकीचे आहे. ते शब्द हाताने दुरुस्त करा.</string>
-    <string name="languages_cjk_traditional_subtitle">कीबोर्ड उमेदवारांना पारंपारिक (繁體) मध्ये रूपांतरित करतो. हे एका वेळी एक अक्षर रूपांतरित करते, त्यामुळे संदर्भावर अवलंबून असलेली काही रूपे चुकीची असू शकतात (发 → 發 / 髮).</string>
     <string name="languages_cjk_traditional_title">पारंपारिक अक्षरे</string>
     <string name="languages_clusters_title">क्लस्टर्स</string>
     <string name="languages_conjunct_backspace_info">बॅकस्पेस सहसा एका वेळी एक कोड पॉइंट हटवते. यामुळे कधीकधी स्क्रीनवर अर्धवट तयार झालेले क्लस्टर्स राहतात. हे सेटिंग चालू असल्यास, %1$s टाइप करताना एक दाब पूर्ण क्लस्टर हटवते. इतर भाषा त्यांची स्वतःची सेटिंग ठेवतात.</string>

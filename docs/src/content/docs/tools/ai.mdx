@@ -242,6 +242,77 @@ In [AI chat](/tools/ai-chat/) the record is saved with the answer, so reopening 
 
 Every search and every page fetch is also a row in the [network activity log](/privacy/network-activity/), filed under **AI tool use** rather than **Web search** — you didn't run that search, the model did, and the log should say which.
 
+## MCP servers
+
+<SettingsPath path="Tools / AI writing tools / MCP servers" />
+
+MCP (the Model Context Protocol) is a standard way for a server to offer tools to a model. Add a server here and the model can use its tools in the panel's actions and in [AI chat](/tools/ai-chat/), the same way it uses the two lookups above: to read your notes, search a wiki, add a calendar event, or whatever the server does. The tools run on that server, not on your phone.
+
+### Adding a server
+
+Press the **+** button. The editor asks for:
+
+- **Name**: what the list calls it. Leave it blank and the host name is used.
+- **Address**: the server's `https://` or `http://` address, for example `https://example.com/mcp`.
+- **Type**: **Auto**, **Streamable HTTP** or **SSE**. Auto works for almost every server. It tries Streamable HTTP, the current transport, and falls back to the older SSE one when the server answers like an old server. Pick SSE for an old server that Auto can't reach. Its address often ends in `/sse`.
+- **Headers**: sent with every request to this server. This is where a token goes. A typical one is the name `Authorization` with the value `Bearer` followed by a space and your token. Values are hidden until you tap the eye.
+
+**Save** stores the server. **Connect** saves it too, then asks the server for its tools and reports back: "Connected to *server name*: 12 tools", or the reason it couldn't. A server you just added says **Not connected** in the list until a Connect has worked, and the model is offered nothing from it until then.
+
+Change the address later and the tool list no longer describes the server, so the editor asks you to connect again.
+
+### Pasting a JSON config
+
+Most desktop apps that use MCP keep their servers in a JSON file. Copy that file's text, then press **Paste a JSON config** on the server list. The keyboard reads the formats in common use: Claude Desktop and Cursor's `mcpServers`, VS Code's `servers`, the inner map on its own, or a single server. It shows what it found before anything is saved, then **Add 2 servers** adds them and connects each one.
+
+```json
+{
+  "mcpServers": {
+    "notes": {
+      "url": "https://notes.example.com/mcp",
+      "headers": { "Authorization": "Bearer your-token" }
+    },
+    "files": {
+      "command": "npx",
+      "args": ["-y", "some-file-server"]
+    }
+  }
+}
+```
+
+Here **notes** is added. **files** is listed as skipped: it starts a program on a computer (the `command` line), and a phone has nothing to start it with. A server with no address, or one that isn't `http` or `https`, is skipped too, with the reason beside it.
+
+### Run, Ask or Off
+
+Once a server is connected, its editor lists every tool, with the server's own description and badges for what the server says about it: **Read only**, or **Can change or delete data**. Each tool has three choices:
+
+- **Run**: the tool runs when the model calls it, without asking you.
+- **Ask**: the answer stops and waits for you to allow the call.
+- **Off**: the model isn't told the tool exists.
+
+A new tool starts on **Run** if the server marks it read only, and on **Ask** otherwise. That default matters because a tool can send mail or delete a file, and text in the field you're editing could try to talk a model into calling one. Your own choice always wins over the server's marks.
+
+The list row for each server sums it up ("12 tools: 3 run, 7 ask, 2 off") with a switch that turns the whole server off without deleting it.
+
+### Allowing a call
+
+When the model calls a tool set to **Ask**, an approval card appears in the panel or in the chat. It names the tool and the server and shows exactly what the model wrote as the tool's input. Three buttons:
+
+- **Deny**: the call doesn't happen. The model is told you said no and answers without it.
+- **Allow once**: this call goes ahead.
+- **Always allow**: this call goes ahead, and the tool is set to **Run** from now on.
+
+### What is sent, and where
+
+Nothing goes to a server until the model calls one of its tools, or you press Connect. A call sends the tool's name and the values the model wrote for it straight to your server, with your headers. It doesn't go through any WM Keyboard service. Whatever the server sends back is handed to the model. Every request shows in the [network activity log](/privacy/network-activity/) under **MCP servers**.
+
+### Limits
+
+- **No sign-in yet.** A server that wants you to log in through OAuth can't be used. If it gives out tokens or API keys, add one as a header instead.
+- **Only `http` and `https` servers.** Local servers that start as a program (`command`, `npx`, `uvx`) need a computer to run on.
+- **Every tool costs prompt space.** The name, description and input format of each tool that isn't **Off** go with every request, so 30 tools can cost more than the text you asked about. The server list warns you past 20. Turn off the tools you don't need.
+- **Text only.** Images, audio and links a tool sends back aren't shown to the model. It is told that something was there.
+
 ## Chatting instead of transforming
 
 <SettingsPath path="Tools / AI writing tools / Chat with the model" />
@@ -283,6 +354,7 @@ Like every tool, AI has an **Enabled** toggle (on by default) and, if [colorful 
 - **Model picker on the panel**: on by default. Adds a horizontally-scrolling row to the panel itself for switching between every configured provider and downloaded local model in one tap. It's hidden automatically whenever there are fewer than two to choose from.
 - **Show a changes view**: on by default, see [Seeing what changed](#seeing-what-changed). **Open a result on the changes** below it is off.
 - **Let the model search the web**: on by default, and only shown once a search service is set up. **Let the model read a web page** below it is off, and **Lookups per answer** defaults to 3. See [Letting the model look things up](#letting-the-model-look-things-up).
+- **MCP servers**: the servers whose tools the model can use, see [MCP servers](#mcp-servers). None are set up to start with.
 - **Chat with the model**: opens the conversation screen, see [AI chat](/tools/ai-chat/).
 - **Enter sends the message**: off by default. In the chat on the keyboard, Enter starts a new line and the send button sends. Turn this on to send with Enter instead.
 - **Actions on the panel**: the whole action list, see [Your own actions](#your-own-actions).
@@ -326,6 +398,7 @@ The panel itself sends nothing until you actually tap an action chip: opening th
 - **Report**: builds a draft in your mail app and hands it over. The app has no reporting server and sends nothing itself, so a report only exists if you send the mail. API keys are never part of it.
 - **History**: goes nowhere. It's a file in the app's private storage, off unless you turn it on, never written from a password field or in incognito, and deleted when you turn it off. It's deliberately left out of the backup file too, so it can't ride along in something you export and mail to yourself. There's no section for it to travel in, unlike the learned dictionary, which is a section of its own that you tick or leave alone. See [Your data](/privacy/data/).
 - **A lookup the model asked for**: goes to the service that answers it, and only when the model actually asks. A search carries the query the model wrote — not your field text — to whichever search backend you set up. A page fetch carries nothing but the request for that page. Both show in the [network activity log](/privacy/network-activity/) under **AI tool use**, and both are off entirely while [Data saver](/privacy/data-saver/) is holding web search back.
+- **A tool on an MCP server**: goes to the server you added, and only when the model calls that tool or you press Connect. A call carries the tool's name and the values the model wrote for it, with your headers. See [MCP servers](#mcp-servers).
 - **The changes view**: is computed on your phone. Comparing two pieces of text is arithmetic, not a request, so nothing is sent to build it.
 
 ## Details & edge cases

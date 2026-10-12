@@ -45,6 +45,14 @@ enum class NetSource(
      * one thing it exists to record.
      */
     AI_TOOLS("ai_tools", ToolbarTool.AI),
+
+    /**
+     * A request to one of the MCP servers the user added (#573): listing its
+     * tools on Connect, or a call a model made. Not [AI_TOOLS], because the
+     * host is the user's choice and the request carries whatever the model
+     * wrote as the tool's arguments.
+     */
+    AI_MCP("ai_mcp", ToolbarTool.AI),
     TRANSCRIPTION("transcription", ToolbarTool.VOICE),
     WIKIPEDIA("wikipedia", ToolbarTool.WIKIPEDIA),
     DICTIONARY("dictionary", ToolbarTool.DICTIONARY),
@@ -78,6 +86,7 @@ enum class NetSource(
     ADDONS("addons"),
     KEYMAN("keyman"),
     SIGNAL_STICKERS("signal_stickers", ToolbarTool.STICKER),
+    TELEGRAM_STICKERS("telegram_stickers", ToolbarTool.STICKER),
 
     /** The Rboard theme list and the packs picked from it, on the Themes screen. */
     RBOARD_THEMES("rboard_themes"),

@@ -1349,14 +1349,20 @@ class SuggestionEngineTest {
 
     @Test fun systemDictionaryIndexNormalisesAndSplitsEntries() {
         val source =
-            SystemUserDictionary.index(listOf("AOSP", "aosp", "on my way", " x ", "")).source
+            SystemUserDictionary.index(listOf("AOSP", "aosp", "on my way", " x ", "", "plan b")).source
         assertTrue(source.contains("aosp"))
         assertEquals(1, source.frequencyOf("aosp"))
         // A multi-word entry indexes as its parts, never as one token.
         assertTrue(source.contains("way"))
         assertFalse(source.contains("on my way"))
-        // Single characters are not words.
-        assertFalse(source.contains("x"))
+        // A row that is one letter was added on purpose ("I", #620); one
+        // letter out of a phrase was not.
+        assertTrue(source.contains("x"))
+        assertFalse(source.contains("b"))
+    }
+
+    @Test fun aOneLetterRowKeepsItsCapital() {
+        assertEquals("I", SystemUserDictionary.index(listOf("I")).shapes["i"])
     }
 
     // ---- capitalization of learned and platform-dictionary words (#44) ----

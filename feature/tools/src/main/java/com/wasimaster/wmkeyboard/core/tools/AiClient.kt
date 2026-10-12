@@ -1032,7 +1032,12 @@ object AiClient {
                             add(buildJsonObject {
                                 put("name", tool.name)
                                 put("description", tool.description)
-                                put("parameters", tool.parameters)
+                                // The full JSON Schema field, not `parameters`:
+                                // that one takes only an OpenAPI subset and
+                                // refuses `$schema`, `additionalProperties` and
+                                // the rest of what an MCP server's tool
+                                // schemas use (#573).
+                                put("parametersJsonSchema", tool.parameters)
                             })
                         }
                     })

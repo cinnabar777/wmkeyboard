@@ -142,6 +142,11 @@ class AssetLayoutsTest {
         // Every letter group 2-9 is present exactly once.
         val digits = keys.mapNotNull { it.output }.filter { it.length == 1 && it[0].isDigit() }
         assertEquals(listOf("2", "3", "4", "5", "6", "7", "8", "9"), digits.sorted())
+        // The left column lists syllables while typing and punctuation otherwise
+        // (#635), three rows tall like a 九宫格 pad's.
+        val column = keys.single { it.action == KeyAction.ReadingColumn }
+        assertEquals(3, column.rowSpan)
+        assertTrue("，" in column.longPress && "。" in column.longPress)
     }
 
     @Test
@@ -209,6 +214,28 @@ class AssetLayoutsTest {
             .toSet()
         assertEquals("ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ".toSet(), typed.filter { it.code < 0x314F }.toSet())
         assertEquals(setOf('ㅣ', 'ㆍ', 'ㅡ'), typed.filter { it.code >= 0x314F }.toSet())
+    }
+
+    /**
+     * The 나랏글 pad (issue #599) types only its ten basic letters, and reaches
+     * every other initial through the 획추가 and 쌍자음 keys, so both have to
+     * be on it.
+     */
+    @Test
+    fun `the naratgeul pad types the basic letters and carries both letter keys`() {
+        val file = layoutFiles.first { it.name == "ko_naratgeul.${LayoutFile.FILE_EXTENSION}" }
+        val layout = LayoutFile.decode(file.readText())!!.layout
+        assertEquals("ko", layout.langId)
+        assertEquals(ComposerType.NARATGEUL, layout.composer)
+        assertTrue(layout.id in LanguageRegistry.byId("ko").layoutIds)
+        val keys = layout.layers.getValue(LayoutLayer.LETTERS.key).rows.flatten()
+        val typed = keys.filter { it.action == KeyAction.Text }
+            .flatMap { listOf(it.output ?: it.label) + it.multitap }
+            .filter { it.length == 1 && it[0].code in 0x3131..0x318E }
+            .toSet()
+        assertEquals("ㄱㄴㄹㅁㅅㅇㅏㅓㅗㅜㅣㅡ".map { it.toString() }.toSet(), typed)
+        assertTrue(keys.any { it.action == KeyAction.AddStroke })
+        assertTrue(keys.any { it.action == KeyAction.DoubleConsonant })
     }
 
     /**

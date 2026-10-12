@@ -248,4 +248,38 @@ class ImportLinkTest {
         val resolved = target("https://signal.art.example.com/addstickers/#pack_id=$packId&pack_key=$packKey")
         assertTrue("$resolved", resolved !is ImportLink.Target.SignalStickers)
     }
+
+    @Test
+    fun `a telegram set link resolves to the set, in every form it is shared in`() {
+        val set = ImportLink.Target.TelegramStickers("Animals_by_StickerBot")
+        assertEquals(set, target("https://t.me/addstickers/Animals_by_StickerBot"))
+        assertEquals(set, target("https://telegram.me/addstickers/Animals_by_StickerBot/"))
+        assertEquals(set, target("https://www.t.me/addstickers/Animals_by_StickerBot?startapp=1"))
+        assertEquals(set, target("Look at these https://t.me/addstickers/Animals_by_StickerBot."))
+        assertEquals(set, target("tg://addstickers?set=Animals_by_StickerBot"))
+        assertEquals(set, target("tg://addstickers?foo=1&set=Animals_by_StickerBot"))
+        assertEquals(
+            ImportLink.Target.TelegramStickers("CoolEmoji"),
+            target("https://t.me/addemoji/CoolEmoji"),
+        )
+    }
+
+    @Test
+    fun `a telegram set link over plain http is refused like any other`() {
+        assertEquals(ImportLink.Target.Insecure, target("http://t.me/addstickers/Animals"))
+    }
+
+    @Test
+    fun `other telegram links and lookalike hosts are not sets`() {
+        for (link in listOf(
+            "https://t.me/durov",
+            "https://t.me/addstickers/",
+            "https://t.me.example.com/addstickers/Animals",
+            "https://t.me/addstickers/${"a".repeat(65)}",
+            "tg://resolve?domain=durov",
+        )) {
+            val resolved = target(link)
+            assertTrue("$link resolved to $resolved", resolved !is ImportLink.Target.TelegramStickers)
+        }
+    }
 }

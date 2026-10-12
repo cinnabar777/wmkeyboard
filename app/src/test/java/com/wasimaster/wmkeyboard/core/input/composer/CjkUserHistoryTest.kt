@@ -24,7 +24,7 @@ class CjkUserHistoryTest {
         CjkLearning.store = null
         CjkLearning.enabled = true
         CjkConfig.traditionalOutput = false
-        HanVariant.s2t = emptyMap()
+        HanVariant.s2t = HanPhraseTable.EMPTY
         CjkDictionaries.pinyin = ConversionDictionary.EMPTY
         CjkDictionaries.ngrams = CjkNgrams.EMPTY
         PinyinSyllables.valid = emptySet()

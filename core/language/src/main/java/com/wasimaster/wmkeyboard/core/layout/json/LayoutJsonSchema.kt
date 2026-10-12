@@ -333,6 +333,11 @@ object LayoutJsonHints {
             "Key.icon" to PropertyHint(domain = JsonValueDomain.ICON),
             "Key.iconHint" to PropertyHint(domain = JsonValueDomain.ICON),
             "Key.actionAlternatesFirst" to PropertyHint(hidden = true),
+            // No ceiling: an index past the characters means "after them", which
+            // is a reading rather than an error.
+            "Key.actionAlternatesAt" to PropertyHint(
+                examples = listOf(JsonValueExample("0"), JsonValueExample("1"), JsonValueExample("2")),
+            ),
             "KeyAlternate.icon" to PropertyHint(domain = JsonValueDomain.ICON),
             "PanelLayoutSpec.version" to PropertyHint(
                 hidden = true,

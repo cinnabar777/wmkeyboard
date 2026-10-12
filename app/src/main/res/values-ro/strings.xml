@@ -2236,9 +2236,6 @@
     <string name="keypress_haptics_title">Haptică la apăsarea tastelor</string>
     <string name="keypress_hold_action_copy_label">Copiază</string>
     <string name="keypress_hold_action_cut_label">Taie</string>
-    <string name="keypress_hold_action_first_info">Acțiunea se află de obicei la sfârșitul ferestrei pop-up, așa că o simplă apăsare lungă vă oferă primul accent. Cu această opțiune activată, se mută în față, iar o apăsare lungă pe una dintre tastele de comandă rapidă execută acțiunea imediat. Accentele sunt încă acolo: mențineți degetul apăsat și glisați pe cel dorit. Aceasta necesită „Mențineți pentru a selecta”, sub „Taste alternative”.</string>
-    <string name="keypress_hold_action_first_subtitle">Apasă lung pentru a executa acțiunea în loc să afișezi accentele</string>
-    <string name="keypress_hold_action_first_title">Acțiune mai întâi</string>
     <string name="keypress_hold_action_paste_label">Lipește</string>
     <string name="keypress_hold_action_redo_label">Refă</string>
     <string name="keypress_hold_action_select_all_label">Selectează tot</string>
@@ -2547,8 +2544,6 @@
     <string name="languages_cjk_region_info">Taiwan și Hong Kong folosesc adesea cuvinte diferite pentru același lucru, nu doar caractere diferite.</string>
     <string name="languages_cjk_region_taiwan_title">Taiwan (臺灣)</string>
     <string name="languages_cjk_region_title">Terminologie regională</string>
-    <string name="languages_cjk_traditional_info">Tastatura convertește fiecare candidat din Simplificat (简体) în Tradițional (繁體) înainte de a-l afișa. Conversia citește câte un caracter pe rând. Câteva caractere simplificate au mai mult de o formă tradițională, iar tastatura scrie întotdeauna varianta mai comună. 发 devine 發, ceea ce este corect în 發展, dar greșit în 頭髮. Corectează acele cuvinte manual.</string>
-    <string name="languages_cjk_traditional_subtitle">Tastatura convertește candidații în chineză tradițională (繁體). Convertește câte un caracter pe rând, deci câteva forme care depind de context sunt greșite (发 → 發 / 髮).</string>
     <string name="languages_cjk_traditional_title">Caractere tradiționale</string>
     <string name="languages_clusters_title">Grupuri</string>
     <string name="languages_conjunct_backspace_info">Tasta Backspace șterge de obicei un punct de cod pe rând. Acest lucru lasă uneori grupuri de caractere formate parțial pe ecran. Cu această setare activată, o singură apăsare șterge întregul grup în timp ce tastați %1$s. Alte limbi își păstrează propria setare.</string>

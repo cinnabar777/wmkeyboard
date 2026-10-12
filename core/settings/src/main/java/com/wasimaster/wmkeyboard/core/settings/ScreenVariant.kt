@@ -43,6 +43,9 @@ enum class ScreenVariant(val suffix: String, @StringRes val labelRes: Int) {
      */
     val wantsLandscapePhoneSizing: Boolean get() = this == LANDSCAPE
 
+    /** Held sideways, folded or not. */
+    val isLandscape: Boolean get() = this == LANDSCAPE || this == LANDSCAPE_UNFOLDED
+
     companion object {
         /** Width in dp at or above which a device counts as unfolded. */
         const val UNFOLDED_MIN_DP = 600
@@ -95,14 +98,45 @@ data class SizingOverride(
      * portrait, as everywhere else here.
      */
     val numberRow: Boolean? = null,
+    /**
+     * Whether one-handed mode may show on this shape (#611), or null for the
+     * shared rule: everywhere, except sideways while "Portrait only" is on. A
+     * gate, not a second switch: the mode itself stays the one setting, so the
+     * toolbar tool and the rail keep driving it on every shape that allows it.
+     */
+    val allowOneHanded: Boolean? = null,
+    /**
+     * The same for the split keyboard (#611): null follows "Split only on wide
+     * screens". An unfolded portrait screen is the usual one to answer apart,
+     * where one-handed and split together are one too many.
+     */
+    val allowSplit: Boolean? = null,
 ) {
     val isEmpty: Boolean
         get() = keyHeightDp == null && numberRowHeightDp == null &&
             bottomPaddingDp == null && keyboardWidthPercent == null &&
             fontScale == null && keyboardAlignment == null && keyboardScale == null &&
             keyGapScale == null && sidePadLeftScale == null && sidePadRightScale == null &&
-            bottomRowHeightDp == null && numberRow == null
+            bottomRowHeightDp == null && numberRow == null &&
+            allowOneHanded == null && allowSplit == null
 }
+
+/**
+ * Whether split may show on [variant] (#611): the shape's own answer, else
+ * the shared one, which holds it back only on a folded phone held upright
+ * while "Split only on wide screens" is on.
+ */
+fun KeyboardSettings.splitAllowedOn(variant: ScreenVariant): Boolean =
+    sizingOverrides[variant]?.allowSplit
+        ?: (!layoutBehavior.splitOnlyOnLargeScreens || variant != ScreenVariant.PORTRAIT)
+
+/**
+ * Whether one-handed mode may show on [variant] (#611): the shape's own
+ * answer, else the shared "Portrait only" rule (#503).
+ */
+fun KeyboardSettings.oneHandedAllowedOn(variant: ScreenVariant): Boolean =
+    sizingOverrides[variant]?.allowOneHanded
+        ?: !(variant.isLandscape && oneHanded.portraitOnly)
 
 /**
  * The settings as a screen shape would have shipped them, before the user, the
@@ -203,14 +237,33 @@ private const val LandscapeChromeScale = 0.7f
  * knowing variants exist at all.
  */
 fun KeyboardSettings.resolvedFor(variant: ScreenVariant): KeyboardSettings {
-    // Split is gated on the shape rather than overridden per shape: the user
-    // set one switch, and this decides whether the current screen is wide
-    // enough to honour it. Portrait on a folded phone is the one that is not.
-    val splitHere = splitKeyboard &&
-        (!layoutBehavior.splitOnlyOnLargeScreens || variant != ScreenVariant.PORTRAIT)
+    // Split and one-handed are gated on the shape rather than switched per
+    // shape: the user set one switch each, and this decides whether the
+    // current screen honours it (#611). The answer is folded into the plain
+    // fields, so the frame never learns there are gates.
+    val splitHere = splitKeyboard && splitAllowedOn(variant)
+    val oneHandedHere = if (oneHandedAllowedOn(variant)) oneHandedMode else OneHandedMode.OFF
+    // "Portrait only" is already answered above, and a shape that allows
+    // one-handed sideways must not have it taken back by oneHandedModeFor.
+    val oneHandedSettings = if (oneHanded.portraitOnly) oneHanded.copy(portraitOnly = false) else oneHanded
+    // Floating is remembered per orientation (#584): the field downstream reads
+    // is set to the answer for this one, so the frame never learns there are two.
+    val floatingHere = floatingFor(variant.isLandscape)
     val override = sizingOverrides[variant]
     if (override == null || override.isEmpty) {
-        return if (splitHere == splitKeyboard) this else copy(splitKeyboard = splitHere)
+        return if (
+            splitHere == splitKeyboard && floatingHere == floatingKeyboard &&
+            oneHandedHere == oneHandedMode && oneHandedSettings === oneHanded
+        ) {
+            this
+        } else {
+            copy(
+                splitKeyboard = splitHere,
+                floatingKeyboard = floatingHere,
+                oneHandedMode = oneHandedHere,
+                oneHanded = oneHandedSettings,
+            )
+        }
     }
     // The scale rides on the resolved heights, so every `settings.keyHeightDp`
     // downstream is already scaled and no render code learns it exists.
@@ -239,6 +292,9 @@ fun KeyboardSettings.resolvedFor(variant: ScreenVariant): KeyboardSettings {
         },
         keyGapScale = override.keyGapScale ?: keyGapScale,
         splitKeyboard = splitHere,
+        floatingKeyboard = floatingHere,
+        oneHandedMode = oneHandedHere,
+        oneHanded = oneHandedSettings,
     )
 }
 
@@ -268,5 +324,7 @@ fun KeyboardSettings.sizingValuesFor(variant: ScreenVariant): SizingOverride {
         sidePadRightScale = override?.sidePadRightScale ?: base.layoutBehavior.sidePadRightScale,
         bottomRowHeightDp = override?.bottomRowHeightDp ?: base.layoutBehavior.bottomRowHeightDp,
         numberRow = override?.numberRow ?: base.numberRow,
+        allowOneHanded = oneHandedAllowedOn(variant),
+        allowSplit = splitAllowedOn(variant),
     )
 }

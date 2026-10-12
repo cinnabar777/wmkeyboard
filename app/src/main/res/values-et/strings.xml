@@ -2239,9 +2239,6 @@
     <string name="keypress_haptics_title">Klahvivajutuse haptika</string>
     <string name="keypress_hold_action_copy_label">Kopeeri</string>
     <string name="keypress_hold_action_cut_label">Lõika</string>
-    <string name="keypress_hold_action_first_info">Toiming asub tavaliselt hüpikakna lõpus, seega tavaline vajutus ja hoidmine annab esimese aktsendi. Kui see on sisse lülitatud, liigub see ette ja otsetee klahvide vajutamine ja hoidmine käivitab toimingu kohe. Aktsendid on endiselt olemas: hoia sõrme all ja libista soovitud aktsendile. See nõuab valikut „Hoia valimiseks” jaotises „Alternatiivsed klahvid”.</string>
-    <string name="keypress_hold_action_first_subtitle">Vajutamine ja hoidmine käivitab toimingu, selle asemel et kuvada aktsente</string>
-    <string name="keypress_hold_action_first_title">Toiming esimesena</string>
     <string name="keypress_hold_action_paste_label">Kleebi</string>
     <string name="keypress_hold_action_redo_label">Tee uuesti</string>
     <string name="keypress_hold_action_select_all_label">Vali kõik</string>
@@ -2551,8 +2548,6 @@
     <string name="languages_cjk_region_info">Taiwan ja Hongkong kasutavad sageli sama asja jaoks erinevaid sõnu, mitte ainult erinevaid märke.</string>
     <string name="languages_cjk_region_taiwan_title">Taiwan (臺灣)</string>
     <string name="languages_cjk_region_title">Piirkondlik sõnastus</string>
-    <string name="languages_cjk_traditional_info">Klaviatuur teisendab iga kandidaadi lihtsustatud hiina keelest (简体) traditsioonilisse (繁體) enne selle kuvamist. Teisendamine loeb ühte märki korraga. Mõnel lihtsustatud märgil on rohkem kui üks traditsiooniline vorm ja klaviatuur kirjutab alati levinuma. 发 muutub 發-ks, mis on õige sõnas 發展, kuid vale sõnas 頭髮. Parandage need sõnad käsitsi.</string>
-    <string name="languages_cjk_traditional_subtitle">Klaviatuur teisendab kandidaadid traditsioonilisteks (繁體). See teisendab ühe märgi korraga, seega on mõned kontekstist sõltuvad vormid valed (发 → 發 / 髮).</string>
     <string name="languages_cjk_traditional_title">Traditsioonilised märgid</string>
     <string name="languages_clusters_title">Klastrid</string>
     <string name="languages_conjunct_backspace_info">Backspace kustutab tavaliselt ühe koodipunkti korraga. See jätab mõnikord ekraanile poolikud klastrid. Kui see säte on sisse lülitatud, kustutab üks vajutus kogu klastri, kui sisestate %1$s. Teised keeled säilitavad oma sätte.</string>

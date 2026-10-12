@@ -149,6 +149,8 @@
     <!-- A search or a page the AI tool fetched on its own, because the model
          asked for it. Separate from "Web search" because you did not run it. -->
     <string name="netlog_source_ai_tools">AI tool use</string>
+    <!-- A request to an MCP server you added to the AI tool. -->
+    <string name="netlog_source_ai_mcp">MCP servers</string>
     <string name="netlog_source_transcription">Transcription server</string>
     <string name="netlog_source_wikipedia">Wikipedia</string>
     <string name="netlog_source_dictionary">Dictionary</string>
@@ -172,6 +174,7 @@
     <string name="netlog_source_addons">Add-ons</string>
     <string name="netlog_source_keyman">Keyman keyboards</string>
     <string name="netlog_source_signal_stickers">Signal sticker packs</string>
+    <string name="netlog_source_telegram_stickers">Telegram sticker sets</string>
     <string name="netlog_source_rboard_themes">Rboard themes</string>
     <string name="netlog_source_link_import">Import from a link</string>
     <string name="netlog_source_backup">Backup</string>
@@ -190,6 +193,7 @@
     <string name="netlog_sent_ocr_online">The photo you scanned, to read the text in it.</string>
     <string name="netlog_sent_ai">The text you ran the action on, and the action\'s instructions.</string>
     <string name="netlog_sent_ai_chat">The conversation so far, and your new message.</string>
+    <string name="netlog_sent_ai_mcp">The name of a tool and the values the model wrote for it, sent to the server you added. Also the request for the list of tools when you connect.</string>
     <string name="netlog_sent_ai_tools">A search the model wrote, or the address of a page it asked to read. Searches go to the same service as the search tool.</string>
     <string name="netlog_sent_transcription">The recording of one phrase, the model name, and the language unless you turned that off.</string>
     <string name="netlog_sent_wikipedia">Your search words or the title of the article.</string>
@@ -205,6 +209,7 @@
     <string name="netlog_sent_addons">The name of the file in the repository. Nothing about you.</string>
     <string name="netlog_sent_keyman">The name of the Keyman keyboard.</string>
     <string name="netlog_sent_signal_stickers">The pack\'s id. No Signal account takes part.</string>
+    <string name="netlog_sent_telegram_stickers">Your bot token and the name of the sticker set. No Telegram account takes part.</string>
     <string name="netlog_sent_rboard_themes">A request for the list of theme packs, and for the pack you picked. Nothing about you.</string>
     <string name="netlog_sent_link_import">A request for the link you shared, and your access token when the link needs one.</string>
     <string name="netlog_sent_backup">Your settings file, encrypted when you set a password, to the destination you selected.</string>

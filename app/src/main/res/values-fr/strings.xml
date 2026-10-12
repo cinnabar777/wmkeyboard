@@ -2232,9 +2232,6 @@
     <string name="keypress_haptics_title">Retour haptique à la frappe</string>
     <string name="keypress_hold_action_copy_label">Copier</string>
     <string name="keypress_hold_action_cut_label">Couper</string>
-    <string name="keypress_hold_action_first_info">L\'action se trouve généralement à la fin de la fenêtre contextuelle, donc un appui long simple vous donne le premier accent. Avec cette option activée, elle se déplace au début, et un appui long sur l\'une des touches de raccourci exécute l\'action immédiatement. Les accents sont toujours là : gardez votre doigt appuyé et faites glisser vers celui que vous voulez. Cela nécessite \"Maintenir pour sélectionner\", sous Touches alternatives.</string>
-    <string name="keypress_hold_action_first_subtitle">Appuyer et maintenir enfoncé exécute l\'action au lieu d\'afficher les accents</string>
-    <string name="keypress_hold_action_first_title">Action d\'abord</string>
     <string name="keypress_hold_action_paste_label">Coller</string>
     <string name="keypress_hold_action_redo_label">Rétablir</string>
     <string name="keypress_hold_action_select_all_label">Tout sélectionner</string>
@@ -2542,8 +2539,6 @@
     <string name="languages_cjk_region_info">Terminologie régionale. Taïwan et Hong Kong utilisent souvent des mots différents pour la même chose, et pas seulement des caractères différents.</string>
     <string name="languages_cjk_region_taiwan_title">Taïwan (臺灣)</string>
     <string name="languages_cjk_region_title">Libellé régional</string>
-    <string name="languages_cjk_traditional_info">Le clavier convertit chaque candidat du simplifié (简体) au traditionnel (繁體) avant de l\'afficher. La conversion lit un caractère à la fois. Quelques caractères simplifiés ont plusieurs formes traditionnelles, et le clavier écrit toujours la plus courante. 发 devient 發, ce qui est correct dans 發展 mais faux dans 頭髮. Corrigez ces mots manuellement.</string>
-    <string name="languages_cjk_traditional_subtitle">Le clavier convertit les candidats en traditionnel (繁體). Il convertit un caractère à la fois, donc quelques formes qui dépendent du contexte sont incorrectes (发 → 發 / 髮).</string>
     <string name="languages_cjk_traditional_title">Caractères traditionnels</string>
     <string name="languages_clusters_title">Groupes</string>
     <string name="languages_conjunct_backspace_info">La touche retour arrière supprime généralement un point de code à la fois. Cela laisse parfois des groupes de caractères mal formés à l\'écran. Avec ce paramètre activé, une pression supprime tout le groupe pendant que vous tapez %1$s. Les autres langues conservent leur propre paramètre.</string>

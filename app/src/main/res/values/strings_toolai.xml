@@ -180,6 +180,122 @@
     <string name="toolai_ai_tool_rounds_info">Each round is another request to the model, carrying everything it has found so far. Higher digs deeper into a question and costs more; lower keeps one answer cheap and quick.</string>
 
     <!--
+      MCP servers (#573): tools that run on a server the user adds. MCP is
+      short for Model Context Protocol, a product name. Keep "MCP" in English.
+    -->
+    <string name="toolai_ai_mcp_title">MCP servers</string>
+    <string name="toolai_ai_mcp_subtitle">Let the model use tools from servers that you add</string>
+    <!-- Title of the screen that lists the MCP servers. -->
+    <string name="toolai_ai_mcp_screen_title">MCP servers</string>
+    <!-- Title of the screen that edits one MCP server. -->
+    <string name="toolai_ai_mcp_edit_screen_title">MCP server</string>
+    <string name="toolai_ai_mcp_servers_group_title">Servers</string>
+    <!-- "OAuth" is the name of a sign-in standard. Keep it in English. -->
+    <string name="toolai_ai_mcp_info">An MCP server gives the model more tools, for example to read your notes or to add an event to a calendar. The tools run on the server that you add, not on your device. When the model uses a tool, the keyboard sends the input that the model wrote to that server. Only servers with an http or https address work. A server that starts as a program on a computer does not work on a phone. Sign-in with OAuth is not available yet. If the server gives you a token, add it as a header.</string>
+    <string name="toolai_ai_mcp_empty">No servers yet. Press Add to add a server, or paste a JSON config from another app.</string>
+    <!-- Status under a server that has no list of tools yet. -->
+    <string name="toolai_ai_mcp_not_connected">Not connected</string>
+    <string name="toolai_ai_mcp_connecting_progress">Connecting…</string>
+    <!-- %1$d is the number of tools that a server has. -->
+    <plurals name="toolai_ai_mcp_tool_count">
+        <item quantity="one">%1$d tool</item>
+        <item quantity="other">%1$d tools</item>
+    </plurals>
+    <!-- Status under a server. %1$s is the number of tools, for example
+         "12 tools". %2$d, %3$d and %4$d are how many of them are set to Run,
+         Ask and Off. Run, ask and off are the names of the three choices, not
+         countable nouns. -->
+    <string name="toolai_ai_mcp_status_counts" tools:ignore="PluralsCandidate">%1$s: %2$d run, %3$d ask, %4$d off</string>
+    <!-- Warning above the server list. %1$d is the number of tools that the
+         model can use. It is always more than 20. -->
+    <plurals name="toolai_ai_mcp_many_tools_body">
+        <item quantity="one">%1$d tool is on. The keyboard sends the description of each tool with every request, so each request gets longer and costs more. Set the tools that you do not need to Off.</item>
+        <item quantity="other">%1$d tools are on. The keyboard sends the description of each tool with every request, so each request gets longer and costs more. Set the tools that you do not need to Off.</item>
+    </plurals>
+    <!-- Screen reader name of the add button on the server list. -->
+    <string name="toolai_ai_mcp_add_desc">Add a server</string>
+
+    <string name="toolai_ai_mcp_import_group_title">Import</string>
+    <string name="toolai_ai_mcp_import_title">Paste a JSON config</string>
+    <!-- Claude Desktop, Cursor and VS Code are product names. -->
+    <string name="toolai_ai_mcp_import_subtitle">Add servers from the MCP settings of another app, for example Claude Desktop, Cursor or VS Code</string>
+    <string name="toolai_ai_mcp_import_label">JSON config</string>
+    <!-- "mcpServers" and "servers" are names in the file. Do not translate them. -->
+    <string name="toolai_ai_mcp_import_hint">Paste the whole text, with the "mcpServers" or "servers" part</string>
+    <!-- Button that reads the pasted text. -->
+    <string name="toolai_ai_mcp_import_read_action">Read</string>
+    <string name="toolai_ai_mcp_import_error">This is not a JSON config. Copy all of the text, from the first brace to the last.</string>
+    <string name="toolai_ai_mcp_import_none_empty">The config has no servers.</string>
+    <string name="toolai_ai_mcp_import_found_title">Servers to add</string>
+    <string name="toolai_ai_mcp_import_skipped_title">Servers that the keyboard skips</string>
+    <!-- One skipped server. %1$s is its name, %2$s the reason. -->
+    <string name="toolai_ai_mcp_import_skipped_line">%1$s: %2$s</string>
+    <string name="toolai_ai_mcp_skip_command">it starts a program on a computer, which a phone cannot run</string>
+    <string name="toolai_ai_mcp_skip_no_url">it has no address</string>
+    <string name="toolai_ai_mcp_skip_bad_url">its address does not start with http or https</string>
+    <!-- Confirm button. %1$d is the number of servers that the button adds. -->
+    <plurals name="toolai_ai_mcp_import_add_action">
+        <item quantity="one">Add %1$d server</item>
+        <item quantity="other">Add %1$d servers</item>
+    </plurals>
+
+    <string name="toolai_ai_mcp_name_label">Name</string>
+    <string name="toolai_ai_mcp_name_hint">Leave this blank to use the name of the host</string>
+    <string name="toolai_ai_mcp_url_label">Address</string>
+    <!-- Helper text under the address field. Do not translate the web address. -->
+    <string name="toolai_ai_mcp_url_hint">For example https://example.com/mcp</string>
+    <string name="toolai_ai_mcp_url_error">Use an address that starts with https:// or http://</string>
+    <!-- Warning under an http:// address that is not on the local network. -->
+    <string name="toolai_ai_mcp_url_plain_warning">Plain http sends your token and the input of the model without encryption. Use https for a server outside your network.</string>
+    <!-- How the keyboard talks to the server. -->
+    <string name="toolai_ai_mcp_transport_title">Type</string>
+    <string name="toolai_ai_mcp_transport_auto_label">Auto</string>
+    <!-- Names of two transports in the MCP standard. -->
+    <string name="toolai_ai_mcp_transport_http_label" translatable="false">Streamable HTTP</string>
+    <string name="toolai_ai_mcp_transport_sse_label" translatable="false">SSE</string>
+    <!-- Streamable HTTP and SSE are names in the MCP standard. -->
+    <string name="toolai_ai_mcp_transport_info">Auto works for almost every server. It tries Streamable HTTP first, then the older SSE type. Select SSE for an old server if Auto does not connect. Its address often ends in /sse.</string>
+
+    <string name="toolai_ai_mcp_headers_title">Headers</string>
+    <!-- "Authorization" and "Bearer" are fixed words in a web request. Keep them in English. -->
+    <string name="toolai_ai_mcp_headers_info">The keyboard sends these headers with every request to this server. Use them for a token or an API key. For example, the name is Authorization and the value is Bearer, a space and your token. A backup without secrets does not include the headers.</string>
+    <string name="toolai_ai_mcp_header_name_label">Header name</string>
+    <string name="toolai_ai_mcp_header_value_label">Value</string>
+    <!-- Example text in an empty header field. A fixed word in a web request. -->
+    <string name="toolai_ai_mcp_header_name_hint" translatable="false">Authorization</string>
+    <!-- Example text in an empty header value field. A fixed word in a web request. -->
+    <string name="toolai_ai_mcp_header_value_hint" translatable="false">Bearer …</string>
+    <string name="toolai_ai_mcp_header_add_action">Add header</string>
+    <string name="toolai_ai_mcp_header_delete_desc">Delete this header</string>
+    <string name="toolai_ai_mcp_header_show_desc">Show the value</string>
+    <string name="toolai_ai_mcp_header_hide_desc">Hide the value</string>
+
+    <!-- Button that saves the server and asks it for its tools. -->
+    <string name="toolai_ai_mcp_connect_action">Connect</string>
+    <!-- Result of Connect. %1$s is the name and version that the server gave,
+         %2$d the number of tools that it has. -->
+    <plurals name="toolai_ai_mcp_connected_body">
+        <item quantity="one">Connected to %1$s: %2$d tool</item>
+        <item quantity="other">Connected to %1$s: %2$d tools</item>
+    </plurals>
+    <string name="toolai_ai_mcp_stale_body">The address changed. Connect again to get the tools at the new address.</string>
+
+    <string name="toolai_ai_mcp_tools_title">Tools</string>
+    <!-- Run, Ask and Off are the three choices on each tool. -->
+    <string name="toolai_ai_mcp_tools_info">Run: the tool runs and the keyboard does not ask you. Ask: the model waits until you allow the call. Off: the model does not see the tool. At the start, a tool that the server marks as read only runs, and all other tools ask.</string>
+    <string name="toolai_ai_mcp_tools_empty">The server has no tools.</string>
+    <!-- The tool runs without a question. -->
+    <string name="toolai_ai_mcp_policy_allow_label">Run</string>
+    <!-- The keyboard asks you before the tool runs. -->
+    <string name="toolai_ai_mcp_policy_ask_label">Ask</string>
+    <!-- The model does not see the tool. -->
+    <string name="toolai_ai_mcp_policy_off_label">Off</string>
+    <!-- Badge on a tool that the server says only reads data. -->
+    <string name="toolai_ai_mcp_read_only_label">Read only</string>
+    <!-- Badge on a tool that the server says can change or delete data. -->
+    <string name="toolai_ai_mcp_destructive_label">Can change or delete data</string>
+
+    <!--
       The chat screen in the settings app. The words it shares with the chat on
       the keyboard's AI panel are in :feature:ime (ime_ai_chat_*); these are the
       ones only this screen draws.

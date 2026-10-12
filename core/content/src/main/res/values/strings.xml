@@ -172,6 +172,28 @@
         <item quantity="other">The app dropped %1$d folders that have no name or that repeat another one. Their snippets came in without a folder.</item>
     </plurals>
 
+    <!-- A row is one line of a table (a CSV file). %1$d is how many rows had
+         nothing in the column for the snippet text, and picks the form. -->
+    <plurals name="core_content_snippet_repair_rows_no_text">
+        <item quantity="one">The app dropped %1$d row that has no text.</item>
+        <item quantity="other">The app dropped %1$d rows that have no text.</item>
+    </plurals>
+
+    <!-- A trigger is the short word that makes a snippet expand. %1$d is how
+         many triggers the keyboard cannot watch for, and picks the form. -->
+    <plurals name="core_content_snippet_repair_triggers_removed">
+        <item quantity="one">The app removed %1$d trigger that the keyboard cannot watch for. Its snippet stays in the list.</item>
+        <item quantity="other">The app removed %1$d triggers that the keyboard cannot watch for. Their snippets stay in the list.</item>
+    </plurals>
+
+    <!-- Gboard is Google's keyboard; do not translate the name. "Personal
+         dictionary" names a settings screen of this app. %1$d is how many words
+         in the file have no shortcut, and picks the form. -->
+    <plurals name="core_content_snippet_gboard_words_skipped">
+        <item quantity="one">The file also has %1$d word with no shortcut. To add it to your words, open the file from Personal dictionary.</item>
+        <item quantity="other">The file also has %1$d words with no shortcut. To add them to your words, open the file from Personal dictionary.</item>
+    </plurals>
+
     <!-- Espanso is a text expander for computers, and the name of its app. Do
          not translate it. Each of these lines says what an imported file lost,
          and %1$d is how many of its snippets were affected, which also picks
@@ -275,6 +297,8 @@
 
     <string name="core_content_selection_macro_copy">Copy</string>
     <string name="core_content_selection_macro_share">Share</string>
+    <!-- Keeps the selected text as a note in the Notes tool. -->
+    <string name="core_content_selection_macro_save_note">Save as note</string>
     <string name="core_content_selection_macro_format">Format</string>
     <string name="core_content_selection_macro_search">Search</string>
     <string name="core_content_selection_macro_translate">Translate</string>
@@ -324,5 +348,13 @@
     <string name="core_content_selection_macro_add_contact">Contact</string>
     <string name="core_content_selection_macro_map">Map</string>
     <string name="core_content_selection_macro_calendar">Calendar</string>
+
+    <!-- The tags the Notes tool suggests before the user has made any of their own. -->
+    <string name="core_content_note_tag_important">Important</string>
+    <string name="core_content_note_tag_work">Work</string>
+    <string name="core_content_note_tag_school">School</string>
+    <string name="core_content_note_tag_study">Study</string>
+    <string name="core_content_note_tag_personal">Personal</string>
+    <string name="core_content_note_tag_ideas">Ideas</string>
 
 </resources>

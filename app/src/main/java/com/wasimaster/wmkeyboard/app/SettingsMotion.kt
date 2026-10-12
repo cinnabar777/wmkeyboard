@@ -13,6 +13,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.grid.LazyGridItemScope
 import androidx.compose.runtime.Composable
@@ -20,7 +21,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
 
 /**
  * The settings app's small, shared motions: rows arriving in and leaving a
@@ -141,4 +144,55 @@ internal fun rememberGrowIn(ready: Boolean): State<Float> {
         }
     }
     return grown.asState()
+}
+
+/** How long one entry of a short list takes to settle in. */
+private const val StaggerInMs = 220
+
+/** The beat between one entry starting and the next. */
+private const val StaggerStepMs = 35
+
+/**
+ * Past this many entries the rest start together: a long list should be there
+ * in a moment, not dealt out one card at a time.
+ */
+private const val StaggerMaxSteps = 8
+
+/** How far below its place an entry starts. */
+private val StaggerRise = 6.dp
+
+/**
+ * One entry of a short list arriving: fades in and rises into place, a beat
+ * after the entry above it. For the lists that are composed once and read — a
+ * preview's first few lines, a picker's choices — rather than edited, which is
+ * [listItemMotion]'s job and the group's own.
+ *
+ * Plays once, the first time [content] is composed. Read in the draw phase, so
+ * the arrival costs a redraw a frame. Under Reduce motion it is simply there.
+ */
+@Composable
+internal fun StaggerIn(index: Int, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+    val reduceMotion = LocalReduceMotion.current
+    val shown = remember { Animatable(if (reduceMotion) 1f else 0f) }
+    LaunchedEffect(reduceMotion) {
+        if (reduceMotion) {
+            shown.snapTo(1f)
+        } else {
+            shown.animateTo(
+                1f,
+                tween(
+                    durationMillis = StaggerInMs,
+                    delayMillis = StaggerStepMs * index.coerceIn(0, StaggerMaxSteps),
+                    easing = FastOutSlowInEasing,
+                ),
+            )
+        }
+    }
+    Box(
+        modifier.graphicsLayer {
+            val t = shown.value
+            alpha = t
+            translationY = (1f - t) * StaggerRise.toPx()
+        },
+    ) { content() }
 }

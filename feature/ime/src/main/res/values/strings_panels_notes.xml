@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+    <!-- Notes tool panel (#560): the list, the read view and the editor. -->
+    <string name="ime_notes_search_hint">Search notes…</string>
+    <!-- Shown in the search bar while the key rows type into it. -->
+    <string name="ime_notes_search_active_hint">Type to search titles, text and tags</string>
+    <string name="ime_notes_new_desc">New note</string>
+    <string name="ime_notes_new_action">New note</string>
+    <!-- %1$s is a tag name. -->
+    <string name="ime_notes_new_tagged_action">New note tagged <xliff:g id="tag" example="Work">%1$s</xliff:g></string>
+    <string name="ime_notes_filter_all">All</string>
+    <string name="ime_notes_filter_pinned">Pinned</string>
+    <string name="ime_notes_filter_archived">Archived</string>
+    <string name="ime_notes_filter_trash">Trash</string>
+    <!-- A filter chip with how many notes it holds, e.g. "Trash (3)". -->
+    <string name="ime_notes_filter_count"><xliff:g id="label" example="Trash">%1$s</xliff:g> (<xliff:g id="count" example="3">%2$d</xliff:g>)</string>
+    <string name="ime_notes_manage_tags_desc">Manage tags</string>
+    <string name="ime_notes_untitled">Untitled</string>
+    <string name="ime_notes_locked_label">Locked</string>
+    <string name="ime_notes_locked_info">This note is locked. Unlock it in Settings to read it here.</string>
+    <string name="ime_notes_unlock_settings_action">Open Settings</string>
+    <string name="ime_notes_locked_toast">Unlock this note in Settings first</string>
+    <string name="ime_notes_unlock_info">Unlock your phone to see your notes.</string>
+    <string name="ime_notes_unlock_toast">Unlock your phone to save notes</string>
+    <!-- Ticked boxes out of all boxes in a note, e.g. "3/5". -->
+    <string name="ime_notes_tasks_progress"><xliff:g id="done" example="3">%1$d</xliff:g>/<xliff:g id="total" example="5">%2$d</xliff:g></string>
+    <!-- %1$s is a relative time like "3 days ago". -->
+    <string name="ime_notes_deleted_ago">Deleted <xliff:g id="when" example="3 days ago">%1$s</xliff:g></string>
+    <string name="ime_notes_archived_badge">Archived</string>
+    <string name="ime_notes_empty_all">No notes yet. Tap + to write one, or select text anywhere and tap Save as note.</string>
+    <string name="ime_notes_empty_pinned">Pin a note to keep it at the top.</string>
+    <!-- %1$s is a tag name. -->
+    <string name="ime_notes_empty_tag">No notes tagged <xliff:g id="tag" example="Work">%1$s</xliff:g>.</string>
+    <string name="ime_notes_empty_archived">Archived notes stay out of the way but still turn up in search.</string>
+    <string name="ime_notes_empty_trash">Trash is empty.</string>
+    <!-- %1$d is a number of days. -->
+    <string name="ime_notes_trash_retention">Notes in the trash are deleted after <xliff:g id="days" example="30">%1$d</xliff:g> days.</string>
+    <string name="ime_notes_trash_kept">Notes stay in the trash until you delete them.</string>
+    <!-- %1$s is what was searched for. -->
+    <string name="ime_notes_no_match">No notes match “<xliff:g id="query" example="milk">%1$s</xliff:g>”.</string>
+    <string name="ime_notes_insert_action">Insert</string>
+    <string name="ime_notes_edit_action">Edit</string>
+    <string name="ime_notes_edit_in_settings_action">Edit in Settings</string>
+    <string name="ime_notes_too_long_info">Too long to edit on the keyboard</string>
+    <string name="ime_notes_pin_action">Pin</string>
+    <string name="ime_notes_unpin_action">Unpin</string>
+    <string name="ime_notes_archive_action">Archive</string>
+    <string name="ime_notes_unarchive_action">Unarchive</string>
+    <string name="ime_notes_lock_action">Lock</string>
+    <string name="ime_notes_restore_action">Restore</string>
+    <string name="ime_notes_delete_forever_action">Delete forever</string>
+    <string name="ime_notes_empty_trash_action">Empty trash</string>
+    <string name="ime_notes_confirm_action">Tap again to confirm</string>
+    <string name="ime_notes_show_more_action">Show more</string>
+    <string name="ime_notes_expand_desc">Make the note taller</string>
+    <string name="ime_notes_collapse_desc">Back to keyboard height</string>
+    <string name="ime_notes_title_hint">Title</string>
+    <string name="ime_notes_body_hint">Write a note… Markdown works: **bold**, - lists, - [ ] tasks</string>
+    <string name="ime_notes_done_desc">Done editing</string>
+    <string name="ime_notes_add_tag_action">+ Tag</string>
+    <string name="ime_notes_new_tag_action">New…</string>
+    <string name="ime_notes_tag_hint">Tag name</string>
+    <!-- Word and character counts under the editor. -->
+    <string name="ime_notes_word_count"><xliff:g id="words" example="12">%1$d</xliff:g> words · <xliff:g id="chars" example="80">%2$d</xliff:g> chars</string>
+    <string name="ime_notes_md_bold_desc">Bold</string>
+    <string name="ime_notes_md_italic_desc">Italic</string>
+    <string name="ime_notes_md_bullet_desc">Bulleted list</string>
+    <string name="ime_notes_md_numbered_desc">Numbered list</string>
+    <string name="ime_notes_md_task_desc">Task box</string>
+    <string name="ime_notes_md_heading_desc">Heading</string>
+    <string name="ime_notes_md_quote_desc">Quote</string>
+    <string name="ime_notes_md_code_desc">Code</string>
+    <string name="ime_notes_tag_row_desc">Tags</string>
+    <string name="ime_notes_saved_toast">Saved to Notes</string>
+    <string name="ime_notes_appended_toast">Added to your last note</string>
+    <string name="ime_notes_copied_toast">Note copied</string>
+    <string name="ime_notes_empty_discarded">Empty note discarded</string>
+    <plurals name="ime_notes_trashed">
+        <item quantity="one">Note moved to trash</item>
+        <item quantity="other">%d notes moved to trash</item>
+    </plurals>
+    <plurals name="ime_notes_archived">
+        <item quantity="one">Note archived</item>
+        <item quantity="other">%d notes archived</item>
+    </plurals>
+
+</resources>

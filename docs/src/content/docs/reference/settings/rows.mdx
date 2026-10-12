@@ -125,6 +125,8 @@ Editing a built-in set doesn't overwrite the shipped version. Your edit is store
 
 - **Row order only orders: it doesn't enable.** The emoji row's line in Row order is a live read-out of the [Emoji](/reference/settings/emoji/) screen's own setting, not something you can flip from here. The symbol row's line mirrors the toggle at the top of this screen the same way.
 - **Reordering is drag, with a handle.** Press and drag the handle on a row's right edge; it settles into the slot you drop it in, and every row it passes along the way shifts to make room.
+- **Keyboard modes can override the switch.** A mode that sets the symbol row (or, on the Emoji screen, the emoji row) to a different value than the global one is listed under the row's setting as a chip, such as "Email: On", that opens the mode's editor. The row's line in Row order adds "Changed by *N* modes". See [Row order](/typing/modes/#row-order).
+
 - **A hidden row keeps its slot.** Turning the emoji or symbol row back on after hiding it drops it back into the same position in the stack, not the top or bottom.
 - **You can't uncheck the last enabled symbol set.** The checkbox for the only remaining checked set silently does nothing when tapped: there's no error message, it just won't go to zero.
 - **Entries can be removed from the keyboard too.** Holding an entry on the symbol row opens a menu with **Remove**, and on a set you made, **Delete the set**, which asks first. On a built-in set a removal is stored as the same override the editor writes, so Reset set undoes it. See [Holding an entry](/typing/modes/#holding-an-entry).

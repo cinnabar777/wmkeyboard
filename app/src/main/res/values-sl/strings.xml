@@ -2240,9 +2240,6 @@
     <string name="keypress_haptics_title">Haptični odziv ob pritisku tipke</string>
     <string name="keypress_hold_action_copy_label">Kopiraj</string>
     <string name="keypress_hold_action_cut_label">Izreži</string>
-    <string name="keypress_hold_action_first_info">Dejanje se običajno nahaja na koncu pojavnega okna, zato navaden pritisk in pridržanje prikaže prvi naglas. S to možnostjo se premakne na začetek, pritisk in pridržanje ene od bližnjičnih tipk pa takoj izvede dejanje. Naglasi so še vedno na voljo: držite prst in podrsajte do tistega, ki ga želite. To zahteva možnost »Pridrži za izbiro« v razdelku »Nadomestne tipke«.</string>
-    <string name="keypress_hold_action_first_subtitle">Pritisnite in držite za izvedbo dejanja namesto prikaza naglasov</string>
-    <string name="keypress_hold_action_first_title">Najprej dejanje</string>
     <string name="keypress_hold_action_paste_label">Prilepi</string>
     <string name="keypress_hold_action_redo_label">Uveljavi</string>
     <string name="keypress_hold_action_select_all_label">Izberi vse</string>
@@ -2553,8 +2550,6 @@
     <string name="languages_cjk_region_info">Tajvan in Hongkong pogosto uporabljata različne besede za isto stvar, ne le različne znake.</string>
     <string name="languages_cjk_region_taiwan_title">Tajvan (臺灣)</string>
     <string name="languages_cjk_region_title">Regionalno besedišče</string>
-    <string name="languages_cjk_traditional_info">Tipkovnica pretvori vsak kandidat iz poenostavljene (简体) v tradicionalno (繁體) kitajščino, preden ga prikaže. Pretvorba poteka znak po znak. Nekaj poenostavljenih znakov ima več kot eno tradicionalno obliko, tipkovnica pa vedno zapiše pogostejšo. 发 postane 發, kar je pravilno v 發展, vendar napačno v 頭髮. Te besede popravite ročno.</string>
-    <string name="languages_cjk_traditional_subtitle">Tipkovnica pretvori kandidate v tradicionalno pisavo (繁體). Pretvori en znak naenkrat, zato so nekatere oblike, ki so odvisne od konteksta, napačne (发 → 發 / 髮).</string>
     <string name="languages_cjk_traditional_title">Tradicionalni znaki</string>
     <string name="languages_clusters_title">Gruče</string>
     <string name="languages_conjunct_backspace_info">Vračalka običajno izbriše eno kodno točko naenkrat. To včasih na zaslonu pusti nepopolne sklope. Če je ta nastavitev vklopljena, en pritisk izbriše celoten sklop, medtem ko tipkate %1$s. Drugi jeziki ohranijo svojo nastavitev.</string>

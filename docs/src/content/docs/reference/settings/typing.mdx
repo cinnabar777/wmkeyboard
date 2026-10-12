@@ -149,14 +149,17 @@ Full writeup: [Suggestions & prediction](/smart/suggestions/) for the strip itse
 | Setting | Control | Default | Shown when |
 | --- | --- | --- | --- |
 | Autopilot | Toggle | On | always (needs Suggestions on to bias toward anything) |
-| Strength | Slider 1–10 | 5 | Autopilot on |
+| Strength | Slider 1–20 | 5 | Autopilot on |
 | Show the effect | Toggle | Off | Autopilot on |
 | Size of the effect | Slider ×1.0–×3.0 | ×1.0 | Show the effect on |
 | Outline the touch areas | Toggle | Off | Autopilot on |
+| Animate the touch areas | Toggle | Off | Autopilot on |
 
-**Strength** is how far a favoured letter reaches over the key next to it. At 1 only a tap on the exact edge changes hands; at 10 an expected letter claims most of the space between itself and a letter the word list isn't expecting. No letter ever reaches more than one key width from its own centre, whatever the slider says, and a press in the middle of a key is never reassigned at any strength.
+**Strength** is how far a favoured letter reaches over the key next to it. At 1 only a tap on the exact edge changes hands; at 10 an expected letter claims most of the space between itself and a letter the word list isn't expecting, and from 11 to 20 it pushes further still until the reach limit stops it. No letter ever reaches more than about one key width from its own centre, whatever the slider says, and a press in the middle of a key is never reassigned at any strength.
 
 The other rows make the invisible visible. **Show the effect** draws each expected letter over the board at the size its touch area has grown to, so you can watch the strength setting work while you type. At most three letters are drawn at once, and they're the three the word list expects most, ranked by likelihood rather than by how much room each one won: on a crowded row the likeliest letter can be hemmed in by its neighbours and grow the least of the lot, and it's still the one you're looking for. What each one is drawn with is the ground the bias won it, measured against where the boundary would have sat with nothing favoured at all. On a layout whose keys differ in width that is not the same as the key you see, since the halfway line between a wide key and a narrow one already falls inside the wide one. The keys themselves never move. **Outline the touch areas** draws a thin line around the same edge, which is what your press is judged against. Both are off by default, since the point of the feature is that you don't notice it.
+
+**Animate the touch areas** (off by default) makes that drawing move smoothly: each letter grows or shrinks to its new size instead of jumping on every keystroke, and fades in or out as it gains or loses favour. Only the drawing animates. The areas your presses are judged against change at once, exactly as before. Reduce motion turns it off.
 
 The drawing follows your typing and nothing else. It disappears for the length of a glide, which owns the board while it's being drawn, and moving the caret into a word you typed earlier doesn't bring it back.
 

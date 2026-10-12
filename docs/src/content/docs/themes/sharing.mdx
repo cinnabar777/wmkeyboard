@@ -29,7 +29,7 @@ The exported file is the whole theme, written as plain JSON with no wrapper or f
 
 ## Importing a theme
 
-There are three ways a theme gets imported, and they don't all behave the same way: two apply the theme immediately, one doesn't. Three more buttons on the same row, **FlorisBoard**, **HeliBoard** and **Gboard**, read someone else's format rather than this one. They're covered separately below.
+There are three ways a theme gets imported, and they don't all behave the same way: two apply the theme immediately, one doesn't. Five more buttons on the same row, **FlorisBoard**, **HeliBoard**, **FUTO**, **Multiling O** and **Gboard**, read someone else's format rather than this one. They're covered separately below.
 
 ### From the Import button
 
@@ -64,6 +64,12 @@ The gallery's **FlorisBoard** button reads FlorisBoard's own `.flex` theme packa
 ### From a HeliBoard or LeanType theme
 
 The **HeliBoard** button reads the colour themes those two keyboards share. They have no theme file at all: a theme is a line of JSON copied out of the menu at the top of their colour screen, which is why their themes circulate as forum posts. So the button asks where yours is, **Paste** or **Open a file**, and reads either. Both of that keyboard's export shapes work, the ten named colours and the forty-odd internal roles of its *all colours* mode. Like a FlorisBoard import, the theme is saved without being switched on, and the result message says how many of its colours landed. See [Importing other keyboards](/reference/importing-other-keyboards/).
+
+### From a Multiling O theme
+
+The **FUTO** button reads a FUTO Keyboard theme `.zip`, the hand-written `theme.txt` kind or one saved by FUTO's own theme editor, with its background picture and font. The theme is saved without being switched on, and the result message lists anything that did not come across, such as pictures drawn per key. A FUTO theme also opens from a file manager. See [Importing other keyboards](/reference/importing-other-keyboards/#futo-keyboard-themes).
+
+The **Multiling O** button reads the colours of a Multiling O Keyboard theme. That keyboard shares a theme as a block of text from its settings export, starting with `OK_Settings_Begin`, or as a link with the block in it. The button asks for **Paste** or **Open a file**, the same as the HeliBoard one. The theme is saved without being switched on, and the result message says how many of its colours landed. See [Importing other keyboards](/reference/importing-other-keyboards/#multiling-o-themes).
 
 ### From a Gboard theme or the Rboard collection
 

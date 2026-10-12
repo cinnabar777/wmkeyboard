@@ -50,7 +50,7 @@ internal fun SelectionMacroSettingsScreen(
         // Where the bar draws, and everything below, only mean something once
         // the bar exists: the service clears the offer outright while the
         // feature is off, so these would be settings for nothing.
-        if (macrosOn) item {
+        item(visible = macrosOn) {
             ChoiceSetting(
                 R.string.selection_macros_placement_title,
                 subtitle = stringResource(R.string.selection_macros_placement_subtitle),
@@ -75,7 +75,7 @@ internal fun SelectionMacroSettingsScreen(
         // Reads as a second question about where the bar appears rather than
         // as one about the actions: it decides whether there is a bar at all
         // on the longest selections, not which chips go on it.
-        if (macrosOn) item {
+        item(visible = macrosOn) {
             ToggleSetting(
                 R.string.selection_macros_every_title,
                 stringResource(R.string.selection_macros_every_subtitle),

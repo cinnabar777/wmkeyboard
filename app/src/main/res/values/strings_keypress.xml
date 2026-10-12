@@ -235,11 +235,17 @@
 
     <string name="keypress_hold_actions_title">Hold shortcuts</string>
     <string name="keypress_hold_actions_subtitle">Edit actions in the press and hold popup of a letter key</string>
-    <string name="keypress_hold_actions_info">Each action you pick goes into the press and hold popup of its key, after the accents that the key already has. Copy and cut take the selection, or all the text if you select nothing. Undo and redo send the same shortcuts as the toolbar tools. Choose the keys under Shortcut keys. To run the action with a plain press and hold instead, turn on Action first.</string>
+    <string name="keypress_hold_actions_info">Each action you pick goes into the press and hold popup of its key, after the accents that the key already has. Copy and cut take the selection, or all the text if you select nothing. Undo and redo send the same shortcuts as the toolbar tools. Choose the keys under Shortcut keys. To put the action nearer to the key, or first so that a plain press and hold runs it, use Action position.</string>
 
-    <string name="keypress_hold_action_first_title">Action first</string>
-    <string name="keypress_hold_action_first_subtitle">Press and hold runs the action instead of showing the accents</string>
-    <string name="keypress_hold_action_first_info">The action usually sits at the end of the popup, so a plain press and hold gives you the first accent. With this on it moves to the front, and a press and hold on one of the shortcut keys runs the action straight away. The accents are still there: keep your finger down and slide onto the one you want. This needs Hold to select, under Alternate keys.</string>
+    <string name="keypress_hold_action_position_title">Action position</string>
+    <string name="keypress_hold_action_position_subtitle">Where the shortcut goes in the press and hold popup</string>
+    <string name="keypress_hold_action_position_info">The shortcut usually goes last in the popup, after the accents of its key. Move it nearer to the key here.\n\nAfter 1 character: a plain press and hold still types the first accent, which is also the one the corner hint shows, and the shortcut is a short slide away.\n\nFirst: a plain press and hold runs the shortcut straight away, and the accents move one along. Keep your finger down and slide onto the accent you want.\n\nA place that is past all the accents of a key puts the shortcut last on that key. This needs Choose without lifting, under Alternate keys.</string>
+    <string name="keypress_hold_action_position_first">First</string>
+    <string name="keypress_hold_action_position_last">Last</string>
+    <plurals name="keypress_hold_action_position_after">
+        <item quantity="one">After %d character</item>
+        <item quantity="other">After %d characters</item>
+    </plurals>
     <string name="keypress_globe_drag_title">Slide from 🌐 for shortcuts</string>
     <string name="keypress_globe_drag_subtitle">Press 🌐 and slide onto C to copy, V to paste</string>
     <string name="keypress_globe_drag_info">Put your finger on the 🌐 key, slide it onto a shortcut key and lift: onto A selects all, C copies, V pastes, X cuts, Z undoes and Y redoes. These are the same keys and the same actions as the hold shortcuts, and you can change the keys under Shortcut keys. This works when the hold shortcuts are off too. Lift anywhere else and nothing happens. Slide back onto 🌐 to change the language as a tap does. If you hold 🌐 still until the language list opens, the slide is for the list. This setting is off by default.</string>

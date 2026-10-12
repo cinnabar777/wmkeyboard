@@ -434,4 +434,24 @@ class LearningBufferTest {
         assertEquals(WordOrigin.GLIDE, dropped.origin)
         assertEquals(WordOrigin.GLIDE, buffer.originOf("hello"))
     }
+
+    /**
+     * A word queued for its place in the run alone (an autocorrect's own
+     * spelling) settles with the rest, but a fix to it is not the user's slip.
+     */
+    @Test
+    fun aContextOnlyWordSettlesInOrderButIsNeverPairedWithItsFix() {
+        val buffer = LearningBuffer()
+        buffer.commit("wibble", 7)
+        buffer.push("I", "en", 0, known = true)
+        buffer.onCaret(9)
+        buffer.commit("wobble", 16)
+        assertEquals(listOf("wibble", "I", "wobble"), buffer.drain().map { it.word })
+        buffer.push("teh", "en", 0)
+        buffer.onCaret(4)
+        assertFalse(buffer.attachGlide("teh", GlideShapeSample(1L, ByteArray(96))))
+        assertTrue(buffer.onDeleted(0, 4).isEmpty())
+        buffer.commit("the", 4)
+        assertNull(buffer.drain().single().replaces)
+    }
 }

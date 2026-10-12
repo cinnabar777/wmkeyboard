@@ -2243,9 +2243,6 @@
     <string name="keypress_haptics_title">Mitetemo ya kubonyeza kitufe</string>
     <string name="keypress_hold_action_copy_label">Nakili</string>
     <string name="keypress_hold_action_cut_label">Kata</string>
-    <string name="keypress_hold_action_first_info">Kitendo kawaida hukaa mwishoni mwa kidukizo, kwa hivyo kubonyeza na kushikilia kawaida hukupa lafudhi ya kwanza. Hii ikiwa imewashwa, inahamia mbele, na kubonyeza na kushikilia kwenye moja ya vitufe vya mkato huendesha kitendo mara moja. Lafudhi bado zipo: weka kidole chako chini na uteleze kwenye ile unayotaka. Hii inahitaji Shikilia ili kuchagua, chini ya Vitufe mbadala.</string>
-    <string name="keypress_hold_action_first_subtitle">Kubonyeza na kushikilia hufanya kitendo badala ya kuonyesha lafudhi</string>
-    <string name="keypress_hold_action_first_title">Kitendo kwanza</string>
     <string name="keypress_hold_action_paste_label">Bandika</string>
     <string name="keypress_hold_action_redo_label">Rudia</string>
     <string name="keypress_hold_action_select_all_label">Chagua yote</string>
@@ -2556,8 +2553,6 @@
     <string name="languages_cjk_region_info">Taiwan na Hong Kong mara nyingi hutumia maneno tofauti kwa kitu kimoja, si herufi tofauti pekee.</string>
     <string name="languages_cjk_region_taiwan_title">Taiwan (臺灣)</string>
     <string name="languages_cjk_region_title">Maneno ya kikanda</string>
-    <string name="languages_cjk_traditional_info">Kibodi hubadilisha kila chaguo kutoka Kilichorahisishwa (简体) hadi cha Jadi (繁體) kabla ya kuonyesha chaguo hilo. Ubadilishaji husoma herufi moja kwa wakati mmoja. Herufi chache zilizorahisishwa zina umbo zaidi ya moja la Jadi, na kibodi huandika ile ya kawaida zaidi. 发 inakuwa 發, ambayo ni sahihi katika 發展 lakini si sahihi katika 頭髮. Sahihisha maneno hayo kwa mkono.</string>
-    <string name="languages_cjk_traditional_subtitle">Kibodi hubadilisha watahiniwa kuwa Jadi (繁體). Inabadilisha herufi moja kwa wakati, kwa hivyo aina chache zinazotegemea muktadha si sahihi (发 → 發 / 髮).</string>
     <string name="languages_cjk_traditional_title">Herufi za kitamaduni</string>
     <string name="languages_clusters_title">Vikundi</string>
     <string name="languages_conjunct_backspace_info">Backspace kwa kawaida hufuta sehemu moja ya msimbo kwa wakati mmoja. Hii wakati mwingine huacha makundi yaliyoundwa nusu kwenye skrini. Kwa mpangilio huu ukiwa umewashwa, bonyeza moja hufuta kundi zima unapoandika %1$s. Lugha nyingine huweka mpangilio wao wenyewe.</string>

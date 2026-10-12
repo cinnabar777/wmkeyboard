@@ -1,6 +1,13 @@
 package com.wasimaster.wmkeyboard.app.storage
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -14,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -31,14 +39,21 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.wasimaster.wmkeyboard.R
 import com.wasimaster.wmkeyboard.app.CaptionText
+import com.wasimaster.wmkeyboard.app.ChartIntroScope
+import com.wasimaster.wmkeyboard.app.CountingText
+import com.wasimaster.wmkeyboard.app.LocalReduceMotion
+import com.wasimaster.wmkeyboard.app.RunGlyph
+import com.wasimaster.wmkeyboard.app.RunPhase
 import com.wasimaster.wmkeyboard.app.SettingsGroup
 import com.wasimaster.wmkeyboard.app.WmIconTile
 import com.wasimaster.wmkeyboard.app.WmRow
 import com.wasimaster.wmkeyboard.app.formatBytes
 import com.wasimaster.wmkeyboard.app.lock.AppLockTargets
+import com.wasimaster.wmkeyboard.app.stateSwapTransform
 import com.wasimaster.wmkeyboard.core.settings.SettingsRepository
 import java.io.File
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -57,24 +72,60 @@ internal fun StorageCategoryScreen(
     repository: SettingsRepository,
     onOpenRoute: (String) -> Unit,
 ) {
+    // The sizes count up when the screen opens, as the Storage screen's do;
+    // coming back to it on the same visit finds them already there.
+    ChartIntroScope { StorageCategoryBody(categoryId, repository, onOpenRoute) }
+}
+
+/** What the item list is showing: nothing yet, the empty note, or the items. */
+private enum class ItemsShown { LOADING, EMPTY, LIST }
+
+@Composable
+private fun StorageCategoryBody(
+    categoryId: String,
+    repository: SettingsRepository,
+    onOpenRoute: (String) -> Unit,
+) {
     val context = LocalContext.current
+    val reduceMotion = LocalReduceMotion.current
     val scope = rememberCoroutineScope()
     val category = remember(categoryId) { StorageCategories.byId(categoryId) } ?: return
     var revision by remember { mutableIntStateOf(0) }
     var busy by remember { mutableStateOf(false) }
     var confirmItem by remember { mutableStateOf<StorageItem?>(null) }
     var confirmAll by remember { mutableStateOf(false) }
+    // Clearing the whole category: a spinner on its button while the files go,
+    // then the tick for a moment before the button folds away.
+    var clearPhase by remember(categoryId) { mutableStateOf(RunPhase.IDLE) }
+    LaunchedEffect(clearPhase) {
+        if (clearPhase == RunPhase.DONE) {
+            delay(CLEAR_DONE_HOLD_MS)
+            clearPhase = RunPhase.IDLE
+        }
+    }
+    // Items on their way out: hidden the moment the deletion is confirmed, so
+    // the row folds away while the files go rather than a beat later when the
+    // list is read again. Cleared on that read — an item that is still there
+    // (the deletion failed) comes back.
+    var leaving by remember(categoryId) { mutableStateOf(emptySet<String>()) }
 
-    val items by produceState(emptyList<StorageItem>(), categoryId, revision) {
+    // Null until the first read lands, so the screen does not say "empty" for
+    // the moment it takes to look. A re-read keeps the old list until the new
+    // one is in.
+    val loaded by produceState<List<StorageItem>?>(null, categoryId, revision) {
         value = withContext(Dispatchers.IO) {
             category.items(StorageEnv(context, repository, storageRoots(context)))
                 .sortedByDescending { it.bytes }
         }
     }
+    val items = loaded.orEmpty()
 
-    fun perform(work: suspend (StorageEnv) -> Unit) {
+    LaunchedEffect(loaded) { leaving = emptySet() }
+
+    fun perform(clearingAll: Boolean = false, work: suspend (StorageEnv) -> Unit) {
         scope.launch {
             busy = true
+            if (clearingAll) clearPhase = RunPhase.RUNNING
             withContext(Dispatchers.IO) {
                 work(StorageEnv(context, repository, storageRoots(context)))
             }
@@ -83,6 +134,7 @@ internal fun StorageCategoryScreen(
             // shows the size of something that has just been deleted.
             StorageSnapshot.invalidate()
             busy = false
+            if (clearingAll) clearPhase = RunPhase.DONE
             revision++
         }
     }
@@ -90,23 +142,43 @@ internal fun StorageCategoryScreen(
     CaptionText(stringResource(category.subtitle))
     if (category.note != 0) CaptionText(stringResource(category.note))
 
-    if (items.isEmpty()) {
-        CaptionText(stringResource(R.string.storage_detail_empty))
-    } else {
-        // A leading slot on every row or on none of them. Thumbnails on the
-        // picture rows and nothing on the JSON beside them would step the
-        // headlines in and out down the column, which reads as a broken list
-        // rather than as two kinds of thing.
-        val slotted = items.any { it.preview != null }
-        SettingsGroup {
-            for (item in items) {
-                item {
-                    StorageItemRow(
-                        item = item,
-                        accent = category.accent,
-                        slotted = slotted,
-                        enabled = !busy,
-                    ) { confirmItem = item }
+    // The empty note and the list hand over to each other — the last item
+    // deleted, or the first read landing — rather than swapping in a frame.
+    AnimatedContent(
+        targetState = when {
+            loaded == null -> ItemsShown.LOADING
+            items.isEmpty() -> ItemsShown.EMPTY
+            else -> ItemsShown.LIST
+        },
+        transitionSpec = { stateSwapTransform(reduceMotion) },
+        modifier = Modifier.fillMaxWidth(),
+        label = "storageItems",
+    ) { shown ->
+        when (shown) {
+            ItemsShown.LOADING -> Unit
+            ItemsShown.EMPTY -> CaptionText(stringResource(R.string.storage_detail_empty))
+            ItemsShown.LIST -> {
+                // A leading slot on every row or on none of them. Thumbnails on
+                // the picture rows and nothing on the JSON beside them would
+                // step the headlines in and out down the column, which reads as
+                // a broken list rather than as two kinds of thing.
+                val slotted = items.any { it.preview != null }
+                SettingsGroup {
+                    for (stored in items) {
+                        // Keyed by the item, so a deleted one closes out of its
+                        // place and the rows under it slide up into the gap,
+                        // where a row matched by position would jump.
+                        item(visible = stored.id !in leaving, key = stored.id) {
+                            StorageItemRow(
+                                item = stored,
+                                accent = category.accent,
+                                slotted = slotted,
+                                // Also off while it folds away: the fading row
+                                // still takes a press.
+                                enabled = !busy && stored.id !in leaving,
+                            ) { if (!busy && stored.id !in leaving) confirmItem = stored }
+                        }
+                    }
                 }
             }
         }
@@ -126,17 +198,31 @@ internal fun StorageCategoryScreen(
         }
     }
 
-    if (category.clearable && items.any { it.deletable }) {
+    // Kept while its tick shows, then folded away with nothing left to clear.
+    val clearAllShown = category.clearable &&
+        (items.any { it.deletable && it.id !in leaving } || clearPhase != RunPhase.IDLE)
+    val clearAll: @Composable () -> Unit = {
         TextButton(
-            onClick = { confirmAll = true },
-            enabled = !busy,
+            onClick = { if (!busy && clearPhase == RunPhase.IDLE) confirmAll = true },
+            enabled = !busy && clearPhase == RunPhase.IDLE,
             modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp),
         ) {
+            RunGlyph(clearPhase, MaterialTheme.colorScheme.error)
             Text(
                 stringResource(R.string.storage_delete_all_desc, stringResource(category.title)),
                 color = MaterialTheme.colorScheme.error,
             )
         }
+    }
+    if (reduceMotion) {
+        if (clearAllShown) clearAll()
+    } else {
+        AnimatedVisibility(
+            visible = clearAllShown,
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut(),
+            label = "storageClearAll",
+        ) { clearAll() }
     }
 
     confirmItem?.let { item ->
@@ -147,6 +233,7 @@ internal fun StorageCategoryScreen(
             onDismiss = { confirmItem = null },
             onConfirm = {
                 confirmItem = null
+                leaving = leaving + item.id
                 perform { env -> category.delete(env, item) }
             },
         )
@@ -161,7 +248,10 @@ internal fun StorageCategoryScreen(
             onDismiss = { confirmAll = false },
             onConfirm = {
                 confirmAll = false
-                perform { env -> category.clear(env) }
+                // The rows that are going fold away now, as a single delete's
+                // does, rather than when the list is read again.
+                leaving = leaving + items.filter { it.deletable }.map { it.id }
+                perform(clearingAll = true) { env -> category.clear(env) }
             },
         )
     }
@@ -196,7 +286,13 @@ private fun StorageItemRow(
         },
         trailing = {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(formatBytes(item.bytes), style = MaterialTheme.typography.labelLarge)
+                // Counts up with the screen's entrance, as the Storage screen's
+                // sizes do.
+                CountingText(
+                    target = item.bytes,
+                    format = { formatBytes(it) },
+                    style = MaterialTheme.typography.labelLarge,
+                )
                 if (item.deletable) {
                     IconButton(onClick = onDelete, enabled = enabled) {
                         Icon(
@@ -232,6 +328,9 @@ private fun StorageThumbnail(file: File, accent: Color) {
         )
     }
 }
+
+/** How long the tick stays on Clear all before the button folds away. */
+private const val CLEAR_DONE_HOLD_MS = 1_200L
 
 private fun bodyForItem(danger: Danger): Int = when (danger) {
     Danger.NONE -> R.string.storage_confirm_free_body

@@ -132,6 +132,15 @@
     <string name="rows_bar_fancy_off_subtitle">Shown while Fancy text is on</string>
     <string name="rows_bar_emoji_off_subtitle">Off. Turn it on in Emoji settings</string>
     <string name="rows_bar_emoji_button_subtitle">Behind a toolbar button</string>
+    <!-- Row order status: how many keyboard modes show, hide or restyle the row differently from its global setting. %1$d is the count. -->
+    <plurals name="rows_bar_mode_overrides">
+        <item quantity="one">Changed by %1$d mode</item>
+        <item quantity="other">Changed by %1$d modes</item>
+    </plurals>
+    <!-- Above the chips naming the keyboard modes that override a row's global setting. -->
+    <string name="rows_mode_overrides_caption">These keyboard modes set this row their own way while they are active. Tap one to change it.</string>
+    <!-- One chip per overriding mode. %1$s is the mode's name, %2$s what it sets the row to (On, Off, Button, Own row). -->
+    <string name="rows_mode_override_chip">%1$s: %2$s</string>
 
     <string name="rows_symbol_row_title">Symbol row</string>
     <string name="rows_symbol_row_subtitle">A row of special characters and snippets above the keys</string>

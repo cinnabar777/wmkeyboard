@@ -1,17 +1,30 @@
 package com.wasimaster.wmkeyboard.ime.ui
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.findRootCoordinates
+import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
 
 /**
  * The key that fires the button this is drawn on: `Ctrl+2`, `Shift+F`, `Alt+1`.
@@ -38,9 +51,34 @@ import androidx.compose.ui.unit.sp
 internal fun HintBadge(label: String, modifier: Modifier = Modifier) {
     val kb = LocalKbTheme.current
     val size = hintBadgeFontSize(label)
+    // Arming the picker brings every badge at once, so they arrive as a wave
+    // from left to right rather than all popping on the same frame. Born at
+    // nothing, so no badge is drawn whole for a frame before it fades in.
+    // Leaving is instant: the caller drops the badge with the picker.
+    val arrive = remember { Animatable(if (kb.motion.any) 0f else 1f) }
+    val wave = remember { BadgeWave() }
+    LaunchedEffect(arrive) {
+        if (arrive.value >= 1f) return@LaunchedEffect
+        // One frame, so the badge has been placed and knows where it is.
+        withFrameNanos { }
+        delay((wave.across * HintBadgeSpreadMs).toLong())
+        arrive.animateTo(1f, tween(HintBadgeInMs, easing = FastOutSlowInEasing))
+    }
     Text(
         label,
         modifier = modifier
+            .onPlaced { wave.place(it) }
+            .graphicsLayer {
+                val p = arrive.value
+                if (p >= 1f) return@graphicsLayer
+                alpha = p
+                val s = HintBadgeFrom + (1f - HintBadgeFrom) * p
+                scaleX = s
+                scaleY = s
+                // The badge overhangs a narrow cell on purpose; an offscreen
+                // buffer the size of the node would cut that off mid-fade.
+                compositingStrategy = CompositingStrategy.ModulateAlpha
+            }
             .wrapContentWidth(unbounded = true)
             .clip(RoundedCornerShape(4.dp))
             .background(kb.accent.copy(alpha = 0.22f))
@@ -76,4 +114,20 @@ private fun hintBadgeFontSize(label: String) = when {
  * badge has somewhere to sit, which moves the glyph without resizing the box.
  */
 internal val HintBadgeHeight = 12.dp
+
+/** Where a badge sits across the keyboard, 0 at the left edge and 1 at the right. */
+private class BadgeWave {
+    var across = 0f
+        private set
+
+    fun place(coordinates: LayoutCoordinates) {
+        val width = coordinates.findRootCoordinates().size.width
+        if (width > 0) across = (coordinates.positionInWindow().x / width).coerceIn(0f, 1f)
+    }
+}
+
+/** A badge's fade and grow in, and the most the wave across the board lags it. */
+private const val HintBadgeInMs = 120
+private const val HintBadgeSpreadMs = 100f
+private const val HintBadgeFrom = 0.6f
 

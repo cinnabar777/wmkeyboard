@@ -47,6 +47,7 @@
     <string name="servers_klipy">KLIPY</string>
     <string name="servers_giphy">GIPHY</string>
     <string name="servers_signal_sticker_cdn">Signal sticker storage</string>
+    <string name="servers_telegram_bot_api">Telegram Bot API</string>
     <string name="servers_unsplash">Unsplash</string>
     <string name="servers_pexels">Pexels</string>
     <string name="servers_wikipedia">Wikipedia or another MediaWiki</string>

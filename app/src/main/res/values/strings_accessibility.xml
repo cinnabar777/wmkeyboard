@@ -53,6 +53,26 @@
 
     <string name="accessibility_reduce_motion_title">Reduce motion</string>
     <string name="accessibility_reduce_motion_subtitle">Turn off the animation that is not necessary</string>
+    <string name="accessibility_panel_motion_title">Animate panels</string>
+    <string name="accessibility_panel_motion_subtitle">Panels grow out of the button or tool name that opened them</string>
+    <string name="accessibility_panel_motion_info">When you open a panel such as the clipboard, emoji or a tool, it grows out of the toolbar button or the tool name you tapped, and it folds back into it when you close it. The animation is short, so it does not slow you down.
+
+Turn this off and panels appear and disappear at once. Reduce motion also turns this off.</string>
+    <string name="accessibility_selection_motion_title">Animate text selection</string>
+    <string name="accessibility_selection_motion_subtitle">The selection highlight and its buttons move smoothly</string>
+    <string name="accessibility_selection_motion_info">While you select text with the keyboard, the highlight slides to the new selection and the buttons of the selection bar come in one after the other.
+
+Turn this off and the selection and its buttons change at once. Reduce motion also turns this off.</string>
+    <string name="accessibility_language_switch_motion_title">Animate language switch</string>
+    <string name="accessibility_language_switch_motion_subtitle">Keys flip to the new language when you switch</string>
+    <string name="accessibility_language_switch_motion_info">When you switch language, each key that shows a different letter in the new language flips over to it. Keys that stay the same hold still, so you can see what changed.
+
+Off by default, because the plain switch is the fastest. Only a language switch animates. Changing to symbols or numbers never does. Reduce motion also turns this off.</string>
+    <string name="accessibility_tool_result_motion_title">Animate grammar and translate results</string>
+    <string name="accessibility_tool_result_motion_subtitle">Fixes and translations move into place</string>
+    <string name="accessibility_tool_result_motion_info">In the grammar tool, a fix you apply crosses out the old words and slides the new ones in, and the list of problems closes up around it. In the translate tool, the part of the translation that changed fades in while the words that stayed hold still, and the language swap button turns.
+
+Off by default, because these tools are for getting text out fast. Reduce motion also turns this off.</string>
     <string name="accessibility_classic_popup_title">Classic press-and-hold popup</string>
     <string name="accessibility_classic_popup_subtitle">The alternates popup as it used to be, with nothing moving under your finger</string>
     <string name="accessibility_classic_popup_info">When you hold a key, its alternates popup normally opens with the first alternate right over the key, the alternate you aim at grows, and the highlight follows your finger and slides from one alternate to the next.\n\nTurn this on for the popup as it used to be. It opens where the key is, the highlight is on whatever alternate is under your finger, nothing grows, and the highlight jumps straight to the next alternate instead of sliding. Choosing still works the same way: slide to an alternate and lift.</string>

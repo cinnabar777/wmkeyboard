@@ -11,8 +11,8 @@ import java.util.zip.ZipInputStream
  *
  * The bundled lists only cover English and Bengali; every other language
  * ships with no dictionary at all. Rather than wait for a curated list per
- * language, this lets anyone drop in their own — a Hunspell `.dic`, a
- * frequency list, or a plain column of words — and get completions and
+ * language, this lets anyone drop in their own — a Hunspell `.aff` and
+ * `.dic`, a frequency list, or a plain column of words — and get completions and
  * autocorrect for a language the app knows nothing about.
  *
  * Lists live in `filesDir/dictionaries/<langId>/<name>.txt` (langId = the
@@ -237,6 +237,12 @@ object CustomDictionaries {
 
         /** A dictionary in a revision the reader does not know. */
         data class UnsupportedVersion(val version: Int) : Refusal
+
+        /** A Hunspell `.dic` came without the `.aff` whose rules spell its words. */
+        data object MissingAff : Refusal
+
+        /** A Hunspell `.aff` came without its `.dic`. */
+        data object MissingDic : Refusal
     }
 
     sealed interface Inspection {
@@ -253,8 +259,11 @@ object CustomDictionaries {
      * - a compiled `.dict` (version 2);
      * - a version 4 dictionary, which is two files: its `.header` and its
      *   `.body`, picked together;
-     * - a `.zip` holding any number of `.dict` files and version 4 pairs, which
-     *   is what a HeliBoard backup is. Only dictionaries are taken out of a zip:
+     * - a Hunspell dictionary, which is two files too: its `.aff` and its
+     *   `.dic`, unfolded into every word they spell ([Hunspell]);
+     * - a `.zip` holding any number of `.dict` files, version 4 pairs and
+     *   Hunspell pairs, which is what a HeliBoard backup, a LibreOffice `.oxt`
+     *   and a Firefox `.xpi` dictionary are. Only dictionaries are taken out of a zip:
      *   the other text files in a backup (layouts, blacklists) would read as
      *   word lists, and are not taken.
      */
@@ -273,10 +282,25 @@ object CustomDictionaries {
         val bodies = items.filter { it.name.endsWith(BODY_SUFFIX) }
             .associateBy { it.name.removeSuffix(BODY_SUFFIX) }
         val usedBodies = HashSet<String>()
+        val affs = items.filter { Hunspell.isAff(it.name) }
+        val affsByStem = affs.associateBy { Hunspell.stem(it.name) }
+        val usedAffs = HashSet<ImportFile>()
         val candidates = ArrayList<ImportCandidate>()
         var refusal: Refusal? = null
         for (item in items) {
-            if (item.name.endsWith(BODY_SUFFIX)) continue
+            if (item.name.endsWith(BODY_SUFFIX) || Hunspell.isAff(item.name)) continue
+            if (Hunspell.looksLikeDic(item.name, item.bytes)) {
+                // Paired by name, or, when only one of each was picked, with
+                // each other: a download often names the two differently.
+                val aff = affsByStem[Hunspell.stem(item.name)] ?: affs.singleOrNull()
+                if (aff == null) {
+                    refusal = refusal ?: Refusal.MissingAff
+                    continue
+                }
+                usedAffs.add(aff)
+                hunspellCandidate(item, aff)?.let(candidates::add)
+                continue
+            }
             if (!AospDictionary.looksLikeDictionary(item.bytes)) {
                 // Inside a zip only a combined list is a dictionary; a picked
                 // file may be any word list.
@@ -305,6 +329,7 @@ object CustomDictionaries {
             }
         }
         if (refusal == null && bodies.keys.any { it !in usedBodies }) refusal = Refusal.MissingHeader
+        if (refusal == null && affs.any { it !in usedAffs }) refusal = Refusal.MissingDic
         val found = candidates.filter { it.words.isNotEmpty() || it.hasExtras }
         return if (found.isNotEmpty()) {
             Inspection.Found(found)
@@ -321,6 +346,20 @@ object CustomDictionaries {
         locale = contents.attributes["locale"]?.takeIf { it.isNotBlank() },
         description = contents.attributes["description"]?.takeIf { it.isNotBlank() },
     )
+
+    private fun hunspellCandidate(dic: ImportFile, aff: ImportFile): ImportCandidate? {
+        val words = runCatching { Hunspell.expand(aff.bytes, dic.bytes) }.getOrDefault(emptyList())
+        if (words.isEmpty()) return null
+        val name = dic.name.substringAfterLast('/')
+        return ImportCandidate(
+            name = name,
+            words = words,
+            ngrams = emptyList(),
+            shortcuts = emptyList(),
+            locale = Hunspell.language(aff.bytes) ?: name.substringBeforeLast('.'),
+            description = null,
+        )
+    }
 
     private fun combinedCandidate(item: ImportFile): ImportCandidate? {
         val first = firstLine(item.bytes) ?: return null
@@ -554,7 +593,7 @@ object CustomDictionaries {
     private fun looksLikeDictionaryEntry(name: String): Boolean {
         val lower = name.lowercase()
         return lower.endsWith(".dict") || lower.endsWith(HEADER_SUFFIX) || lower.endsWith(BODY_SUFFIX) ||
-            lower.endsWith(".combined")
+            lower.endsWith(".combined") || lower.endsWith(".aff") || lower.endsWith(".dic")
     }
 
     private fun firstLine(bytes: ByteArray): String? = runCatching {

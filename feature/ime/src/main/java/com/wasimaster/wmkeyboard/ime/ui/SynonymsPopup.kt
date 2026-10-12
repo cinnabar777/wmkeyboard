@@ -27,11 +27,22 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationVector1D
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -49,6 +60,7 @@ import com.wasimaster.wmkeyboard.ime.SynonymAction
 import com.wasimaster.wmkeyboard.ime.SynonymsSheet
 import com.wasimaster.wmkeyboard.ime.SynonymsStatus
 import com.wasimaster.wmkeyboard.ime.caseLike
+import kotlinx.coroutines.launch
 
 /**
  * The synonyms for a held word (#321): what the held-word menu's Synonyms
@@ -65,7 +77,17 @@ import com.wasimaster.wmkeyboard.ime.caseLike
  * so the sheet shows exactly what a tap will type.
  */
 @Composable
-internal fun SynonymsPopup(sheet: SynonymsSheet, onAction: (SynonymAction) -> Unit) {
+internal fun SynonymsPopup(sheet: SynonymsSheet?, onAction: (SynonymAction) -> Unit) {
+    GrowingPopupHost(sheet) { shown, growth ->
+        // On its way out the sheet has already been closed or picked from;
+        // nothing on it answers any more.
+        SynonymsWindow(shown, growth) { action -> if (!growth.leaving) onAction(action) }
+    }
+}
+
+/** The sheet's window, growing in from the strip and folding back ([growth]). */
+@Composable
+private fun SynonymsWindow(sheet: SynonymsSheet, growth: PopupGrowth, onAction: (SynonymAction) -> Unit) {
     val kb = LocalKbTheme.current
     val dismiss = { onAction(SynonymAction.Dismiss) }
 
@@ -73,7 +95,7 @@ internal fun SynonymsPopup(sheet: SynonymsSheet, onAction: (SynonymAction) -> Un
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.5f))
+                .popupScrim(growth)
                 .pointerInput(Unit) { detectTapGestures { dismiss() } },
             contentAlignment = Alignment.Center,
         ) {
@@ -84,6 +106,7 @@ internal fun SynonymsPopup(sheet: SynonymsSheet, onAction: (SynonymAction) -> Un
                 shadowElevation = elevationFor(kb.menuShapeKind, 8.dp),
                 modifier = Modifier
                     .padding(12.dp)
+                    .popupGrow(growth)
                     // As tall as its list, and no taller than the keyboard:
                     // the box it is centred in is the keyboard window.
                     .fillMaxWidth(0.94f)
@@ -174,13 +197,22 @@ private fun ColumnScope.Found(
         )
     }
     val rail = rememberScrollRailState(rememberScrollState())
+    // One clock for every chip, so a long list costs one animation and not
+    // one per chip; each chip reads its own slice of it in its layer.
+    val motion = LocalKbTheme.current.motion.any
+    val arrival = remember(status) { Animatable(if (motion) 0f else 1f) }
+    LaunchedEffect(arrival) { arrival.animateTo(1f, tween(ChipArrivalMs, easing = LinearEasing)) }
     ScrollRail(
         state = rail,
         modifier = Modifier.fillMaxWidth().weight(1f, fill = false),
         fadeColor = kb.popup,
         colors = kbRailColors(kb),
     ) {
-        for (group in status.groups) Group(group, sheet.caseModel, kb, onAction)
+        var first = 0
+        for (group in status.groups) {
+            Group(group, sheet.caseModel, kb, ChipArrival(arrival, first, motion), onAction)
+            first += group.words.size
+        }
     }
     Text(
         text = stringResource(R.string.ime_synonyms_from, stringResource(status.source.labelRes)),
@@ -190,9 +222,34 @@ private fun ColumnScope.Found(
     )
 }
 
+/**
+ * Where the chips are in arriving: [clock] runs 0 to 1 over [ChipArrivalMs],
+ * and the chip at [first] plus n starts its own short rise a stagger after the
+ * one before it, so the list fills in from the top rather than landing at once.
+ */
+@Stable
+private class ChipArrival(
+    private val clock: Animatable<Float, AnimationVector1D>,
+    private val first: Int,
+    val motion: Boolean,
+) {
+    /** How far chip [index] of its group is in, 0 to 1. */
+    fun of(index: Int): Float {
+        val ms = clock.value * ChipArrivalMs
+        val start = minOf(first + index, ChipStaggerCap) * ChipStaggerMs
+        return FastOutSlowInEasing.transform(((ms - start) / ChipRiseMs).coerceIn(0f, 1f))
+    }
+}
+
 /** A part of speech, the meaning when the source gave one, and its synonyms as chips. */
 @Composable
-private fun Group(group: SynonymGroup, caseModel: String, kb: KbTheme, onAction: (SynonymAction) -> Unit) {
+private fun Group(
+    group: SynonymGroup,
+    caseModel: String,
+    kb: KbTheme,
+    arrival: ChipArrival,
+    onAction: (SynonymAction) -> Unit,
+) {
     val color = kb.popupText
     val heading = listOfNotNull(group.pos.takeIf { it.isNotEmpty() }, group.sense).joinToString(" · ")
     if (heading.isNotEmpty()) {
@@ -210,22 +267,71 @@ private fun Group(group: SynonymGroup, caseModel: String, kb: KbTheme, onAction:
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        for (word in group.words) {
-            val shown = caseLike(word, caseModel)
-            val label = stringResource(R.string.ime_synonyms_pick_desc, shown)
-            Text(
-                text = shown,
-                style = MaterialTheme.typography.bodyLarge,
-                color = color,
-                modifier = Modifier
-                    .clip(ChipShape)
-                    .background(color.copy(alpha = 0.10f))
-                    .clickable { onAction(SynonymAction.Pick(word)) }
-                    .semantics { contentDescription = label }
-                    .padding(horizontal = 12.dp, vertical = 6.dp),
-            )
+        group.words.forEachIndexed { index, word ->
+            SynonymChip(word, caseModel, color, arrival, index, onAction)
         }
     }
 }
 
+/**
+ * One synonym. A tap picks it at once, and the chip pulses while the sheet
+ * folds away around it, so the eye lands on what was put in; the pick never
+ * waits for the pulse.
+ */
+@Composable
+private fun SynonymChip(
+    word: String,
+    caseModel: String,
+    color: Color,
+    arrival: ChipArrival,
+    index: Int,
+    onAction: (SynonymAction) -> Unit,
+) {
+    val shown = caseLike(word, caseModel)
+    val label = stringResource(R.string.ime_synonyms_pick_desc, shown)
+    val pulse = remember { Animatable(0f) }
+    val scope = rememberCoroutineScope()
+    val rise = with(LocalDensity.current) { ChipRise.toPx() }
+    Text(
+        text = shown,
+        style = MaterialTheme.typography.bodyLarge,
+        color = color,
+        modifier = Modifier
+            .graphicsLayer {
+                val p = arrival.of(index)
+                val grow = 1f + ChipPulseGrow * pulse.value
+                alpha = p
+                translationY = (1f - p) * rise
+                scaleX = grow
+                scaleY = grow
+            }
+            .clip(ChipShape)
+            .background(color.copy(alpha = 0.10f))
+            .clickable {
+                onAction(SynonymAction.Pick(word))
+                if (arrival.motion) {
+                    scope.launch {
+                        pulse.animateTo(1f, tween(ChipPulseMs, easing = FastOutSlowInEasing))
+                        pulse.animateTo(0f, tween(ChipPulseMs, easing = FastOutSlowInEasing))
+                    }
+                }
+            }
+            .semantics { contentDescription = label }
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+    )
+}
+
 private val ChipShape = RoundedCornerShape(16.dp)
+
+/** The chips' arrival: each rises over [ChipRiseMs], the next a stagger later, the whole well under 200 ms. */
+private const val ChipRiseMs = 100f
+private const val ChipStaggerMs = 12f
+private const val ChipStaggerCap = 5
+private const val ChipArrivalMs = 160
+
+/** How far a chip lifts as it arrives. */
+private val ChipRise = 6.dp
+
+/** The picked chip's pulse: out and back in two halves, under the sheet's own way out. */
+private const val ChipPulseMs = 65
+private const val ChipPulseGrow = 0.08f

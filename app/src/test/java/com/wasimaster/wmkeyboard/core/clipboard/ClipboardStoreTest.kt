@@ -68,6 +68,17 @@ class ClipboardStoreTest {
         assertEquals(listOf("newer", "the answer"), store.items(now = 3000).map { it.text })
     }
 
+    @Test fun editStampsEditedAtOnlyOnChange() {
+        val store = ClipboardStore(null)
+        val a = store.add("hello", now = 1000)!!
+        assertNull(a.editedAt)
+        // Saved without a change: not an edit.
+        assertNull(store.editText(a.id, "hello", now = 2000)!!.editedAt)
+        assertEquals(3000L, store.editText(a.id, "hello there", now = 3000)!!.editedAt)
+        assertEquals(4000L, store.editText(a.id, "hi there", now = 4000)!!.editedAt)
+        assertEquals(1000, store.items(now = 5000).single().timestamp)
+    }
+
     @Test fun editRejectsBlankMissingAndNonText() {
         val store = ClipboardStore(null)
         val a = store.add("hello", now = 1000)!!

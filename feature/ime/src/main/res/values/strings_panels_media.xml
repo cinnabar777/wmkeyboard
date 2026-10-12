@@ -112,6 +112,16 @@
     <!-- Collapse button on the voice panel and the compact bar: switch
          dictation to the small pill and make that the new default. -->
     <string name="ime_voice_collapse_desc">Collapse to the small bar</string>
+    <string name="ime_voice_mic_auto">Automatic mic</string>
+    <string name="ime_voice_mic_phone">Built-in mic</string>
+    <string name="ime_voice_mic_wired">Wired mic</string>
+    <string name="ime_voice_mic_usb">USB mic</string>
+    <string name="ime_voice_mic_bluetooth">Bluetooth mic</string>
+    <!-- "Bluetooth mic (X7)": the kind of microphone, then the name the device gives itself. -->
+    <string name="ime_voice_mic_named">%1$s (%2$s)</string>
+    <string name="ime_voice_mic_using">Using %1$s</string>
+    <string name="ime_voice_mic_desc">Microphone: %1$s</string>
+    <string name="ime_voice_mic_switch">Switch microphone</string>
     <!-- The bar's expand button: go back to the surface it replaced. -->
     <string name="ime_voice_bar_expand_panel_desc">Open the voice panel</string>
     <string name="ime_voice_bar_expand_strip_desc">Open the bar over the keys</string>
@@ -195,6 +205,12 @@
     <string name="ime_media_trending_empty">No trending results now</string>
     <!-- The first chip in the category row: what is popular now, no category. -->
     <string name="ime_media_category_trending_label">Trending</string>
+    <string name="ime_gif_favourites_label">Favourites</string>
+    <string name="ime_gif_recent_label">Recent</string>
+    <string name="ime_gif_favourites_empty">No favourites yet. Long-press a GIF to add it.</string>
+    <string name="ime_gif_recent_empty">The GIFs you send show here.</string>
+    <string name="ime_gif_favourite_add_action">Add to favourites</string>
+    <string name="ime_gif_favourite_remove_action">Remove from favourites</string>
     <!-- %1$s is what the user typed in the search box. -->
     <string name="ime_gif_search_empty">No GIFs for “<xliff:g id="query" example="cat">%1$s</xliff:g>”</string>
     <!-- %1$s is what the user typed in the search box. -->

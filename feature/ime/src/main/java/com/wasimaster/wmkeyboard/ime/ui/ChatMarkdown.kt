@@ -1,7 +1,16 @@
 package com.wasimaster.wmkeyboard.ime.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.material.icons.Icons
+import androidx.compose.material3.Icon
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextDecoration
+import com.wasimaster.wmkeyboard.core.icons.symbols.outlined.CheckBox
+import com.wasimaster.wmkeyboard.core.icons.symbols.outlined.CheckBoxOutlineBlank
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -64,12 +73,28 @@ fun ChatMarkdown(
     colors: ChatMarkdownColors,
     modifier: Modifier = Modifier,
     fontSize: TextUnit = 13.sp,
+    /**
+     * A task item's box was tapped (#560). Null leaves the boxes as drawings:
+     * a chat answer's checklist is the model's, not something to tick off.
+     */
+    onTaskToggle: ((Block.Task) -> Unit)? = null,
+    /**
+     * A block tapped (#560): the notes read view opens its editor at that
+     * block's line. Null leaves the text inert, as a chat answer is.
+     */
+    onBlockTap: ((Block) -> Unit)? = null,
     codeActions: (@Composable RowScope.(Block.Code) -> Unit)? = null,
 ) {
     val blocks = remember(text) { AiMarkdownBlocks.parse(text) }
     val lineHeight = fontSize * LINE_HEIGHT
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
         for (block in blocks) {
+            val tappable = if (onBlockTap != null && block !is Block.Task) {
+                Modifier.fillMaxWidth().clickable { onBlockTap(block) }
+            } else {
+                Modifier
+            }
+            Box(tappable) {
             when (block) {
                 is Block.Paragraph -> Text(
                     annotated(block.inline, colors),
@@ -95,6 +120,7 @@ fun ChatMarkdown(
                         lineHeight = lineHeight,
                     )
                 }
+                is Block.Task -> TaskRow(block, colors, fontSize, lineHeight, onTaskToggle)
                 is Block.Quote -> Row {
                     Box(
                         Modifier
@@ -111,7 +137,7 @@ fun ChatMarkdown(
                     )
                 }
                 is Block.Code -> CodeBlock(block, colors, fontSize, codeActions)
-                Block.Rule -> Box(
+                is Block.Rule -> Box(
                     Modifier
                         .fillMaxWidth()
                         .padding(vertical = 3.dp)
@@ -119,7 +145,58 @@ fun ChatMarkdown(
                         .background(colors.dim.copy(alpha = colors.dim.alpha * 0.5f)),
                 )
             }
+            }
         }
+    }
+}
+
+/**
+ * A task item: a box, then its text struck through once ticked. Tappable only
+ * when the caller handed over [onToggle]; the box is then a checkbox to
+ * TalkBack, and the whole row is the target rather than the 18 dp glyph.
+ */
+@Composable
+private fun TaskRow(
+    block: Block.Task,
+    colors: ChatMarkdownColors,
+    fontSize: TextUnit,
+    lineHeight: TextUnit,
+    onToggle: ((Block.Task) -> Unit)?,
+) {
+    val toggleable = if (onToggle != null) {
+        Modifier.toggleable(
+            value = block.checked,
+            role = Role.Checkbox,
+            onValueChange = { onToggle(block) },
+        )
+    } else {
+        Modifier
+    }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = (block.indent * 12).dp)
+            .clip(RoundedCornerShape(6.dp))
+            .then(toggleable)
+            .padding(vertical = 1.dp),
+        verticalAlignment = Alignment.Top,
+    ) {
+        Icon(
+            if (block.checked) Icons.Outlined.CheckBox else Icons.Outlined.CheckBoxOutlineBlank,
+            contentDescription = null,
+            tint = if (block.checked) colors.dim else colors.text,
+            modifier = Modifier
+                .padding(top = with(androidx.compose.ui.platform.LocalDensity.current) { ((lineHeight.toDp() - 18.dp) / 2).coerceAtLeast(0.dp) })
+                .size(18.dp),
+        )
+        Spacer(Modifier.width(6.dp))
+        Text(
+            annotated(block.inline, colors),
+            color = if (block.checked) colors.dim else colors.text,
+            fontSize = fontSize,
+            lineHeight = lineHeight,
+            textDecoration = if (block.checked) TextDecoration.LineThrough else null,
+        )
     }
 }
 

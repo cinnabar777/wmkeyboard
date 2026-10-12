@@ -32,6 +32,16 @@ object KeyboardControls {
 
         /** Pin or unpin, exactly as the toolbar's own toggle does. */
         fun setPinned(pinned: Boolean)
+
+        /** Draw the controls again, after the user swiped them away. */
+        fun repostControls()
+
+        /**
+         * Put the floating keyboard button up or take it down to match the
+         * setting and the overlay grant, which the settings app may just have
+         * changed. See [SummonButton].
+         */
+        fun syncSummonButton()
     }
 
     /**
@@ -53,6 +63,9 @@ object KeyboardControls {
 
     /** Intent action: open Android's own input-method picker. */
     const val ACTION_PICKER = "com.wasimaster.wmkeyboard.action.INPUT_METHOD_PICKER"
+
+    /** Intent action: the user swiped the controls away; put them back. */
+    const val ACTION_DISMISSED = "com.wasimaster.wmkeyboard.action.CONTROLS_DISMISSED"
 
     /**
      * Draws (or redraws) the controls.
@@ -89,6 +102,12 @@ object KeyboardControls {
                 broadcast(context, ACTION_PICKER),
             )
             setContentIntent(broadcast(context, ACTION_SHOW))
+            // Android 14 lets the user swipe away even an ongoing notification.
+            // These controls are the way back to a keyboard that has gone down
+            // over a window with no field, so losing them to a stray swipe is
+            // losing that way back (issue #374): they come straight back. The
+            // switch in Settings > Notifications is how they are turned off.
+            setDeleteIntent(broadcast(context, ACTION_DISMISSED))
         }
     }
 
@@ -122,6 +141,7 @@ class KeyboardControlReceiver : BroadcastReceiver() {
         when (intent.action) {
             KeyboardControls.ACTION_SHOW -> KeyboardControls.host?.showKeyboard()
             KeyboardControls.ACTION_UNPIN -> KeyboardControls.host?.setPinned(false)
+            KeyboardControls.ACTION_DISMISSED -> KeyboardControls.host?.repostControls()
             KeyboardControls.ACTION_PICKER -> {
                 val manager = context.getSystemService(InputMethodManager::class.java)
                 runCatching { manager?.showInputMethodPicker() }

@@ -91,7 +91,6 @@ import com.wasimaster.wmkeyboard.core.script.LanguageSuggestions
 import com.wasimaster.wmkeyboard.core.script.NumeralSystem
 import com.wasimaster.wmkeyboard.core.script.ScriptId
 import com.wasimaster.wmkeyboard.core.script.ScriptRegistry
-import com.wasimaster.wmkeyboard.core.script.isRomanized
 import com.wasimaster.wmkeyboard.core.script.SuggestedLanguage
 import com.wasimaster.wmkeyboard.core.script.SuggestionReason
 import com.wasimaster.wmkeyboard.core.script.resolveNumeralDigits
@@ -977,20 +976,19 @@ internal fun LanguageDetailScreen(
     // too. Same gate as the custom list; switching off is never gated.
     LayoutsGroup(lang, settings, repository, scope, onNavigate)
 
-    // A romanized language is mostly wanted for its words, on the keyboard
-    // of the language it shares letters with (#473). Hidden, it stays on and
-    // keeps lending them, and the switcher has one stop fewer.
-    if (lang.isRomanized) {
-        SettingsGroup(stringResource(R.string.languages_picker_hidden_group)) {
-            item {
-                ToggleSetting(
-                    R.string.languages_picker_hidden_title,
-                    stringResource(R.string.languages_picker_hidden_subtitle),
-                    settings.watch { langId in it.layoutBehavior.pickerHiddenLanguages },
-                    info = stringResource(R.string.languages_picker_hidden_info, lang.englishName),
-                    default = false,
-                ) { scope.launch { repository.setLanguageHiddenFromPicker(langId, it) } }
-            }
+    // A language can be wanted only for its words, on the keyboard of
+    // another one: Banglish on English (#473), English on Swedish (#618).
+    // Hidden, it stays on and keeps lending them, and the switcher has one
+    // stop fewer.
+    SettingsGroup(stringResource(R.string.languages_picker_hidden_group)) {
+        item {
+            ToggleSetting(
+                R.string.languages_picker_hidden_title,
+                stringResource(R.string.languages_picker_hidden_subtitle),
+                settings.watch { langId in it.layoutBehavior.pickerHiddenLanguages },
+                info = stringResource(R.string.languages_picker_hidden_info, lang.englishName),
+                default = false,
+            ) { scope.launch { repository.setLanguageHiddenFromPicker(langId, it) } }
         }
     }
 
@@ -1131,7 +1129,7 @@ internal fun LanguageDetailScreen(
         }
     }
     val phonetic = ComposerType.TRANSLITERATE in composers
-    val transliterating = phonetic || ComposerType.KHIPRO in composers
+    val transliterating = phonetic || ComposerType.KHIPRO in composers || ComposerType.KHIPRO_DARK in composers
     if (transliterating) {
         SettingsGroup(stringResource(R.string.languages_translit_hints_title)) {
             item {

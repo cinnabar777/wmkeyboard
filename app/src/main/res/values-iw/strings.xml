@@ -2238,9 +2238,6 @@
     <string name="keypress_haptics_title">משוב רטט בלחיצה על מקש</string>
     <string name="keypress_hold_action_copy_label">העתק</string>
     <string name="keypress_hold_action_cut_label">גזור</string>
-    <string name="keypress_hold_action_first_info">הפעולה נמצאת בדרך כלל בסוף החלונית הקופצת, כך שלחיצה ארוכה רגילה נותנת לך את הסימן הראשון. כשהגדרה זו מופעלת, היא עוברת להתחלה, ולחיצה ארוכה על אחד ממקשי הקיצור מפעילה את הפעולה מיד. הסימנים עדיין שם: השאר את האצבע לחוצה והחלק אל הסימן הרצוי. הגדרה זו דורשת \'החזק כדי לבחור\', תחת \'מקשים חלופיים\'.</string>
-    <string name="keypress_hold_action_first_subtitle">לחיצה והחזקה מפעילה את הפעולה במקום להציג את סימני הדיאקריטיים</string>
-    <string name="keypress_hold_action_first_title">פעולה תחילה</string>
     <string name="keypress_hold_action_paste_label">הדבק</string>
     <string name="keypress_hold_action_redo_label">בצע שוב</string>
     <string name="keypress_hold_action_select_all_label">בחר הכל</string>
@@ -2548,8 +2545,6 @@
     <string name="languages_cjk_region_info">טאיוואן והונג קונג משתמשות לעיתים קרובות במילים שונות לאותו דבר, ולא רק בתווים שונים.</string>
     <string name="languages_cjk_region_taiwan_title">טאיוואן (臺灣)</string>
     <string name="languages_cjk_region_title">ניסוח אזורי</string>
-    <string name="languages_cjk_traditional_info">המקלדת ממירה כל מועמד מסינית מפושטת (简体) למסורתית (繁體) לפני הצגתו. ההמרה מתבצעת תו תו. למספר תווים מפושטים יש יותר מצורה מסורתית אחת, והמקלדת תמיד כותבת את הנפוצה שבהן. 发 הופך ל-發, שזה נכון ב-發展 אך שגוי ב-頭髮. תקן מילים אלו ידנית.</string>
-    <string name="languages_cjk_traditional_subtitle">המקלדת ממירה מועמדים לסינית מסורתית (繁體). היא ממירה תו אחד בכל פעם, לכן צורות מסוימות התלויות בהקשר עלולות להיות שגויות (发 → 發 / 髮).</string>
     <string name="languages_cjk_traditional_title">תווים מסורתיים</string>
     <string name="languages_clusters_title">אשכולות</string>
     <string name="languages_conjunct_backspace_info">מקש ה-Backspace מוחק בדרך כלל נקודת קוד אחת בכל פעם. זה משאיר לעיתים צברים חלקיים על המסך. כאשר הגדרה זו מופעלת, לחיצה אחת מוחקת את כל הצבר בזמן ההקלדה ב-%1$s. שפות אחרות שומרות על ההגדרה שלהן.</string>

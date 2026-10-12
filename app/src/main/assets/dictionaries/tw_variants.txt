@@ -1,6 +1,6 @@
-# Taiwan character variants (OpenCC TWVariants)
-# Source: OpenCC, https://github.com/BYVoid/OpenCC — Apache-2.0
-# Format: standard-traditional<TAB>regional-form
+# OpenCC TWVariants, ver.1.4.2 (https://github.com/BYVoid/OpenCC), Apache-2.0
+# Format: key<TAB>value(s), values separated by spaces; the first is used
+# Regenerate with scripts/update-opencc.py; do not edit by hand.
 僞	偽
 啓	啟
 喫	吃
@@ -8,8 +8,9 @@
 嬀	媯
 峯	峰
 幺	么
+梁	梁
 棱	稜
-樑	梁
+樑	梁 樑
 檐	簷
 污	汙
 泄	洩
@@ -39,4 +40,5 @@
 鍼	針
 鮎	鯰
 麪	麵
+麼	麼 么
 齶	顎

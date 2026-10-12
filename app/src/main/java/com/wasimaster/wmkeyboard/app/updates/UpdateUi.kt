@@ -3,6 +3,15 @@ package com.wasimaster.wmkeyboard.app.updates
 import android.content.Context
 import android.text.format.Formatter
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,9 +19,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -25,15 +36,18 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.wasimaster.wmkeyboard.BuildConfig
 import com.wasimaster.wmkeyboard.R
 import com.wasimaster.wmkeyboard.app.LiveSettings
+import com.wasimaster.wmkeyboard.app.LocalReduceMotion
 import com.wasimaster.wmkeyboard.app.MeteredBlockedDialog
 import com.wasimaster.wmkeyboard.app.MeteredDownloadDialog
 import com.wasimaster.wmkeyboard.app.NavRow
@@ -44,9 +58,14 @@ import com.wasimaster.wmkeyboard.app.ToggleSetting
 import com.wasimaster.wmkeyboard.app.WmRow
 import com.wasimaster.wmkeyboard.app.downloadDecisionNow
 import com.wasimaster.wmkeyboard.app.isMeteredNow
+import com.wasimaster.wmkeyboard.app.RunGlyph
+import com.wasimaster.wmkeyboard.app.RunPhase
 import com.wasimaster.wmkeyboard.app.rememberDisclosedSpecialAccess
+import com.wasimaster.wmkeyboard.app.stateSwapTransform
 import com.wasimaster.wmkeyboard.common.R as CommonR
+import com.wasimaster.wmkeyboard.core.icons.symbols.automirrored.outlined.KeyboardArrowRight
 import com.wasimaster.wmkeyboard.core.settings.MeteredDecision
+import kotlinx.coroutines.delay
 
 /**
  * The update card on the settings home screen.
@@ -65,20 +84,51 @@ internal fun UpdateCard(settings: LiveSettings, modifier: Modifier = Modifier) {
     // The move to every language is drawn on the About screen's App language
     // row, where it was started. As a card it would read as a version update.
     if (switching) return
-    when (val current = state) {
-        is UpdateState.Available ->
-            if (current.dismissed) Unit else AvailableCard(current, updater, settings, modifier)
-        is UpdateState.Downloading -> DownloadingCard(current, updater, modifier)
-        UpdateState.Downloaded -> ReadyCard(updater, modifier)
-        UpdateState.Installing -> InstallingCard(updater, modifier)
-        UpdateState.Unsupported,
-        UpdateState.Idle,
-        UpdateState.Checking,
-        is UpdateState.UpToDate,
-        is UpdateState.Failed,
-        -> Unit
+    val reduceMotion = LocalReduceMotion.current
+    // One card handing over to the next as the update moves along — the offer
+    // to the download, the download's bar to the Install button — and opening
+    // out of nothing or closing into it at either end. Keyed by the card, so a
+    // download's every progress report is the same card updating, not a swap.
+    AnimatedContent(
+        targetState = state,
+        transitionSpec = { stateSwapTransform(reduceMotion) },
+        contentKey = { it.card() },
+        label = "updateCard",
+    ) { shown ->
+        when (shown.card()) {
+            UpdateCardKind.AVAILABLE ->
+                AvailableCard(shown as UpdateState.Available, updater, settings, modifier)
+            UpdateCardKind.DOWNLOADING ->
+                DownloadingCard(shown as UpdateState.Downloading, updater, modifier)
+            UpdateCardKind.READY -> ReadyCard(updater, modifier)
+            UpdateCardKind.INSTALLING -> InstallingCard(updater, modifier)
+            UpdateCardKind.NONE -> Unit
+        }
     }
 }
+
+/** Which of the home screen's update cards a state draws. */
+private enum class UpdateCardKind { NONE, AVAILABLE, DOWNLOADING, READY, INSTALLING }
+
+private fun UpdateState.card(): UpdateCardKind = when (this) {
+    is UpdateState.Available -> if (dismissed) UpdateCardKind.NONE else UpdateCardKind.AVAILABLE
+    is UpdateState.Downloading -> UpdateCardKind.DOWNLOADING
+    UpdateState.Downloaded -> UpdateCardKind.READY
+    UpdateState.Installing -> UpdateCardKind.INSTALLING
+    UpdateState.Unsupported,
+    UpdateState.Idle,
+    UpdateState.Checking,
+    is UpdateState.UpToDate,
+    is UpdateState.Failed,
+    -> UpdateCardKind.NONE
+}
+
+/**
+ * Whether the updater is still where [kind]'s card says it is. The card that
+ * is fading out keeps its buttons for the moment it takes, and a press on the
+ * old offer must not start a second download under the new card's bar.
+ */
+private fun AppUpdater.showing(kind: UpdateCardKind): Boolean = state.value.card() == kind
 
 /**
  * "Updated to 0.5.3", once, after this app has replaced itself.
@@ -99,8 +149,29 @@ internal fun UpdatedCard(modifier: Modifier = Modifier) {
         val switched = prefs.justSwitchedLanguages
         prefs.takeJustUpdated(BuildConfig.VERSION_CODE, System.currentTimeMillis()) to switched
     }
-    var showing by remember { mutableStateOf(justUpdated) }
-    if (!showing) return
+    if (!justUpdated) return
+    var showing by remember { mutableStateOf(true) }
+    val reduceMotion = LocalReduceMotion.current
+    // Folds away when dismissed rather than vanishing from under the cards
+    // below it.
+    if (reduceMotion && !showing) return
+    AnimatedVisibility(
+        visible = showing,
+        enter = fadeIn(),
+        exit = fadeOut() + shrinkVertically(),
+        label = "updatedCard",
+    ) {
+        UpdatedCardBody(switchedLanguages, modifier, uriHandler) { showing = false }
+    }
+}
+
+@Composable
+private fun UpdatedCardBody(
+    switchedLanguages: Boolean,
+    modifier: Modifier,
+    uriHandler: UriHandler,
+    onDismiss: () -> Unit,
+) {
     UpdateCardFrame(
         title = if (switchedLanguages) {
             stringResource(R.string.update_card_switched_title)
@@ -112,7 +183,7 @@ internal fun UpdatedCard(modifier: Modifier = Modifier) {
         ),
         modifier = modifier,
     ) {
-        Button(onClick = { showing = false }) {
+        Button(onClick = onDismiss) {
             Text(stringResource(R.string.update_action_dismiss))
         }
         Spacer(Modifier.width(8.dp))
@@ -204,13 +275,15 @@ private fun AvailableCard(
         body = availableBody(state, updater),
         modifier = modifier,
     ) {
-        Button(onClick = download) { Text(startActionLabel(updater)) }
+        Button(onClick = { if (updater.showing(UpdateCardKind.AVAILABLE)) download() }) {
+            Text(startActionLabel(updater))
+        }
         // An urgent release gets no "Not now": the button would write a snooze
         // that [UpdatePolicy] ignores for that release anyway, so it would be
         // a control that does nothing.
         if (!state.immediate) {
             Spacer(Modifier.width(8.dp))
-            TextButton(onClick = updater::dismiss) {
+            TextButton(onClick = { if (updater.showing(UpdateCardKind.AVAILABLE)) updater.dismiss() }) {
                 Text(stringResource(R.string.update_action_later))
             }
         }
@@ -245,16 +318,12 @@ private fun DownloadingCard(
         modifier = modifier,
     ) {
         Column(Modifier.fillMaxWidth()) {
-            if (fraction == null) {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-            } else {
-                LinearProgressIndicator(progress = { fraction }, modifier = Modifier.fillMaxWidth())
-            }
+            UpdateProgressBar(fraction, Modifier.fillMaxWidth())
             // Only where this app is the one downloading. A store's download
             // is the store's to stop.
             if (updater.ownsDownload) {
                 Spacer(Modifier.height(8.dp))
-                TextButton(onClick = updater::cancel) {
+                TextButton(onClick = { if (updater.showing(UpdateCardKind.DOWNLOADING)) updater.cancel() }) {
                     Text(stringResource(CommonR.string.common_cancel))
                 }
             }
@@ -283,6 +352,7 @@ private fun ReadyCard(updater: AppUpdater, modifier: Modifier = Modifier) {
     ) {
         Button(
             onClick = {
+                if (!updater.showing(UpdateCardKind.READY)) return@Button
                 // Records the press either way. When Android still has to be
                 // told this app may install, the disclosure goes first and the
                 // install picks up on the way back.
@@ -327,8 +397,15 @@ private fun UpdateCardFrame(
     busy: Boolean = false,
     controls: @Composable () -> Unit,
 ) {
+    val reduceMotion = LocalReduceMotion.current
     Card(modifier = modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        // Grows with its words — a download's byte count arriving under the
+        // title once the size is known — rather than jumping.
+        Column(
+            modifier = Modifier
+                .then(if (reduceMotion) Modifier else Modifier.animateContentSize())
+                .padding(16.dp),
+        ) {
             Text(title, style = MaterialTheme.typography.titleMedium)
             if (body != null) {
                 Spacer(Modifier.height(8.dp))
@@ -444,15 +521,19 @@ internal fun UpdateSettings(settings: LiveSettings) {
     val autoCheck = remember { mutableStateOf(updater.autoCheck) }
     val autoPrompt = remember { mutableStateOf(updater.autoPrompt) }
     val prereleases = remember { mutableStateOf(updater.includePrereleases) }
+    val releaseUrl = (state as? UpdateState.Available)?.releaseUrl?.takeUnless { switching }
+    // The address the row last linked to, for it to keep while it folds away.
+    val shownUrl = remember { arrayOfNulls<String>(1) }
+    if (releaseUrl != null) shownUrl[0] = releaseUrl
 
     SettingsGroup(stringResource(R.string.update_section_title)) {
         // While the move to every language runs, the state is that move's, and
         // the App language row above draws it. Drawn here too it would say
         // "Download the update" about something that is not one.
         item(visible = !switching) { UpdateRow(state, updater, settings) }
-        (state as? UpdateState.Available)?.releaseUrl?.takeUnless { switching }?.let { url ->
-            item { ReleasePageRow(url) }
-        }
+        // Opens under the row above when a release turns up, and folds away
+        // when it has been installed or the move to every language takes over.
+        item(visible = releaseUrl != null) { shownUrl[0]?.let { ReleasePageRow(it) } }
         item {
             ToggleSetting(
                 R.string.update_row_auto_check_title,
@@ -494,6 +575,37 @@ internal fun UpdateSettings(settings: LiveSettings) {
 
 @Composable
 private fun UpdateRow(state: UpdateState, updater: AppUpdater, settings: LiveSettings) {
+    val reduceMotion = LocalReduceMotion.current
+    // The row hands over to its next self — the check to the offer, the offer
+    // to the bar, the bar to Install — rather than being swapped in a frame.
+    // Keyed by what the row is, so the bar's progress and the check's words
+    // update in place.
+    AnimatedContent(
+        targetState = state,
+        transitionSpec = { stateSwapTransform(reduceMotion) },
+        contentKey = { it.row() },
+        label = "updateRow",
+    ) { shown -> UpdateRowContent(shown, updater, settings) }
+}
+
+/** Which of its faces the Updates row is showing. */
+private enum class UpdateRowKind { CHECK, AVAILABLE, DOWNLOADING, INSTALL, INSTALLING }
+
+private fun UpdateState.row(): UpdateRowKind = when (this) {
+    is UpdateState.Available -> UpdateRowKind.AVAILABLE
+    is UpdateState.Downloading -> UpdateRowKind.DOWNLOADING
+    UpdateState.Downloaded -> UpdateRowKind.INSTALL
+    UpdateState.Installing -> UpdateRowKind.INSTALLING
+    UpdateState.Unsupported,
+    UpdateState.Idle,
+    UpdateState.Checking,
+    is UpdateState.UpToDate,
+    is UpdateState.Failed,
+    -> UpdateRowKind.CHECK
+}
+
+@Composable
+private fun UpdateRowContent(state: UpdateState, updater: AppUpdater, settings: LiveSettings) {
     val context = LocalContext.current
     when (state) {
         is UpdateState.Available -> AvailableRow(state, updater, settings, context)
@@ -517,12 +629,55 @@ private fun UpdateRow(state: UpdateState, updater: AppUpdater, settings: LiveSet
         UpdateState.Checking,
         is UpdateState.UpToDate,
         is UpdateState.Failed,
-        -> NavRow(
-            R.string.update_row_check_title,
-            subtitle = stringResource(state.checkSubtitle()),
-            onClick = { updater.check(userAsked = true) },
-        )
+        -> CheckRow(state, updater)
     }
+}
+
+/**
+ * "Check for updates", with the check's own glyph beside the chevron: a
+ * spinner while it asks, then a tick that draws itself on when the answer is
+ * that this is the newest, for a moment, before the row is a row again.
+ */
+@Composable
+private fun CheckRow(state: UpdateState, updater: AppUpdater) {
+    var answered by remember { mutableStateOf(false) }
+    // Whether the last state this row saw was a check under way, so only an
+    // answer to one earns the tick and not an up-to-date state it opened on.
+    val wasChecking = remember { booleanArrayOf(false) }
+    LaunchedEffect(state) {
+        val finished = wasChecking[0] && state is UpdateState.UpToDate
+        wasChecking[0] = state == UpdateState.Checking
+        answered = finished
+        if (finished) {
+            delay(CHECK_DONE_HOLD_MS)
+            answered = false
+        }
+    }
+    val phase = when {
+        state == UpdateState.Checking -> RunPhase.RUNNING
+        answered -> RunPhase.DONE
+        else -> RunPhase.IDLE
+    }
+    val title = R.string.update_row_check_title
+    WmRow(
+        title = stringResource(title),
+        subtitle = stringResource(state.checkSubtitle()),
+        icon = SettingsRowIcons[title],
+        highlightKey = title,
+        trailing = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                RunGlyph(phase, MaterialTheme.colorScheme.primary)
+                Icon(
+                    Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        },
+        // Only from the row that is still the check: the one fading out under
+        // a fresh offer must not ask again.
+        onClick = { if (updater.state.value.row() == UpdateRowKind.CHECK) updater.check(userAsked = true) },
+    )
 }
 
 @Composable
@@ -541,7 +696,7 @@ private fun AvailableRow(
                 state.versionName.orEmpty(),
                 stringResource(updater.sourceNameRes),
             ),
-            onClick = download,
+            onClick = { if (updater.state.value.row() == UpdateRowKind.AVAILABLE) download() },
         )
         return
     }
@@ -553,7 +708,7 @@ private fun AvailableRow(
         } else {
             stringResource(R.string.update_row_available_subtitle_plain, state.versionCode)
         },
-        onClick = download,
+        onClick = { if (updater.state.value.row() == UpdateRowKind.AVAILABLE) download() },
     )
 }
 
@@ -565,6 +720,7 @@ private fun InstallRow(updater: AppUpdater) {
         R.string.update_row_install_title,
         subtitle = stringResource(R.string.update_row_install_subtitle),
         onClick = {
+            if (updater.state.value.row() != UpdateRowKind.INSTALL) return@NavRow
             updater.install()
             if (grant != null) requestGrant()
         },
@@ -603,13 +759,43 @@ private fun ProgressRow(@StringRes title: Int, subtitle: String?, fraction: Floa
             icon = SettingsRowIcons[title],
             highlightKey = title,
         )
-        if (fraction == null) {
-            LinearProgressIndicator(modifier = ProgressBarModifier)
+        UpdateProgressBar(fraction, ProgressBarModifier)
+    }
+}
+
+/**
+ * An update's bar: endless while there is no size to measure against, then
+ * filling. The endless one hands over to the filling one rather than being
+ * swapped in a frame, and the fill glides between the download's reports
+ * instead of stepping from one to the next. Under Reduce motion it steps.
+ */
+@Composable
+private fun UpdateProgressBar(fraction: Float?, modifier: Modifier) {
+    val reduceMotion = LocalReduceMotion.current
+    val shown by animateFloatAsState(
+        targetValue = fraction ?: 0f,
+        animationSpec = if (reduceMotion) snap<Float>() else tween<Float>(durationMillis = PROGRESS_GLIDE_MS),
+        label = "updateProgress",
+    )
+    AnimatedContent(
+        targetState = fraction != null,
+        transitionSpec = { stateSwapTransform(reduceMotion) },
+        modifier = modifier,
+        label = "updateProgressKind",
+    ) { known ->
+        if (known) {
+            LinearProgressIndicator(progress = { shown }, modifier = Modifier.fillMaxWidth())
         } else {
-            LinearProgressIndicator(progress = { fraction }, modifier = ProgressBarModifier)
+            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
         }
     }
 }
+
+/** How long the bar takes to glide to the download's latest report. */
+private const val PROGRESS_GLIDE_MS = 250
+
+/** How long the tick stays on "Check for updates" after a check finds nothing. */
+private const val CHECK_DONE_HOLD_MS = 1_500L
 
 /**
  * Where the progress bar sits under its row: inset to the row's own text

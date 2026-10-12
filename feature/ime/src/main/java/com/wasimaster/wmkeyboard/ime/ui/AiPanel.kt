@@ -66,9 +66,11 @@ import com.wasimaster.wmkeyboard.core.tools.AiMarkdown
 import com.wasimaster.wmkeyboard.core.tools.AiPhase
 import com.wasimaster.wmkeyboard.core.tools.AiThinking
 import com.wasimaster.wmkeyboard.core.tools.AiToolActivity
+import com.wasimaster.wmkeyboard.core.tools.AiToolApproval
 import com.wasimaster.wmkeyboard.core.tools.BuiltInAiActions
 import com.wasimaster.wmkeyboard.core.tools.TextDiff
 import com.wasimaster.wmkeyboard.core.tools.visibleAiActions
+import com.wasimaster.wmkeyboard.ime.AiChatAction
 import com.wasimaster.wmkeyboard.ime.AiUi
 import com.wasimaster.wmkeyboard.ime.FocusRegion
 import com.wasimaster.wmkeyboard.ime.KeyboardClipboard
@@ -97,9 +99,12 @@ internal fun AiPanel(
     onSetShowDiff: (Boolean) -> Unit,
     onReport: () -> Unit,
     onOpenToolSettings: (ToolbarTool) -> Unit,
+    /** The chat's callback, which also carries the answer to a tool that asks first (#573). */
+    onChat: (AiChatAction) -> Unit,
 ) {
     val kb = LocalKbTheme.current
     val ai0 = state.ai
+    val onToolApproval = remember(onChat) { { choice: AiToolApproval -> onChat(AiChatAction.ToolApproval(choice)) } }
     val settings = state.settings
     val actions = remember(
         settings.ai.customActions,
@@ -291,7 +296,7 @@ internal fun AiPanel(
             is AiUi.Loading -> Column(Modifier.fillMaxSize()) {
                 ActionChips(actions, onAction, running = ai.action)
                 Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    AiProgress(ai, state.settings)
+                    AiProgress(ai, state.settings, onToolApproval)
                 }
             }
             is AiUi.Error -> Column(Modifier.fillMaxSize()) {
@@ -368,7 +373,7 @@ internal fun AiPanel(
                 ) {
                     // What the model looked up for this answer (#470). Not
                     // part of what Replace or Insert commits.
-                    PanelToolUses(ai.tools, Modifier.padding(bottom = 4.dp))
+                    PanelToolUses(ai.tools, Modifier.padding(bottom = 4.dp), onApproval = onToolApproval)
                     val comparison = diff
                     Text(
                         if (showDiff && comparison != null && !comparison.tooLong) {
@@ -938,7 +943,11 @@ private fun ActionChips(
  * visible for entire seconds — that anything is arriving at all.
  */
 @Composable
-private fun AiProgress(ai: AiUi.Loading, settings: KeyboardSettings) {
+private fun AiProgress(
+    ai: AiUi.Loading,
+    settings: KeyboardSettings,
+    onToolApproval: (AiToolApproval) -> Unit,
+) {
     val kb = LocalKbTheme.current
     val onDevice = settings.ai.provider == AiProvider.ON_DEVICE
     val steps = buildList {
@@ -1009,17 +1018,22 @@ private fun AiProgress(ai: AiUi.Loading, settings: KeyboardSettings) {
             Text(detail, color = kb.secondaryText, fontSize = 11.sp)
         }
         // Calls already made, while the model reads what they returned. A
-        // running one is the headline instead.
-        if (ai.tools.isNotEmpty() && ai.tools.none { it.running }) {
+        // running one is the headline instead, unless it is asking to be
+        // allowed: then its question and buttons have to be on screen.
+        if (ai.tools.isNotEmpty() && (ai.tools.none { it.running } || ai.tools.any { it.awaitingApproval })) {
             Spacer(Modifier.height(6.dp))
-            PanelToolUses(ai.tools)
+            PanelToolUses(ai.tools, onApproval = onToolApproval)
         }
     }
 }
 
 /** [ChatToolUses] in the panel's colours; a page opens in the browser, an address copies. */
 @Composable
-private fun PanelToolUses(uses: List<AiToolActivity>, modifier: Modifier = Modifier) {
+private fun PanelToolUses(
+    uses: List<AiToolActivity>,
+    modifier: Modifier = Modifier,
+    onApproval: ((AiToolApproval) -> Unit)? = null,
+) {
     if (uses.isEmpty()) return
     val kb = LocalKbTheme.current
     val context = LocalContext.current
@@ -1037,6 +1051,8 @@ private fun PanelToolUses(uses: List<AiToolActivity>, modifier: Modifier = Modif
         onCopy = { KeyboardClipboard.copy(context, it) },
         modifier = modifier,
         fontSize = 11.sp,
+        onApproval = onApproval,
+        animate = kb.motion.any,
     )
 }
 

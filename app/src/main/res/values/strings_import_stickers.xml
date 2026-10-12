@@ -36,7 +36,32 @@
     <string name="import_futo_body">This is a FUTO Keyboard layout. The app adds its letter keys as a layout of yours; the symbol and number keys stay the ones you have. The layout stays off. To type with it, turn it on in Languages.</string>
     <!-- Keys Cafe is the name of a Samsung app; leave it as it is.
          Languages is the name of a screen in the settings app. -->
+    <!-- Multiling O Keyboard is the name of another keyboard app; leave it as
+         it is. Languages is the name of a screen in the settings app. -->
+    <string name="import_multiling_layout_body">This is a Multiling O Keyboard layout. The app adds it as a layout of yours, with its symbol and AltGr pages. The layout stays off. To type with it, turn it on in Languages.</string>
+    <string name="import_multiling_title">From Multiling O Keyboard</string>
+    <plurals name="import_multiling_layouts_body">
+        <item quantity="one">The text has %1$d layout. The app adds it as a layout of yours, in the language it was made for. It stays off. To type with it, turn it on in Languages.</item>
+        <item quantity="other">The text has %1$d layouts. The app adds them as layouts of yours, each in the language it was made for. They stay off. To type with one, turn it on in Languages.</item>
+    </plurals>
+    <string name="import_multiling_theme_line">The text also has the colours of a theme. The app saves them as a theme of yours. Open Themes to use it.</string>
+    <plurals name="import_multiling_layouts_done">
+        <item quantity="one">The app added %1$d layout. Turn it on in Languages to type with it.</item>
+        <item quantity="other">The app added %1$d layouts. Turn them on in Languages to type with them.</item>
+    </plurals>
+    <string name="import_multiling_theme_done">The app saved the theme. Open Themes to use it.</string>
     <string name="import_keyscafe_body">This is a Samsung Keyboard layout made in Keys Cafe. The app adds it as a layout of yours, laid out as it was there, bottom row included; the symbol keys stay the ones you have. The layout stays off. To type with it, turn it on in Languages.</string>
+    <!-- Unexpected Keyboard and CleverKeys are the names of other keyboard apps; leave them as they are. -->
+    <!-- A layout made for a computer keyboard: Windows, Mac or Linux.
+         Languages is the name of a screen in the settings app. -->
+    <string name="import_desktop_layout_body">This is a layout for a computer keyboard. The app adds its letter keys as a layout of yours, in their places, with the AltGr and accented letters on press and hold; the symbol keys stay the ones you have. The layout stays off. To type with it, turn it on in Languages.</string>
+    <string name="import_desktop_title">From a computer layout</string>
+    <!-- A Linux layout file can hold several layouts, called variants. -->
+    <plurals name="import_desktop_layouts_body">
+        <item quantity="one">The file has %1$d layout. The app adds it as a layout of yours, in the language its letters suggest. It stays off. To type with it, turn it on in Languages.</item>
+        <item quantity="other">The file has %1$d layouts. The app adds them as layouts of yours, each in the language its letters suggest. They stay off. To type with one, turn it on in Languages.</item>
+    </plurals>
+    <string name="import_unexpected_body">This is an Unexpected Keyboard or CleverKeys layout. The app adds it as a layout of yours. The swipes to the corners of each key stay swipes; the symbol keys stay the ones you have. The layout stays off. To type with it, turn it on in Languages.</string>
 
     <!-- ==== Backup files. ==== -->
 
@@ -111,6 +136,40 @@
     <string name="import_espanso_title">Nothing to import</string>
     <string name="import_espanso_none">This is an Espanso file, but the app could read no snippets from it.</string>
 
+    <!-- ==== Snippet tables: a CSV or TSV file with a trigger column and a
+         text column, from another text expander or a spreadsheet. ==== -->
+
+    <!-- %1$s is the name of the folder the snippets land in. -->
+    <string name="import_csv_body">This is a table of snippets. The app adds them to yours, in a folder called <xliff:g id="folder_name" example="Replies">%1$s</xliff:g>, so you can turn all of them off at once.</string>
+    <!-- Stands in for the folder name when the file has no name to use. It
+         goes into import_csv_body. -->
+    <string name="import_csv_folder_fallback">Imported</string>
+    <string name="import_csv_none">This is a table, but no row has text for a snippet.</string>
+
+    <!-- ==== Gboard dictionary files. Gboard is Google's keyboard; do not
+         translate the name. Its personal dictionary export holds words, and
+         shortcuts that each offer a word. ==== -->
+
+    <string name="import_gboard_dictionary_title">Import Gboard dictionary?</string>
+    <string name="import_gboard_dictionary_empty">This is a Gboard dictionary, but it has no words in it.</string>
+    <!-- %1$d is how many words go into the personal dictionary. -->
+    <plurals name="import_gboard_dictionary_words">
+        <item quantity="one">The app adds %1$d word to your personal dictionary.</item>
+        <item quantity="other">The app adds %1$d words to your personal dictionary.</item>
+    </plurals>
+    <!-- %1$d is how many shortcuts become snippets. %2$s is the name of the
+         folder they land in. A snippet made from a shortcut does not type
+         itself: the keyboard shows it as a suggestion, as Gboard does. -->
+    <plurals name="import_gboard_dictionary_shortcuts">
+        <item quantity="one">The app makes %1$d shortcut into a snippet, in a folder called <xliff:g id="folder_name" example="Gboard">%2$s</xliff:g>. When you type the shortcut, the keyboard shows the word as a suggestion, as Gboard does.</item>
+        <item quantity="other">The app makes %1$d shortcuts into snippets, in a folder called <xliff:g id="folder_name" example="Gboard">%2$s</xliff:g>. When you type a shortcut, the keyboard shows its word as a suggestion, as Gboard does.</item>
+    </plurals>
+    <!-- %1$d is how many words the app added. -->
+    <plurals name="import_gboard_dictionary_words_done">
+        <item quantity="one">The app added %1$d word to your personal dictionary.</item>
+        <item quantity="other">The app added %1$d words to your personal dictionary.</item>
+    </plurals>
+
     <!-- ==== Sticker pack files. ==== -->
 
     <string name="import_stickers_title">Import sticker pack?</string>
@@ -156,6 +215,21 @@
     <string name="import_floris_done_family" tools:ignore="PluralsCandidate">The app saved <xliff:g id="theme_name" example="Dusk">%1$s</xliff:g> with <xliff:g id="count" example="2">%2$d</xliff:g> looks. Open Themes to look at it.</string>
     <string name="import_floris_unreadable_body">The app cannot read this FlorisBoard file. It may be damaged, or it may be a language pack or a keyboard extension instead of a theme.</string>
 
+    <!-- ==== FUTO Keyboard custom themes: a ZIP with theme.txt or
+         config.json in it. ==== -->
+
+    <string name="import_futo_theme_title">Theme from FUTO Keyboard</string>
+    <string name="import_futo_theme_body">The app converts the colours of this FUTO Keyboard theme, and its background picture and font if it has them. The app saves the theme but does not turn it on, so that you can look at it first.</string>
+    <!-- %1$s is who made the theme. -->
+    <string name="import_futo_theme_credit">Made by <xliff:g id="author" example="Someone">%1$s</xliff:g>.</string>
+    <!-- %1$s is the name of the theme. -->
+    <string name="import_futo_theme_done">The app saved <xliff:g id="theme_name" example="Midnight">%1$s</xliff:g>. Open Themes to look at it.</string>
+    <string name="import_futo_theme_unreadable_body">The app cannot read that as a FUTO Keyboard theme. Pick the theme\'s .zip file, the one with theme.txt or config.json in it.</string>
+    <!-- Lines in the "what the app changed" list of a FUTO theme import. -->
+    <string name="import_futo_theme_dropped_pictures">The theme draws some keys with pictures of their own. This app draws those keys in the theme\'s colours.</string>
+    <string name="import_futo_theme_dropped_wallpaper">The theme takes some colours from the wallpaper. This app cannot read those, so it works out its own colours for those parts.</string>
+    <string name="import_futo_theme_dropped_shader">The theme draws an animated pattern behind the keys, which this app does not draw.</string>
+
     <!-- ==== HeliBoard and LeanType colour themes. Those keyboards share a
          theme as a line of text rather than as a file, so the app takes it
          from a file or from the clipboard. ==== -->
@@ -174,6 +248,19 @@
     <!-- Lines in the "what the app changed" list of a HeliBoard import. -->
     <string name="import_heli_dropped_derived">The file leaves some colours for the keyboard to work out. This app works them out in its own way, so those parts may not match what you saw in HeliBoard.</string>
     <string name="import_heli_dropped_unused">The file sets colours for parts of HeliBoard that this keyboard does not have, such as its emoji board. Those colours have nowhere to go.</string>
+
+    <!-- ==== Multiling O Keyboard themes. That keyboard shares a theme as a
+         block of text that starts with OK_Settings_Begin, so the app takes it
+         from a file or from the clipboard. ==== -->
+
+    <string name="import_multiling_theme_title">Theme from Multiling O</string>
+    <string name="import_multiling_theme_body">Multiling O Keyboard shares a theme as a block of text that starts with OK_Settings_Begin. Copy it from Misc, then Import | Export, in that keyboard, or pick the file that you saved it in. A link to a shared theme also works.</string>
+    <string name="import_multiling_theme_unreadable_body">The app cannot find the colours of a Multiling O theme in that text. Copy the whole block, from OK_Settings_Begin to OK_Settings_End.</string>
+
+    <!-- Lines in the "what the app changed" list of a Multiling O import. -->
+    <string name="import_multiling_dropped_text_shadows">The theme puts shadows behind the letters on the keys. This keyboard does not draw those.</string>
+    <string name="import_multiling_dropped_wallpaper">The theme uses a picture behind the keys, but the text does not contain the picture. Add one in the theme editor.</string>
+    <string name="import_multiling_dropped_unused">The theme sets colours for parts of Multiling O that this keyboard does not have. Those colours have nowhere to go.</string>
 
     <!-- Lines in the "what the app changed" list of a FlorisBoard import. -->
     <string name="import_floris_dropped_shadow_color">The file picks a colour for the shadows under the keys. The shadows come across, but this app draws them in its own colour.</string>

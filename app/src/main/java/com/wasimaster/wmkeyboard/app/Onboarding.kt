@@ -119,6 +119,10 @@ internal fun OnboardingScreen(
     // first. Stable across a recreate, which that page's own choice causes.
     val deviceSignals = remember { DeviceLocales.read(context) }
     val askAppLanguage = remember { shouldAskAppLanguage(deviceSignals, AppLanguage.available) }
+    // Set once a backup is restored from the welcome page. Saveable, because
+    // the page list reads it and a list that changes on rotation replays the
+    // page transition.
+    var restored by rememberSaveable { mutableStateOf(false) }
     val pages = settings.watch {
         onboardingPages(
             persona = it.onboarding,
@@ -127,6 +131,7 @@ internal fun OnboardingScreen(
             replay = replay,
             imeReady = replayImeReady,
             askAppLanguage = askAppLanguage,
+            restored = restored,
         )
     }
     val reduceMotion = settings.watch { it.reduceMotion }
@@ -158,8 +163,13 @@ internal fun OnboardingScreen(
     val accent = OnboardingPageAccents.getValue(page)
     val playServices = remember { PlayServices.available }
     val finish: () -> Unit = {
-        finishOnboarding(scope, repository, settings.value, replay, playServices)
+        finishOnboarding(scope, repository, settings.value, replay, playServices, restored)
         onFinished()
+    }
+    // A restore on a phone where the keyboard is already on and selected has
+    // nothing left to do, so the wizard closes by itself.
+    LaunchedEffect(restored, keyboardReady) {
+        if (restored && keyboardReady) finish()
     }
     // Which way the turn went is read off the transition itself
     // (initialState vs targetState), so the move is only the page change.
@@ -247,6 +257,10 @@ internal fun OnboardingScreen(
                             },
                         )
                         OnboardingPage.WELCOME -> WelcomePage(
+                            repository = repository,
+                            canRestore = !replay && !restored,
+                            restored = restored,
+                            onRestored = { restored = true },
                             // Set here as well as through onSetupChanged: the
                             // auto-advance below takes the page out of the
                             // composition in the same pass, so its own effect
@@ -298,7 +312,10 @@ internal fun OnboardingScreen(
                 Spacer(Modifier.weight(1f))
                 Button(
                     onClick = { if (onLastPage) finish() else goTo(index + 1) },
-                    enabled = page != OnboardingPage.WELCOME || keyboardReady,
+                    // After a restore the welcome page is the last page, and
+                    // Finish stays open: the keyboard can be turned on later,
+                    // as Skip allows on a run that was not restored.
+                    enabled = page != OnboardingPage.WELCOME || keyboardReady || restored,
                 ) {
                     Text(
                         stringResource(
@@ -315,8 +332,8 @@ internal fun OnboardingScreen(
 /**
  * Closes the wizard. If the run never reached a point that replaced the
  * enable-everything tool default (skipping from the first page used to leave
- * all 70+ tools on), land the persona's starter set first; a replay never
- * touches anything.
+ * all 70+ tools on), land the persona's starter set first; a replay and a
+ * restore never touch anything.
  */
 private fun finishOnboarding(
     scope: CoroutineScope,
@@ -324,11 +341,16 @@ private fun finishOnboarding(
     settings: KeyboardSettings,
     replay: Boolean,
     playServices: Boolean,
+    restored: Boolean,
 ) {
     scope.launch {
         if (!replay) {
-            toolsAfterFinish(settings, playServices, ::isSupportedTool)?.let {
-                repository.setEnabledTools(it)
+            // A restored backup's tools are the user's own, even when they are
+            // the everything-on default.
+            if (!restored) {
+                toolsAfterFinish(settings, playServices, ::isSupportedTool)?.let {
+                    repository.setEnabledTools(it)
+                }
             }
             repository.setOnboardingDone(true)
         }

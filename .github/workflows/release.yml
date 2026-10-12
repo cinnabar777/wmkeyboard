@@ -661,6 +661,27 @@ jobs:
           done
           gh release edit "$TAG" --repo "$REPO" --draft=false --latest
 
+      # Announce the new release on the Telegram community in the
+      # announcements and releases topic (#19), linking the full arm64 APK
+      # and attaching the lite arm64 APK for direct install.
+      - name: Announce on Telegram
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TAG: ${{ github.ref_name }}
+          REPO: ${{ github.repository }}
+          VERSION: ${{ needs.verify.outputs.version }}
+        run: |
+          if [ -z "$TELEGRAM_TOKEN" ]; then
+            echo "::warning::TELEGRAM_TOKEN is not set; skipping Telegram announcement"
+            exit 0
+          fi
+          python3 .github/scripts/telegram_release.py \
+            --tag "$TAG" \
+            --repo "$REPO" \
+            --version "$VERSION" \
+            --notes-file release-body.md \
+            --dist dist
+
   # Comments on every issue the release notes link, now that there is a
   # release to point at. A call rather than a `release: published` trigger in
   # that workflow, because the release above is published with this run's

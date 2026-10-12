@@ -1,6 +1,12 @@
 package com.wasimaster.wmkeyboard.app
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
@@ -35,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -136,9 +143,17 @@ internal fun VocabDailyCard(settings: LiveSettings, onNavigate: (String) -> Unit
         return
     }
     var dismissed by remember(today) { mutableStateOf(false) }
-    if (dismissed || !current.draws) return
+    if (!current.draws) return
+    val reduceMotion = LocalReduceMotion.current
+    // Fades up into the skeleton's place when it had to wait for the packs;
+    // already there, with nothing to announce, when the draw was cached. Put
+    // away, it folds up and the rows below rise into its space.
+    val shown = remember(today) { MutableTransitionState(cached != null || reduceMotion) }
+    shown.targetState = !dismissed
     val progress = rememberVocabProgress()
-    val putAway: () -> Unit = {
+    val putAway: () -> Unit = putAway@{
+        // The card still takes a press while it folds away.
+        if (dismissed) return@putAway
         dismissed = true
         // The record is written by the keyboard too, and this copy was read
         // when the screen opened; re-read before adding to it.
@@ -147,6 +162,34 @@ internal fun VocabDailyCard(settings: LiveSettings, onNavigate: (String) -> Unit
         progress.save()
         VocabDailyCache.markDismissed(today)
     }
+    if (reduceMotion) {
+        if (!dismissed) VocabDailyBody(current, interval, today, accent, progress, settings, onNavigate, putAway)
+        return
+    }
+    AnimatedVisibility(
+        visibleState = shown,
+        enter = fadeIn(tween(durationMillis = CARD_IN_MS)) +
+            slideInVertically(tween(durationMillis = CARD_IN_MS)) { it / CARD_RISE_FRACTION },
+        exit = fadeOut(tween(durationMillis = CARD_OUT_MS)) + shrinkVertically(tween(durationMillis = CARD_OUT_MS)),
+        label = "vocabDailyCard",
+    ) {
+        VocabDailyBody(current, interval, today, accent, progress, settings, onNavigate, putAway)
+    }
+}
+
+/** The card itself: the install nudge, or the word with its buttons. */
+@Composable
+private fun VocabDailyBody(
+    current: DailyPick,
+    interval: VocabWordInterval,
+    today: Int,
+    accent: Color,
+    progress: VocabProgress,
+    settings: LiveSettings,
+    onNavigate: (String) -> Unit,
+    putAway: () -> Unit,
+) {
+    val context = LocalContext.current
     VocabCardFrame {
         if (!current.hasPacks) {
             Row(modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 16.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -213,6 +256,12 @@ internal fun VocabDailyCard(settings: LiveSettings, onNavigate: (String) -> Unit
         }
     }
 }
+
+private const val CARD_IN_MS = 220
+private const val CARD_OUT_MS = 200
+
+/** The card rises into place by this fraction of its height (1/n). */
+private const val CARD_RISE_FRACTION = 12
 
 /** Reads the packs (through the process's one index) and the record; off the main thread, and cached by the caller. */
 private suspend fun drawWordOfTheDay(filesDir: File, slot: Int, translationCodes: List<String>): DailyPick {

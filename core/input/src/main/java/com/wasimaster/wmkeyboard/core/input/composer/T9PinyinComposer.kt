@@ -16,6 +16,13 @@ package com.wasimaster.wmkeyboard.core.input.composer
  * lengths need no translation back to keystrokes — unlike [JapaneseComposer],
  * which segments kana but must report romaji. [consumedFor] counts digits
  * directly, so prefix commit works unchanged.
+ *
+ * A syllable the user picked from [readings] (issue #635) is written into the
+ * buffer as its letters in place of its digits: `9426` picked as `xiao` leaves
+ * `xiao` composing, and `xiao'94426` once more is typed. Letters and digits never
+ * share a unit, so the segmenter splits a mixed buffer with no help, and a letter
+ * unit reaches the decoder as the one reading it can be. The buffer stays the
+ * whole state — prefix commit, the cache and backspace need nothing new to keep.
  */
 object T9PinyinComposer : Composer {
 
@@ -35,13 +42,95 @@ object T9PinyinComposer : Composer {
     /** Ranked depth for resolving a tap, so the expanded grid can be tapped too. */
     private const val LOOKUP_LIMIT = 128
 
+    /** Longest pinyin syllable, and so the longest digit code (`zhuang`). */
+    private const val MAX_SYLLABLE = 6
+
     /**
      * The composing region shows the pinyin of the best candidate rather than the
      * raw digits: `426` reads back as `hao`, which is what the user is spelling.
-     * Falls back to the digits themselves when nothing segments yet.
+     * Syllables are set apart with `'` (`you'dian'xiao`), so the user can see
+     * where the decoder split the digits — the split [readings] lets them
+     * overrule. Past what the best candidate covers, a unit reads as its code's
+     * first syllable, and digits no syllable spells yet stay digits. Falls back to
+     * the digits themselves when nothing converts at all.
      */
-    override fun composeBuffer(buffer: String): String =
-        ranked(buffer).firstOrNull()?.reading ?: buffer
+    override fun composeBuffer(buffer: String): String {
+        val best = ranked(buffer).firstOrNull() ?: return buffer
+        val segs = segments(buffer)
+        val out = StringBuilder(buffer.length + segs.size)
+        var pos = 0
+        var covered = 0
+        for (seg in segs) {
+            // One letter to a key, so a syllable is exactly as long as its code.
+            val len = seg.syllable.length
+            val syllable = if (pos + len <= best.reading.length) {
+                best.reading.substring(pos, pos + len)
+            } else {
+                optionsFor(seg.syllable)?.firstOrNull() ?: seg.syllable
+            }
+            if (out.isNotEmpty()) out.append('\'')
+            out.append(syllable)
+            pos += len
+            covered += seg.inputLen
+        }
+        if (covered < buffer.length) out.append(buffer, covered, buffer.length)
+        return out.toString()
+    }
+
+    /** Enter writes the letters spelled, without the syllable marks [composeBuffer] adds. */
+    override fun typedReading(buffer: String): String = composeBuffer(buffer).replace("'", "")
+
+    /**
+     * The syllables the first undecided code of [buffer] could be, for the user
+     * to pick one (issue #635): every syllable whose code starts the digits
+     * after the picked ones, longest first, the way 九宫格 pads list them — `968`
+     * offers you and zou, then wo and yo. The one the decoder is already using
+     * leads, since that is what the strip shows; ties go to the syllable with the
+     * commoner characters. Empty when nothing is left undecided.
+     */
+    override fun readings(buffer: String): List<String> {
+        val run = undecided(buffer).run
+        if (run.isEmpty()) return emptyList()
+        val index = T9Pinyin.index
+        val dict = CjkDictionaries.pinyin
+        val found = ArrayList<String>()
+        for (len in minOf(MAX_SYLLABLE, run.length) downTo 1) {
+            val options = index[run.substring(0, len)] ?: continue
+            found += options.sortedByDescending { syllableWeight(dict, it) }
+        }
+        val leading = decodedNext(buffer)
+        return if (leading != null && leading in found) listOf(leading) + (found - leading) else found
+    }
+
+    /**
+     * [buffer] with its first undecided code written as [reading], one of
+     * [readings]: the digits it spelled become its letters, set off from a
+     * syllable picked before it by `'` so `xi` then `an` never reads back as
+     * `xian`. Null when [reading] does not spell the digits there.
+     */
+    override fun pickReading(buffer: String, reading: String): String? {
+        val (head, run, rest) = undecided(buffer)
+        val code = T9Pinyin.encode(reading)
+        if (code.isEmpty() || !run.startsWith(code)) return null
+        val picked = head.trimEnd('\'')
+        val sep = if (picked.isEmpty()) "" else "'"
+        return picked + sep + reading.lowercase() + run.substring(code.length) + rest
+    }
+
+    /**
+     * One backspace takes back the last keypress — and once only picked
+     * syllables are left, the last pick: the syllable goes back to the digits it
+     * was picked from, so the next press deletes those one at a time again and
+     * [readings] can offer it afresh. Never half a syllable, which would read as
+     * a different one (`xian` less a letter is `xia`).
+     */
+    override fun backspaceBuffer(buffer: String): String {
+        if (buffer.isEmpty() || !buffer.last().isLetter()) return super.backspaceBuffer(buffer)
+        val syllable = buffer.takeLastWhile { it.isLetter() }
+        val code = T9Pinyin.encode(syllable)
+        if (code.isEmpty()) return super.backspaceBuffer(buffer)
+        return buffer.dropLast(syllable.length).trimEnd('\'') + code
+    }
 
     override fun candidates(buffer: String): List<String> = candidates(buffer, LIMIT)
 
@@ -64,6 +153,69 @@ object T9PinyinComposer : Composer {
     private data class Cand(val text: String, val consumed: Int, val reading: String)
 
     /**
+     * [buffer] cut where the picking stands: the syllables already picked (with
+     * any `'` after them), the first digit run after them, which is what
+     * [readings] offers syllables for, and everything past that run's own `'`.
+     */
+    private data class Undecided(val head: String, val run: String, val rest: String)
+
+    private fun undecided(buffer: String): Undecided {
+        val digit = buffer.indexOfFirst { it.isDigit() }
+        if (digit < 0) return Undecided(buffer, "", "")
+        val end = buffer.indexOf('\'', digit).let { if (it < 0) buffer.length else it }
+        return Undecided(buffer.substring(0, digit), buffer.substring(digit, end), buffer.substring(end))
+    }
+
+    /** The syllable the best candidate reads the first undecided code as, if it reaches it. */
+    private fun decodedNext(buffer: String): String? {
+        val best = ranked(buffer).firstOrNull() ?: return null
+        var pos = 0
+        for (seg in segments(buffer)) {
+            val len = seg.syllable.length
+            if (seg.syllable.first().isDigit()) {
+                return if (pos + len <= best.reading.length) best.reading.substring(pos, pos + len) else null
+            }
+            pos += len
+        }
+        return null
+    }
+
+    /** How common [syllable]'s commonest single character is, to order equally long readings. */
+    private fun syllableWeight(dict: ConversionDictionary, syllable: String): Int {
+        var best = 0
+        for (row in dict.rowsFor(syllable)) {
+            if (dict.wordLength(row) == 1 && dict.frequency(row) > best) best = dict.frequency(row)
+        }
+        return best
+    }
+
+    /**
+     * What a unit can be read as: the syllables of a digit code, or the one
+     * syllable the user picked for a letter unit. Null for a code no syllable
+     * spells, which cannot happen for a unit the segmenter returned.
+     */
+    private fun optionsFor(unit: String): List<String>? =
+        if (unit.first().isDigit()) T9Pinyin.index[unit] else listOf(unit)
+
+    /** The index the inventory below was built from, and that inventory. */
+    @Volatile
+    private var inventoryCache: Pair<Map<String, List<String>>, Set<String>>? = null
+
+    /**
+     * Every unit a buffer can hold: each syllable's digit code, and the syllable
+     * itself for one already picked. Rebuilt only when [T9Pinyin.index] is.
+     */
+    private fun inventory(): Set<String> {
+        val index = T9Pinyin.index
+        inventoryCache?.let { if (it.first === index) return it.second }
+        val units = HashSet<String>(index.size * 3)
+        units += index.keys
+        for (syllables in index.values) units += syllables
+        inventoryCache = index to units
+        return units
+    }
+
+    /**
      * Splits the digit buffer against the digit codes of real syllables. Reuses
      * [PinyinSyllables.segment] verbatim, because segmenting digit codes and
      * segmenting syllables are the same problem over a different alphabet. Each
@@ -72,9 +224,12 @@ object T9PinyinComposer : Composer {
      * The backtracking search matters more here than anywhere: 412 syllables
      * collapse onto ~230 codes over an eight-symbol alphabet, so ambiguous splits
      * are far commoner among digits than among letters.
+     *
+     * A syllable picked from [readings] is in the buffer as letters, and letters
+     * and digits never meet in one unit, so the same walk splits it off too.
      */
     private fun segments(buffer: String): List<Seg> =
-        PinyinSyllables.segment(buffer, T9Pinyin.index.keys)
+        PinyinSyllables.segment(buffer, inventory())
 
     /**
      * Candidates for [buffer], longest reading first so a whole-phrase entry
@@ -97,7 +252,7 @@ object T9PinyinComposer : Composer {
         // the cap cut alphabetically — for 726726726 every surviving reading
         // began `pan`, so 三三三 was unreachable. Here an option no word starts
         // with is pruned by one binary search and costs nothing.
-        val options = segs.map { T9Pinyin.index[it.syllable]?.toTypedArray() ?: return emptyList() }
+        val options = segs.map { optionsFor(it.syllable)?.toTypedArray() ?: return emptyList() }
         val input = Lattice.options(options, segs.map { it.inputLen })
         return Lattice.decode(
             input,

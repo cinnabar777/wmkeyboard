@@ -447,7 +447,7 @@ val KB_SHOTS: List<KbShot> = listOf(
         repo.setOneHandedMode(com.wasimaster.wmkeyboard.core.settings.OneHandedMode.RIGHT)
     }, steps = { type("See you at six") }),
     KbShot("typing/size-position-split", mode = "blank", seed = { repo.setSplitKeyboard(true) }),
-    KbShot("typing/size-position-floating", mode = "blank", seed = { repo.setFloatingKeyboard(true) }),
+    KbShot("typing/size-position-floating", mode = "blank", seed = { repo.setFloatingKeyboard(false, true) }),
 
     // ------------------------------------------------------------ fields adapt
     KbShot("typing/field-adaptation-email", kind = "email", hint = "Email address"),

@@ -51,6 +51,9 @@ internal val ToolSetupTools = setOf(
  * the rest of the wizard in Bengali. [askAppLanguage] is decided by the phone's
  * region (see [shouldAskAppLanguage]), so it never shows where English is the
  * first language, and never on a build that has only English to offer.
+ *
+ * [restored] is a run where the welcome page's restore brought a backup in:
+ * the welcome page is all that is left.
  */
 internal fun onboardingPages(
     persona: OnboardingSettings,
@@ -59,7 +62,11 @@ internal fun onboardingPages(
     replay: Boolean,
     imeReady: Boolean,
     askAppLanguage: Boolean = false,
+    restored: Boolean = false,
 ): List<OnboardingPage> = OnboardingPage.entries.filter { page ->
+    // A restored backup answered every question already: only the step no
+    // backup can carry, turning the keyboard on, is left.
+    if (restored) return@filter page == OnboardingPage.WELCOME
     when (page) {
         OnboardingPage.APP_LANGUAGE -> askAppLanguage
         OnboardingPage.WELCOME -> !(replay && imeReady)

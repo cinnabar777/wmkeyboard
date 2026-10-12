@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.Density
 import com.wasimaster.wmkeyboard.core.layout.AssetLayouts
 import com.wasimaster.wmkeyboard.core.settings.DeviceForm
+import com.wasimaster.wmkeyboard.core.settings.FloatingHandlePosition
 import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.OneHandedMode
 import com.wasimaster.wmkeyboard.core.settings.isTelevision
@@ -324,6 +325,8 @@ internal object SettingsDigest {
             enabledLayoutIds = emptyList(),
             activeLayoutId = "",
             floatingKeyboard = false,
+            floatingKeyboardLandscape = null,
+            floatingHandle = FloatingHandlePosition.BOTTOM,
             oneHandedMode = OneHandedMode.OFF,
         ).toString() + "\u0000" +
             // Secondary grids ride along with every layout (the Fn and

@@ -103,6 +103,8 @@ dependencies {
     implementation(libs.apng4android.apng)
     // A supertype of that library's drawable. See the version catalog.
     compileOnly(libs.androidx.vectordrawable.animated)
+    // Draws Telegram's animated stickers, which are Lottie animations. See TgsFrames.
+    implementation(libs.lottie)
     // Background removal in the sticker editor. Full only: lite ships a stub
     // with the same signatures, and its editor simply has no cutout button.
     "fullImplementation"(libs.mlkit.subject.segmentation)

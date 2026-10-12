@@ -124,10 +124,13 @@ A theme can carry a key sound of its own, and where it does, it wins over everyt
 | Word delete distance | Slider, 32–120 dp | 72 dp | Swipe deletes = Words |
 | Character delete distance | Slider, 8–48 dp | 20 dp | Swipe deletes = Characters |
 | Swipe on forward delete | Toggle | On | always |
+| Backspace as a key press on web pages | Toggle | On | always |
 
 A leftward drag on <KeyCap>⌫</KeyCap> deletes more than the one character a press does, and **Swipe deletes** sets what one step of it takes off. **Word delete distance** is how far you drag before the first word goes, with later words coming off faster on a fixed curve, so that one number tunes the whole gesture; **Character delete distance** is the flat cost of one character, with no curve. **Show what you will delete** makes the swipe select the text and delete it when you lift your finger, so a swipe that went too far can be dragged back.
 
 **Swipe on forward delete** gives <KeyCap>⌦</KeyCap> the same drag pointed the other way: rightward, over the text after the cursor. It has its own on/off switch and then borrows every other row above, so the two delete keys cannot end up tuned differently. No built-in layout carries a <KeyCap>⌦</KeyCap> key; add one in the [layout editor](/languages/custom-layouts/). Full writeup: [Gestures](/typing/gestures/#deleting-more-than-a-character-with-backspace). This group moved here from the [Typing](/reference/settings/typing/) screen: what a key does under a swipe is a key-press matter.
+
+**Backspace as a key press on web pages** sends <KeyCap>⌫</KeyCap> to a text box on a web page, in a browser or inside an app, the way a physical keyboard sends it instead of deleting the text directly. Code editors on a page, such as Violentmonkey's script editor, only delete when they see that key press and put back text deleted any other way. The browser then decides how much one press removes. A language set to delete whole conjuncts keeps the direct delete. Turn it off if backspace misbehaves on a site.
 
 ### Alternate keys
 
@@ -198,7 +201,7 @@ The repeat interval is two sliders, because delete and space are held for opposi
 | Currency keys | Free-text field, space-separated | Any characters | ৳ € £ ¥ ₹ ₿ |
 | Ctrl shortcuts as raw key events | Toggle | On / Off | Off |
 | Hold shortcuts | Filter chips, any number | Select all, Copy, Cut, Paste, Undo, Redo | All six on |
-| Action first *(shown once at least one hold shortcut is on)* | Toggle | On / Off | Off |
+| Action position *(shown once at least one hold shortcut is on)* | Stepper | First, After 1 to 7 characters, Last | Last |
 | Slide from 🌐 for shortcuts | Toggle | On / Off | Off |
 | Shortcut keys *(shown once a hold shortcut or the 🌐 slide is on)* | Nav row → dialog | one letter per action | a c v x z y |
 
@@ -224,7 +227,7 @@ The repeat interval is two sliders, because delete and space are held for opposi
 
 **Hold shortcuts** is one row of six chips, all on by default: Select all, Copy, Cut, Paste, Undo and Redo. Each one goes into that letter's press-and-hold popup, after the accents the key already has, so holding C still offers `çć` and copy sits at the end of the row. Copy and cut both fall back to select-all when nothing is selected, so one hold copies or cuts the whole field. Turn a chip off and only its own entry goes.
 
-**Action first** sits next to Hold shortcuts and starts off. Off, holding a shortcut letter still opens on its first accent, the same as a letter with no shortcuts. Copy or cut still sits at the end of that popup. Turn it on and the shortcut moves to the front instead, so a plain hold on <KeyCap>C</KeyCap> runs Copy right away. Keep your finger down and slide on to reach `çć` instead of releasing. It needs **Choose without lifting**, under Alternate keys, turned on, since a popup that just sits open has nothing to run on release.
+**Action position** sits next to Hold shortcuts and says where the shortcut goes in its key's popup. It starts at **Last**: holding a shortcut letter still opens on its first accent, the same as a letter with no shortcuts, and Copy or Cut sits at the end. **After 1 character** (up to 7) moves the shortcut in among the accents. A plain hold on <KeyCap>C</KeyCap> still types `ç`, the accent the corner hint shows, and Copy is the next entry, a short slide away instead of past every accent. **First** moves it to the front, so a plain hold on <KeyCap>C</KeyCap> runs Copy right away; keep your finger down and slide on to reach `çć` instead of releasing. A place past all of a key's accents puts the shortcut last on that key. A key whose layout places its own actions (**Where the actions go** in the [key edit sheet](/reference/settings/keymaps/#the-key-edit-sheet)) keeps that place. Anything but Last needs **Choose without lifting**, under Alternate keys, turned on, since a popup that just sits open has nothing to run on release. If you had the old **Action first** switch on, it carries over as First.
 
 **Slide from 🌐 for shortcuts** is off by default. On, pressing 🌐 and sliding onto one of the six shortcut keys runs that key's action when you lift, whether or not its hold shortcut is on. See [Switching languages](/languages/switching/#sliding-from--onto-a-shortcut).
 

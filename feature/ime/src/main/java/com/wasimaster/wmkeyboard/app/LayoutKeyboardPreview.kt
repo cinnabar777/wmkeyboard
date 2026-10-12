@@ -466,6 +466,7 @@ private fun layoutPreviewShown(
         activeLayoutId = spec.id,
         enabledLayoutIds = enabled,
         floatingKeyboard = false,
+        floatingKeyboardLandscape = false,
         oneHandedMode = OneHandedMode.OFF,
     )
 }

@@ -111,6 +111,7 @@ internal fun panelTitleRes(kind: PanelKind): Int = when (kind) {
     PanelKind.TEXT_EDIT -> R.string.panel_name_text_edit
     PanelKind.TRACKPAD -> R.string.panel_name_trackpad
     PanelKind.NUMPAD -> R.string.panel_name_numpad
+    PanelKind.HANDWRITING -> R.string.panel_name_handwriting
 }
 
 /** A component's name, in the picker, the preview cell and the reorder dialog. */
@@ -127,6 +128,7 @@ internal fun fieldTitleRes(kind: PanelFieldKind): Int = when (kind) {
     PanelFieldKind.TRACKPAD -> R.string.field_name_trackpad
     PanelFieldKind.GIF_BROWSER -> R.string.field_name_gif_browser
     PanelFieldKind.STICKER_BROWSER -> R.string.field_name_sticker_browser
+    PanelFieldKind.HANDWRITING_CANVAS -> R.string.field_name_handwriting_canvas
     PanelFieldKind.UNKNOWN -> R.string.field_name_unknown
 }
 

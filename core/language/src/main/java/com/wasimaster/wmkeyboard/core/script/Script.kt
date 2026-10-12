@@ -258,11 +258,24 @@ enum class ComposerType {
     CHEONJIIN,
 
     /**
+     * Korean: 나랏글 (Naratgeul) keypad (issue #599). Two-set Hangul plus ㅐ ㅒ ㅔ ㅖ
+     * typed as their vowel and ㅣ; strokes and tense consonants come from the
+     * pad's 획추가 and 쌍자음 keys.
+     */
+    NARATGEUL,
+
+    /**
      * Bengali: ক্ষিপ্র Khipro, composed from lowercase keys with `f` and `/` as
      * modifiers (issue #400). Deterministic, so unlike [TRANSLITERATE] there is
      * no dictionary reading to rank: the keys spell exactly one word.
      */
     KHIPRO,
+
+    /**
+     * Bengali: Khipro Dark (issue #631). Khipro, except that consonants stay
+     * apart until `/` joins them, one press per extra consonant.
+     */
+    KHIPRO_DARK,
 }
 
 /**
@@ -329,6 +342,16 @@ data class ScriptDef(
      * on the built-in Latin grids.
      */
     val questionMark: String = "?",
+    /**
+     * Marks appended to the letters page's period key popup, after whatever
+     * the layout put there itself.
+     *
+     * Issue #606: the Arabic harakat. They are written over the letter before
+     * them, few layouts give them keys of their own, and the period key is where
+     * Gboard and FlorisBoard both keep them. A pass in `currentLayout` rather
+     * than a line in each layout, for the same reason as [questionMark].
+     */
+    val periodAlternates: List<String> = emptyList(),
 ) {
     /** Whether [codePoint] is one of this script's own characters. */
     fun contains(codePoint: Int): Boolean =
@@ -396,6 +419,14 @@ object ScriptRegistry {
             unicodeRange = 0x0600..0x06FF,
             // Persian, Urdu, Pashto, Sorani, Sindhi and Arabic alike.
             questionMark = "؟",
+            // Fatha, damma, kasra, sukun, shadda, the three tanwin, then the
+            // rarer marks: dagger alef, maddah, hamza above and below, and
+            // the subscript alef Urdu writes. FlorisBoard's Persian set.
+            periodAlternates = listOf(
+                "\u064E", "\u064F", "\u0650", "\u0652", "\u0651",
+                "\u064B", "\u064C", "\u064D",
+                "\u0670", "\u0653", "\u0654", "\u0655", "\u0656",
+            ),
         ),
         ScriptDef(
             id = ScriptId.GREEK,
@@ -617,6 +648,9 @@ object ScriptRegistry {
             composer = ComposerType.NONE,
             fontHint = FontHint.GENERIC,
             unicodeRange = 0x4E00..0x9FFF,
+            // Chinese ends a sentence with 。 too: a Pinyin or Stroke board whose
+            // key beside the spacebar says "." typed it into Chinese text (#610).
+            fullStop = "。",
         ),
         // IPA is uncased (a shift key would be inert) and composes 1:1 — each key
         // commits its phonetic symbol directly, combining diacritics included. It

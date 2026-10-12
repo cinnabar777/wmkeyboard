@@ -141,7 +141,7 @@ On the **Languages** screen:
 - **Add language** searches the whole catalogue and enables an unadded language's first layout. A language with data to fetch asks about the download first (see [Downloads & mobile data](/languages/downloads/)), and its Cancel backs out of the language too.
 - **Switch order** appears once you have more than one layout enabled. Drag to reorder the raw layout list, so two English layouts (QWERTY and AZERTY, say) keep independent slots in the ring even though they're both "English."
 
-A romanized language (Banglish, Hinglish, Arabizi and the rest) can stay enabled without a stop in the ring. Open it under **Your languages** and turn on **Do not show in the language switcher**. The globe key, the spacebar swipe and the picker then skip it, while its words keep showing on every keyboard that lists it under **Also suggest from**. With English, Banglish and a Bangla layout enabled, hiding Banglish leaves two stops: English with Banglish suggestions, and Bangla. If hiding would leave nothing to switch to, every layout stays in the ring.
+Any language can stay enabled without a stop in the ring, which suits one you want only for its words: a romanized language such as Banglish on your English keyboard, or English suggestions on a Swedish one. Open it under **Your languages** and turn on **Do not show in the language switcher**. The globe key, the spacebar swipe and the picker then skip it, while its words keep showing on every keyboard that lists it under **Also suggest from**. With English, Banglish and a Bangla layout enabled, hiding Banglish leaves two stops: English with Banglish suggestions, and Bangla. With Swedish and English enabled and English listed under Swedish's **Also suggest from**, hiding English leaves one stop: the Swedish layout, with both dictionaries suggesting. If hiding would leave nothing to switch to, every layout stays in the ring.
 
 There's no "maximum visible" setting. (The one recently-used option, [🌐 goes back to the last language](#going-back-to-the-last-language), only changes which layout the key visits next, not which ones are in the ring.) The ring is exactly as long as your enabled-layout list, so reordering or removing is the only way to shorten it. Ring length changes behavior on its own at three thresholds: two layouts swipe as a toggle rather than a cycle, more than four turn the hold-drag gesture from an inline preview into a full list (unless **Picker for more than four layouts** is off), and more than five shrink the swipe preview to a sliding five-chip window.
 
@@ -175,7 +175,7 @@ A separate, unrelated toggle, **Remember language per app** (under Per-app langu
 
 ## Switching mid-word onto a phonetic layout
 
-<SettingsPath path="Languages / Switching language / Carry the word over" />
+<SettingsPath path="Languages & layouts / Switching language / Carry the word over" />
 
 Phonetic layouts spell their script with roman letters: Avro and Khipro write Bengali, Hindi phonetic writes Devanagari, and Urdu phonetic and the [other phonetic layouts](/languages/phonetic/) write theirs. Which means the letters you type on your Latin keyboard are the very letters those layouts take, and noticing halfway through a word that you never switched no longer costs you the word. **Carry the word over** is on by default. Type `tu`, switch to Avro, and what you already typed becomes তু; the `mi` after it finishes তুমি. Without it the `tu` commits as Latin and only the `mi` is Bengali, so the whole word has to be typed again.
 
@@ -213,7 +213,7 @@ Automation apps such as Tasker, and `adb` on a computer, can switch too. They se
 | Remember language per app | Languages → Per-app language | Off |
 | Forget remembered apps | Languages → Language data | A button, shown once apps are remembered |
 | Link romanized languages automatically | Languages → Language data | On |
-| Do not show in the language switcher | Languages → a romanized language | Off |
+| Do not show in the language switcher | Languages → any language | Off |
 | List languages in the Android switcher | Languages → System language switcher | Off |
 | Show app name first | Languages → System language switcher | Off |
 

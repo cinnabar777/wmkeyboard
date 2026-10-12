@@ -57,6 +57,14 @@ class AiClientToolsTest {
         assertEquals(AiTools.WEB_SEARCH, declarations?.single()?.jsonObject?.get("name")?.jsonPrimitive?.content)
     }
 
+    @Test
+    fun `gemini takes the schema as full json schema`() {
+        val declared = body(AiClient.geminiBody("s", user, 100, tools))["tools"]
+            ?.jsonArray?.single()?.jsonObject?.get("functionDeclarations")?.jsonArray?.single()?.jsonObject
+        assertEquals("object", declared?.get("parametersJsonSchema")?.jsonObject?.get("type")?.jsonPrimitive?.content)
+        assertFalse(declared?.containsKey("parameters") == true)
+    }
+
     // ---- the turns that carry a call and its answer ----------------------
 
     private val call = AiToolCall("call_1", AiTools.WEB_SEARCH, """{"query":"who won"}""")

@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import com.wasimaster.wmkeyboard.core.debug.DebugLog
 import com.wasimaster.wmkeyboard.core.layout.LayoutSpec
 import com.wasimaster.wmkeyboard.core.layout.language
@@ -518,7 +519,11 @@ class KeyboardAutomationReceiver : BroadcastReceiver() {
                     ?: return fail("\"${KeyboardAutomation.EXTRA_POSITION}\" must be normal, left, right, split or floating")
                 repository.setOneHandedMode(position.oneHanded)
                 repository.setSplitKeyboard(position.split)
-                repository.setFloatingKeyboard(position.floating)
+                // Floating is remembered per orientation (#584), so this sets
+                // the one the device is held in, as the toolbar tool does.
+                val landscape = context.resources.configuration.orientation ==
+                    Configuration.ORIENTATION_LANDSCAPE
+                repository.setFloatingKeyboard(landscape, position.floating)
                 ok(position.name.lowercase())
             }
             KeyboardAutomation.ACTION_OPEN_TOOL -> {

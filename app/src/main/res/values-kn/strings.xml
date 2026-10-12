@@ -2243,9 +2243,6 @@
     <string name="keypress_haptics_title">ಕೀ ಪ್ರೆಸ್ ಹ್ಯಾಪ್ಟಿಕ್ಸ್</string>
     <string name="keypress_hold_action_copy_label">ನಕಲಿಸಿ</string>
     <string name="keypress_hold_action_cut_label">ಕತ್ತರಿಸಿ</string>
-    <string name="keypress_hold_action_first_info">ಕ್ರಿಯೆಯು ಸಾಮಾನ್ಯವಾಗಿ ಪಾಪ್‌ಅಪ್‌ನ ಕೊನೆಯಲ್ಲಿ ಇರುತ್ತದೆ, ಆದ್ದರಿಂದ ಸರಳವಾಗಿ ಒತ್ತಿ ಹಿಡಿದರೆ ನಿಮಗೆ ಮೊದಲ ಉಚ್ಚಾರಣೆಯನ್ನು ನೀಡುತ್ತದೆ. ಇದನ್ನು ಆನ್ ಮಾಡಿದರೆ ಅದು ಮುಂಭಾಗಕ್ಕೆ ಚಲಿಸುತ್ತದೆ, ಮತ್ತು ಶಾರ್ಟ್‌ಕಟ್ ಕೀಗಳಲ್ಲಿ ಒಂದನ್ನು ಒತ್ತಿ ಹಿಡಿದರೆ ಕ್ರಿಯೆಯು ತಕ್ಷಣವೇ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ. ಉಚ್ಚಾರಣೆಗಳು ಇನ್ನೂ ಇವೆ: ನಿಮ್ಮ ಬೆರಳನ್ನು ಕೆಳಗೆ ಇರಿಸಿ ಮತ್ತು ನಿಮಗೆ ಬೇಕಾದ ಒಂದರ ಮೇಲೆ ಸ್ಲೈಡ್ ಮಾಡಿ. ಇದಕ್ಕೆ ಪರ್ಯಾಯ ಕೀಗಳ ಅಡಿಯಲ್ಲಿ ಆಯ್ಕೆ ಮಾಡಲು ಹಿಡಿದಿಟ್ಟುಕೊಳ್ಳುವ ಅಗತ್ಯವಿದೆ.</string>
-    <string name="keypress_hold_action_first_subtitle">ಒತ್ತಿ ಹಿಡಿಯುವುದು ಆಕ್ಸೆಂಟ್‌ಗಳನ್ನು ತೋರಿಸುವ ಬದಲು ಕ್ರಿಯೆಯನ್ನು ರನ್ ಮಾಡುತ್ತದೆ</string>
-    <string name="keypress_hold_action_first_title">ಮೊದಲು ಕ್ರಿಯೆ</string>
     <string name="keypress_hold_action_paste_label">ಅಂಟಿಸಿ</string>
     <string name="keypress_hold_action_redo_label">ಮತ್ತೆ ಮಾಡಿ</string>
     <string name="keypress_hold_action_select_all_label">ಎಲ್ಲವನ್ನೂ ಆಯ್ಕೆಮಾಡಿ</string>
@@ -2559,8 +2556,6 @@
     <string name="languages_cjk_region_info">ಪ್ರಾದೇಶಿಕ ಶಬ್ದಕೋಶ. ತೈವಾನ್ ಮತ್ತು ಹಾಂಗ್ ಕಾಂಗ್ ಒಂದೇ ವಿಷಯಕ್ಕೆ ವಿಭಿನ್ನ ಪದಗಳನ್ನು ಬಳಸುತ್ತವೆ, ಕೇವಲ ವಿಭಿನ್ನ ಅಕ್ಷರಗಳನ್ನಲ್ಲ.</string>
     <string name="languages_cjk_region_taiwan_title">ತೈವಾನ್ (臺灣)</string>
     <string name="languages_cjk_region_title">ಪ್ರಾದೇಶಿಕ ಶಬ್ದಕೋಶ</string>
-    <string name="languages_cjk_traditional_info">ಕೀಬೋರ್ಡ್ ಪ್ರತಿ ಅಭ್ಯರ್ಥಿಯನ್ನು ತೋರಿಸುವ ಮೊದಲು ಸರಳೀಕೃತ (简体) ದಿಂದ ಸಾಂಪ್ರದಾಯಿಕ (繁體) ಗೆ ಪರಿವರ್ತಿಸುತ್ತದೆ. ಪರಿವರ್ತನೆಯು ಒಂದು ಸಮಯದಲ್ಲಿ ಒಂದು ಅಕ್ಷರವನ್ನು ಓದುತ್ತದೆ. ಕೆಲವು ಸರಳೀಕೃತ ಅಕ್ಷರಗಳು ಒಂದಕ್ಕಿಂತ ಹೆಚ್ಚು ಸಾಂಪ್ರದಾಯಿಕ ರೂಪವನ್ನು ಹೊಂದಿವೆ, ಮತ್ತು ಕೀಬೋರ್ಡ್ ಯಾವಾಗಲೂ ಹೆಚ್ಚು ಸಾಮಾನ್ಯವಾದದನ್ನು ಬರೆಯುತ್ತದೆ. 发 ಎಂಬುದು 發 ಆಗುತ್ತದೆ, ಇದು 發展 ನಲ್ಲಿ ಸರಿಯಾಗಿದೆ ಆದರೆ 頭髮 ನಲ್ಲಿ ತಪ್ಪಾಗಿದೆ. ಆ ಪದಗಳನ್ನು ಕೈಯಾರೆ ಸರಿಪಡಿಸಿ.</string>
-    <string name="languages_cjk_traditional_subtitle">ಕೀಬೋರ್ಡ್ ಅಭ್ಯರ್ಥಿಗಳನ್ನು ಸಾಂಪ್ರದಾಯಿಕಕ್ಕೆ (繁體) ಪರಿವರ್ತಿಸುತ್ತದೆ. ಇದು ಒಂದು ಸಮಯದಲ್ಲಿ ಒಂದು ಅಕ್ಷರವನ್ನು ಪರಿವರ್ತಿಸುತ್ತದೆ, ಆದ್ದರಿಂದ ಸಂದರ್ಭವನ್ನು ಅವಲಂಬಿಸಿರುವ ಕೆಲವು ರೂಪಗಳು ತಪ್ಪಾಗಿವೆ (发 → 發 / 髮).</string>
     <string name="languages_cjk_traditional_title">ಸಾಂಪ್ರದಾಯಿಕ ಅಕ್ಷರಗಳು</string>
     <string name="languages_clusters_title">ಕ್ಲಸ್ಟರ್‌ಗಳು</string>
     <string name="languages_conjunct_backspace_info">ಬ್ಯಾಕ್‌ಸ್ಪೇಸ್ ಸಾಮಾನ್ಯವಾಗಿ ಒಂದು ಸಮಯದಲ್ಲಿ ಒಂದು ಕೋಡ್ ಪಾಯಿಂಟ್ ಅನ್ನು ಅಳಿಸುತ್ತದೆ. ಇದು ಕೆಲವೊಮ್ಮೆ ಪರದೆಯ ಮೇಲೆ ಅಪೂರ್ಣ ಅಕ್ಷರಗಳನ್ನು ಬಿಡುತ್ತದೆ. ಈ ಸೆಟ್ಟಿಂಗ್ ಆನ್ ಆಗಿದ್ದರೆ, ಒಂದು ಬಾರಿ ಒತ್ತಿದಾಗ ಸಂಪೂರ್ಣ ಅಕ್ಷರಗುಚ್ಛವು ಅಳಿಸಲ್ಪಡುತ್ತದೆ. ಇತರ ಭಾಷೆಗಳು ತಮ್ಮದೇ ಆದ ಸೆಟ್ಟಿಂಗ್ ಅನ್ನು ಉಳಿಸಿಕೊಳ್ಳುತ್ತವೆ.</string>

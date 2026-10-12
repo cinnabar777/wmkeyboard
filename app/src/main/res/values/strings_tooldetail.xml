@@ -453,6 +453,14 @@
     <string name="tooldetail_media_spacing_value" tools:ignore="PluralsCandidate">%1$d dp</string>
     <string name="tooldetail_media_hide_header_title">Hide the search when you scroll</string>
     <string name="tooldetail_media_hide_header_subtitle">Scroll down to fold the search box and the chips away, and scroll up to bring them back</string>
+    <string name="tooldetail_gif_collections_group">Favourites and recent</string>
+    <string name="tooldetail_gif_collections_info">Long-press a GIF and choose Add to favourites. A Favourites chip then leads the category chips. Long-press it again to remove it.</string>
+    <string name="tooldetail_gif_recent_title">Recent GIFs</string>
+    <string name="tooldetail_gif_recent_subtitle">Show a Recent chip with the GIFs you sent last</string>
+    <string name="tooldetail_gif_recent_info">The list keeps the last 48 GIFs and stays on the phone. Incognito does not add to it. Turn this off to delete the list.</string>
+    <string name="tooldetail_gif_favourites_offline_title">Keep favourites on the phone</string>
+    <string name="tooldetail_gif_favourites_offline_subtitle">Save a copy of each favourite, so it shows and sends without a connection</string>
+    <string name="tooldetail_gif_favourites_offline_info">The copies download when you add a favourite or open Favourites, and only on a connection that data saving allows. Turn this off to delete the copies. Your favourites stay.</string>
     <string name="tooldetail_media_hide_header_info">The results get the room that the search box, the source chips and the category chips take. When you are at the top of the results, pull down to bring them back. While you type a search, the search box always shows. This applies to both tools.</string>
     <string name="tooldetail_media_keys_group">Sources and API keys</string>
     <string name="tooldetail_media_klipy_label">Klipy API key</string>
@@ -804,8 +812,49 @@
     <!-- %1$s is the name of a tool, for example "Undo". -->
     <string name="tooldetail_hold_pick_title">Press and hold <xliff:g id="tool" example="Undo">%1$s</xliff:g></string>
 
+    <!-- Notes tool (#560). -->
+    <string name="tooldetail_notes_group">Notes</string>
+    <string name="tooldetail_notes_open_title">Your notes</string>
+    <plurals name="tooldetail_notes_open_subtitle">
+        <item quantity="one">%1$d note</item>
+        <item quantity="other">%1$d notes</item>
+    </plurals>
+    <string name="tooldetail_notes_open_none_subtitle">Nothing saved yet</string>
+    <string name="tooldetail_notes_tags_subtitle">Rename, recolour or remove the tags on your notes</string>
+    <string name="tooldetail_notes_trash_subtitle">Notes you deleted, until they are gone for good</string>
+    <string name="tooldetail_notes_sort_title">Sort notes by</string>
+    <string name="tooldetail_notes_sort_updated_label">Last edited</string>
+    <string name="tooldetail_notes_sort_created_label">Date created</string>
+    <string name="tooldetail_notes_sort_title_label">Title</string>
+    <string name="tooldetail_notes_markdown_title">Format Markdown</string>
+    <string name="tooldetail_notes_markdown_subtitle">Show headings, lists and checklists formatted in the keyboard and in previews. Off, every note is plain text.</string>
+    <string name="tooldetail_notes_panel_start_title">The keyboard panel opens on</string>
+    <string name="tooldetail_notes_panel_start_subtitle">What you see when you tap the tool</string>
+    <string name="tooldetail_notes_panel_start_list_label">The list of notes</string>
+    <string name="tooldetail_notes_panel_start_last_label">The note you edited last</string>
+    <string name="tooldetail_notes_trash_days_title">Keep trashed notes for</string>
+    <string name="tooldetail_notes_trash_7_label">7 days</string>
+    <string name="tooldetail_notes_trash_30_label">30 days</string>
+    <string name="tooldetail_notes_trash_90_label">90 days</string>
+    <string name="tooldetail_notes_trash_never_label">Until I delete them</string>
+    <string name="tooldetail_notes_save_selection_title">Save as note from a selection</string>
+    <string name="tooldetail_notes_save_selection_subtitle">What the selection bar\'s Save as note does</string>
+    <string name="tooldetail_notes_save_new_label">Make a new note each time</string>
+    <string name="tooldetail_notes_save_append_label">Add to the note I edited last</string>
+    <string name="tooldetail_notes_clear_title">Delete all notes</string>
+    <string name="tooldetail_notes_clear_subtitle">Every note, every tag and the trash</string>
+    <string name="tooldetail_notes_clear_confirm">Delete every note? This cannot be undone. A backup that holds the Notes section can bring them back.</string>
+
     <!-- Media control tool. -->
     <string name="tooldetail_mediactl_group">Media control</string>
+    <string name="tooldetail_find_history_title">Remember searches</string>
+    <string name="tooldetail_find_history_subtitle">Offer your last ten searches when the Find field is empty. Never kept in incognito or from a password field</string>
+    <string name="tooldetail_find_history_clear_title">Search history</string>
+    <string name="tooldetail_find_history_clear_action">Clear</string>
+    <plurals name="tooldetail_find_history_count">
+        <item quantity="one">%d search remembered</item>
+        <item quantity="other">%d searches remembered</item>
+    </plurals>
     <string name="tooldetail_mediactl_pin_title">Pin while music plays</string>
     <string name="tooldetail_mediactl_pin_subtitle">Put the media tool on the toolbar on its own while a music app is playing</string>
     <string name="tooldetail_mediactl_pin_info">The pin is temporary. It goes on the end of the toolbar, it never moves the tools you pinned yourself, and it disappears when the player does. If you have already pinned the media tool, nothing changes.</string>
@@ -953,4 +1002,9 @@
     <string name="tooldetail_media_wiki_hint">https://commons.wikimedia.org</string>
     <string name="tooldetail_hold_nothing_value">Does nothing</string>
     <string name="tooldetail_hold_nothing_subtitle">The hold only vibrates. Nothing opens and nothing runs.</string>
+    <string name="tooldetail_hold_default_title">Default</string>
+    <!-- %1$s is the name of a tool, for example Redo. -->
+    <string name="tooldetail_hold_default_pairing_subtitle">Runs <xliff:g id="tool" example="Redo">%1$s</xliff:g>, the same pair as HeliBoard</string>
+    <string name="tooldetail_hold_settings_title">Settings page</string>
+    <string name="tooldetail_hold_settings_subtitle">Opens the settings of this tool, as the hold did before</string>
 </resources>

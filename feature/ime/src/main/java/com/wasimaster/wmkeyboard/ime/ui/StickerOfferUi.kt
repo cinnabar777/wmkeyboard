@@ -1,6 +1,10 @@
 package com.wasimaster.wmkeyboard.ime.ui
 
 import android.view.WindowManager
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationVector1D
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
@@ -30,7 +34,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -38,15 +42,19 @@ import com.wasimaster.wmkeyboard.core.icons.symbols.outlined.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -74,6 +82,9 @@ import com.wasimaster.wmkeyboard.ime.PanelMode
 import com.wasimaster.wmkeyboard.ime.R
 import com.wasimaster.wmkeyboard.ime.StickerOffer
 import com.wasimaster.wmkeyboard.ime.StickerOfferItem
+import kotlinx.coroutines.launch
+import kotlin.math.PI
+import kotlin.math.sin
 
 /**
  * What the stickers offered while typing reach (#329). Rides [ToolHoldCallbacks]
@@ -154,7 +165,7 @@ internal fun ColumnScope.StickerTrayRow(state: KeyboardUiState, callbacks: Stick
     val visible = stickerTrayShows(state)
     val last = remember { arrayOfNulls<StickerOffer>(1) }
     if (visible) last[0] = state.stickerOffer
-    val motion = !state.settings.reduceMotion
+    val motion = LocalKbTheme.current.motion.any
     RevealingBarRow(
         visible = visible,
         enter = if (motion) {
@@ -183,6 +194,7 @@ private fun StickerOfferTray(offer: StickerOffer, callbacks: StickerOfferCallbac
     // Read by the gesture at the moment it needs them: the offer changes
     // under a hold as the text does, and the gesture is not restarted for it.
     val stickersNow by rememberUpdatedState(offer.stickers)
+    val peek = rememberStickerPeek(offer.trigger)
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -211,11 +223,12 @@ private fun StickerOfferTray(offer: StickerOffer, callbacks: StickerOfferCallbac
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            items(offer.stickers, key = { it.item.id }) { pick ->
+            itemsIndexed(offer.stickers, key = { _, pick -> pick.item.id }) { index, pick ->
                 StickerThumb(
                     pick = pick,
                     loader = loader,
                     size = StickerTrayCell,
+                    peek = { peek.of(index) },
                     onClick = { callbacks.onPick(pick) },
                 )
             }
@@ -368,15 +381,17 @@ internal fun StickerStripOffer(
     val loader = rememberMediaImageLoader()
     val dismissLabel = stringResource(R.string.ime_sticker_offer_dismiss_desc, offer.trigger)
     if (style == StickerSuggestStyle.STRIP) {
+        val peek = rememberStickerPeek(offer.trigger)
         Row(
             modifier = modifier.fillMaxHeight(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            for (pick in offer.stickers.take(StripThumbs)) {
+            offer.stickers.take(StripThumbs).forEachIndexed { index, pick ->
                 StickerThumb(
                     pick = pick,
                     loader = loader,
                     size = StripThumb,
+                    peek = { peek.of(index) },
                     onClick = { callbacks.onPick(pick) },
                     onLongClick = callbacks.onDismiss,
                     longClickLabel = dismissLabel,
@@ -457,23 +472,89 @@ private fun OfferPill(
     }
 }
 
+/**
+ * The stickers peeking up as an offer arrives: each rises from just below its
+ * place with a little wobble, the next a stagger after the one before. One
+ * clock for the row, read by each sticker in its own layer. Keyed on the
+ * trigger, so the same offer republished as the text moves does not peek
+ * again, and stickers scrolled into view later find the clock run out.
+ */
+@Stable
+private class StickerPeek(private val clock: Animatable<Float, AnimationVector1D>) {
+    /** How far sticker [index] is through its peek, 0 to 1. */
+    fun of(index: Int): Float {
+        val ms = clock.value * PeekClockMs
+        return ((ms - minOf(index, PeekStaggerCap) * PeekStaggerMs) / PeekMs).coerceIn(0f, 1f)
+    }
+}
+
+@Composable
+private fun rememberStickerPeek(trigger: String): StickerPeek {
+    val motion = LocalKbTheme.current.motion.any
+    val clock = remember(trigger) { Animatable(if (motion) 0f else 1f) }
+    LaunchedEffect(clock) { clock.animateTo(1f, tween(PeekClockMs.toInt(), easing = LinearEasing)) }
+    return remember(clock) { StickerPeek(clock) }
+}
+
+/** A peek: the rise and its wobble, then the stagger between stickers. */
+private const val PeekMs = 220f
+private const val PeekStaggerMs = 25f
+private const val PeekStaggerCap = 3
+private const val PeekClockMs = PeekMs + PeekStaggerMs * PeekStaggerCap
+private val PeekRise = 10.dp
+private const val PeekWobbleDegrees = 7f
+
+/** A sent sticker swelling and fading as it goes; the send itself never waits for it. */
+private const val SentMs = 160
+private const val SentGrow = 0.18f
+
+/** An ease that runs a little past its end and settles back: the peek's bounce. */
+private fun backOut(t: Float): Float {
+    val u = t - 1f
+    return 1f + 2.70158f * u * u * u + 1.70158f * u * u
+}
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun StickerThumb(
     pick: StickerOfferItem,
     loader: ImageLoader,
     size: Dp,
+    peek: () -> Float,
     onClick: () -> Unit,
     onLongClick: (() -> Unit)? = null,
     longClickLabel: String? = null,
 ) {
     val title = pick.item.title
+    val motion = LocalKbTheme.current.motion.any
+    val sent = remember { Animatable(0f) }
+    val scope = rememberCoroutineScope()
+    val rise = with(LocalDensity.current) { PeekRise.toPx() }
     Box(
         modifier = Modifier
+            .graphicsLayer {
+                val p = peek()
+                val gone = sent.value
+                val grow = 1f + SentGrow * gone
+                translationY = (1f - backOut(p)) * rise
+                rotationZ = PeekWobbleDegrees * (1f - p) * sin(p * PI.toFloat() * 3f)
+                alpha = (p * 3f).coerceAtMost(1f) * (1f - gone)
+                scaleX = grow
+                scaleY = grow
+            }
             .size(size)
             .clip(RoundedCornerShape(8.dp))
             .combinedClickable(
-                onClick = onClick,
+                onClick = {
+                    onClick()
+                    if (motion) {
+                        scope.launch {
+                            sent.animateTo(1f, tween(SentMs, easing = FastOutSlowInEasing))
+                            // Still here (a tray that stays up): back in its place.
+                            sent.snapTo(0f)
+                        }
+                    }
+                },
                 onLongClick = onLongClick,
                 onLongClickLabel = longClickLabel,
             ),

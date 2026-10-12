@@ -2,6 +2,7 @@ package com.wasimaster.wmkeyboard.app
 
 import android.content.Context
 import android.net.Uri
+import androidx.annotation.PluralsRes
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -35,6 +36,7 @@ import com.wasimaster.wmkeyboard.R
 import com.wasimaster.wmkeyboard.core.addons.AddonPreviewContent
 import com.wasimaster.wmkeyboard.core.addons.AddonPreviewReader
 import com.wasimaster.wmkeyboard.core.layout.LayoutSpec
+import com.wasimaster.wmkeyboard.core.snippets.GboardDictionary
 import com.wasimaster.wmkeyboard.core.snippets.Snippet
 import com.wasimaster.wmkeyboard.core.theme.FlexResult
 import com.wasimaster.wmkeyboard.core.theme.GboardResult
@@ -79,6 +81,8 @@ internal fun ImportFilePreview(state: WMFileTypes.Opened, uri: Uri) {
             converted?.themes?.firstOrNull()?.let { FlorisFilePreview(it) }
         }
 
+        is WMFileTypes.Opened.FutoThemeFile -> FlorisFilePreview(state.result.converted)
+
         // The first look of the first theme, drawn by the same miniature: a
         // pack's dialog already says how many themes it holds.
         is WMFileTypes.Opened.GboardThemeFile ->
@@ -90,13 +94,26 @@ internal fun ImportFilePreview(state: WMFileTypes.Opened, uri: Uri) {
         is WMFileTypes.Opened.FutoLayout -> LayoutFilePreview(state.converted.layout)
 
         is WMFileTypes.Opened.KeysCafeLayout -> LayoutFilePreview(state.converted.layout)
+        is WMFileTypes.Opened.UnexpectedLayout -> LayoutFilePreview(state.converted.layout)
+
+        // The first variant: the dialog lists the rest by name.
+        is WMFileTypes.Opened.DesktopLayoutFile -> state.layouts.firstOrNull()?.let { LayoutFilePreview(it.layout) }
+
+        // The first layout, or the theme when the text holds no layout: a
+        // settings export's dialog already says how many of each it holds.
+        is WMFileTypes.Opened.MultilingFile -> {
+            val first = state.layouts.firstOrNull()
+            if (first != null) LayoutFilePreview(first.layout) else state.theme?.let { ThemeFilePreview(it.theme) }
+        }
 
         is WMFileTypes.Opened.KeymanPackageFile ->
             keymanLayoutOf(state.contents)?.let { LayoutFilePreview(it.layout) }
 
         is WMFileTypes.Opened.Snippets -> SnippetsFilePreview(state.snippets.snippets)
 
-        is WMFileTypes.Opened.EspansoSnippets -> SnippetsFilePreview(state.parsed.snippets)
+        is WMFileTypes.Opened.ForeignSnippets -> SnippetsFilePreview(state.parsed.snippets)
+
+        is WMFileTypes.Opened.GboardDictionaryFile -> GboardDictionaryPreview(state.contents)
 
         is WMFileTypes.Opened.Vocabulary -> VocabularyFilePreview(state.pack)
 
@@ -152,7 +169,8 @@ private fun FlorisFilePreview(converted: com.wasimaster.wmkeyboard.core.theme.Co
             runCatching { converted.stored("preview", previewCacheDir(context)) }.getOrNull()
         }
     }
-    shown?.let { PreviewFrame { ThemePreview(it, animatedBadge = false) } }
+    // Fades in once the images are out, rather than popping into the dialog.
+    shown?.let { StaggerIn(0) { PreviewFrame { ThemePreview(it, animatedBadge = false) } } }
 }
 
 /**
@@ -173,13 +191,37 @@ private fun SnippetsFilePreview(snippets: List<Snippet>) {
     val shown = snippets.take(MAX_ROWS)
     if (shown.isEmpty()) return
     Column(Modifier.fillMaxWidth().padding(bottom = PREVIEW_GAP)) {
-        for (snippet in shown) {
-            PreviewLine(
-                title = snippet.label.ifBlank { snippet.trigger.orEmpty() },
-                detail = snippet.text,
-            )
+        for ((index, snippet) in shown.withIndex()) {
+            StaggerIn(index) {
+                PreviewLine(
+                    title = snippet.label.ifBlank { snippet.trigger.orEmpty() },
+                    detail = snippet.text,
+                )
+            }
         }
         MoreLine(snippets.size - shown.size)
+    }
+}
+
+/**
+ * The first few entries of a Gboard dictionary: a shortcut over the word it
+ * offers, or a plain word on its own.
+ */
+@Composable
+private fun GboardDictionaryPreview(contents: GboardDictionary.Contents) {
+    val shown = contents.entries.take(MAX_ROWS)
+    if (shown.isEmpty()) return
+    Column(Modifier.fillMaxWidth().padding(bottom = PREVIEW_GAP)) {
+        for ((index, entry) in shown.withIndex()) {
+            StaggerIn(index) {
+                if (entry.shortcut.isEmpty()) {
+                    PreviewLine(title = entry.word, detail = "")
+                } else {
+                    PreviewLine(title = entry.shortcut, detail = entry.word)
+                }
+            }
+        }
+        MoreLine(contents.entries.size - shown.size)
     }
 }
 
@@ -189,8 +231,8 @@ private fun VocabularyFilePreview(pack: VocabPack) {
     val shown = pack.words.take(MAX_ROWS)
     if (shown.isEmpty()) return
     Column(Modifier.fillMaxWidth().padding(bottom = PREVIEW_GAP)) {
-        for (word in shown) {
-            PreviewLine(title = word.word, detail = word.definition)
+        for ((index, word) in shown.withIndex()) {
+            StaggerIn(index) { PreviewLine(title = word.word, detail = word.definition) }
         }
         MoreLine(pack.words.size - shown.size)
     }
@@ -207,22 +249,18 @@ private fun StickersFilePreview(uri: Uri) {
             modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            for (image in stickers.images.take(MAX_STICKERS)) {
-                AsyncImage(
-                    model = image,
-                    contentDescription = null,
-                    imageLoader = loader,
-                    modifier = Modifier.size(STICKER_SIZE).clip(RoundedCornerShape(8.dp)),
-                )
+            for ((index, image) in stickers.images.take(MAX_STICKERS).withIndex()) {
+                StaggerIn(index) {
+                    AsyncImage(
+                        model = image,
+                        contentDescription = null,
+                        imageLoader = loader,
+                        modifier = Modifier.size(STICKER_SIZE).clip(RoundedCornerShape(8.dp)),
+                    )
+                }
             }
         }
-        CountLine(
-            pluralStringResource(
-                R.plurals.addon_preview_sticker_count,
-                stickers.total,
-                stickers.total,
-            ),
-        )
+        CountingLine(stickers.total, R.plurals.addon_preview_sticker_count)
     }
 }
 
@@ -243,16 +281,10 @@ private fun SoundPackFilePreview(uri: Uri) {
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             for ((index, variant) in pack.variants.withIndex()) {
-                PlayChip(index + 1) { AddonSoundPreview.play(variant) }
+                StaggerIn(index) { PlayChip(index + 1) { AddonSoundPreview.play(variant) } }
             }
         }
-        CountLine(
-            pluralStringResource(
-                R.plurals.addon_preview_pack_variant_count,
-                pack.totalVariants,
-                pack.totalVariants,
-            ),
-        )
+        CountingLine(pack.totalVariants, R.plurals.addon_preview_pack_variant_count)
     }
 }
 
@@ -318,13 +350,15 @@ private fun PreviewLine(title: String, detail: String) {
 @Composable
 private fun MoreLine(remaining: Int) {
     if (remaining <= 0) return
-    CountLine(pluralStringResource(R.plurals.import_preview_more, remaining, remaining))
+    CountingLine(remaining, R.plurals.import_preview_more)
 }
 
+/** A line under a preview saying how many, the figure counting up to itself as it arrives. */
 @Composable
-private fun CountLine(text: String) {
-    Text(
-        text,
+private fun CountingLine(count: Int, @PluralsRes plural: Int) {
+    CountingText(
+        target = count.toLong(),
+        format = { shown -> pluralStringResource(plural, shown.toInt(), shown.toInt()) },
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.padding(top = 4.dp),

@@ -2240,9 +2240,6 @@
     <string name="keypress_haptics_title">بازخورد لرزشی هنگام فشردن کلید</string>
     <string name="keypress_hold_action_copy_label">کپی</string>
     <string name="keypress_hold_action_cut_label">برش</string>
-    <string name="keypress_hold_action_first_info">این عمل معمولاً در انتهای پنجره بازشو قرار دارد، بنابراین یک فشار و نگه داشتن ساده، اولین علامت را به شما می‌دهد. با فعال بودن این گزینه، به جلو منتقل می‌شود و فشار و نگه داشتن روی یکی از کلیدهای میانبر، عمل را بلافاصله اجرا می‌کند. علامت‌ها همچنان وجود دارند: انگشت خود را پایین نگه دارید و روی موردی که می‌خواهید بکشید. این نیاز به «نگه داشتن برای انتخاب» در زیر «کلیدهای جایگزین» دارد.</string>
-    <string name="keypress_hold_action_first_subtitle">فشردن و نگه‌داشتن به جای نمایش نویسه‌های ویژه، کنش را اجرا می‌کند</string>
-    <string name="keypress_hold_action_first_title">اول اقدام</string>
     <string name="keypress_hold_action_paste_label">جای‌گذاری</string>
     <string name="keypress_hold_action_redo_label">انجام مجدد</string>
     <string name="keypress_hold_action_select_all_label">انتخاب همه</string>
@@ -2552,8 +2549,6 @@
     <string name="languages_cjk_region_info">عبارات منطقه‌ای. تایوان و هنگ‌کنگ اغلب از کلمات متفاوتی برای یک چیز استفاده می‌کنند، نه فقط نویسه‌های متفاوت.</string>
     <string name="languages_cjk_region_taiwan_title">تایوان (臺灣)</string>
     <string name="languages_cjk_region_title">عبارات منطقه‌ای</string>
-    <string name="languages_cjk_traditional_info">صفحه‌کلید هر کاندیدا را قبل از نمایش، از چینی ساده‌شده (简体) به سنتی (繁體) تبدیل می‌کند. این تبدیل یک نویسه در هر زمان انجام می‌شود. برخی از نویسه‌های ساده‌شده بیش از یک شکل سنتی دارند و صفحه‌کلید همیشه رایج‌ترین شکل را می‌نویسد. 发 به 發 تبدیل می‌شود که در 發展 درست است اما در 頭髮 غلط است. این کلمات را به صورت دستی اصلاح کنید.</string>
-    <string name="languages_cjk_traditional_subtitle">صفحه‌کلید نامزدها را به چینی سنتی (繁體) تبدیل می‌کند. این کار را کاراکتر به کاراکتر انجام می‌دهد، بنابراین برخی اشکال که به متن وابسته هستند ممکن است اشتباه باشند (发 → 發 / 髮).</string>
     <string name="languages_cjk_traditional_title">نویسه‌های سنتی</string>
     <string name="languages_clusters_title">خوشه‌ها</string>
     <string name="languages_conjunct_backspace_info">کلید بازگشت (Backspace) معمولاً هر بار یک نقطه کد را حذف می‌کند. این کار گاهی باعث باقی ماندن خوشه‌های ناقص روی صفحه می‌شود. با فعال بودن این تنظیم، یک بار فشردن، کل خوشه را هنگام تایپ %1$s حذف می‌کند. سایر زبان‌ها تنظیمات خاص خود را حفظ می‌کنند.</string>

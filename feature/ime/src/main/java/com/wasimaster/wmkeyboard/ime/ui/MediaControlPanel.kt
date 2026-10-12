@@ -1,6 +1,13 @@
 package com.wasimaster.wmkeyboard.ime.ui
 
 import android.os.SystemClock
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -35,6 +42,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,6 +53,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -169,6 +178,7 @@ internal fun NowPlaying(
     // edge. Cap the square against the width as well, and against a flat
     // maximum so a tall keyboard doesn't become an album cover.
     val artSide = minOf(maxHeight, maxWidth * 0.4f, 176.dp)
+    val motion = LocalKbTheme.current.motion.any
     Row(
         modifier = Modifier.fillMaxSize(),
         verticalAlignment = Alignment.CenterVertically,
@@ -181,21 +191,34 @@ internal fun NowPlaying(
                 .background(kb.chip),
             contentAlignment = Alignment.Center,
         ) {
-            val art = track.art
-            if (art != null) {
-                Image(
-                    bitmap = art.asImageBitmap(),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize(),
-                )
-            } else {
-                Icon(
-                    Icons.Outlined.MusicNote,
-                    contentDescription = null,
-                    tint = kb.secondaryText,
-                    modifier = Modifier.size(artSide * 0.3f),
-                )
+            // Cross-faded on the track, not on the bitmap: a session hands
+            // over a fresh Bitmap with every playback-state change, and the
+            // art must not fade into itself on each one. Art arriving after
+            // the title is a change too.
+            MotionCrossfade(
+                target = TrackArt(TrackArtKey(track.title, track.artist, track.album, track.art != null), track.art),
+                animate = motion,
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+                contentKey = { it.key },
+                label = "trackArt",
+            ) { shown ->
+                val art = shown.art
+                if (art != null) {
+                    Image(
+                        bitmap = art.asImageBitmap(),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                } else {
+                    Icon(
+                        Icons.Outlined.MusicNote,
+                        contentDescription = null,
+                        tint = kb.secondaryText,
+                        modifier = Modifier.size(artSide * 0.3f),
+                    )
+                }
             }
         }
 
@@ -209,45 +232,54 @@ internal fun NowPlaying(
             verticalArrangement = Arrangement.Center,
         ) {
             val unknownTitle = stringResource(R.string.ime_media_control_unknown_title)
-            Text(
-                track.title.ifBlank { unknownTitle },
-                // The title is on the board, not on a key: a theme whose keys
-                // invert the board draws keyText invisible here.
-                color = kb.suggestionText,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            val subtitle = track.artist.ifBlank { track.appLabel }
-            if (subtitle.isNotBlank()) {
-                Text(
-                    subtitle,
-                    color = kb.secondaryText,
-                    fontSize = 13.sp,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
             // Third line: album, or the source app when there's no album so the
             // user still sees where the audio is coming from.
-            val third = track.album.ifBlank {
-                if (track.artist.isNotBlank()) track.appLabel else ""
-            }
-            if (third.isNotBlank()) {
-                Text(
-                    third,
-                    color = kb.secondaryText,
-                    fontSize = 11.sp,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.alpha(0.8f),
-                )
+            val lines = TrackLines(
+                title = track.title.ifBlank { unknownTitle },
+                subtitle = track.artist.ifBlank { track.appLabel },
+                third = track.album.ifBlank {
+                    if (track.artist.isNotBlank()) track.appLabel else ""
+                },
+            )
+            // A new track's names fade in over the old; the seek bar and the
+            // transport below stay put.
+            MotionCrossfade(lines, animate = motion, label = "trackLines") { shown ->
+                Column {
+                    Text(
+                        shown.title,
+                        // The title is on the board, not on a key: a theme whose keys
+                        // invert the board draws keyText invisible here.
+                        color = kb.suggestionText,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    if (shown.subtitle.isNotBlank()) {
+                        Text(
+                            shown.subtitle,
+                            color = kb.secondaryText,
+                            fontSize = 13.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                    if (shown.third.isNotBlank()) {
+                        Text(
+                            shown.third,
+                            color = kb.secondaryText,
+                            fontSize = 11.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.alpha(0.8f),
+                        )
+                    }
+                }
             }
 
             if (track.durationMs > 0L) {
                 Spacer(Modifier.height(8.dp))
-                SeekBar(kb, track, onSeek)
+                SeekBar(kb, track, onSeek, smooth = motion)
             }
 
             Spacer(Modifier.height(6.dp))
@@ -284,17 +316,27 @@ internal fun NowPlaying(
     }
 }
 
+/** The names a track is drawn with; a change in any is a new track to fade to. */
+private data class TrackLines(val title: String, val subtitle: String, val third: String)
+
+/** What the art cross-fades on: the track, and whether it has art yet. */
+private data class TrackArtKey(val title: String, val artist: String, val album: String, val hasArt: Boolean)
+
+/** The art to draw, carrying its own key so an outgoing state keeps the key it came with. */
+private data class TrackArt(val key: TrackArtKey, val art: android.graphics.Bitmap?)
+
 @Composable
-private fun SeekBar(kb: KbTheme, track: MediaSnapshot, onSeek: (Long) -> Unit) {
+private fun SeekBar(kb: KbTheme, track: MediaSnapshot, onSeek: (Long) -> Unit, smooth: Boolean) {
     // Live position: extrapolate from the last stamp while playing so the bar
     // creeps forward between the sparse state updates the session sends.
     var scrubbing by remember { mutableStateOf(false) }
     var scrubFraction by remember { mutableFloatStateOf(0f) }
     var now by remember { mutableLongStateOf(SystemClock.elapsedRealtime()) }
+    var barWidthPx by remember { mutableIntStateOf(0) }
     LaunchedEffect(track.playing, track.positionMs, track.positionUpdateTimeMs) {
         now = SystemClock.elapsedRealtime()
         while (track.playing) {
-            delay(500)
+            delay(seekTickMs(track, barWidthPx, smooth))
             now = SystemClock.elapsedRealtime()
         }
     }
@@ -323,7 +365,10 @@ private fun SeekBar(kb: KbTheme, track: MediaSnapshot, onSeek: (Long) -> Unit) {
                 disabledActiveTrackColor = kb.secondaryText,
                 disabledInactiveTrackColor = kb.divider,
             ),
-            modifier = Modifier.fillMaxWidth().height(24.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(24.dp)
+                .onSizeChanged { barWidthPx = it.width },
         )
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -337,6 +382,23 @@ private fun SeekBar(kb: KbTheme, track: MediaSnapshot, onSeek: (Long) -> Unit) {
         }
     }
 }
+
+/**
+ * How often the bar's position is recomputed while playing. With motion on,
+ * once per pixel the thumb would travel, so a short clip glides at the frame
+ * rate and a long track does not recompose sixty times a second to stand
+ * still; off, the old half-second step.
+ */
+private fun seekTickMs(track: MediaSnapshot, barWidthPx: Int, smooth: Boolean): Long {
+    if (!smooth || barWidthPx <= 0 || track.durationMs <= 0L) return SEEK_STEP_MS
+    val speed = kotlin.math.abs(track.speed).coerceAtLeast(MIN_SPEED)
+    val msPerPixel = (track.durationMs / (barWidthPx * speed)).toLong()
+    return msPerPixel.coerceIn(SEEK_FRAME_MS, SEEK_STEP_MS)
+}
+
+private const val SEEK_STEP_MS = 500L
+private const val SEEK_FRAME_MS = 16L
+private const val MIN_SPEED = 0.1f
 
 @Composable
 private fun MediaButton(
@@ -359,14 +421,31 @@ private fun MediaButton(
             .clickable(enabled = enabled) { onClick() },
         contentAlignment = Alignment.Center,
     ) {
-        Icon(
-            icon,
-            contentDescription = description,
-            tint = if (accent) kb.toolCircleActiveIcon else kb.toolbarIcon,
-            modifier = Modifier.size(size * 0.5f),
-        )
+        val tint = if (accent) kb.toolCircleActiveIcon else kb.toolbarIcon
+        if (LocalKbTheme.current.motion.any) {
+            // Play turning into pause shrinks one glyph out as the other grows
+            // in; the button itself, and its tap, never move.
+            AnimatedContent(
+                targetState = icon,
+                transitionSpec = {
+                    (fadeIn(tween(ICON_SWAP_MS)) + scaleIn(tween(ICON_SWAP_MS), initialScale = ICON_SWAP_SCALE)) togetherWith
+                        (fadeOut(tween(ICON_SWAP_OUT_MS)) + scaleOut(tween(ICON_SWAP_OUT_MS), targetScale = ICON_SWAP_SCALE)) using
+                        null
+                },
+                contentAlignment = Alignment.Center,
+                label = "mediaIcon",
+            ) { shown ->
+                Icon(shown, contentDescription = description, tint = tint, modifier = Modifier.size(size * 0.5f))
+            }
+        } else {
+            Icon(icon, contentDescription = description, tint = tint, modifier = Modifier.size(size * 0.5f))
+        }
     }
 }
+
+private const val ICON_SWAP_MS = 150
+private const val ICON_SWAP_OUT_MS = 100
+private const val ICON_SWAP_SCALE = 0.6f
 
 @Composable
 private fun AccessPrompt(kb: KbTheme, onRequestAccess: () -> Unit, focused: Boolean = false) {

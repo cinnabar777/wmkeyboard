@@ -482,6 +482,13 @@ object AssetLayouts {
      * tapping their key again (`Key.multitap`).
      */
     const val KO_CHEONJIIN_ID = "asset_ko_cheonjiin"
+
+    /**
+     * 나랏글 (Naratgeul), the other Korean 12-key pad (issue #599): six basic
+     * consonants and four vowel keys, with 획추가 and 쌍자음 building every
+     * other jamo from them, and ㅐ ㅔ typed as ㅏ ㅓ and ㅣ (`NaratgeulComposer`).
+     */
+    const val KO_NARATGEUL_ID = "asset_ko_naratgeul"
     const val ML_INSCRIPT_ENHANCED_ID = "asset_ml_inscript_enhanced"
     const val MNI_INSCRIPT_ID = "asset_mni_inscript"
     const val MNS_ID = "asset_mns"

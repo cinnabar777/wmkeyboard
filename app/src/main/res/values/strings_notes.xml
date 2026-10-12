@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+    <!-- Notes tool (#560): the settings app's list, editor, tags and trash screens. -->
+    <string name="notes_title">Notes</string>
+    <string name="notes_new_title">New note</string>
+    <string name="notes_edit_title">Edit note</string>
+    <string name="notes_tags_title">Tags</string>
+    <string name="notes_trash_title">Trash</string>
+
+    <!-- The list. -->
+    <string name="notes_search_hint">Search notes</string>
+    <string name="notes_filter_all">All</string>
+    <string name="notes_filter_pinned">Pinned</string>
+    <string name="notes_filter_archived">Archived</string>
+    <string name="notes_filter_untagged">No tag</string>
+    <string name="notes_sort_desc">Sort</string>
+    <string name="notes_add_action">New note</string>
+    <string name="notes_untitled">Untitled</string>
+    <string name="notes_locked_preview">Locked note</string>
+    <string name="notes_locked_desc">Locked</string>
+    <string name="notes_pinned_desc">Pinned</string>
+    <string name="notes_empty">You have no notes yet. Press the + button to write one, or select text in any app and press Save as note on the keyboard.</string>
+    <!-- %1$s is what was searched for. -->
+    <string name="notes_empty_search">No note matches “<xliff:g id="query" example="milk">%1$s</xliff:g>”.</string>
+    <string name="notes_empty_filter">No note matches this filter.</string>
+    <string name="notes_empty_archived">Nothing is archived.</string>
+    <string name="notes_gone_caption">This note has been deleted.</string>
+    <plurals name="notes_count">
+        <item quantity="one">%1$d note</item>
+        <item quantity="other">%1$d notes</item>
+    </plurals>
+    <plurals name="notes_tags_count">
+        <item quantity="one">%1$d tag</item>
+        <item quantity="other">%1$d tags</item>
+    </plurals>
+    <plurals name="notes_selected_count">
+        <item quantity="one">%1$d selected</item>
+        <item quantity="other">%1$d selected</item>
+    </plurals>
+
+    <!-- Bulk actions. -->
+    <string name="notes_bulk_tag">Add a tag</string>
+    <plurals name="notes_bulk_tag_title">
+        <item quantity="one">Add a tag to %1$d note</item>
+        <item quantity="other">Add a tag to %1$d notes</item>
+    </plurals>
+    <plurals name="notes_trashed_count_snackbar">
+        <item quantity="one">Moved %1$d note to the trash</item>
+        <item quantity="other">Moved %1$d notes to the trash</item>
+    </plurals>
+    <!-- %1$s is a note's title. -->
+    <string name="notes_restored_snackbar">Restored “<xliff:g id="title" example="Shopping">%1$s</xliff:g>”</string>
+
+    <!-- The editor. -->
+    <string name="notes_field_title_label">Title</string>
+    <string name="notes_field_body_label">Note</string>
+    <string name="notes_mode_edit">Edit</string>
+    <string name="notes_mode_preview">Preview</string>
+    <string name="notes_preview_empty">Nothing to show yet. Write something under Edit.</string>
+    <string name="notes_tags_label">Tags</string>
+    <string name="notes_tag_add_hint">Add a tag</string>
+    <string name="notes_pin_action">Pin</string>
+    <string name="notes_unpin_action">Unpin</string>
+    <string name="notes_archive_action">Archive</string>
+    <string name="notes_unarchive_action">Unarchive</string>
+    <string name="notes_lock_action">Lock</string>
+    <string name="notes_unlock_action">Unlock</string>
+    <string name="notes_lock_info">A locked note asks for your fingerprint or screen lock before it opens here, and the keyboard shows its title but never its text. This locks the screen, not the data: the note is stored like any other note, and it stays out of a backup unless you include your API keys in it.</string>
+    <string name="notes_lock_unavailable_caption">This phone has no fingerprint or screen lock set up, so locked notes open here without a check.</string>
+    <string name="notes_share_md_action">Share as Markdown</string>
+    <string name="notes_share_txt_action">Share as text</string>
+    <string name="notes_share_title">Share note</string>
+    <string name="notes_share_error">Could not write the note to a file.</string>
+    <string name="notes_trash_action">Move to trash</string>
+    <plurals name="notes_words">
+        <item quantity="one">%1$d word</item>
+        <item quantity="other">%1$d words</item>
+    </plurals>
+    <plurals name="notes_characters">
+        <item quantity="one">%1$d character</item>
+        <item quantity="other">%1$d characters</item>
+    </plurals>
+    <!-- The two counts under the editor, e.g. "12 words · 80 characters". -->
+    <string name="notes_counter"><xliff:g id="words" example="12 words">%1$s</xliff:g> · <xliff:g id="chars" example="80 characters">%2$s</xliff:g></string>
+    <string name="notes_saved_caption">Saved</string>
+    <!-- %1$s is a relative time like "3 days ago". -->
+    <string name="notes_edited_time">Edited <xliff:g id="when" example="3 days ago">%1$s</xliff:g></string>
+
+    <!-- Tags. -->
+    <string name="notes_tags_empty">No tags yet. Add one to a note and it appears here.</string>
+    <string name="notes_tag_add_action">New tag</string>
+    <string name="notes_tag_name_label">Name</string>
+    <string name="notes_tag_rename_action">Rename</string>
+    <!-- %1$s is the name of the tag that already exists. -->
+    <string name="notes_tag_rename_merge_body">A tag called “<xliff:g id="name" example="Work">%1$s</xliff:g>” already exists. Renaming puts both sets of notes under that one tag.</string>
+    <string name="notes_tag_merge_action">Merge</string>
+    <string name="notes_tag_colour_title">Colour</string>
+    <string name="notes_tag_remove_action">Remove</string>
+    <!-- %1$s is the tag's name, %2$d how many notes carry it. -->
+    <plurals name="notes_tag_remove_body">
+        <item quantity="one">Remove “%1$s” from %2$d note? The note stays.</item>
+        <item quantity="other">Remove “%1$s” from %2$d notes? The notes stay.</item>
+    </plurals>
+    <plurals name="notes_tag_count">
+        <item quantity="one">%1$d note</item>
+        <item quantity="other">%1$d notes</item>
+    </plurals>
+
+    <!-- Trash. -->
+    <string name="notes_trash_empty">The trash is empty.</string>
+    <!-- %1$d is a number of days. -->
+    <string name="notes_trash_info_days">Notes in the trash are deleted for good after <xliff:g id="days" example="30">%1$d</xliff:g> days.</string>
+    <string name="notes_trash_info_never">Notes stay in the trash until you delete them.</string>
+    <string name="notes_restore_action">Restore</string>
+    <string name="notes_delete_forever_action">Delete forever</string>
+    <!-- %1$s is a note's title. -->
+    <string name="notes_delete_forever_confirm">Delete “<xliff:g id="title" example="Shopping">%1$s</xliff:g>” for good? This cannot be undone.</string>
+    <string name="notes_empty_trash_action">Empty trash</string>
+    <string name="notes_empty_trash_confirm">Delete every note in the trash? This cannot be undone.</string>
+    <!-- %1$s is a relative time like "3 days ago". -->
+    <string name="notes_trashed_ago">Trashed <xliff:g id="when" example="3 days ago">%1$s</xliff:g></string>
+
+    <!-- Files. -->
+    <string name="notes_files_group">Export and import</string>
+    <string name="notes_export_all_action">Export all as a zip</string>
+    <string name="notes_export_all_subtitle">One Markdown file per note. Locked notes are left out.</string>
+    <string name="notes_export_button">Export</string>
+    <string name="notes_import_action">Import text files</string>
+    <string name="notes_import_subtitle">Each .txt or .md file becomes a note</string>
+    <string name="notes_import_button">Import</string>
+    <plurals name="notes_exported_count">
+        <item quantity="one">Saved %1$d note to the file</item>
+        <item quantity="other">Saved %1$d notes to the file</item>
+    </plurals>
+    <string name="notes_export_error">Could not write the file.</string>
+    <plurals name="notes_imported_count">
+        <item quantity="one">Imported %1$d note</item>
+        <item quantity="other">Imported %1$d notes</item>
+    </plurals>
+    <plurals name="notes_import_duplicates">
+        <item quantity="one">%1$d was already in your notes and was skipped</item>
+        <item quantity="other">%1$d were already in your notes and were skipped</item>
+    </plurals>
+    <plurals name="notes_import_skipped">
+        <item quantity="one">%1$d file skipped: not a text file</item>
+        <item quantity="other">%1$d files skipped: not text files</item>
+    </plurals>
+
+</resources>

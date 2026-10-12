@@ -116,7 +116,7 @@
     <string name="typing_skip_all_caps_subtitle">Leave words typed in capital letters alone</string>
     <string name="typing_dictionary_capitals_title">Capitals from the word list</string>
     <string name="typing_dictionary_capitals_subtitle">Write a word with the capital letter that its word list gives it</string>
-    <string name="typing_dictionary_capitals_info">Some word lists spell words with a capital letter, such as the nouns in German and the names of places. When you type or swipe one of these words in small letters, the keyboard writes it with its capital letter. A word that the list also spells in small letters stays as you typed it. Backspace immediately after the word puts back what you typed. This uses the word list that you downloaded for the language. For the built-in English list, the keyboard carries the capitals of days, months, places, names and acronyms itself.</string>
+    <string name="typing_dictionary_capitals_info">Some word lists spell words with a capital letter, such as the nouns in German and the names of places. When you type or swipe one of these words in small letters, the keyboard writes it with its capital letter. A word that the list also spells in small letters stays as you typed it. Backspace immediately after the word puts back what you typed. This uses the word list that you downloaded for the language. For the built-in English list, the keyboard carries the capitals of days, months, places, names, acronyms and the word I itself.</string>
     <string name="typing_autocorrect_on_enter_title">Correct the word before Enter</string>
     <string name="typing_autocorrect_on_enter_subtitle">Enter corrects the last word, as space does</string>
     <string name="typing_autocorrect_on_enter_info">Enter ends a word the same way space does, so autocorrect can change the word before it. In a search box or a chat, Enter also sends the text, and you cannot see the correction before it goes. Turn this off to send the last word as you typed it. Space still corrects words.</string>
@@ -162,7 +162,7 @@
 
     <string name="typing_auto_close_brackets_title">Close brackets for me</string>
     <string name="typing_auto_close_brackets_subtitle">Press ( [ { and the keyboard types the closing half, with the cursor between them</string>
-    <string name="typing_auto_close_brackets_info">This setting is off by default. With it on, pressing an opening bracket types the closing one behind the cursor and leaves the cursor between the two, so you type straight inside the pair: press ( and you get (), ready for what goes in it. Pressing the closing bracket when it is already the next character steps over it instead of typing a second one, and one backspace on an empty pair takes both halves out. The CJK brackets are included, and so are the fullwidth ones. Quotes are not: the apostrophe in \"don\'t\" shares that key, and closing it would be wrong more often than right. Nor is &lt;, which outside code is a less-than sign. Passwords, web addresses and number pads are left alone.</string>
+    <string name="typing_auto_close_brackets_info">This setting is off by default. With it on, pressing an opening bracket types the closing one behind the cursor and leaves the cursor between the two, so you type straight inside the pair: press ( and you get (), ready for what goes in it. Pressing the closing bracket when it is already the next character steps over it instead of typing a second one, and one backspace on an empty pair takes both halves out. The CJK brackets are included, and so are the fullwidth ones. Quotes are not: the apostrophe in \"don\'t\" shares that key, and closing it would be wrong more often than right. Nor is &lt;, which outside code is a less-than sign. Passwords, email fields and number pads are left alone; a browser\'s address bar is not.</string>
 
     <string name="typing_shift_recase_title">Shift changes the case of the selection</string>
     <string name="typing_shift_recase_subtitle">Shift with text selected steps through lowercase, Title Case and UPPERCASE</string>
@@ -296,7 +296,7 @@
 
     <string name="typing_autopilot_strength_title">Strength</string>
     <string name="typing_autopilot_strength_subtitle">How far a likely letter reaches over the key next to it</string>
-    <string name="typing_autopilot_strength_info">At 1 the keyboard changes a press only at the exact edge between two keys. At 10 a likely letter claims most of the space between itself and a letter that the word list does not expect. A letter never reaches more than one key width away, whatever you set here. 5 is the value the keyboard started with.</string>
+    <string name="typing_autopilot_strength_info">At 1 the keyboard changes a press only at the exact edge between two keys. At 10 a likely letter claims most of the space between itself and a letter that the word list does not expect. From 11 to 20 it pushes further still, until it reaches the limit. A letter never reaches more than about one key width away, whatever you set here. 5 is the value the keyboard started with.</string>
 
     <string name="typing_autopilot_show_title">Show the effect</string>
     <string name="typing_autopilot_show_subtitle">Draw a favoured letter at the size its touch area has grown to</string>
@@ -308,6 +308,9 @@
 
     <string name="typing_autopilot_outline_title">Outline the touch areas</string>
     <string name="typing_autopilot_outline_subtitle">Draw the boundary each expected letter has claimed</string>
+    <string name="typing_autopilot_animate_title">Animate the touch areas</string>
+    <string name="typing_autopilot_animate_subtitle">Ease the enlarged letters and outlines to their new size instead of jumping</string>
+    <string name="typing_autopilot_animate_info">With Show the effect or Outline the touch areas on, each expected letter normally jumps to its new size on every keystroke. Turn this on and the areas grow and shrink smoothly, and fade in and out as letters gain or lose favour. It only changes the drawing. The touch areas you type against change at once, as before. Reduce motion turns this off.</string>
     <string name="typing_autopilot_outline_info">A thin line marks the edge each expected letter has grown to. Use it to tune Strength. The line traces the same edge that Show the effect draws, so the two always agree. The line is a tuning aid, so turn it off again when you are done.</string>
 
     <string name="typing_personal_dictionary_title">Personal dictionary</string>
@@ -410,6 +413,17 @@
 
     <string name="typing_space_glide_multiword_title">Glide across the spacebar</string>
     <string name="typing_space_glide_multiword_subtitle">Swipe over the spacebar to continue with the next word</string>
+    <string name="typing_two_thumb_title">Two-thumb typing</string>
+    <string name="typing_two_thumb_subtitle">Tap and swipe with both thumbs at once to build one word</string>
+    <string name="typing_two_thumb_info">Use both thumbs together. Each thumb can tap or swipe, at the same time as the other, and every tap and swipe adds to the same word. For example, tap S with the left thumb, swipe O to M with the right, tap E with the left, then swipe T H I N G with the right, and you get "something". A tap that lands while the other thumb is still swiping goes into the word at that point, so a swipe over H E L O and a tap on L give "hello". Backspace removes the last tap or swipe from the word.</string>
+    <string name="typing_two_thumb_word_end_title">Finish a two-thumb word</string>
+    <string name="typing_two_thumb_word_end_subtitle">What types the word you are building</string>
+    <string name="typing_two_thumb_word_end_info">With space, the word stays open while you tap and swipe, and the keyboard reads it again after each one. Tap space or punctuation to type it. With all thumbs up, the word is typed with a space as soon as no thumb touches the keyboard, like ordinary glide, so your thumbs have to overlap to share a word.</string>
+    <string name="typing_two_thumb_word_end_space_label">Space</string>
+    <string name="typing_two_thumb_word_end_all_up_label">All thumbs up</string>
+    <string name="typing_swipe_continues_typed_title">Swipe finishes typed letters</string>
+    <string name="typing_swipe_continues_typed_subtitle">Typed letters and the swipe after them make one word</string>
+    <string name="typing_swipe_continues_typed_info">Type the start of a word, then swipe the rest without a space. For example, type T O and swipe G E T H E R to get "together". When this setting is off, the typed letters are a word of their own and the swipe types the next word. Two-thumb typing always works this way.</string>
     <string name="typing_space_glide_multiword_info">Keep your finger down. Glide a word, swipe across the spacebar, then glide the next word. Each crossing types the word and a space, so one stroke gives a full phrase. When this setting is off, a swipe across the spacebar makes one word.</string>
     <string name="typing_shift_glide_capitals_title">Glide over Shift to capitalize</string>
     <string name="typing_shift_glide_capitals_subtitle">Draw through the Shift key mid-swipe for a capital letter</string>
@@ -584,6 +598,10 @@
     <string name="typing_glide_shapes_per_word_title">Shapes kept per word</string>
     <string name="typing_glide_shapes_per_word_subtitle">How many ways of swiping one word are remembered</string>
     <string name="typing_glide_shapes_per_word_info">Learn my swipe style keeps your own shapes for each word you swipe, and a swipe is read against the nearest of them. Swipe a word the same way and the shape settles in; swipe it a clearly different way and that is kept as another shape, up to this many, the least used making room. Raise it if you swipe some words several different ways and the keyboard keeps forgetting one of them. The shapes travel in a backup under Swipe style, so you can see how many your words really use. Lowering it takes the extras out of use at once, and they are only deleted when that word next learns a new shape. Used only while Learn my swipe style is on.</string>
+
+    <string name="typing_glide_shape_seeding_title">Seed candidates from learned shapes</string>
+    <string name="typing_glide_shape_seeding_subtitle">Allows imprecise or off-target gestures to suggest learned words</string>
+    <string name="typing_glide_shape_seeding_info">When enabled, any gesture that closely matches a learned shape in your swipe style store will be directly promoted into the candidate suggestions, even if the gesture started or ended far off the word\'s target keys. Leave disabled if you prefer standard key-anchor decoding without candidate seeding.</string>
     <string name="typing_glide_wiggle_extent_info">Measured in key widths. Keep this under the width of one key, or a word that goes from one key to the key next door and back reads as a rub on one key. Used only while the switch above is on.</string>
 
     <string name="typing_swipe_start_distance_title">Swipe start distance</string>
@@ -731,6 +749,9 @@
 
     <string name="typing_forward_delete_swipe_title">Swipe on forward delete</string>
     <string name="typing_forward_delete_swipe_subtitle">Swipe right on the forward delete key to clear the text ahead</string>
+    <string name="typing_web_backspace_key_title">Backspace as a key press on web pages</string>
+    <string name="typing_web_backspace_key_subtitle">Lets code editors and other page editors see backspace</string>
+    <string name="typing_web_backspace_key_info">In a text box on a web page, or in an app that shows one, backspace is sent the way a physical keyboard sends it. Some page editors, like the code editor in Violentmonkey, only delete when they see that key press. Other keyboards delete the text directly, and these editors put it back. The browser then decides how much one press deletes. If you set your language to delete a whole conjunct at once, backspace keeps deleting directly. Turn this off if backspace does something unexpected on a website.</string>
     <string name="typing_forward_delete_swipe_info">Press the forward delete key and swipe right. Each step of the swipe deletes one more word, or one more character, ahead of the cursor. It is the backspace swipe pointed the other way, and it follows the same three settings above: what one step takes off, whether you see it first, and how far you drag for one step.\n\nThe forward delete key is not on the standard keyboard. Add it to a row, or to a key you press and hold, in the layout editor.</string>
 
     <!-- ==== Typing settings: enter key ==== -->
@@ -853,6 +874,9 @@
     <string name="typing_space_cursor_edge_repeat_title">Keep moving while held</string>
     <string name="typing_space_cursor_edge_repeat_subtitle">A cursor swipe held still, or past the end of the spacebar, keeps going</string>
     <string name="typing_space_cursor_edge_repeat_info">The spacebar is shorter than a long line of text. With this setting on, a cursor swipe keeps going by itself, about eight characters a second: at once when your finger is past either end of the spacebar, and after a short pause when you hold your finger still away from where the swipe began. Move your finger again, or lift it, to stop. Short swipes and fine adjustments near where you started are not affected. This setting is off by default.</string>
+    <string name="typing_space_swipe_up_touchpad_title">Swipe up for the touchpad</string>
+    <string name="typing_space_swipe_up_touchpad_subtitle">A swipe up from the spacebar moves the cursor in every direction</string>
+    <string name="typing_space_swipe_up_touchpad_info">Swipe up from the spacebar, then keep your finger down and move it: the cursor follows left, right, up and down, like the 2-D cursor touchpad, until you lift. The swipe has to go a short way up first, so a tap that slides a little still types a space. Sideways swipes keep the actions set above, so a quick swipe can still switch the language and you do not have to hold the spacebar first. With Keep moving while held and Whole keyboard as touchpad both on, the cursor keeps going when your finger reaches any edge of the keyboard: the sides move it along the line, the top and bottom move it between lines. This setting is off by default.</string>
     <string name="typing_space_cursor_whole_keyboard_title">Whole keyboard as touchpad</string>
     <string name="typing_space_cursor_whole_keyboard_subtitle">A cursor swipe can use the whole keyboard, and the other keys pause</string>
     <string name="typing_space_cursor_whole_keyboard_info">Once a spacebar swipe starts moving the cursor, the whole keyboard becomes its touchpad. The keys dim, and touching them with another finger types nothing until you lift. With Keep moving while held on, the cursor keeps going when your finger reaches either side of the keyboard rather than the end of the spacebar. Your finger can always leave the spacebar during a swipe; this setting stops the other keys from reacting while it does. This setting is off by default.</string>

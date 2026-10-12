@@ -26,7 +26,7 @@ If you've made any [folders](#folders), the panel opens on them instead: folder 
 
 The panel re-reads the snippet file every time you open it. Settings and the keyboard share that file, so an edit you make in Settings shows up the next time you switch to this panel, not while it's already open.
 
-The magnifier in the panel's header opens a **search**. The keys come back under the collapsed panel, and as you type the grid narrows to the snippets whose label, text or trigger contains what you typed, from every folder at once. The × in the search, or Back, closes it and brings the full list and the folders back. **Panel columns** under [Options](#options) sets how many tiles sit side by side, two unless you change it.
+The magnifier in the panel's header opens a **search**. The keys come back under the collapsed panel, with a bar on top that [drags it taller](/tools/overview/#making-a-panel-over-the-keys-taller) so more matches show, and as you type the grid narrows to the snippets whose label, text or trigger contains what you typed, from every folder at once. The × in the search, or Back, closes it and brings the full list and the folders back. **Panel columns** under [Options](#options) sets how many tiles sit side by side, two unless you change it.
 
 ## Auto-expanding as you type
 
@@ -222,6 +222,13 @@ A folder switched off costs nothing at all while you type. Its snippets are left
 ### Import and export
 
 **Import** and **Export** each start by asking which format you mean. This app's own is one of three; the other two are [Espanso](/reference/importing-from-espanso/)'s, which is what lets a package from the [Espanso Hub](https://hub.espanso.org/search) work here and your own snippets work on a desktop. Importing from Espanso can also fetch straight from a pasted web address, and always shows what conversion costs before it writes anything.
+
+Import takes two more formats that nothing exports to:
+
+- **A table (CSV).** A `.csv` or `.tsv` file, with commas, tabs or semicolons between the columns. This is what most other text expanders and every spreadsheet can write. With a header row, the columns are found by name in any order: `trigger`, `shortcut` or `abbreviation` for the trigger; `text`, `expansion`, `phrase` or `content` for what it types; and, if you want them, `label` or `name`, `folder` or `group`, and `tags`. Without a header the columns are read in order: trigger, text, then an optional label, which is how TextExpander, aText and Texpand export. A cell in double quotes can hold commas and line breaks. A row with no text is dropped, and a trigger the keyboard cannot watch for is taken off while the snippet stays.
+- **Gboard's dictionary.** The `PersonalDictionary.zip` that Gboard exports. Its shortcuts become snippets that ask first, the way Gboard shows them as suggestions. Its plain words are left out here; import the same file from the [personal dictionary](/smart/personal-dictionary/#androids-dictionary) to add both at once. See [Gboard's personal dictionary](/reference/importing-other-keyboards/#gboards-personal-dictionary).
+
+Both show the same confirm dialog as an Espanso file, with a folder name to put the snippets in.
 
 **Export** writes every current snippet to a `.wmsnippets.json` file (see [file formats](/reference/file-formats/)), along with the folders they're filed in. A folder with nothing in it isn't written, so exporting doesn't carry empty shelves along. **Import** always adds alongside what's already there rather than replacing it, so importing the same file twice leaves you with two copies. The file's folders come back as new folders of the same name, and a snippet that was in none stays in none.
 

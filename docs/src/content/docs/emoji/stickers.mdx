@@ -62,7 +62,7 @@ The **+** chip at the end of the source chips' row, beside **My stickers**, is t
 
 Building and managing packs happens in the app, not the keyboard, under <SettingsPath path="Tools / Stickers / Your stickers / Sticker packs" />.
 
-- **New pack** starts one empty. **Import a pack** reads a `.wmstickers` file, or a `.wastickers` file made for WhatsApp. **Signal sticker packs** adds a pack made for Signal from its link, as described [below](#signal-sticker-packs). **WhatsApp stickers** brings in a WhatsApp pack file or the stickers WhatsApp has saved on the phone, as described [below](#whatsapp-stickers).
+- **New pack** starts one empty. **Import a pack** reads a `.wmstickers` file, or a `.wastickers` file made for WhatsApp. **Signal sticker packs** adds a pack made for Signal from its link, as described [below](#signal-sticker-packs). **Telegram sticker sets** does the same for a Telegram set, as described [below](#telegram-sticker-sets). **WhatsApp stickers** brings in a WhatsApp pack file or the stickers WhatsApp has saved on the phone, as described [below](#whatsapp-stickers).
 - Inside a pack, **Add stickers** opens the photo picker for up to 30 images in one trip. Each one is processed automatically. A still image is resized to 512×512 and re-encoded as WebP, trying progressively lower quality (90 down to 50) until it lands under 100 KB, matching WhatsApp's static sticker spec. An animated source, GIF or animated WebP, is stored byte-for-byte instead, since re-compressing one would only cost quality. Those are capped at 2 MB rather than the 100 KB still budget. An animated PNG (APNG) is the one animation that is converted: nothing on Android plays an APNG and no app takes one as a sticker, so its frames are read out and rebuilt as a 512×512 animated WebP, aiming for WhatsApp's 500 KB animated budget. If the conversion fails, the first frame is kept as a still, and the result says how many stickers that happened to. Any single source file over 12 MB is refused before processing even starts.
 - Pick exactly **one** still image and it opens in the [sticker editor](#the-sticker-editor) first, instead of being added as-is. Pick several and they're all added the old way, because an editor thirty times over isn't a flow anyone wants. Either way the photo behind each sticker is kept for later editing, as described below.
 - Per sticker, you can set its **title** and its **keywords**, reorder it within the pack, move it to a different pack, or delete it. The title is the sticker's name, and it's what a screen reader reads out for it. Keywords are anything else you'd want to type to find it: words, short phrases or emoji. Put a comma between words and phrases ("cat, good night"). Emoji need nothing between them, so "😂🐱" is two keywords. Both fields feed the search in **My stickers**, and both can [offer the sticker while you type](#stickers-as-you-type).
@@ -145,6 +145,32 @@ The stickers come from Signal's sticker storage, the same place a Signal client 
 Stickers are made to fit the same way as any other you add: a still that is already a 512×512 WebP under 100 KB is kept as it is, and anything else is resized and re-encoded.
 
 Animated Signal stickers are APNG files, which Android can't play and which no other app accepts as a sticker. Each one is converted to an animated WebP as it is added, frame for frame and with the same timing, so it moves in **My stickers** and goes out to WhatsApp as a real animated sticker. Other apps get it as a GIF, as described under [Searching and sending](#searching-and-sending). In the preview, before you add the pack, animated stickers already play, so you can tell what kind of pack it is. Every frame is encoded again, so this is the slow half of adding an animated pack, and it is what the "Adding N of M" half of the progress row is counting. On Android 8.1 and older the grid shows an animated WebP as a still, but it is still sent animated.
+
+### Telegram sticker sets
+
+Sticker sets made for Telegram, and its sets of custom emoji, can become packs of your own too. A set is shared as a link, `https://t.me/addstickers/<name>` (or `https://t.me/addemoji/<name>` for emoji), and the name at the end is all there is to it.
+
+Unlike Signal, Telegram has no open storage that a set can be read from. The one way in that needs no Telegram account is a **bot**: a free Telegram account meant for programs, which the Bot API lets ask for any public set. So you make a bot once, and the keyboard asks Telegram for sets through it. The keyboard never signs in to your own Telegram account and does nothing else with the bot.
+
+Open <SettingsPath path="Tools / Stickers / Your stickers / Sticker packs / Telegram sticker sets" />.
+
+1. Press **Make a bot with @BotFather**. It opens Telegram's bot that makes bots. Send it `/newbot`, then a display name, then a username that ends in `bot`.
+2. @BotFather answers with a token, which looks like `123456789:AAE...`. Copy all of it into **Bot token**. The field says so if what you pasted can't be a token.
+3. **Add a set from a link** now takes a pasted link, or only the set's name. In Telegram, open a set, press the menu, and press **Copy link** to get one. The `tg://addstickers?set=...` form Telegram opens works too, and Android offers WM Keyboard as **Add stickers to WM Keyboard** when you press **Open in Telegram** on a `t.me/addstickers` page in a browser. You can also share a set link to WM Keyboard, or paste it into **Import from a link** on the Add-ons screen. The field never fills itself from the clipboard.
+
+The token is yours and stays on this device. It is left out of backups unless you turn on **Include API keys**, the same as the other keys. There is no built-in token: one token shared by every copy of the app would be one that Telegram could block for everybody at once. If you revoke the token in @BotFather, the screen tells you that Telegram no longer takes it.
+
+As with Signal, what opens is a preview: the set's title, how many stickers it holds, and the stickers, with the animated ones already playing. Video stickers show the still Telegram made of them. Nothing is kept until you press **Add this set**. Each sticker keeps its emoji as a keyword, so it is [offered while you type](#stickers-as-you-type) like any other. Opening the same set again offers your copy instead of a second one. The keyboard offers no list of sets of its own. Sets are other people's work, so add the ones you may use.
+
+Telegram has three kinds of sticker, and each becomes one you can send in every app:
+
+- **Still stickers** are WebP pictures, kept as they are when they are already 512×512 and small enough, and resized like any other picture when they are not.
+- **Animated stickers** are `.tgs` files: animations drawn from shapes, made in After Effects and saved for the Lottie player. No other app accepts one. Each is drawn frame by frame, at up to 30 frames a second, and saved as an animated WebP.
+- **Video stickers** are short `.webm` videos with a see-through background. Android's video decoder throws the transparency away, which would put every one of them on a black square, so the keyboard reads the transparency out of the file on its own and puts it back on each frame. They become animated WebP as well.
+
+Turning animated and video stickers into WebP is the slow part of adding a set, and the "Adding N of M" half of the progress row counts it. A sticker that cannot be converted is kept as its first frame, and the result says how many that happened to. Like animated Signal stickers, the result goes to WhatsApp as a real animated sticker and to other apps as a GIF.
+
+The requests go to Telegram's Bot API, `api.telegram.org`, and carry your bot token and the name of the set. While [Data saver](/privacy/data-saver/) is on, the preview asks before its first request.
 
 ### WhatsApp stickers
 

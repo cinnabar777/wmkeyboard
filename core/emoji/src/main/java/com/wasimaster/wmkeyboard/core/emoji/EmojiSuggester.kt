@@ -46,7 +46,9 @@ class EmojiSuggester(
      */
     fun suggest(word: String, previous: String = "", limit: Int = 4): List<String> {
         val cleaned = word.trim().lowercase()
-        if (cleaned.length < 2) return emptyList()
+        // One letter is no word, but one Han character or kana often is: 笑,
+        // 猫 and 雨 each name an emoji in the Chinese and Japanese packs (#633).
+        if (cleaned.isEmpty() || cleaned.length < 2 && !isLogogram(cleaned[0])) return emptyList()
         val results = LinkedHashSet<String>()
         // A two-word hit is the more specific reading of what was typed, so it
         // leads: "alarm clock" is a clock, not an alarm.
@@ -80,6 +82,11 @@ class EmojiSuggester(
         if (word.length >= MIN_SHORTCODE_LENGTH) shortcodes.exact(word)?.let { into.add(it) }
         byKeyword[word]?.let { into.addAll(it) }
     }
+
+    /** A character that is a word on its own: a Han ideograph, or Japanese kana. */
+    private fun isLogogram(c: Char): Boolean = Character.isIdeographic(c.code) ||
+        Character.UnicodeBlock.of(c) == Character.UnicodeBlock.HIRAGANA ||
+        Character.UnicodeBlock.of(c) == Character.UnicodeBlock.KATAKANA
 
     companion object {
 

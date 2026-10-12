@@ -402,10 +402,13 @@
     <string name="ime_tool_dictionary">Dictionary</string>
     <string name="ime_tool_vocabulary">Vocabulary</string>
     <string name="ime_tool_learn_from_text">Learn from text</string>
+    <string name="ime_tool_find_replace">Find &amp; replace</string>
+    <string name="ime_tool_notes">Notes</string>
     <!-- Learn from text (#174): the panel that lists words the keyboard does not know yet. -->
     <string name="ime_learn_select_all_action">Select all</string>
     <string name="ime_learn_select_none_action">Select none</string>
     <string name="ime_learn_add_action">Add %1$d</string>
+    <string name="ime_learn_text_action">Learn text</string>
     <string name="ime_learn_pairs_label">Word pairs</string>
     <string name="ime_learn_pairs_desc">Also learn the word pairs in this text</string>
     <string name="ime_learn_sort_frequent_label">Most used</string>
@@ -435,6 +438,7 @@
         <item quantity="other">%d word pairs</item>
     </plurals>
     <string name="ime_learn_result_both">%1$s · %2$s</string>
+    <string name="ime_learn_result_text_only">Learned text statistics</string>
     <string name="ime_learn_count_label">×%1$d</string>
     <string name="ime_learn_seen_label">seen %1$d</string>
     <string name="ime_learn_edited_label">%1$s → %2$s</string>
@@ -676,9 +680,12 @@
     <string name="ime_clipboard_height_taller">Make the panel taller</string>
     <string name="ime_clipboard_height_shorter">Make the panel shorter</string>
     <string name="ime_media_height_desc">Emoji, GIF and sticker panel height. Drag up or down</string>
+    <string name="ime_panel_over_keys_height_desc">Panel height over the keys. Drag up or down</string>
     <!-- The bin beside the clipboard search bar, for a screen reader. -->
     <string name="ime_clipboard_clear_desc">Delete all unpinned clips</string>
     <!-- The question the bin asks before it deletes. %1$d is how many clips it deletes. -->
+    <!-- Asked before a pinned clip is deleted, when that setting is on (#636). -->
+    <string name="ime_clip_delete_pinned_question">Delete this pinned clip?</string>
     <plurals name="ime_clip_clear_question">
         <item quantity="one">Delete %1$d unpinned clip? Pinned clips stay.</item>
         <item quantity="other">Delete %1$d unpinned clips? Pinned clips stay.</item>
@@ -731,6 +738,7 @@
     </plurals>
     <!-- Labels in the press-and-hold details popup for one clip. -->
     <string name="ime_clip_info_copied">Copied</string>
+    <string name="ime_clip_info_edited">Edited</string>
     <string name="ime_clip_info_from">From</string>
     <string name="ime_clip_info_type">Type</string>
     <string name="ime_clip_info_size">Size</string>
@@ -803,6 +811,10 @@
     <string name="ime_selection_macro_hindi_unavailable_toast">Hindi phonetic is not loaded</string>
     <string name="ime_selection_macro_no_app_toast">No app can open this</string>
     <string name="ime_find_not_addressable">This field cannot be searched</string>
+    <string name="ime_find_secure_field">Password fields cannot be searched</string>
+    <!-- The chip after the recent searches in the Find and replace panel that forgets them. -->
+    <string name="ime_find_history_clear">Clear</string>
+    <string name="ime_find_history_desc">Recent search</string>
     <!-- The Find and replace panel. -->
     <string name="ime_find_hint">Find</string>
     <string name="ime_replace_hint">Replace with</string>

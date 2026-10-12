@@ -1,5 +1,7 @@
 package com.wasimaster.wmkeyboard.app
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -127,6 +129,15 @@ internal fun DictionarySettings(repository: SettingsRepository, settings: LiveSe
     // The row being edited (#47): its spelling and weight, as they are now.
     var editing by remember { mutableStateOf<Pair<String, Int>?>(null) }
     var androidPicker by remember { mutableStateOf<AndroidWordPicker?>(null) }
+    // A Gboard dictionary picked from the row below, shown in the same import
+    // dialog a file manager opens. Bumping [loads] re-reads the words after it,
+    // so the list shows what came in and a later edit here does not save the
+    // copy from before over it.
+    var gboardFile by remember { mutableStateOf<android.net.Uri?>(null) }
+    var loads by remember { mutableIntStateOf(0) }
+    val gboardLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        gboardFile = uri
+    }
 
     fun pinnedIn(lex: UserLexicon, all: List<Pair<String, Int>>): Set<String> =
         all.mapNotNullTo(HashSet()) { (word, _) -> word.takeIf { lex.isCasePinned(it) } }
@@ -135,7 +146,7 @@ internal fun DictionarySettings(repository: SettingsRepository, settings: LiveSe
     fun bornIn(lex: UserLexicon, all: List<Pair<String, Int>>): Map<String, Long> =
         all.mapNotNull { (word, _) -> lex.addedGeneration(word)?.let { word to it } }.toMap()
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(loads) {
         val lex = withContext(Dispatchers.IO) { UserLexicon(file) }
         val all = lex.allWords()
         words = all
@@ -251,6 +262,14 @@ internal fun DictionarySettings(repository: SettingsRepository, settings: LiveSe
                 onClick = { openAndroidPicker(export = true) },
             )
         }
+        item {
+            WmRow(
+                title = stringResource(R.string.backup_gboard_import_title),
+                subtitle = stringResource(R.string.backup_gboard_import_subtitle),
+                icon = Icons.Outlined.Download,
+                onClick = { gboardLauncher.launch(arrayOf("application/zip", "text/plain", "application/octet-stream")) },
+            )
+        }
     }
     Spacer(Modifier.height(12.dp))
     // The lexicon holds up to 10,000 words and used to render as one flat
@@ -325,7 +344,9 @@ internal fun DictionarySettings(repository: SettingsRepository, settings: LiveSe
     var visible by remember(query, sort) { mutableIntStateOf(WORD_LIST_PAGE) }
     SettingsGroup {
         for ((word, count) in shown.take(visible)) {
-            item {
+            // Keyed on the spelling, so a word deleted or added opens and
+            // closes in place rather than every row under it jumping.
+            item(key = word) {
                 // Every row carries its count (#165); a word the user added
                 // says so in front of it rather than instead of it.
                 val seen = pluralStringResource(R.plurals.backup_dictionary_seen_count, count, count)
@@ -386,7 +407,7 @@ internal fun DictionarySettings(repository: SettingsRepository, settings: LiveSe
     if (rankEntries.isNotEmpty()) {
         SettingsGroup(title = stringResource(R.string.backup_rank_adjustments_title)) {
             for ((word, steps) in rankEntries) {
-                item {
+                item(key = word) {
                     WmRow(
                         title = word,
                         subtitle = stringResource(
@@ -460,6 +481,17 @@ internal fun DictionarySettings(repository: SettingsRepository, settings: LiveSe
                     // A capital the user wrote into Android's list is kept (#44).
                     persist { lex -> for (word in chosen) lex.addWord(word, caseEvidence = word != word.lowercase()) }
                 }
+            },
+        )
+    }
+
+    gboardFile?.let { uri ->
+        ImportFileDialog(
+            repository = repository,
+            uri = uri,
+            onClose = {
+                gboardFile = null
+                loads++
             },
         )
     }
@@ -851,7 +883,7 @@ internal fun BlacklistSettings(repository: SettingsRepository, settings: LiveSet
     }
     SettingsGroup {
         for (entry in shown.take(visible)) {
-            item {
+            item(key = entry) {
                 val word = entry.word
                 WmRow(
                     title = word,
@@ -966,7 +998,7 @@ internal fun PhoneFormatSettings(repository: SettingsRepository, settings: LiveS
     }
     SettingsGroup {
         for (format in formats) {
-            item {
+            item(key = format) {
                 WmRow(
                     title = format,
                     icon = Icons.Outlined.Phone,
@@ -1177,7 +1209,7 @@ internal fun LearnedCorrectionsSettings(repository: SettingsRepository, settings
     } else if (shown.isNotEmpty()) {
         SettingsGroup(stringResource(R.string.typing_learned_corrections_pairs_title)) {
             for ((typed, taught) in shown.take(visible)) {
-                item {
+                item(key = typed) {
                     WmRow(
                         title = "$typed → ${taught.fixed}",
                         subtitle = pluralStringResource(

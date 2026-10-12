@@ -33,6 +33,11 @@ data class CjkDictPack(
     val sha256: String,
     /** On-disk file name for the downloaded pack. */
     val fileName: String,
+    /**
+     * Other languages whose detail screen also lists the pack. Still one pack,
+     * downloaded once: the row on either screen shows the same file.
+     */
+    val alsoLangIds: Set<String> = emptySet(),
 ) {
     /** Where the pack is fetched from: the data repository, wherever [ServiceRepo.DATA] points. */
     val url: String get() = ServiceEndpoints.repo(ServiceRepo.DATA).rawUrl(path)
@@ -57,8 +62,8 @@ object CjkDictCatalog {
             displayNameRes = R.string.core_input_cjk_pack_pinyin_title,
             descriptionRes = R.string.core_input_cjk_pack_pinyin_subtitle,
             path = "cjk/pinyin.tsv",
-            sizeBytes = 2_489_699L,
-            sha256 = "8baab4c758499272e36dba4bda4253317a4f93bb88bcf386ea86196c50d73715",
+            sizeBytes = 2_586_937L,
+            sha256 = "0c572b5f5699378beb0eab5ec81cf79bb277e0f100d3c944d8969b7445b1a0c9",
             fileName = "pinyin.tsv",
         ),
         CjkDictPack(
@@ -91,6 +96,22 @@ object CjkDictCatalog {
             sha256 = "77a5a4c054019e3a3ea875e86a37cb08b71ce29392b6680208bb0c5749feb25d",
             fileName = "cangjie.tsv",
         ),
+        // Not a reading table: the OpenCC phrases that let Traditional output
+        // pick 頭髮 over 頭發 (#609). Optional — without it the bundled character
+        // table still converts, one character at a time. See [HanVariant].
+        // Cantonese lists it too: Jyutping candidates go through the same
+        // conversion when Traditional output is on.
+        CjkDictPack(
+            id = "s2t_phrases",
+            langId = "zh",
+            displayNameRes = R.string.core_input_cjk_pack_s2t_phrases_title,
+            descriptionRes = R.string.core_input_cjk_pack_s2t_phrases_subtitle,
+            path = "cjk/s2t_phrases.txt",
+            sizeBytes = 1_021_797L,
+            sha256 = "a8c1ff12191edfc8dc435d23736e2bf097357650ea195f51767d397c5b70908c",
+            fileName = "s2t_phrases.txt",
+            alsoLangIds = setOf("yue"),
+        ),
         CjkDictPack(
             id = "jyutping",
             langId = "yue",
@@ -113,7 +134,8 @@ object CjkDictCatalog {
     fun byFileName(name: String): CjkDictPack? =
         packs.firstOrNull { it.available && it.path.substringAfterLast('/') == name }
 
-    fun forLang(langId: String): List<CjkDictPack> = packs.filter { it.langId == langId }
+    fun forLang(langId: String): List<CjkDictPack> =
+        packs.filter { it.langId == langId || langId in it.alsoLangIds }
 }
 
 /**

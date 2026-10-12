@@ -1,5 +1,6 @@
 package com.wasimaster.wmkeyboard.ime.ui
 
+import android.os.SystemClock
 import androidx.compose.ui.geometry.Offset
 import com.wasimaster.wmkeyboard.core.prediction.OctopusWord
 
@@ -35,6 +36,24 @@ internal class OctopusRects {
     fun clear() {
         slots = emptyList()
     }
+
+    /** The word last taken off the board by a tap or a flick, and when. */
+    private var taken: String? = null
+    private var takenAt = 0L
+
+    /**
+     * Notes that [word] was just taken, so the overlay can send it up toward
+     * the strip as it leaves rather than fading it where it stood. Drawing only:
+     * nothing here changes what [wordAt] answers.
+     */
+    fun markTaken(word: String) {
+        taken = word
+        takenAt = SystemClock.uptimeMillis()
+    }
+
+    /** The word taken a moment ago, if one was; see [markTaken]. */
+    fun recentlyTaken(): String? =
+        taken?.takeIf { SystemClock.uptimeMillis() - takenAt <= TakenFreshMs }
 
     /** Whether anything is floating at all — the gate the flick arms on. */
     fun isEmpty(): Boolean = slots.isEmpty()
@@ -85,3 +104,9 @@ internal fun nearestOctopusCentre(
     }
     return best
 }
+
+/**
+ * How long a taken word stays the one the board is saying goodbye to: long
+ * enough for the service to clear the words, short of the next keystroke's.
+ */
+private const val TakenFreshMs = 600L

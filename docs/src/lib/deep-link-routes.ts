@@ -29,7 +29,7 @@ export interface RouteSpec {
 	args?: ArgSpec[];
 }
 
-const PANEL_HINT = 'EMOJI, CLIPBOARD, TEXT_EDIT, TRACKPAD or NUMPAD';
+const PANEL_HINT = 'EMOJI, GIF, STICKER, CLIPBOARD, TEXT_EDIT, TRACKPAD, NUMPAD or HANDWRITING';
 
 export const ROUTE_GROUPS = [
 	'Getting in',
@@ -79,6 +79,12 @@ export const ROUTES: RouteSpec[] = [
 		group: 'Appearance',
 		args: [{ name: 'themeId', hint: 'The id of one of your own themes' }],
 	},
+	{
+		pattern: 'theme_assets/{themeId}',
+		label: 'Image sizes and templates for one of your themes',
+		group: 'Appearance',
+		args: [{ name: 'themeId', hint: 'The id of one of your own themes' }],
+	},
 	{ pattern: 'fonts', label: 'Keyboard font', group: 'Appearance' },
 	{
 		pattern: 'fonts/{script}',
@@ -125,6 +131,7 @@ export const ROUTES: RouteSpec[] = [
 
 	{ pattern: 'languages', label: 'Languages and layouts', group: 'Languages' },
 	{ pattern: 'add_language', label: 'Add language', group: 'Languages' },
+	{ pattern: 'double_pinyin_custom', label: 'Your own Double Pinyin scheme', group: 'Languages' },
 	{
 		pattern: 'language/{langId}',
 		label: "One language's page",
@@ -152,6 +159,8 @@ export const ROUTES: RouteSpec[] = [
 	{ pattern: 'phoneformats', label: 'Phone number formats', group: 'Emoji, clipboard and stickers' },
 	{ pattern: 'sticker_packs', label: 'Sticker packs', group: 'Emoji, clipboard and stickers' },
 	{ pattern: 'signal_stickers', label: 'Signal sticker packs', group: 'Emoji, clipboard and stickers' },
+	{ pattern: 'whatsapp_stickers', label: 'WhatsApp stickers', group: 'Emoji, clipboard and stickers' },
+	{ pattern: 'telegram_stickers', label: 'Telegram sticker sets', group: 'Emoji, clipboard and stickers' },
 	{
 		pattern: 'sticker_pack/{packId}',
 		label: 'One of your sticker packs',
@@ -191,6 +200,15 @@ export const ROUTES: RouteSpec[] = [
 			{ name: 'word', hint: 'The word itself' },
 		],
 	},
+	{ pattern: 'notes', label: 'Notes', group: 'Tools' },
+	{
+		pattern: 'notes/edit/{noteId}',
+		label: 'One note, open in the editor',
+		group: 'Tools',
+		args: [{ name: 'noteId', hint: 'A note id, or 0 for a new note' }],
+	},
+	{ pattern: 'notes/tags', label: 'Note tags', group: 'Tools' },
+	{ pattern: 'notes/trash', label: 'Notes trash', group: 'Tools' },
 	{ pattern: 'voice', label: 'Voice typing', group: 'Tools' },
 	{ pattern: 'expander', label: 'Text expansion', group: 'Tools' },
 	{
@@ -212,6 +230,7 @@ export const ROUTES: RouteSpec[] = [
 		args: [{ name: 'snippetId', hint: 'A snippet number; 0 opens an empty new one' }],
 	},
 	{ pattern: 'musicapps', label: 'Music players', group: 'Tools' },
+	{ pattern: 'launchercombos', label: 'Split screen pairs, for the app launcher', group: 'Tools' },
 	{ pattern: 'kdeconnect/devices', label: 'KDE Connect devices', group: 'Tools' },
 	{ pattern: 'ai_actions', label: 'AI actions', group: 'Tools' },
 	{
@@ -221,6 +240,13 @@ export const ROUTES: RouteSpec[] = [
 		args: [{ name: 'actionId', hint: 'The id of one of your AI actions' }],
 	},
 	{ pattern: 'ai_history', label: 'AI history', group: 'Tools' },
+	{ pattern: 'ai_mcp', label: 'MCP servers for AI chat', group: 'Tools' },
+	{
+		pattern: 'ai_mcp_edit/{serverId}',
+		label: 'One MCP server',
+		group: 'Tools',
+		args: [{ name: 'serverId', hint: 'The id of one of your MCP servers' }],
+	},
 	{ pattern: 'ai_chat', label: 'AI chat', group: 'Tools' },
 	{
 		pattern: 'ai_chat/{conversationId}',
@@ -323,7 +349,7 @@ export const TOOL_NAMES = [
 	'CURSOR_RIGHT', 'CURSOR_UP', 'CURSOR_DOWN', 'CURSOR_HOME', 'CURSOR_END', 'PAGE_UP', 'PAGE_DOWN',
 	'CURSOR_WORD_LEFT', 'CURSOR_WORD_RIGHT', 'SELECT_WORD', 'SELECT_LINE', 'SELECT_ALL', 'SELECT_MODE', 'COPY',
 	'CUT', 'PASTE', 'HIDE_KEYBOARD', 'PERSISTENT', 'SELECTION_ACTIONS', 'LEARN_FROM_TEXT',
-	'PHONETIC_ENGLISH', 'KDE_CONNECT',
+	'PHONETIC_ENGLISH', 'KDE_CONNECT', 'STATISTICS', 'FIND_REPLACE', 'NOTES',
 ];
 
 /**
@@ -343,7 +369,7 @@ export const MODE_IDS: { id: string; name: string }[] = [
 ];
 
 /** `PanelKind` entry names. */
-export const PANEL_NAMES = ['EMOJI', 'CLIPBOARD', 'TEXT_EDIT', 'TRACKPAD', 'NUMPAD'];
+export const PANEL_NAMES = ['EMOJI', 'GIF', 'STICKER', 'CLIPBOARD', 'TEXT_EDIT', 'TRACKPAD', 'NUMPAD', 'HANDWRITING'];
 
 /**
  * The scripts the font screen lists: Latin, then `KeyboardFonts.scriptFontChoices`
@@ -353,11 +379,12 @@ export const PANEL_NAMES = ['EMOJI', 'CLIPBOARD', 'TEXT_EDIT', 'TRACKPAD', 'NUMP
 export const SCRIPT_NAMES = [
 	'LATIN', 'BENGALI', 'ARABIC', 'HEBREW', 'ARMENIAN', 'GEORGIAN', 'DEVANAGARI', 'GURMUKHI', 'GUJARATI', 'ORIYA',
 	'TAMIL', 'TELUGU', 'KANNADA', 'MALAYALAM', 'SINHALA', 'THAI', 'LAO', 'KHMER', 'MYANMAR', 'ETHIOPIC', 'HANGUL', 'JAPANESE', 'HAN',
+	'PIQAD',
 ];
 
 /** `StorageCategories` ids, the accepted values of `storage/{category}`. */
 export const STORAGE_IDS = [
-	'wordlists', 'bundled_dicts', 'emoji_dicts', 'vocab', 'voice_models', 'ai_models', 'addon_index', 'themes',
+	'wordlists', 'bundled_dicts', 'emoji_dicts', 'vocab', 'voice_models', 'ai_models', 'ocr_packs', 'gif_packs', 'addon_index', 'themes',
 	'stickers', 'icon_packs', 'fonts', 'key_sounds', 'plugins', 'learned', 'typing_stats', 'netlog', 'clipboard',
 	'snippets', 'ai_history', 'custom_wordlists', 'captures', 'settings_data', 'cache_images', 'cache_media',
 	'cache_addons', 'cache_temp', 'logs',
@@ -365,10 +392,11 @@ export const STORAGE_IDS = [
 
 /** The files under app/src/main/assets/licenses/. */
 export const LICENSE_ASSETS = [
-	'apache-2.0.txt', 'bsd-2-clause-stroke.txt', 'bsd-3-clause.txt', 'cc-by-4.0-lshk.txt', 'cc-by-4.0-noto-animated.txt',
-	'cc-by-sa-4.0.txt', 'harper-third-party.txt', 'jyutping-sources.txt', 'mit-color-themes.txt', 'mit-gemoji.txt',
-	'mit-keyman.txt', 'mit-khipro.txt', 'mit-luaj.txt', 'mit-whisper-android.txt', 'mit-whisper.txt', 'mit-wmkeyboard.txt',
-	'ofl-1.1-fonts.txt', 'ofl-1.1.txt', 'unicode-3.0.txt', 'wordlist-sources.txt',
+	'apache-2.0.txt', 'bsd-2-clause-leptonica.txt', 'bsd-2-clause-stroke.txt', 'bsd-3-clause.txt', 'bsd-jsch.txt',
+	'cc-by-4.0-lshk.txt', 'cc-by-4.0-noto-animated.txt', 'cc-by-sa-4.0.txt', 'harper-third-party.txt', 'jyutping-sources.txt',
+	'mit-bouncycastle.txt', 'mit-color-themes.txt', 'mit-gemoji.txt', 'mit-keyman.txt', 'mit-khipro.txt', 'mit-luaj.txt',
+	'mit-whisper-android.txt', 'mit-whisper.txt', 'mit-wmkeyboard.txt', 'mpl-1.1.txt', 'ofl-1.1-fonts.txt', 'ofl-1.1.txt',
+	'unicode-3.0.txt', 'wordlist-sources.txt',
 ];
 
 /** `FLASHLIGHT` → `Flashlight`, `SOUND_HAPTICS` → `Sound haptics`. */

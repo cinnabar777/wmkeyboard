@@ -63,9 +63,48 @@ data class AiToolResult(
     val sources: List<AiToolSource> = emptyList(),
     /** Not empty means the call failed, and says why. */
     val error: String = "",
+    /**
+     * How the call was shown while it ran, when that is more than its name:
+     * an MCP call carries its server and the tool's own title (#573). Null
+     * for our own tools, whose record is built from the call alone.
+     */
+    val display: AiToolActivity? = null,
 ) {
     val activity: AiToolActivity
-        get() = AiToolActivity.started(call).copy(running = false, sources = sources, error = error)
+        get() = (display ?: AiToolActivity.started(call)).copy(
+            running = false,
+            sources = sources,
+            error = error,
+            awaitingApproval = false,
+            details = "",
+        )
+}
+
+/** What the user answered when a call asked first (#573). */
+enum class AiToolApproval {
+    /** Run this call. */
+    ONCE,
+
+    /** Run this call, and every later call of the same tool without asking. */
+    ALWAYS,
+
+    /** Do not run it; the model is told so. */
+    DENY,
+
+    /** The run was stopped while the question was showing. */
+    CANCELLED,
+}
+
+/**
+ * Asks the user whether a call may run, and waits for the answer. [ask] is
+ * the call as the user is to see it, with [AiToolActivity.awaitingApproval]
+ * set and its arguments in [AiToolActivity.details].
+ *
+ * Blocking: it is called from the tool loop's own thread, which has nothing
+ * to do until the user answers.
+ */
+fun interface AiToolApprover {
+    fun approve(ask: AiToolActivity): AiToolApproval
 }
 
 /** One page a tool call put in front of the model: a search result, or the page it read. */
@@ -101,8 +140,21 @@ data class AiToolActivity(
     val sources: List<AiToolSource> = emptyList(),
     /** Not empty means the call failed, and says why. */
     val error: String = "",
+    /**
+     * The MCP server the tool belongs to (#573), by the name the user gave it.
+     * Empty for our own tools. When set, [tool] is the tool's title rather
+     * than a name from [AiTools].
+     */
+    val server: String = "",
+    /** The call is waiting for the user to allow it. Never true in a stored message. */
+    val awaitingApproval: Boolean = false,
+    /** The call's arguments in full, for the approval card. Empty once it has run. */
+    val details: String = "",
 ) {
     val failed: Boolean get() = error.isNotEmpty()
+
+    /** A tool from one of the user's MCP servers rather than one of ours. */
+    val isMcp: Boolean get() = server.isNotEmpty()
 
     companion object {
         /** A call the model just asked for, before it has run. */
@@ -133,7 +185,20 @@ data class AiToolActivity(
          * looking as if it were still going, or as if it had worked.
          */
         fun settle(trace: List<AiToolActivity>, reason: String): List<AiToolActivity> =
-            trace.map { if (it.running) it.copy(running = false, error = reason) else it }
+            trace.map {
+                if (it.running) it.copy(running = false, error = reason, awaitingApproval = false, details = "") else it
+            }
+
+        /**
+         * [trace] with the newest running call replaced by [shown]: the same
+         * call, now asking to be allowed, or done asking. Added at the end
+         * when nothing is running, as [record] does.
+         */
+        fun replaceRunning(trace: List<AiToolActivity>, shown: AiToolActivity): List<AiToolActivity> {
+            val at = trace.indexOfLast { it.running }
+            if (at < 0) return trace + shown
+            return trace.toMutableList().also { it[at] = shown }
+        }
 
         /**
          * The host of [url] without a leading `www.`, or [url] itself when it

@@ -182,7 +182,7 @@ internal fun StickerPacksScreen(onNavigate: (String) -> Unit) {
             }
         }
         for (pack in packs) {
-            item {
+            item(key = pack.id) {
                 HighlightableItem(pack.id) {
                     StickerPackRow(
                         pack = pack,
@@ -210,6 +210,16 @@ internal fun StickerPacksScreen(onNavigate: (String) -> Unit) {
                 accent = routeAccent("sticker_packs"),
                 highlightKey = R.string.import_signal_row_title,
                 onClick = { onNavigate(SIGNAL_STICKERS_ROUTE) },
+            )
+        }
+        item {
+            WmRow(
+                title = stringResource(R.string.import_telegram_row_title),
+                subtitle = stringResource(R.string.import_telegram_row_subtitle),
+                icon = SymbolIcons.StickerAdd,
+                accent = routeAccent("sticker_packs"),
+                highlightKey = R.string.import_telegram_row_title,
+                onClick = { onNavigate(TELEGRAM_STICKERS_ROUTE) },
             )
         }
         item {

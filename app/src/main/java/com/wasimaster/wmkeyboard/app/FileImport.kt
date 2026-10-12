@@ -58,10 +58,13 @@ import com.wasimaster.wmkeyboard.core.layout.KeymanBinding
 import com.wasimaster.wmkeyboard.core.script.LanguageRegistry
 import com.wasimaster.wmkeyboard.core.keyman.KeymanPackage
 import com.wasimaster.wmkeyboard.core.layout.ConvertedLayout
+import com.wasimaster.wmkeyboard.core.layout.DesktopLayouts
 import com.wasimaster.wmkeyboard.core.layout.FutoLayouts
 import com.wasimaster.wmkeyboard.core.layout.ImportedLayout
 import com.wasimaster.wmkeyboard.core.layout.KeysCafeLayouts
 import com.wasimaster.wmkeyboard.core.layout.LayoutFile
+import com.wasimaster.wmkeyboard.core.layout.MultilingLayouts
+import com.wasimaster.wmkeyboard.core.layout.UnexpectedLayouts
 import com.wasimaster.wmkeyboard.core.plugins.PluginFile
 import com.wasimaster.wmkeyboard.core.plugins.PluginImportResult
 import com.wasimaster.wmkeyboard.core.plugins.PluginManifestResult
@@ -73,6 +76,10 @@ import com.wasimaster.wmkeyboard.core.settings.DeviceForm
 import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
 import com.wasimaster.wmkeyboard.core.settings.SettingsBackup
 import com.wasimaster.wmkeyboard.core.settings.SettingsRepository
+import com.wasimaster.wmkeyboard.core.settings.foreign.ForeignBackup
+import com.wasimaster.wmkeyboard.core.settings.foreign.ForeignBackups
+import com.wasimaster.wmkeyboard.core.prediction.UserLexicon
+import com.wasimaster.wmkeyboard.core.snippets.GboardDictionary
 import com.wasimaster.wmkeyboard.core.snippets.ImportedSnippets
 import com.wasimaster.wmkeyboard.core.snippets.SnippetFile
 import com.wasimaster.wmkeyboard.core.snippets.SnippetPayload
@@ -84,6 +91,9 @@ import com.wasimaster.wmkeyboard.core.stickers.whatsapp.WaStickersFile
 import com.wasimaster.wmkeyboard.core.theme.ConvertedTheme
 import com.wasimaster.wmkeyboard.core.theme.FlexResult
 import com.wasimaster.wmkeyboard.core.theme.FlexTheme
+import com.wasimaster.wmkeyboard.core.theme.FutoTheme
+import com.wasimaster.wmkeyboard.core.theme.FutoThemeResult
+import com.wasimaster.wmkeyboard.core.theme.FutoThemeUnsupported
 import com.wasimaster.wmkeyboard.core.theme.dynamicSnyggPalette
 import com.wasimaster.wmkeyboard.core.fonts.FontFile
 import com.wasimaster.wmkeyboard.core.fonts.FontImportResult
@@ -93,12 +103,16 @@ import com.wasimaster.wmkeyboard.core.theme.FlexUnsupported
 import com.wasimaster.wmkeyboard.core.theme.GboardResult
 import com.wasimaster.wmkeyboard.core.theme.GboardTheme
 import com.wasimaster.wmkeyboard.core.theme.HeliUnsupported
+import com.wasimaster.wmkeyboard.core.theme.MultilingTheme
+import com.wasimaster.wmkeyboard.core.theme.MultilingThemeResult
+import com.wasimaster.wmkeyboard.core.theme.MultilingUnsupported
 import com.wasimaster.wmkeyboard.core.theme.ThemeCodec
 import com.wasimaster.wmkeyboard.core.theme.ThemeSpec
 import com.wasimaster.wmkeyboard.core.theme.groupAsFamily
 import com.wasimaster.wmkeyboard.core.theme.themeFamilyName
 import com.wasimaster.wmkeyboard.core.theme.withExtractedImages
 import com.wasimaster.wmkeyboard.core.theme.withFreshIds
+import com.wasimaster.wmkeyboard.core.util.MultilingExport
 import com.wasimaster.wmkeyboard.core.util.firstJsonDocument
 import com.wasimaster.wmkeyboard.core.util.readCapped
 import com.wasimaster.wmkeyboard.core.util.requireInputStream
@@ -172,6 +186,14 @@ object WMFileTypes {
         // reason again: the file is somebody's own arrangement, and opening it
         // is how they bring it over. Keys Cafe keeps its own filter.
         KeysCafeLayouts.FILE_EXTENSION,
+        // A Windows layout's MSKLC source and a macOS layout from Ukelele,
+        // claimed for the same reason again: for a language nobody ships a
+        // phone layout for, the desktop file is often the only one there is.
+        // Neither extension means anything else, and the desktop tools that
+        // own them have no Android app to compete with. XKB files have no
+        // extension at all, so they are recognised by their contents alone.
+        DesktopLayouts.KLC_EXTENSION,
+        DesktopLayouts.KEYLAYOUT_EXTENSION,
     )
 
     /**
@@ -212,15 +234,58 @@ object WMFileTypes {
         data class KeysCafeLayout(val converted: ConvertedLayout) : Opened
 
         /**
-         * An Espanso match file: somebody else's text expander, read into
-         * snippets of ours.
+         * An Unexpected Keyboard or CleverKeys layout, already converted. Its
+         * own case for the reason [FutoLayout] is: the language is a guess to
+         * settle, and the body says the corner swipes came across.
+         */
+        data class UnexpectedLayout(val converted: ConvertedLayout) : Opened
+
+        /**
+         * A computer keyboard's layout, already converted: a Windows `.klc`,
+         * a macOS `.keylayout`, or an XKB `symbols` file, which holds one
+         * layout per variant. Its own case for the reason [FutoLayout] is, and
+         * a list because of the XKB variants.
+         */
+        data class DesktopLayoutFile(val layouts: List<ConvertedLayout>) : Opened
+
+        /**
+         * Text from Multiling O Keyboard, already converted: one layout, or a
+         * settings export holding every layout its user made and the colours
+         * of their theme. [theme] is null when the text has no colours, which
+         * is every layout shared on its own.
+         */
+        data class MultilingFile(
+            val layouts: List<ConvertedLayout>,
+            val theme: MultilingThemeResult.Converted?,
+        ) : Opened
+
+        /**
+         * Somebody else's snippets, read into snippets of ours: an Espanso
+         * match file, or a table of them from another text expander or a
+         * spreadsheet. [SnippetPayload.Parsed.source] says which.
          *
          * Carries the whole [SnippetPayload.Parsed] rather than the snippets
          * alone, because the notes are the point of the dialog — an Espanso file
          * can say things this app has no equivalent for, and finding that out
          * after the import is worse than being told and deciding.
          */
-        data class EspansoSnippets(val parsed: SnippetPayload.Parsed) : Opened
+        data class ForeignSnippets(val parsed: SnippetPayload.Parsed) : Opened
+
+        /**
+         * Gboard's personal dictionary export. Its own case rather than a
+         * [ForeignSnippets], because only half of it is snippets: the words
+         * with no shortcut go to the personal dictionary.
+         */
+        data class GboardDictionaryFile(val contents: GboardDictionary.Contents) : Opened
+
+        /**
+         * Another keyboard's whole backup: HeliBoard, LeanType, FUTO,
+         * FlorisBoard, CleverKeys or AnySoftKeyboard, already read and
+         * converted. Not a [Config]: nothing in it is ours, and the dialog for
+         * it is a list of everything inside to tick or leave rather than one
+         * question.
+         */
+        data class ForeignBackupFile(val backup: ForeignBackup) : Opened
 
         /** The older standalone `wmsettings.json`. */
         data class Settings(val text: String, val parsed: SettingsBackup.Parsed) : Opened
@@ -256,6 +321,13 @@ object WMFileTypes {
          * what did not. A converted theme must never be presented as one of ours.
          */
         data class FlorisTheme(val result: FlexResult) : Opened
+
+        /**
+         * A FUTO Keyboard custom theme ZIP, already converted. Its own case for
+         * the reason [FlorisTheme] is: the dialog has to say that it came from
+         * another keyboard and what did not come across.
+         */
+        data class FutoThemeFile(val result: FutoThemeResult.Converted) : Opened
 
         /**
          * A Gboard theme ZIP or an Rboard pack of them, already converted.
@@ -345,7 +417,8 @@ object WMFileTypes {
                 // Capped on what comes *out*: a few megabytes of gzip inflate
                 // to far more, and this is the one read where the file's own
                 // size says nothing about what it costs to hold.
-                input.readCapped()?.decodeToString()
+                // UTF-16 is read as such: MSKLC saves every `.klc` that way.
+                input.readCapped()?.let(DesktopLayouts::decodeText)
             }
         }.getOrNull() ?: return Opened.Unreadable
 
@@ -400,6 +473,9 @@ object WMFileTypes {
         LayoutFile.decode(text)?.let { return Opened.Layout(it) }
         SnippetFile.decode(text)?.let { return Opened.Snippets(it) }
         VocabPackFile.decode(text)?.let { return Opened.Vocabulary(it) }
+        // Not ours, but its first line is as good as a tag: no other format
+        // can start with Gboard's own header comment.
+        GboardDictionary.read(text)?.let { return Opened.GboardDictionaryFile(it) }
         // A theme has no tag and every field has a default, so decoding any JSON
         // object at all succeeds and yields an all-defaults theme. The file name
         // is the only evidence there is that this one was meant to be a theme.
@@ -417,6 +493,38 @@ object WMFileTypes {
             KeysCafeLayouts.convert(text, name)?.let { return Opened.KeysCafeLayout(it) }
         }
 
+        // Multiling O shares text: a settings block or a DIY+ layout behind a
+        // marker no other file has, or a DIY layout whose JSON is told by its
+        // `onScreen` object, a key no other layout format writes. That key is
+        // the evidence the theme branch above needs a file name for.
+        if (MultilingLayouts.looksLikeMultiling(text) || text.contains(MultilingExport.SETTINGS_BEGIN)) {
+            val layouts = MultilingLayouts.convertAll(text, name)
+            val theme = MultilingTheme.read(text) as? MultilingThemeResult.Converted
+            if (layouts.isNotEmpty() || theme != null) return Opened.MultilingFile(layouts, theme)
+        }
+
+        // A computer keyboard's layout. A `.klc` is told by its section
+        // words, a `.keylayout` by its `<keyMapSet>`, an XKB file by its
+        // `xkb_symbols "name" {` blocks; no other format here has any of them.
+        // Ahead of the Unexpected Keyboard branch below, whose `<keyboard>`
+        // and `<key>` test a `.keylayout` passes as well.
+        if (DesktopLayouts.looksLikeDesktopLayout(text)) {
+            val layouts = DesktopLayouts.convertAll(text, name)
+            if (layouts.isNotEmpty()) return Opened.DesktopLayoutFile(layouts)
+        }
+
+        // An Unexpected Keyboard or CleverKeys layout: XML with a `<keyboard>`
+        // and its `<key>`s, which no other format here is. AnySoftKeyboard's
+        // XML, read just below, has neither element.
+        if (UnexpectedLayouts.looksLikeUnexpected(text)) {
+            UnexpectedLayouts.convert(text, name)?.let { return Opened.UnexpectedLayout(it) }
+        }
+
+        // Another keyboard's settings as one text file: a CleverKeys export,
+        // told by its `metadata` and `preferences` objects together, or
+        // AnySoftKeyboard's XML, which no other format here is.
+        ForeignBackups.readText(text)?.let { return Opened.ForeignBackupFile(it) }
+
         // The two YAML formats, which are the two that can follow the branch
         // above safely. Both are somebody else's and neither carries a tag of
         // ours, but each is recognised by a key at the start of a line — `rows:`
@@ -429,14 +537,16 @@ object WMFileTypes {
         if (FutoLayouts.looksLikeFutoLayout(text)) {
             FutoLayouts.convert(text, name)?.let { return Opened.FutoLayout(it) }
         }
-        // Espanso's half of SnippetPayload. The native half of it already
-        // answered above, so an Espanso file is all that can still come back —
-        // and asking the shared reader rather than repeating its sniff here is
-        // what keeps this screen and the Text Expander screen from disagreeing
-        // about what a snippet file is.
+        // The foreign half of SnippetPayload: Espanso, then a table. The native
+        // half and Gboard's dictionary already answered above, so only those
+        // two can still come back — and asking the shared reader rather than
+        // repeating its sniff here is what keeps this screen and the Text
+        // Expander screen from disagreeing about what a snippet file is. A
+        // table is last of everything: it needs a header naming a text column,
+        // or a `.csv` name, and almost any text has a comma in it.
         SnippetPayload.readText(text, name)
-            ?.takeIf { it.isEspanso }
-            ?.let { return Opened.EspansoSnippets(it) }
+            ?.takeIf { it.isForeign }
+            ?.let { return Opened.ForeignSnippets(it) }
         return Opened.Unrecognized
     }
 
@@ -520,6 +630,31 @@ object WMFileTypes {
      * because a ZIP of pictures with no such file is any ZIP of pictures.
      */
     private fun identifyManifestless(context: android.content.Context, uri: Uri, names: List<String>): Opened {
+        // A FUTO theme: no manifest, only its settings file beside the
+        // pictures. `theme.txt` is a common name, so the read has to find
+        // FUTO's colours before the file counts as one.
+        if (FutoTheme.looksLikeFutoTheme(names)) {
+            val result = runCatching {
+                context.contentResolver.requireInputStream(uri).use { FutoTheme.read(it) }
+            }.getOrNull()
+            if (result is FutoThemeResult.Converted) return Opened.FutoThemeFile(result)
+        }
+        // Another keyboard's backup, told by the file each one always writes
+        // first: its settings, or its export's version stamp.
+        if (ForeignBackups.looksLikeBackup(names)) {
+            val backup = runCatching {
+                context.contentResolver.requireInputStream(uri).use { ForeignBackups.read(it) }
+            }.getOrNull()
+            return if (backup != null) Opened.ForeignBackupFile(backup) else Opened.Unrecognized
+        }
+        // Gboard's personal dictionary export: one `dictionary.txt`, which the
+        // read then has to find Gboard's header in.
+        if (GboardDictionary.looksLikeGboardZip(names)) {
+            val contents = runCatching {
+                context.contentResolver.requireInputStream(uri).use { GboardDictionary.readZip(it.buffered()) }
+            }.getOrNull()
+            if (contents != null) return Opened.GboardDictionaryFile(contents)
+        }
         if (!WaStickersFile.looksLikeWaStickers(names)) return Opened.Unrecognized
         val header = runCatching {
             context.contentResolver.requireInputStream(uri).use { WaStickersFile.peek(it) }
@@ -738,6 +873,12 @@ private fun proposalTitle(proposal: ImportProposal): String {
 internal fun ImportFileDialog(
     repository: SettingsRepository,
     uri: Uri,
+    /**
+     * Called once a backup has been restored: one of ours, or another
+     * keyboard's. The setup wizard listens for it, because a restored phone
+     * has nothing left to be asked.
+     */
+    onImported: () -> Unit = {},
     onClose: () -> Unit,
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
@@ -766,31 +907,44 @@ internal fun ImportFileDialog(
     }
 
     val state = opened
-    if (state == null || working) {
-        // Reading a backup with sticker packs in it is not instant, and neither
-        // is writing one back out.
-        val progress = if (working) {
-            R.string.import_progress_importing
-        } else {
-            R.string.import_progress_reading
-        }
+    if (state == null) {
+        // Reading a backup with sticker packs in it is not instant.
         AlertDialog(
             onDismissRequest = {},
-            title = { Text(stringResource(progress)) },
+            title = { Text(stringResource(R.string.import_progress_reading)) },
             text = { CircularProgressIndicator() },
             confirmButton = {},
         )
         return
     }
 
-    val proposal = rememberProposal(state, repository, context, uri)
+    // A whole backup from another keyboard is a list to choose from, not one
+    // question, so it has a dialog of its own.
+    if (state is WMFileTypes.Opened.ForeignBackupFile) {
+        ForeignBackupDialog(
+            backup = state.backup,
+            repository = repository,
+            onDone = { result ->
+                message = result
+                onImported()
+            },
+            onDismiss = onClose,
+        )
+        return
+    }
+
+    val proposal = rememberProposal(state, repository, context, uri, onImported)
     var passphrase by remember { mutableStateOf("") }
     var language by remember(proposal) { mutableStateOf(proposal.language.orEmpty()) }
     var pickingLanguage by remember { mutableStateOf(false) }
     val needsPassphrase = proposal.applyWithPassphrase != null
+    // Writing it out is not instant either. The dialog stays, its title says
+    // so, and the spinner sits in the button that was pressed rather than the
+    // whole dialog being swapped for another one.
+    val phase = if (working) RunPhase.RUNNING else RunPhase.IDLE
     AlertDialog(
-        onDismissRequest = onClose,
-        title = { Text(proposalTitle(proposal)) },
+        onDismissRequest = { if (!working) onClose() },
+        title = { Text(if (working) stringResource(R.string.import_progress_importing) else proposalTitle(proposal)) },
         text = {
             // Scrolls: a preview, a long backup summary and a list of repairs
             // together are taller than a dialog on a short screen, and a
@@ -846,22 +1000,36 @@ internal fun ImportFileDialog(
                 }) { Text(stringResource(proposal.confirmLabelRes)) }
 
                 applyWithLanguage != null -> TextButton(onClick = {
+                    // Left enabled while it works, so the spinner in it is
+                    // drawn in the button's colour rather than greyed out.
+                    if (working) return@TextButton
                     working = true
                     scope.launch { message = applyWithLanguage(language); working = false }
-                }) { Text(stringResource(proposal.confirmLabelRes)) }
+                }) {
+                    RunGlyph(phase)
+                    Text(stringResource(proposal.confirmLabelRes))
+                }
 
                 applyWithPassphrase != null -> TextButton(
                     enabled = passphrase.isNotEmpty(),
                     onClick = {
+                        if (working) return@TextButton
                         working = true
                         scope.launch { message = applyWithPassphrase(passphrase); working = false }
                     },
-                ) { Text(stringResource(proposal.confirmLabelRes)) }
+                ) {
+                    RunGlyph(phase)
+                    Text(stringResource(proposal.confirmLabelRes))
+                }
 
                 apply != null -> TextButton(onClick = {
+                    if (working) return@TextButton
                     working = true
                     scope.launch { message = apply(); working = false }
-                }) { Text(stringResource(proposal.confirmLabelRes)) }
+                }) {
+                    RunGlyph(phase)
+                    Text(stringResource(proposal.confirmLabelRes))
+                }
 
                 else -> TextButton(onClick = onClose) {
                     Text(stringResource(CommonR.string.common_ok))
@@ -870,7 +1038,7 @@ internal fun ImportFileDialog(
         },
         dismissButton = {
             if (proposal.actionable) {
-                TextButton(onClick = onClose) { Text(stringResource(CommonR.string.common_cancel)) }
+                TextButton(onClick = onClose, enabled = !working) { Text(stringResource(CommonR.string.common_cancel)) }
             }
         },
     )
@@ -973,6 +1141,125 @@ private fun keymanProposal(
 }
 
 /**
+ * What text from Multiling O Keyboard offers.
+ *
+ * One layout on its own goes through the language step, like every other
+ * foreign layout: nothing in a shared layout says what language it is for. A
+ * settings export says it for each layout, so all of them are added at once,
+ * each with the language it was filed under, or the one its letters suggest
+ * where this app does not have that language. Its colours are saved as a theme
+ * beside them. Nothing is turned on: a converted layout and a converted theme
+ * are both things to look at first.
+ */
+private fun multilingProposal(
+    state: WMFileTypes.Opened.MultilingFile,
+    repository: SettingsRepository,
+    context: android.content.Context,
+): ImportProposal {
+    val single = state.layouts.singleOrNull()
+    if (single != null && state.theme == null) {
+        return ImportProposal(
+            titleRes = R.string.import_name_title,
+            titleArg = single.layout.name,
+            body = context.getString(R.string.import_multiling_layout_body),
+            repairs = single.notes.map { it.format(context.resources) },
+            language = single.guessedLangId,
+            applyWithLanguage = { langId ->
+                repository.upsertCustomLayout(
+                    single.withLanguage(langId).copy(id = "custom_${System.currentTimeMillis()}"),
+                )
+                context.getString(R.string.import_done_name, single.layout.name)
+            },
+        )
+    }
+    val count = state.layouts.size
+    return ImportProposal(
+        titleRes = R.string.import_multiling_title,
+        body = buildString {
+            if (count > 0) {
+                append(context.resources.getQuantityString(R.plurals.import_multiling_layouts_body, count, count))
+            }
+            if (state.theme != null) {
+                if (isNotEmpty()) append("\n\n")
+                append(context.getString(R.string.import_multiling_theme_line))
+            }
+        },
+        apply = {
+            val stamp = System.currentTimeMillis()
+            state.layouts.forEachIndexed { index, converted ->
+                // One stamp for the whole batch, with the position after it:
+                // a loop is faster than the clock, and two layouts saved under
+                // one id would leave only the second.
+                repository.upsertCustomLayout(
+                    converted.withLanguage(converted.guessedLangId).copy(id = "custom_${stamp}_$index"),
+                )
+            }
+            state.theme?.let { result ->
+                repository.upsertCustomTheme(result.theme.copy(id = "custom_${stamp}_theme"))
+            }
+            buildString {
+                if (count > 0) {
+                    append(context.resources.getQuantityString(R.plurals.import_multiling_layouts_done, count, count))
+                }
+                if (state.theme != null) {
+                    if (isNotEmpty()) append("\n\n")
+                    append(context.getString(R.string.import_multiling_theme_done))
+                }
+            }
+        },
+    )
+}
+
+/**
+ * What a computer keyboard's layout file offers.
+ *
+ * One layout goes through the language step, like every other foreign layout:
+ * only a `.klc` states a language, and the picker starts from it. An XKB file
+ * with several variants adds them all at once, each with the language its
+ * letters suggest, the way a Multiling settings export does. Nothing is turned
+ * on.
+ */
+private fun desktopProposal(
+    layouts: List<ConvertedLayout>,
+    repository: SettingsRepository,
+    context: android.content.Context,
+): ImportProposal {
+    val single = layouts.singleOrNull()
+    if (single != null) {
+        return ImportProposal(
+            titleRes = R.string.import_name_title,
+            titleArg = single.layout.name,
+            body = context.getString(R.string.import_desktop_layout_body),
+            repairs = single.notes.map { it.format(context.resources) },
+            language = single.guessedLangId,
+            applyWithLanguage = { langId ->
+                repository.upsertCustomLayout(
+                    single.withLanguage(langId).copy(id = "custom_${System.currentTimeMillis()}"),
+                )
+                context.getString(R.string.import_done_name, single.layout.name)
+            },
+        )
+    }
+    val count = layouts.size
+    return ImportProposal(
+        titleRes = R.string.import_desktop_title,
+        body = context.resources.getQuantityString(R.plurals.import_desktop_layouts_body, count, count) +
+            layouts.joinToString(separator = "\n", prefix = "\n\n") { "• ${it.layout.name}" },
+        apply = {
+            // One stamp for the batch with the position after it, as for a
+            // Multiling export: the loop is faster than the clock.
+            val stamp = System.currentTimeMillis()
+            layouts.forEachIndexed { index, converted ->
+                repository.upsertCustomLayout(
+                    converted.withLanguage(converted.guessedLangId).copy(id = "custom_${stamp}_$index"),
+                )
+            }
+            context.resources.getQuantityString(R.plurals.import_multiling_layouts_done, count, count)
+        },
+    )
+}
+
+/**
  * Turns a read file into what the dialog should say and do. Every branch mirrors
  * the equivalent in-app import so an opened file and a picked file behave the
  * same — including reading first and asking before anything is written.
@@ -983,6 +1270,7 @@ private fun rememberProposal(
     repository: SettingsRepository,
     context: android.content.Context,
     uri: Uri,
+    onImported: () -> Unit,
 ): ImportProposal = remember(state) {
     when (state) {
         is WMFileTypes.Opened.Theme -> {
@@ -1012,6 +1300,8 @@ private fun rememberProposal(
         is WMFileTypes.Opened.FlorisTheme -> florisProposal(state.result, repository, context)
 
         is WMFileTypes.Opened.GboardThemeFile -> gboardProposal(state.result, repository, context)
+
+        is WMFileTypes.Opened.FutoThemeFile -> futoThemeProposal(state.result, repository, context)
 
         is WMFileTypes.Opened.KeymanPackageFile ->
             keymanProposal(state.contents, repository, context)
@@ -1065,7 +1355,35 @@ private fun rememberProposal(
             },
         )
 
-        is WMFileTypes.Opened.EspansoSnippets -> espansoProposal(state.parsed, context)
+        is WMFileTypes.Opened.UnexpectedLayout -> ImportProposal(
+            titleRes = R.string.import_name_title,
+            titleArg = state.converted.layout.name,
+            body = context.getString(R.string.import_unexpected_body),
+            repairs = state.converted.notes.map { it.format(context.resources) },
+            language = state.converted.guessedLangId,
+            applyWithLanguage = { langId ->
+                repository.upsertCustomLayout(
+                    state.converted.withLanguage(langId)
+                        .copy(id = "custom_${System.currentTimeMillis()}"),
+                )
+                context.getString(R.string.import_done_name, state.converted.layout.name)
+            },
+        )
+
+        is WMFileTypes.Opened.MultilingFile -> multilingProposal(state, repository, context)
+
+        is WMFileTypes.Opened.DesktopLayoutFile -> desktopProposal(state.layouts, repository, context)
+
+        // Drawn by ForeignBackupDialog before this is reached; here only so the
+        // list stays exhaustive.
+        is WMFileTypes.Opened.ForeignBackupFile -> ImportProposal(
+            titleRes = R.string.foreign_backup_title_generic,
+            body = "",
+        )
+
+        is WMFileTypes.Opened.ForeignSnippets -> foreignSnippetsProposal(state.parsed, context)
+
+        is WMFileTypes.Opened.GboardDictionaryFile -> gboardDictionaryProposal(state.contents, repository, context)
 
         is WMFileTypes.Opened.Config -> {
             val counts = repository.describeConfig(state.parsed)
@@ -1093,6 +1411,7 @@ private fun rememberProposal(
                 apply = {
                     when (val result = repository.importConfig(state.text)) {
                         is SettingsRepository.ConfigImportResult.Applied -> buildString {
+                            if (result.restored.isNotEmpty() && !result.settingsFailed) onImported()
                             if (result.restored.isEmpty()) {
                                 append(context.getString(R.string.import_backup_nothing))
                             } else {
@@ -1141,6 +1460,7 @@ private fun rememberProposal(
                                 if (result.restored.isEmpty()) {
                                     context.getString(R.string.import_backup_nothing)
                                 } else {
+                                    if (!result.settingsFailed) onImported()
                                     context.getString(
                                         R.string.import_backup_restored,
                                         result.restored.joinToString {
@@ -1185,12 +1505,14 @@ private fun rememberProposal(
             },
             apply = {
                 when (val result = repository.importSettings(state.text)) {
-                    is SettingsRepository.ImportResult.Applied ->
+                    is SettingsRepository.ImportResult.Applied -> {
+                        onImported()
                         context.resources.getQuantityString(
                             R.plurals.import_settings_restored,
                             result.settings,
                             result.settings,
                         )
+                    }
                     SettingsRepository.ImportResult.RolledBack ->
                         context.getString(R.string.import_settings_rolled_back)
                     SettingsRepository.ImportResult.NotABackup ->
@@ -1416,7 +1738,7 @@ private fun whatsAppStickersProposal(
 }
 
 /**
- * The confirmation for an Espanso match file.
+ * The confirmation for an Espanso match file or a table of snippets.
  *
  * Worded as a conversion, like the FlorisBoard one below and unlike the app's
  * own snippet file: Espanso can say things this app has no equivalent for, and
@@ -1426,15 +1748,16 @@ private fun whatsAppStickersProposal(
  * imported pack a single off switch — the same rule the Text Expander screen's
  * own Espanso import follows.
  */
-private fun espansoProposal(
+private fun foreignSnippetsProposal(
     parsed: SnippetPayload.Parsed,
     context: android.content.Context,
 ): ImportProposal {
+    val table = parsed.source == SnippetPayload.Source.CSV
     val folderName = parsed.suggestedName.trim()
     if (parsed.snippets.isEmpty()) {
         return ImportProposal(
             titleRes = R.string.import_espanso_title,
-            body = context.getString(R.string.import_espanso_none),
+            body = context.getString(if (table) R.string.import_csv_none else R.string.import_espanso_none),
             repairs = parsed.notes.map { it.resolve(context) },
             apply = null,
         )
@@ -1443,8 +1766,10 @@ private fun espansoProposal(
         titlePluralRes = R.plurals.import_snippets_title,
         titleQuantity = parsed.snippets.size,
         body = context.getString(
-            R.string.import_espanso_body,
-            folderName.ifEmpty { context.getString(R.string.import_espanso_folder_fallback) },
+            if (table) R.string.import_csv_body else R.string.import_espanso_body,
+            folderName.ifEmpty {
+                context.getString(if (table) R.string.import_csv_folder_fallback else R.string.import_espanso_folder_fallback)
+            },
         ),
         repairs = parsed.notes.map { it.resolve(context) },
         apply = {
@@ -1465,6 +1790,81 @@ private fun espansoProposal(
                 parsed.snippets.size,
                 parsed.snippets.size,
             )
+        },
+    )
+}
+
+/**
+ * The confirmation for Gboard's personal dictionary export.
+ *
+ * Both halves go in on one press, because both are what the file is: the words
+ * with no shortcut join the personal dictionary as words added by hand, and the
+ * shortcuts become snippets in a folder of their own, which gives the set one
+ * off switch. Each half is counted in the body, so a file that holds only one
+ * of them says so.
+ */
+private fun gboardDictionaryProposal(
+    contents: GboardDictionary.Contents,
+    repository: SettingsRepository,
+    context: android.content.Context,
+): ImportProposal {
+    val words = contents.words
+    val converted = GboardDictionary.toSnippets(contents)
+    val snippets = converted.snippets
+    if (words.isEmpty() && snippets.isEmpty()) {
+        return ImportProposal(
+            titleRes = R.string.import_gboard_dictionary_title,
+            body = context.getString(R.string.import_gboard_dictionary_empty),
+        )
+    }
+    val res = context.resources
+    return ImportProposal(
+        titleRes = R.string.import_gboard_dictionary_title,
+        body = buildString {
+            if (words.isNotEmpty()) {
+                append(res.getQuantityString(R.plurals.import_gboard_dictionary_words, words.size, words.size))
+            }
+            if (snippets.isNotEmpty()) {
+                if (isNotEmpty()) append("\n\n")
+                append(
+                    res.getQuantityString(
+                        R.plurals.import_gboard_dictionary_shortcuts,
+                        snippets.size,
+                        snippets.size,
+                        GboardDictionary.FOLDER_NAME,
+                    ),
+                )
+            }
+        },
+        repairs = converted.notes.map { it.resolve(context) },
+        apply = {
+            if (words.isNotEmpty()) {
+                withContext(Dispatchers.IO) {
+                    val lexicon = UserLexicon(File(context.filesDir, "learning/user_lexicon.json"))
+                    // Added by hand there, so added by hand here, and a capital
+                    // the user wrote is kept, as Android's own import does.
+                    for (word in words) lexicon.addWord(word, caseEvidence = word != word.lowercase())
+                    lexicon.save()
+                }
+                repository.bumpLexiconVersion()
+            }
+            if (snippets.isNotEmpty()) {
+                withContext(Dispatchers.IO) {
+                    val store = SnippetStore(File(context.filesDir, "snippets/snippets.json"))
+                    val folder = store.addFolder(GboardDictionary.FOLDER_NAME).id
+                    store.addAll(snippets, fallbackFolderId = folder)
+                    store.save()
+                }
+            }
+            buildString {
+                if (words.isNotEmpty()) {
+                    append(res.getQuantityString(R.plurals.import_gboard_dictionary_words_done, words.size, words.size))
+                }
+                if (snippets.isNotEmpty()) {
+                    if (isNotEmpty()) append("\n\n")
+                    append(res.getQuantityString(R.plurals.import_snippets_done, snippets.size, snippets.size))
+                }
+            }
         },
     )
 }
@@ -1553,6 +1953,64 @@ private fun florisProposal(
         apply = null,
     )
 }
+
+/**
+ * The confirmation for a FUTO Keyboard theme.
+ *
+ * Worded as a conversion, like the FlorisBoard one: what did not come across
+ * is listed, and the theme is saved but not switched on.
+ */
+private fun futoThemeProposal(
+    result: FutoThemeResult.Converted,
+    repository: SettingsRepository,
+    context: android.content.Context,
+): ImportProposal = ImportProposal(
+    titleRes = R.string.import_futo_theme_title,
+    body = buildString {
+        append(context.getString(R.string.import_futo_theme_body))
+        if (result.author.isNotBlank()) {
+            append("\n\n").append(context.getString(R.string.import_futo_theme_credit, result.author))
+        }
+    },
+    repairs = result.dropped.map { futoThemeDroppedLine(context, it) },
+    apply = { saveFutoTheme(context, repository, result) },
+)
+
+/**
+ * Stores a converted FUTO theme, its picture and its font, and says so. Shared
+ * by the file dialog and the button on the themes screen.
+ */
+internal suspend fun saveFutoTheme(
+    context: android.content.Context,
+    repository: SettingsRepository,
+    result: FutoThemeResult.Converted,
+): String {
+    val stored = withContext(Dispatchers.IO) {
+        result.converted.stored(
+            "custom_${System.currentTimeMillis()}",
+            File(context.filesDir, "theme_images").apply { mkdirs() },
+            FontStore.get(context),
+        )
+    }
+    repository.upsertCustomTheme(stored)
+    return buildString {
+        append(context.getString(R.string.import_futo_theme_done, stored.name))
+        if (result.dropped.isNotEmpty()) {
+            append("\n\n").append(context.getString(R.string.import_repairs_title))
+            for (line in result.dropped) append("\n• ").append(futoThemeDroppedLine(context, line))
+        }
+    }
+}
+
+/** One line of the "what the app changed" list of a FUTO theme import. */
+internal fun futoThemeDroppedLine(context: android.content.Context, dropped: FutoThemeUnsupported): String =
+    context.getString(
+        when (dropped) {
+            FutoThemeUnsupported.KEY_PICTURES -> R.string.import_futo_theme_dropped_pictures
+            FutoThemeUnsupported.WALLPAPER_COLOURS -> R.string.import_futo_theme_dropped_wallpaper
+            FutoThemeUnsupported.SHADER -> R.string.import_futo_theme_dropped_shader
+        },
+    )
 
 /**
  * The confirmation for a Gboard theme ZIP or an Rboard pack.
@@ -1715,6 +2173,16 @@ internal fun heliDroppedLine(context: android.content.Context, dropped: HeliUnsu
             HeliUnsupported.DERIVED_COLOURS -> R.string.import_heli_dropped_derived
             HeliUnsupported.UNUSED_COLOURS -> R.string.import_heli_dropped_unused
             HeliUnsupported.LOW_CONTRAST_FALLBACK -> R.string.import_floris_dropped_contrast
+        },
+    )
+
+/** One line of the "what the app changed" list of a Multiling O theme import. */
+internal fun multilingDroppedLine(context: android.content.Context, dropped: MultilingUnsupported): String =
+    context.getString(
+        when (dropped) {
+            MultilingUnsupported.TEXT_SHADOWS -> R.string.import_multiling_dropped_text_shadows
+            MultilingUnsupported.WALLPAPER -> R.string.import_multiling_dropped_wallpaper
+            MultilingUnsupported.UNUSED_COLOURS -> R.string.import_multiling_dropped_unused
         },
     )
 

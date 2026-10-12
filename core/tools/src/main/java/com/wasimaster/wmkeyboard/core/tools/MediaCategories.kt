@@ -39,6 +39,20 @@ object MediaCategories {
     /** A provider tag longer than this is a sentence, not a category. */
     private const val MAX_TERM_LENGTH = 32
 
+    /**
+     * The GIF panel's favourites chip (#597). It rides the category row and
+     * its selection, but it is no search: the panel shows its own list
+     * ([GifCollections]). The NUL keeps it apart from any term a provider
+     * could send.
+     */
+    const val FAVOURITES = "\u0000favourites"
+
+    /** The recent GIFs chip, the same kind of entry as [FAVOURITES]. */
+    const val RECENT = "\u0000recent"
+
+    /** Whether [term] is one of the panel's own lists rather than a search. */
+    fun isCollection(term: String?): Boolean = term == FAVOURITES || term == RECENT
+
     val bundledGif: List<MediaCategory> = listOf(
         bundled("reactions", R.string.core_tools_media_category_reactions),
         bundled("love", R.string.core_tools_media_category_love),

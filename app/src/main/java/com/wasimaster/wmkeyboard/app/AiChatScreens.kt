@@ -700,6 +700,9 @@ private fun ToolUses(
         onCopy = onCopy,
         modifier = modifier,
         fontSize = MaterialTheme.typography.labelMedium.fontSize,
+        // The same controller runs the keyboard's chat, so a question asked
+        // here is the one asked there; either screen can answer it (#573).
+        onApproval = { AiChatController.answerTool(it) },
     )
 }
 

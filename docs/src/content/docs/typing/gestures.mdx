@@ -41,11 +41,15 @@ Set a slot to **Cursor** and the drag moves the text cursor instead of typing. T
 
 **Keep moving while held** (off by default) is for the line that outruns the spacebar. The cursor keeps going by itself, about eight characters a second, in two cases: at once when your finger is past either end of the spacebar, and after a pause of about half a second when you hold your finger still at least a fifth of the spacebar's width away from where the swipe began. Move your finger again, or lift it, and it stops. A short swipe, or settling the finger near where you started, never sets it off.
 
-**Whole keyboard as touchpad** (off by default) hands the drag the whole key area once a swipe has turned into a cursor drag, the way SwiftKey's does. The keys dim, and a second finger landing on them types nothing until you lift. Your finger could always wander off the spacebar mid-drag; what changes is that the edges Keep moving while held uses are the sides of the keyboard instead of the ends of the spacebar, and its hold-still reach is a fifth of the keyboard's width.
+**Whole keyboard as touchpad** (off by default) hands the drag the whole key area once a swipe has turned into a cursor drag, the way SwiftKey's does. The keys dim, and a second finger landing on them types nothing until you lift. Your finger could always wander off the spacebar mid-drag; what changes is that the edges Keep moving while held uses are the sides of the keyboard instead of the ends of the spacebar, and its hold-still reach is a fifth of the keyboard's width. When the drag also moves up and down (the 2-D cursor touchpad, or Swipe up for the touchpad), the keyboard's top and bottom edges keep the cursor moving between lines the same way.
 
 <SettingsPath path="Typing / Gestures / 2-D cursor touchpad" />
 
-**2-D cursor touchpad** (off by default) turns the same drag into a touchpad. A vertical component now steps the cursor up and down through the text too, on the same Cursor speed distance. Both axes send real arrow-key events rather than computing a raw text offset, so vertical movement follows whatever line-wrapping the app is doing instead of guessing at it. Move the cursor directly changes that in one-line fields, where up and down go to the start and end of the text. Only movement that is mostly up or down counts toward a line step: the small wobble of a sideways drag drains away instead of adding up into a jump to another line. The toggle only appears once one of the two swipe slots above is set to Cursor, and Cursor speed appears beside it.
+**2-D cursor touchpad** (off by default) turns the same drag into a touchpad. A vertical component now steps the cursor up and down through the text too, on the same Cursor speed distance. Both axes send real arrow-key events rather than computing a raw text offset, so vertical movement follows whatever line-wrapping the app is doing instead of guessing at it. Move the cursor directly changes that in one-line fields, where up and down go to the start and end of the text. Only movement that is mostly up or down counts toward a line step: the small wobble of a sideways drag drains away instead of adding up into a jump to another line. The toggle only appears once one of the two swipe slots above is set to Cursor, or Swipe up for the touchpad is on, and Cursor speed appears beside it.
+
+<SettingsPath path="Typing / Gestures / Swipe up for the touchpad" />
+
+**Swipe up for the touchpad** (off by default) opens the 2-D touchpad from a swipe up, with no hold first. Swipe up from the spacebar, keep your finger down, and the cursor follows it left, right, up and down until you lift. The finger has to travel 24&nbsp;dp up, and more up than sideways, before the touchpad opens, so a tap that rolls a little still types a space. Sideways swipes are untouched: they still run the two slots above, so the default quick swipe keeps switching the language. This works whatever the slots are set to and whether the 2-D cursor touchpad switch is on, and every cursor setting on this page applies to the drag. With **Keep moving while held** and **Whole keyboard as touchpad** both on, the touchpad scrolls by itself at every edge of the keyboard: the sides keep the cursor moving along the line, and the top and bottom 24&nbsp;dp keep it moving up or down, about five lines a second, until you move back or lift. The band the drag started in doesn't count, so starting on a spacebar near the bottom edge never sets it off.
 
 <SettingsPath path="Typing / Gestures / Cursor magnifier" />
 
@@ -89,7 +93,7 @@ The one real cost is with [glide typing](/typing/glide-typing/). A very fast gli
 
 The same flick the other way. With this on, a short, quick swipe straight up on a letter types its capital, so a single capital in the middle of a word or a name needs no trip to <KeyCap>Shift</KeyCap>. On a key that has a shifted character of its own, such as a number-row key with a symbol above it, the swipe types that character instead. Keys whose Shift changes nothing (a digit with no shifted twin, a script without capitals) don't take the swipe. It doesn't touch Shift either: a Shift you armed is still armed for the next letter. Off by default.
 
-The rules are the ones the hint flick uses, pointed up: within about 30° of straight up, between half a key's height and two of them, straight, and under a quarter of a second. When [Words on the keys](/smart/words-on-the-keys/) shows a word on the key, a swipe up still takes that word, as it always has. The glide cost is the mirror image too: a very fast glide of a short word that runs straight up between neighbouring rows, "de" for instance, can type a capital instead.
+The rules are the ones the hint flick uses, pointed up: within about 30° of straight up, between half a key's height and two of them, straight, and under a quarter of a second. When [Words on the keys](/typing/words-on-the-keys/) shows a word on the key, a swipe up still takes that word, as it always has. The glide cost is the mirror image too: a very fast glide of a short word that runs straight up between neighbouring rows, "de" for instance, can type a capital instead.
 
 ## Flick keys
 
@@ -277,6 +281,7 @@ A printable table of every gesture on one page lives at [Gesture cheat sheet](/r
 | Move the cursor directly | Off |
 | Keep moving while held | Off |
 | Whole keyboard as touchpad | Off |
+| Swipe up for the touchpad | Off |
 | Top cursor speed | 4× (2–8×) |
 | Cursor magnifier | On |
 | Swipe in from the edge to go back | Off |

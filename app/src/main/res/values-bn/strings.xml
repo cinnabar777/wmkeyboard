@@ -2246,9 +2246,6 @@
     <string name="keypress_haptics_title">কী প্রেস হ্যাপটিক্স</string>
     <string name="keypress_hold_action_copy_label">কপি করুন</string>
     <string name="keypress_hold_action_cut_label">কাট করুন</string>
-    <string name="keypress_hold_action_first_info">অ্যাকশনটি সাধারণত পপআপের শেষে থাকে, তাই সাধারণ প্রেস এবং হোল্ড করলে আপনি প্রথম অ্যাকসেন্টটি পান। এটি চালু থাকলে এটি সামনে চলে আসে এবং শর্টকাট কিগুলোর একটিতে প্রেস এবং হোল্ড করলে অ্যাকশনটি সরাসরি কাজ করে। অ্যাকসেন্টগুলো এখনও সেখানে আছে: আঙুল চেপে ধরে রাখুন এবং আপনি যেটি চান সেটির ওপর স্লাইড করুন। এর জন্য অল্টারনেট কি-এর অধীনে \'হোল্ড টু সিলেক্ট\' প্রয়োজন।</string>
-    <string name="keypress_hold_action_first_subtitle">প্রেস এবং হোল্ড করলে অ্যাকসেন্ট দেখানোর পরিবর্তে অ্যাকশনটি কাজ করে</string>
-    <string name="keypress_hold_action_first_title">প্রথমে অ্যাকশন</string>
     <string name="keypress_hold_action_paste_label">পেস্ট করুন</string>
     <string name="keypress_hold_action_redo_label">পুনরায় করুন</string>
     <string name="keypress_hold_action_select_all_label">সব নির্বাচন করুন</string>
@@ -2563,8 +2560,6 @@
     <string name="languages_cjk_region_info">আঞ্চলিক শব্দচয়ন। তাইওয়ান এবং হংকং প্রায়শই একই জিনিসের জন্য ভিন্ন ভিন্ন শব্দ ব্যবহার করে, শুধু ভিন্ন অক্ষরই নয়।</string>
     <string name="languages_cjk_region_taiwan_title">তাইওয়ান (臺灣)</string>
     <string name="languages_cjk_region_title">আঞ্চলিক শব্দচয়ন</string>
-    <string name="languages_cjk_traditional_info">কীবোর্ড প্রতিটি প্রার্থীকে দেখানোর আগে সরলীকৃত (简体) থেকে ঐতিহ্যবাহী (繁體)-তে রূপান্তর করে। রূপান্তরটি একবারে একটি অক্ষর পড়ে। কিছু সরলীকৃত অক্ষরের একাধিক ঐতিহ্যবাহী রূপ রয়েছে এবং কীবোর্ড সবসময় সাধারণ রূপটি লেখে। 发 হয়ে যায় 發, যা 發展-এ সঠিক কিন্তু 頭髮-এ ভুল। সেই শব্দগুলো হাতে সংশোধন করুন।</string>
-    <string name="languages_cjk_traditional_subtitle">কীবোর্ডটি প্রার্থী শব্দগুলোকে প্রথাগত (繁體) লিপিতে রূপান্তর করে। এটি একবারে একটি অক্ষর রূপান্তর করে, তাই প্রসঙ্গের ওপর নির্ভর করে এমন কিছু রূপ ভুল হতে পারে (发 → 發 / 髮)।</string>
     <string name="languages_cjk_traditional_title">ঐতিহ্যবাহী অক্ষর</string>
     <string name="languages_clusters_title">ক্লাস্টার</string>
     <string name="languages_conjunct_backspace_info">ব্যাকস্পেস সাধারণত একবারে একটি কোড পয়েন্ট মুছে ফেলে। এটি কখনও কখনও স্ক্রিনে অসম্পূর্ণ ক্লাস্টার রেখে দেয়। এই সেটিং চালু থাকলে, এক চাপে পুরো ক্লাস্টার মুছে যায় যখন আপনি %1$s টাইপ করেন। অন্যান্য ভাষা তাদের নিজস্ব সেটিং বজায় রাখে।</string>

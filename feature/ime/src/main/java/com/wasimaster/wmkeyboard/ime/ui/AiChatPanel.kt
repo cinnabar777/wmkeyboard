@@ -606,6 +606,10 @@ private fun ToolUses(
         onOpen = { openToolLink(context, it) },
         onCopy = { onChat(AiChatAction.Copy(it)) },
         modifier = modifier,
+        // Only a running call ever asks, so a stored answer's record never
+        // shows the buttons.
+        onApproval = { onChat(AiChatAction.ToolApproval(it)) },
+        animate = LocalKbTheme.current.motion.any,
     )
 }
 

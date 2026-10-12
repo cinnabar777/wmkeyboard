@@ -2238,9 +2238,6 @@
     <string name="keypress_haptics_title">Taustiņu nospiešanas haptika</string>
     <string name="keypress_hold_action_copy_label">Kopēt</string>
     <string name="keypress_hold_action_cut_label">Izgriezt</string>
-    <string name="keypress_hold_action_first_info">Darbība parasti atrodas uznirstošā loga beigās, tāpēc vienkārša nospiešana un turēšana sniedz pirmo akcentu. Ja šis ir ieslēgts, tā pārvietojas uz priekšu, un nospiešana un turēšana uz viena no saīsnes taustiņiem nekavējoties izpilda darbību. Akcenti joprojām ir pieejami: turiet pirkstu nospiestu un slidiniet uz to, kuru vēlaties. Tam ir nepieciešams \"Turēt, lai atlasītu\" sadaļā \"Alternatīvie taustiņi\".</string>
-    <string name="keypress_hold_action_first_subtitle">Nospiešana un turēšana izpilda darbību, nevis parāda akcentus</string>
-    <string name="keypress_hold_action_first_title">Darbība vispirms</string>
     <string name="keypress_hold_action_paste_label">Ielīmēt</string>
     <string name="keypress_hold_action_redo_label">Atkārtot</string>
     <string name="keypress_hold_action_select_all_label">Atlasīt visu</string>
@@ -2550,8 +2547,6 @@
     <string name="languages_cjk_region_info">Taivāna un Honkonga bieži lieto atšķirīgus vārdus vienām un tām pašām lietām, ne tikai atšķirīgas rakstzīmes.</string>
     <string name="languages_cjk_region_taiwan_title">Taivāna (臺灣)</string>
     <string name="languages_cjk_region_title">Reģionālais formulējums</string>
-    <string name="languages_cjk_traditional_info">Tastatūra pārveido katru kandidātu no vienkāršotās (简体) uz tradicionālo (繁體) pirms tā parādīšanas. Pārveidošana notiek pa vienai rakstzīmei. Dažām vienkāršotajām rakstzīmēm ir vairāk nekā viena tradicionālā forma, un tastatūra vienmēr raksta biežāk lietoto. 发 kļūst par 發, kas ir pareizi vārdā 發展, bet nepareizi vārdā 頭髮. Labojiet šos vārdus manuāli.</string>
-    <string name="languages_cjk_traditional_subtitle">Tastatūra konvertē kandidātus uz tradicionālo ķīniešu rakstību (繁體). Tā konvertē pa vienam simbolam, tāpēc dažas formas, kas atkarīgas no konteksta, var būt nepareizas (发 → 發 / 髮).</string>
     <string name="languages_cjk_traditional_title">Tradicionālās rakstzīmes</string>
     <string name="languages_clusters_title">Klasteri</string>
     <string name="languages_conjunct_backspace_info">Atpakaļatkāpes taustiņš parasti izdzēš vienu koda punktu vienlaikus. Tas dažreiz atstāj uz ekrāna nepilnīgi izveidotus klasterus. Kad šis iestatījums ir ieslēgts, viena nospiešana izdzēš visu klasteri, kamēr rakstāt %1$s. Citas valodas saglabā savus iestatījumus.</string>

@@ -9,22 +9,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import com.wasimaster.wmkeyboard.core.icons.symbols.automirrored.outlined.Backspace
-import com.wasimaster.wmkeyboard.core.icons.symbols.automirrored.outlined.KeyboardReturn
 import com.wasimaster.wmkeyboard.core.icons.symbols.automirrored.outlined.Undo
 import com.wasimaster.wmkeyboard.core.icons.symbols.outlined.FileDownload
-import com.wasimaster.wmkeyboard.core.icons.symbols.outlined.Keyboard
 import com.wasimaster.wmkeyboard.core.icons.symbols.outlined.OpenInFull
-import com.wasimaster.wmkeyboard.core.icons.symbols.outlined.SpaceBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -66,19 +59,19 @@ import com.wasimaster.wmkeyboard.ime.HandwritingStatus
 import com.wasimaster.wmkeyboard.ime.HandwritingUi
 import com.wasimaster.wmkeyboard.ime.KeyboardUiState
 import com.wasimaster.wmkeyboard.ime.R
-import com.wasimaster.wmkeyboard.core.layout.Key
-import com.wasimaster.wmkeyboard.core.layout.KeyAction
+import com.wasimaster.wmkeyboard.core.layout.PanelFieldKind
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
- * Handwriting input panel (Gboard style): a full-width writing canvas with
- * a narrow action rail on the right (backspace, space, enter, back to
- * keys). Completed strokes come from the service via
- * [KeyboardUiState.handwriting]; only the stroke currently under the
- * finger/stylus is local, so the canvas stays smooth while recognition
- * and clearing remain the service's call.
+ * The handwriting panel's writing area (Gboard style), the
+ * [PanelFieldKind.HANDWRITING_CANVAS] cell of its panel layout (#568): the
+ * keys around it — delete, space, enter, back to the letters — are the
+ * layout's own and go through the panel grid like any panel key. Completed
+ * strokes come from the service via [KeyboardUiState.handwriting]; only the
+ * stroke currently under the finger/stylus is local, so the canvas stays
+ * smooth while recognition and clearing remain the service's call.
  *
  * S Pen / stylus support: stylus points are captured like finger points
  * (Compose reports them as pointer events). Palm rejection: once a stylus
@@ -86,130 +79,80 @@ import kotlinx.coroutines.launch
  * entirely, when the stylus-only setting is on.
  */
 @Composable
-internal fun HandwritingPanel(
+internal fun HandwritingCanvasField(
     state: KeyboardUiState,
     onStroke: (HwStroke, IntSize) -> Unit,
     onUndoStroke: () -> Unit,
     onDownloadModel: () -> Unit,
-    onKey: (Key) -> Unit,
     onLayoutSelect: (String) -> Unit,
-    onClose: () -> Unit,
 ) {
     val kb = LocalKbTheme.current
-    val height = keyRowsHeight(state)
     val hw = state.handwriting
     val feedback = LocalKeyPressFeedback.current
 
-    Row(
+    Box(
         modifier = Modifier
-            .fillMaxWidth()
-            .height(height)
-            .padding(horizontal = 4.dp, vertical = 4.dp),
+            .fillMaxSize()
+            .padding(2.dp),
     ) {
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight()
-                .padding(2.dp),
-        ) {
-            HandwritingStatusBody(state, onStroke, onDownloadModel)
+        HandwritingStatusBody(state, onStroke, onDownloadModel)
 
-            // Language chip: shows the active model, tap cycles through the
-            // handwriting languages of the enabled modes.
-            // Only languages ML Kit can actually recognize belong on the chip;
-            // cycling onto one with no model would strand the panel on a
-            // download that can never complete.
-            val languages = state.settings.enabledLanguages
-                .ifEmpty { listOf(LanguageRegistry.byId("en")) }
-                .filter { HandwritingModels.tagFor(it) != null }
-            val distinctTags = languages.mapNotNull { HandwritingModels.tagFor(it) }.distinct()
-            if (distinctTags.size > 1) {
-                Text(
-                    text = HandwritingModels.shortLabel(hw.languageTag),
-                    color = kb.secondaryText,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .padding(4.dp)
-                        .clip(kb.chipShape())
-                        .background(kb.chip)
-                        .chipBorder(kb, kb.chipShape())
-                        .clickable {
-                            feedback()
-                            val next = distinctTags[
-                                (distinctTags.indexOf(hw.languageTag) + 1).mod(distinctTags.size),
-                            ]
-                            val targetLang = languages.first { HandwritingModels.tagFor(it) == next }
-                            val layoutId = targetLang.layoutIds.firstOrNull { it in state.settings.enabledLayoutIds }
-                                ?: targetLang.layoutIds.firstOrNull()
-                            if (layoutId != null) onLayoutSelect(layoutId)
-                        }
-                        .padding(horizontal = 12.dp, vertical = 6.dp),
-                )
-            }
-
-            // Undo the last stroke while ink is still on the canvas.
-            UndoStrokeButton(hw, onUndoStroke, Modifier.align(Alignment.BottomStart))
-
-            // Blow the canvas up over the whole app (issue #386).
-            if (hw.status == HandwritingStatus.READY) {
-                val fullScreen = LocalHandwritingFullScreen.current
-                Icon(
-                    Icons.Outlined.OpenInFull,
-                    contentDescription = stringResource(R.string.ime_handwriting_full_screen_desc),
-                    tint = kb.toolbarIcon,
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(4.dp)
-                        .clip(RoundedCornerShape(kb.toolRadiusDp.dp))
-                        .clickable {
-                            feedback()
-                            fullScreen.onToggle()
-                        }
-                        .padding(8.dp)
-                        .size(20.dp),
-                )
-            }
+        // Language chip: shows the active model, tap cycles through the
+        // handwriting languages of the enabled modes.
+        // Only languages ML Kit can actually recognize belong on the chip;
+        // cycling onto one with no model would strand the panel on a
+        // download that can never complete.
+        val languages = state.settings.enabledLanguages
+            .ifEmpty { listOf(LanguageRegistry.byId("en")) }
+            .filter { HandwritingModels.tagFor(it) != null }
+        val distinctTags = languages.mapNotNull { HandwritingModels.tagFor(it) }.distinct()
+        if (distinctTags.size > 1) {
+            Text(
+                text = HandwritingModels.shortLabel(hw.languageTag),
+                color = kb.secondaryText,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(4.dp)
+                    .clip(kb.chipShape())
+                    .background(kb.chip)
+                    .chipBorder(kb, kb.chipShape())
+                    .clickable {
+                        feedback()
+                        val next = distinctTags[
+                            (distinctTags.indexOf(hw.languageTag) + 1).mod(distinctTags.size),
+                        ]
+                        val targetLang = languages.first { HandwritingModels.tagFor(it) == next }
+                        val layoutId = targetLang.layoutIds.firstOrNull { it in state.settings.enabledLayoutIds }
+                            ?: targetLang.layoutIds.firstOrNull()
+                        if (layoutId != null) onLayoutSelect(layoutId)
+                    }
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
+            )
         }
 
-        // Action rail, sized like a key column.
-        Column(modifier = Modifier
-            .width(64.dp)
-            .fillMaxHeight()) {
-            HwRailKey(
-                description = stringResource(CommonR.string.common_delete),
-                icon = Icons.AutoMirrored.Outlined.Backspace,
-                repeatable = true,
-                modifier = Modifier.weight(1f),
-            ) {
-                feedback()
-                onKey(Key("⌫", action = KeyAction.Delete))
-            }
-            HwRailKey(
-                description = stringResource(R.string.ime_rail_space_desc),
-                icon = Icons.Outlined.SpaceBar,
-                modifier = Modifier.weight(1f),
-            ) {
-                feedback()
-                onKey(Key(" ", action = KeyAction.Space))
-            }
-            HwRailKey(
-                description = stringResource(R.string.ime_rail_enter_desc),
-                icon = Icons.AutoMirrored.Outlined.KeyboardReturn,
-                modifier = Modifier.weight(1f),
-            ) {
-                feedback()
-                onKey(Key("⏎", action = KeyAction.Enter))
-            }
-            HwRailKey(
-                description = stringResource(R.string.ime_rail_back_desc),
-                icon = Icons.Outlined.Keyboard,
-                modifier = Modifier.weight(1f),
-            ) {
-                feedback()
-                onClose()
-            }
+        // Undo the last stroke while ink is still on the canvas.
+        UndoStrokeButton(hw, onUndoStroke, Modifier.align(Alignment.BottomStart))
+
+        // Blow the canvas up over the whole app (issue #386).
+        if (hw.status == HandwritingStatus.READY) {
+            val fullScreen = LocalHandwritingFullScreen.current
+            Icon(
+                Icons.Outlined.OpenInFull,
+                contentDescription = stringResource(R.string.ime_handwriting_full_screen_desc),
+                tint = kb.toolbarIcon,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(4.dp)
+                    .clip(RoundedCornerShape(kb.toolRadiusDp.dp))
+                    .clickable {
+                        feedback()
+                        fullScreen.onToggle()
+                    }
+                    .padding(8.dp)
+                    .size(20.dp),
+            )
         }
     }
 }
@@ -454,6 +397,7 @@ internal fun WritingCanvas(
     // Palm rejection: after stylus ink, finger touches are ignored briefly
     // so a knuckle or palm resting on the screen never draws.
     var lastStylusTime by remember { mutableLongStateOf(0L) }
+    val dissolve = rememberInkDissolve(hw)
 
     Box(
         modifier = Modifier
@@ -512,6 +456,7 @@ internal fun WritingCanvas(
                 join = StrokeJoin.Round,
             )
             val inkColor = if (hw.recognizing) kb.accent.copy(alpha = 0.45f) else kb.accent
+            drawDissolvingInk(dissolve, kb.accent.copy(alpha = 0.45f), strokeStyle)
             for (stroke in hw.strokes) {
                 drawPath(pathOf(stroke.points), color = inkColor, style = strokeStyle)
             }

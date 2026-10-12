@@ -95,4 +95,19 @@ class BracketPairsTest {
         }
         assertEquals(AUTO_CLOSE_PAIRS.size, AUTO_CLOSE_CLOSERS.size)
     }
+
+    @Test
+    fun `a closing bracket at the end of what it closes takes the space after it`() {
+        assertTrue(closerTakesSpace(null))
+        assertTrue(closerTakesSpace(""))
+        assertTrue(closerTakesSpace(" more"))
+        assertTrue(closerTakesSpace("\nnext line"))
+    }
+
+    @Test
+    fun `a closing bracket landing mid-text takes no space`() {
+        assertFalse(closerTakesSpace(")"))
+        assertFalse(closerTakesSpace("."))
+        assertFalse(closerTakesSpace("word"))
+    }
 }

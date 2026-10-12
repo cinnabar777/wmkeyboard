@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- ================================================================== -->
+    <!-- Telegram sticker sets. Telegram is the name of a messaging app.    -->
+    <!-- A "bot" is a Telegram account that a program uses, and a "bot     -->
+    <!-- token" is the password of that account. @BotFather is the Telegram -->
+    <!-- bot that makes bots. Do not translate Telegram, @BotFather, t.me   -->
+    <!-- or /newbot.                                                        -->
+    <!-- ================================================================== -->
+
+    <!-- The row on the Sticker packs screen, and the title of the screen it opens. -->
+    <string name="import_telegram_row_title">Telegram sticker sets</string>
+    <string name="import_telegram_row_subtitle">Adds a sticker set or an emoji set from Telegram to your packs</string>
+
+    <string name="import_telegram_section_title">Add a Telegram set</string>
+    <string name="import_telegram_caption">Telegram gives its sticker sets to other apps only through a bot. A bot is a free Telegram account for programs, and you make one in a minute. WM Keyboard uses your bot to get a set. It does not use your own Telegram account, and it does nothing else with the bot. Animated and video stickers become animated stickers that you can send in every app. A set that you add becomes one of your own packs. The stickers stay the work of the person who made them, so add only sets that you may use.</string>
+
+    <!-- The group with the token. -->
+    <string name="import_telegram_bot_section_title">Your bot</string>
+    <string name="import_telegram_bot_section_info">To make a bot, open @BotFather in Telegram, send /newbot, and give the bot a name. @BotFather then sends you a token, which looks like 123456789:AAE… Copy all of it into the field below. The token stays on this device. It is not in backups unless you turn on Include API keys.</string>
+    <string name="import_telegram_token_label">Bot token</string>
+    <string name="import_telegram_token_hint">Needed to get sticker sets</string>
+    <string name="import_telegram_token_invalid">This is not a bot token. A bot token is a number, a colon and a long code.</string>
+    <string name="import_telegram_botfather_title">Make a bot with @BotFather</string>
+    <string name="import_telegram_botfather_subtitle">Opens @BotFather in Telegram or in your browser</string>
+
+    <string name="import_telegram_link_title">Add a set from a link</string>
+    <string name="import_telegram_link_subtitle">Paste a t.me/addstickers or t.me/addemoji link</string>
+    <string name="import_telegram_link_needs_token">Add your bot token first</string>
+    <string name="import_telegram_link_body">Paste the link of the set, or only its name. In Telegram, open the set, press the menu, and then press Copy link. The app shows the set before it adds it.</string>
+    <string name="import_telegram_link_error">That is not the link or the name of a Telegram set.</string>
+    <string name="import_telegram_open_set">Show the set</string>
+
+    <!-- The label in the "Open with" list when a Telegram set link is opened. -->
+    <string name="import_telegram_chooser_label">Add stickers to WM Keyboard</string>
+
+    <!-- The preview of one set. -->
+    <string name="import_telegram_pack_title">Telegram sticker set</string>
+    <string name="import_telegram_loading">Getting the set…</string>
+    <string name="import_telegram_untitled">Set with no name</string>
+    <string name="import_telegram_animated_note">Some stickers in this set move. They become animated stickers when you add the set, which takes longer.</string>
+    <string name="import_telegram_add_title">Add this set</string>
+    <string name="import_telegram_add_subtitle">Downloads the stickers and keeps them on your device</string>
+    <string name="import_telegram_added_title">You have this set</string>
+    <!-- %1$s is the name of the user's pack. -->
+    <string name="import_telegram_added_subtitle">Press to open %1$s</string>
+    <!-- Progress of an import. Counts of stickers, as in "Downloading 3 of 40". -->
+    <string name="import_telegram_downloading" tools:ignore="PluralsCandidate">Downloading %1$d of %2$d</string>
+    <string name="import_telegram_adding" tools:ignore="PluralsCandidate">Adding %1$d of %2$d</string>
+    <string name="import_telegram_error_not_found">Telegram has no set with this name. The set was removed, or the link is not complete.</string>
+    <string name="import_telegram_error_bad_token">Telegram does not accept your bot token. Copy it again from @BotFather.</string>
+    <string name="import_telegram_error_no_token">Add your bot token first. The Telegram sticker sets screen tells you how to get one.</string>
+    <string name="import_telegram_open_settings">Open Telegram sticker sets</string>
+
+    <!-- Import from a link: the confirm for a Telegram set link. %1$s is a server name. -->
+    <string name="import_link_confirm_telegram">This link is a Telegram sticker set. WM Keyboard will get the set from %1$s with your bot token and show it to you. Nothing is added until you confirm it.</string>
+
+</resources>

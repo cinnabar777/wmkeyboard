@@ -78,6 +78,9 @@ internal fun AiToolSettings(
     val searchReady = settings.watch { hasSearchKey(it) }
     val toolSearch = settings.watch { it.ai.toolWebSearch }
     val toolFetch = settings.watch { it.ai.toolWebFetch }
+    // MCP servers (#573): a turned-on server's tools take rounds like the
+    // built-in two, so the rounds slider shows for them too.
+    val mcpOn = settings.watch { s -> s.ai.mcpServers.any { it.enabled } }
     // What the chosen provider needs, and where the text goes, both ride on
     // the heading's "?" rather than as paragraphs between the controls.
     val setupNote = when (aiProvider) {
@@ -432,7 +435,19 @@ internal fun AiToolSettings(
                 default = SettingsDefaults.ai.toolWebFetch,
             ) { scope.launch { repository.setAiToolWebFetch(it) } }
         }
-        item(visible = toolFetch || (toolSearch && searchReady)) {
+        item {
+            // The count is of the servers that are on, which is what decides
+            // whether the model is offered anything from them at all.
+            val enabledServers = settings.watch { s -> s.ai.mcpServers.count { it.enabled } }
+            NavRow(
+                title = R.string.toolai_ai_mcp_title,
+                subtitle = stringResource(R.string.toolai_ai_mcp_subtitle),
+                value = numberFormat.format(enabledServers),
+                route = "ai_mcp",
+                onClick = { onNavigate("ai_mcp") },
+            )
+        }
+        item(visible = toolFetch || (toolSearch && searchReady) || mcpOn) {
             SliderSetting(
                 R.string.toolai_ai_tool_rounds_title,
                 subtitle = stringResource(R.string.toolai_ai_tool_rounds_subtitle),

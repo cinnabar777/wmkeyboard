@@ -188,6 +188,8 @@ import com.wasimaster.wmkeyboard.core.theme.SeedSwatches
 import com.wasimaster.wmkeyboard.core.theme.isAnimatedImageFile
 import com.wasimaster.wmkeyboard.core.theme.ThemeAnimation
 import com.wasimaster.wmkeyboard.core.theme.ThemeCodec
+import com.wasimaster.wmkeyboard.core.theme.FutoTheme
+import com.wasimaster.wmkeyboard.core.theme.FutoThemeResult
 import com.wasimaster.wmkeyboard.core.theme.ThemeSpec
 import com.wasimaster.wmkeyboard.core.theme.brush
 import com.wasimaster.wmkeyboard.core.theme.keyShapeFor
@@ -225,6 +227,8 @@ import com.wasimaster.wmkeyboard.core.theme.GboardResult
 import com.wasimaster.wmkeyboard.core.theme.GboardTheme
 import com.wasimaster.wmkeyboard.core.theme.HeliResult
 import com.wasimaster.wmkeyboard.core.theme.HeliTheme
+import com.wasimaster.wmkeyboard.core.theme.MultilingTheme
+import com.wasimaster.wmkeyboard.core.theme.MultilingThemeResult
 import com.wasimaster.wmkeyboard.core.icons.symbols.outlined.Crop169
 import com.wasimaster.wmkeyboard.core.icons.symbols.outlined.CropFree
 import com.wasimaster.wmkeyboard.core.icons.symbols.outlined.CropSquare
@@ -1046,6 +1050,24 @@ fun ThemesScreen(
             }
         }
     }
+    // A FUTO theme is a ZIP, read and saved the way the file dialog does it.
+    val futoLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        scope.launch {
+            val result = withContext(Dispatchers.IO) {
+                runCatching {
+                    context.contentResolver.requireInputStream(uri).use { FutoTheme.read(it) }
+                }.getOrElse { FutoThemeResult.Unreadable }
+            }
+            message = if (result is FutoThemeResult.Converted) {
+                saveFutoTheme(context, repository, result)
+            } else {
+                context.getString(R.string.import_futo_theme_unreadable_body)
+            }
+        }
+    }
     // HeliBoard and LeanType have no theme file: a theme is a line of JSON,
     // copied out of their colour screen and pasted into a forum post. So this
     // import takes text from either source, and the button opens a two-way
@@ -1094,6 +1116,51 @@ fun ThemesScreen(
                 }.getOrNull()
             }
             applyHeliTheme(text)
+        }
+    }
+    // Multiling O has no theme file either: a theme is the colours block of its
+    // settings export, pasted or saved to a text file, or a link to the
+    // community theme page with the block in it. The same two-way chooser.
+    var multilingChooser by remember { mutableStateOf(false) }
+    suspend fun applyMultilingTheme(text: String?) {
+        if (text.isNullOrBlank()) {
+            message = context.getString(R.string.import_heli_clipboard_empty_body)
+            return
+        }
+        val result = withContext(Dispatchers.Default) { MultilingTheme.read(text) }
+        if (result !is MultilingThemeResult.Converted) {
+            message = context.getString(R.string.import_multiling_theme_unreadable_body)
+            return
+        }
+        val stored = result.theme.copy(id = "custom_${System.currentTimeMillis()}")
+        repository.upsertCustomTheme(stored)
+        // Saved, not switched to, like the other converted themes.
+        message = buildString {
+            append(
+                context.getString(
+                    R.string.import_heli_done,
+                    stored.name,
+                    result.coloursUsed,
+                    result.coloursRead,
+                ),
+            )
+            if (result.dropped.isNotEmpty()) {
+                append("\n\n").append(context.getString(R.string.import_repairs_pending_title))
+                for (line in result.dropped) append("\n• ").append(multilingDroppedLine(context, line))
+            }
+        }
+    }
+    val multilingLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        scope.launch {
+            val text = withContext(Dispatchers.IO) {
+                runCatching {
+                    context.contentResolver.readTextCapped(uri)
+                }.getOrNull()
+            }
+            applyMultilingTheme(text)
         }
     }
     // Gboard themes: a ZIP picked here, or the Rboard collection on its own
@@ -1377,6 +1444,16 @@ fun ThemesScreen(
             Spacer(Modifier.width(6.dp))
             Text(stringResource(R.string.theme_import_heli_action))
         }
+        OutlinedButton(onClick = { futoLauncher.launch(FutoTheme.IMPORT_MIME_TYPES) }) {
+            Icon(Icons.Outlined.SwapHoriz, contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(Modifier.width(6.dp))
+            Text(stringResource(R.string.theme_import_futo_action))
+        }
+        OutlinedButton(onClick = { multilingChooser = true }) {
+            Icon(Icons.Outlined.SwapHoriz, contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(Modifier.width(6.dp))
+            Text(stringResource(R.string.theme_import_multiling_action))
+        }
         // The Play build has no Rboard browser (it would fetch a collection of
         // unlicensed third-party artwork from inside the app), so there is
         // nothing to choose between and the button opens the file picker.
@@ -1436,6 +1513,27 @@ fun ThemesScreen(
                 TextButton(onClick = {
                     heliChooser = false
                     heliLauncher.launch(HeliTheme.IMPORT_MIME_TYPES)
+                }) { Text(stringResource(R.string.import_heli_file_action)) }
+            },
+        )
+    }
+    if (multilingChooser) {
+        val clipboard = LocalClipboardManager.current
+        AlertDialog(
+            onDismissRequest = { multilingChooser = false },
+            title = { Text(stringResource(R.string.import_multiling_theme_title)) },
+            text = { Text(stringResource(R.string.import_multiling_theme_body)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    multilingChooser = false
+                    val pasted = clipboard.getText()?.text
+                    scope.launch { applyMultilingTheme(pasted) }
+                }) { Text(stringResource(R.string.import_heli_paste_action)) }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    multilingChooser = false
+                    multilingLauncher.launch(MultilingTheme.IMPORT_MIME_TYPES)
                 }) { Text(stringResource(R.string.import_heli_file_action)) }
             },
         )

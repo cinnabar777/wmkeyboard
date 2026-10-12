@@ -212,7 +212,7 @@ export const LAYER_LABELS: Record<string, string> = {
 
 export const KEY_ACTION_TYPES = [
 	'text', 'shift', 'caps_lock', 'delete', 'forward_delete', 'space', 'enter', 'newline', 'symbols', 'letters',
-	'language_switch', 'input_method_picker', 'emoji', 'numpad', 'fn', 'kana_variant', 'morse_dot', 'morse_dash', 'none',
+	'language_switch', 'input_method_picker', 'emoji', 'numpad', 'fn', 'kana_variant', 'add_stroke', 'double_consonant', 'morse_dot', 'morse_dash', 'none',
 	'tool', 'layout', 'mod', 'send_key', 'broadcast', 'braille_dot', 'keyman_key', 'field', 'edit',
 ] as const;
 
@@ -226,6 +226,8 @@ export function keyFallbackLabel(action: { type: string; [k: string]: unknown } 
 		case 'numpad': return '123';
 		case 'fn': return 'Fn';
 		case 'kana_variant': return '小';
+		case 'add_stroke': return '획추가';
+		case 'double_consonant': return '쌍자음';
 		case 'morse_dot': return '·';
 		case 'morse_dash': return '–';
 		case 'newline': return '⏎';

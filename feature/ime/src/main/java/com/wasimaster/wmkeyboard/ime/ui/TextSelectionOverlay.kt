@@ -1,5 +1,8 @@
 package com.wasimaster.wmkeyboard.ime.ui
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.compositionLocalOf
@@ -26,12 +30,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
@@ -39,6 +43,11 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
+import androidx.compose.ui.node.DrawModifierNode
+import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.node.currentValueOf
+import androidx.compose.ui.node.invalidateDraw
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextLayoutResult
@@ -47,6 +56,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.ResolvedTextDirection
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -56,6 +66,10 @@ import com.wasimaster.wmkeyboard.ime.CaptureSelectionAction
 import com.wasimaster.wmkeyboard.ime.CaretText
 import com.wasimaster.wmkeyboard.ime.R
 import com.wasimaster.wmkeyboard.ime.aichat.AskAiContext
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.launch
+import kotlin.math.ceil
+import kotlin.math.floor
 import kotlin.math.roundToInt
 
 /*
@@ -190,6 +204,14 @@ internal fun SelectionOverlay(overlay: SelectionOverlayState, modifier: Modifier
     val density = androidx.compose.ui.platform.LocalDensity.current
     val handleBox = with(density) { HandleTouch.roundToPx() }
     val gap = with(density) { BarGap.roundToPx() }
+    // A new span of the same text eases the handles and the bar over from
+    // where they were; a new text, a scroll or reduce motion places them
+    // outright. The ease starts at 0 in the composition that sees the span,
+    // so no frame shows them already at the far end.
+    val glide = remember(overlay) { HandleGlide() }
+    val token = glide.observe(session, LocalKbTheme.current.motion.selection)
+    val ease = remember(token) { Animatable(if (glide.animate) 0f else 1f) }
+    LaunchedEffect(ease) { ease.animateTo(1f, tween(SelectionEaseMs, easing = FastOutSlowInEasing)) }
     Layout(
         modifier = modifier,
         content = {
@@ -205,11 +227,15 @@ internal fun SelectionOverlay(overlay: SelectionOverlayState, modifier: Modifier
         layout(width, height) {
             // Read here, not in composition: a scroll re-places, it never recomposes.
             overlay.moves
+            // Likewise the ease, which re-places on every frame of it and
+            // recomposes nothing.
+            val left = 1f - ease.value
             val own = coordinates
             val geometry = own?.let { selectionGeometry(it, session) }
             if (geometry == null) {
                 overlay.chrome = emptyList()
                 overlay.textBounds = null
+                glide.forget()
                 return@layout
             }
             val rects = ArrayList<Rect>(3)
@@ -222,9 +248,13 @@ internal fun SelectionOverlay(overlay: SelectionOverlayState, modifier: Modifier
             // A bar at a bare caret has nothing to stretch, so no handles.
             val caretOnly = session.start == session.end
             listOf(geometry.startFoot, geometry.endFoot).forEachIndexed { index, foot ->
-                if (caretOnly || !inView(Offset(foot.x, foot.y - 1f))) return@forEachIndexed
-                val x = (foot.x - handleBox / 2f).roundToInt()
-                val y = foot.y.roundToInt()
+                if (caretOnly || !inView(Offset(foot.x, foot.y - 1f))) {
+                    glide.forget(index)
+                    return@forEachIndexed
+                }
+                val at = glide.place(index, token, IntOffset((foot.x - handleBox / 2f).roundToInt(), foot.y.roundToInt()), left)
+                val x = at.x
+                val y = at.y
                 placeables[index].place(x, y)
                 rects += Rect(x.toFloat(), y.toFloat(), (x + handleBox).toFloat(), (y + handleBox).toFloat())
             }
@@ -232,14 +262,17 @@ internal fun SelectionOverlay(overlay: SelectionOverlayState, modifier: Modifier
             // when there is no room above, and always inside the body.
             val bar = placeables[2]
             val mid = (geometry.startFoot.x + geometry.endFoot.x) / 2f
-            val barX = (mid - bar.width / 2f).roundToInt().coerceIn(0, (width - bar.width).coerceAtLeast(0))
+            val barX0 = (mid - bar.width / 2f).roundToInt().coerceIn(0, (width - bar.width).coerceAtLeast(0))
             val above = (geometry.top - bar.height - gap).roundToInt()
             val below = (geometry.endFoot.y + handleBox + gap).roundToInt()
-            val barY = when {
+            val barTarget = when {
                 above >= 0 -> above
                 below + bar.height <= height -> below
                 else -> (height - bar.height).coerceAtLeast(0)
             }
+            val barAt = glide.place(BarSlot, token, IntOffset(barX0, barTarget), left)
+            val barX = barAt.x
+            val barY = barAt.y
             bar.place(barX, barY)
             rects += Rect(barX.toFloat(), barY.toFloat(), (barX + bar.width).toFloat(), (barY + bar.height).toFloat())
             overlay.chrome = rects
@@ -247,6 +280,74 @@ internal fun SelectionOverlay(overlay: SelectionOverlayState, modifier: Modifier
         }
     }
 }
+
+/** Which of [HandleGlide]'s slots is the bar; the two handles are 0 and 1. */
+private const val BarSlot = 2
+
+/**
+ * Eases the handles and the bar from where they were to where a new span puts
+ * them. [observe] runs in composition and hands out a new token whenever the
+ * span changes; the first placement under a token works out how far each
+ * piece jumped, and every placement after that takes the rest of that jump
+ * off what the geometry says, [left] of it at a time. The geometry itself is
+ * read fresh each time, so a scroll mid-ease carries the pieces with it.
+ *
+ * Plain fields, not state: the overlay's placement block is the only reader,
+ * and the ease's own value is what re-places it.
+ */
+private class HandleGlide {
+    private var owner: Any? = null
+    private var start = -1
+    private var end = -1
+    private var token = 0
+
+    /** Whether the current token's ease moves anything; false for a snap. */
+    var animate = false
+        private set
+
+    private val placed = arrayOfNulls<IntOffset>(3)
+    private val jump = arrayOfNulls<IntOffset>(3)
+    private val jumpToken = IntArray(3) { -1 }
+
+    fun observe(session: SelectionSession, motion: Boolean): Int {
+        if (session.owner === owner && session.start == start && session.end == end) return token
+        animate = motion && session.owner === owner
+        owner = session.owner
+        start = session.start
+        end = session.end
+        token++
+        return token
+    }
+
+    /** Where piece [slot] goes now, given where the geometry puts it. */
+    fun place(slot: Int, token: Int, target: IntOffset, left: Float): IntOffset {
+        if (jumpToken[slot] != token) {
+            jumpToken[slot] = token
+            jump[slot] = placed[slot]?.takeIf { animate }?.let { it - target }
+        }
+        val by = jump[slot]
+        val at = if (by == null || left <= 0f) {
+            target
+        } else {
+            IntOffset(target.x + (by.x * left).roundToInt(), target.y + (by.y * left).roundToInt())
+        }
+        placed[slot] = at
+        return at
+    }
+
+    /** Piece [slot] is not on screen: when it comes back, it comes back in place. */
+    fun forget(slot: Int) {
+        placed[slot] = null
+        jump[slot] = null
+    }
+
+    fun forget() {
+        for (slot in placed.indices) forget(slot)
+    }
+}
+
+/** How long the handles, the bar and the highlight take to ease to a new span. */
+private const val SelectionEaseMs = 140
 
 /** Where a selection's handles and bar go, in the overlay's space. */
 private class SelectionGeometry(
@@ -453,22 +554,95 @@ internal fun PublishSelection(
     DisposableEffect(overlay, owner) { onDispose { overlay.clear(owner) } }
 }
 
-/** The highlight under [start]..[end], drawn from [layout] only when it is a layout of [text]. */
+/**
+ * The highlight under [start]..[end], drawn from [layout] only when it is a
+ * layout of [text].
+ *
+ * A new span of the same text sweeps over from the old one, a character at a
+ * time, under Animate text selection: a select-all reads as the selection
+ * growing rather than as a second highlight replacing the first. Appearing,
+ * going and a new text are never animated.
+ */
 internal fun Modifier.selectionHighlight(
     text: String,
     start: Int,
     end: Int,
     color: Color,
     layout: () -> TextLayoutResult?,
-): Modifier = if (start == end) {
-    this
-} else {
-    drawBehind {
-        val result = layout()?.takeIf { it.layoutInput.text.text == text } ?: return@drawBehind
+): Modifier = this then SelectionHighlightElement(text, minOf(start, end), maxOf(start, end), color, layout)
+
+private data class SelectionHighlightElement(
+    val text: String,
+    val from: Int,
+    val to: Int,
+    val color: Color,
+    val layout: () -> TextLayoutResult?,
+) : ModifierNodeElement<SelectionHighlightNode>() {
+    override fun create() = SelectionHighlightNode(text, from, to, color, layout)
+
+    override fun update(node: SelectionHighlightNode) = node.update(text, from, to, color, layout)
+}
+
+private class SelectionHighlightNode(
+    private var text: String,
+    private var from: Int,
+    private var to: Int,
+    private var color: Color,
+    private var layout: () -> TextLayoutResult?,
+) : Modifier.Node(), DrawModifierNode, CompositionLocalConsumerModifierNode {
+    // The span as drawn while it eases, in fractional characters. Only read
+    // while [easing]; settled, the selection's own span is drawn.
+    private val shownFrom = Animatable(from.toFloat())
+    private val shownTo = Animatable(to.toFloat())
+    private var easing = false
+
+    fun update(text: String, from: Int, to: Int, color: Color, layout: () -> TextLayoutResult?) {
+        val oldFrom = this.from
+        val oldTo = this.to
+        val sameText = text == this.text
+        val moved = from != oldFrom || to != oldTo || !sameText
+        val ease = moved && sameText && oldFrom < oldTo && from < to &&
+            isAttached && currentValueOf(LocalKbTheme).motion.selection
+        this.text = text
+        this.from = from
+        this.to = to
+        this.color = color
+        this.layout = layout
+        if (ease) {
+            val restart = !easing
+            easing = true
+            // Undispatched, so a fresh sweep has its start in place before
+            // the next draw reads it.
+            coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
+                if (restart) {
+                    shownFrom.snapTo(oldFrom.toFloat())
+                    shownTo.snapTo(oldTo.toFloat())
+                }
+                val lead = launch { shownFrom.animateTo(from.toFloat(), tween(SelectionEaseMs, easing = FastOutSlowInEasing)) }
+                shownTo.animateTo(to.toFloat(), tween(SelectionEaseMs, easing = FastOutSlowInEasing))
+                lead.join()
+                easing = false
+                invalidateDraw()
+            }
+        } else if (moved) {
+            easing = false
+        }
+        invalidateDraw()
+    }
+
+    override fun ContentDrawScope.draw() {
+        drawHighlight()
+        drawContent()
+    }
+
+    private fun ContentDrawScope.drawHighlight() {
+        if (from >= to) return
+        val result = layout()?.takeIf { it.layoutInput.text.text == text } ?: return
         val length = result.layoutInput.text.length
-        val from = minOf(start, end).coerceIn(0, length)
-        val to = maxOf(start, end).coerceIn(0, length)
-        if (from < to) drawPath(result.getPathForRange(from, to), color)
+        // Easing, whole characters only, so the sweep never cuts a glyph in half.
+        val lo = (if (easing) floor(shownFrom.value).toInt() else from).coerceIn(0, length)
+        val hi = (if (easing) ceil(shownTo.value).toInt() else to).coerceIn(0, length)
+        if (lo < hi) drawPath(result.getPathForRange(lo, hi), color)
     }
 }
 

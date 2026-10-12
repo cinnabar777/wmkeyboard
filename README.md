@@ -103,10 +103,10 @@ The features the keyboard has
 
 ### Languages
 
-- **867 languages, 1,700+ layouts** from one data-driven registry: native scripts, InScript
+- **826 languages, 1,700+ layouts** from one data-driven registry: native scripts, InScript
   variants, romanised entries, CJK, minority Cyrillic alphabets, and a dozen constructed ones. A
   fresh install starts in whatever your phone is already set to.
-- **Bangla, done properly.** Avro phonetic, Probhat with aspirates on shift, Jatiya, Khipro,
+- **Bangla, done properly.** Avro phonetic, Probhat with aspirates on shift, Jatiya, Khipro Classic and Dark,
   conjunct-aware backspace, and Bangla-English mixing in one field.
 - **CJK input** with composers for pinyin, jyutping, kana and hangul, plus Vietnamese Telex.
 - **Layouts you can edit**, build from JSON, or import from FlorisBoard, HeliBoard, FUTO, and Keyman.

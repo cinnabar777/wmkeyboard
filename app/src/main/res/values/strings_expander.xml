@@ -108,6 +108,13 @@
     <string name="expander_source_native_body">A .wmsnippets.json file exported from this app.</string>
     <string name="expander_source_espanso">An Espanso file</string>
     <string name="expander_source_espanso_body">A .yml match file or a package .zip from the Espanso Hub.</string>
+    <string name="expander_source_csv">A table (CSV)</string>
+    <!-- A column is a vertical part of a table. Trigger and text are the two
+         parts of a snippet. -->
+    <string name="expander_source_csv_body">A .csv or .tsv file from another text expander or a spreadsheet. Use one column for the trigger and one for the text.</string>
+    <!-- Gboard is Google's keyboard; do not translate the name. -->
+    <string name="expander_source_gboard">Gboard\'s dictionary</string>
+    <string name="expander_source_gboard_body">The PersonalDictionary.zip that Gboard exports. Its shortcuts become snippets.</string>
     <string name="expander_source_url">A web address</string>
     <string name="expander_source_url_body">Paste a link to an Espanso package or match file.</string>
 
@@ -128,6 +135,17 @@
     <plurals name="expander_espanso_import_title">
         <item quantity="one">Import %1$d snippet from Espanso?</item>
         <item quantity="other">Import %1$d snippets from Espanso?</item>
+    </plurals>
+    <!-- %1$d is how many snippets the table holds, and also picks the form. -->
+    <plurals name="expander_csv_import_title">
+        <item quantity="one">Import %1$d snippet from the table?</item>
+        <item quantity="other">Import %1$d snippets from the table?</item>
+    </plurals>
+    <!-- Gboard is Google's keyboard; do not translate the name. %1$d is how
+         many snippets the file holds, and also picks the form. -->
+    <plurals name="expander_gboard_import_title">
+        <item quantity="one">Import %1$d shortcut from Gboard?</item>
+        <item quantity="other">Import %1$d shortcuts from Gboard?</item>
     </plurals>
     <string name="expander_espanso_folder_label">Folder name</string>
     <string name="expander_espanso_folder_body">The snippets go in this folder, so you can switch the whole set off at once. Clear the name to leave them ungrouped.</string>

@@ -3,8 +3,10 @@ package com.wasimaster.wmkeyboard.core.tools
 import android.content.Context
 import com.wasimaster.wmkeyboard.core.netlog.NetSource
 import com.wasimaster.wmkeyboard.core.settings.KeyboardSettings
+import com.wasimaster.wmkeyboard.core.settings.SettingsRepository
 import com.wasimaster.wmkeyboard.tools.feature.R
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.runBlocking
 
 /**
  * Runs the tools a model asked for (#470), and turns what happened — including
@@ -17,11 +19,79 @@ import kotlinx.coroutines.CancellationException
  * network error for a page they never asked for.
  *
  * Both surfaces share this: the AI panel's actions and the AI chat.
+ *
+ * The tools of the user's MCP servers (#573) run here too. A tool whose policy
+ * is "ask" goes through [approver] first; a surface that passes none cannot
+ * ask, and such a call is declined rather than run unseen.
  */
 class AiToolRunner(
     private val context: Context,
     private val settings: KeyboardSettings,
+    private val approver: AiToolApprover? = null,
 ) {
+
+    /** One MCP tool offered in this run, under the name the model sees. */
+    private class McpOffer(
+        val spec: AiToolSpec,
+        val server: McpServerSpec,
+        val entry: McpCatalogEntry,
+        val tool: McpTool,
+        val policy: McpToolPolicy,
+    )
+
+    /**
+     * The MCP tools of this run, by the name the model sees. Worked out once:
+     * [tools] and [run] must agree on every name, and the catalogue is read
+     * from a file.
+     */
+    private val mcp: Map<String, McpOffer> by lazy { mcpOffers() }
+
+    /** Tools the user allowed for good during this run; later calls skip the question. */
+    private val allowedNow = HashSet<String>()
+
+    /**
+     * The tools one run may offer, from the settings and from what is
+     * actually set up. See [enabled].
+     */
+    fun tools(): List<AiToolSpec> = AiTools.enabled(
+        search = settings.ai.toolWebSearch && ToolApiKeys.searchBackend(settings) != null,
+        fetch = settings.ai.toolWebFetch,
+    ) + mcp.values.map { it.spec }
+
+    /**
+     * How a call is shown while it runs. An MCP call is named by its tool's
+     * title and its server, with its arguments in a short line; ours by what
+     * [AiToolActivity.started] reads out of the call.
+     */
+    fun activityFor(call: AiToolCall): AiToolActivity {
+        val offer = mcp[call.name] ?: return AiToolActivity.started(call)
+        return AiToolActivity(
+            tool = offer.tool.label,
+            target = McpProtocol.preview(call.arguments),
+            running = true,
+            server = offer.server.label,
+        )
+    }
+
+    private fun mcpOffers(): Map<String, McpOffer> {
+        val servers = settings.ai.mcpServers.filter { it.enabled }
+        if (servers.isEmpty()) return emptyMap()
+        val taken = HashSet<String>(listOf(AiTools.WEB_SEARCH, AiTools.WEB_FETCH))
+        val out = LinkedHashMap<String, McpOffer>()
+        for (server in servers) {
+            // A server never connected, or connected at another address, has
+            // nothing to offer until the user presses Connect.
+            val entry = McpCatalogStore.entryFor(context, server) ?: continue
+            for (tool in entry.tools) {
+                val policy = server.policyFor(tool)
+                if (policy == McpToolPolicy.OFF) continue
+                val name = McpProtocol.exposedName(server.label, tool.name, taken)
+                taken += name
+                out[name] = McpOffer(McpProtocol.spec(name, server.label, tool), server, entry, tool, policy)
+            }
+        }
+        return out
+    }
 
     /**
      * Runs one call. Blocking; call on an IO dispatcher.
@@ -31,23 +101,87 @@ class AiToolRunner(
      * answered rather than ignored, because a model that gets silence repeats
      * itself until the round limit.
      */
-    fun run(call: AiToolCall): AiToolResult = runCatching {
-        when (call.name) {
-            AiTools.WEB_SEARCH -> search(call)
-            AiTools.WEB_FETCH -> fetch(call)
-            else -> refused(
+    fun run(call: AiToolCall): AiToolResult {
+        val offer = mcp[call.name]
+        val display = if (offer != null) activityFor(call) else null
+        return runCatching {
+            when {
+                offer != null -> runMcp(call, offer, display)
+                call.name == AiTools.WEB_SEARCH -> search(call)
+                call.name == AiTools.WEB_FETCH -> fetch(call)
+                else -> refused(
+                    call,
+                    context.getString(R.string.ftools_ai_tool_unknown, call.name),
+                    context.getString(R.string.ftools_ai_tool_reason_unknown),
+                )
+            }
+        }.getOrElse { failure ->
+            // Everything else becomes an answer the model can act on, but a
+            // cancelled run is not a failed tool: swallowing it here would
+            // keep a retired generation going round the loop.
+            if (failure is CancellationException) throw failure
+            val reason = McpClient.message(context, failure)
+            refused(call, context.getString(R.string.ftools_ai_tool_failed, reason), reason, display)
+        }
+    }
+
+    /**
+     * One MCP call: asked about first when its tool's policy says so, then
+     * sent to its server, and its answer cut to what a prompt can hold.
+     */
+    private fun runMcp(call: AiToolCall, offer: McpOffer, display: AiToolActivity?): AiToolResult {
+        val key = offer.server.id + "\u0000" + offer.tool.name
+        if (offer.policy == McpToolPolicy.ASK && key !in allowedNow) {
+            val ask = (display ?: activityFor(call)).copy(
+                awaitingApproval = true,
+                details = McpProtocol.pretty(call.arguments),
+            )
+            when (approver?.approve(ask) ?: AiToolApproval.DENY) {
+                AiToolApproval.ONCE -> Unit
+                AiToolApproval.ALWAYS -> {
+                    allowedNow += key
+                    // Blocking is fine: this thread is the tool loop's, and
+                    // it waits for the call anyway.
+                    runCatching {
+                        runBlocking {
+                            SettingsRepository(context).setMcpToolPolicy(
+                                offer.server.id, offer.tool.name, McpToolPolicy.ALLOW,
+                            )
+                        }
+                    }
+                }
+                AiToolApproval.DENY -> return refused(
+                    call,
+                    context.getString(R.string.ftools_mcp_declined),
+                    context.getString(R.string.ftools_mcp_reason_declined),
+                    display,
+                )
+                AiToolApproval.CANCELLED -> return refused(
+                    call,
+                    context.getString(R.string.ftools_mcp_stopped),
+                    context.getString(R.string.ftools_mcp_reason_stopped),
+                    display,
+                )
+            }
+        }
+        val headers = settings.ai.mcpHeaders[offer.server.id].orEmpty()
+        val outcome = McpClient.call(offer.server, headers, offer.entry, offer.tool.name, call.arguments)
+        val content = buildString {
+            append(outcome.text.ifBlank { context.getString(R.string.ftools_mcp_empty) })
+            if (outcome.truncated) append("\n\n").append(context.getString(R.string.ftools_mcp_truncated))
+            if (outcome.omitted.isNotEmpty()) {
+                append("\n\n").append(context.getString(R.string.ftools_mcp_omitted, outcome.omitted.joinToString(", ")))
+            }
+        }
+        if (outcome.isError) {
+            return refused(
                 call,
-                context.getString(R.string.ftools_ai_tool_unknown, call.name),
-                context.getString(R.string.ftools_ai_tool_reason_unknown),
+                context.getString(R.string.ftools_mcp_tool_error, content),
+                context.getString(R.string.ftools_mcp_reason_tool_error),
+                display,
             )
         }
-    }.getOrElse { failure ->
-        // Everything else becomes an answer the model can act on, but a
-        // cancelled run is not a failed tool: swallowing it here would
-        // keep a retired generation going round the loop.
-        if (failure is CancellationException) throw failure
-        val reason = ToolHttp.friendlyMessage(context, failure)
-        refused(call, context.getString(R.string.ftools_ai_tool_failed, reason), reason)
+        return AiToolResult(call, content, display = display)
     }
 
     /**
@@ -56,8 +190,8 @@ class AiToolRunner(
      * two readers — "answer from what you already know" is not something to
      * show a person.
      */
-    private fun refused(call: AiToolCall, content: String, reason: String) =
-        AiToolResult(call, content, error = reason)
+    private fun refused(call: AiToolCall, content: String, reason: String, display: AiToolActivity? = null) =
+        AiToolResult(call, content, error = reason, display = display)
 
     private fun missing(call: AiToolCall, argument: String) = refused(
         call,
@@ -130,12 +264,12 @@ class AiToolRunner(
          * Search drops out when no backend is configured rather than being
          * offered and failing: a tool the model can only ever be refused by
          * still costs its description in the prompt of every run, and a small
-         * model handed one tends to keep trying it.
+         * model handed one tends to keep trying it. For the same reason an
+         * MCP server that was never connected offers nothing, and a tool the
+         * user turned off is not in the list at all.
          */
-        fun enabled(settings: KeyboardSettings): List<AiToolSpec> = AiTools.enabled(
-            search = settings.ai.toolWebSearch && ToolApiKeys.searchBackend(settings) != null,
-            fetch = settings.ai.toolWebFetch,
-        )
+        fun enabled(context: Context, settings: KeyboardSettings): List<AiToolSpec> =
+            AiToolRunner(context, settings).tools()
 
         /**
          * Results per search handed to the model: fewer than the panel shows a

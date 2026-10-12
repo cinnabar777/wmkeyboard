@@ -19,9 +19,10 @@ import androidx.compose.ui.platform.LocalContext
 import com.wasimaster.wmkeyboard.common.R
 
 /**
- * The three grants Android does not hand out through a permission dialog:
- * notification access, usage access and the accessibility service. Each is a
- * toggle on a system Settings screen the app can only *navigate to*.
+ * The grants Android does not hand out through a permission dialog:
+ * notification access, usage access, the accessibility service, installing
+ * updates and drawing over other apps. Each is a toggle on a system Settings
+ * screen the app can only *navigate to*.
  *
  * Play treats these as more sensitive than ordinary permissions, not less —
  * notification access and the Accessibility API each have their own Console
@@ -68,6 +69,12 @@ enum class SpecialAccess {
      * checking the file against the release checksum and its own signing key.
      */
     INSTALL_UPDATES,
+
+    /**
+     * "Display over other apps", for the floating keyboard button (issue
+     * #374). Nothing is read with it: the one window it draws is the button.
+     */
+    OVERLAY,
     ;
 
     /** Dialog heading: the grant and the feature that wants it. */
@@ -79,6 +86,7 @@ enum class SpecialAccess {
             USAGE -> R.string.common_special_access_usage_title
             ACCESSIBILITY -> R.string.common_special_access_accessibility_title
             INSTALL_UPDATES -> R.string.common_special_access_install_updates_title
+            OVERLAY -> R.string.common_special_access_overlay_title
         }
 
     /** What is read, why, where it goes, and that the feature is optional. */
@@ -90,6 +98,7 @@ enum class SpecialAccess {
             USAGE -> R.string.common_special_access_usage_body
             ACCESSIBILITY -> R.string.common_special_access_accessibility_body
             INSTALL_UPDATES -> R.string.common_special_access_install_updates_body
+            OVERLAY -> R.string.common_special_access_overlay_body
         }
 
     /**
@@ -133,6 +142,11 @@ enum class SpecialAccess {
         } else {
             emptyList()
         }
+        // The app's own row first; some skins only have the list of apps.
+        OVERLAY -> listOf(
+            Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, "package:$packageName".toUri()),
+            Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION),
+        )
     }.map { it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
 }
 

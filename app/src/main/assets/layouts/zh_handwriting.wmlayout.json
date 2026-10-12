@@ -13,7 +13,7 @@
         "rows": [
           [
             { "label": "?123", "action": { "type": "symbols" }, "width": 1.5 },
-            { "label": "，", "longPress": ["！", "？", "、"], "role": "Comma" },
+            { "label": "，", "longPress": ["！", "？", "、", "“", "”", "「", "」", "《", "》"], "role": "Comma" },
             { "label": "🌐", "action": { "type": "language_switch" } },
             { "label": " ", "action": { "type": "space" }, "width": 3.5 },
             { "label": "。", "longPress": ["…", "，", "？", "！", "：", "；"], "role": "Period" },

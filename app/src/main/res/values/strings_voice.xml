@@ -109,6 +109,14 @@
     <!-- The line between a tap and a walkie-talkie hold. -->
     <string name="voice_pause_media_title">Pause media during voice typing</string>
     <string name="voice_pause_media_subtitle">Pause music and video while the microphone listens</string>
+    <string name="voice_mic_title">Microphone</string>
+    <string name="voice_mic_subtitle">Prefer a Bluetooth, wired or USB microphone when one is connected</string>
+    <string name="voice_mic_info">Which microphone voice typing listens through. Automatic uses the one Android picks, which is a plugged-in headset before the phone. Pick a kind to prefer it whenever one is connected. When it is not connected, voice typing uses the automatic choice.\n\nOffline Whisper and the transcription server can use every kind. The system recognizer records the audio itself, so for it only Bluetooth has an effect.\n\nThe microphone button on the voice panel and both voice bars shows the microphone in use. Tap it to switch to the next one that is connected.</string>
+    <string name="voice_mic_auto">Automatic</string>
+    <string name="voice_mic_phone">Phone microphone</string>
+    <string name="voice_mic_wired">Wired headset</string>
+    <string name="voice_mic_usb">USB microphone</string>
+    <string name="voice_mic_bluetooth">Bluetooth headset</string>
     <string name="voice_pause_media_info">When voice typing starts, the keyboard asks other apps to pause their sound. Music, podcasts and video stop while the microphone listens. They continue a moment after voice typing stops. An app that ignores the request continues to play.</string>
     <!-- #499: each dictated phrase is cleaned up by the model of the AI tool. -->
     <string name="voice_ai_tidy_title">Tidy dictation with AI</string>

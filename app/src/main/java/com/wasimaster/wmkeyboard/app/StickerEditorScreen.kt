@@ -8,6 +8,17 @@ import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
 import android.graphics.Rect
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -33,6 +44,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -46,6 +58,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
@@ -163,6 +176,53 @@ private const val BRUSH_PREVIEW_MS = 1100L
 private enum class EditorMode { CROP, ERASE, RESTORE, BORDER }
 
 /**
+ * The controls under the canvas, which is coarser than [EditorMode]: Erase and
+ * Restore share one brush slider, and switching between them must not fade the
+ * slider out and back in under the thumb that is about to use it.
+ */
+private enum class ToolPanel { CROP, BRUSH, BORDER }
+
+private fun toolPanelOf(mode: EditorMode): ToolPanel = when (mode) {
+    EditorMode.CROP -> ToolPanel.CROP
+    EditorMode.ERASE, EditorMode.RESTORE -> ToolPanel.BRUSH
+    EditorMode.BORDER -> ToolPanel.BORDER
+}
+
+/** How long the picture before a cut-out or an undo takes to fade off the canvas. */
+private const val DissolveMs = 220
+
+/**
+ * The picture as it was a moment ago, fading off the top of the canvas.
+ *
+ * The editor's bitmaps are changed in place, so once a cut-out or an undo has
+ * run there is no "before" left to fade from. The screen takes a copy just
+ * ahead of the change and hands it here; the canvas draws it over the new
+ * picture at [fade] until it has gone. What the change took away melts out of
+ * the picture rather than vanishing from one frame to the next, which is the
+ * difference between seeing the background go and wondering whether it did.
+ *
+ * Read in the canvas's draw pass only, so the fade is a redraw a frame.
+ */
+@Stable
+private class CanvasDissolve {
+    var from by mutableStateOf<ImageBitmap?>(null)
+        private set
+    val fade = Animatable(0f)
+
+    suspend fun play(before: ImageBitmap) {
+        from = before
+        try {
+            fade.snapTo(1f)
+            fade.animateTo(0f, tween(DissolveMs, easing = FastOutSlowInEasing))
+        } finally {
+            // A second change interrupting this one has already put its own
+            // picture up; only the dissolve still showing its picture clears it.
+            if (from === before) from = null
+        }
+    }
+}
+
+/**
  * Crop, background removal and a border, for one sticker.
  *
  * Everything happens at 512×512, the sticker canvas: the crop is applied
@@ -197,6 +257,8 @@ internal fun StickerEditorScreen(request: StickerEditRequest, onDone: () -> Unit
 
     val state = remember(loaded) { EditorState(loaded.bitmap, loaded.edit, loaded.mask) }
     DisposableEffect(state) { onDispose { state.recycle() } }
+    val reduceMotion = LocalReduceMotion.current
+    val dissolve = remember(state) { CanvasDissolve() }
 
     // A resumed edit opens on the brush rather than on Crop: the crop is
     // already made, and the one gesture that would silently undo the erasing
@@ -240,6 +302,21 @@ internal fun StickerEditorScreen(request: StickerEditRequest, onDone: () -> Unit
         showBrush = false
     }
 
+    /**
+     * Runs [change] on the picture and lets what it replaced dissolve away.
+     * For the whole-canvas changes only — a cut-out, an undo — never for a
+     * brush stroke, which the finger is already watching happen.
+     */
+    fun dissolving(change: () -> Unit) {
+        if (reduceMotion || mode == EditorMode.CROP) {
+            change()
+            return
+        }
+        val before = state.snapshot().asImageBitmap()
+        change()
+        scope.launch { dissolve.play(before) }
+    }
+
     fun enterMode(next: EditorMode) {
         if (next == EditorMode.CROP && mode != EditorMode.CROP && state.masked) {
             recropAsk = true
@@ -270,8 +347,10 @@ internal fun StickerEditorScreen(request: StickerEditRequest, onDone: () -> Unit
             busy = null
             when (result) {
                 is SubjectCutout.Result.Ok -> {
-                    state.pushUndo()
-                    state.applyAlphaMask(result.alpha)
+                    dissolving {
+                        state.pushUndo()
+                        state.applyAlphaMask(result.alpha)
+                    }
                     result.alpha.recycle()
                 }
                 SubjectCutout.Result.NoSubject ->
@@ -347,10 +426,23 @@ internal fun StickerEditorScreen(request: StickerEditRequest, onDone: () -> Unit
             .clip(RoundedCornerShape(12.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant),
     ) {
-        if (mode == EditorMode.CROP) {
-            CropCanvas(state)
-        } else {
-            EditorCanvas(state, mode, brushPx, showBrush)
+        // Into and out of the crop step the canvas hands over rather than
+        // swapping in a frame: the framed photo and the cut-out are the same
+        // picture, and a cross-fade says so. The brush tabs share one canvas,
+        // so moving between them changes nothing here.
+        AnimatedContent(
+            targetState = mode == EditorMode.CROP,
+            transitionSpec = { stateSwapTransform(reduceMotion, animateSize = false) },
+            label = "stickerEditorCanvas",
+        ) { cropping ->
+            // The canvas on its way out is still composed, and would still
+            // take a pan or a stroke: each one listens only while its step is
+            // the current one.
+            if (cropping) {
+                CropCanvas(state, active = mode == EditorMode.CROP)
+            } else {
+                EditorCanvas(state, mode, brushPx, showBrush, dissolve)
+            }
         }
         if (busy != null) {
             Column(
@@ -394,54 +486,74 @@ internal fun StickerEditorScreen(request: StickerEditRequest, onDone: () -> Unit
         },
     ) { enterMode(it) }
 
-    when (mode) {
-        EditorMode.CROP -> CaptionText(stringResource(R.string.import_sticker_editor_crop_hint))
-        EditorMode.ERASE, EditorMode.RESTORE -> {
-            SliderRow(
-                title = R.string.import_sticker_editor_brush_size_label,
-                value = brushPx,
-                range = MIN_BRUSH_PX..MAX_BRUSH_PX,
-                display = { "${it.roundToInt()}" },
-            ) { brushPx = it }
-        }
-        EditorMode.BORDER -> {
-            SliderRow(
-                title = R.string.import_sticker_editor_border_width_label,
-                value = state.border.widthPx,
-                range = 0f..OutlineSpec.MAX_WIDTH_PX,
-                display = { "${it.roundToInt()}" },
-            ) { state.changeBorder(state.border.copy(widthPx = it)) }
-            ChoiceControl(
-                options = listOf(
-                    AndroidColor.WHITE to stringResource(R.string.import_sticker_editor_border_white_option),
-                    AndroidColor.BLACK to stringResource(R.string.import_sticker_editor_border_black_option),
-                ),
-                selected = state.border.color,
-                modifier = Modifier.padding(horizontal = 16.dp),
-                label = stringResource(R.string.import_sticker_editor_border_color_label),
-            ) { state.changeBorder(state.border.copy(color = it)) }
+    // Each tool's own controls hand over to the next tool's, the box between
+    // them growing or shrinking to fit rather than the page jumping.
+    AnimatedContent(
+        targetState = toolPanelOf(mode),
+        transitionSpec = { stateSwapTransform(reduceMotion) },
+        label = "stickerEditorTool",
+    ) { panel ->
+        Column {
+            when (panel) {
+                ToolPanel.CROP -> CaptionText(stringResource(R.string.import_sticker_editor_crop_hint))
+                ToolPanel.BRUSH -> {
+                    SliderRow(
+                        title = R.string.import_sticker_editor_brush_size_label,
+                        value = brushPx,
+                        range = MIN_BRUSH_PX..MAX_BRUSH_PX,
+                        display = { "${it.roundToInt()}" },
+                    ) { brushPx = it }
+                }
+                ToolPanel.BORDER -> {
+                    SliderRow(
+                        title = R.string.import_sticker_editor_border_width_label,
+                        value = state.border.widthPx,
+                        range = 0f..OutlineSpec.MAX_WIDTH_PX,
+                        display = { "${it.roundToInt()}" },
+                    ) { state.changeBorder(state.border.copy(widthPx = it)) }
+                    ChoiceControl(
+                        options = listOf(
+                            AndroidColor.WHITE to stringResource(R.string.import_sticker_editor_border_white_option),
+                            AndroidColor.BLACK to stringResource(R.string.import_sticker_editor_border_black_option),
+                        ),
+                        selected = state.border.color,
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        label = stringResource(R.string.import_sticker_editor_border_color_label),
+                    ) { state.changeBorder(state.border.copy(color = it)) }
+                }
+            }
         }
     }
 
-    if (cutoutSupported && mode != EditorMode.CROP) {
-        SettingsGroup {
-            item {
-                WmRow(
-                    title = stringResource(R.string.import_sticker_editor_cutout_action),
-                    icon = SettingsRowIcons[R.string.import_sticker_editor_cutout_action],
-                    subtitle = stringResource(
-                        when {
-                            modelReady -> R.string.import_sticker_editor_cutout_subtitle
-                            SubjectCutout.downloadsFromPlayServices(context) ->
-                                R.string.import_sticker_editor_cutout_download_subtitle
-                            // No Play services to ask, so the app gets its own
-                            // model, and can say how much it is about to fetch.
-                            else -> R.string.import_sticker_editor_cutout_download_own_subtitle
-                        },
-                    ),
-                    enabled = busy == null,
-                    onClick = { runCutout() },
-                )
+    if (cutoutSupported) {
+        // Leaves with the crop step's arrival and comes back after it, rather
+        // than blinking: it is the one row on the screen that comes and goes.
+        AnimatedVisibility(
+            visible = mode != EditorMode.CROP,
+            enter = if (reduceMotion) EnterTransition.None else expandVertically() + fadeIn(),
+            exit = if (reduceMotion) ExitTransition.None else shrinkVertically() + fadeOut(),
+        ) {
+            SettingsGroup {
+                item {
+                    WmRow(
+                        title = stringResource(R.string.import_sticker_editor_cutout_action),
+                        icon = SettingsRowIcons[R.string.import_sticker_editor_cutout_action],
+                        subtitle = stringResource(
+                            when {
+                                modelReady -> R.string.import_sticker_editor_cutout_subtitle
+                                SubjectCutout.downloadsFromPlayServices(context) ->
+                                    R.string.import_sticker_editor_cutout_download_subtitle
+                                // No Play services to ask, so the app gets its own
+                                // model, and can say how much it is about to fetch.
+                                else -> R.string.import_sticker_editor_cutout_download_own_subtitle
+                            },
+                        ),
+                        enabled = busy == null,
+                        // Still drawn for a moment as the crop step opens, and
+                        // a cut-out there would run on a crop not yet made.
+                        onClick = { if (mode != EditorMode.CROP) runCutout() },
+                    )
+                }
             }
         }
     }
@@ -455,7 +567,7 @@ internal fun StickerEditorScreen(request: StickerEditRequest, onDone: () -> Unit
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         OutlinedButton(
-            onClick = { state.undo() },
+            onClick = { dissolving { state.undo() } },
             enabled = state.undoDepth > 0 && busy == null,
         ) { Text(stringResource(R.string.import_sticker_editor_undo_action)) }
         Spacer(Modifier.fillMaxWidth().weight(1f))
@@ -488,7 +600,7 @@ internal fun StickerEditorScreen(request: StickerEditRequest, onDone: () -> Unit
 
 /** The crop step: the picture pans and zooms under a square frame. */
 @Composable
-private fun CropCanvas(state: EditorState) {
+private fun CropCanvas(state: EditorState, active: Boolean) {
     val source = state.source
     var frame by remember { mutableStateOf(IntSize.Zero) }
 
@@ -514,12 +626,18 @@ private fun CropCanvas(state: EditorState) {
                     state.cropOffset = clamp(state.cropOffset, state.cropZoom)
                 }
             }
-            .pointerInput(source) {
-                detectTransformGestures { _, pan, gestureZoom, _ ->
-                    state.cropZoom = (state.cropZoom * gestureZoom).coerceIn(1f, MAX_CROP_ZOOM)
-                    state.cropOffset = clamp(state.cropOffset + pan, state.cropZoom)
-                }
-            },
+            .then(
+                if (!active) {
+                    Modifier
+                } else {
+                    Modifier.pointerInput(source) {
+                        detectTransformGestures { _, pan, gestureZoom, _ ->
+                            state.cropZoom = (state.cropZoom * gestureZoom).coerceIn(1f, MAX_CROP_ZOOM)
+                            state.cropOffset = clamp(state.cropOffset + pan, state.cropZoom)
+                        }
+                    }
+                },
+            ),
     ) {
         Canvas(modifier = Modifier.fillMaxWidth().aspectRatio(1f)) {
             val scale = coverScale() * state.cropZoom
@@ -550,6 +668,7 @@ private fun EditorCanvas(
     mode: EditorMode,
     brushPx: Float,
     showBrush: Boolean,
+    dissolve: CanvasDissolve,
 ) {
     val erasing = mode == EditorMode.ERASE
     val painting = mode == EditorMode.ERASE || mode == EditorMode.RESTORE
@@ -620,6 +739,10 @@ private fun EditorCanvas(
                 dstOffset = IntOffset.Zero,
                 dstSize = target,
             )
+            // The picture before a cut-out or an undo, fading off the new one.
+            dissolve.from?.let { before ->
+                drawImage(before, dstOffset = IntOffset.Zero, dstSize = target, alpha = dissolve.fade.value)
+            }
             if (!showBrush) return@Canvas
             // Two rings, dark under light: the brush has to read on a white
             // subject, on a black one and on the checkerboard behind both.
@@ -884,6 +1007,21 @@ private class EditorState(
 
     /** The flattened sticker: border under subject, on transparency. */
     fun render(): Bitmap = StickerOutline.render(subject, border)
+
+    /**
+     * What the canvas is showing right now, border and all, as a picture of
+     * its own: the "before" a dissolve fades from. Left to the collector
+     * rather than recycled, because the frame that last drew it may still be
+     * on its way to the screen when the dissolve lets go of it.
+     */
+    fun snapshot(): Bitmap {
+        val out = Bitmap.createBitmap(CANVAS, CANVAS, Bitmap.Config.ARGB_8888)
+        val canvas = AndroidCanvas(out)
+        val whole = Rect(0, 0, CANVAS, CANVAS)
+        outline?.let { canvas.drawBitmap(it, null, whole, null) }
+        canvas.drawBitmap(subject, null, whole, null)
+        return out
+    }
 
     fun recycle() {
         base.recycle()

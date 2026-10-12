@@ -2237,9 +2237,6 @@
     <string name="keypress_haptics_title">Απτική ανάδραση πατήματος πλήκτρων</string>
     <string name="keypress_hold_action_copy_label">Αντιγραφή</string>
     <string name="keypress_hold_action_cut_label">Αποκοπή</string>
-    <string name="keypress_hold_action_first_info">Η ενέργεια βρίσκεται συνήθως στο τέλος του αναδυόμενου παραθύρου, οπότε ένα απλό παρατεταμένο πάτημα σας δίνει τον πρώτο τόνο. Με αυτή την επιλογή ενεργοποιημένη, μετακινείται στην αρχή και ένα παρατεταμένο πάτημα σε ένα από τα πλήκτρα συντόμευσης εκτελεί την ενέργεια αμέσως. Οι τόνοι εξακολουθούν να υπάρχουν: κρατήστε το δάχτυλό σας πατημένο και σύρετε σε αυτόν που θέλετε. Αυτό απαιτεί την επιλογή \"Παρατεταμένο πάτημα για επιλογή\" στις \"Εναλλακτικά πλήκτρα\".</string>
-    <string name="keypress_hold_action_first_subtitle">Το πάτημα και κράτημα εκτελεί την ενέργεια αντί να εμφανίζει τους τόνους</string>
-    <string name="keypress_hold_action_first_title">Πρώτα η ενέργεια</string>
     <string name="keypress_hold_action_paste_label">Επικόλληση</string>
     <string name="keypress_hold_action_redo_label">Ακύρωση αναίρεσης</string>
     <string name="keypress_hold_action_select_all_label">Επιλογή όλων</string>
@@ -2547,8 +2544,6 @@
     <string name="languages_cjk_region_info">Η Ταϊβάν και το Χονγκ Κονγκ χρησιμοποιούν συχνά διαφορετικές λέξεις για το ίδιο πράγμα, όχι μόνο διαφορετικούς χαρακτήρες.</string>
     <string name="languages_cjk_region_taiwan_title">Ταϊβάν (臺灣)</string>
     <string name="languages_cjk_region_title">Περιφερειακή διατύπωση</string>
-    <string name="languages_cjk_traditional_info">Το πληκτρολόγιο μετατρέπει κάθε υποψήφια λέξη από Απλοποιημένα (简体) σε Παραδοσιακά (繁體) πριν την εμφανίσει. Η μετατροπή διαβάζει έναν χαρακτήρα τη φορά. Μερικοί Απλοποιημένοι χαρακτήρες έχουν περισσότερες από μία Παραδοσιακές μορφές και το πληκτρολόγιο γράφει πάντα την πιο κοινή. Το 发 γίνεται 發, το οποίο είναι σωστό στο 發展 αλλά λάθος στο 頭髮. Διορθώστε αυτές τις λέξεις χειροκίνητα.</string>
-    <string name="languages_cjk_traditional_subtitle">Το πληκτρολόγιο μετατρέπει τις υποψήφιες λέξεις σε Παραδοσιακά Κινεζικά (繁體). Μετατρέπει έναν χαρακτήρα τη φορά, επομένως ορισμένες μορφές που εξαρτώνται από τα συμφραζόμενα μπορεί να είναι λανθασμένες (发 → 發 / 髮).</string>
     <string name="languages_cjk_traditional_title">Παραδοσιακοί χαρακτήρες</string>
     <string name="languages_clusters_title">Συστάδες</string>
     <string name="languages_conjunct_backspace_info">Το backspace συνήθως διαγράφει ένα σημείο κώδικα τη φορά. Αυτό μερικές φορές αφήνει ημιτελή συμπλέγματα στην οθόνη. Με αυτή τη ρύθμιση ενεργοποιημένη, ένα πάτημα διαγράφει ολόκληρο το σύμπλεγμα ενώ πληκτρολογείτε %1$s. Άλλες γλώσσες διατηρούν τη δική τους ρύθμιση.</string>

@@ -2,6 +2,9 @@ package com.wasimaster.wmkeyboard.ime.ui
 
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -217,15 +220,20 @@ internal fun PasswordPanel(
                 .padding(horizontal = 10.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                generated.ifEmpty { "…" },
-                color = kb.chipText,
-                fontSize = 15.sp,
-                fontFamily = FontFamily.Monospace,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f),
-            )
+            // A new value scrambles into place. Display only: Copy and
+            // Insert below act on [generated] itself, so a tap mid-scramble
+            // still takes the real password.
+            ScrambledText(generated.ifEmpty { "…" }, animate = kb.motion.any) { shown ->
+                Text(
+                    shown,
+                    color = kb.chipText,
+                    fontSize = 15.sp,
+                    fontFamily = FontFamily.Monospace,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f),
+                )
+            }
             IconButton(
                 onClick = { regenerateKey++ },
                 modifier = Modifier
@@ -252,8 +260,15 @@ internal fun PasswordPanel(
                 if (generated.isNotEmpty()) onInsert(generated)
             }
         }
+        // The strength figure runs to its new value with the scramble rather
+        // than jumping, so a length step reads as more (or less) strength.
+        val shownEntropy by animateIntAsState(
+            entropy,
+            animationSpec = if (kb.motion.any) tween(SCRAMBLE_MS) else snap(),
+            label = "entropy",
+        )
         Text(
-            stringResource(R.string.ime_password_entropy_info, entropy),
+            stringResource(R.string.ime_password_entropy_info, shownEntropy),
             color = kb.secondaryText,
             fontSize = 11.sp,
             modifier = Modifier

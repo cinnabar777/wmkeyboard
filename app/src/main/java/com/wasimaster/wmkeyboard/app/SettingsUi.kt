@@ -383,6 +383,7 @@ internal val SettingsRouteColors: Map<String, Color> = mapOf(
     "ai_actions" to Color(0xFF7E57C2),
     "ai_history" to Color(0xFF7E57C2),
     "ai_chat" to Color(0xFF7E57C2),
+    "ai_mcp" to Color(0xFF7E57C2),
     "modes" to Color(0xFFFFA726),
     "emoji" to Color(0xFFFFB300),
     "emoji/panel" to Color(0xFFFFB300),
@@ -397,6 +398,10 @@ internal val SettingsRouteColors: Map<String, Color> = mapOf(
     "vocab/lists" to Color(0xFF8E24AA),
     "vocab/review" to Color(0xFF8E24AA),
     "vocab/browse" to Color(0xFF8E24AA),
+    // The Notes tool's own yellow, see ToolColors.
+    "notes" to Color(0xFFFBC02D),
+    "notes/tags" to Color(0xFFFBC02D),
+    "notes/trash" to Color(0xFFFBC02D),
     // The editor is opened from a pack, so it keeps the pack screens' pink.
     "sticker_editor" to Color(0xFFF06292),
     "plugins" to Color(0xFF06B6D4),
@@ -1307,10 +1312,11 @@ internal val LocalSettingsSnackbar = compositionLocalOf<SettingsSnackbar?> { nul
  * row stays — a swipe is a shortcut for people who know it is there, never the
  * only way to reach something.
  *
- * Callers in a plain `Column` (which is what a settings group is) must wrap the
- * call in `key(id) { }`. Without it the state remembered here belongs to a
- * *position* in the list, and the row that slides up into a deleted row's place
- * inherits its dismissed state and vanishes too.
+ * Callers in a plain `Column` (which is what a settings group is) must key the
+ * row: `item(key = id) { }` in a group, which also closes the deleted row in
+ * place, or `key(id) { }` anywhere else. Without it the state remembered here
+ * belongs to a *position* in the list, and the row that slides up into a
+ * deleted row's place inherits its dismissed state and vanishes too.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

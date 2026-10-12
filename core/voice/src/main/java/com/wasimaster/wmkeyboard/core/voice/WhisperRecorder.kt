@@ -1,6 +1,7 @@
 package com.wasimaster.wmkeyboard.core.voice
 
 import android.annotation.SuppressLint
+import android.media.AudioDeviceInfo
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
@@ -35,6 +36,12 @@ class WhisperRecorder(
     private val silenceStopMs: Int = 0,
     /** The clip ended on a pause; the samples so far are there for [stop]. */
     private val onSilence: () -> Unit = {},
+    /**
+     * The microphone to record from (#581), or null for the one Android picks.
+     * A preference, not a demand: if it goes away mid-clip Android carries on
+     * with its own choice rather than ending the capture.
+     */
+    private val preferredDevice: AudioDeviceInfo? = null,
 ) {
     private val maxSamples = WhisperMel.N_SAMPLES // 16 kHz * 30 s
     private val buffer = FloatArray(maxSamples)
@@ -48,6 +55,9 @@ class WhisperRecorder(
 
     /** The capture's audio session, for [MicBlockWatcher]; 0 when not recording. */
     val audioSessionId: Int get() = record?.audioSessionId ?: 0
+
+    /** The microphone the capture is actually coming from, once it has started; null before or if Android won't say. */
+    val routedDevice: AudioDeviceInfo? get() = runCatching { record?.routedDevice }.getOrNull()
 
     /** How much has been captured so far, in samples. */
     val sampleCount: Int get() = count
@@ -79,6 +89,7 @@ class WhisperRecorder(
             runCatching { r.release() }
             return false
         }
+        if (preferredDevice != null) runCatching { r.setPreferredDevice(preferredDevice) }
         record = r
         count = 0
         running = true

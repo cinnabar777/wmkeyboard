@@ -2238,9 +2238,6 @@
     <string name="keypress_haptics_title">Haptisk tilbakemelding ved tastetrykk</string>
     <string name="keypress_hold_action_copy_label">Kopier</string>
     <string name="keypress_hold_action_cut_label">Klipp ut</string>
-    <string name="keypress_hold_action_first_info">Handlingen ligger vanligvis på slutten av popup-vinduet, så et vanlig trykk og hold gir deg den første aksenten. Med denne på flyttes den til forsiden, og et trykk og hold på en av snarveistastene utfører handlingen umiddelbart. Aksentene er fortsatt der: hold fingeren nede og skyv over på den du vil ha. Dette krever Hold for å velge, under Alternative taster.</string>
-    <string name="keypress_hold_action_first_subtitle">Trykk og hold utfører handlingen i stedet for å vise aksenter</string>
-    <string name="keypress_hold_action_first_title">Handling først</string>
     <string name="keypress_hold_action_paste_label">Lim inn</string>
     <string name="keypress_hold_action_redo_label">Gjør om</string>
     <string name="keypress_hold_action_select_all_label">Velg alt</string>
@@ -2549,8 +2546,6 @@
     <string name="languages_cjk_region_info">Taiwan og Hong Kong bruker ofte forskjellige ord for samme ting, ikke bare forskjellige tegn.</string>
     <string name="languages_cjk_region_taiwan_title">Taiwan (臺灣)</string>
     <string name="languages_cjk_region_title">Regional ordlyd</string>
-    <string name="languages_cjk_traditional_info">Tastaturet konverterer hver kandidat fra forenklet (简体) til tradisjonell (繁體) før det viser kandidaten. Konverteringen leser ett tegn om gangen. Noen få forenklede tegn har mer enn én tradisjonell form, og tastaturet skriver alltid den vanligste. 发 blir til 發, noe som er korrekt i 發展, men feil i 頭髮. Rett disse ordene manuelt.</string>
-    <string name="languages_cjk_traditional_subtitle">Tastaturet konverterer kandidater til tradisjonell kinesisk (繁體). Det konverterer ett tegn om gangen, så noen få former som avhenger av kontekst blir feil (发 → 發 / 髮).</string>
     <string name="languages_cjk_traditional_title">Tradisjonelle tegn</string>
     <string name="languages_clusters_title">Klynger</string>
     <string name="languages_conjunct_backspace_info">Tilbake-tasten sletter vanligvis ett tegn om gangen. Dette etterlater noen ganger halvformede klynger på skjermen. Med denne innstillingen på, sletter ett trykk hele klyngen mens du skriver %1$s. Andre språk beholder sin egen innstilling.</string>

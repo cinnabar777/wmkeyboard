@@ -62,6 +62,7 @@ import com.wasimaster.wmkeyboard.core.emoji.EmojiDictStore
 import com.wasimaster.wmkeyboard.core.emoji.EmojiKeywordPack
 import com.wasimaster.wmkeyboard.core.emoji.EmojiKeywordPacks
 import com.wasimaster.wmkeyboard.core.emoji.EmojiSearchExamples
+import com.wasimaster.wmkeyboard.core.input.composer.ConversionWordLists
 import com.wasimaster.wmkeyboard.core.prediction.CustomDictionaries
 import kotlinx.coroutines.launch
 
@@ -112,10 +113,18 @@ internal fun CustomDictionarySettings(
             ids.associateWith { langId ->
                 // allLists, not lists: a switched-off list still has to be
                 // shown, or there is no way to switch it back on.
+                // A converting language counts the lines that carry a reading,
+                // since only those reach its candidates (#633).
+                val reading = ConversionWordLists.readingFor(langId)
                 CustomDictionaries.allLists(context.filesDir, langId).map { file ->
                     WordListEntry(
                         file,
-                        CustomDictionaries.wordsOf(file).size,
+                        if (reading == null) {
+                            CustomDictionaries.wordsOf(file).size
+                        } else {
+                            runCatching { file.bufferedReader().useLines { ConversionWordLists.count(it, reading) } }
+                                .getOrDefault(0)
+                        },
                         CustomDictionaries.pairCount(file),
                         CustomDictionaries.shortcutCount(file),
                     )
@@ -161,6 +170,8 @@ internal fun CustomDictionarySettings(
         CustomDictionaries.Refusal.TooLarge -> context.getString(R.string.customdict_import_too_large_error)
         CustomDictionaries.Refusal.MissingBody -> context.getString(R.string.customdict_import_missing_body_error)
         CustomDictionaries.Refusal.MissingHeader -> context.getString(R.string.customdict_import_missing_header_error)
+        CustomDictionaries.Refusal.MissingAff -> context.getString(R.string.customdict_import_missing_aff_error)
+        CustomDictionaries.Refusal.MissingDic -> context.getString(R.string.customdict_import_missing_dic_error)
         is CustomDictionaries.Refusal.UnsupportedVersion ->
             context.getString(R.string.customdict_import_unsupported_error, reason.version)
     }
@@ -302,7 +313,10 @@ internal fun CustomDictionarySettings(
         val shipped = settings.watch { it.suggestionStrip.shippedDictionaryEnabledFor(langId) }
         SettingsGroup(if (languageOff) offHeader.format(header) else header) {
             for (entry in entries) {
-                item {
+                // Keyed on the name rather than the path: switching a list off
+                // renames its file, and a key that changed with it would close
+                // the row and open it again for a flick of the switch.
+                item(key = CustomDictionaries.displayName(entry.file)) {
                     // A downloaded word list is recorded by its path, which is
                     // what an addon's Use button hands over.
                     HighlightableItem(entry.file.absolutePath) {
@@ -840,7 +854,7 @@ internal fun EmojiKeywordSettings(
                 item { EmojiDictRow(dict) }
             }
             for (entry in entries) {
-                item {
+                item(key = entry.file.absolutePath) {
                     HighlightableItem(entry.file.absolutePath) {
                         WmRow(
                             title = entry.file.nameWithoutExtension,

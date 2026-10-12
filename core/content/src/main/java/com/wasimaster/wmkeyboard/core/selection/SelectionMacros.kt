@@ -45,6 +45,12 @@ enum class SelectionMacro {
     DELETE,
     SHARE,
     /**
+     * Keep the selection as a note in the Notes tool (#560): a new note, or
+     * added to the last one edited, as the tool's setting says. Nothing
+     * leaves the app, so it sits with the edits rather than the doors.
+     */
+    SAVE_NOTE,
+    /**
      * Rewrite the selection in place. What that means follows the kind: a phone
      * number takes the user's own mask, a link loses its tracking parameters, an
      * address is lower-cased, and plain text opens the case ladder below.
@@ -143,6 +149,7 @@ enum class SelectionMacro {
             PASTE -> CommonR.string.common_paste
             DELETE -> CommonR.string.common_delete
             SHARE -> R.string.core_content_selection_macro_share
+            SAVE_NOTE -> R.string.core_content_selection_macro_save_note
             FORMAT -> R.string.core_content_selection_macro_format
             FIND -> R.string.core_content_selection_macro_find
             REPLACE -> R.string.core_content_selection_macro_replace
@@ -194,7 +201,7 @@ enum class SelectionMacro {
     /** The group the settings screen lists the macro under. */
     val category: MacroCategory
         get() = when (this) {
-            UNDO, SELECT_ALL, COPY, CUT, PASTE, DELETE, FIND, REPLACE -> MacroCategory.EDITING
+            UNDO, SELECT_ALL, COPY, CUT, PASTE, DELETE, FIND, REPLACE, SAVE_NOTE -> MacroCategory.EDITING
             LINES_SORT, LINES_DEDUPE, LINES_NUMBER, LINES_BULLET -> MacroCategory.LINES
             FORMAT, FANCY, CHAT_BOLD, CHAT_ITALIC, CHAT_STRIKE, CHAT_MONO,
             CASE_LOWER, CASE_TITLE, CASE_UPPER, CASE_SENTENCE,
@@ -212,11 +219,12 @@ enum class SelectionMacro {
 
     /**
      * Whether the macro can run before the first unlock. Anything that starts
-     * an activity cannot; nor can a paste (the clipboard is behind the lock)
-     * or reading aloud (a speech engine is another app to bind).
+     * an activity cannot; nor can a paste (the clipboard is behind the lock),
+     * reading aloud (a speech engine is another app to bind), or saving a
+     * note (the notes file is behind the lock too).
      */
     val directBootSafe: Boolean
-        get() = !leavesApp && this != PASTE && this != READ_ALOUD
+        get() = !leavesApp && this != PASTE && this != READ_ALOUD && this != SAVE_NOTE
 
     /** A door rather than an action: the bar opens a ladder for it and the service never sees the tap. */
     val opensLadder: Boolean
@@ -371,6 +379,7 @@ object SelectionMacros {
         SelectionMacro.CALL, SelectionMacro.SMS, SelectionMacro.WHATSAPP, SelectionMacro.EMAIL,
         SelectionMacro.OPEN, SelectionMacro.STRIP_TRACKERS, SelectionMacro.QR, SelectionMacro.ADD_CONTACT,
         SelectionMacro.COPY, SelectionMacro.CUT, SelectionMacro.PASTE, SelectionMacro.DELETE, SelectionMacro.SHARE,
+        SelectionMacro.SAVE_NOTE,
         SelectionMacro.FORMAT, SelectionMacro.FIND, SelectionMacro.REPLACE,
         SelectionMacro.LINES_SORT, SelectionMacro.LINES_DEDUPE, SelectionMacro.LINES_NUMBER, SelectionMacro.LINES_BULLET,
         SelectionMacro.GRAMMAR_FIX, SelectionMacro.DEEPL_WRITE, SelectionMacro.TRANSLATE, SelectionMacro.AI,
@@ -396,7 +405,7 @@ object SelectionMacros {
      */
     val defaultMacros: Set<SelectionMacro> = setOf(
         SelectionMacro.UNDO, SelectionMacro.SELECT_ALL, SelectionMacro.COPY, SelectionMacro.CUT,
-        SelectionMacro.PASTE, SelectionMacro.DELETE, SelectionMacro.SHARE, SelectionMacro.FORMAT,
+        SelectionMacro.PASTE, SelectionMacro.DELETE, SelectionMacro.SHARE, SelectionMacro.SAVE_NOTE, SelectionMacro.FORMAT,
         SelectionMacro.FIND, SelectionMacro.REPLACE,
         SelectionMacro.LINES_SORT, SelectionMacro.LINES_DEDUPE, SelectionMacro.LINES_NUMBER, SelectionMacro.LINES_BULLET,
         SelectionMacro.GRAMMAR_FIX, SelectionMacro.DEEPL_WRITE, SelectionMacro.TRANSLATE, SelectionMacro.AI,
@@ -413,7 +422,7 @@ object SelectionMacros {
      * existing user should receive. A stored list under an older version is
      * read as unset, which is the shipped list.
      */
-    const val LIST_VERSION = 2
+    const val LIST_VERSION = 3
 
     /** The case ladder [SelectionMacro.FORMAT] opens on a plain-text selection. */
     fun caseLadder(allowed: Set<SelectionMacro>): List<SelectionMacro> =
@@ -495,7 +504,7 @@ object SelectionMacros {
         SelectionMacro.ADD_CONTACT -> kind == SelectionKind.PHONE || kind == SelectionKind.EMAIL
         SelectionMacro.URL_DECODE -> kind == SelectionKind.URL || kind == SelectionKind.TEXT
         SelectionMacro.UNDO, SelectionMacro.SELECT_ALL, SelectionMacro.COPY, SelectionMacro.CUT,
-        SelectionMacro.PASTE, SelectionMacro.DELETE, SelectionMacro.SHARE, SelectionMacro.FORMAT,
+        SelectionMacro.PASTE, SelectionMacro.DELETE, SelectionMacro.SHARE, SelectionMacro.SAVE_NOTE, SelectionMacro.FORMAT,
         SelectionMacro.FIND, SelectionMacro.REPLACE, SelectionMacro.READ_ALOUD -> true
         else -> kind == SelectionKind.TEXT
     }

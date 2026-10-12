@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+    <!-- ==== Importing a whole backup from another keyboard: a list of
+         everything inside it, each item with its own check box. ==== -->
+
+    <!-- The names of the other keyboards. Product names, not translated. -->
+    <string name="foreign_keyboard_heliboard" translatable="false">HeliBoard</string>
+    <string name="foreign_keyboard_leantype" translatable="false">LeanType</string>
+    <string name="foreign_keyboard_futo" translatable="false">FUTO Keyboard</string>
+    <string name="foreign_keyboard_florisboard" translatable="false">FlorisBoard</string>
+    <string name="foreign_keyboard_cleverkeys" translatable="false">CleverKeys</string>
+    <string name="foreign_keyboard_anysoftkeyboard" translatable="false">AnySoftKeyboard</string>
+
+    <!-- Title of the list. %1$s is the other keyboard's name, for example
+         HeliBoard. -->
+    <string name="foreign_backup_title">Import from <xliff:g id="keyboard">%1$s</xliff:g></string>
+    <string name="foreign_backup_title_generic">Import from another keyboard</string>
+    <string name="foreign_backup_intro">Select what to bring over. The app changes nothing until you tap Import.</string>
+
+    <!-- Section headings of the list. -->
+    <string name="foreign_backup_section_layouts">Layouts</string>
+    <string name="foreign_backup_section_themes">Themes</string>
+    <string name="foreign_backup_section_languages">Languages</string>
+    <string name="foreign_backup_section_words">Dictionaries and words</string>
+    <string name="foreign_backup_section_settings">Settings</string>
+    <!-- Read by TalkBack for the check box beside a section heading. %1$s is
+         the heading. -->
+    <string name="foreign_backup_section_toggle_desc">Select all in <xliff:g id="section">%1$s</xliff:g></string>
+
+    <!-- Under a theme that was the one in use on the other keyboard. -->
+    <string name="foreign_backup_theme_active">In use on the other keyboard. The app uses it here too.</string>
+    <string name="foreign_backup_theme_saved">The app adds it to your themes.</string>
+
+    <!-- Under a language. %1$s is the layout it types with. -->
+    <string name="foreign_backup_language_layout">Layout: <xliff:g id="layout">%1$s</xliff:g></string>
+    <!-- Under a language that typed with one of the user's own layouts from
+         the backup. %1$s is that layout's name. -->
+    <string name="foreign_backup_language_custom">Your layout <xliff:g id="layout">%1$s</xliff:g>, if you import it</string>
+    <string name="foreign_backup_languages_note">The app adds these languages to the ones you have, and downloads their dictionaries.</string>
+
+    <!-- Under a word list. %1$s is its language, %2$s is a word count such as
+         "1,200 words". -->
+    <string name="foreign_backup_dictionary_subtitle"><xliff:g id="language">%1$s</xliff:g>, <xliff:g id="count">%2$s</xliff:g></string>
+    <plurals name="foreign_backup_word_count">
+        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> word</item>
+        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> words</item>
+    </plurals>
+    <!-- A list of the words the other keyboard learned from typing. %1$s is
+         the language. -->
+    <string name="foreign_backup_learned_title">Words learned from your typing (<xliff:g id="language">%1$s</xliff:g>)</string>
+    <string name="foreign_backup_personal_title">Words you added</string>
+    <string name="foreign_backup_blacklist_title">Words that are never suggested</string>
+
+    <!-- The settings, one row each, named as they are on this app's own
+         screens. -->
+    <string name="foreign_setting_number_row">Number row</string>
+    <string name="foreign_setting_key_popup">Key popup</string>
+    <string name="foreign_setting_haptics">Vibrate on key press</string>
+    <string name="foreign_setting_haptic_strength">Vibration length</string>
+    <string name="foreign_setting_key_sound">Sound on key press</string>
+    <string name="foreign_setting_sound_volume">Key sound volume</string>
+    <string name="foreign_setting_autocorrect">Autocorrect</string>
+    <string name="foreign_setting_auto_capitalize">Automatic capitals</string>
+    <string name="foreign_setting_double_space_period">Double space types a period</string>
+    <string name="foreign_setting_suggestions">Suggestions</string>
+    <string name="foreign_setting_emoji_suggestions">Emoji suggestions</string>
+    <string name="foreign_setting_gesture_typing">Glide typing</string>
+    <string name="foreign_setting_long_press_delay">Long press delay</string>
+    <string name="foreign_setting_key_height">Key height</string>
+    <string name="foreign_setting_split_keyboard">Split keyboard</string>
+    <string name="foreign_setting_theme_mode">Light or dark</string>
+    <string name="foreign_setting_tool_holds">Press and hold on toolbar keys</string>
+
+    <!-- The value a setting will get. -->
+    <string name="foreign_value_on">On</string>
+    <string name="foreign_value_off">Off</string>
+    <string name="foreign_value_ms" tools:ignore="PluralsCandidate"><xliff:g id="ms">%1$d</xliff:g> ms</string>
+    <!-- One toolbar key and what its press and hold runs. %1$s and %2$s are tool names, for example Undo and Redo. -->
+    <string name="foreign_value_tool_hold"><xliff:g id="tool" example="Undo">%1$s</xliff:g>: <xliff:g id="action" example="Redo">%2$s</xliff:g></string>
+    <string name="foreign_value_dp" tools:ignore="PluralsCandidate"><xliff:g id="dp">%1$d</xliff:g> dp</string>
+    <string name="foreign_value_percent"><xliff:g id="percent">%1$d</xliff:g>%%</string>
+    <string name="foreign_value_mode_system">Same as the phone</string>
+    <string name="foreign_value_mode_light">Light</string>
+    <string name="foreign_value_mode_dark">Dark</string>
+    <string name="foreign_value_mode_amoled">Black</string>
+
+    <!-- What the backup holds that the app cannot use. -->
+    <string name="foreign_backup_left_title">Not imported</string>
+    <string name="foreign_backup_left_clipboard">Clipboard history</string>
+    <string name="foreign_backup_left_other_layouts">Symbol and number layouts. The app uses its own.</string>
+    <string name="foreign_backup_left_theme_files">Theme files in a format the app cannot read</string>
+    <string name="foreign_backup_left_fonts">Custom fonts</string>
+    <string name="foreign_backup_left_backgrounds">Background pictures</string>
+    <string name="foreign_backup_left_models">Language models and other large files</string>
+    <string name="foreign_backup_left_shortcuts">Shortcuts on your added words</string>
+
+    <!-- The Import button. %1$d is how many items are selected. -->
+    <plurals name="foreign_backup_import_count">
+        <item quantity="one">Import <xliff:g id="count">%1$d</xliff:g> item</item>
+        <item quantity="other">Import <xliff:g id="count">%1$d</xliff:g> items</item>
+    </plurals>
+
+    <!-- After the import. %1$s is a list such as "2 layouts, 1 theme, 12
+         settings", made from the plurals below. -->
+    <string name="foreign_backup_done">The app imported <xliff:g id="list">%1$s</xliff:g>.</string>
+    <string name="foreign_backup_done_nothing">Nothing was selected, so the app imported nothing.</string>
+    <string name="foreign_backup_settings_rolled_back">The settings did not apply, so the app kept your settings as they were.</string>
+    <plurals name="foreign_backup_done_layouts">
+        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> layout</item>
+        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> layouts</item>
+    </plurals>
+    <plurals name="foreign_backup_done_themes">
+        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> theme</item>
+        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> themes</item>
+    </plurals>
+    <plurals name="foreign_backup_done_languages">
+        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> language</item>
+        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> languages</item>
+    </plurals>
+    <plurals name="foreign_backup_done_settings">
+        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> setting</item>
+        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> settings</item>
+    </plurals>
+    <plurals name="foreign_backup_done_word_lists">
+        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> word list</item>
+        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> word lists</item>
+    </plurals>
+    <plurals name="foreign_backup_done_words">
+        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> added word</item>
+        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> added words</item>
+    </plurals>
+    <plurals name="foreign_backup_done_blocked">
+        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> blocked word</item>
+        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> blocked words</item>
+    </plurals>
+
+    <!-- The row on Backup and restore. -->
+    <string name="backup_foreign_import_title">Import from another keyboard</string>
+    <string name="backup_foreign_import_subtitle">A backup from HeliBoard, LeanType, FUTO Keyboard, FlorisBoard, CleverKeys or AnySoftKeyboard</string>
+</resources>

@@ -54,10 +54,24 @@ The Accessibility screen collects every vision, motion, screen-reader, and touch
 |---|---|---|---|
 | Reduce motion | Toggle | On / Off | Off |
 | Classic press-and-hold popup | Toggle | On / Off | Off |
+| Animate panels | Toggle | On / Off | On |
+| Animate text selection | Toggle | On / Off | On |
+| Animate language switch | Toggle | On / Off | Off |
+| Animate grammar and translate results | Toggle | On / Off | Off |
 
 **Reduce motion** turns off non-essential animation across the toolbar, animated theme backgrounds, and this settings app's own transitions. Feedback that tells you something stays: the key-preview bubble, the pressed-key colour, the glide-typing trail. Removing those would make typing harder rather than easier.
 
 **Classic press-and-hold popup** puts the long-press popup back the way it was before the first alternate moved over the key: no growing alternate, no sliding highlight, and the highlight on whatever is under the finger.
+
+**Animate panels** makes a panel (clipboard, emoji, any tool) grow out of the toolbar button or the tool name you tapped to open it, and fold back into it when it closes. It is quick, under a fifth of a second. Off, panels appear and disappear at once.
+
+**Animate text selection** slides the selection highlight to its new range and brings the selection bar's buttons in one after another. Off, both change at once.
+
+**Animate language switch** (off by default) flips each key whose letter changes when you switch language, while keys that stay the same hold still. Only a language switch animates; changing to symbols or numbers never does.
+
+**Animate grammar and translate results** (off by default) plays out a grammar fix on its card, the old words dimming under their strike and the new ones sliding in, before the list closes up around it. In the translate tool, the part of the translation that changed fades in while the words that stayed hold still, and the swap button turns.
+
+All four follow **Reduce motion**: with it on, none of them animates, whatever each switch says.
 
 [Power saving mode](/typing/power-saving/) can flip this same behaviour on as a side effect of its own "Animations" toggle, without touching this switch. Check there too if animation is off and you didn't turn it off here.
 

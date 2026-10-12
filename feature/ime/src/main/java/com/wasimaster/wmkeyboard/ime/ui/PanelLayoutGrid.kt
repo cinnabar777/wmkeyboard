@@ -1,5 +1,10 @@
 package com.wasimaster.wmkeyboard.ime.ui
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationVector1D
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -12,8 +17,13 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
@@ -115,6 +125,17 @@ internal fun PanelLayoutGrid(
     val panelRects = remember(spec) { KeyRects() }
     val peekRects = remember(peekSpec) { KeyRects() }
     val liveRects = rememberUpdatedState(if (peekSpec != null) peekRects else panelRects)
+    // The panel's own cells fade out under a peeked layer arriving (which
+    // staggers in like any grid, see [PanelKeyGrid]) and back in as it goes,
+    // rather than blinking. A fade of what is drawn alone: the cells stay
+    // where they are, and the peek reads its own table.
+    val motion = LocalKbTheme.current.motion.any
+    val peeking = peekSpec != null
+    val cover = remember { Animatable(0f) }
+    LaunchedEffect(peeking, motion) {
+        val to = if (peeking) 1f else 0f
+        if (motion) cover.animateTo(to, tween(PeekFadeMs, easing = LinearEasing)) else cover.snapTo(to)
+    }
     val liveMode = rememberUpdatedState(state.layoutMode)
     val hapticOn = rememberUpdatedState(settings.haptics.enabled)
     val pickerHaptic = LocalHapticFeedback.current
@@ -165,8 +186,12 @@ internal fun PanelLayoutGrid(
         PanelKeyGrid(
             state, spec, callbacks, onPanelKey, fields, keyPreview, panelRects, collapsedFields,
             // Read in the layer block, so a peek starting and ending repaints
-            // and never recomposes the panel.
-            Modifier.graphicsLayer { alpha = if (peek.mode != null) 0f else 1f },
+            // and never recomposes the panel. With motion off it is gone the
+            // frame the peek starts, as it always was.
+            Modifier.graphicsLayer {
+                alpha = if (!motion) (if (peek.mode != null) 0f else 1f) else 1f - cover.value
+                compositingStrategy = CompositingStrategy.ModulateAlpha
+            },
         )
         if (peekSpec != null) {
             PanelKeyGrid(state, peekSpec, callbacks, onPanelKey, { _ -> }, keyPreview, peekRects)
@@ -262,19 +287,53 @@ private fun PanelKeyGrid(
         }
     }
 
+    // A tile slides to where a reflow puts it — a strip folding away, a row
+    // changing — and every key is a possible panel opener (an emoji panel's
+    // clipboard key), so a panel it opens grows out of it. Not a component's
+    // cell: the first opener a press reaches wins, and the media switch marks
+    // each of its own tabs, which the cell around it would beat.
+    val animate = kb.motion.any
+    val tile = Modifier.reflowOnMove(animate)
+    // The grid arriving — the panel opening, its layout changing, a peeked
+    // layer coming up — on one clock: every cell fades and settles in, a
+    // little later the further down and along it sits. Born at 0 in the
+    // composition that brings the grid, so no cell shows a frame early.
+    val entrance = remember(spec) { Animatable(if (animate) 0f else 1f) }
+    LaunchedEffect(entrance) {
+        if (entrance.value < 1f) entrance.animateTo(1f, tween(CellEntranceTotalMs, easing = LinearEasing))
+    }
+    // One modifier per cell for the grid's shape, so a recomposition that
+    // keeps it hands every key an equal modifier and leaves it skipped.
+    val arrive = remember(rows, gridWeight, entrance, animate) {
+        slots.map { panelSlot ->
+            if (!animate) {
+                Modifier
+            } else {
+                val lag = panelSlot.slot.row.toFloat() / rows.size * CellEntranceRowShare +
+                    panelSlot.slot.x / gridWeight * (1f - CellEntranceRowShare)
+                Modifier.cellEntrance(entrance, lag.coerceIn(0f, 1f))
+            }
+        }
+    }
     Layout(
         modifier = modifier,
         content = {
-            for (panelSlot in slots) {
+            for ((index, panelSlot) in slots.withIndex()) {
                 val field = panelSlot.field
+                val cell = tile.then(arrive.getOrElse(index) { Modifier })
                 if (field != null) {
                     // Inset by the key gaps so the component's edges line up
                     // with the faces of the keys beside it.
-                    Box(Modifier.padding(horizontal = gapH, vertical = gapV)) { fields(field) }
+                    PanelFieldCell(
+                        collapsed = field in collapsedFields,
+                        animate = animate,
+                        modifier = cell.padding(horizontal = gapH, vertical = gapV),
+                    ) { fields(field) }
                 } else {
                     KeyButton(
                         visual = panelSlot.visual!!,
                         settings = settings,
+                        modifier = cell.panelOrigin(),
                         onKey = onPanelKey,
                         onText = callbacks.onText,
                         onCursorMove = callbacks.onCursorMove,
@@ -324,6 +383,94 @@ private fun PanelKeyGrid(
         }
     }
 }
+
+/**
+ * A component's cell. A strip that folded away for want of anything to show
+ * (see [PanelLayoutGrid]'s `collapsedFields`) fades back in when it returns,
+ * while the tiles around it slide to make room, instead of popping up whole.
+ * An alpha alone, never a transform: a component's own coordinates (the
+ * emoji grid's, the trackpad's) stay where they are.
+ */
+@Composable
+private fun PanelFieldCell(
+    collapsed: Boolean,
+    animate: Boolean,
+    modifier: Modifier,
+    content: @Composable () -> Unit,
+) {
+    val last = remember { booleanArrayOf(collapsed) }
+    // Decided in the composition that brings the cell back, at 0, so it
+    // never shows a frame at full strength before fading in.
+    val reveal = remember(collapsed) {
+        val back = animate && last[0] && !collapsed
+        last[0] = collapsed
+        Animatable(if (back) 0f else 1f)
+    }
+    LaunchedEffect(reveal) {
+        if (reveal.value < 1f) reveal.animateTo(1f, tween(FieldRevealMs, easing = FastOutSlowInEasing))
+    }
+    Box(
+        modifier.graphicsLayer {
+            val a = reveal.value
+            if (a < 1f) {
+                alpha = a
+                compositingStrategy = CompositingStrategy.ModulateAlpha
+            }
+        },
+    ) { content() }
+}
+
+/**
+ * A cell of a grid arriving, [lag] (0..1) of the stagger behind the first:
+ * faded in, risen a few dp and grown from a little under its size, all read
+ * off the grid's one [clock] in the draw.
+ *
+ * Drawn, never laid out or put through a layer transform: a key's cell, its
+ * rectangle in the window (the alternates popup, the preview bubble) and the
+ * table the layer drag reads are right from the first frame, as with
+ * [reflowOnMove]. The fade is a layer saved for the cell only while it runs.
+ */
+private fun Modifier.cellEntrance(clock: Animatable<Float, AnimationVector1D>, lag: Float): Modifier {
+    val paint = Paint()
+    return drawWithContent {
+        val elapsed = clock.value * CellEntranceTotalMs - lag * CellEntranceSpreadMs
+        val t = (elapsed / CellEntranceMs).coerceIn(0f, 1f)
+        if (t >= 1f) {
+            drawContent()
+            return@drawWithContent
+        }
+        if (t <= 0f) return@drawWithContent
+        val e = FastOutSlowInEasing.transform(t)
+        val s = CellEntranceScale + (1f - CellEntranceScale) * e
+        paint.alpha = t
+        val canvas = drawContext.canvas
+        canvas.saveLayer(Rect(Offset.Zero, size), paint)
+        translate(top = CellEntranceRise.toPx() * (1f - e)) {
+            scale(s, s, center) { this@drawWithContent.drawContent() }
+        }
+        canvas.restore()
+    }
+}
+
+/** One cell's arrival, and how much later the last cell starts than the first. */
+private const val CellEntranceMs = 150
+private const val CellEntranceSpreadMs = 60
+
+/** The whole grid's arrival on its one clock: under 220 ms, first cell to last. */
+private const val CellEntranceTotalMs = CellEntranceMs + CellEntranceSpreadMs
+
+/** How much of the stagger runs down the rows; the rest runs along them. */
+private const val CellEntranceRowShare = 0.6f
+
+/** The size a cell grows from, and how far below its place it rises from. */
+private const val CellEntranceScale = 0.92f
+private val CellEntranceRise = 6.dp
+
+/** A folded strip fading back in. */
+private const val FieldRevealMs = 160
+
+/** The panel's cells fading under a peeked layer, and back. */
+private const val PeekFadeMs = 120
 
 /** One cell of a panel grid: the key's resolved face, or the component it hosts. */
 private class PanelSlot(

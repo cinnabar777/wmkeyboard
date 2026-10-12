@@ -232,6 +232,13 @@ internal class ClipboardPanelSession(
     val perClip: Map<Long, List<ClipEntity>> = emptyMap(),
     /** The cards count their fragments in icons, and the chip strip stands down. */
     val entityIcons: Boolean = false,
+    /** A pinned clip's delete asks first (#636). */
+    val confirmPinned: Boolean = false,
+    /**
+     * The pinned clip whose delete is being asked about, or null. Kept apart
+     * from the session for the reason [clearAsking] is.
+     */
+    val deleteAsking: MutableState<ClipItem?> = mutableStateOf(null),
 ) {
     /** The question is on screen: asked, and there is still something to delete. */
     val confirmingClear: Boolean get() = showClear && clearAsking.value
@@ -260,6 +267,15 @@ internal fun rememberClipboardPanelSession(state: KeyboardUiState): ClipboardPan
     // A question left standing while there was nothing to clear would pop
     // back up, unasked, with the next copy.
     LaunchedEffect(showClear) { if (!showClear) clearAsking.value = false }
+    val confirmPinned = state.settings.clipboard.confirmPinnedDelete
+    val deleteAsking = remember { mutableStateOf<ClipItem?>(null) }
+    // The clip asked about went some other way, or lost its pin: nothing left to ask.
+    val asked = deleteAsking.value
+    LaunchedEffect(asked, state.clipboardItems, confirmPinned) {
+        if (asked != null && (!confirmPinned || state.clipboardItems.none { it.id == asked.id && it.pinned })) {
+            deleteAsking.value = null
+        }
+    }
     val ocr = clipOcrAvailable(state.settings)
     // Scanning every clip with three regexes is not free, so it happens once
     // per history change rather than on every recomposition.
@@ -292,11 +308,13 @@ internal fun rememberClipboardPanelSession(state: KeyboardUiState): ClipboardPan
     }
     return remember(
         shownItems, entities, showSearch, query, gridState, list, numbers,
-        tabbed, pinnedCount, unpinnedCount, showClear, ocr, perClip, entityIcons,
+        tabbed, pinnedCount, unpinnedCount, showClear, ocr, perClip, entityIcons, confirmPinned,
     ) {
         ClipboardPanelSession(
             shownItems, entities, showSearch, query, gridState, list, numbers,
             tabbed, tab, pinnedCount, unpinnedCount, showClear, clearAsking, ocr, perClip, entityIcons,
+            confirmPinned = confirmPinned,
+            deleteAsking = deleteAsking,
         )
     }
 }
@@ -461,6 +479,31 @@ private fun ClipboardListField(
         columns = ClipTab.entries.size,
         onActivate = { index -> ClipTab.entries.getOrNull(index)?.let { session.tab.value = it } },
     )
+    // Every delete in the history — bin, swipe, hold popup — passes through
+    // here, so a pinned clip's asks first wherever it came from (#636).
+    val guarded = remember(callbacks, session.confirmPinned) {
+        if (!session.confirmPinned) {
+            callbacks
+        } else {
+            ClipboardFieldCallbacks(
+                onItem = callbacks.onItem,
+                onSticker = callbacks.onSticker,
+                onPin = callbacks.onPin,
+                onDelete = { item ->
+                    if (item.pinned) {
+                        session.clearAsking.value = false
+                        session.deleteAsking.value = item
+                    } else {
+                        callbacks.onDelete(item)
+                    }
+                },
+                onSearchToggle = callbacks.onSearchToggle,
+                onEntity = callbacks.onEntity,
+                actions = callbacks.actions,
+            )
+        }
+    }
+    val deleteAsked = session.deleteAsking.value
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             if (session.tabbed) {
@@ -473,17 +516,31 @@ private fun ClipboardListField(
                 )
             }
             Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
-                ClipboardHistory(state, session, callbacks)
+                ClipboardHistory(state, session, guarded)
             }
         }
+        val clearCount = session.unpinnedCount
         ClipClearQuestion(
-            // Not over the search's few rows: the bin that asked is not drawn there.
-            count = if (session.confirmingClear && !state.clipboardSearchActive) session.unpinnedCount else null,
+            text = when {
+                deleteAsked != null -> stringResource(R.string.ime_clip_delete_pinned_question)
+                // Not over the search's few rows: the bin that asked is not drawn there.
+                session.confirmingClear && !state.clipboardSearchActive ->
+                    pluralStringResource(R.plurals.ime_clip_clear_question, clearCount, clearCount)
+                else -> null
+            },
             reduceMotion = state.settings.reduceMotion,
-            onCancel = { session.clearAsking.value = false },
-            onDelete = {
+            onCancel = {
                 session.clearAsking.value = false
-                callbacks.actions.onClearUnpinned()
+                session.deleteAsking.value = null
+            },
+            onDelete = {
+                if (deleteAsked != null) {
+                    session.deleteAsking.value = null
+                    callbacks.onDelete(deleteAsked)
+                } else {
+                    session.clearAsking.value = false
+                    callbacks.actions.onClearUnpinned()
+                }
             },
             modifier = Modifier
                 .align(Alignment.TopCenter)
@@ -574,22 +631,24 @@ private fun ClipTabRow(
 }
 
 /**
- * The clear button's question, in the Undo bar's popup style, over the top of
- * the history where the bin that asked it is (#371). [count] is how many clips
- * would go, or null while nothing is being asked.
+ * A delete's question, in the Undo bar's popup style, over the top of the
+ * history: the clear button's (#371), where the bin that asked it is, or a
+ * pinned clip's (#636). [text] is the question, or null while nothing is
+ * being asked.
  */
 @Composable
 private fun ClipClearQuestion(
-    count: Int?,
+    text: String?,
     reduceMotion: Boolean,
     onCancel: () -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var lastCount by remember { mutableIntStateOf(1) }
-    if (count != null) lastCount = count
+    // The last question, kept while it slides away so it does not blank out.
+    var lastText by remember { mutableStateOf("") }
+    if (text != null) lastText = text
     AnimatedVisibility(
-        visible = count != null,
+        visible = text != null,
         modifier = modifier,
         enter = if (reduceMotion) fadeIn(tween(0)) else slideInVertically(tween(180)) { -it } + fadeIn(tween(180)),
         exit = if (reduceMotion) fadeOut(tween(0)) else slideOutVertically(tween(160)) { -it } + fadeOut(tween(160)),
@@ -606,7 +665,7 @@ private fun ClipClearQuestion(
         ) {
             Column(modifier = Modifier.padding(start = 14.dp, end = 4.dp, top = 10.dp)) {
                 Text(
-                    pluralStringResource(R.plurals.ime_clip_clear_question, lastCount, lastCount),
+                    lastText,
                     fontSize = 13.sp,
                     color = kb.popupText,
                     modifier = Modifier.padding(end = 10.dp),
@@ -630,11 +689,8 @@ private fun ClipClearQuestion(
 }
 
 /**
- * "Clip deleted · Undo", in the keyboard's popup style. A snackbar in all but
- * name: Compose's own needs a Scaffold, and a keyboard panel has none.
- *
- * It keeps the count it last showed while it slides away, so the text does
- * not blank out under the exit animation once the service clears the state.
+ * "Clip deleted · Undo", in the keyboard's popup style: [PanelUndoBar] with
+ * the clipboard's words on it.
  */
 @Composable
 private fun ClipUndoBar(
@@ -645,23 +701,51 @@ private fun ClipUndoBar(
     modifier: Modifier = Modifier,
 ) {
     var lastCount by remember { mutableIntStateOf(1) }
-    // The bar last shown, kept while it slides away, so the swipe below starts
-    // afresh for each new delete but not for its own exit animation.
-    var shown by remember { mutableStateOf(undo) }
-    if (undo != null) {
-        lastCount = undo.items.size
-        shown = undo
-    }
+    if (undo != null) lastCount = undo.items.size
+    PanelUndoBar(
+        text = pluralStringResource(R.plurals.ime_clip_deleted, lastCount, lastCount),
+        visible = undo != null,
+        key = undo,
+        reduceMotion = reduceMotion,
+        onUndo = onUndo,
+        onDismiss = onDismiss,
+        modifier = modifier,
+    )
+}
+
+/**
+ * "Something happened · Undo", in the keyboard's popup style. A snackbar in
+ * all but name: Compose's own needs a Scaffold, and a keyboard panel has none.
+ * The clipboard's delete and the Notes panel's trash and archive (#560) draw it.
+ *
+ * [text] should be what the caller last had to say even once [visible] has
+ * gone false, so the bar does not blank out under its exit animation; [key]
+ * changing restarts the swipe gesture for a fresh offer.
+ */
+@Composable
+internal fun PanelUndoBar(
+    text: String,
+    visible: Boolean,
+    key: Any?,
+    reduceMotion: Boolean,
+    onUndo: () -> Unit,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    // The offer last shown, kept while it slides away, so the swipe below
+    // starts afresh for each new offer but not for its own exit animation.
+    var shown by remember { mutableStateOf(key) }
+    if (visible) shown = key
     val dismissLabel = stringResource(R.string.ime_clip_undo_dismiss)
     AnimatedVisibility(
-        visible = undo != null,
+        visible = visible,
         modifier = modifier,
         enter = if (reduceMotion) fadeIn(tween(0)) else slideInVertically(tween(180)) { it } + fadeIn(tween(180)),
         exit = if (reduceMotion) fadeOut(tween(0)) else slideOutVertically(tween(160)) { it } + fadeOut(tween(160)),
     ) {
         val kb = LocalKbTheme.current
         // A sideways swipe puts the bar away and ends the Undo there and then
-        // (#371), the way a snackbar goes; the clips it held are gone for good.
+        // (#371), the way a snackbar goes.
         key(shown) {
             SwipeToDeleteCard(onDelete = onDismiss) {
                 Surface(
@@ -681,7 +765,7 @@ private fun ClipUndoBar(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
-                            pluralStringResource(R.plurals.ime_clip_deleted, lastCount, lastCount),
+                            text,
                             fontSize = 13.sp,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
@@ -792,6 +876,8 @@ private fun ClipboardHistory(
             SwipeToDeleteCard(
                 onDelete = { callbacks.onDelete(item) },
                 enabled = swipe,
+                // A pinned clip's swipe only asks (#636), so the card comes back.
+                keepOnDelete = item.pinned && session.confirmPinned,
                 // Right pins, left deletes, when asked (#414).
                 onSwipeRight = if (clipboard.swipeRightPins) {
                     { callbacks.onPin(item) }
@@ -1231,7 +1317,10 @@ private fun ClipBody(item: ClipItem, maxLines: Int) {
     }
 }
 
-/** The pin and delete circles, in that order. */
+/**
+ * The pin and delete circles, in that order, with the edited mark between them
+ * on a clip that was edited (#576), to the right of the pin.
+ */
 @Composable
 private fun ClipActions(item: ClipItem, callbacks: ClipboardFieldCallbacks) {
     ClipActionCircle(
@@ -1240,11 +1329,30 @@ private fun ClipActions(item: ClipItem, callbacks: ClipboardFieldCallbacks) {
         tint = if (item.pinned) MaterialTheme.colorScheme.primary
         else MaterialTheme.colorScheme.onSurfaceVariant,
     ) { callbacks.onPin(item) }
+    if (item.editedAt != null) ClipEditedMark()
     ClipActionCircle(
         icon = Icons.Outlined.Delete,
         description = stringResource(CommonR.string.common_delete),
         tint = MaterialTheme.colorScheme.onSurfaceVariant,
     ) { callbacks.onDelete(item) }
+}
+
+/**
+ * The mark on a clip whose text was edited (#576): the edit glyph alone, with
+ * no circle under it, so it does not read as one more button. Nothing happens
+ * on a press; when the edit was is in the clip's details.
+ */
+@Composable
+private fun ClipEditedMark() {
+    val description = stringResource(R.string.ime_clip_info_edited)
+    Icon(
+        Icons.Outlined.Edit,
+        contentDescription = null,
+        modifier = Modifier
+            .size(15.dp)
+            .clearAndSetSemantics { contentDescription = description },
+        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
 }
 
 /**
@@ -1275,8 +1383,8 @@ private fun ClipNumberBadge(number: Int, modifier: Modifier = Modifier) {
 }
 
 /**
- * One history card: body by kind, then the number, the pin and the delete
- * circle along the bottom. The number rides the row the circles already
+ * One history card: body by kind, then the number, the pin, the edited mark
+ * (#576) and the delete circle along the bottom. The number rides the row the circles already
  * take, so turning numbering on never makes a card taller. With [buttons] off
  * (#414) the row goes too, on any card it would have left empty.
  */
@@ -1309,7 +1417,8 @@ private fun ClipCard(
         val tag = item.kind == ClipKind.HTML && hold.typeTag
         // Per card: one clip may still have a number or a time to show while
         // the next, pinned and unnumbered, has nothing left for the row.
-        val footer = buttons || number != null || time != null || tag || icons
+        val edited = item.editedAt != null
+        val footer = buttons || number != null || time != null || tag || icons || edited
         if (footer) Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1331,7 +1440,8 @@ private fun ClipCard(
             if (time != null) ClipTimeText(time, Modifier.weight(1f, fill = false))
             Spacer(Modifier.weight(1f))
             if (icons) ClipEntityIcons(hold.entities, callbacks)
-            if (buttons) ClipActions(item, callbacks)
+            // Without the buttons there is no pin to sit beside; the mark stays.
+            if (buttons) ClipActions(item, callbacks) else if (edited) ClipEditedMark()
         }
     }
 }
@@ -1531,10 +1641,14 @@ private fun ClipRow(
             }
         }
         val icons = hold.icons && hold.entities.isNotEmpty()
-        if (buttons || icons) {
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        val edited = item.editedAt != null
+        if (buttons || icons || edited) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
                 if (icons) ClipEntityIcons(hold.entities, callbacks)
-                if (buttons) ClipActions(item, callbacks)
+                if (buttons) ClipActions(item, callbacks) else if (edited) ClipEditedMark()
             }
         }
     }
@@ -1598,7 +1712,7 @@ private const val MinuteMs = 60_000L
 private const val ClipTimeTickMs = 30_000L
 
 /** The history's bottom padding while the Undo bar covers its last few dp. */
-private val UndoBarClearance = 64.dp
+internal val UndoBarClearance = 64.dp
 
 /** How big a picture is drawn in a list row. */
 private val ListThumbnailWidth = 96.dp

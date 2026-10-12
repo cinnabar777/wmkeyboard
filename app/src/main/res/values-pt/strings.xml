@@ -2234,9 +2234,6 @@
     <string name="keypress_haptics_title">Háptica de pressão de tecla</string>
     <string name="keypress_hold_action_copy_label">Copiar</string>
     <string name="keypress_hold_action_cut_label">Cortar</string>
-    <string name="keypress_hold_action_first_info">A ação geralmente fica no final do pop-up, então um simples toque e segurar fornece o primeiro acento. Com isso ativado, ela se move para a frente, e um toque e segurar em uma das teclas de atalho executa a ação imediatamente. Os acentos ainda estão lá: mantenha o dedo pressionado e deslize para o que você deseja. Isso requer Manter pressionado para selecionar, em Teclas alternativas.</string>
-    <string name="keypress_hold_action_first_subtitle">Pressionar e segurar executa a ação em vez de mostrar os acentos</string>
-    <string name="keypress_hold_action_first_title">Ação primeiro</string>
     <string name="keypress_hold_action_paste_label">Colar</string>
     <string name="keypress_hold_action_redo_label">Refazer</string>
     <string name="keypress_hold_action_select_all_label">Selecionar tudo</string>
@@ -2545,8 +2542,6 @@
     <string name="languages_cjk_region_info">Terminologia regional. Taiwan e Hong Kong costumam usar palavras diferentes para a mesma coisa, não apenas caracteres diferentes.</string>
     <string name="languages_cjk_region_taiwan_title">Taiwan (臺灣)</string>
     <string name="languages_cjk_region_title">Redação regional</string>
-    <string name="languages_cjk_traditional_info">O teclado converte cada candidato de Simplificado (简体) para Tradicional (繁體) antes de exibi-lo. A conversão lê um caractere de cada vez. Alguns caracteres simplificados possuem mais de uma forma tradicional, e o teclado sempre escreve a mais comum. 发 torna-se 發, o que está correto em 發展, mas incorreto em 頭髮. Corrija essas palavras manualmente.</string>
-    <string name="languages_cjk_traditional_subtitle">O teclado converte candidatos para Tradicional (繁體). Ele converte um caractere de cada vez, portanto, algumas formas que dependem do contexto estão incorretas (发 → 發 / 髮).</string>
     <string name="languages_cjk_traditional_title">Caracteres tradicionais</string>
     <string name="languages_clusters_title">Clusters</string>
     <string name="languages_conjunct_backspace_info">O backspace geralmente exclui um ponto de código por vez. Isso às vezes deixa clusters mal formados na tela. Com essa configuração ativada, um toque exclui o cluster inteiro enquanto você digita %1$s. Outros idiomas mantêm sua própria configuração.</string>

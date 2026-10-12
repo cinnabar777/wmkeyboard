@@ -280,11 +280,14 @@ private fun CandidateRow(candidates: List<String>, onPick: (String) -> Unit) {
 /** Committed-but-unrecognised ink, drawn without catching any touch. */
 @Composable
 private fun PassiveInk(hw: HandwritingUi) {
-    if (hw.strokes.isEmpty()) return
+    // Recognised ink dissolves here too, as on the panel's canvas.
+    val dissolve = rememberInkDissolve(hw)
+    if (hw.strokes.isEmpty() && dissolve.progress == null) return
     val kb = LocalKbTheme.current
     Canvas(modifier = Modifier.fillMaxSize()) {
         val style = Stroke(width = 4.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
         val ink = if (hw.recognizing) kb.accent.copy(alpha = 0.45f) else kb.accent
+        drawDissolvingInk(dissolve, kb.accent.copy(alpha = 0.45f), style)
         for (stroke in hw.strokes) drawPath(pathOf(stroke.points), color = ink, style = style)
     }
 }

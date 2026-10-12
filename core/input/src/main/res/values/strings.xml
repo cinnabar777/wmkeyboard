@@ -20,6 +20,9 @@
     <string name="core_input_cjk_pack_cangjie_title">Cangjie (倉頡) dictionary</string>
     <string name="core_input_cjk_pack_cangjie_subtitle">A table of radical codes to Hanzi characters, 29,000 characters. The keyboard needs this pack for the Cangjie and Quick layouts.</string>
 
+    <string name="core_input_cjk_pack_s2t_phrases_title">Traditional characters phrase table</string>
+    <string name="core_input_cjk_pack_s2t_phrases_subtitle">Phrases from OpenCC, 50,000 entries, about 1 MB. With Traditional characters on, the keyboard uses it to write the correct form for the word, such as 頭髮 and not 頭發.</string>
+
     <string name="core_input_cjk_pack_jyutping_title">Cantonese Jyutping dictionary</string>
     <string name="core_input_cjk_pack_jyutping_subtitle">A table of Jyutping readings to Hanzi characters, 163,000 entries. The keyboard needs this pack for Cantonese conversion.</string>
 

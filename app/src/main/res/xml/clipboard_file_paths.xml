@@ -10,6 +10,8 @@
     <files-path name="kde_received" path="kdeconnect/received/" />
     <!-- Downloaded GIFs/stickers/search images, committed via commitContent. -->
     <cache-path name="media_cache" path="media/" />
+    <!-- A note shared as a .md or .txt file from the Notes screen. -->
+    <cache-path name="notes_share" path="notes/" />
     <!-- The diagnostics report, shared out of the debug log screen. -->
     <cache-path name="diagnostics" path="diagnostics/" />
 </paths>

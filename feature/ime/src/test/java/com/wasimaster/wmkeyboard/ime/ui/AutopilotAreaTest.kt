@@ -213,6 +213,7 @@ class AutopilotAreaTest {
         assertEquals(0.5f, smartHitStrength(5), 0.001f)
         assertEquals(0.1f, smartHitStrength(1), 0.001f)
         assertEquals(1.0f, smartHitStrength(10), 0.001f)
-        assertEquals("out of range is clamped", 1.0f, smartHitStrength(99), 0.001f)
+        assertEquals(2.0f, smartHitStrength(20), 0.001f)
+        assertEquals("out of range is clamped", 2.0f, smartHitStrength(99), 0.001f)
     }
 }

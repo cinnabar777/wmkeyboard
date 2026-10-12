@@ -2232,9 +2232,6 @@
     <string name="keypress_haptics_title">Phản hồi rung khi nhấn phím</string>
     <string name="keypress_hold_action_copy_label">Sao chép</string>
     <string name="keypress_hold_action_cut_label">Cắt</string>
-    <string name="keypress_hold_action_first_info">Thao tác thường nằm ở cuối cửa sổ bật lên, vì vậy nhấn và giữ thông thường sẽ cho bạn dấu phụ đầu tiên. Khi bật tính năng này, nó sẽ di chuyển lên phía trước và nhấn giữ một trong các phím tắt sẽ chạy thao tác ngay lập tức. Các dấu phụ vẫn ở đó: giữ ngón tay của bạn và trượt vào dấu bạn muốn. Tính năng này cần bật Giữ để chọn, trong phần Phím thay thế.</string>
-    <string name="keypress_hold_action_first_subtitle">Nhấn và giữ để thực hiện hành động thay vì hiển thị các dấu</string>
-    <string name="keypress_hold_action_first_title">Hành động trước</string>
     <string name="keypress_hold_action_paste_label">Dán</string>
     <string name="keypress_hold_action_redo_label">Làm lại</string>
     <string name="keypress_hold_action_select_all_label">Chọn tất cả</string>
@@ -2542,8 +2539,6 @@
     <string name="languages_cjk_region_info">Cách dùng từ theo vùng. Đài Loan và Hồng Kông thường sử dụng các từ khác nhau cho cùng một sự vật, không chỉ là các ký tự khác nhau.</string>
     <string name="languages_cjk_region_taiwan_title">Đài Loan (臺灣)</string>
     <string name="languages_cjk_region_title">Cách diễn đạt theo vùng</string>
-    <string name="languages_cjk_traditional_info">Bàn phím chuyển đổi từng ứng viên từ Giản thể (简体) sang Phồn thể (繁體) trước khi hiển thị. Quá trình chuyển đổi đọc từng ký tự một. Một số ký tự Giản thể có nhiều hơn một dạng Phồn thể, và bàn phím luôn viết dạng phổ biến hơn. 发 trở thành 發, điều này đúng trong 發展 nhưng sai trong 頭髮. Hãy sửa các từ đó theo cách thủ công.</string>
-    <string name="languages_cjk_traditional_subtitle">Bàn phím chuyển đổi các ứng viên sang Chữ Hán phồn thể (繁體). Nó chuyển đổi từng ký tự một, vì vậy một số dạng phụ thuộc vào ngữ cảnh có thể bị sai (发 → 發 / 髮).</string>
     <string name="languages_cjk_traditional_title">Chữ Hán phồn thể</string>
     <string name="languages_clusters_title">Cụm</string>
     <string name="languages_conjunct_backspace_info">Phím xóa lùi thường xóa từng điểm mã một. Điều này đôi khi để lại các cụm ký tự chưa hoàn chỉnh trên màn hình. Khi bật cài đặt này, một lần nhấn sẽ xóa toàn bộ cụm ký tự trong khi bạn nhập %1$s. Các ngôn ngữ khác vẫn giữ cài đặt riêng của chúng.</string>

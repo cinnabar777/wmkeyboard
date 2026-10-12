@@ -120,6 +120,7 @@ object LanguageRegistry {
             layoutIds = listOf(
                 BuiltInLayouts.AVRO_ID,
                 BuiltInLayouts.KHIPRO_ID,
+                BuiltInLayouts.KHIPRO_DARK_ID,
                 BuiltInLayouts.PROBHAT_ID,
                 BuiltInLayouts.JATIYA_ID,
                 AssetLayouts.BN_BAISHAKHI_ID,
@@ -188,6 +189,7 @@ object LanguageRegistry {
                 AssetLayouts.KO_SEBEOLSIK_390_ID,
                 AssetLayouts.KO_SEBEOLSIK_FINAL_ID,
                 AssetLayouts.KO_CHEONJIIN_ID,
+                AssetLayouts.KO_NARATGEUL_ID,
                 AssetLayouts.KO_PHONETIC_ID,
                 AssetLayouts.KO_DANMOEUM_ID,
                 AssetLayouts.KO_HANDWRITING_ID,

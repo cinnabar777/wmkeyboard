@@ -315,6 +315,63 @@ object ToolHttp {
             }
     }
 
+    /** What [exchange] hands its reader: the response before its body is read. */
+    class Exchange(
+        val status: Int,
+        /** The media type alone, lower case, without its parameters. Empty when the server sent none. */
+        val contentType: String,
+        /** The response headers the caller named, by the name it gave them. */
+        val headers: Map<String, String>,
+        /** The body, or the error body for a failure. Null when there is none (a 202). */
+        val body: java.io.BufferedReader?,
+    )
+
+    /**
+     * One request whose response the caller reads itself, a line at a time
+     * if it wants: for a protocol where the status, a header and the body's
+     * type all decide what happens next, and where the body may be a stream
+     * that has to be read only as far as one answer. Built for MCP (#573).
+     *
+     * Never throws on a status: [read] sees every response, failures
+     * included, with the error body in [Exchange.body]. The connection closes
+     * when [read] returns, which is how a stream is abandoned once the answer
+     * it carried has arrived.
+     */
+    @Suppress("LongParameterList")
+    fun <T> exchange(
+        url: String,
+        method: String,
+        body: String? = null,
+        headers: Map<String, String> = emptyMap(),
+        wantHeaders: Set<String> = emptySet(),
+        timeoutMs: Int = 60_000,
+        source: NetSource? = null,
+        route: String? = null,
+        read: (Exchange) -> T,
+    ): T = metered(url, method, source, route) { connection, call ->
+        connection.connectTimeout = 10_000
+        connection.readTimeout = timeoutMs
+        connection.setRequestProperty("User-Agent", USER_AGENT)
+        connection.requestMethod = method
+        for ((name, value) in headers) connection.setRequestProperty(name, value)
+        if (body != null) {
+            connection.doOutput = true
+            connection.setRequestProperty("Content-Type", "application/json")
+            connection.send(body.toByteArray(), call)
+        }
+        val status = connection.responseCode
+        call.status = status
+        val kept = wantHeaders.mapNotNull { name -> connection.getHeaderField(name)?.let { name to it } }.toMap()
+        val type = connection.contentType.orEmpty().substringBefore(';').trim().lowercase()
+        val stream = if (status >= 400) connection.errorStream else runCatching { connection.inputStream }.getOrNull()
+        val reader = stream?.let(call::countIn)?.bufferedReader()
+        try {
+            read(Exchange(status, type, kept, reader))
+        } finally {
+            runCatching { reader?.close() }
+        }
+    }
+
     /**
      * Streams a URL into [target] (creating parent dirs); deletes the partial file on
      * failure. [maxBytes] aborts the transfer once exceeded rather than trusting a

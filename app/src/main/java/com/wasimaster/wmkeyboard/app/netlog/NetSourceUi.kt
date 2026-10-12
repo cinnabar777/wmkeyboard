@@ -113,6 +113,7 @@ private fun texts(source: NetSource): Pair<Int, Int> = when (source) {
     NetSource.AI -> R.string.netlog_source_ai to R.string.netlog_sent_ai
     NetSource.AI_CHAT -> R.string.netlog_source_ai_chat to R.string.netlog_sent_ai_chat
     NetSource.AI_TOOLS -> R.string.netlog_source_ai_tools to R.string.netlog_sent_ai_tools
+    NetSource.AI_MCP -> R.string.netlog_source_ai_mcp to R.string.netlog_sent_ai_mcp
     NetSource.TRANSCRIPTION -> R.string.netlog_source_transcription to R.string.netlog_sent_transcription
     NetSource.WIKIPEDIA -> R.string.netlog_source_wikipedia to R.string.netlog_sent_wikipedia
     NetSource.DICTIONARY -> R.string.netlog_source_dictionary to R.string.netlog_sent_dictionary
@@ -136,6 +137,7 @@ private fun texts(source: NetSource): Pair<Int, Int> = when (source) {
     NetSource.ADDONS -> R.string.netlog_source_addons to R.string.netlog_sent_addons
     NetSource.KEYMAN -> R.string.netlog_source_keyman to R.string.netlog_sent_keyman
     NetSource.SIGNAL_STICKERS -> R.string.netlog_source_signal_stickers to R.string.netlog_sent_signal_stickers
+    NetSource.TELEGRAM_STICKERS -> R.string.netlog_source_telegram_stickers to R.string.netlog_sent_telegram_stickers
     NetSource.RBOARD_THEMES -> R.string.netlog_source_rboard_themes to R.string.netlog_sent_rboard_themes
     NetSource.LINK_IMPORT -> R.string.netlog_source_link_import to R.string.netlog_sent_link_import
     NetSource.BACKUP -> R.string.netlog_source_backup to R.string.netlog_sent_backup

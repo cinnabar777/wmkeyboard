@@ -1,6 +1,9 @@
 package com.wasimaster.wmkeyboard.ime
 
+import com.wasimaster.wmkeyboard.core.settings.DefaultToolHoldActions
 import com.wasimaster.wmkeyboard.core.settings.ToolHoldAction
+import com.wasimaster.wmkeyboard.core.settings.ToolbarBehavior
+import com.wasimaster.wmkeyboard.core.settings.holdActionOf
 import com.wasimaster.wmkeyboard.core.settings.ToolHoldActions
 import com.wasimaster.wmkeyboard.core.settings.ToolbarPlacement
 import com.wasimaster.wmkeyboard.core.settings.ToolbarTool
@@ -71,6 +74,30 @@ class ToolHoldActionsTest {
             mapOf(ToolbarTool.UNDO to ToolHoldAction.Run(ToolbarTool.REDO)),
             ToolHoldActions.decode("UNDO=REDO,REDO=REDO"),
         )
+    }
+
+    @Test
+    fun `the settings page round trips as its own token`() {
+        assertEquals("COPY=PAGE", ToolHoldActions.encode(mapOf(ToolbarTool.COPY to ToolHoldAction.OpenSettings)))
+        assertEquals(mapOf(ToolbarTool.COPY to ToolHoldAction.OpenSettings), ToolHoldActions.decode("COPY=PAGE"))
+        assertTrue(ToolbarTool.entries.none { it.name == ToolHoldActions.SETTINGS_TOKEN })
+    }
+
+    /** HeliBoard's pairings (issue #639), then the settings page, then the user. */
+    @Test
+    fun `an unbound tool holds to its pairing, or to its settings`() {
+        val plain = ToolbarBehavior()
+        assertEquals(ToolHoldAction.Run(ToolbarTool.REDO), plain.holdActionOf(ToolbarTool.UNDO))
+        assertEquals(ToolHoldAction.Run(ToolbarTool.CUT), plain.holdActionOf(ToolbarTool.COPY))
+        assertEquals(ToolHoldAction.Run(ToolbarTool.PASTE), plain.holdActionOf(ToolbarTool.CLIPBOARD))
+        assertEquals(ToolHoldAction.OpenSettings, plain.holdActionOf(ToolbarTool.TRANSLATE))
+        val bound = ToolbarBehavior(holdActions = mapOf(ToolbarTool.UNDO to ToolHoldAction.OpenSettings))
+        assertEquals(ToolHoldAction.OpenSettings, bound.holdActionOf(ToolbarTool.UNDO))
+    }
+
+    @Test
+    fun `no pairing holds a tool to itself`() {
+        assertTrue(DefaultToolHoldActions.none { (tool, action) -> tool == action })
     }
 
     @Test

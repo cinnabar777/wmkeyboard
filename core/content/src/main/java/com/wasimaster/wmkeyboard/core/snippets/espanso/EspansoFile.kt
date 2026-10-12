@@ -331,10 +331,8 @@ object EspansoFile {
      * (`->`) or that ends in it (`x:`) leaves nothing to look up at all.
      */
     private fun matchable(trigger: String): Boolean =
-        trigger.all(SnippetMatcher::isTriggerWordChar) ||
-            SnippetMatcher.splitPrefix(trigger) != null ||
-            // `js:`, `->`: fired off the field when the last symbol lands (#471).
-            SnippetMatcher.isSuffixTrigger(trigger)
+        // `js:`, `->` count too: fired off the field when the last symbol lands (#471).
+        SnippetMatcher.isMatchableTrigger(trigger)
 
     /**
      * True when this app would insist on a word boundary in front of [trigger]

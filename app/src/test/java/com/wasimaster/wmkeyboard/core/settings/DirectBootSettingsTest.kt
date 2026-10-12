@@ -161,7 +161,7 @@ class DirectBootSettingsTest {
         // storage that is not covered by the user's credential.
         val credentials = setOf(
             "translate_api_key", "deepl_api_key", "translate_server_key",
-            "klipy_api_key", "brave_api_key", "giphy_api_key",
+            "klipy_api_key", "brave_api_key", "giphy_api_key", "telegram_bot_token",
             "ai_anthropic_key", "ai_openai_key", "ai_gemini_key", "hf_token",
         )
         assertTrue(credentials.all { it in SettingsBackup.SECRET_KEYS })

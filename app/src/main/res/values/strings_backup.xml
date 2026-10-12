@@ -51,6 +51,9 @@
     <string name="backup_android_import_subtitle">Add the words saved in Android\'s personal dictionary</string>
     <string name="backup_android_export_title">Export to Android\'s dictionary</string>
     <string name="backup_android_export_subtitle">Copy your words to Android\'s personal dictionary, for other keyboards and the spell checker</string>
+    <!-- Gboard is Google's keyboard; do not translate the name. -->
+    <string name="backup_gboard_import_title">Import a Gboard dictionary</string>
+    <string name="backup_gboard_import_subtitle">The PersonalDictionary.zip from Gboard\'s Export. Its words come here, and its shortcuts become snippets</string>
     <string name="backup_android_import_dialog_title">Words from Android</string>
     <string name="backup_android_export_dialog_title">Words to copy to Android</string>
     <string name="backup_android_nothing_to_import_body">Every word in Android\'s dictionary is already in your personal dictionary.</string>
@@ -126,6 +129,7 @@
     <string name="backup_section_statistics_label">Typing statistics</string>
     <string name="backup_section_vocab_label">Vocabulary</string>
     <string name="backup_section_swipe_label">Swipe style</string>
+    <string name="backup_section_notes_label">Notes</string>
 
     <!-- The same names in the middle of a sentence, for the list in     -->
     <!-- backup_restore_done ("The app restored themes, snippets.").      -->
@@ -143,6 +147,7 @@
     <string name="backup_section_statistics_label_lowercase">typing statistics</string>
     <string name="backup_section_vocab_label_lowercase">vocabulary</string>
     <string name="backup_section_swipe_label_lowercase">swipe style</string>
+    <string name="backup_section_notes_label_lowercase">notes</string>
 
     <!-- How much of each part a backup file holds. %1$d is the count. These -->
     <!-- go after the name of the part: "Themes: 3 custom themes".           -->
@@ -199,6 +204,10 @@
         <item quantity="one">%1$d word you have swiped</item>
         <item quantity="other">%1$d words you have swiped</item>
     </plurals>
+    <plurals name="backup_section_notes_count">
+        <item quantity="one">%1$d note</item>
+        <item quantity="other">%1$d notes</item>
+    </plurals>
 
     <!-- ================================================================== -->
     <!-- Backup: what the export file holds.                                -->
@@ -209,7 +218,7 @@
 
     <string name="backup_include_settings_subtitle">Every keyboard setting</string>
     <string name="backup_include_secrets_title">Include API keys</string>
-    <string name="backup_include_secrets_subtitle">The keys for translate, GIF, search and AI</string>
+    <string name="backup_include_secrets_subtitle">The keys for translate, GIF, search and AI, and your locked notes</string>
     <string name="backup_include_secrets_info">This setting is off at the start. A backup file is easy to send to yourself or to put in a shared folder. These keys spend real money on your accounts.\n\nTurn it on only for a backup that you keep to yourself. Anyone who opens that file can use your keys.</string>
     <string name="backup_include_themes_subtitle">Your custom themes</string>
     <string name="backup_include_themes_info">The colours, the gradients and the layout of your saved themes. The file does not hold the background image of a theme. It holds only the theme itself.</string>
@@ -229,6 +238,8 @@
     <string name="backup_include_emoji_subtitle">Your recent emoji, your favourites and the skin tone of each one</string>
     <string name="backup_include_statistics_subtitle">Your daily typing counts and your all-time speed</string>
     <string name="backup_include_vocab_subtitle">Your word lists, imported packs and learning progress. Downloaded packs are left out; they can be downloaded again.</string>
+    <string name="backup_include_notes_subtitle">Your notes, their tags, and what is in the trash</string>
+    <string name="backup_include_notes_info">Locked notes stay out of the file unless Include API keys is on. A backup file is easy to share, and a locked note is one you asked to keep from view.</string>
     <string name="backup_include_swipe_subtitle">How you swipe: where your finger lands, the readings you corrected, and the shape you draw each word in. Holds the words you have swiped.</string>
     <string name="backup_include_addons_info">This is only the list of addresses. The add-ons themselves go into the sections above. An installed theme is a custom theme, and an installed pack is an icon pack.</string>
 

@@ -152,6 +152,8 @@
     <string name="ime_service_resize_floating_toast">Dock the keyboard to resize it</string>
     <!-- The One-handed tool was pressed with the phone sideways while the "Portrait only" setting holds the mode off there. -->
     <string name="ime_service_one_handed_portrait_only_toast">One-handed mode is set to portrait only</string>
+    <!-- The One-handed tool was pressed on a screen shape (such as unfolded portrait) whose per-screen setting holds the mode off. -->
+    <string name="ime_service_one_handed_screen_off_toast">One-handed mode is off for this screen</string>
     <string name="ime_service_power_saving_on_empty_toast">Power saving is on. No feature is set to stop yet.</string>
     <string name="ime_service_power_saving_still_on_toast">Power saving stays on. The battery trigger is on.</string>
     <string name="ime_service_power_saving_off_toast">Power saving is off</string>
@@ -205,6 +207,8 @@
     <!-- GIFs, stickers and images the keyboard sends or saves. -->
     <string name="ime_service_sticker_pack_default_name">My stickers</string>
     <string name="ime_service_sticker_saved_toast">Saved to your stickers</string>
+    <string name="ime_service_gif_favourite_added_toast">Added to favourites</string>
+    <string name="ime_service_gif_favourite_removed_toast">Removed from favourites</string>
     <string name="ime_service_sticker_pack_full_toast">That pack is full</string>
     <string name="ime_service_sticker_pack_missing_toast">That pack is gone</string>
     <string name="ime_service_sticker_save_error_toast">The keyboard cannot save that sticker</string>
@@ -234,5 +238,10 @@
     <string name="ime_controls_show">Show</string>
     <string name="ime_controls_unpin">Unpin</string>
     <string name="ime_controls_switch">Switch keyboard</string>
+
+    <!-- The floating keyboard button over other apps (issue #374). The label
+         is what a screen reader says for the button. -->
+    <string name="ime_summon_button_label">Show keyboard</string>
+    <string name="ime_summon_button_hidden_toast">Keyboard button hidden until the keyboard next opens</string>
 
 </resources>

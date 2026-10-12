@@ -92,13 +92,13 @@ class CurrentLayoutTest {
     }
 
     /**
-     * `actionFirst` is the trade the other way: the action moves to entry 0, so
-     * a plain hold-and-release copies, and the accents move one along rather
-     * than being taken away.
+     * An `actionPosition` of 0 is the trade the other way: the action moves to
+     * entry 0, so a plain hold-and-release copies, and the accents move one
+     * along rather than being taken away.
      */
     @Test
-    fun `actionFirst puts the hold shortcut at entry zero`() {
-        val actions = copyOnC().copy(actionFirst = true)
+    fun `actionPosition 0 puts the hold shortcut at entry zero`() {
+        val actions = copyOnC().copy(actionPosition = 0)
         val s = state(settings = plain().copy(longPressLetterActions = actions))
         val entries = cKeyOf(s).alternateEntries()
         assertEquals(
@@ -108,6 +108,19 @@ class CurrentLayoutTest {
         // The accents are still reachable, and in their own order.
         val characters = entries.drop(1).map { (it as AlternateEntry.Character).text }
         assertEquals(cKeyOf(s).longPress, characters)
+    }
+
+    /**
+     * Issue #570's middle way: one along, a plain hold still types the accent
+     * the corner hint shows, and copy is the next entry.
+     */
+    @Test
+    fun `actionPosition 1 puts the hold shortcut after the first accent`() {
+        val s = state(settings = plain().copy(longPressLetterActions = copyOnC().copy(actionPosition = 1)))
+        val key = cKeyOf(s)
+        val entries = key.alternateEntries()
+        assertEquals(key.longPress.first(), (entries[0] as AlternateEntry.Character).text)
+        assertEquals(KeyAction.Edit(TextEditAction.COPY), (entries[1] as AlternateEntry.Action).alternate.action)
     }
 
     /** Copy on `c`, every other hold shortcut off. */
@@ -669,7 +682,59 @@ class CurrentLayoutTest {
     fun `an arabic-script grid leads the period popup with its own question mark`() {
         val s = state(buried("…", "؟", "،", "?", "!"), settings = plain())
             .copy(script = ScriptRegistry[ScriptId.ARABIC])
-        assertEquals(listOf("؟", "…", "،", "?", "!"), periodOf(s).longPress)
+        assertEquals(listOf("؟", "…", "،", "?", "!"), periodOf(s).longPress.take(5))
+    }
+
+    /** Issue #606: the harakat close the period key's hold, after the layout's own. */
+    @Test
+    fun `an arabic-script grid ends the period popup with the harakat`() {
+        val s = state(buried("…", "\u064E", "!"), settings = plain())
+            .copy(script = ScriptRegistry[ScriptId.ARABIC])
+        val popup = periodOf(s).longPress
+        assertEquals(listOf("…", "\u064E", "!"), popup.take(3))
+        assertEquals(ScriptRegistry[ScriptId.ARABIC].periodAlternates - "\u064E", popup.drop(3))
+    }
+
+    /** Only the letters page: the symbols pages' "." is for numbers. */
+    @Test
+    fun `the harakat stay off the symbols pages`() {
+        val s = state(settings = plain())
+            .copy(script = ScriptRegistry[ScriptId.ARABIC], layoutMode = LayoutMode.SYMBOLS)
+        assertTrue(currentLayout(s).keys().none { "\u064E" in it.longPress })
+    }
+
+    /** Issue #605: the symbols page's ? key types ؟, with ? one hold away. */
+    @Test
+    fun `an arabic-script symbols page types its own question mark`() {
+        val s = state(settings = plain())
+            .copy(script = ScriptRegistry[ScriptId.ARABIC], layoutMode = LayoutMode.SYMBOLS)
+        val keys = currentLayout(s).keys()
+        assertTrue("no key may still type ?", keys.none { (it.output ?: it.label) == "?" })
+        val asked = keys.first { (it.output ?: it.label) == "؟" }
+        assertEquals("?", asked.longPress.first())
+    }
+
+    /** A letters key that typed ? counts as ؟ to hand, so nothing is lifted. */
+    @Test
+    fun `a swapped question key keeps the period popup as laid out`() {
+        val s = state(buried("…", "!", letter = Key("?")), settings = plain())
+            .copy(script = ScriptRegistry[ScriptId.ARABIC])
+        assertEquals("؟", currentLayout(s).rows.first().first().label)
+        assertEquals(listOf("…", "!"), periodOf(s).longPress.take(2))
+    }
+
+    /** A script that asks with ? leaves the key alone. */
+    @Test
+    fun `a latin symbols page keeps its question mark`() {
+        val s = state(settings = plain()).copy(layoutMode = LayoutMode.SYMBOLS)
+        assertTrue(currentLayout(s).keys().any { (it.output ?: it.label) == "?" })
+    }
+
+    @Test
+    fun `a lone combining mark draws on a dotted circle`() {
+        assertEquals("\u25CC\u064E", visibleAlternate("\u064E"))
+        assertEquals("ب\u064E", visibleAlternate("ب\u064E"))
+        assertEquals("ZWNJ", visibleAlternate("\u200C"))
     }
 
     /** The same fix for every other language whose layout buried "?" there. */

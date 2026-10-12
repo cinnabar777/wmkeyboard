@@ -7,8 +7,8 @@
     <string name="vocab_packs_available_info">Word lists from the WM Keyboard data repository, with definitions, pronunciations and examples from Wiktionary and WordNet.</string>
     <string name="vocab_packs_installed_title">Installed packs</string>
     <string name="vocab_packs_installed_empty">Nothing yet. Download a pack above, install one from an add-on repository, or import a file.</string>
-    <string name="vocab_packs_import_title">Import a pack file</string>
-    <string name="vocab_packs_import_subtitle">A .wmvocab.json file, as the app exports a list</string>
+    <string name="vocab_packs_import_title">Import a pack or flashcards</string>
+    <string name="vocab_packs_import_subtitle">A .wmvocab.json pack, an Anki deck (.apkg or .colpkg), or a CSV or TSV of words and meanings, as Quizlet exports</string>
     <string name="vocab_pack_download_action">Download</string>
     <!-- %1$s bytes so far, %2$s the total. -->
     <string name="vocab_pack_downloading_subtitle">Downloading… <xliff:g id="done" example="120 KB">%1$s</xliff:g> of <xliff:g id="total" example="270 KB">%2$s</xliff:g></string>
@@ -32,9 +32,9 @@
         <item quantity="one">Imported %d word.</item>
         <item quantity="other">Imported %d words.</item>
     </plurals>
-    <string name="vocab_import_error">That file is not a vocabulary pack.</string>
-    <string name="vocab_import_empty_error">The pack has no words.</string>
-    <string name="vocab_import_too_large_error">The pack is larger than the app accepts.</string>
+    <string name="vocab_import_error">That file is not a vocabulary pack, an Anki deck or a list of words and meanings.</string>
+    <string name="vocab_import_empty_error">The file has no words. Cards whose front is longer than a word are skipped.</string>
+    <string name="vocab_import_too_large_error">The file is larger than the app accepts.</string>
 
     <string name="vocab_lists_title">My lists</string>
     <string name="vocab_lists_info">Lists you make yourself work like packs: their words get cards, nudges and flashcards. Details fill in from your installed packs or the online dictionary.</string>

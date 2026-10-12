@@ -55,6 +55,18 @@ class EmojiSuggesterTest {
         assertTrue("🐱" in suggester.suggest("cat", limit = 10))
     }
 
+    /** One Han character or kana is a word on its own, where one Latin letter never is (#633). */
+    @Test fun aSingleHanCharacterIsAKeyword() {
+        val packed = EmojiSuggester(
+            listOf(
+                EmojiEntry("😄", "smileys", listOf("笑")),
+                EmojiEntry("🅰️", "symbols", listOf("a")),
+            ),
+        )
+        assertEquals(listOf("😄"), packed.suggest("笑"))
+        assertTrue(packed.suggest("a").isEmpty())
+    }
+
     @Test fun simplePluralsStillMatch() {
         assertTrue(suggester.suggest("cakes").isNotEmpty())
     }

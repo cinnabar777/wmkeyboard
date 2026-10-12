@@ -1,6 +1,23 @@
 package com.wasimaster.wmkeyboard.ime.ui
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.offset
@@ -214,8 +231,17 @@ internal fun BoxScope.OctopusOverlay(
     rects: OctopusRects,
 ) {
     val octopus = settings.octopus
+    // Remembered before any early way out, so a word leaving still has the
+    // record of what was up a moment ago.
+    val motion = remember { OctopusMotion() }
+    // Words fade and bloom only while the board is the one they were on. A
+    // picker opening takes them at once, as does a layout change: the cells
+    // they were measured against are gone.
+    val animate = kb.motion.any && !hidden && bounds.isNotEmpty() && boardSize.width > 0f
     if (hidden || words.isEmpty() || bounds.isEmpty() || boardSize.width <= 0f) {
         rects.publish(emptyList(), bounds)
+        val leaving = motion.settle(emptyList(), animate, rects.recentlyTaken(), null)
+        OctopusLeavingWords(motion, leaving)
         return
     }
     val density = LocalDensity.current
@@ -251,36 +277,286 @@ internal fun BoxScope.OctopusOverlay(
     // this has run again against it.
     rects.publish(slots, bounds)
     val head = palette.keyText.copy(alpha = OctopusHeadAlpha)
-    for (slot in slots) {
-        val area = slot.area
-        Box(
-            modifier = Modifier
-                // The key underneath is what a screen reader reads; this word
-                // reaches TalkBack through that key's own custom action, so a
-                // node here would only offer a target it could never activate.
-                .clearAndSetSemantics { }
-                // Declared after the key grid, so it already draws over it —
-                // but stated rather than inherited from declaration order,
-                // because a word half-swallowed by the key under it is the one
-                // failure this layer cannot recover from, and z-order is
-                // exactly the kind of thing a later refactor moves by accident.
-                .zIndex(1f)
-                .offset { IntOffset(area.left.roundToInt(), area.top.roundToInt()) }
-                .size(
-                    width = with(density) { area.width.toDp() },
-                    height = with(density) { area.height.toDp() },
-                ),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                text = octopusLabel(slot.word, head, kb.accent, promised, promiseColor),
-                // Shrunk to fit where a long word would otherwise not have
-                // been drawn at all.
-                style = if (slot.scale == 1f) style else style.copy(fontSize = (fontSize * slot.scale).sp),
-                maxLines = 1,
-                softWrap = false,
+    val labelFor = { slot: OctopusSlot -> octopusLabel(slot.word, head, kb.accent, promised, promiseColor) }
+    val styleFor = { slot: OctopusSlot ->
+        // Shrunk to fit where a long word would otherwise not have been drawn
+        // at all.
+        if (slot.scale == 1f) style else style.copy(fontSize = (fontSize * slot.scale).sp)
+    }
+    val taken = rects.recentlyTaken()
+    val leaving = motion.settle(slots, animate, taken) { labelFor(it) to styleFor(it) }
+    for ((order, slot) in slots.withIndex()) {
+        // One box per key the word hangs from, so the box outlives the word on
+        // it: a new word on the same key crossfades rather than popping.
+        key(slot.word.keyCodePoint, slot.word.tier) {
+            OctopusWordBox(
+                slot = slot,
+                text = labelFor(slot),
+                style = styleFor(slot),
+                anchor = bounds[slot.word.keyCodePoint]?.center,
+                animate = animate,
+                order = order,
+                taken = taken,
             )
         }
+    }
+    OctopusLeavingWords(motion, leaving)
+}
+
+/**
+ * One floating word in its band. Plain boxes and text, so every press falls
+ * through to the key underneath; the motion is all in the drawing.
+ *
+ * With motion on it blooms out of its key the first time it appears (from the
+ * key's centre, a few ms behind the better words), and when the word on its key
+ * changes the old one fades out under the new one coming in.
+ */
+@Composable
+private fun OctopusWordBox(
+    slot: OctopusSlot,
+    text: AnnotatedString,
+    style: TextStyle,
+    /** The centre of the key the word belongs to, in the grid's space. */
+    anchor: Offset?,
+    animate: Boolean,
+    order: Int,
+    /** The word a tap or a flick just took, if any; see [OctopusRects.markTaken]. */
+    taken: String?,
+) {
+    val density = LocalDensity.current
+    val area = slot.area
+    // Born at nothing in the composition that brings the word in, so its first
+    // frame is never drawn whole.
+    val bloom = remember { Animatable(if (animate) 0f else 1f) }
+    LaunchedEffect(bloom) {
+        if (bloom.value >= 1f) return@LaunchedEffect
+        delay(order.coerceAtMost(OctopusStaggerSteps) * OctopusStaggerMs)
+        bloom.animateTo(1f, tween(OctopusBloomMs, easing = FastOutSlowInEasing))
+    }
+    val face = remember { OctopusFace(text, style) }
+    val epoch = face.swap(text, style, animate, taken)
+    val cross = remember(epoch) { Animatable(if (face.previous != null) 0f else 1f) }
+    LaunchedEffect(cross) {
+        if (cross.value >= 1f) return@LaunchedEffect
+        cross.animateTo(1f, tween(OctopusSwapMs))
+        face.previous = null
+    }
+    Box(
+        modifier = Modifier
+            // The key underneath is what a screen reader reads; this word
+            // reaches TalkBack through that key's own custom action, so a
+            // node here would only offer a target it could never activate.
+            .clearAndSetSemantics { }
+            // Declared after the key grid, so it already draws over it —
+            // but stated rather than inherited from declaration order,
+            // because a word half-swallowed by the key under it is the one
+            // failure this layer cannot recover from, and z-order is
+            // exactly the kind of thing a later refactor moves by accident.
+            .zIndex(1f)
+            .offset { IntOffset(area.left.roundToInt(), area.top.roundToInt()) }
+            .size(
+                width = with(density) { area.width.toDp() },
+                height = with(density) { area.height.toDp() },
+            )
+            .graphicsLayer {
+                val b = bloom.value
+                if (b >= 1f) return@graphicsLayer
+                alpha = b
+                val s = OctopusBloomFrom + (1f - OctopusBloomFrom) * b
+                scaleX = s
+                scaleY = s
+                if (anchor != null && area.width > 0f && area.height > 0f) {
+                    transformOrigin = TransformOrigin(
+                        (anchor.x - area.left) / area.width,
+                        (anchor.y - area.top) / area.height,
+                    )
+                }
+            },
+        contentAlignment = Alignment.Center,
+    ) {
+        val previous = face.previous
+        if (previous != null) {
+            Text(
+                text = previous.first,
+                style = previous.second,
+                maxLines = 1,
+                softWrap = false,
+                // Its own width, not the new word's box, so a longer word on
+                // its way out is not clipped while it goes.
+                modifier = Modifier
+                    .wrapContentWidth(unbounded = true)
+                    .graphicsLayer { alpha = 1f - cross.value },
+            )
+        }
+        Text(
+            text = text,
+            style = style,
+            maxLines = 1,
+            softWrap = false,
+            modifier = if (previous != null) Modifier.graphicsLayer { alpha = cross.value } else Modifier,
+        )
+    }
+}
+
+/**
+ * The words that have just left the board, each drawn where it was for the
+ * moment it takes to go: fading where it stood, or — the one a tap or a flick
+ * just took — rising toward the strip it is on its way to.
+ */
+@Composable
+private fun OctopusLeavingWords(motion: OctopusMotion, leaving: List<LeavingWord>) {
+    if (leaving.isEmpty()) return
+    val density = LocalDensity.current
+    // Up past the top of the grid, where the strip and the field are.
+    val rise = with(density) { OctopusTakenRise.toPx() }
+    for (gone in leaving) {
+        key(gone.id) {
+            val out = remember { Animatable(0f) }
+            LaunchedEffect(out) {
+                out.animateTo(
+                    1f,
+                    if (gone.taken) {
+                        tween(OctopusTakenMs, easing = FastOutLinearInEasing)
+                    } else {
+                        tween(OctopusLeaveMs)
+                    },
+                )
+                motion.drop(gone)
+            }
+            val area = gone.area
+            Box(
+                modifier = Modifier
+                    .clearAndSetSemantics { }
+                    .zIndex(1f)
+                    .offset { IntOffset(area.left.roundToInt(), area.top.roundToInt()) }
+                    .size(
+                        width = with(density) { area.width.toDp() },
+                        height = with(density) { area.height.toDp() },
+                    )
+                    .graphicsLayer {
+                        val t = out.value
+                        alpha = 1f - t
+                        if (gone.taken) {
+                            translationY = -(area.bottom + rise) * t
+                            val s = 1f + OctopusTakenGrow * t
+                            scaleX = s
+                            scaleY = s
+                        } else {
+                            val s = 1f - (1f - OctopusBloomFrom) * 0.5f * t
+                            scaleX = s
+                            scaleY = s
+                        }
+                    },
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = gone.text,
+                    style = gone.style,
+                    maxLines = 1,
+                    softWrap = false,
+                    modifier = Modifier.wrapContentWidth(unbounded = true),
+                )
+            }
+        }
+    }
+}
+
+/** A word that has left the board, drawn for as long as it takes to go. */
+private class LeavingWord(
+    val id: Long,
+    val area: Rect,
+    val text: AnnotatedString,
+    val style: TextStyle,
+    /** Taken by a tap or a flick, rather than simply no longer offered. */
+    val taken: Boolean,
+)
+
+/**
+ * What the overlay drew last time, and the words on their way out since.
+ *
+ * Plain fields, worked out in composition from the slots it is handed: running
+ * it again with the same slots changes nothing, so a recomposition for some
+ * other reason cannot double a word's exit. [version] is the one piece of
+ * snapshot state, bumped when a word has finished going so the overlay drops it.
+ */
+private class OctopusMotion {
+    private var last: List<OctopusSlot> = emptyList()
+    private var lastFaces: Map<Long, Pair<AnnotatedString, TextStyle>> = emptyMap()
+    private val leaving = ArrayList<LeavingWord>()
+    private var nextId = 0L
+    private var version by mutableIntStateOf(0)
+
+    /**
+     * The words to draw leaving, after [slots] replace what was up. With
+     * [animate] off, nothing leaves: the board simply changes.
+     */
+    fun settle(
+        slots: List<OctopusSlot>,
+        animate: Boolean,
+        taken: String?,
+        faceOf: ((OctopusSlot) -> Pair<AnnotatedString, TextStyle>)?,
+    ): List<LeavingWord> {
+        // Read, so a word finishing its exit recomposes the overlay.
+        check(version >= 0)
+        if (!animate) {
+            leaving.clear()
+        } else {
+            val next = slots.associateBy { anchorOf(it) }
+            val now = next.keys
+            for (slot in last) {
+                val anchor = anchorOf(slot)
+                // Still on its key: the box crossfades it. Unless it is the word
+                // just taken, which goes up to the strip even when the key has
+                // a new word to offer in its place.
+                val wasTaken = taken != null && slot.word.word == taken
+                val stays = next[anchor]?.word?.word == slot.word.word
+                if (anchor in now && (!wasTaken || stays)) continue
+                val face = lastFaces[anchor] ?: continue
+                leaving.add(
+                    LeavingWord(
+                        id = nextId++,
+                        area = slot.area,
+                        text = face.first,
+                        style = face.second,
+                        taken = wasTaken,
+                    ),
+                )
+            }
+        }
+        if (slots !== last) {
+            last = slots
+            lastFaces = if (faceOf == null) emptyMap() else slots.associate { anchorOf(it) to faceOf(it) }
+        }
+        return leaving.toList()
+    }
+
+    fun drop(word: LeavingWord) {
+        if (leaving.remove(word)) version++
+    }
+
+    private fun anchorOf(slot: OctopusSlot): Long =
+        (slot.word.keyCodePoint.toLong() shl 8) or (slot.word.tier.toLong() and 0xFF)
+}
+
+/**
+ * The word a floating box is showing, and the one it showed before when that
+ * changed. Compared by the word, not its colours: the typed head growing by a
+ * letter is the same offer, and only a different word crossfades.
+ */
+private class OctopusFace(var text: AnnotatedString, var style: TextStyle) {
+    var previous: Pair<AnnotatedString, TextStyle>? = null
+    private var epoch = 0
+
+    fun swap(next: AnnotatedString, nextStyle: TextStyle, animate: Boolean, taken: String?): Int {
+        if (next.text != text.text) {
+            // The word just taken is already flying off to the strip as a
+            // leaving word of its own; fading it here too would draw it twice.
+            previous = if (animate && text.text != taken) text to style else null
+            epoch++
+        }
+        text = next
+        style = nextStyle
+        return epoch
     }
 }
 
@@ -375,6 +651,23 @@ private const val OctopusMaxOverlap = 0.35f
 
 /** The typed head, faded against the completion it introduces. */
 private const val OctopusHeadAlpha = 0.55f
+
+/** A word's bloom out of its key: how long, and from what size. */
+private const val OctopusBloomMs = 140
+private const val OctopusBloomFrom = 0.6f
+
+/** How far behind the better words a word blooms, per rank, and for how many ranks. */
+private const val OctopusStaggerMs = 8L
+private const val OctopusStaggerSteps = 3
+
+/** A word crossfading to the next on the same key, and one fading out. */
+private const val OctopusSwapMs = 120
+private const val OctopusLeaveMs = 110
+
+/** A taken word rising toward the strip: how long, how far past the grid, how much it grows. */
+private const val OctopusTakenMs = 180
+private val OctopusTakenRise = 24.dp
+private const val OctopusTakenGrow = 0.15f
 
 /**
  * Which keys are carrying a word this frame, as one boolean per key.

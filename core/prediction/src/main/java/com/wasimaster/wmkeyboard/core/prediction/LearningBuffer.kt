@@ -154,6 +154,17 @@ class LearningBuffer(private val capacity: Int = DEFAULT_CAPACITY) {
          */
         var suspended: Boolean = false
             internal set
+
+        /**
+         * A word that landed in the field but teaches nothing about itself:
+         * an autocorrect's own spelling, a word just added by hand, one the
+         * user has asked never to see, an unknown one there is no counting.
+         * It waits here only so the run of words settles as it stands, and
+         * the pairs either side of it are not stitched together across it.
+         * Never kept for pairing: a fix to it is not a fix to the user's own
+         * typing.
+         */
+        val contextOnly: Boolean get() = weight <= 0
     }
 
     /**
@@ -236,7 +247,9 @@ class LearningBuffer(private val capacity: Int = DEFAULT_CAPACITY) {
                 if (!old.suspended || WordKey.of(old.word) != key) continue
                 // Dated before this push: the replacement is pushed after
                 // the drop, as [pairWithDropped]'s two-word rule expects.
-                remember(Dropped(old.word, old.anchor, old.origin, old.replaces, pushes - 1))
+                if (!old.contextOnly) {
+                    remember(Dropped(old.word, old.anchor, old.origin, old.replaces, pushes - 1))
+                }
                 iterator.remove()
             }
         }
@@ -329,9 +342,11 @@ class LearningBuffer(private val capacity: Int = DEFAULT_CAPACITY) {
                 entry.anchor -= length
                 continue
             }
-            val d = Dropped(entry.word, entry.anchor, entry.origin, entry.replaces, pushes)
-            dropped.add(d)
-            remember(d)
+            if (!entry.contextOnly) {
+                val d = Dropped(entry.word, entry.anchor, entry.origin, entry.replaces, pushes)
+                dropped.add(d)
+                remember(d)
+            }
             iterator.remove()
         }
         return dropped
@@ -378,9 +393,11 @@ class LearningBuffer(private val capacity: Int = DEFAULT_CAPACITY) {
             // Dated before the entry that landed on it was pushed, which is
             // when a drop-on-touch would have happened: the two-word rule in
             // [pairWithDropped] wants the halves pushed after the drop.
-            val d = Dropped(old.word, old.anchor, old.origin, old.replaces, entry.pushIndex - 1)
-            (dropped ?: ArrayList<Dropped>().also { dropped = it }).add(d)
-            remember(d)
+            if (!old.contextOnly) {
+                val d = Dropped(old.word, old.anchor, old.origin, old.replaces, entry.pushIndex - 1)
+                (dropped ?: ArrayList<Dropped>().also { dropped = it }).add(d)
+                remember(d)
+            }
             iterator.remove()
         }
         return dropped.orEmpty()
@@ -394,7 +411,7 @@ class LearningBuffer(private val capacity: Int = DEFAULT_CAPACITY) {
      */
     fun attachGlide(word: String, sample: GlideShapeSample): Boolean {
         val key = WordKey.of(word)
-        val entry = entries.lastOrNull { WordKey.of(it.word) == key } ?: return false
+        val entry = entries.lastOrNull { !it.contextOnly && WordKey.of(it.word) == key } ?: return false
         entry.glideShape = sample
         return true
     }
@@ -436,7 +453,7 @@ class LearningBuffer(private val capacity: Int = DEFAULT_CAPACITY) {
      * said so at push, and that knowledge is not overwritten by a guess.
      */
     private fun pairWithDropped(entry: Entry) {
-        if (recent.isEmpty() || entry.replaces != null) return
+        if (recent.isEmpty() || entry.replaces != null || entry.contextOnly) return
         val iterator = recent.iterator()
         while (iterator.hasNext()) {
             val d = iterator.next()

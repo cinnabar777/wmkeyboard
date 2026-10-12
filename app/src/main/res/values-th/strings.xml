@@ -2232,9 +2232,6 @@
     <string name="keypress_haptics_title">การสั่นเมื่อกดปุ่ม</string>
     <string name="keypress_hold_action_copy_label">คัดลอก</string>
     <string name="keypress_hold_action_cut_label">ตัด</string>
-    <string name="keypress_hold_action_first_info">โดยปกติการดำเนินการจะอยู่ที่ส่วนท้ายของป๊อปอัป ดังนั้นการกดค้างแบบปกติจะทำให้คุณได้ตัวอักษรพิเศษตัวแรก เมื่อเปิดตัวเลือกนี้ การดำเนินการจะย้ายไปไว้ด้านหน้า และการกดค้างที่คีย์ทางลัดตัวใดตัวหนึ่งจะเรียกใช้การดำเนินการทันที ตัวอักษรพิเศษยังคงอยู่: เพียงกดนิ้วค้างไว้แล้วเลื่อนไปยังตัวที่คุณต้องการ ตัวเลือกนี้จำเป็นต้องใช้การกดค้างเพื่อเลือก ภายใต้คีย์สำรอง</string>
-    <string name="keypress_hold_action_first_subtitle">การกดค้างไว้จะเป็นการเรียกใช้คำสั่งแทนการแสดงตัวอักษรพิเศษ</string>
-    <string name="keypress_hold_action_first_title">ดำเนินการก่อน</string>
     <string name="keypress_hold_action_paste_label">วาง</string>
     <string name="keypress_hold_action_redo_label">ทำซ้ำ</string>
     <string name="keypress_hold_action_select_all_label">เลือกทั้งหมด</string>
@@ -2540,8 +2537,6 @@
     <string name="languages_cjk_region_info">คำศัพท์ตามภูมิภาค ไต้หวันและฮ่องกงมักใช้คำที่แตกต่างกันสำหรับสิ่งเดียวกัน ไม่ใช่แค่ตัวอักษรที่ต่างกันเท่านั้น</string>
     <string name="languages_cjk_region_taiwan_title">ไต้หวัน (臺灣)</string>
     <string name="languages_cjk_region_title">คำศัพท์ตามภูมิภาค</string>
-    <string name="languages_cjk_traditional_info">คีย์บอร์ดจะแปลงตัวเลือกคำจากตัวย่อ (简体) เป็นตัวเต็ม (繁體) ก่อนที่จะแสดงผล โดยจะแปลงทีละตัวอักษร ตัวอักษรย่อบางตัวอาจมีตัวเต็มได้มากกว่าหนึ่งรูปแบบ ซึ่งคีย์บอร์ดจะเลือกใช้รูปแบบที่พบบ่อยที่สุดเสมอ เช่น 发 จะกลายเป็น 發 ซึ่งถูกต้องในคำว่า 發展 แต่ผิดในคำว่า 頭髮 โปรดแก้ไขคำเหล่านี้ด้วยตนเอง</string>
-    <string name="languages_cjk_traditional_subtitle">แป้นพิมพ์จะแปลงตัวเลือกเป็นแบบดั้งเดิม (繁體) โดยจะแปลงทีละตัวอักษร ดังนั้นรูปแบบบางอย่างที่ขึ้นอยู่กับบริบทอาจไม่ถูกต้อง (发 → 發 / 髮)</string>
     <string name="languages_cjk_traditional_title">ตัวอักษรจีนตัวเต็ม</string>
     <string name="languages_clusters_title">กลุ่ม</string>
     <string name="languages_conjunct_backspace_info">โดยปกติปุ่มย้อนกลับจะลบทีละหนึ่งรหัส ซึ่งบางครั้งอาจทำให้เกิดกลุ่มอักขระที่ไม่สมบูรณ์บนหน้าจอ เมื่อเปิดการตั้งค่านี้ การกดหนึ่งครั้งจะลบทั้งกลุ่มอักขระในขณะที่คุณพิมพ์ %1$s ภาษาอื่นๆ จะยังคงใช้การตั้งค่าของตนเอง</string>

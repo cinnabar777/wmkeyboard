@@ -64,6 +64,9 @@
     <string name="clipboard_undo_delete_title">Undo a deleted clip</string>
     <string name="clipboard_undo_delete_subtitle">After you delete a clip, show an Undo button for a few seconds</string>
     <string name="clipboard_undo_delete_info">A swipe across a card deletes the clip with no question first, and a swipe is easy to make by accident while you scroll. With this setting on, a bar at the bottom of the panel offers the clip back. Delete more clips while the bar is up and one Undo brings them all back, each to the place it had. The bar stays for five seconds, or longer if you have set a longer time to take action in Android\'s accessibility settings. This setting is on by default.</string>
+    <string name="clipboard_confirm_pinned_delete_title">Ask before deleting a pinned clip</string>
+    <string name="clipboard_confirm_pinned_delete_subtitle">Deleting a pinned clip asks first; unpinned clips go at once</string>
+    <string name="clipboard_confirm_pinned_delete_info">You pin a clip to keep it, so losing one to a stray tap on its bin or a swipe made while scrolling costs more than losing any other clip. With this setting on, deleting a pinned clip from the panel shows a question first, and only Delete removes it. Unpinned clips are deleted straight away, as before. This setting is on by default.</string>
     <string name="clipboard_pinned_last_title">Pinned entries last</string>
     <string name="clipboard_clear_button_title">Clear button</string>
     <string name="clipboard_clear_button_subtitle">Show a bin beside the search bar that deletes all unpinned clips</string>
@@ -95,6 +98,14 @@
     <string name="clipboard_panel_height_none">Same as keyboard</string>
     <!-- Slider readout for how much taller than the keyboard the clipboard panel is. %1$d is a number of dp. -->
     <string name="clipboard_panel_height_value" tools:ignore="PluralsCandidate">+%1$d dp</string>
+    <string name="clipboard_over_keys_height_title">Height over the keys</string>
+    <string name="clipboard_over_keys_height_subtitle">How much taller a panel opens when the keys are under it</string>
+    <string name="clipboard_over_keys_height_info">This is the height of the clipboard when it is stacked over the keys or while you search it. Other panels with the keys under them use the same height: a snippet or dictionary search, a GIF search, a note that you write, and more. You can also drag the bar on top of such a panel up or down. The keys under the panel keep their size. The default is the compact height of each panel.</string>
+    <!-- Slider readout for the height over the keys at each panel's own compact height. -->
+    <string name="clipboard_over_keys_height_none">Compact</string>
+    <string name="clipboard_key_row_title">ABC, space and enter keys</string>
+    <string name="clipboard_key_row_subtitle">A row of keys along the bottom of the clipboard panel</string>
+    <string name="clipboard_key_row_info">Paste a link and press enter to go to it, or paste more clips with a space or a new line between them, without going back to the keyboard. ABC goes back to the letters. If you changed the panel layout, this setting does nothing: add the keys in the layout editor instead. The row is not shown while the clipboard is stacked over the keys. This setting is off by default.</string>
     <!-- What a screen reader says for the picture in the full-screen viewer of a clipboard image. -->
     <string name="clipboard_image_viewer_desc">Copied image</string>
     <string name="clipboard_pinned_last_subtitle">List pinned clips at the end of the panel instead of the top</string>

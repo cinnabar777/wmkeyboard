@@ -48,6 +48,17 @@ object BuiltInPanelLayouts {
     )
 
     /**
+     * abc / space / enter, the row the clipboard's Key row setting adds
+     * (#615): enter rather than backspace, because what the panel is for is
+     * pasting, and a pasted link wants Go.
+     */
+    val clipboardKeyRow: List<Key> = listOf(
+        Key("ABC", action = KeyAction.Letters, width = 1.5f),
+        Key(" ", action = KeyAction.Space, width = 7f),
+        Key("⏎", action = KeyAction.Enter, width = 1.5f),
+    )
+
+    /**
      * [bottomRow] with the emoji / GIF / sticker switch between abc and space
      * (issue #366). The GIF and sticker panels draw this same row under their
      * grids, so the switch and the keys either side of it do not move when one
@@ -124,15 +135,21 @@ object BuiltInPanelLayouts {
      * chips pulled out of the history, the history itself. [bottomRow] adds the abc / space / backspace
      * row the old `clipboard.bottomRow` setting used to switch on; the
      * settings store seeds a user's layout from this when that flag was set.
+     * [keyRow] adds [clipboardKeyRow] instead, which the clipboard's Key row
+     * setting asks of the shipped panel (#615).
      */
-    fun clipboard(bottomRow: Boolean = false): PanelLayoutSpec = PanelLayoutSpec(
+    fun clipboard(bottomRow: Boolean = false, keyRow: Boolean = false): PanelLayoutSpec = PanelLayoutSpec(
         panel = PanelKind.CLIPBOARD,
         grid = LayerSpec(
             rows = buildList {
                 add(listOf(field(PanelFieldKind.CLIPBOARD_SEARCH, 9f), field(PanelFieldKind.CLIPBOARD_VIEW, 1f)))
                 add(listOf(field(PanelFieldKind.CLIPBOARD_ENTITIES, 10f)))
                 add(listOf(field(PanelFieldKind.CLIPBOARD_LIST, 10f)))
-                if (bottomRow) add(this@BuiltInPanelLayouts.bottomRow)
+                if (bottomRow) {
+                    add(this@BuiltInPanelLayouts.bottomRow)
+                } else if (keyRow) {
+                    add(clipboardKeyRow)
+                }
             },
             // The search pill is a key tall; the fragment strip is a caption
             // over a row of two-line chips, about a key and a half, and it
@@ -141,7 +158,7 @@ object BuiltInPanelLayouts {
                 add(0.8f)
                 add(1.6f)
                 add(3f)
-                if (bottomRow) add(1f)
+                if (bottomRow || keyRow) add(1f)
             },
         ),
     )
@@ -241,6 +258,28 @@ object BuiltInPanelLayouts {
         )
     }
 
+    /**
+     * The handwriting panel (#568): the canvas over a row of abc / space /
+     * backspace / enter. The panel used to stack those four down a rail on the
+     * right; a bottom row gives the canvas the full width and matches the
+     * trackpad and emoji panels.
+     */
+    val HANDWRITING: PanelLayoutSpec = PanelLayoutSpec(
+        panel = PanelKind.HANDWRITING,
+        grid = LayerSpec(
+            rows = listOf(
+                listOf(field(PanelFieldKind.HANDWRITING_CANVAS, 10f)),
+                listOf(
+                    Key("ABC", action = KeyAction.Letters, width = 1.5f),
+                    Key(" ", action = KeyAction.Space, width = 5.5f),
+                    Key("⌫", action = KeyAction.Delete, width = 1.5f),
+                    Key("⏎", action = KeyAction.Enter, width = 1.5f),
+                ),
+            ),
+            rowHeights = listOf(3f, 1f),
+        ),
+    )
+
     val byKind: Map<PanelKind, PanelLayoutSpec> = mapOf(
         PanelKind.EMOJI to EMOJI,
         PanelKind.GIF to GIF,
@@ -249,6 +288,7 @@ object BuiltInPanelLayouts {
         PanelKind.TEXT_EDIT to TEXT_EDIT,
         PanelKind.TRACKPAD to TRACKPAD,
         PanelKind.NUMPAD to NUMPAD,
+        PanelKind.HANDWRITING to HANDWRITING,
     )
 
     fun default(kind: PanelKind): PanelLayoutSpec = byKind.getValue(kind)

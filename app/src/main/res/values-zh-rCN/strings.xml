@@ -2231,9 +2231,6 @@
     <string name="keypress_haptics_title">按键触感反馈</string>
     <string name="keypress_hold_action_copy_label">复制</string>
     <string name="keypress_hold_action_cut_label">剪切</string>
-    <string name="keypress_hold_action_first_info">该操作通常位于弹出窗口的末尾，因此普通的长按会显示第一个重音符号。开启此选项后，它会移至最前面，长按快捷键即可直接运行该操作。重音符号仍然存在：按住手指并滑动到您想要的符号上即可。这需要开启“备选按键”下的“长按以选择”功能。</string>
-    <string name="keypress_hold_action_first_subtitle">长按执行操作，而不是显示重音字符</string>
-    <string name="keypress_hold_action_first_title">优先执行操作</string>
     <string name="keypress_hold_action_paste_label">粘贴</string>
     <string name="keypress_hold_action_redo_label">重做</string>
     <string name="keypress_hold_action_select_all_label">全选</string>
@@ -2540,8 +2537,6 @@
     <string name="languages_cjk_region_info">区域用语。台湾和香港不仅在字符上有所不同，对于同一事物通常也使用不同的词汇。</string>
     <string name="languages_cjk_region_taiwan_title">台湾 (臺灣)</string>
     <string name="languages_cjk_region_title">区域用词</string>
-    <string name="languages_cjk_traditional_info">键盘会在显示候选词之前将每个候选词从简体转换为繁体。转换按逐个字符进行。少数简体字符对应多个繁体形式，键盘始终写入更常用的那个。例如“发”变为“發”，这在“發展”中是正确的，但在“頭髮”中是错误的。请手动更正这些单词。</string>
-    <string name="languages_cjk_traditional_subtitle">键盘将候选词转换为繁体 (繁體)。它一次转换一个字符，因此一些依赖上下文的字形可能会出错 (发 → 發 / 髮)。</string>
     <string name="languages_cjk_traditional_title">繁体字</string>
     <string name="languages_clusters_title">集群</string>
     <string name="languages_conjunct_backspace_info">退格键通常一次删除一个代码点。这有时会在屏幕上留下未完成的字符簇。开启此设置后，按一次即可在输入 %1$s 时删除整个字符簇。其他语言将保持其各自的设置。</string>

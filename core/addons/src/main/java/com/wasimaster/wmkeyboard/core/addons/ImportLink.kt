@@ -75,6 +75,15 @@ object ImportLink {
          */
         data class SignalStickers(val packId: String, val packKey: String) : Target
 
+        /**
+         * A Telegram sticker set, by its name: `https://t.me/addstickers/<name>`,
+         * the `tg://addstickers?set=<name>` form Telegram itself opens, and
+         * the same two for custom emoji (`addemoji`). Not a file at an address
+         * either: the set is asked for through the Bot API with the user's
+         * own bot token. The name is letters, digits and underscores.
+         */
+        data class TelegramStickers(val setName: String) : Target
+
         /** A plain http address. Its own case so the refusal can say why. */
         data object Insecure : Target
 
@@ -137,6 +146,22 @@ object ImportLink {
         """(?:https://signal\.art/addstickers/?#|sgnl://addstickers/?\?)([A-Za-z0-9_=&]+)""",
         RegexOption.IGNORE_CASE,
     )
+
+    /**
+     * A Telegram set link on the web. Group 1 is the set name. https only,
+     * like every other address here: a plain http one falls through and is
+     * refused as [Target.Insecure].
+     */
+    private val TELEGRAM_WEB = Regex(
+        """https://(?:www\.)?(?:t\.me|telegram\.me|telegram\.dog)/(?:addstickers|addemoji)/([A-Za-z0-9_]{1,64})(?![A-Za-z0-9_])""",
+        RegexOption.IGNORE_CASE,
+    )
+
+    /** The form Telegram opens: `tg://addstickers?set=<name>`. Group 1 is the set name. */
+    private val TELEGRAM_APP = Regex(
+        """tg:(?://)?(?:addstickers|addemoji)/?\?(?:[^\s#]*&)?set=([A-Za-z0-9_]{1,64})(?![A-Za-z0-9_])""",
+        RegexOption.IGNORE_CASE,
+    )
     private const val SIGNAL_ID_LENGTH = 32
     private const val SIGNAL_KEY_LENGTH = 64
 
@@ -173,9 +198,11 @@ object ImportLink {
      *
      * A Signal pack is looked for before anything else: its `sgnl:` form is not
      * a web address, so [urlIn] would never find it, and its `signal.art` form
-     * would otherwise be downloaded as a web page.
+     * would otherwise be downloaded as a web page. A Telegram set is looked
+     * for next, for the same two reasons.
      */
-    fun resolve(shared: String): Target = signalStickers(shared) ?: resolveAddress(shared)
+    fun resolve(shared: String): Target =
+        signalStickers(shared) ?: telegramStickers(shared) ?: resolveAddress(shared)
 
     /** [resolve] for everything that is an address on the web. */
     private fun resolveAddress(shared: String): Target {
@@ -237,6 +264,12 @@ object ImportLink {
         val id = params["pack_id"]?.lowercase()?.takeIf { it.length == SIGNAL_ID_LENGTH && it.isHex() }
         val key = params["pack_key"]?.lowercase()?.takeIf { it.length == SIGNAL_KEY_LENGTH && it.isHex() }
         return if (id != null && key != null) Target.SignalStickers(id, key) else null
+    }
+
+    /** The Telegram sticker set [shared] links to, or null when it links to none. */
+    fun telegramStickers(shared: String): Target.TelegramStickers? {
+        val match = TELEGRAM_WEB.find(shared) ?: TELEGRAM_APP.find(shared) ?: return null
+        return Target.TelegramStickers(match.groupValues[1])
     }
 
     private fun String.isHex(): Boolean = all { it in '0'..'9' || it in 'a'..'f' }

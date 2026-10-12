@@ -1,5 +1,13 @@
 package com.wasimaster.wmkeyboard.app.storage
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -43,6 +51,10 @@ import com.wasimaster.wmkeyboard.app.rememberLockGuard
 import com.wasimaster.wmkeyboard.app.SettingsGroup
 import com.wasimaster.wmkeyboard.app.WmRow
 import com.wasimaster.wmkeyboard.app.formatBytes
+import com.wasimaster.wmkeyboard.app.ChartIntroScope
+import com.wasimaster.wmkeyboard.app.LocalReduceMotion
+import com.wasimaster.wmkeyboard.app.rememberCount
+import com.wasimaster.wmkeyboard.app.stateSwapTransform
 import com.wasimaster.wmkeyboard.core.settings.SettingsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -62,7 +74,18 @@ internal fun StorageScreen(
     repository: SettingsRepository,
     onOpenCategory: (String) -> Unit,
 ) {
+    // The ring sweeps and the sizes count up when the screen opens; stepping
+    // back in from a category finds them already there.
+    ChartIntroScope { StorageBody(repository, onOpenCategory) }
+}
+
+@Composable
+private fun StorageBody(
+    repository: SettingsRepository,
+    onOpenCategory: (String) -> Unit,
+) {
     val context = LocalContext.current
+    val reduceMotion = LocalReduceMotion.current
     val scope = rememberCoroutineScope()
     var revision by remember { mutableIntStateOf(0) }
     var busy by remember { mutableStateOf(false) }
@@ -87,7 +110,19 @@ internal fun StorageScreen(
         }
     }
 
-    fun perform(work: suspend (StorageEnv) -> Unit) {
+    // Categories cleared on this visit. They keep their row, and their place,
+    // while their size ticks down to "Empty", instead of dropping out of the
+    // list the moment the new measurement lands — the reader sees what the
+    // press did rather than a row that has gone.
+    var cleared by remember { mutableStateOf(emptySet<String>()) }
+    // Whether the next finished measurement may reorder the list. Not after a
+    // deletion: the cleared row would leap to the bottom at the moment its
+    // size starts ticking down, out from under the eye that is watching it.
+    var resort by remember { mutableStateOf(true) }
+
+    fun perform(clearing: Collection<String>, work: suspend (StorageEnv) -> Unit) {
+        cleared = cleared + clearing
+        resort = false
         scope.launch {
             busy = true
             withContext(Dispatchers.IO) {
@@ -102,26 +137,40 @@ internal fun StorageScreen(
     // Largest first, but only re-sorted when a scan finishes. Sorting on every
     // emission had the rows leapfrogging for the whole of a measure, and doing
     // it mid-refresh would move them under a finger that is already reaching.
-    var ordered by remember { mutableStateOf(StorageCategories.all) }
+    // A cached report is already complete, so it is sorted from the first
+    // frame rather than one frame after it.
+    var ordered by remember {
+        mutableStateOf(
+            if (report.scanning) StorageCategories.all
+            else StorageCategories.all.sortedByDescending { report.bytesOf(it.id) },
+        )
+    }
     LaunchedEffect(report.scanning) {
-        if (!report.scanning) {
+        if (!report.scanning && resort) {
             ordered = StorageCategories.all.sortedByDescending { report.bytesOf(it.id) }
         }
     }
 
-    StorageSummary(report, busy) { revision++ }
+    StorageSummary(report, busy) {
+        resort = true
+        revision++
+    }
 
     val freeable = StorageCategories.all
         .filter { it.group == StorageGroup.CACHE && it.clearable }
     val freeableBytes = freeable.sumOf { report.bytesOf(it.id) }
-    if (freeableBytes >= FREE_UP_FLOOR) {
+    // The figure the button last offered, for it to keep while it folds away:
+    // by then the live figure is the few bytes left over.
+    val offered = remember { longArrayOf(0L) }
+    if (freeableBytes >= FREE_UP_FLOOR) offered[0] = freeableBytes
+    FoldAway(visible = freeableBytes >= FREE_UP_FLOOR, reduceMotion = reduceMotion) {
         SettingsGroup {
             item {
                 Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
                     FilledTonalButton(onClick = { confirmFreeUp = true }, enabled = !busy) {
                         Icon(Icons.Outlined.DeleteSweep, contentDescription = null)
                         Text(
-                            stringResource(R.string.storage_free_up_action, formatBytes(freeableBytes)),
+                            stringResource(R.string.storage_free_up_action, formatBytes(offered[0])),
                             modifier = Modifier.padding(start = 8.dp),
                         )
                     }
@@ -147,6 +196,7 @@ internal fun StorageScreen(
                 links = emptyList(),
                 onImported = {
                     StorageSnapshot.invalidate()
+                    resort = true
                     revision++
                 },
             )
@@ -156,15 +206,12 @@ internal fun StorageScreen(
     var anyHidden = false
     for (group in StorageGroup.entries) {
         val inGroup = ordered.filter { it.group == group }
-        val visible = inGroup.filter { showEmpty || report.bytesOf(it.id) > 0L }
+        val visible = inGroup.filter { showEmpty || report.bytesOf(it.id) > 0L || it.id in cleared }
         if (visible.size < inGroup.size) anyHidden = true
         if (visible.isEmpty()) continue
-        SectionHeader(
-            stringResource(group.title),
-            trailing = formatBytes(inGroup.sumOf { report.bytesOf(it.id) }),
-        )
+        GroupHeading(group, inGroup.sumOf { report.bytesOf(it.id) })
         StorageBar(
-            slices = inGroup.map { StorageSlice(it.accent, report.bytesOf(it.id)) },
+            slices = inGroup.map { StorageSlice(it.accent, report.bytesOf(it.id), key = it.id) },
             modifier = Modifier.padding(horizontal = 32.dp, vertical = 4.dp),
         )
         SettingsGroup {
@@ -207,7 +254,7 @@ internal fun StorageScreen(
             onDismiss = { confirm = null },
             onConfirm = {
                 confirm = null
-                perform { env -> category.clear(env) }
+                perform(listOf(category.id)) { env -> category.clear(env) }
             },
         )
     }
@@ -219,7 +266,7 @@ internal fun StorageScreen(
             onConfirm = {
                 confirmReset = false
                 StorageCategories.byId(SETTINGS_CATEGORY)?.let { category ->
-                    perform { env -> category.clear(env) }
+                    perform(listOf(category.id)) { env -> category.clear(env) }
                 }
             },
         )
@@ -232,7 +279,7 @@ internal fun StorageScreen(
             onDismiss = { confirmFreeUp = false },
             onConfirm = {
                 confirmFreeUp = false
-                perform { env -> freeable.forEach { it.clear(env) } }
+                perform(freeable.map { it.id }) { env -> freeable.forEach { it.clear(env) } }
             },
         )
     }
@@ -243,6 +290,18 @@ internal fun StorageScreen(
 @Composable
 private fun StorageSummary(report: StorageReport, busy: Boolean, onRefresh: () -> Unit) {
     val working = busy || report.scanning
+    val reduceMotion = LocalReduceMotion.current
+    // The scan reports one category at a time; the bar glides between them
+    // rather than stepping. Forwards only: a new scan starts it again from
+    // nothing at once, rather than draining the old one back to zero.
+    val progress = remember { Animatable(report.progress) }
+    LaunchedEffect(report.progress, reduceMotion) {
+        if (reduceMotion || report.progress < progress.value) {
+            progress.snapTo(report.progress)
+        } else {
+            progress.animateTo(report.progress, tween(PROGRESS_GLIDE_MS))
+        }
+    }
     SettingsGroup {
         item {
             Column(
@@ -297,35 +356,80 @@ private fun StorageSummary(report: StorageReport, busy: Boolean, onRefresh: () -
                 // Only while something is actually running. A measure that
                 // follows a cached paint takes about a second, and this is the
                 // only sign of it — the numbers above deliberately hold still.
-                if (working) {
-                    Spacer(Modifier.height(12.dp))
-                    Text(
-                        stringResource(
-                            if (busy) R.string.storage_deleting_label else R.string.storage_measuring_label,
-                        ),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Spacer(Modifier.height(6.dp))
-                    if (busy) {
-                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                // The progress and the Refresh button hand over to each other
+                // rather than swapping in a frame.
+                AnimatedContent(
+                    targetState = working,
+                    transitionSpec = { stateSwapTransform(reduceMotion) },
+                    contentAlignment = Alignment.TopCenter,
+                    label = "storageWorking",
+                ) { running ->
+                    if (running) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Spacer(Modifier.height(12.dp))
+                            Text(
+                                stringResource(
+                                    if (busy) R.string.storage_deleting_label else R.string.storage_measuring_label,
+                                ),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Spacer(Modifier.height(6.dp))
+                            if (busy) {
+                                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                            } else {
+                                LinearProgressIndicator(
+                                    progress = { progress.value },
+                                    modifier = Modifier.fillMaxWidth(),
+                                )
+                            }
+                        }
                     } else {
-                        LinearProgressIndicator(
-                            progress = { report.progress },
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                    }
-                } else {
-                    TextButton(onClick = onRefresh, modifier = Modifier.padding(top = 4.dp)) {
-                        Icon(Icons.Outlined.Refresh, contentDescription = null)
-                        Text(
-                            stringResource(R.string.storage_refresh_action),
-                            modifier = Modifier.padding(start = 8.dp),
-                        )
+                        // Guarded on the live state: while it fades in over a
+                        // scan that has just restarted it must not start
+                        // another one.
+                        TextButton(
+                            onClick = { if (!working) onRefresh() },
+                            modifier = Modifier.padding(top = 4.dp),
+                        ) {
+                            Icon(Icons.Outlined.Refresh, contentDescription = null)
+                            Text(
+                                stringResource(R.string.storage_refresh_action),
+                                modifier = Modifier.padding(start = 8.dp),
+                            )
+                        }
                     }
                 }
             }
         }
+    }
+}
+
+/**
+ * A group's heading, its total counting to its size as the rows below do. On
+ * its own so the count recomposes the heading and not the screen.
+ */
+@Composable
+private fun GroupHeading(group: StorageGroup, bytes: Long) {
+    val shown = rememberCount(bytes)
+    SectionHeader(stringResource(group.title), trailing = formatBytes(shown.value))
+}
+
+/**
+ * [content] folding open and shut with [visible], where an `if` would make it
+ * appear and vanish in a frame and jump everything under it.
+ */
+@Composable
+private fun FoldAway(visible: Boolean, reduceMotion: Boolean, content: @Composable () -> Unit) {
+    if (reduceMotion) {
+        if (visible) content()
+    } else {
+        AnimatedVisibility(
+            visible = visible,
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut(),
+            label = "storageFold",
+        ) { content() }
     }
 }
 
@@ -338,15 +442,6 @@ private fun StorageCategoryRow(
     onOpen: () -> Unit,
     onClear: () -> Unit,
 ) {
-    val summary = when {
-        bytes <= 0L -> stringResource(R.string.storage_empty_label)
-        items <= 0 -> formatBytes(bytes)
-        else -> stringResource(
-            R.string.storage_row_summary,
-            formatBytes(bytes),
-            pluralStringResource(R.plurals.storage_item_count, items, items),
-        )
-    }
     val deleteDesc = stringResource(R.string.storage_delete_all_desc, stringResource(category.title))
     WmRow(
         title = stringResource(category.title),
@@ -360,7 +455,7 @@ private fun StorageCategoryRow(
         // the size is the row, so it goes first and the note sits under it.
         supporting = {
             Column {
-                Text(summary)
+                CategorySummary(bytes, items)
                 if (category.note != 0) {
                     Text(
                         stringResource(category.note),
@@ -383,6 +478,28 @@ private fun StorageCategoryRow(
             }
         },
         onClick = onOpen,
+    )
+}
+
+/**
+ * A category's size, and how many things make it up. Counts up with the rest
+ * of the screen, and down to "Empty" when the category is cleared — empty
+ * only once the count has got there, so a cleared row says its old size on
+ * the way down rather than "Empty" from the first frame.
+ */
+@Composable
+private fun CategorySummary(bytes: Long, items: Int) {
+    val shown = rememberCount(bytes).value
+    Text(
+        when {
+            bytes <= 0L && shown <= 0L -> stringResource(R.string.storage_empty_label)
+            items <= 0 -> formatBytes(shown)
+            else -> stringResource(
+                R.string.storage_row_summary,
+                formatBytes(shown),
+                pluralStringResource(R.plurals.storage_item_count, items, items),
+            )
+        },
     )
 }
 
@@ -451,6 +568,7 @@ private fun bodyFor(danger: Danger): Int = when (danger) {
 
 /** Below this the button is noise: the press costs more than the space it wins. */
 private const val FREE_UP_FLOOR = 512L * 1024
+private const val PROGRESS_GLIDE_MS = 300
 private const val DISABLED_ALPHA = 0.38f
 private const val NOTE_ALPHA = 0.75f
 private const val SETTINGS_CATEGORY = "settings_data"

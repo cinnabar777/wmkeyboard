@@ -2238,9 +2238,6 @@
     <string name="keypress_haptics_title">కీ ప్రెస్ హ్యాప్టిక్స్</string>
     <string name="keypress_hold_action_copy_label">కాపీ చేయి</string>
     <string name="keypress_hold_action_cut_label">కట్ చేయి</string>
-    <string name="keypress_hold_action_first_info">ఈ చర్య సాధారణంగా పాపప్ చివరలో ఉంటుంది, కాబట్టి సాధారణ ప్రెస్ మరియు హోల్డ్ మీకు మొదటి యాసను ఇస్తుంది. ఇది ఆన్‌లో ఉన్నప్పుడు అది ముందు భాగానికి కదులుతుంది, మరియు షార్ట్‌కట్ కీలలో ఒకదానిపై ప్రెస్ మరియు హోల్డ్ చేయడం ద్వారా చర్య వెంటనే రన్ అవుతుంది. యాసలు ఇంకా అక్కడే ఉన్నాయి: మీ వేలిని కింద ఉంచి, మీకు కావలసిన దానిపైకి జారండి. దీనికి ప్రత్యామ్నాయ కీలలో \'ఎంచుకోవడానికి పట్టుకోండి\' అవసరం.</string>
-    <string name="keypress_hold_action_first_subtitle">నొక్కి పట్టుకోవడం వల్ల యాసలను (accents) చూపించడానికి బదులుగా చర్య రన్ అవుతుంది</string>
-    <string name="keypress_hold_action_first_title">మొదటి చర్య</string>
     <string name="keypress_hold_action_paste_label">పేస్ట్ చేయి</string>
     <string name="keypress_hold_action_redo_label">తిరిగి చేయి</string>
     <string name="keypress_hold_action_select_all_label">అన్నీ ఎంచుకోండి</string>
@@ -2551,8 +2548,6 @@
     <string name="languages_cjk_region_info">ప్రాంతీయ పదజాలం. తైవాన్ మరియు హాంకాంగ్ తరచుగా ఒకే విషయానికి వేర్వేరు పదాలను ఉపయోగిస్తాయి, కేవలం వేర్వేరు అక్షరాలను మాత్రమే కాదు.</string>
     <string name="languages_cjk_region_taiwan_title">తైవాన్ (臺灣)</string>
     <string name="languages_cjk_region_title">ప్రాంతీయ పదజాలం</string>
-    <string name="languages_cjk_traditional_info">కీబోర్డ్ ప్రతి అభ్యర్థిని సరళీకృత (简体) నుండి సాంప్రదాయ (繁體)కి మార్చిన తర్వాత చూపిస్తుంది. ఈ మార్పిడి ఒక సమయంలో ఒక అక్షరాన్ని చదువుతుంది. కొన్ని సరళీకృత అక్షరాలకు ఒకటి కంటే ఎక్కువ సాంప్రదాయ రూపాలు ఉంటాయి, మరియు కీబోర్డ్ ఎల్లప్పుడూ సాధారణమైన దానిని వ్రాస్తుంది. 发 అనేది 發 అవుతుంది, ఇది 發展లో సరైనది కానీ 頭髮లో తప్పు. ఆ పదాలను చేతితో సరిచేయండి.</string>
-    <string name="languages_cjk_traditional_subtitle">కీబోర్డ్ అభ్యర్థులను సాంప్రదాయ (繁體) భాషలోకి మారుస్తుంది. ఇది ఒక సమయంలో ఒక అక్షరాన్ని మారుస్తుంది, కాబట్టి సందర్భాన్ని బట్టి ఉండే కొన్ని రూపాలు తప్పుగా ఉండవచ్చు (发 → 發 / 髮).</string>
     <string name="languages_cjk_traditional_title">సాంప్రదాయ అక్షరాలు</string>
     <string name="languages_clusters_title">క్లస్టర్‌లు</string>
     <string name="languages_conjunct_backspace_info">బ్యాక్‌స్పేస్ సాధారణంగా ఒక సమయంలో ఒక కోడ్ పాయింట్‌ను తొలగిస్తుంది. ఇది కొన్నిసార్లు స్క్రీన్‌పై సగం ఏర్పడిన క్లస్టర్‌లను వదిలివేస్తుంది. ఈ సెట్టింగ్ ఆన్‌లో ఉన్నప్పుడు, మీరు %1$s టైప్ చేస్తున్నప్పుడు ఒక ప్రెస్ మొత్తం క్లస్టర్‌ను తొలగిస్తుంది. ఇతర భాషలు వాటి స్వంత సెట్టింగ్‌ను కలిగి ఉంటాయి.</string>

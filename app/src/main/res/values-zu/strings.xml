@@ -2242,9 +2242,6 @@
     <string name="keypress_haptics_title">Ukudlidliza kokucindezela inkinobho</string>
     <string name="keypress_hold_action_copy_label">Kopisha</string>
     <string name="keypress_hold_action_cut_label">Sika</string>
-    <string name="keypress_hold_action_first_info">Isenzo ngokuvamile sihlala ekupheleni kwe-popup, ngakho ukucindezela nokubamba okujwayelekile kukunika i-accent yokuqala. Uma lokhu kuvuliwe, isenzo sithuthela phambili, futhi ukucindezela nokubamba okukodwa kwezinkinobho zokunqamulela kwenza isenzo ngokushesha. Ama-accent asakhona: gcina umunwe wakho phansi bese uslayida uye kulowo owufunayo. Lokhu kudinga ukuthi \'Bamba ukuze ukhethe\', ngaphansi kwezinkinobho ezishintshanayo.</string>
-    <string name="keypress_hold_action_first_subtitle">Ukucindezela nokubamba kwenza isenzo esikhundleni sokubonisa ama-accents</string>
-    <string name="keypress_hold_action_first_title">Isenzo kuqala</string>
     <string name="keypress_hold_action_paste_label">Namathisela</string>
     <string name="keypress_hold_action_redo_label">Yenza futhi</string>
     <string name="keypress_hold_action_select_all_label">Khetha konke</string>
@@ -2556,8 +2553,6 @@
     <string name="languages_cjk_region_info">Amagama esifunda. I-Taiwan ne-Hong Kong ngokuvamile zisebenzisa amagama ahlukene entweni efanayo, hhayi izinhlamvu ezihlukene kuphela.</string>
     <string name="languages_cjk_region_taiwan_title">Taiwan (臺灣)</string>
     <string name="languages_cjk_region_title">Amagama esifunda</string>
-    <string name="languages_cjk_traditional_info">Ikhibhodi iguqula umuntu ngamunye kusuka kokulula (简体) kuya kokudala (繁體) ngaphambi kokuba ikubonise. Ukuguqulwa kufunda uhlamvu olulodwa ngesikhathi. Izinhlamvu ezimbalwa ezilula zinohlobo olungaphezu kolulodwa lwendabuko, futhi ikhibhodi ihlale ibhala leyo evame kakhulu. 发 iba ngu-發, okuyiqiniso ku-發展 kodwa okungalungile ku-頭髮. Lungisa lawo magama ngesandla.</string>
-    <string name="languages_cjk_traditional_subtitle">Ikhibhodi iguqula izinhlamvu zibe isiShayina sendabuko (繁體). Iguqula uhlamvu olulodwa ngesikhathi, ngakho ezinye izinhlobo ezincike kumongo azilungile (发 → 發 / 髮).</string>
     <string name="languages_cjk_traditional_title">Izinhlamvu zendabuko</string>
     <string name="languages_clusters_title">Ama-cluster</string>
     <string name="languages_conjunct_backspace_info">I-Backspace ngokuvamile isusa ikhodi eyodwa ngesikhathi. Lokhu kwesinye isikhathi kushiya amaqoqo angaphelele esikrinini. Ngalolu hlelo oluvuliwe, ukucindezela okukodwa kususa iqoqo lonke ngenkathi uthayipha %1$s. Ezinye izilimi zigcina izilungiselelo zazo.</string>

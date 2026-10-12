@@ -18,6 +18,10 @@ import androidx.camera.core.resolutionselector.ResolutionSelector
 import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -65,9 +69,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
@@ -274,6 +280,13 @@ private fun CameraContent(
     // the global haptic settings still shape the actual vibration.
     val keyFeedback = LocalKeyPressFeedback.current
     val feedback = { if (state.settings.camera.haptics) keyFeedback() }
+    // The shutter's answer to a tap: the button dips and springs back, and
+    // when the picture is actually taken (after any countdown) the frame
+    // flashes white and fades into the still. Both are draw-time values, and
+    // neither holds anything up — the capture runs at once underneath.
+    val motion = kb.motion.any
+    val shutterScale = remember { Animatable(1f) }
+    val flash = remember { Animatable(0f) }
     val shutterSound = remember {
         MediaActionSound().apply { load(MediaActionSound.SHUTTER_CLICK) }
     }
@@ -358,6 +371,15 @@ private fun CameraContent(
         if (capturing) return
         feedback()
         capturing = true
+        if (motion) {
+            scope.launch {
+                shutterScale.snapTo(SHUTTER_DIP_SCALE)
+                shutterScale.animateTo(
+                    1f,
+                    spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium),
+                )
+            }
+        }
         scope.launch {
             if (timerSeconds > 0) {
                 for (second in timerSeconds downTo 1) {
@@ -369,6 +391,12 @@ private fun CameraContent(
             }
             if (state.settings.camera.shutterSound) {
                 shutterSound.play(MediaActionSound.SHUTTER_CLICK)
+            }
+            if (motion) {
+                launch {
+                    flash.snapTo(FLASH_PEAK_ALPHA)
+                    flash.animateTo(0f, tween(FLASH_FADE_MS))
+                }
             }
             val mirror = usingFront && state.settings.camera.mirrorFront
             val geo = geometry
@@ -413,11 +441,24 @@ private fun CameraContent(
                     height = coords.size.height,
                     windowHeight = windowHeight,
                 )
+            }
+            // Over everything, controls included, the way a real flash
+            // whites out the whole frame. Drawn, not a layer of its own, so
+            // it takes no touches.
+            .drawWithContent {
+                drawContent()
+                val a = flash.value
+                if (a > 0f) drawRect(Color.White, alpha = a)
             },
         contentAlignment = Alignment.Center,
     ) {
         val captured = pending
         if (captured != null) {
+            // The still and its actions fade in under the fading flash, so
+            // viewfinder to confirm step is one soft change, not a cut.
+            val stillAlpha = remember(captured) { Animatable(if (motion) 0f else 1f) }
+            LaunchedEffect(captured) { stillAlpha.animateTo(1f, tween(STILL_FADE_MS)) }
+            val stillLayer = Modifier.graphicsLayer { alpha = stillAlpha.value }
             val sliceHeight = captured.visibleHeight
             if (sliceHeight == null) {
                 // A whole-frame capture is taller than the panel box and was
@@ -426,7 +467,7 @@ private fun CameraContent(
                 Image(
                     bitmap = captured.bitmap.asImageBitmap(),
                     contentDescription = stringResource(R.string.ime_camera_captured_photo_desc),
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize().then(stillLayer),
                     contentScale = ContentScale.Fit,
                 )
             } else {
@@ -448,7 +489,8 @@ private fun CameraContent(
                             layout(constraints.maxWidth, constraints.maxHeight) {
                                 placeable.place(0, captured.visibleOffsetY ?: 0)
                             }
-                        },
+                        }
+                        .then(stillLayer),
                     contentScale = ContentScale.FillBounds,
                 )
             }
@@ -497,7 +539,8 @@ private fun CameraContent(
             Row(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 10.dp),
+                    .padding(bottom = 10.dp)
+                    .then(stillLayer),
                 horizontalArrangement = Arrangement.spacedBy(if (actions.size > 2) 10.dp else 14.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -658,6 +701,10 @@ private fun CameraContent(
             Box(
                 modifier = Modifier
                     .size(54.dp)
+                    .graphicsLayer {
+                        scaleX = shutterScale.value
+                        scaleY = shutterScale.value
+                    }
                     .clip(CircleShape)
                     .background(Color.White.copy(alpha = 0.35f))
                     .padding(5.dp)
@@ -727,20 +774,46 @@ internal fun CameraChipButton(
         contentAlignment = Alignment.Center,
     ) {
         IconButton(onClick = onClick, modifier = Modifier.fillMaxSize()) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(
-                    icon,
-                    contentDescription = description,
-                    modifier = Modifier.size(if (label == null) 20.dp else 16.dp),
-                    tint = if (active) Color(0xFFFFD54F) else Color.White,
-                )
-                if (label != null) {
-                    Text(label, color = Color.White, fontSize = 9.sp, lineHeight = 9.sp)
+            // Flash off → auto → on and the timer's steps cross-fade from
+            // one face to the next; the button and its tap stay where they are.
+            MotionCrossfade(
+                target = CameraChipFace(icon, active, label),
+                animate = LocalKbTheme.current.motion.any,
+                contentAlignment = Alignment.Center,
+                label = "cameraChip",
+            ) { face ->
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(
+                        face.icon,
+                        contentDescription = description,
+                        modifier = Modifier.size(if (face.label == null) 20.dp else 16.dp),
+                        tint = if (face.active) Color(0xFFFFD54F) else Color.White,
+                    )
+                    if (face.label != null) {
+                        Text(face.label, color = Color.White, fontSize = 9.sp, lineHeight = 9.sp)
+                    }
                 }
             }
         }
     }
 }
+
+/** What a [CameraChipButton] shows; a change in any of it is a new face to fade to. */
+private data class CameraChipFace(
+    val icon: androidx.compose.ui.graphics.vector.ImageVector,
+    val active: Boolean,
+    val label: String?,
+)
+
+/** How far the shutter dips under the finger before springing back. */
+private const val SHUTTER_DIP_SCALE = 0.86f
+
+/** The capture flash: how white it starts, and how long it takes to clear. */
+private const val FLASH_PEAK_ALPHA = 0.85f
+private const val FLASH_FADE_MS = 220
+
+/** The confirm step's still and buttons coming in under the flash. */
+private const val STILL_FADE_MS = 180
 
 /** Retake/Send pill under the frozen capture. */
 @Composable

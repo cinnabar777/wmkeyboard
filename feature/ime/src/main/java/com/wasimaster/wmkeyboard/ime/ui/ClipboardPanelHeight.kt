@@ -9,18 +9,22 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.contentDescription
@@ -29,6 +33,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
+import com.wasimaster.wmkeyboard.core.settings.PanelOverKeysExtraHeightRange
+import com.wasimaster.wmkeyboard.ime.KeyboardUiState
 import com.wasimaster.wmkeyboard.ime.R
 
 /**
@@ -200,3 +206,59 @@ internal val ClipPanelBarHeight = 16.dp
 
 /** How far a screen reader's Taller or Shorter moves the panel. */
 private const val ClipPanelHeightStepDp = 48f
+
+/**
+ * Where the bar on a panel over the keys commits what it lands on (#615): how
+ * many dp taller than its compact height such a panel opens. A local rather
+ * than a parameter, because [FullBleedTool] draws the bar and none of its
+ * dozen callers should have to carry the callback to it.
+ */
+internal val LocalPanelOverKeysHeight = staticCompositionLocalOf<(Int) -> Unit> { {} }
+
+/**
+ * A panel stacked over the live keys, sized: its [height] with the bar, the
+ * [bar] itself (null where the screen leaves no room to grow), and the [probe]
+ * its outermost node wears so a drag can hold the window still.
+ */
+@Immutable
+internal class PanelOverKeysSize(
+    val height: Dp,
+    val bar: (@Composable () -> Unit)?,
+    val probe: Modifier,
+)
+
+/**
+ * The height of a panel over the live keys (#615): the [wanted] compact height
+ * it has always had, plus the shared setting the bar on top drags, fitted to
+ * the screen with the keys underneath counted, and never below [floor].
+ *
+ * Before this a panel over the keys had a fixed height, and with a strip or a
+ * tab row of its own on top of the header (the clipboard's) the list under
+ * them was left a single line. The bar is the same one the clipboard and media
+ * panels grow the keyboard with; its band is added to the panel, not taken
+ * out of it, since a panel collapsed to its header has nothing to give it.
+ */
+@Composable
+internal fun panelOverKeysSize(state: KeyboardUiState, wanted: Dp, floor: Dp): PanelOverKeysSize {
+    val setting = state.settings.layoutBehavior.panelOverKeysExtraHeightDp
+    val resize = rememberClipPanelResize(setting)
+    val base = toolPanelHeight(state, wanted = wanted + ClipPanelBarHeight, floor = floor + ClipPanelBarHeight)
+    val maxPanel = toolPanelHeight(
+        state,
+        wanted = wanted + ClipPanelBarHeight + PanelOverKeysExtraHeightRange.last.dp,
+        floor = base,
+    )
+    val maxExtra = (maxPanel - base).coerceAtLeast(0.dp)
+    val probe = remember(resize) { Modifier.clipPanelHeightProbe(resize) }
+    if (maxExtra < 1.dp) return PanelOverKeysSize(base - ClipPanelBarHeight, null, probe)
+    val extra = resize.shownDp(setting).dp.coerceIn(0.dp, maxExtra)
+    val maxPanelPx = with(LocalDensity.current) { maxPanel.roundToPx() }
+    SideEffect { resize.maxPanelPx = maxPanelPx }
+    val onCommit = LocalPanelOverKeysHeight.current
+    val description = stringResource(R.string.ime_panel_over_keys_height_desc)
+    return PanelOverKeysSize(
+        height = base + extra,
+        bar = { ClipPanelHeightBar(resize, extra, maxExtra, onCommit, description) },
+        probe = probe,
+    )
+}

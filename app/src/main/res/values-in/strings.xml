@@ -2232,9 +2232,6 @@
     <string name="keypress_haptics_title">Haptik tekan tombol</string>
     <string name="keypress_hold_action_copy_label">Salin</string>
     <string name="keypress_hold_action_cut_label">Potong</string>
-    <string name="keypress_hold_action_first_info">Tindakan biasanya berada di akhir popup, jadi tekan dan tahan biasa memberikan aksen pertama. Dengan fitur ini aktif, tindakan berpindah ke depan, dan tekan serta tahan pada salah satu tombol pintas akan langsung menjalankan tindakan tersebut. Aksen tetap ada: tahan jari Anda dan geser ke aksen yang diinginkan. Ini memerlukan Tahan untuk memilih, di bawah tombol Alternatif.</string>
-    <string name="keypress_hold_action_first_subtitle">Tekan dan tahan menjalankan tindakan alih-alih menampilkan aksen</string>
-    <string name="keypress_hold_action_first_title">Tindakan pertama</string>
     <string name="keypress_hold_action_paste_label">Tempel</string>
     <string name="keypress_hold_action_redo_label">Ulangi</string>
     <string name="keypress_hold_action_select_all_label">Pilih semua</string>
@@ -2543,8 +2540,6 @@
     <string name="languages_cjk_region_info">Pilihan kata regional. Taiwan dan Hong Kong sering menggunakan kata yang berbeda untuk hal yang sama, bukan hanya karakter yang berbeda.</string>
     <string name="languages_cjk_region_taiwan_title">Taiwan (臺灣)</string>
     <string name="languages_cjk_region_title">Pilihan kata regional</string>
-    <string name="languages_cjk_traditional_info">Keyboard mengonversi setiap kandidat dari Sederhana (简体) ke Tradisional (繁體) sebelum menampilkannya. Konversi membaca satu karakter dalam satu waktu. Beberapa karakter Sederhana memiliki lebih dari satu bentuk Tradisional, dan keyboard selalu menulis yang lebih umum. 发 menjadi 發, yang benar dalam 發展 tetapi salah dalam 頭髮. Perbaiki kata-kata tersebut secara manual.</string>
-    <string name="languages_cjk_traditional_subtitle">Papan ketik mengonversi kandidat ke Tradisional (繁體). Konversi dilakukan satu karakter setiap kali, jadi beberapa bentuk yang bergantung pada konteks mungkin salah (发 → 發 / 髮).</string>
     <string name="languages_cjk_traditional_title">Karakter tradisional</string>
     <string name="languages_clusters_title">Klaster</string>
     <string name="languages_conjunct_backspace_info">Backspace biasanya menghapus satu titik kode sekaligus. Ini terkadang meninggalkan kluster yang terbentuk sebagian di layar. Dengan pengaturan ini aktif, satu kali tekan akan menghapus seluruh kluster saat Anda mengetik %1$s. Bahasa lain tetap menggunakan pengaturannya sendiri.</string>

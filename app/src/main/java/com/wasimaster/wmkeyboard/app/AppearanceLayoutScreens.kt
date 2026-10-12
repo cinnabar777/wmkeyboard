@@ -12,6 +12,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import com.wasimaster.wmkeyboard.ime.KeyboardControls
+import androidx.compose.runtime.LaunchedEffect
+import android.provider.Settings
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,6 +42,8 @@ import com.wasimaster.wmkeyboard.ime.ui.arrowRowKey
 import com.wasimaster.wmkeyboard.ime.ui.gestureBarAtBottom
 import com.wasimaster.wmkeyboard.core.settings.autoBottomPaddingDp
 import com.wasimaster.wmkeyboard.core.settings.KeyboardAlignment
+import com.wasimaster.wmkeyboard.core.settings.FloatingHandlePosition
+import com.wasimaster.wmkeyboard.core.settings.floatingFor
 import com.wasimaster.wmkeyboard.core.script.NumeralCommitScope
 import com.wasimaster.wmkeyboard.core.settings.DefaultToolbarTools
 import com.wasimaster.wmkeyboard.core.settings.KeyFontScaleRange
@@ -47,6 +52,8 @@ import com.wasimaster.wmkeyboard.core.settings.OneHandedSide
 import com.wasimaster.wmkeyboard.core.settings.ScreenVariant
 import com.wasimaster.wmkeyboard.core.settings.SettingsRepository
 import com.wasimaster.wmkeyboard.core.settings.sizingValuesFor
+import com.wasimaster.wmkeyboard.core.settings.oneHandedAllowedOn
+import com.wasimaster.wmkeyboard.core.settings.splitAllowedOn
 import com.wasimaster.wmkeyboard.core.settings.ToolbarPlacement
 import com.wasimaster.wmkeyboard.core.settings.ToolboxLayout
 import com.wasimaster.wmkeyboard.core.settings.ToolboxPageSizeRange
@@ -1280,6 +1287,24 @@ internal fun LayoutSizeSettings(
             ) { scope.launch { repository.setBottomPaddingDp(it.toInt()) } }
         }
         item {
+            // Android has no way for a keyboard to ask for this before 16 (#582).
+            val supported = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.BAKLAVA
+            ToggleSetting(
+                R.string.layout_hide_system_keyboard_bar_title,
+                stringResource(
+                    if (supported) {
+                        R.string.layout_hide_system_keyboard_bar_subtitle
+                    } else {
+                        R.string.layout_hide_system_keyboard_bar_unsupported
+                    },
+                ),
+                settings.watch { it.layoutBehavior.hideSystemKeyboardBar },
+                info = stringResource(R.string.layout_hide_system_keyboard_bar_info),
+                enabled = supported,
+                default = SettingsDefaults.layoutBehavior.hideSystemKeyboardBar,
+            ) { scope.launch { repository.setHideSystemKeyboardBar(it) } }
+        }
+        item {
             val square = stringResource(R.string.layout_board_corner_square)
             SliderSetting(
                 R.string.layout_board_corner_top_title,
@@ -1497,6 +1522,24 @@ internal fun LayoutSizeSettings(
                         shapeNumberRow,
                     ) { scope.launch { repository.setVariantNumberRow(variant, it) } }
                 }
+                // Gates on the two shared switches (#611), not switches of
+                // their own: the mode stays one setting, and this says whether
+                // the shape honours it. Unset, they show the shared rules
+                // ("Portrait only", "Split only on wide screens").
+                item {
+                    ToggleSetting(
+                        R.string.layout_variant_allow_one_handed_title,
+                        stringResource(R.string.layout_variant_allow_one_handed_subtitle),
+                        settings.watch { it.oneHandedAllowedOn(variant) },
+                    ) { scope.launch { repository.setVariantAllowOneHanded(variant, it) } }
+                }
+                item {
+                    ToggleSetting(
+                        R.string.layout_variant_allow_split_title,
+                        stringResource(R.string.layout_variant_allow_split_subtitle),
+                        settings.watch { it.splitAllowedOn(variant) },
+                    ) { scope.launch { repository.setVariantAllowSplit(variant, it) } }
+                }
                 item(visible = shapeNarrowed) {
                     ChoiceSetting(
                         title = R.string.layout_keyboard_position_title,
@@ -1536,7 +1579,17 @@ internal fun LayoutOneHandedSettings(
     // What decides which rows the group holds; each row reads its own value.
     val oneHanded = settings.watch { it.oneHandedMode != OneHandedMode.OFF }
     val split = settings.watch { it.splitKeyboard }
-    val floating = settings.watch { it.floatingKeyboard }
+    // Either orientation floating (#584) shows the panel's own rows.
+    val floating = settings.watch { it.floatingFor(false) || it.floatingFor(true) }
+    // The floating keyboard button (#374) and the grant it cannot draw without.
+    val summonButton = settings.watch { it.summonButton.enabled }
+    val overlayGranted = rememberGrantState { Settings.canDrawOverlays(it) }
+    val askOverlay = rememberDisclosedSpecialAccess(SpecialAccess.OVERLAY)
+    // The keyboard only re-checks the grant when it next closes; coming back
+    // from the system screen with it is worth showing the button at once.
+    LaunchedEffect(summonButton, overlayGranted) {
+        KeyboardControls.host?.syncSummonButton()
+    }
     SettingsGroup(
         stringResource(R.string.layout_one_handed_group_title),
         info = stringResource(R.string.layout_one_handed_caption),
@@ -1659,14 +1712,38 @@ internal fun LayoutOneHandedSettings(
                 default = SettingsDefaults.layoutBehavior.splitSpacebar,
             ) { scope.launch { repository.setSplitSpacebar(it) } }
         }
+        // One switch per orientation (#584): each remembers its own, as the
+        // toolbar tool and the dock button do for the one the phone is in.
         item {
             ToggleSetting(
                 R.string.layout_floating_title,
                 stringResource(R.string.layout_floating_subtitle),
-                floating,
+                settings.watch { it.floatingFor(false) },
                 info = stringResource(R.string.layout_floating_info),
                 default = SettingsDefaults.floatingKeyboard,
-            ) { scope.launch { repository.setFloatingKeyboard(it) } }
+            ) { scope.launch { repository.setFloatingKeyboard(false, it) } }
+        }
+        item {
+            ToggleSetting(
+                R.string.layout_floating_landscape_title,
+                stringResource(R.string.layout_floating_landscape_subtitle),
+                settings.watch { it.floatingFor(true) },
+                info = stringResource(R.string.layout_floating_landscape_info),
+                default = SettingsDefaults.floatingFor(true),
+            ) { scope.launch { repository.setFloatingKeyboard(true, it) } }
+        }
+        item(visible = floating) {
+            ChoiceSetting(
+                title = R.string.layout_floating_handle_title,
+                subtitle = stringResource(R.string.layout_floating_handle_subtitle),
+                options = listOf(
+                    FloatingHandlePosition.BOTTOM to stringResource(R.string.layout_floating_handle_bottom_label),
+                    FloatingHandlePosition.TOP to stringResource(R.string.layout_floating_handle_top_label),
+                ),
+                selected = settings.watch { it.floatingHandle },
+                default = SettingsDefaults.floatingHandle,
+                info = stringResource(R.string.layout_floating_handle_info),
+            ) { scope.launch { repository.setFloatingHandle(it) } }
         }
         item(visible = floating) {
             SliderSetting(
@@ -1713,6 +1790,26 @@ internal fun LayoutOneHandedSettings(
                 info = stringResource(R.string.layout_persistent_info),
                 default = SettingsDefaults.persistentKeyboard,
             ) { scope.launch { repository.setPersistentKeyboard(it) } }
+        }
+        item {
+            ToggleSetting(
+                R.string.layout_summon_button_title,
+                stringResource(R.string.layout_summon_button_subtitle),
+                summonButton,
+                info = stringResource(R.string.layout_summon_button_info),
+                default = SettingsDefaults.summonButton.enabled,
+            ) { on ->
+                scope.launch { repository.setSummonButton(on) }
+                // The disclosure, then Android's own switch. The setting is
+                // kept either way, so granting later is all it takes.
+                if (on && !overlayGranted) askOverlay()
+            }
+        }
+        item(visible = summonButton && !overlayGranted) {
+            NavRow(
+                R.string.layout_summon_button_permission_title,
+                subtitle = stringResource(R.string.layout_summon_button_permission_subtitle),
+            ) { askOverlay() }
         }
     }
 }

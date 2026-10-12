@@ -2239,9 +2239,6 @@
     <string name="keypress_haptics_title">اهتزاز عند الضغط على المفاتيح</string>
     <string name="keypress_hold_action_copy_label">نسخ</string>
     <string name="keypress_hold_action_cut_label">قص</string>
-    <string name="keypress_hold_action_first_info">عادة ما يكون الإجراء في نهاية النافذة المنبثقة، لذا فإن الضغط المطول العادي يمنحك أول علامة تشكيل. مع تفعيل هذا الخيار، ينتقل الإجراء إلى المقدمة، ويؤدي الضغط المطول على أحد مفاتيح الاختصار إلى تنفيذ الإجراء مباشرة. لا تزال علامات التشكيل موجودة: استمر في الضغط بإصبعك واسحب إلى العلامة التي تريدها. يتطلب هذا تفعيل خيار \'الضغط المطول للاختيار\' ضمن \'المفاتيح البديلة\'.</string>
-    <string name="keypress_hold_action_first_subtitle">الضغط المطول ينفذ الإجراء بدلاً من إظهار علامات التشكيل</string>
-    <string name="keypress_hold_action_first_title">الإجراء أولاً</string>
     <string name="keypress_hold_action_paste_label">لصق</string>
     <string name="keypress_hold_action_redo_label">إعادة</string>
     <string name="keypress_hold_action_select_all_label">تحديد الكل</string>
@@ -2550,8 +2547,6 @@
     <string name="languages_cjk_region_info">صياغة إقليمية. غالباً ما تستخدم تايوان وهونغ كونغ كلمات مختلفة لنفس الشيء، وليس فقط أحرفاً مختلفة.</string>
     <string name="languages_cjk_region_taiwan_title">تايوان (臺灣)</string>
     <string name="languages_cjk_region_title">الصياغة الإقليمية</string>
-    <string name="languages_cjk_traditional_info">تقوم لوحة المفاتيح بتحويل كل مرشح من الصينية المبسطة (简体) إلى التقليدية (繁體) قبل عرضه. يتم التحويل حرفًا بحرف. بعض الأحرف المبسطة لها أكثر من شكل تقليدي، وتكتب لوحة المفاتيح دائمًا الشكل الأكثر شيوعًا. تتحول 发 إلى 發، وهو صحيح في 發展 ولكنه خاطئ في 頭髮. قم بتصحيح هذه الكلمات يدويًا.</string>
-    <string name="languages_cjk_traditional_subtitle">تقوم لوحة المفاتيح بتحويل المرشحات إلى التقليدية (繁體). وهي تحول حرفاً واحداً في كل مرة، لذا فإن بعض النماذج التي تعتمد على السياق تكون خاطئة (发 → 發 / 髮).</string>
     <string name="languages_cjk_traditional_title">الحروف التقليدية</string>
     <string name="languages_clusters_title">المجموعات</string>
     <string name="languages_conjunct_backspace_info">عادةً ما يحذف مفتاح المسافة الخلفية نقطة رمز واحدة في كل مرة. يؤدي هذا أحياناً إلى ترك مجموعات غير مكتملة على الشاشة. مع تفعيل هذا الإعداد، تؤدي ضغطة واحدة إلى حذف المجموعة بأكملها أثناء الكتابة بـ %1$s. اللغات الأخرى تحتفظ بإعداداتها الخاصة.</string>

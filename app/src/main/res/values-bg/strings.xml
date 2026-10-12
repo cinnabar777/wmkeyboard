@@ -2237,9 +2237,6 @@
     <string name="keypress_haptics_title">Хаптична обратна връзка при натискане на клавиш</string>
     <string name="keypress_hold_action_copy_label">Копиране</string>
     <string name="keypress_hold_action_cut_label">Изрязване</string>
-    <string name="keypress_hold_action_first_info">Действието обикновено се намира в края на изскачащия прозорец, така че обикновено натискане и задържане ви дава първия акцент. С включена тази опция то се премества в началото и натискането и задържането на един от клавишите за бърз достъп изпълнява действието веднага. Акцентите все още са там: задръжте пръста си и плъзнете върху този, който искате. Това изисква „Задържане за избор“ в „Алтернативни клавиши“.</string>
-    <string name="keypress_hold_action_first_subtitle">Натискането и задържането изпълнява действието, вместо да показва акцентите</string>
-    <string name="keypress_hold_action_first_title">Първо действие</string>
     <string name="keypress_hold_action_paste_label">Поставяне</string>
     <string name="keypress_hold_action_redo_label">Повтори</string>
     <string name="keypress_hold_action_select_all_label">Избери всичко</string>
@@ -2548,8 +2545,6 @@
     <string name="languages_cjk_region_info">Тайван и Хонконг често използват различни думи за едно и също нещо, а не само различни йероглифи.</string>
     <string name="languages_cjk_region_taiwan_title">Тайван (臺灣)</string>
     <string name="languages_cjk_region_title">Регионална терминология</string>
-    <string name="languages_cjk_traditional_info">Клавиатурата преобразува всеки кандидат от опростен (简体) към традиционен (繁體) китайски, преди да го покаже. Преобразуването се извършва символ по символ. Някои опростени символи имат повече от една традиционна форма, като клавиатурата винаги изписва по-често срещаната. 发 става 發, което е правилно в 發展, но грешно в 頭髮. Коригирайте тези думи ръчно.</string>
-    <string name="languages_cjk_traditional_subtitle">Клавиатурата преобразува кандидатите в традиционни (繁體). Преобразува по един символ наведнъж, така че някои форми, които зависят от контекста, са грешни (发 → 發 / 髮).</string>
     <string name="languages_cjk_traditional_title">Традиционни йероглифи</string>
     <string name="languages_clusters_title">Клъстери</string>
     <string name="languages_conjunct_backspace_info">Backspace обикновено изтрива по един кодов знак наведнъж. Това понякога оставя непълни клъстери на екрана. С включена тази настройка, едно натискане изтрива целия клъстер, докато пишете %1$s. Други езици запазват собствената си настройка.</string>

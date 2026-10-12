@@ -172,7 +172,11 @@ class UserLexicon(private val storageFile: File?) {
         listedInLowerCase: Boolean = false,
     ): Boolean {
         val key = WordKey.of(word)
-        if (key.length < 2 || key.length > MAX_WORD_LENGTH || count <= 0) return false
+        // One letter is a word as well: "I" and "a" are among the commonest
+        // there are, and refusing them kept them out of the counts and, with
+        // them, every pair they start (#620). Only known words reach here with
+        // so little; [PendingLearn] still holds a lone unknown letter back.
+        if (key.isEmpty() || key.length > MAX_WORD_LENGTH || count <= 0) return false
         if (!WordContext.isLearnableWord(key)) return false
         // Only the caller knows whether the capital it is holding is the
         // user's or the keyboard's, so the vote is cast on its say-so (#44).

@@ -1,6 +1,10 @@
 package com.wasimaster.wmkeyboard.ime.ui
 
 import android.text.format.Formatter
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.offset
@@ -36,21 +40,30 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
@@ -399,6 +412,15 @@ private fun TranslateLanguageRow(
         val canSwap = translate.translated.isNotEmpty() &&
             TranslateClient.pickerCode(translate.detectedSource)
                 ?.equals(target, ignoreCase = true) == false
+        // Half a turn per swap, opt-in: the arrows going round is the two
+        // languages trading places.
+        val animate = kb.motion.toolResults
+        var swapTurns by remember { mutableIntStateOf(0) }
+        val swapTurn = animateFloatAsState(
+            targetValue = swapTurns * 180f,
+            animationSpec = if (animate) tween(TranslateSwapMs, easing = FastOutSlowInEasing) else tween(0),
+            label = "translateSwap",
+        )
         Icon(
             Icons.Outlined.SwapHoriz,
             contentDescription = stringResource(R.string.ime_translate_swap_desc),
@@ -407,9 +429,13 @@ private fun TranslateLanguageRow(
                 .padding(horizontal = 2.dp)
                 .clip(kb.chipShape())
                 .focusRing(focusedChip == 1, kb.chipShape())
-                .clickable(enabled = canSwap) { callbacks.onSwap() }
+                .clickable(enabled = canSwap) {
+                    if (animate) swapTurns++
+                    callbacks.onSwap()
+                }
                 .padding(4.dp)
-                .size(18.dp),
+                .size(18.dp)
+                .graphicsLayer { rotationZ = swapTurn.value },
         )
         Box(modifier = Modifier.weight(1f, fill = false)) {
             TranslateChip(
@@ -483,11 +509,27 @@ private fun TranslateLanguageRow(
 private fun TranslateResult(state: KeyboardUiState, modifier: Modifier) {
     val kb = LocalKbTheme.current
     val translate = state.translate
-    if (translate.offersDownload()) {
-        TranslateDownloadOffer(translate = translate, modifier = modifier)
-        return
+    val animate = kb.motion.toolResults
+    MotionCrossfade(
+        target = translate.offersDownload(),
+        animate = animate,
+        modifier = modifier,
+        label = "translateResult",
+    ) { offer ->
+        if (offer) {
+            TranslateDownloadOffer(translate = translate, modifier = Modifier.fillMaxSize(), animate = animate)
+        } else {
+            TranslateText(state, animate, Modifier.fillMaxSize())
+        }
     }
-    Text(
+}
+
+/** The translation, or the line standing in for it, fading in where it changed. */
+@Composable
+private fun TranslateText(state: KeyboardUiState, animate: Boolean, modifier: Modifier) {
+    val kb = LocalKbTheme.current
+    val translate = state.translate
+    RevealedText(
         text = when {
             translate.error != null -> translate.error
             translate.translated.isNotEmpty() -> translate.translated
@@ -500,11 +542,66 @@ private fun TranslateResult(state: KeyboardUiState, modifier: Modifier) {
             else -> kb.suggestionText
         },
         fontSize = if (state.mediaSearchActive) 14.sp else 16.sp,
+        animate = animate,
         modifier = modifier
             .padding(vertical = 4.dp)
             .verticalScroll(rememberScrollState()),
     )
 }
+
+/**
+ * [text], with what changed since it was last drawn fading in. The result
+ * follows the text box live, so a translation mostly grows or changes at its
+ * end: the words that stayed hold still and only the rest arrives, from the
+ * start of the first word that differs. A script with no spaces fades in
+ * whole, which is also what a first translation does.
+ *
+ * Reads the fade in composition, so only this Text redraws for its length.
+ */
+@Composable
+private fun RevealedText(
+    text: String,
+    color: Color,
+    fontSize: TextUnit,
+    animate: Boolean,
+    modifier: Modifier,
+) {
+    var settled by remember { mutableStateOf(text) }
+    val keep = remember(text) { if (animate) revealStart(settled, text) else text.length }
+    val fade = remember(text) { Animatable(if (keep < text.length) 0f else 1f) }
+    LaunchedEffect(text) {
+        settled = text
+        if (fade.value < 1f) fade.animateTo(1f, tween(TranslateRevealMs, easing = FastOutSlowInEasing))
+    }
+    val p = fade.value
+    val shown = if (p >= 1f) {
+        AnnotatedString(text)
+    } else {
+        buildAnnotatedString {
+            append(text, 0, keep)
+            withStyle(SpanStyle(color = color.copy(alpha = color.alpha * p))) { append(text, keep, text.length) }
+        }
+    }
+    Text(text = shown, color = color, fontSize = fontSize, modifier = modifier)
+}
+
+/**
+ * Where [new] stops matching [old], pulled back to the start of that word: the
+ * part of [new] that [RevealedText] fades in begins here. [new]'s length when
+ * nothing changed.
+ */
+internal fun revealStart(old: String, new: String): Int {
+    val shared = minOf(old.length, new.length)
+    var i = 0
+    while (i < shared && old[i] == new[i]) i++
+    if (i == new.length && i == old.length) return i
+    while (i > 0 && !new[i - 1].isWhitespace()) i--
+    return i
+}
+
+private const val TranslateRevealMs = 200
+private const val TranslateSwapMs = 260
+private const val TranslateProgressMs = 300
 
 /**
  * Replace and Insert, or the one download button while that is the offer,
@@ -814,11 +911,11 @@ private fun TranslateChip(
  * is the panel's action row, so it sits where Replace and Insert will be.
  */
 @Composable
-private fun TranslateDownloadOffer(translate: TranslateUi, modifier: Modifier = Modifier) {
+private fun TranslateDownloadOffer(translate: TranslateUi, modifier: Modifier = Modifier, animate: Boolean = false) {
     val kb = LocalKbTheme.current
     val context = LocalContext.current
     if (translate.moduleMissing) {
-        TranslateModuleOffer(translate, modifier)
+        TranslateModuleOffer(translate, modifier, animate)
         return
     }
     val states = translate.missingModels.map { translate.models[it] }
@@ -842,8 +939,9 @@ private fun TranslateDownloadOffer(translate: TranslateUi, modifier: Modifier = 
             val bytes = running.sumOf { it.bytes }
             val total = running.sumOf { it.totalBytes }
             if (total > 0L && running.all { it.totalBytes > 0L }) {
+                val progress = smoothProgress((bytes.toFloat() / total).coerceIn(0f, 1f), animate)
                 LinearProgressIndicator(
-                    progress = { (bytes.toFloat() / total).coerceIn(0f, 1f) },
+                    progress = progress,
                     modifier = Modifier.fillMaxWidth(),
                     color = kb.accent,
                     trackColor = kb.chip,
@@ -900,7 +998,7 @@ private fun TranslateDownloadOffer(translate: TranslateUi, modifier: Modifier = 
  * the fetch starts, so none is promised before that.
  */
 @Composable
-private fun TranslateModuleOffer(translate: TranslateUi, modifier: Modifier = Modifier) {
+private fun TranslateModuleOffer(translate: TranslateUi, modifier: Modifier = Modifier, animate: Boolean = false) {
     val kb = LocalKbTheme.current
     val context = LocalContext.current
     val module = translate.module
@@ -924,8 +1022,9 @@ private fun TranslateModuleOffer(translate: TranslateUi, modifier: Modifier = Mo
                     null
                 }
                 if (fraction != null) {
+                    val progress = smoothProgress(fraction, animate)
                     LinearProgressIndicator(
-                        progress = { fraction },
+                        progress = progress,
                         modifier = Modifier.fillMaxWidth(),
                         color = kb.accent,
                         trackColor = kb.chip,
@@ -959,6 +1058,18 @@ private fun TranslateModuleOffer(translate: TranslateUi, modifier: Modifier = Mo
             )
         }
     }
+}
+
+/**
+ * A download's progress for a bar to read at draw time: eased between the
+ * updates when [animate], which arrive in steps of a few hundred kilobytes,
+ * and the raw figure otherwise.
+ */
+@Composable
+private fun smoothProgress(target: Float, animate: Boolean): () -> Float {
+    if (!animate) return { target }
+    val eased = animateFloatAsState(target, tween(TranslateProgressMs), label = "translateProgress")
+    return { eased.value }
 }
 
 @Composable

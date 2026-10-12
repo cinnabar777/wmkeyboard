@@ -6,7 +6,7 @@ package com.wasimaster.wmkeyboard.core.input.composer
  * The conversion tables are all keyed to Simplified characters, but three of the
  * input methods here are used mostly by Traditional writers — Zhuyin in Taiwan,
  * Cangjie and Jyutping in Hong Kong. Rather than ship a second copy of every
- * dictionary, candidates pass through this character map on the way out when
+ * dictionary, candidates pass through this conversion on the way out when
  * [CjkConfig.traditionalOutput] is on.
  *
  * **Where this is applied matters.** It runs *inside* each composer, at the point
@@ -14,48 +14,78 @@ package com.wasimaster.wmkeyboard.core.input.composer
  * already returned. `Composer.consumedFor` finds the chosen candidate by string
  * equality against what the composer produced, so converting afterwards would
  * leave it unable to match, silently falling back to consuming the whole buffer
- * and breaking prefix commit.
+ * and breaking prefix commit. The converted text may be longer or shorter than
+ * the original; the input a candidate consumes comes from its reading, never
+ * from its length.
  *
- * The map is loaded from the bundled `s2t.txt` asset; until then it is empty and
- * [toTraditional] is the identity, so the toggle is inert rather than destructive.
+ * ### Words, not characters (#609)
  *
- * Known limitation: character-level mapping is not truly 1:1 — one simplified
- * character can correspond to several traditional ones depending on the word it
- * sits in (发 → 發 in 發展 but 髮 in 頭髮). This takes the more common form.
+ * One Simplified character can stand for several Traditional ones, and only the
+ * word decides which: 发 is 發 in 發展 but 髮 in 頭髮, 后 is 後 in 後來 but stays
+ * 后 in 皇后, 干 is 幹 in 幹部 but 乾 in 乾淨. A character map has to pick one
+ * and is wrong in every word that wants the other, so this runs OpenCC's own
+ * conversion over the bundled OpenCC tables (pinned in `scripts/update-opencc.py`)
+ * with OpenCC's matching semantics:
  *
- * ### Regional vocabulary
+ * 1. **Segment** the candidate by longest match against the phrase table
+ *    ([s2tPhrases]); characters no phrase starts at gather into one run.
+ * 2. **Convert** each segment: at each position the longest phrase match wins,
+ *    else the character table ([s2t]), else the character passes through.
+ * 3. **Localize** each converted segment the same way through the region's
+ *    tables, which are keyed to *Traditional* text (出租車, not 出租车), so this
+ *    step cannot run first. Taiwan is OpenCC's `s2twp` (phrases, then variant
+ *    phrases, then variant characters: 出租車 → 計程車); Hong Kong is `s2hk`
+ *    (character preferences only); Standard is `s2t` and stops after step 2.
  *
- * Converting characters is not the same as writing Traditional. Taiwan and Hong
- * Kong do not merely spell the mainland's words differently, they often use
- * different words: 出租車 is 計程車 in Taipei, 光盤 is 光碟, 軟件 is 軟體. A
- * character map cannot reach any of that, so a Taiwanese user with the toggle on
- * still got mainland vocabulary in Traditional dress.
+ * Every table group is short-circuit, as in OpenCC: the first table that has
+ * *any* match at a position wins, even over a longer match in a later table.
  *
- * [region] adds that layer, from OpenCC's own tables: after the character pass,
- * the whole candidate is looked up as a phrase, then any remaining regional
- * character preferences are applied. Whole-string lookup is enough because a
- * candidate is always a complete dictionary word — there is nothing to segment.
+ * The character and regional tables are bundled; the phrase table is the
+ * downloadable `s2t_phrases` pack ([CjkDictCatalog]), since it is a megabyte
+ * nobody writing Simplified needs. Without it, conversion still works, one
+ * character at a time. Tables load only once the toggle is on; until then each
+ * is empty and [toTraditional] is the identity, so the toggle is inert rather
+ * than destructive. Every assignment invalidates the candidate caches.
  */
 object HanVariant {
 
     /** Which Traditional-using region's vocabulary to prefer. */
     enum class HanRegion { GENERIC, TAIWAN, HONG_KONG }
 
-    /** Simplified → Traditional, one character to one. Empty until the asset loads. */
+    /** OpenCC STCharacters: Simplified → Traditional, one character each. */
     @Volatile
-    var s2t: Map<Char, Char> = emptyMap()
+    var s2t: HanPhraseTable = HanPhraseTable.EMPTY
+        set(value) { field = value; CjkDictionaries.invalidate() }
+
+    /** OpenCC STPhrases, with the Simplified spellings of the regional phrase keys; the `s2t_phrases` pack. */
+    @Volatile
+    var s2tPhrases: HanPhraseTable = HanPhraseTable.EMPTY
+        set(value) { field = value; CjkDictionaries.invalidate() }
 
     /** Standard Traditional phrase → its Taiwan form (出租車 → 計程車). */
     @Volatile
-    var twPhrases: Map<String, String> = emptyMap()
+    var twPhrases: HanPhraseTable = HanPhraseTable.EMPTY
+        set(value) { field = value; CjkDictionaries.invalidate() }
+
+    /** Words whose Taiwan spelling keeps a character [twVariants] would change. */
+    @Volatile
+    var twVariantsPhrases: HanPhraseTable = HanPhraseTable.EMPTY
+        set(value) { field = value; CjkDictionaries.invalidate() }
 
     /** Standard Traditional → Taiwan character preference (僞 → 偽). */
     @Volatile
-    var twVariants: Map<Char, Char> = emptyMap()
+    var twVariants: HanPhraseTable = HanPhraseTable.EMPTY
+        set(value) { field = value; CjkDictionaries.invalidate() }
+
+    /** Words whose Hong Kong spelling keeps a character [hkVariants] would change. */
+    @Volatile
+    var hkVariantsPhrases: HanPhraseTable = HanPhraseTable.EMPTY
+        set(value) { field = value; CjkDictionaries.invalidate() }
 
     /** Standard Traditional → Hong Kong character preference. */
     @Volatile
-    var hkVariants: Map<Char, Char> = emptyMap()
+    var hkVariants: HanPhraseTable = HanPhraseTable.EMPTY
+        set(value) { field = value; CjkDictionaries.invalidate() }
 
     /** The user's region; [HanRegion.GENERIC] leaves vocabulary untouched. */
     @Volatile
@@ -63,86 +93,83 @@ object HanVariant {
         set(value) { field = value; CjkDictionaries.invalidate() }
 
     /**
-     * [text] in Traditional characters when the toggle is on and the map is
-     * loaded; [text] unchanged otherwise. Characters absent from the map — which
-     * is most of them, since the two scripts share the majority of their
-     * characters — pass through as they are.
-     *
-     * The order is the one OpenCC uses and cannot be rearranged: the regional
-     * tables are keyed to *Traditional* text (出租車, not 出租车), so the
-     * character pass has to run first or none of them would ever match.
+     * [text] in Traditional when the toggle is on and the tables are loaded;
+     * [text] itself otherwise. Characters in no table — most of them, since the
+     * two scripts share the majority of their characters — pass through as they
+     * are, and when nothing changes the original instance comes back, which
+     * keeps the common case allocation-light: this runs per candidate, per
+     * keystroke.
      */
     fun toTraditional(text: String): String {
-        val map = s2t
-        if (!CjkConfig.traditionalOutput || map.isEmpty() || text.isEmpty()) return text
-        var changed = false
-        val out = StringBuilder(text.length)
-        for (c in text) {
-            val t = map[c]
-            if (t != null && t != c) { changed = true; out.append(t) } else out.append(c)
+        if (!CjkConfig.traditionalOutput || text.isEmpty()) return text
+        val phrases = s2tPhrases
+        val standard = arrayOf(phrases, s2t)
+        if (standard.all { it.isEmpty() }) return text
+        val regional = when (region) {
+            HanRegion.GENERIC -> null
+            HanRegion.TAIWAN -> arrayOf(twPhrases, twVariantsPhrases, twVariants)
+            HanRegion.HONG_KONG -> arrayOf(hkVariantsPhrases, hkVariants)
         }
-        // Returning the original instance when nothing mapped keeps the common
-        // case allocation-free — this runs per candidate, per keystroke.
-        val traditional = if (changed) out.toString() else text
-        return localize(traditional)
+        val out = StringBuilder(text.length + 2)
+        var run = 0
+        var i = 0
+        while (i < text.length) {
+            val entry = phrases.matchPrefix(text, i, text.length)
+            if (entry < 0) {
+                i += Character.charCount(text.codePointAt(i))
+                continue
+            }
+            if (run < i) segment(text, run, i, standard, regional, out)
+            val end = i + phrases.keyLength(entry)
+            segment(text, i, end, standard, regional, out)
+            i = end
+            run = end
+        }
+        if (run < text.length) segment(text, run, text.length, standard, regional, out)
+        return if (text.contentEquals(out)) text else out.toString()
     }
 
-    /** [traditional] in the active region's vocabulary and character preferences. */
-    private fun localize(traditional: String): String {
-        val chars = when (region) {
-            HanRegion.GENERIC -> return traditional
-            HanRegion.TAIWAN -> twVariants
-            HanRegion.HONG_KONG -> hkVariants
+    private fun segment(
+        text: String,
+        start: Int,
+        end: Int,
+        standard: Array<HanPhraseTable>,
+        regional: Array<HanPhraseTable>?,
+        out: StringBuilder,
+    ) {
+        if (regional == null) {
+            convert(text, start, end, standard, out)
+            return
         }
-        // The phrase table is Taiwan's; Hong Kong shares the standard vocabulary
-        // and differs only in character preferences.
-        val phrased = if (region == HanRegion.TAIWAN) twPhrases[traditional] ?: traditional else traditional
-        if (chars.isEmpty()) return phrased
-        var changed = false
-        val out = StringBuilder(phrased.length)
-        for (c in phrased) {
-            val t = chars[c]
-            if (t != null && t != c) { changed = true; out.append(t) } else out.append(c)
-        }
-        return if (changed) out.toString() else phrased
+        val traditional = StringBuilder(end - start)
+        convert(text, start, end, standard, traditional)
+        convert(traditional, 0, traditional.length, regional, out)
     }
 
-    /**
-     * Parses `phrase<TAB>replacement` lines — the multi-character rows [parse]
-     * deliberately drops, which is why this exists beside it rather than as a
-     * flag on it.
-     */
-    fun parsePhrases(lines: Sequence<String>): Map<String, String> {
-        val acc = HashMap<String, String>()
-        for (raw in lines) {
-            val line = raw.trim()
-            if (line.isEmpty() || line.startsWith("#")) continue
-            val parts = line.split('\t')
-            if (parts.size < 2) continue
-            val from = parts[0].trim()
-            val to = parts[1].trim()
-            if (from.isEmpty() || to.isEmpty() || from == to) continue
-            acc.putIfAbsent(from, to)
+    /** OpenCC's `Conversion::Convert` over `[start, end)` with a short-circuit table group. */
+    private fun convert(
+        text: CharSequence,
+        start: Int,
+        end: Int,
+        group: Array<HanPhraseTable>,
+        out: StringBuilder,
+    ) {
+        var i = start
+        while (i < end) {
+            var matched = false
+            for (table in group) {
+                val entry = table.matchPrefix(text, i, end)
+                if (entry < 0) continue
+                table.appendValue(entry, out)
+                i += table.keyLength(entry)
+                matched = true
+                break
+            }
+            if (!matched) {
+                val n = Character.charCount(Character.codePointAt(text, i))
+                out.append(text, i, i + n)
+                i += n
+            }
         }
-        return acc
-    }
-
-    /** Parses `simplified<TAB>traditional` lines; malformed or identity rows are skipped. */
-    fun parse(lines: Sequence<String>): Map<Char, Char> {
-        val acc = HashMap<Char, Char>()
-        for (raw in lines) {
-            val line = raw.trim()
-            if (line.isEmpty() || line.startsWith("#")) continue
-            val parts = line.split('\t')
-            if (parts.size < 2) continue
-            val simplified = parts[0].trim()
-            val traditional = parts[1].trim()
-            // One character per side: a multi-character mapping is a phrase rule,
-            // which this table deliberately does not model.
-            if (simplified.length != 1 || traditional.length != 1) continue
-            if (simplified[0] == traditional[0]) continue
-            acc.putIfAbsent(simplified[0], traditional[0])
-        }
-        return acc
     }
 }

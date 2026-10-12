@@ -49,12 +49,35 @@ class AiMarkdownBlocksTest {
     @Test
     fun `headings, bullets, numbers, quotes and rules are read as blocks`() {
         val blocks = AiMarkdownBlocks.parse("## Title\n- first\n  - nested\n3. third\n> said\n---")
-        assertEquals(Block.Heading(2, AiMarkdownBlocks.Inline("Title")), blocks[0])
-        assertEquals(Block.Bullet(0, "•", AiMarkdownBlocks.Inline("first")), blocks[1])
-        assertEquals(Block.Bullet(1, "•", AiMarkdownBlocks.Inline("nested")), blocks[2])
-        assertEquals(Block.Bullet(0, "3.", AiMarkdownBlocks.Inline("third")), blocks[3])
-        assertEquals(Block.Quote(AiMarkdownBlocks.Inline("said")), blocks[4])
-        assertEquals(Block.Rule, blocks[5])
+        assertEquals(Block.Heading(2, AiMarkdownBlocks.Inline("Title"), line = 0), blocks[0])
+        assertEquals(Block.Bullet(0, "•", AiMarkdownBlocks.Inline("first"), line = 1), blocks[1])
+        assertEquals(Block.Bullet(1, "•", AiMarkdownBlocks.Inline("nested"), line = 2), blocks[2])
+        assertEquals(Block.Bullet(0, "3.", AiMarkdownBlocks.Inline("third"), line = 3), blocks[3])
+        assertEquals(Block.Quote(AiMarkdownBlocks.Inline("said"), line = 4), blocks[4])
+        assertEquals(Block.Rule(line = 5), blocks[5])
+    }
+
+    @Test
+    fun `task items are their own blocks, ticked or not`() {
+        val blocks = AiMarkdownBlocks.parse("- [ ] milk\n- [x] eggs\n  - [X] nested\n- [ ]\n- [ ]x not a task")
+        assertEquals(Block.Task(0, false, AiMarkdownBlocks.Inline("milk"), line = 0), blocks[0])
+        assertEquals(Block.Task(0, true, AiMarkdownBlocks.Inline("eggs"), line = 1), blocks[1])
+        assertEquals(Block.Task(1, true, AiMarkdownBlocks.Inline("nested"), line = 2), blocks[2])
+        // A box somebody has only just typed is a task with nothing after it yet.
+        assertEquals(Block.Task(0, false, AiMarkdownBlocks.Inline(""), line = 3), blocks[3])
+        // No space after the box: a bullet whose text happens to start with brackets.
+        assertEquals(Block.Bullet(0, "•", AiMarkdownBlocks.Inline("[ ]x not a task"), line = 4), blocks[4])
+    }
+
+    @Test
+    fun `line indices survive a fenced block and a multi-line paragraph`() {
+        val blocks = AiMarkdownBlocks.parse("intro\nstill intro\n\n```\ncode\nmore\n```\n- [ ] after")
+        assertEquals(0, blocks[0].line)
+        assertEquals(3, blocks[1].line)
+        val task = blocks[2] as Block.Task
+        assertEquals(7, task.line)
+        assertEquals(AiMarkdownBlocks.TaskLine("", '-', false, "after"), AiMarkdownBlocks.task("- [ ] after"))
+        assertEquals(null, AiMarkdownBlocks.task("- plain bullet"))
     }
 
     @Test

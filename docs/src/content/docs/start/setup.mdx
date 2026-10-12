@@ -47,7 +47,7 @@ The wizard tailors itself to a short quiz on its **Make it yours** page, so not 
 
 1. **App language** *(only where English isn't the first language)*. Which language the app's own menus and settings are shown in: **System default**, then the languages your phone and your region suggest, then English, with **Show all languages** under them for the rest. A pick applies at once and the page comes back in that language, so the rest of the wizard reads in it too. The page appears when your phone's region (from the SIM, the network, the time zone or the language setting, in that order) is outside the US, the UK, Ireland, Canada, Australia, New Zealand and the English-speaking Caribbean, and never on an English-only build. Change it later under [About, App language](/reference/settings/about/#changing-the-apps-language).
 
-2. **Welcome.** The setup card from above, embedded in the wizard. Enable and select WM Keyboard here and the wizard advances on its own. You do not have to tap Next after you come back from system settings.
+2. **Welcome.** The setup card from above, embedded in the wizard. Enable and select WM Keyboard here and the wizard advances on its own. You do not have to tap Next after you come back from system settings. Under the card, **Restore a backup** takes a backup instead of the questions: see [Restoring a backup instead](#restoring-a-backup-instead).
 
 3. **Make it yours.** Three quick questions, all optional. How many languages you type in, whether you want a simple or a fully loaded keyboard, and how private it should be. Each answer's subtitle spells out what picking it changes. Answers apply their defaults on the spot, and the rest of the wizard trims itself to match. Leave all three alone and you get the short version. [What the quiz changes](#what-the-quiz-changes) below lists every setting each answer writes.
 
@@ -74,6 +74,19 @@ The wizard tailors itself to a short quiz on its **Make it yours** page, so not 
 <PhoneFrame caption="The Spacebar & keys page, where one choice sets both swipe directions at once.">
   <Shot id="start/wizard-gestures-page" alt="The Spacebar & keys page — one choice sets both swipe directions at once." />
 </PhoneFrame>
+
+## Restoring a backup instead
+
+Moving from another phone, or from another keyboard? **Restore a backup** on the Welcome page opens a file picker. It takes:
+
+- a backup from WM Keyboard, `.wmconfig.json`, an encrypted `.wmconfig.enc` (it asks for the passphrase), or an older `.wmsettings.json`;
+- a whole backup from HeliBoard, LeanType, FUTO Keyboard, FlorisBoard, CleverKeys or AnySoftKeyboard, where you pick what comes across first. See [Whole backups](/reference/importing-other-keyboards/#whole-backups).
+
+Once the backup is restored, the rest of the wizard is skipped: the quiz, the languages, the theme and every page after them. Your backup already answered all of it, and nothing the quiz would preset is written over it, the tool set included. Only the Welcome page is left, because no backup can turn a keyboard on for you. If WM Keyboard is already enabled and selected, the wizard closes by itself; if not, the page says so, and **Finish** stays open so you can do it later.
+
+The languages in the backup get their word lists and prediction data downloaded in the background, the same way a language added on the wizard's own page does.
+
+A file that is not a backup, such as a single theme or layout, imports as usual, and the wizard carries on.
 
 ## What the quiz changes
 
@@ -137,6 +150,7 @@ The wizard isn't a one-shot. <SettingsPath path="About / Run setup again" /> rep
 ## Details & edge cases
 
 - Whether the wizard appears has nothing to do with whether the keyboard is enabled. A "have you finished onboarding" flag drives it, not a check of Android's input-method state. Enable and select WM Keyboard entirely from system Settings, without ever opening the app, and the wizard still appears on first launch. Its Welcome page just already shows the "done" state and lets you move straight past it.
+- A restore from the Welcome page is the only way to skip the wizard that keeps the everything-enabled tool default when the backup has it. Skip and Finish otherwise replace it, as the next point says.
 - Skipping the wizard early still lands a sane tool set. Finishing it, or skipping over the untouched everything-enabled default, replaces that default with the recommended set. Answer "keep it simple" first and you get the smaller essential set instead.
 - On a Lite build, the Tools page doesn't offer handwriting, OCR, QR/barcode scanning, document scanning, or grammar checking as options at all, since those features aren't built into that edition. See [Full vs Lite](/start/editions/).
 - Installing over an existing WM Keyboard install (same signing key) keeps the wizard from running again. `onboardingDone` is a regular setting, so it carries over like any other. A clean reinstall, or a new phone with no settings backup, shows the wizard again. See [Installation](/start/installation/) for what does and doesn't carry over.

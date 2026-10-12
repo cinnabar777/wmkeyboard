@@ -34,6 +34,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.pluralStringResource
@@ -46,11 +47,17 @@ import com.wasimaster.wmkeyboard.R
 import com.wasimaster.wmkeyboard.app.ChoiceControl
 import com.wasimaster.wmkeyboard.app.SettingsGroup
 import com.wasimaster.wmkeyboard.app.WmRow
-import com.wasimaster.wmkeyboard.app.rememberGrowIn
+import com.wasimaster.wmkeyboard.app.CountMotion
+import com.wasimaster.wmkeyboard.app.CountingText
+import com.wasimaster.wmkeyboard.app.chartEntrance
+import com.wasimaster.wmkeyboard.app.rememberChartEntrance
+import com.wasimaster.wmkeyboard.app.rememberCount
 import com.wasimaster.wmkeyboard.core.tools.TypingHeatmapMath
 import com.wasimaster.wmkeyboard.core.tools.TypingProgress
 import com.wasimaster.wmkeyboard.core.tools.TypingStats
 import java.text.NumberFormat
+import kotlin.math.PI
+import kotlin.math.sin
 import kotlin.math.sqrt
 
 /*
@@ -60,13 +67,31 @@ import kotlin.math.sqrt
  * arithmetic lives in [TypingProgress] and [TypingHeatmapMath].
  */
 
-/** The level, its name, and a bar to the next one. The words restate the bar. */
+/**
+ * The level, its name, and a bar to the next one. The words restate the bar.
+ *
+ * The first time the card is on screen the XP counts up from the level's
+ * floor and the bar fills with it — one number driving both, so the figure
+ * and the bar never disagree on the way — and the medal pops in beside them.
+ */
 @Composable
 internal fun LevelCard(level: TypingProgress.Level) {
     val numbers = remember { NumberFormat.getIntegerInstance() }
+    val entrance = rememberChartEntrance(ready = true, durationMs = LEVEL_ENTRANCE_MS)
+    val xp = rememberCount(
+        level.xp,
+        from = level.floor,
+        start = entrance.seen,
+        durationMs = LEVEL_ENTRANCE_MS,
+    )
+    val span = (level.next - level.floor).coerceAtLeast(1L)
     SettingsGroup {
         item {
-            Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)) {
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp, vertical = 16.dp)
+                    .chartEntrance(entrance),
+            ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
@@ -84,41 +109,63 @@ internal fun LevelCard(level: TypingProgress.Level) {
                         Icons.Outlined.MilitaryTech,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(40.dp),
+                        modifier = Modifier
+                            .size(40.dp)
+                            .graphicsLayer {
+                                // Arrives as the bar lands: grows in from a
+                                // little under size and just past it before
+                                // settling, the one bounce on the screen.
+                                val p = entrance.at(1f, spread = MEDAL_DELAY)
+                                val scale = MEDAL_START + (1f - MEDAL_START) * p +
+                                    MEDAL_OVERSHOOT * sin(PI.toFloat() * p)
+                                scaleX = scale
+                                scaleY = scale
+                                alpha = p
+                            },
                     )
                 }
                 LinearProgressIndicator(
-                    progress = { level.fraction },
+                    progress = { ((xp.value - level.floor).toFloat() / span).coerceIn(0f, 1f) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 16.dp)
                         .clearAndSetSemantics {},
                 )
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    Text(
-                        stringResource(
-                            R.string.statistics_level_xp,
-                            numbers.format(level.xp),
-                            numbers.format(level.next),
-                        ),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Text(
-                        stringResource(
-                            R.string.statistics_level_next,
-                            numbers.format(level.next - level.xp),
-                            level.number + 1,
-                        ),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
+                LevelNumbers(level, xp, numbers)
             }
         }
+    }
+}
+
+/**
+ * The XP line under the bar, on its own so the count recomposes these two
+ * texts and not the card.
+ */
+@Composable
+private fun LevelNumbers(level: TypingProgress.Level, xp: CountMotion, numbers: NumberFormat) {
+    val shown = xp.value
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(
+            stringResource(
+                R.string.statistics_level_xp,
+                numbers.format(shown),
+                numbers.format(level.next),
+            ),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            stringResource(
+                R.string.statistics_level_next,
+                numbers.format(level.next - shown),
+                level.number + 1,
+            ),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
@@ -126,12 +173,16 @@ internal fun LevelCard(level: TypingProgress.Level) {
  * One row per achievement: what it counts, which step it is on, and the count
  * against the next target beside a ring. The ring is decoration — the numbers
  * beside it say the same thing — so screen readers skip it.
+ *
+ * The rings fill one after another down the list the first time it is on
+ * screen, each count running up beside its ring.
  */
 @Composable
 internal fun AchievementRows(states: List<TypingProgress.AchievementState>) {
     val numbers = remember { NumberFormat.getIntegerInstance() }
+    val entrance = rememberChartEntrance(ready = true, durationMs = RINGS_ENTRANCE_MS)
     SettingsGroup {
-        for (state in states) {
+        states.forEachIndexed { index, state ->
             item {
                 val a = state.achievement
                 val step = if (state.finished) {
@@ -139,29 +190,19 @@ internal fun AchievementRows(states: List<TypingProgress.AchievementState>) {
                 } else {
                     stringResource(R.string.statistics_achievement_step, state.steps + 1, state.stepCount)
                 }
-                val count = stringResource(
-                    if (a == TypingProgress.Achievement.GLIDE_DISTANCE) {
-                        R.string.statistics_achievement_metres
-                    } else {
-                        R.string.statistics_achievement_count
-                    },
-                    numbers.format(state.value),
-                    numbers.format(state.target),
-                )
                 WmRow(
                     title = stringResource(achievementTitle(a)),
                     subtitle = stringResource(achievementSubtitle(a)) + "\n" + step,
                     icon = achievementIcon(a),
                     trailing = {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                count,
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
+                            AchievementCount(state, numbers, entrance.seen, index * RING_STAGGER_MS)
                             AchievementRing(
-                                state.fraction,
-                                modifier = Modifier.padding(start = 12.dp),
+                                fraction = state.fraction,
+                                arrived = { entrance.at(index, states.size, RING_SPREAD) },
+                                modifier = Modifier
+                                    .padding(start = 12.dp)
+                                    .chartEntrance(entrance),
                             )
                         }
                     },
@@ -171,11 +212,33 @@ internal fun AchievementRows(states: List<TypingProgress.AchievementState>) {
     }
 }
 
+/** "1,204 / 5,000", counting up beside its ring. */
 @Composable
-private fun AchievementRing(fraction: Float, modifier: Modifier = Modifier) {
-    val grown by rememberGrowIn(ready = true)
+private fun AchievementCount(
+    state: TypingProgress.AchievementState,
+    numbers: NumberFormat,
+    seen: Boolean,
+    delayMs: Int,
+) {
+    val res = if (state.achievement == TypingProgress.Achievement.GLIDE_DISTANCE) {
+        R.string.statistics_achievement_metres
+    } else {
+        R.string.statistics_achievement_count
+    }
+    CountingText(
+        target = state.value,
+        format = { stringResource(res, numbers.format(it), numbers.format(state.target)) },
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        start = seen,
+        delayMs = delayMs,
+    )
+}
+
+@Composable
+private fun AchievementRing(fraction: Float, arrived: () -> Float, modifier: Modifier = Modifier) {
     CircularProgressIndicator(
-        progress = { fraction * grown },
+        progress = { fraction * arrived() },
         modifier = modifier
             .size(RingSize)
             .clearAndSetSemantics {},
@@ -251,12 +314,18 @@ private fun HeatmapBoard(map: TypingStats.Heatmap) {
     val cool = MaterialTheme.colorScheme.primary
     val measurer = rememberTextMeasurer()
     val peak = remember(map) { map.cells.values.maxOrNull() ?: 0L }
-    // Fades in once, the way the history bars grow.
-    val grown by rememberGrowIn(ready = peak > 0L)
+    // The heat ripples in across the board from the top-left corner the first
+    // time it is on screen, and again for another board picked from the chips.
+    val entrance = rememberChartEntrance(
+        ready = peak > 0L,
+        durationMs = HEAT_ENTRANCE_MS,
+        replayKey = map.layoutId,
+    )
     Canvas(
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(bounds.width / (bounds.height * ROW_ASPECT))
+            .chartEntrance(entrance)
             .clearAndSetSemantics {},
     ) {
         val ux = size.width / bounds.width
@@ -277,15 +346,21 @@ private fun HeatmapBoard(map: TypingStats.Heatmap) {
                 val (cx, cy) = TypingHeatmapMath.centreOf(cell)
                 // Square root, so a key hit a tenth as often still shows.
                 val heat = sqrt(count.toFloat() / peak)
+                // Its place on the diagonal, 0 at the top-left, 1 at the
+                // bottom-right: the order the ripple reaches it in.
+                val diagonal = ((cx - bounds.minX) / bounds.width + (cy - bounds.minY) / bounds.height) / 2f
+                val arrived = entrance.at(diagonal, spread = HEAT_SPREAD)
+                if (arrived <= 0f) continue
                 val centre = Offset(x(cx), y(cy))
                 val color = lerp(cool, HotColor, heat)
+                val reach = radius * (HEAT_START + (1f - HEAT_START) * arrived)
                 drawCircle(
                     brush = Brush.radialGradient(
-                        listOf(color.copy(alpha = HEAT_ALPHA * heat * grown), Color.Transparent),
+                        listOf(color.copy(alpha = HEAT_ALPHA * heat * arrived), Color.Transparent),
                         center = centre,
-                        radius = radius,
+                        radius = reach,
                     ),
-                    radius = radius,
+                    radius = reach,
                     center = centre,
                 )
             }
@@ -388,3 +463,22 @@ private const val EMPTY_WIDTH = 10f
 private const val EMPTY_ROWS = 4f
 private const val TOP_KEYS = 5
 private const val MAX_BOARDS = 4
+
+private const val LEVEL_ENTRANCE_MS = 700
+private const val RINGS_ENTRANCE_MS = 750
+private const val HEAT_ENTRANCE_MS = 700
+
+/** The medal waits for most of the bar before it arrives. */
+private const val MEDAL_DELAY = 0.45f
+private const val MEDAL_START = 0.6f
+private const val MEDAL_OVERSHOOT = 0.25f
+
+/** How far apart the rings start, as a share of their entrance. */
+private const val RING_SPREAD = 0.4f
+private const val RING_STAGGER_MS = 50
+
+/** How much of the ripple is the wave crossing the board. */
+private const val HEAT_SPREAD = 0.55f
+
+/** A heat spot grows out from this share of its radius as it arrives. */
+private const val HEAT_START = 0.4f

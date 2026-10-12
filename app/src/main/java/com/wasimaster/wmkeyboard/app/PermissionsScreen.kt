@@ -111,6 +111,13 @@ internal fun PermissionsSettings() {
                 ::hasUsageAccess,
             )
         }
+        item {
+            SpecialAccessRow(
+                R.string.privacy_permissions_overlay_title,
+                R.string.privacy_permissions_overlay_subtitle,
+                SpecialAccess.OVERLAY,
+            ) { Settings.canDrawOverlays(it) }
+        }
         item(visible = ChannelFeatures.GESTURE_PASSTHROUGH) {
             SpecialAccessRow(
                 R.string.privacy_permissions_accessibility_title,

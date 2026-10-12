@@ -1,6 +1,13 @@
 package com.wasimaster.wmkeyboard.ime.ui
 
 import android.view.WindowManager
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.VectorConverter
+import androidx.compose.animation.core.VisibilityThreshold
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
@@ -8,6 +15,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -72,6 +81,22 @@ private val MagnifierHeight = 48.dp
 private val MagnifierGap = 12.dp
 private val MagnifierFontSize = 22.sp
 
+/** How small the bubble starts as it springs in, and how it comes and goes. */
+private const val MagnifierGrowFrom = 0.8f
+private const val MagnifierOutMs = 110
+private val MagnifierInSpring = spring<Float>(dampingRatio = 0.8f, stiffness = Spring.StiffnessMedium)
+
+/**
+ * How the bubble follows the caret: stiff and without overshoot, so it glides
+ * between the characters a drag steps through instead of jumping, yet never
+ * trails the caret by more than a frame or two.
+ */
+private val MagnifierFollowSpring = spring(
+    dampingRatio = Spring.DampingRatioNoBouncy,
+    stiffness = 2500f,
+    visibilityThreshold = Offset.VisibilityThreshold,
+)
+
 /** Wide enough for the fade to read as the line going on, narrow enough to keep the caret's neighbours. */
 private const val MagnifierFadeFraction = 0.18f
 
@@ -92,7 +117,58 @@ private val MagnifierPopupProperties = PopupProperties(
 @Composable
 internal fun CaretMagnifierHost(state: StateFlow<CaretMagnifierState?>) {
     val current by state.collectAsState()
-    val magnifier = current ?: return
+    val motion = LocalKbTheme.current.motion.any
+    // The last thing the bubble showed, kept for its way out: the service
+    // clears the state the moment the finger lifts.
+    val held = remember { arrayOfNulls<CaretMagnifierState>(1) }
+    val live = current
+    if (live != null) held[0] = live
+    val up = live != null
+    val appear = remember { Animatable(0f) }
+    LaunchedEffect(up, motion) {
+        when {
+            !motion -> appear.snapTo(if (up) 1f else 0f)
+            up -> appear.animateTo(1f, MagnifierInSpring)
+            else -> appear.animateTo(0f, tween(MagnifierOutMs, easing = FastOutLinearInEasing))
+        }
+    }
+    // Only the end of the way out recomposes this; the frames between are
+    // read by the bubble's layer alone.
+    val gone by remember { derivedStateOf { appear.value == 0f } }
+    // Where the bubble is on its way to the caret, and whether it has a place
+    // to start from yet: a fresh drag puts it straight on its caret, and only
+    // the steps after that are smoothed.
+    val follow = remember { Animatable(Offset.Zero, Offset.VectorConverter) }
+    val seeded = remember { BooleanArray(1) }
+    if (!up && (!motion || gone)) {
+        held[0] = null
+        seeded[0] = false
+        return
+    }
+    val magnifier = held[0] ?: return
+    val anchor = magnifier.anchor
+    LaunchedEffect(anchor, motion) {
+        if (anchor == null) {
+            seeded[0] = false
+            return@LaunchedEffect
+        }
+        val to = Offset(anchor.x, anchor.top)
+        if (!motion || !seeded[0]) {
+            follow.snapTo(to)
+            seeded[0] = true
+        } else {
+            follow.animateTo(to, MagnifierFollowSpring)
+        }
+    }
+    // Read in composition on purpose: the window's place is the popup's
+    // position provider, which only a recomposition hands a new one. This
+    // recomposes on every step of a drag already.
+    val placed = if (anchor != null && motion && seeded[0]) {
+        val at = follow.value
+        CaretAnchor(x = at.x, top = at.y, bottom = at.y + (anchor.bottom - anchor.top))
+    } else {
+        anchor
+    }
     val view = LocalView.current
     val density = LocalDensity.current
     // Where this window starts on screen. The editor reports its caret in
@@ -103,11 +179,11 @@ internal fun CaretMagnifierHost(state: StateFlow<CaretMagnifierState?>) {
         IntArray(2).also { view.rootView.getLocationOnScreen(it) }.let { IntOffset(it[0], it[1]) }
     }
     val gapPx = with(density) { MagnifierGap.roundToPx() }
-    val provider = remember(magnifier.anchor, origin, gapPx) {
-        MagnifierPositionProvider(anchor = magnifier.anchor, windowOrigin = origin, gapPx = gapPx)
+    val provider = remember(placed, origin, gapPx) {
+        MagnifierPositionProvider(anchor = placed, windowOrigin = origin, gapPx = gapPx)
     }
     Popup(popupPositionProvider = provider, properties = MagnifierPopupProperties) {
-        MagnifierBubble(magnifier.line)
+        MagnifierBubble(magnifier.line) { if (motion) appear.value else 1f }
     }
 }
 
@@ -157,7 +233,7 @@ private class MagnifierPositionProvider(
  * part of the keyboard rather than a piece of the app.
  */
 @Composable
-private fun MagnifierBubble(line: MagnifierLine) {
+private fun MagnifierBubble(line: MagnifierLine, appear: () -> Float) {
     val kb = LocalKbTheme.current
     val measurer = rememberTextMeasurer()
     val style = LocalTextStyle.current.merge(TextStyle(color = kb.popupText, fontSize = MagnifierFontSize))
@@ -166,6 +242,16 @@ private fun MagnifierBubble(line: MagnifierLine) {
     val selectionColor = textColor.copy(alpha = 0.3f)
     Box(
         modifier = Modifier
+            // Springs up out of the caret as the drag starts and drops back
+            // into it as it ends. Per draw op, so the shadow is not cut off.
+            .graphicsLayer {
+                val p = appear()
+                val scale = MagnifierGrowFrom + (1f - MagnifierGrowFrom) * p
+                alpha = p.coerceIn(0f, 1f)
+                scaleX = scale
+                scaleY = scale
+                compositingStrategy = CompositingStrategy.ModulateAlpha
+            }
             .shadow(6.dp, shape, clip = false)
             .background(kb.popup, shape)
             .clip(shape)

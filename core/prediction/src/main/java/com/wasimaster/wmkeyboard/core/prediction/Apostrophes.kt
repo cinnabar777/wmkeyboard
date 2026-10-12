@@ -102,8 +102,9 @@ object Apostrophes {
         "cmon" to "c'mon",
         "maam" to "ma'am",
         "oclock" to "o'clock",
-        // Not a contraction, but the same class of slip — and autocorrect's
-        // minimum word length means nothing else ever fixes a lone "i".
+        // Not a contraction, but the same class of slip. Autocorrect also
+        // capitalizes it now, from the bundled capitals (#620), but only with
+        // autocorrect on; this keeps it fixed with autocorrect off.
         "i" to "I",
     )
 

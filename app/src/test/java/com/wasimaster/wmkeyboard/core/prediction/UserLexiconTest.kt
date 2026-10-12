@@ -695,4 +695,17 @@ class UserLexiconTest {
         assertFalse(f.readText().contains("manager\\\""))
         assertTrue(f.readText().contains("c++"))
     }
+
+    /** #620: "I" and "a" are words, and the pairs they start are learned. */
+    @Test
+    fun aOneLetterWordIsLearnedWithItsPairs() {
+        val lexicon = UserLexicon(null)
+        assertTrue(lexicon.learnWord("I"))
+        assertTrue(lexicon.learnWord("a"))
+        assertTrue(lexicon.contains("i"))
+        assertTrue(lexicon.contains("a"))
+        lexicon.learnBigram("I", "think")
+        assertEquals(listOf("think"), lexicon.nextWords("i", 3))
+        assertFalse(lexicon.learnWord(""))
+    }
 }

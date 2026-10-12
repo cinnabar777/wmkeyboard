@@ -92,6 +92,10 @@
     <string name="layout_extend_edge_keys_info">Some rows are shorter than the keyboard, for example the A to L row of QWERTY. They have blank space at the left and right ends. With this setting on, a tap in that space types the key at that end of the row, so a tap to the left of A types A. The keys do not change size or position. Only the area that you can tap gets larger. This setting is on by default.</string>
     <string name="layout_bottom_padding_title">Bottom padding</string>
     <string name="layout_bottom_padding_subtitle">More space below the keys, above the navigation bar</string>
+    <string name="layout_hide_system_keyboard_bar_title">Hide the system keyboard bar</string>
+    <string name="layout_hide_system_keyboard_bar_subtitle">Remove the bar with the hide and switch keyboard buttons below the keys</string>
+    <string name="layout_hide_system_keyboard_bar_unsupported">Needs Android 16 or later</string>
+    <string name="layout_hide_system_keyboard_bar_info">With gesture navigation, Android puts a bar below the keyboard. It has a button that hides the keyboard and a button that changes to a different keyboard. With this setting on, the keyboard asks Android to remove that bar. If the keys still sit higher than you want, make Bottom padding smaller. To hide the keyboard, use Back. To change to a different keyboard, use the 🌐 key. Only Android 16 and later lets a keyboard remove the bar. On older versions, this setting is not available. Some phones may keep the bar anyway. This setting is off by default.</string>
     <string name="layout_bottom_padding_info">The whole keyboard moves up, away from the bottom edge and the gesture navigation bar. Increase it if the bottom row is too near the edge of the screen, or if you start the system navigation by mistake.</string>
     <string name="layout_board_corner_top_title">Round top corners</string>
     <string name="layout_board_corner_top_subtitle">Cut round corners into the top of the keyboard</string>
@@ -125,6 +129,11 @@
     <string name="layout_keyboard_scale_title">Keyboard scale</string>
     <string name="layout_keyboard_scale_subtitle">Make the whole keyboard smaller or larger on this screen</string>
     <string name="layout_font_size_title">Font size</string>
+    <!-- Per-screen gates on one-handed and split mode (#611). -->
+    <string name="layout_variant_allow_one_handed_title">One-handed mode on this screen</string>
+    <string name="layout_variant_allow_one_handed_subtitle">When off, the keyboard stays full width here, even with one-handed mode on</string>
+    <string name="layout_variant_allow_split_title">Split keyboard on this screen</string>
+    <string name="layout_variant_allow_split_subtitle">When off, the keyboard stays in one piece here, even with split keyboard on</string>
     <string name="layout_follow_portrait_title">Follow portrait again</string>
     <!-- %1$s is the name of a screen shape, such as Landscape. -->
     <string name="layout_follow_portrait_subtitle">Delete the sizes that you set for <xliff:g id="screen" example="Landscape">%1$s</xliff:g></string>
@@ -161,13 +170,26 @@
     <string name="layout_split_gap_subtitle">The width of the gap between the halves</string>
     <string name="layout_split_gap_info">This is the gap in the centre, as a percentage of the keyboard width. A larger gap moves the halves toward the edges, but each key becomes narrower.</string>
     <string name="layout_floating_title">Floating keyboard</string>
-    <string name="layout_floating_subtitle">Put the keyboard in a panel that you can move</string>
-    <string name="layout_floating_info">The keyboard becomes a small panel that floats above the apps, and it does not dock to the bottom of the screen. Drag the pill at the top of the panel to move it. Drag the corner grip to change the size. Press the dock button to go back to the normal keyboard. Apps do not change size while the panel floats, and touches outside the panel go to the app.</string>
+    <string name="layout_floating_subtitle">Put the keyboard in a panel that you can move while the phone is upright</string>
+    <string name="layout_floating_info">The keyboard becomes a small panel that floats above the apps, and it does not dock to the bottom of the screen. Drag the pill on the panel\'s handle bar to move it. Drag the corner grip to change the size. Press the dock button to go back to the normal keyboard. Apps do not change size while the panel floats, and touches outside the panel go to the app. Portrait and landscape each remember their own choice, so the floating tool and the dock button only change the one the phone is held in.</string>
+    <string name="layout_floating_landscape_title">Floating in landscape</string>
+    <string name="layout_floating_landscape_subtitle">Float the keyboard while the phone is sideways</string>
+    <string name="layout_floating_landscape_info">Turn this on and off on its own to float the keyboard sideways and keep it docked upright, or the other way round. The keyboard changes as soon as you turn the phone. Until you change one of the two, landscape follows the portrait switch.</string>
+    <string name="layout_floating_handle_title">Handle bar position</string>
+    <string name="layout_floating_handle_subtitle">Where the floating panel\'s drag bar and resize grip sit</string>
+    <string name="layout_floating_handle_info">The handle bar holds the dock button, the drag pill and the resize grip. Under the keys is the default, where your thumb already is. With the bar under the keys, drag the grip down to make the panel taller. With the bar above the keys, drag it up.</string>
+    <string name="layout_floating_handle_bottom_label">Under the keys</string>
+    <string name="layout_floating_handle_top_label">Above the keys</string>
     <string name="layout_floating_width_title">Floating keyboard width</string>
     <string name="layout_floating_width_subtitle">You can also drag the corner grip of the panel</string>
     <string name="layout_floating_width_info">This is the width of the floating panel. The key heights still follow the sliders above.</string>
     <string name="layout_persistent_title">Keep the keyboard on screen</string>
     <string name="layout_persistent_subtitle">Stay open when no text field has focus</string>
+    <string name="layout_summon_button_title">Floating keyboard button</string>
+    <string name="layout_summon_button_subtitle">A button over other apps that opens the keyboard, with or without a text field</string>
+    <string name="layout_summon_button_info">While the keyboard is closed, a small round button floats over every app. Tap it and the keyboard opens, even on a screen with no text field, and stays open there until you close it. Keys then reach the app as key presses, the same as with Keep the keyboard on screen. Drag the button to move it; it settles against the nearer side. Press and hold it to hide it until the keyboard next opens. Needs Android\'s Display over other apps permission.</string>
+    <string name="layout_summon_button_permission_title">Allow display over other apps</string>
+    <string name="layout_summon_button_permission_subtitle">The button cannot appear until Android allows it</string>
     <string name="layout_persistent_info">After the keyboard opens, it stays on screen when the text field closes, and over apps that have no text field. This lets you send keys and keyboard shortcuts to an app, for example to set a hotkey in a notes app. To close the keyboard, press the hide key, swipe down on the toolbar, or press Back. It opens again the next time you tap a text field. The keyboard never stays on the lock screen. Works docked or floating.</string>
 
     <!-- Layout screen: the two keys of the bottom row that can change. -->

@@ -74,7 +74,7 @@ This page writes a backup on a timer to the locations you tick. It stays inert u
 | **Back up to** | A tick box per location | On for every location | always |
 | Protect with a passphrase | Toggle | Off | always |
 | Passphrase | Password field | empty | Protect with a passphrase on |
-| **What goes in a backup** | The same thirteen switches as the export list, with their own settings | Same defaults as the export list | always |
+| **What goes in a backup** | The same fourteen switches as the export list, with their own settings | Same defaults as the export list | always |
 
 Each backup goes to every ticked location. A location you untick keeps its settings and gets no backups until you tick it again. One passphrase covers the automatic backups and the sync files, so use the same one on every device that syncs.
 
@@ -93,7 +93,7 @@ Sync keeps your devices the same. Each device keeps one sync file at the locatio
 | How often | Slider, the same stops as the backup interval | 6 hours | Sync on, On a schedule |
 | Sync API keys and passwords | Toggle | Off | Sync on |
 | **Sync through** | A tick box per location | the first location, when you turn sync on | always |
-| **What syncs** | The thirteen section switches, with their own settings | Settings, Themes, Snippets | always |
+| **What syncs** | The fourteen section switches, with their own settings | Settings, Themes, Snippets, Notes | always |
 | **Keep on this device**: Toolbar and toolbox | Toggle | Off | always (needs Settings ticked in What syncs) |
 | **Keep on this device**: Languages and layouts | Toggle | Off | always (needs Settings ticked in What syncs) |
 | **Sync now** | Button | | always |
@@ -112,7 +112,7 @@ Some settings never sync, because they only fit one device: the keyboard size an
 
 <SettingsPath path="Data / Backup & restore / What goes in an export" />
 
-**What goes in an export** is thirteen toggles, top to bottom. Twelve are independent; the thirteenth, **Include API keys**, only exists while **Settings** is on:
+**What goes in an export** is fourteen toggles, top to bottom. Thirteen are independent; the fourteenth, **Include API keys**, only exists while **Settings** or **Notes** is on, since it also decides whether locked notes travel:
 
 | Setting | Subtitle | Default |
 |---|---|---|
@@ -130,6 +130,7 @@ Some settings never sync, because they only fit one device: the keyboard size an
 | Typing statistics | Your daily typing counts and your all-time speed | On |
 | Vocabulary | Your word lists, imported packs and learning progress. Downloaded packs are left out; they can be downloaded again. | On |
 | Swipe style | How you swipe: where your finger lands, the readings you corrected, and the shape you draw each word in | Off |
+| Notes | Your notes, their tags, and what is in the trash. Locked notes stay out of the file unless Include API keys is on. | On |
 
 :::note[Three lists, not one]
 The export, the automatic backup and sync each have their own list, because they're three different decisions: a file to hand to someone, a copy for yourself, and what your devices share. The export list starts from whatever you had ticked before the lists were split.
@@ -177,10 +178,13 @@ Confirming a current-format import applies each section independently and merges
 | Typing statistics | **Replaces**. The day-by-day counts and the all-time totals both come from the file |
 | Vocabulary | **Replaces**, but only your own word lists and packs. A downloaded catalogue pack stays put, since the bundle never carried it, and the learning-progress record is written whole |
 | Swipe style | **Replaces**. The finger-position model, the corrected readings and the learned shapes all come from the file |
+| Notes | **Replaces**, except that locked notes already on the phone are kept when the file was made without them. A keyboard already running reloads rather than saving its own list back |
 
 Settings import is rollback-safe. After writing, the keyboard re-reads its own settings to confirm they still parse, and it undoes the write if they don't. The other sections in the same file still apply even when settings roll back. After a confirmed import you see either "The app restored `<sections>`.", a lowercase comma-separated list of what changed, or "The file has nothing to restore." A rolled-back settings portion appends "The app could not apply the settings. Your settings did not change." A confirmed legacy import instead reports how many settings it restored, or says "The app could not apply that backup. Your settings did not change."
 
 Opening a `.wmconfig.json` or `.wmsettings.json` file from a file manager routes through this same read-then-confirm flow rather than importing silently.
+
+**Import from another keyboard**, the row under it, takes a whole backup from HeliBoard, LeanType, FUTO Keyboard, FlorisBoard, CleverKeys or AnySoftKeyboard. It reads the file and lists everything inside, grouped as Layouts, Themes, Languages, Dictionaries and words, and Settings, each item with its own check box and every box ticked to start. A section heading's box ticks or clears the whole section. **Import** writes only the ticked items and then says what landed, for example "The app imported 2 layouts, 1 theme, 12 settings." Settings get the same read-back and rollback as a restore of this app's own backup. What each keyboard's backup holds, and what never comes across, is on [Importing from other keyboards](/reference/importing-other-keyboards/#whole-backups).
 
 ## Details & edge cases
 

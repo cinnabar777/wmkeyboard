@@ -708,6 +708,18 @@ internal fun Key.repairKey(
     if (fixed.actionAlternates.any { !it.isUsable() }) {
         fixed = fixed.copy(actionAlternates = fixed.actionAlternates.filter { it.isUsable() })
     }
+    // The hold action is a popup entry with no popup, and a dead one is dead
+    // the same way. Kept on a key that cannot run it, as the alternates are
+    // kept under a repeat: the key sheet says why it does nothing, and the
+    // action comes back when whatever took the hold goes.
+    if (fixed.holdAction?.isUsable() == false) {
+        fixed = fixed.copy(holdAction = null)
+    }
+    // Quietly: a negative position is not one the editor can write, and the
+    // default (after the characters) is the only reading that changes nothing.
+    if ((fixed.actionAlternatesAt ?: 0) < 0) {
+        fixed = fixed.copy(actionAlternatesAt = null)
+    }
     // A flick arm is a popup entry by another gesture (issue #549), and a dead
     // one is dead in the same way. Typing text is what [Key.flick] is for, so
     // an action arm that only types goes too rather than shadowing it.

@@ -2236,9 +2236,6 @@
     <string name="keypress_haptics_title">Klaviatūros paspaudimo vibracija</string>
     <string name="keypress_hold_action_copy_label">Kopijuoti</string>
     <string name="keypress_hold_action_cut_label">Iškirpti</string>
-    <string name="keypress_hold_action_first_info">Veiksmas paprastai yra iššokančiojo lango pabaigoje, todėl paprastas paspaudimas ir palaikymas suteikia pirmąjį akcentą. Įjungus šią parinktį, jis perkeliamas į priekį, o paspaudus ir palaikius vieną iš sparčiųjų klavišų, veiksmas atliekamas iškart. Akcentai vis dar yra: laikykite pirštą nuspaustą ir braukite ant norimo. Tam reikia „Palaikyti norint pasirinkti“ parinkties skiltyje „Alternatyvūs klavišai“.</string>
-    <string name="keypress_hold_action_first_subtitle">Paspaudus ir palaikius įvykdomas veiksmas, o ne rodomi akcentai</string>
-    <string name="keypress_hold_action_first_title">Veiksmas pirmiausia</string>
     <string name="keypress_hold_action_paste_label">Įklijuoti</string>
     <string name="keypress_hold_action_redo_label">Atkurti</string>
     <string name="keypress_hold_action_select_all_label">Pasirinkti viską</string>
@@ -2548,8 +2545,6 @@
     <string name="languages_cjk_region_info">Taivane ir Honkonge dažnai vartojami skirtingi žodžiai tam pačiam dalykui, ne tik skirtingi rašmenys.</string>
     <string name="languages_cjk_region_taiwan_title">Taivanas (臺灣)</string>
     <string name="languages_cjk_region_title">Regioninė terminologija</string>
-    <string name="languages_cjk_traditional_info">Klaviatūra konvertuoja kiekvieną kandidatą iš supaprastintos (简体) į tradicinę (繁體) kalbą prieš jį rodydama. Konvertavimas atliekamas po vieną simbolį. Kai kurie supaprastinti simboliai turi daugiau nei vieną tradicinę formą, o klaviatūra visada rašo dažniau vartojamą. 发 tampa 發, kas yra teisinga žodyje 發展, bet neteisinga žodyje 頭髮. Pataisykite šiuos žodžius rankiniu būdu.</string>
-    <string name="languages_cjk_traditional_subtitle">Klaviatūra konvertuoja kandidatus į tradicinius (繁體). Ji konvertuoja po vieną simbolį, todėl kai kurios formos, priklausančios nuo konteksto, yra neteisingos (发 → 發 / 髮).</string>
     <string name="languages_cjk_traditional_title">Tradiciniai rašmenys</string>
     <string name="languages_clusters_title">Klasteriai</string>
     <string name="languages_conjunct_backspace_info">„Backspace“ paprastai ištrina po vieną kodo tašką. Tai kartais palieka ekrane pusiau suformuotus klasterius. Įjungus šį nustatymą, vienas paspaudimas ištrina visą klasterį, kol rašote %1$s. Kitos kalbos išlaiko savo nustatymus.</string>

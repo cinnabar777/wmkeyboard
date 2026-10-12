@@ -656,6 +656,29 @@ fun KeyboardSettings.withoutModes(): KeyboardSettings =
     }
 
 /**
+ * The modes that draw [row] differently from the global setting while they are
+ * active, in list order — what the settings app warns about next to the row's
+ * own switch. Switching the symbol row off globally does nothing in a field the
+ * Email mode takes over, since the mode turns it back on; without the warning
+ * that reads as a switch that does not work.
+ *
+ * Only the rows a mode can override are answered: the emoji row and the symbol
+ * row. Every other row returns empty. A mode that sets the row to the value the
+ * global setting already has is no override worth naming, and modes the
+ * keyboard is not using ([withoutModes]) never activate, so neither is listed.
+ */
+fun KeyboardSettings.modesOverridingRow(row: BarRow): List<KeyboardMode> {
+    val modes = withoutModes().keyboardModes
+    return when (row) {
+        BarRow.EMOJI -> modes.filter { it.emojiBarMode != null && it.emojiBarMode != emojiBarMode }
+        BarRow.SYMBOL -> modes.filter {
+            it.symbolRowEnabled != null && it.symbolRowEnabled != symbolRowEnabled
+        }
+        else -> emptyList()
+    }
+}
+
+/**
  * Picks the active mode: a manual pick from the Modes tool wins, then the
  * most specific automatic match. A mode that names hint texts beats one that
  * names field kinds, which beats one that only names apps — so a password

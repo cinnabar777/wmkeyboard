@@ -90,6 +90,10 @@ apng4android = "3.0.5"
 # drawable be used at all. At run time it arrives with appcompat, at whatever
 # version appcompat asks for, which is why this one is never packaged.
 vectordrawableAnimated = "1.1.0"
+# Draws Telegram's animated stickers (.tgs, gzipped Lottie JSON) frame by
+# frame, so they can become animated WebP. Apache-2.0. Its one runtime
+# dependency is appcompat, which the app already carries.
+lottie = "6.7.1"
 zxing = "3.5.3"
 litertlm = "0.14.0"
 # 2.x splits into litert + litert-api sharing one namespace, which AGP's
@@ -223,6 +227,7 @@ jsch = { group = "com.github.mwiede", name = "jsch", version.ref = "jsch" }
 bouncycastle-prov = { group = "org.bouncycastle", name = "bcprov-jdk18on", version.ref = "bouncycastle" }
 apng4android-apng = { group = "com.github.penfeizhou.android.animation", name = "apng", version.ref = "apng4android" }
 androidx-vectordrawable-animated = { group = "androidx.vectordrawable", name = "vectordrawable-animated", version.ref = "vectordrawableAnimated" }
+lottie = { group = "com.airbnb.android", name = "lottie", version.ref = "lottie" }
 zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxing" }
 litertlm-android = { group = "com.google.ai.edge.litertlm", name = "litertlm-android", version.ref = "litertlm" }
 litert = { group = "com.google.ai.edge.litert", name = "litert", version.ref = "litert" }

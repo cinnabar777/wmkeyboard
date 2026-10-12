@@ -186,6 +186,15 @@ private val bundledAttributions: List<Attribution> = buildList {
     )
     add(
         Attribution(
+            "Lottie for Android",
+            R.string.about_bundled_lottie_used,
+            "Copyright Airbnb, Inc.",
+            "Apache-2.0", "apache-2.0.txt",
+            "https://github.com/airbnb/lottie-android",
+        ),
+    )
+    add(
+        Attribution(
             "ZXing",
             R.string.about_bundled_zxing_used,
             "Copyright ZXing authors",
@@ -339,6 +348,17 @@ private val bundledAttributions: List<Attribution> = buildList {
             "Copyright the individual keyboard authors, listed in the licence",
             "MIT", "mit-keyman.txt",
             "https://github.com/keymanapp/keyboards",
+        ),
+    )
+    // The keysym names in XkbKeysyms.kt, generated from xorgproto's
+    // keysymdef.h, whose notice asks to travel with copies.
+    add(
+        Attribution(
+            "X11 keysym table",
+            R.string.about_bundled_keysyms_used,
+            "Copyright 1987, 1994, 1998 The Open Group; 1987 Digital Equipment Corporation",
+            "X11", "x11-keysymdef.txt",
+            "https://gitlab.freedesktop.org/xorg/proto/xorgproto",
         ),
     )
     // The layouts added for parity with FUTO Keyboard and FlorisBoard were

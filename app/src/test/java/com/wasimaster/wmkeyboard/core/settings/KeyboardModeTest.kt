@@ -294,6 +294,27 @@ class KeyboardModeTest {
     }
 
     @Test
+    fun `modes overriding a row are the ones that set it the other way`() {
+        val writing = KeyboardMode(id = "writing", name = "Writing", symbolRowEnabled = true)
+        val off = KeyboardSettings(
+            symbolRowEnabled = false,
+            emojiBarMode = EmojiBarMode.OFF,
+            keyboardModes = listOf(password, email, writing, chat),
+        )
+        // Passwords sets the row off, which is what the global switch says too.
+        assertEquals(listOf("writing"), off.modesOverridingRow(BarRow.SYMBOL).map { it.id })
+        assertEquals(listOf("chat"), off.modesOverridingRow(BarRow.EMOJI).map { it.id })
+        val on = off.copy(symbolRowEnabled = true, emojiBarMode = EmojiBarMode.ALWAYS)
+        assertEquals(listOf("password"), on.modesOverridingRow(BarRow.SYMBOL).map { it.id })
+        assertEquals(listOf("password"), on.modesOverridingRow(BarRow.EMOJI).map { it.id })
+        // Rows no mode can set, and modes the keyboard is not using, say nothing.
+        assertTrue(off.modesOverridingRow(BarRow.DICTIONARY).isEmpty())
+        assertTrue(off.copy(modesEnabled = false).modesOverridingRow(BarRow.SYMBOL).isEmpty())
+        val writingOff = off.copy(keyboardModes = listOf(writing.copy(enabled = false)))
+        assertTrue(writingOff.modesOverridingRow(BarRow.SYMBOL).isEmpty())
+    }
+
+    @Test
     fun `with every mode on the view is the settings themselves`() {
         val settings = KeyboardSettings(keyboardModes = modes)
         assertTrue(settings.withoutModes() === settings)

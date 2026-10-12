@@ -1,0 +1,83 @@
+---
+title: "Notes"
+description: "A notebook inside the keyboard: jot while you type, tag and pin, tick off checklists, lock the private ones, and keep every note in your backup."
+sidebar:
+  order: 17.7
+---
+
+import SettingsPath from '@components/SettingsPath.astro';
+import KeyCap from '@components/KeyCap.astro';
+
+The **Notes** tool is a notebook that lives in the keyboard. Ideas, a diary, a shopping list, the thing someone just said in a call: write it down without leaving the app you are in, and find it again from any other app. Notes are plain text that the keyboard draws as Markdown, so a heading, a list or a `- [ ]` task box looks like one, and a task box can be ticked with a tap. Tags are buttons along the top of the list, so a tap on **Work** shows only the notes you filed under it.
+
+The same notes are in the settings app, where a full-screen editor with a real text field is the better place to write anything longer than a few lines. Both sides write the same file, so a note made on the keyboard is in the app when you come back to it, and the other way round.
+
+## Opening it
+
+Tap **Notes** on the toolbar, or in the toolbox if it isn't pinned (see [the toolbar](/tools/overview/)). Tap it again to close it. Typing `notes` into a text field offers the tool as a chip on the suggestion strip, like every other tool keyword.
+
+In the settings app the notebook is one tap from the tool's own page:
+
+<SettingsPath path="Tools / Notes / Your notes" />
+
+The panel opens on the list by default. <SettingsPath path="Tools / Notes / The keyboard panel opens on" /> can make it open on the note you edited last instead, which suits a running diary or a list you add to all day.
+
+## The list and the tags
+
+The list shows each note's title, a line or two of its text, when it was last edited, and a coloured dot for each of its tags. Along the top sit the filter chips: **All**, **Pinned**, one chip per tag, **Archived** and **Trash**. The tag chips are your tags, in your colours; there are none until you make one. The search pill at the top of the panel searches titles, tags and text as you type into it, the way the clipboard's search works, and the keys type into the search rather than into the app behind the keyboard.
+
+Tap a note to read it. Hold a note for its actions right there in the list: **Insert**, **Copy**, **Edit**, **Share**, **Pin**, **Archive**, **Lock** and **Delete**. Holding a tag chip opens the tag manager in the settings app.
+
+The **+** button at the top starts a new note. On an empty tag, the empty list offers **New note tagged** with that tag already on it.
+
+## Writing a note
+
+A new note opens its editor with the title line focused: type a title, press <KeyCap>Enter</KeyCap>, and you are in the body. A title is optional. A note with none is named after its first line, with the Markdown taken off, so `# Shopping` on the first line is a note called Shopping.
+
+The editor collapses the panel so the key rows come back underneath it, the way the clipboard's clip editor does. Enter is a line break. Inside a list it carries the list on: `- ` after a bullet, `3. ` after `2. `, a fresh `- [ ] ` after a task box, and Enter on an empty item ends the list. A row of chips above the keys inserts the Markdown you reach for most: bold, italic, a bullet or a numbered list, a task box, a heading, a quote and code. Each one wraps whatever is selected, or toggles its prefix on the lines you selected. The row's end counts your words and characters.
+
+Everything you type is saved as you go. There is no Save button and nothing to lose when the keyboard closes or another app takes the field: the draft is written first. **Done** keeps the note and goes back to reading it; **Cancel** puts the note back the way it was when you started, and throws away a new note altogether. A new note left blank is not kept.
+
+Tags sit above the body. Tap one to take it off the note, or **+ Tag** for the picker: your other tags first, then a few starters (Important, Work, School, Study, Personal, Ideas) until you have tags of your own, and **New…** to type a name. A tag is made the first time it goes on a note.
+
+## Reading a note
+
+The reading view draws the note as Markdown: headings, lists, quotes, code blocks, and task boxes you can tick and untick. Ticking a box rewrites that one line of the note, so the text behind the view always says what the view shows. Tap anywhere in the text to edit from that line. The chips under the note are the same actions the list offers: **Insert** types the note into the field behind the keyboard, as it was written; **Copy** puts it on the clipboard; **Share** hands it to another app. The arrows in the header make the note taller, up to most of the screen, for reading something long.
+
+A long note shows its first part and a **Show more** chip. A very long one, past twenty thousand characters, still reads here but edits in the settings app, where the Edit chip takes you.
+
+<SettingsPath path="Tools / Notes / Format Markdown" /> turns the formatting off, for anyone who would rather see exactly what they typed.
+
+## Pin, archive, trash
+
+**Pin** keeps a note at the top of every list, whatever the sort order. **Archive** takes a note out of the main list without deleting it: it waits under the **Archived** chip and still turns up in a search of that chip. **Delete** moves a note to the **Trash**, and an Undo bar gives you a few seconds to change your mind; the trash itself is the longer undo, with **Restore** on every note in it. Notes in the trash are deleted for good after thirty days, or after seven or ninety, or never, under:
+
+<SettingsPath path="Tools / Notes / Keep trashed notes for" />
+
+**Delete forever** and **Empty trash** ask for a second tap. In the settings app the same actions are on each note's menu, and the list there has a select mode: hold a note, tick the others, and pin, archive, tag, lock or trash them together.
+
+The sort order, last edited by default, is <SettingsPath path="Tools / Notes / Sort notes by" />.
+
+## Locked notes
+
+A note can be locked, from its actions on the keyboard or from the menu in the app. A locked note shows its title and nothing else in every list, and the keyboard never shows, inserts, copies or shares its text. In the settings app it opens only after your fingerprint or screen lock, through the same check the [fingerprint lock](/reference/settings/app-lock/) uses, and unlocking it is done there too. If the whole Notes screen is already behind the fingerprint lock, opening a locked note does not ask a second time.
+
+This is a lock on the screen, not on the data. The note is stored like any other note, so a backup file, Android's own backup, or a computer with USB debugging still reach it. To keep a locked note out of the backup file, see [Backups](#backups) below. On a phone with no fingerprint and no screen lock set up, there is nothing to ask for, and locked notes open with a caption that says so.
+
+## Save a selection as a note
+
+With [selection actions](/smart/selection-actions/) on, selecting text in any app offers **Save as note** on the bar. It saves the selection as a new note and says so with a toast, leaving the field as it was. <SettingsPath path="Tools / Notes / Save as note from a selection" /> can make it add the selection to the end of the note you edited last instead, which turns a day of selections into one running note.
+
+Nothing is saved from a password field, and nothing can be saved before the phone's first unlock after a restart, since the notes file is behind the lock screen until then.
+
+## Export, share and import
+
+In the settings app, a note's menu shares it as a Markdown or a plain text file, named after its title. **Export all as a zip** under the list writes one Markdown file per note, archived notes included and locked notes left out, with the note's tags on a `Tags:` line at the end. **Import text files** reads `.txt` and `.md` files back as notes, one per file, skipping any that already exist word for word, and reads a `Tags:` last line back as tags.
+
+## Backups
+
+Notes are a section of the [backup file](/privacy/backup/), on by default for the automatic backup and for sync between phones. Every note, its tags and the trash travel in it, except locked notes, which stay out unless **Include API keys** is on: a backup file is easy to send yourself or drop in a shared folder, and a locked note is one you asked to keep from view. Restoring a backup that left locked notes out keeps the ones already on the phone.
+
+## Privacy
+
+Notes stay on the phone. Nothing is sent anywhere unless you share a note, export the zip, or back the file up to a location you chose. The keyboard never learns from a note: what you type into it does not reach your personal dictionary, your word pairs or your typing statistics. The tool is not available before the first unlock after a restart, when the keyboard has no access to its files.

@@ -2236,9 +2236,6 @@
     <string name="keypress_haptics_title">Тактильний відгук при натисканні клавіш</string>
     <string name="keypress_hold_action_copy_label">Копіювати</string>
     <string name="keypress_hold_action_cut_label">Вирізати</string>
-    <string name="keypress_hold_action_first_info">Дія зазвичай знаходиться в кінці спливаючого вікна, тому звичайне натискання й утримування дає перший акцент. Якщо це увімкнено, вона переміщується на початок, і натискання й утримування однієї з клавіш швидкого доступу одразу виконує дію. Акценти залишаються: тримайте палець натиснутим і проведіть до того, який вам потрібен. Для цього потрібно увімкнути \"Утримувати для вибору\" в розділі \"Альтернативні клавіші\".</string>
-    <string name="keypress_hold_action_first_subtitle">Натискання й утримання виконує дію замість відображення акцентів</string>
-    <string name="keypress_hold_action_first_title">Спочатку дія</string>
     <string name="keypress_hold_action_paste_label">Вставити</string>
     <string name="keypress_hold_action_redo_label">Повторити</string>
     <string name="keypress_hold_action_select_all_label">Вибрати все</string>
@@ -2546,8 +2543,6 @@
     <string name="languages_cjk_region_info">Регіональна термінологія. Тайвань і Гонконг часто використовують різні слова для позначення одного й того самого, а не лише різні ієрогліфи.</string>
     <string name="languages_cjk_region_taiwan_title">Тайвань (臺灣)</string>
     <string name="languages_cjk_region_title">Регіональне формулювання</string>
-    <string name="languages_cjk_traditional_info">Клавіатура перетворює кожен варіант зі спрощеної (简体) на традиційну (繁體) перед відображенням. Перетворення відбувається по одному символу. Деякі спрощені символи мають більше однієї традиційної форми, і клавіатура завжди пише найпоширенішу. 发 стає 發, що правильно у 發展, але неправильно у 頭髮. Виправляйте такі слова вручну.</string>
-    <string name="languages_cjk_traditional_subtitle">Клавіатура перетворює варіанти на традиційні (繁體). Вона перетворює по одному символу за раз, тому деякі форми, що залежать від контексту, можуть бути неправильними (发 → 發 / 髮).</string>
     <string name="languages_cjk_traditional_title">Традиційні ієрогліфи</string>
     <string name="languages_clusters_title">Кластери</string>
     <string name="languages_conjunct_backspace_info">Клавіша Backspace зазвичай видаляє по одному кодовому символу. Це іноді залишає на екрані незавершені кластери. Якщо цей параметр увімкнено, одне натискання видаляє весь кластер під час введення %1$s. Інші мови зберігають власні налаштування.</string>

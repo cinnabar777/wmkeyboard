@@ -17,6 +17,13 @@
     <!-- Shown under the setup card while the keyboard is not yet turned on and
          selected. The Next button waits for both. -->
     <string name="onboarding_welcome_required">Press Skip at the top to do this later.</string>
+    <!-- The welcome page's restore button, and the line under it. A restore
+         skips the rest of the wizard. -->
+    <string name="onboarding_restore_action">Restore a backup</string>
+    <string name="onboarding_restore_info">Moving from another phone or keyboard? A backup from WM Keyboard, HeliBoard, LeanType, FUTO Keyboard, FlorisBoard, CleverKeys or AnySoftKeyboard sets everything up, and the app skips the questions.</string>
+    <!-- Shown on the welcome page once a backup is restored and the keyboard
+         is still not turned on and selected. -->
+    <string name="onboarding_restored_info">Your backup is restored. Turn on the keyboard above, then press Finish.</string>
 
     <!-- Onboarding, languages page. -->
     <string name="onboarding_languages_title">Your languages</string>

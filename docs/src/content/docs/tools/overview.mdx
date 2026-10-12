@@ -12,7 +12,7 @@ import KeyCap from '@components/KeyCap.astro';
 import Flavor from '@components/Flavor.astro';
 import Shot from '@components/Shot.astro';
 
-WM Keyboard ships 77 tools (panels, sensors, generators, and one-tap actions), but only a handful sit on the toolbar at once. The rest wait one tap away in the toolbox, and you decide which is which by dragging tools between the two.
+WM Keyboard ships 79 tools (panels, sensors, generators, and one-tap actions), but only a handful sit on the toolbar at once. The rest wait one tap away in the toolbox, and you decide which is which by dragging tools between the two.
 
 <PhoneFrame caption="The toolbar's default row (Emoji, Clipboard, Settings) with the toolbox grid open below it.">
   <Shot id="tools/toolbar-and-toolbox" alt="The toolbar's default row (Emoji, Clipboard, Settings) with the toolbox grid open below it." />
@@ -38,7 +38,23 @@ A keyboard [mode](/typing/modes/) can carry its own pinned toolbar, separate fro
 
 <SettingsPath path="Tools / (any tool) / Press and hold on the toolbar" />
 
-A pinned tool answers three gestures: a tap runs it, a hold that stays put opens its settings page, and a hold that drags picks it up. The middle one is yours to rebind. Open any tool's own page and the **Press and hold on the toolbar** row picks another tool for its hold to run: hold Undo to redo, hold Text edit to open the clipboard. The row shows what a hold does right now, and **Opens this tool's settings** means nothing is bound. The same picker offers **Does nothing**, for a tool whose hold you would rather have do nothing at all: it still buzzes, and nothing opens.
+A pinned tool answers three gestures: a tap runs it, a hold that stays put does a second thing, and a hold that drags picks it up. The hold runs when you lift your finger, and only the hold: the tap's action does not run as well.
+
+Out of the box, the tools that come in pairs hold to their partner, the same pairs HeliBoard uses:
+
+| Tool | Hold runs |
+|---|---|
+| Clipboard | Paste |
+| Paste | Clipboard |
+| Copy | Cut |
+| Undo | Redo |
+| Redo | Undo |
+| Select word | Select all |
+| Select all | Select word |
+
+Every other tool holds to its own settings page. The cursor tools have pairs too (left and right to a word left and right, up and down to page up and down, word left and right to the start and end of the line), but their hold repeats the move, so the pairs only take over once **Hold to repeat on the toolbar** is off; see [Text editing](/tools/text-editing/).
+
+All of it is yours to change. Open any tool's own page and the **Press and hold on the toolbar** row picks another tool for its hold to run: hold Text edit to open the clipboard, say. The row shows what a hold does right now. The picker's first row, **Default**, says what the tool does untouched. **Settings page** gets the settings page back on a tool that has a pair, and **Does nothing** is for a tool whose hold you would rather have do nothing at all: it still buzzes, and nothing opens.
 
 The third gesture is optional too. **Rearrange by dragging**, under <SettingsPath path="Appearance / Toolbar" />, is on by default; switched off, a hold that drifts stays a hold and ends as whatever a stationary one would, and the toolbox is where you rearrange the bar instead.
 
@@ -74,7 +90,7 @@ Pick a page size that's a multiple of your row size and every page comes out wit
 
 <SettingsPath path="Tools" />
 
-All 77 tools have a settings screen under `Settings → Tools`, each with its own **Enabled** switch plus whatever options it carries.
+All 79 tools have a settings screen under `Settings → Tools`, each with its own **Enabled** switch plus whatever options it carries.
 
 **Colorful tool icons** sits at the top of that screen and is on by default. It tints each tool's icon with the tool's own accent color, in the toolbox grid and down this settings list. The pinned row on the keyboard itself is the exception: those icons always take the theme's toolbar-icon color, so the bar stays one color whatever this is set to. Turn the setting off and the toolbox falls back to that same plain foreground color.
 
@@ -84,7 +100,7 @@ A row's switch enables or disables the tool everywhere at once: toolbar, toolbox
 
 To keep a tool working but out of the toolbox grid, open its page and turn off **Show in toolbox**. It still runs from the toolbar if pinned, from its keyword, from [selection actions](/smart/selection-actions/) and from the hardware leader key; the grid just loses one cell. Each tool has its own switch. A small tune icon marks the tools with settings beyond the switch. Most have them. Four don't, because their real options live on other screens: Settings, Sound & haptics, One-handed, and [Resize](/tools/resize/).
 
-Related pages cover most of these tools in depth: [Clipboard manager](/tools/clipboard/), [Snippets & text expansion](/tools/snippets/), [Text editing & cursor tools](/tools/text-editing/), [Trackpad](/tools/trackpad/), [Handwriting](/tools/handwriting/), [Camera tool](/tools/camera/), [Voice typing](/tools/voice/), [Offline voice (Whisper)](/tools/whisper/), [Scanner (OCR, QR, documents)](/tools/scanner/), [Translate](/tools/translate/), [Search & Wikipedia](/tools/search/), [AI tools](/tools/ai/), [Utility tools](/tools/utilities/), [Media controls](/tools/media/), [Calendar](/tools/calendar/), [App launcher](/tools/app-launcher/), [Resize](/tools/resize/), and [Instruments](/tools/instruments/) (flashlight, compass, level, moon phase, weather). The master tool list is being built out on [Reference → Tools](/reference/settings/tools/).
+Related pages cover most of these tools in depth: [Clipboard manager](/tools/clipboard/), [Snippets & text expansion](/tools/snippets/), [Notes](/tools/notes/), [Text editing & cursor tools](/tools/text-editing/), [Trackpad](/tools/trackpad/), [Handwriting](/tools/handwriting/), [Camera tool](/tools/camera/), [Voice typing](/tools/voice/), [Offline voice (Whisper)](/tools/whisper/), [Scanner (OCR, QR, documents)](/tools/scanner/), [Translate](/tools/translate/), [Search & Wikipedia](/tools/search/), [AI tools](/tools/ai/), [Utility tools](/tools/utilities/), [Media controls](/tools/media/), [Calendar](/tools/calendar/), [App launcher](/tools/app-launcher/), [Resize](/tools/resize/), and [Instruments](/tools/instruments/) (flashlight, compass, level, moon phase, weather). The master tool list is being built out on [Reference → Tools](/reference/settings/tools/).
 
 ## Panels and captured keys
 
@@ -102,6 +118,10 @@ Those boxes type like the app's own field, not like a one-way buffer:
 
 On a short screen, a phone turned sideways most of all, the panel is what gives way. A captured box with the keys back underneath, or a tool that grows above the keyboard for more room (the converters, the calendar, the AI), keeps the keyboard to at most 80% of the screen's height, and the panel shrinks to fit rather than squashing the keys. If the screen still can't hold both, the panel is measured against what's left once the keys are paid for, so the keys under a captured box always keep their full height. It never shrinks below its own header, so the box and the back arrow always stay in reach.
 
+### Making a panel over the keys taller
+
+A panel that shrinks so the keys fit under it has a short bar across its top edge: the clipboard while it's [stacked over the keys](/tools/clipboard/#clipboard-and-keys-together) or searched, a [snippet search](/tools/snippets/#opening-the-panel), the dictionary's, the GIF and sticker searches, the web and image search, a note being written and the rest. Drag the bar up and the panel grows over the app, so more results fit above the keys; the keys stay where they are. Drag it down to go back to the panel's own compact height. Where you let go is kept, and it's one height for every such panel, so the keys sit at the same place whichever one is up. The same 80% ceiling applies, and with no room to grow the bar isn't drawn. The height is also a slider, **Height over the keys**, under <SettingsPath path="Clipboard" />. With TalkBack on, the bar offers **Make the panel taller** and **Make the panel shorter** as actions.
+
 Nothing typed into a captured box is learned. A search query isn't writing, so it never reaches your personal dictionary, your word pairs or your typing stats.
 
 Sensor and generator tools work differently. Compass, Level, Moon phase, Weather, Calendar, Password generator, Media controls, Camera, and the scanners all replace the key rows outright instead of intercepting keystrokes. There's no letter row to type on while they're open, so there's nothing to intercept.
@@ -118,9 +138,9 @@ To back out of any open panel:
 
 **Direct boot** is the window right after a restart, before you've entered your PIN or pattern for the first time. The keyboard can't reach its stored data yet. Some tools work anyway.
 
-WM Keyboard exposes 47 of its 77 tools during that window: everything that's pure arithmetic, a sensor reading, or a control over the keyboard's own on-screen state. That's Emoji, Text editing, Trackpad, Numpad, Symbols, One-handed, Split, Floating, Keep on screen, Resize, Hide keyboard, Appearance, Autocorrect, Sound & haptics, Incognito, Selection actions, English words, Modes, Fancy text, Secondary layout, Undo, Redo, Power saving, Calculator, Unit converter, Password generator, QR generator, Flashlight, Compass, Level, Moon phase, Copy, Cut, and all fourteen cursor tools. Paste is the one clipboard button left out: the clipboard itself is credential-encrypted, so before the first unlock the button would be there and do nothing.
+WM Keyboard exposes 48 of its 79 tools during that window: everything that's pure arithmetic, a sensor reading, or a control over the keyboard's own on-screen state. That's Emoji, Text editing, Trackpad, Numpad, Symbols, One-handed, Split, Floating, Keep on screen, Resize, Hide keyboard, Appearance, Autocorrect, Sound & haptics, Incognito, Selection actions, English words, Find & replace, Modes, Fancy text, Secondary layout, Undo, Redo, Power saving, Calculator, Unit converter, Password generator, QR generator, Flashlight, Compass, Level, Moon phase, Copy, Cut, and all fourteen cursor tools. Paste is the one clipboard button left out: the clipboard itself is credential-encrypted, so before the first unlock the button would be there and do nothing.
 
-The other 30 sit it out until you unlock. That covers anything backed by a file on disk (Clipboard, Snippets, Camera, downloaded speech or AI models), anything that needs a credential (Translate, the online searches, AI, the paired computers of KDE Connect), anything that reads a content provider behind the lock screen (Calendar), and anything that has to launch a separate activity (Settings, Statistics, the document scanner). None of it is a toggle. The split is automatic, and it only applies before that first unlock.
+The other 31 sit it out until you unlock. That covers anything backed by a file on disk (Clipboard, Snippets, Notes, Camera, downloaded speech or AI models), anything that needs a credential (Translate, the online searches, AI, the paired computers of KDE Connect), anything that reads a content provider behind the lock screen (Calendar), and anything that has to launch a separate activity (Settings, Statistics, the document scanner). None of it is a toggle. The split is automatic, and it only applies before that first unlock.
 
 **Hide toolbar & clipboard on lock screen** under <SettingsPath path="Appearance / Toolbar" /> is a different thing, and it's off by default. It hides the *entire* toolbar rather than filtering it, any time the screen is locked, including long after you've unlocked the phone once since the last restart. Turn it on if you'd rather not have a pinned tool or the suggestion strip visible while you reply to a notification from the lock screen. Everything comes back the moment you unlock, even in the text box the keyboard was open in when the screen turned off.
 

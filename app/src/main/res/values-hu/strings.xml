@@ -2235,9 +2235,6 @@
     <string name="keypress_haptics_title">Billentyűleütési rezgés</string>
     <string name="keypress_hold_action_copy_label">Másolás</string>
     <string name="keypress_hold_action_cut_label">Kivágás</string>
-    <string name="keypress_hold_action_first_info">A művelet általában a felugró ablak végén található, így egy egyszerű lenyomás és tartás az első ékezetet adja. Ha ez be van kapcsolva, az előre kerül, és a gyorsbillentyűk egyikének lenyomása és tartása azonnal végrehajtja a műveletet. Az ékezetek továbbra is ott vannak: tartsa lenyomva az ujját, és csúsztassa a kívántra. Ehhez a „Lenyomva tartás a kijelöléshez” beállítás szükséges az Alternatív billentyűk alatt.</string>
-    <string name="keypress_hold_action_first_subtitle">A hosszan tartó megnyomás a műveletet futtatja az ékezetek megjelenítése helyett</string>
-    <string name="keypress_hold_action_first_title">Művelet először</string>
     <string name="keypress_hold_action_paste_label">Beillesztés</string>
     <string name="keypress_hold_action_redo_label">Mégis</string>
     <string name="keypress_hold_action_select_all_label">Összes kijelölése</string>
@@ -2542,8 +2539,6 @@
     <string name="languages_cjk_region_info">Tajvan és Hongkong gyakran különböző szavakat használ ugyanarra a dologra, nemcsak a karakterek térnek el.</string>
     <string name="languages_cjk_region_taiwan_title">Tajvan (臺灣)</string>
     <string name="languages_cjk_region_title">Regionális megfogalmazás</string>
-    <string name="languages_cjk_traditional_info">A billentyűzet minden jelöltet egyszerűsített (简体) formáról hagyományosra (繁體) konvertál, mielőtt megjelenítené. Az átalakítás karakterenként történik. Néhány egyszerűsített karakternek több hagyományos formája is van, és a billentyűzet mindig a gyakoribbat írja. A 发 karakterből 發 lesz, ami helyes a 發展 szóban, de helytelen a 頭髮 szóban. Javítsa ezeket a szavakat kézzel.</string>
-    <string name="languages_cjk_traditional_subtitle">A billentyűzet a jelölteket hagyományosra (繁體) konvertálja. Egyszerre egy karaktert konvertál, így néhány, a környezettől függő forma helytelen lehet (发 → 發 / 髮).</string>
     <string name="languages_cjk_traditional_title">Hagyományos karakterek</string>
     <string name="languages_clusters_title">Fürtök</string>
     <string name="languages_conjunct_backspace_info">A Backspace általában egyszerre egy kódpontot töröl. Ez néha félig formált klasztereket hagy a képernyőn. Ha ez a beállítás be van kapcsolva, egyetlen megnyomás az egész klasztert törli, miközben %1$s nyelven gépel. Más nyelvek megtartják a saját beállításukat.</string>

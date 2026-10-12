@@ -2244,9 +2244,6 @@
     <string name="keypress_haptics_title">की प्रेस हैप्टिक्स</string>
     <string name="keypress_hold_action_copy_label">कॉपी करें</string>
     <string name="keypress_hold_action_cut_label">काटें</string>
-    <string name="keypress_hold_action_first_info">यह क्रिया आमतौर पर पॉपअप के अंत में होती है, इसलिए एक साधारण प्रेस और होल्ड आपको पहला एक्सेंट देता है। इसे चालू करने पर यह सामने आ जाता है, और शॉर्टकट कुंजियों में से किसी एक पर प्रेस और होल्ड करने से क्रिया तुरंत शुरू हो जाती है। एक्सेंट अभी भी वहीं हैं: अपनी उंगली नीचे रखें और उस पर स्लाइड करें जिसे आप चाहते हैं। इसके लिए \'वैकल्पिक कुंजियाँ\' के अंतर्गत \'चुनने के लिए होल्ड करें\' की आवश्यकता है।</string>
-    <string name="keypress_hold_action_first_subtitle">दबाकर रखने पर एक्सेंट दिखाने के बजाय क्रिया चलती है</string>
-    <string name="keypress_hold_action_first_title">पहले क्रिया</string>
     <string name="keypress_hold_action_paste_label">पेस्ट करें</string>
     <string name="keypress_hold_action_redo_label">रीडू</string>
     <string name="keypress_hold_action_select_all_label">सभी चुनें</string>
@@ -2559,8 +2556,6 @@
     <string name="languages_cjk_region_info">क्षेत्रीय शब्दावली। ताइवान और हांगकांग अक्सर एक ही चीज़ के लिए अलग-अलग शब्दों का उपयोग करते हैं, न कि केवल अलग-अलग वर्णों का।</string>
     <string name="languages_cjk_region_taiwan_title">ताइवान (臺灣)</string>
     <string name="languages_cjk_region_title">क्षेत्रीय शब्दावली</string>
-    <string name="languages_cjk_traditional_info">कीबोर्ड प्रत्येक उम्मीदवार को सरलीकृत (简体) से पारंपरिक (繁體) में बदलने के बाद दिखाता है। रूपांतरण एक बार में एक वर्ण पढ़ता है। कुछ सरलीकृत वर्णों के एक से अधिक पारंपरिक रूप होते हैं, और कीबोर्ड हमेशा अधिक सामान्य रूप लिखता है। 发, 發 बन जाता है, जो 發展 में सही है लेकिन 頭髮 में गलत है। उन शब्दों को हाथ से सही करें।</string>
-    <string name="languages_cjk_traditional_subtitle">कीबोर्ड उम्मीदवारों को पारंपरिक (繁體) में बदल देता है। यह एक बार में एक वर्ण को बदलता है, इसलिए संदर्भ पर निर्भर कुछ रूप गलत हो सकते हैं (发 → 發 / 髮)।</string>
     <string name="languages_cjk_traditional_title">पारंपरिक वर्ण</string>
     <string name="languages_clusters_title">क्लस्टर</string>
     <string name="languages_conjunct_backspace_info">बैकस्पेस आमतौर पर एक बार में एक कोड पॉइंट हटाता है। इससे कभी-कभी स्क्रीन पर आधे-अधूरे क्लस्टर रह जाते हैं। इस सेटिंग के चालू होने पर, एक बार दबाने से पूरा क्लस्टर हट जाता है जब आप %1$s टाइप करते हैं। अन्य भाषाएँ अपनी सेटिंग बनाए रखती हैं।</string>

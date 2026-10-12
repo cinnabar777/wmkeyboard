@@ -206,7 +206,7 @@ private val MarkTypes = setOf(
 // grids add a script's own full stop to the period's list; an import does not
 // know its language yet, so it gets the ones every script shares.
 private val CommaAlternates = listOf("!", "?")
-private val PeriodAlternates = listOf("…", ",", "?", "!", ":", ";")
+internal val PeriodAlternates = listOf("…", ",", "?", "!", ":", ";")
 
 private const val WIDE_KEY = 1.5f
 private const val SPACE_WIDTH = 4f

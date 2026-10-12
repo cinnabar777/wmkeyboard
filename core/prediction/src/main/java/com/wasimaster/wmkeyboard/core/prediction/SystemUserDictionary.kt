@@ -185,7 +185,10 @@ object SystemUserDictionary {
             val singleWord = parts.size == 1
             for (trimmed in parts) {
                 val key = WordKey.of(trimmed)
-                if (key.length < 2) continue
+                // A row that is one letter was put there on purpose — "I", the
+                // capital the keyboard should write it with (#620). One letter
+                // out of a phrase ("Plan B") is not a word anyone added.
+                if (key.isEmpty() || (key.length < 2 && !singleWord)) continue
                 keys.add(key)
                 // The capital the user typed into the platform's dictionary is
                 // the whole reason they went there ("Boston", "AOSP", an email

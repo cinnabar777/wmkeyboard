@@ -15,7 +15,7 @@ import com.wasimaster.wmkeyboard.core.prediction.Trie
 import java.io.File
 import java.util.Locale
 import kotlin.math.ln
-import org.junit.Ignore
+import org.junit.Assume.assumeTrue
 import org.junit.Test
 
 /**
@@ -37,10 +37,14 @@ import org.junit.Test
  *    covers, which is a fact about the user rather than the decoder.
  *    [coverageSweep] varies it and finds the crossover.
  *
- * `@Ignore` for the same reason `GlideTuningSweepTest` is: minutes of work,
- * and nothing here regresses.
+ * Skipped unless `WM_GLIDE_SANDBOX_SWEEP` is set, for the same reason
+ * `GlideTuningSweepTest` is: minutes of work, and nothing here regresses. Set
+ * it when re-deciding the sandbox policy:
+ *
+ * ```
+ * WM_GLIDE_SANDBOX_SWEEP=1 ./gradlew :app:testFullIntlDebugUnitTest --tests "*GlideSandboxSweepTest"
+ * ```
  */
-@Ignore("measurement, minutes long; run by name when re-deciding the sandbox policy")
 class GlideSandboxSweepTest {
 
     private companion object {
@@ -109,6 +113,7 @@ class GlideSandboxSweepTest {
      */
     @Test
     fun userWeightSweep() {
+        assumeTrue("set WM_GLIDE_SANDBOX_SWEEP to run this measurement", !System.getenv("WM_GLIDE_SANDBOX_SWEEP").isNullOrBlank())
         val english = load("en.txt")
         val lexiconWords = english.take(2_000)
         val known = lexiconWords.mapTo(HashSet()) { it.first.lowercase(Locale.ROOT) }
@@ -157,6 +162,7 @@ class GlideSandboxSweepTest {
      */
     @Test
     fun coverageSweep() {
+        assumeTrue("set WM_GLIDE_SANDBOX_SWEEP to run this measurement", !System.getenv("WM_GLIDE_SANDBOX_SWEEP").isNullOrBlank())
         val english = load("en.txt")
         val dictionary = Trie().apply { english.forEach { (w, f) -> insert(w, f) } }
         val dictSources = dictionary.walkers().map {
@@ -219,6 +225,7 @@ class GlideSandboxSweepTest {
      */
     @Test
     fun settledUserSweep() {
+        assumeTrue("set WM_GLIDE_SANDBOX_SWEEP to run this measurement", !System.getenv("WM_GLIDE_SANDBOX_SWEEP").isNullOrBlank())
         val english = load("en.txt")
         val vocabulary = sampleVocabulary(english, 2_000)
         val known = vocabulary.mapTo(HashSet()) { it.first.lowercase(Locale.ROOT) }

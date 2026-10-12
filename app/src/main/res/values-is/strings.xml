@@ -2235,9 +2235,6 @@
     <string name="keypress_haptics_title">Snertiviðbrögð við lyklaborðsstýringu</string>
     <string name="keypress_hold_action_copy_label">Afrita</string>
     <string name="keypress_hold_action_cut_label">Klippa</string>
-    <string name="keypress_hold_action_first_info">Aðgerðin er venjulega í lok sprettigluggans, þannig að venjuleg ýting og hald gefur þér fyrsta kommu. Með þessu virku færist hún fremst og ýting og hald á einn af flýtilyklunum keyrir aðgerðina strax. Kommur eru enn til staðar: haltu fingrinum niðri og renndu honum á þann sem þú vilt. Þetta krefst „Hald til að velja“ undir „Aðrir lyklar“.</string>
-    <string name="keypress_hold_action_first_subtitle">Að ýta og halda inni framkvæmir aðgerðina í stað þess að sýna kommur</string>
-    <string name="keypress_hold_action_first_title">Aðgerð fyrst</string>
     <string name="keypress_hold_action_paste_label">Líma</string>
     <string name="keypress_hold_action_redo_label">Endurgera</string>
     <string name="keypress_hold_action_select_all_label">Velja allt</string>
@@ -2546,8 +2543,6 @@
     <string name="languages_cjk_region_info">Taívan og Hong Kong nota oft mismunandi orð yfir sama hlutinn, ekki bara mismunandi tákn.</string>
     <string name="languages_cjk_region_taiwan_title">Taívan (臺灣)</string>
     <string name="languages_cjk_region_title">Svæðisbundin orðalag</string>
-    <string name="languages_cjk_traditional_info">Lyklaborðið breytir hverju frambjóðanda úr einfölduðu (简体) yfir í hefðbundið (繁體) áður en það sýnir frambjóðandann. Umbreytingin les einn staf í einu. Nokkrir einfaldaðir stafir hafa fleiri en eitt hefðbundið form og lyklaborðið skrifar alltaf það algengara. 发 verður að 發, sem er rétt í 發展 en rangt í 頭髮. Leiðréttu þessi orð handvirkt.</string>
-    <string name="languages_cjk_traditional_subtitle">Lyklaborðið breytir valkostum í hefðbundið kínverskt letur (繁體). Það breytir einum staf í einu, svo nokkur form sem ráðast af samhengi gætu verið röng (发 → 發 / 髮).</string>
     <string name="languages_cjk_traditional_title">Hefðbundnir stafir</string>
     <string name="languages_clusters_title">Klasar</string>
     <string name="languages_conjunct_backspace_info">Baklykill eyðir venjulega einum kóðapunkti í einu. Þetta skilur stundum eftir hálfgerða klasa á skjánum. Með þessari stillingu virkjaðri eyðir ein snerting öllum klasanum á meðan þú slærð inn %1$s. Önnur tungumál halda sinni eigin stillingu.</string>

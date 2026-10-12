@@ -2238,9 +2238,6 @@
     <string name="keypress_haptics_title">Haptička povratna informacija pri pritisku tipke</string>
     <string name="keypress_hold_action_copy_label">Kopiraj</string>
     <string name="keypress_hold_action_cut_label">Izreži</string>
-    <string name="keypress_hold_action_first_info">Radnja se obično nalazi na kraju skočnog prozora, pa običan pritisak i držanje daje prvi naglasak. S uključenom ovom opcijom pomiče se na početak, a pritisak i držanje jedne od tipki prečaca odmah pokreće radnju. Naglasci su i dalje tu: držite prst pritisnut i kliznite na onaj koji želite. Ovo zahtijeva opciju \"Drži za odabir\" pod \"Alternativne tipke\".</string>
-    <string name="keypress_hold_action_first_subtitle">Pritisnite i držite za pokretanje radnje umjesto prikazivanja naglasaka</string>
-    <string name="keypress_hold_action_first_title">Prvo radnja</string>
     <string name="keypress_hold_action_paste_label">Zalijepi</string>
     <string name="keypress_hold_action_redo_label">Ponovi</string>
     <string name="keypress_hold_action_select_all_label">Odaberi sve</string>
@@ -2550,8 +2547,6 @@
     <string name="languages_cjk_region_info">Tajvan i Hong Kong često koriste različite riječi za istu stvar, ne samo različite znakove.</string>
     <string name="languages_cjk_region_taiwan_title">Tajvan (臺灣)</string>
     <string name="languages_cjk_region_title">Regionalni izričaj</string>
-    <string name="languages_cjk_traditional_info">Tipkovnica pretvara svaki kandidat iz pojednostavljenog (简体) u tradicionalni (繁體) prije nego što ga prikaže. Pretvorba čita jedan po jedan znak. Nekoliko pojednostavljenih znakova ima više od jednog tradicionalnog oblika, a tipkovnica uvijek piše onaj češći. 发 postaje 發, što je točno u 發展, ali pogrešno u 頭髮. Ispravite te riječi ručno.</string>
-    <string name="languages_cjk_traditional_subtitle">Tipkovnica pretvara kandidate u tradicionalno pismo (繁體). Pretvara jedan po jedan znak, pa su neki oblici koji ovise o kontekstu pogrešni (发 → 發 / 髮).</string>
     <string name="languages_cjk_traditional_title">Tradicionalni znakovi</string>
     <string name="languages_clusters_title">Klasteri</string>
     <string name="languages_conjunct_backspace_info">Backspace obično briše jednu kodnu točku odjednom. To ponekad ostavlja napola oblikovane klastere na zaslonu. S uključenom ovom postavkom, jedan pritisak briše cijeli klaster dok tipkate %1$s. Drugi jezici zadržavaju vlastite postavke.</string>

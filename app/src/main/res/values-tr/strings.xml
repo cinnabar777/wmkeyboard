@@ -2233,9 +2233,6 @@
     <string name="keypress_haptics_title">Tuş basımı dokunsal geri bildirimi</string>
     <string name="keypress_hold_action_copy_label">Kopyala</string>
     <string name="keypress_hold_action_cut_label">Kes</string>
-    <string name="keypress_hold_action_first_info">Eylem genellikle açılır pencerenin sonunda yer alır, bu nedenle basit bir basılı tutma işlemi size ilk aksanı verir. Bu açıkken başa taşınır ve kısayol tuşlarından birine basılı tutmak eylemi hemen çalıştırır. Aksanlar hala oradadır: parmağınızı basılı tutun ve istediğinizin üzerine kaydırın. Bu, Alternatif tuşlar altında Basılı tutarak seç özelliğini gerektirir.</string>
-    <string name="keypress_hold_action_first_subtitle">Basılı tutmak, aksanları göstermek yerine eylemi çalıştırır</string>
-    <string name="keypress_hold_action_first_title">Önce eylem</string>
     <string name="keypress_hold_action_paste_label">Yapıştır</string>
     <string name="keypress_hold_action_redo_label">Yinele</string>
     <string name="keypress_hold_action_select_all_label">Tümünü seç</string>
@@ -2541,8 +2538,6 @@
     <string name="languages_cjk_region_info">Bölgesel ifade. Tayvan ve Hong Kong, aynı şey için genellikle sadece farklı karakterler değil, farklı kelimeler de kullanır.</string>
     <string name="languages_cjk_region_taiwan_title">Tayvan (臺灣)</string>
     <string name="languages_cjk_region_title">Bölgesel ifade</string>
-    <string name="languages_cjk_traditional_info">Klavye, her adayı göstermeden önce Basitleştirilmişten (简体) Geleneksele (繁體) dönüştürür. Dönüştürme işlemi her seferinde bir karakter okur. Bazı Basitleştirilmiş karakterlerin birden fazla Geleneksel biçimi vardır ve klavye her zaman daha yaygın olanı yazar. 发, 發 olur; bu 發展 kelimesinde doğrudur ancak 頭髮 kelimesinde yanlıştır. Bu kelimeleri elle düzeltin.</string>
-    <string name="languages_cjk_traditional_subtitle">Klavye adayları Geleneksel (繁體) Çinceye dönüştürür. Her seferinde bir karakter dönüştürdüğü için, bağlama bağlı birkaç biçim yanlış olabilir (发 → 發 / 髮).</string>
     <string name="languages_cjk_traditional_title">Geleneksel karakterler</string>
     <string name="languages_clusters_title">Kümeler</string>
     <string name="languages_conjunct_backspace_info">Geri tuşu genellikle her seferinde bir kod noktası siler. Bu bazen ekranda yarım kalmış kümeler bırakır. Bu ayar açıkken, bir kez basmak %1$s yazarken tüm kümeyi siler. Diğer diller kendi ayarlarını korur.</string>

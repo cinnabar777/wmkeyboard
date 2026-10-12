@@ -20,9 +20,11 @@ Chinese and Japanese aren't typed directly: you type a *reading* (pinyin, bopomo
 
 **Conversion input methods** (Pinyin, T9 Pinyin, Zhuyin, Cangjie, Cangjie Quick, Stroke for Chinese; Jyutping for Cantonese; Romaji, Flick, and Kana JIS for Japanese) hold what you type in a composing buffer and replace the entire suggestion strip with ranked character/word candidates. Nothing commits until you pick a candidate, press space, or otherwise flush the buffer.
 
-**Korean** types the other way. `HangulComposer` composes jamo directly into syllable blocks (ㄱ + ㅏ + ㄴ → 간) with no reading step and no candidate list. There's nothing to convert. Four keymaps ship: the standard two-set (두벌식) grid, where one key is ㄱ whether it starts or ends a syllable and the composer decides by position, the two three-set (세벌식) grids, 390 and Final, whose keys say for themselves whether they are an initial or a final, and the 천지인 (Cheonjiin) 12-key pad. On a three-set grid a tense initial is typed by pressing the plain one twice (ᄀ ᄀ → ㄲ), and a vowel after a final never pulls that final into the next syllable. Syllables build the same way in the keyboard's own text boxes, such as the emoji, GIF and clipboard searches, Find and replace, and the AI prompt: backspace there takes back the last jamo rather than the whole block. The same goes for the other keyboards that build letters from keys, Vietnamese Telex and VNI and Khipro. Korean typing gets the ordinary word-suggestion and autocorrect strip instead, backed by a real downloadable dictionary (see [Downloadable dictionaries](/languages/dictionaries/)). If you've used a Chinese or Japanese IME before, don't expect Korean to work the same way. It's a direct phonetic keyboard.
+**Korean** types the other way. `HangulComposer` composes jamo directly into syllable blocks (ㄱ + ㅏ + ㄴ → 간) with no reading step and no candidate list. There's nothing to convert. Five keymaps ship: the standard two-set (두벌식) grid, where one key is ㄱ whether it starts or ends a syllable and the composer decides by position, the two three-set (세벌식) grids, 390 and Final, whose keys say for themselves whether they are an initial or a final, and the two 12-key pads, 천지인 (Cheonjiin) and 나랏글 (Naratgeul). On a three-set grid a tense initial is typed by pressing the plain one twice (ᄀ ᄀ → ㄲ), and a vowel after a final never pulls that final into the next syllable. Syllables build the same way in the keyboard's own text boxes, such as the emoji, GIF and clipboard searches, Find and replace, and the AI prompt: backspace there takes back the last jamo rather than the whole block. The same goes for the other keyboards that build letters from keys, Vietnamese Telex and VNI and Khipro. Korean typing gets the ordinary word-suggestion and autocorrect strip instead, backed by a real downloadable dictionary (see [Downloadable dictionaries](/languages/dictionaries/)). If you've used a Chinese or Japanese IME before, don't expect Korean to work the same way. It's a direct phonetic keyboard.
 
 **천지인 (Cheonjiin)** is the phone keypad, laid out the way Samsung's is. Vowels are drawn from three strokes, <KeyCap>ㅣ</KeyCap>, <KeyCap>ㆍ</KeyCap> and <KeyCap>ㅡ</KeyCap>, in the order you would write them: ㅣ ㆍ is ㅏ, ㆍ ㅣ is ㅓ, ㆍ ㅡ is ㅗ, ㅡ ㆍ is ㅜ, a second dot gives the y-vowel (ㅣ ㆍ ㆍ is ㅑ), and a ㅣ after a vowel gives ㅐ, ㅔ, ㅚ, ㅟ and the rest. A dot that isn't part of a vowel yet waits on screen as ㆍ or ‥, and a third dot goes back to one. Each consonant key holds two or three letters, picked by tapping it again: <KeyCap>ㄱㅋ</KeyCap> once is ㄱ, twice ㅋ, three times ㄲ. To type the same consonant twice in a row (the ㄱ ㄱ in 먹고), either pause for a second before the second tap or press <KeyCap>Space</KeyCap> between them. A space straight after a consonant tap only ends that letter and types nothing; press it again for a real space. The <KeyCap>.,?!</KeyCap> key cycles through its four marks the same way. <KeyCap>Delete</KeyCap> takes back one tap: a whole consonant, or one stroke of a vowel (ㅏ back to ㅣ).
+
+**나랏글 (Naratgeul)** is the other phone keypad, laid out the way Samsung's is. It has keys for six consonants, <KeyCap>ㄱ</KeyCap> <KeyCap>ㄴ</KeyCap> <KeyCap>ㄹ</KeyCap> <KeyCap>ㅁ</KeyCap> <KeyCap>ㅅ</KeyCap> <KeyCap>ㅇ</KeyCap>, and for the vowels <KeyCap>ㅏㅓ</KeyCap>, <KeyCap>ㅗㅜ</KeyCap>, <KeyCap>ㅣ</KeyCap> and <KeyCap>ㅡ</KeyCap>. Tap <KeyCap>ㅏㅓ</KeyCap> once for ㅏ and again for ㅓ, and <KeyCap>ㅗㅜ</KeyCap> the same way. Every other letter is built from these with two keys that change the last letter you typed. <KeyCap>획추가</KeyCap> adds a stroke and goes round: ㄱ ㅋ, ㄴ ㄷ ㅌ, ㅁ ㅂ ㅍ, ㅅ ㅈ ㅊ, ㅇ ㅎ, and ㅏ ㅑ, ㅓ ㅕ, ㅗ ㅛ, ㅜ ㅠ. <KeyCap>쌍자음</KeyCap> doubles a consonant and undoubles it: ㄱ ㄲ, ㄷ ㄸ, ㅂ ㅃ, ㅅ ㅆ, ㅈ ㅉ. Both work on a syllable you are still building, so 가 becomes 갸, 롬 becomes 롭 and then 롶, and 각 becomes 갂. A letter that can't stay in the syllable moves out of it: 밥 doubled is 바ㅃ, and 낛 with a stroke is 낙ㅈ. ㅐ, ㅒ, ㅔ and ㅖ have no key: type the vowel and then <KeyCap>ㅣ</KeyCap> (ㅏ ㅣ is ㅐ), and <KeyCap>획추가</KeyCap> on ㅐ gives ㅒ. Once a word is finished with <KeyCap>Space</KeyCap> or a mark, the two keys do nothing to it. Both keys are also in the [layout editor's](/languages/custom-layouts/) action picker, for a pad of your own.
 
 ## Chinese input schemes
 
@@ -44,6 +46,8 @@ Chinese carries six layouts. Adding it from the language catalogue turns on Piny
 Pinyin, T9 Pinyin, and Zhuyin are all **prefix-commit**: type `nihao` and the strip offers 你好 first, then leading-syllable candidates like 你 alone. Tapping one consumes only the part of the buffer it covers and re-converts the rest, so you don't have to clear the buffer between characters. Cangjie, Cangjie Quick, and Stroke are the opposite: shape and stroke codes map to exactly one character each, so a commit always consumes everything you've typed.
 
 Zhuyin and T9 Pinyin don't need their own dictionary. They reuse the Pinyin pack and translate each segmented syllable to its pinyin spelling. Cangjie and Cangjie Quick share one radical-code table. Stroke and Jyutping (below) each have their own pack.
+
+**Picking syllables on T9 Pinyin.** Each key on the T9 pad stands for three or four letters, so the keys you press could spell several syllables, and the keyboard guesses which. The column down the left of the pad shows what the next syllable could be while you type. <KeyCap>WXYZ</KeyCap> <KeyCap>GHI</KeyCap> <KeyCap>ABC</KeyCap> <KeyCap>MNO</KeyCap> lists xiao, xian, zhao and zhan, then xia and zha, then xi, yi and zi: longest first, with the keyboard's own guess at the top. Tap one and that syllable is settled. The strip then offers only characters read that way, and the column moves on to the next syllable, so a phrase the strip keeps getting wrong (优点真遗恨 for 有点小遗憾) can be pinned down one syllable at a time. The text you are typing shows a `'` between syllables, so you can see how your keys were split. <KeyCap>Delete</KeyCap> takes back the last key you pressed, and once only settled syllables are left it unsettles the last one, back to its keys. While you aren't typing a reading, the column lists punctuation (，。？！、：； and more) to tap instead. The column is in the [layout editor's](/languages/custom-layouts/) action picker too, as "Pinyin syllable list", for a pad of your own.
 
 ### Cantonese: Jyutping
 
@@ -127,9 +131,11 @@ Fuzzy Pinyin is off by default and lazy pronunciation is on, and they change ran
 
 ## Traditional characters and regional wording
 
-A single toggle switches candidate output from Simplified to Traditional Han, applied character-by-character as each composer builds its candidate list (not as a find-and-replace afterward, which would break prefix-commit matching). One character can map to several traditional forms depending on context, and the keyboard picks the more common one. Occasional mismatches (like 发 mapping to 發 in most contexts but needing 髮 in a word like hair) are a known limitation, not a bug to report.
+A single toggle switches candidate output from Simplified to Traditional Han, applied as each composer builds its candidate list (not as a find-and-replace afterward, which would break prefix-commit matching). Many Simplified characters have more than one Traditional form, and only the word tells which: 发 is 發 in 發展 but 髮 in 頭髮, 后 is 後 in 後來 but stays 后 in 皇后, 干 is 幹 in 幹部 but 乾 in 乾淨. The keyboard converts word by word with the [OpenCC](https://github.com/BYVoid/OpenCC) phrase and character tables (release 1.4.2), using OpenCC's own matching: the candidate is split into the longest phrases it contains, each phrase converts as a unit, and only a character that is in no phrase falls back to its most common form. A candidate the keyboard stitched from several words is split the same way, so 头发干净 comes out as 頭髮乾淨.
 
-With Traditional on, a second control appears: a region picker (Standard / Taiwan / Hong Kong) that also swaps regional vocabulary: Taiwan's 計程車 instead of the mainland's 出租車 for "taxi," for instance. This affects whole dictionary words, not individual characters, so it only kicks in where the candidate is a complete match in the regional phrase table.
+The character tables ship with the app. The phrase table is the **Traditional characters phrase table** pack, about 1 MB, which you download from the Chinese or Cantonese options page like the other tables below. It is one download: the row on either page is the same file. Without it, Traditional output still works, but one character at a time: each character takes its most common form, so 头发 comes out as 頭發. Conversion itself never goes online. The tables load the first time you turn the toggle on, so for a moment after that the candidates can still show in Simplified.
+
+With Traditional on, a second control appears: a region picker (Standard / Taiwan / Hong Kong). **Taiwan** follows OpenCC's `s2twp`: it swaps regional vocabulary, Taiwan's 計程車 instead of the mainland's 出租車 for "taxi," for instance, and then applies Taiwan's character preferences (為, 裡, 著). Vocabulary is matched inside a candidate too, so 出租车光盘 becomes 計程車光碟. **Hong Kong** follows OpenCC's `s2hk`: the standard wording with Hong Kong's character preferences (説, 衞, 温). The Hong Kong choices come straight from OpenCC's tables and have not been reviewed by a Hong Kong writer yet; a wrong one is worth reporting.
 
 Both the Traditional toggle and the region picker also appear on the Japanese language screen, but they have no effect there. Japanese candidates never pass through this conversion at all.
 
@@ -161,6 +167,18 @@ It only ever adds marks. A が or a っ you typed was asked for by name and is n
 
 Romaji is never widened. `ga` costs exactly what `ka` does on a QWERTY layout, so `kaki` means かき and nothing else, which keeps the strip as tight as it was.
 
+## Punctuation
+
+Every Japanese and Chinese layout carries its language's punctuation, whichever input method you type with.
+
+- **Beside the space bar.** The comma key types <KeyCap>、</KeyCap> in Japanese and <KeyCap>，</KeyCap> in Chinese, and the full stop types <KeyCap>。</KeyCap>. Hold the comma for the quotes: <KeyCap>「</KeyCap> <KeyCap>」</KeyCap> <KeyCap>『</KeyCap> <KeyCap>』</KeyCap> in Japanese; <KeyCap>“</KeyCap> <KeyCap>”</KeyCap> <KeyCap>「</KeyCap> <KeyCap>」</KeyCap> <KeyCap>《</KeyCap> <KeyCap>》</KeyCap> in Chinese, alongside <KeyCap>、</KeyCap> <KeyCap>！</KeyCap> <KeyCap>？</KeyCap>.
+- **Flick.** Flick <KeyCap>や</KeyCap> left for <KeyCap>「</KeyCap> and right for <KeyCap>」</KeyCap>. Hold <KeyCap>、</KeyCap> for 『』, （）, ・ and 〜.
+- **<KeyCap>?123</KeyCap>.** The first symbols page swaps the ASCII quotes and the Spanish ¿ ¡ for the language's own marks. Japanese gets <KeyCap>・</KeyCap> <KeyCap>「</KeyCap> <KeyCap>」</KeyCap> <KeyCap>、</KeyCap> <KeyCap>：</KeyCap> <KeyCap>！</KeyCap> <KeyCap>？</KeyCap>, Chinese gets <KeyCap>、</KeyCap> <KeyCap>“</KeyCap> <KeyCap>”</KeyCap> <KeyCap>：</KeyCap> <KeyCap>；</KeyCap> <KeyCap>！</KeyCap> <KeyCap>？</KeyCap>, and the brackets become <KeyCap>（</KeyCap> <KeyCap>）</KeyCap>. Hold a quote for the nested pair (『』, ‘’) or the other convention.
+- **<KeyCap>{'=\\<'}</KeyCap>.** The second page has the rest of the bracket family as keys of their own. Japanese: 『』【】, holding 〈〉《》 and 〔〕. Chinese: the title marks 《》 (hold for 〈〉) and the corner brackets 「」 (hold for 『』 and 【】), so Mainland and Taiwan or Hong Kong quoting are both a tap away. It also has 〜 and … (Japanese) or —— and …… (Chinese). © ® ™ moved onto ¶'s hold.
+- **Dashes.** Hold <KeyCap>-</KeyCap> on the first symbols page for ー, 〜 and ―― (Japanese) or —— and …… (Chinese) as well as the usual dashes.
+
+The `,` and `.` on the symbols page itself stay ASCII, because that is where numbers like 1,000.5 get typed. Their holds lead with the wide forms. A layout that writes its own symbols page keeps it exactly as written.
+
 ## Full-width space
 
 Japanese and Chinese text is spaced with the ideographic space (U+3000, 「　」), which is as wide as a character, rather than the narrow space between words in other languages. Turn on **Full-width space** in the language's options and the space bar types it. It is set per language, off by default, so you can have it for Japanese and not for Chinese. A space pressed while a reading is still waiting to convert picks a candidate as it always has; only a press with nothing composing types a space.
@@ -176,6 +194,12 @@ Whenever a conversion composer has a non-empty buffer, the usual word-suggestion
 Tapping a candidate (in the strip or the grid) resolves by its position in the ranked list, not by its text, because the same word can legitimately appear twice at different reading lengths (a Japanese reading might list 行 for both い and いき). Only the part of your typed buffer that the candidate covers gets deleted. The rest re-converts. Space is the fast path: it commits the top-ranked candidate for the leading syllables and moves on, so repeated space presses walk a whole sentence through without ever opening the strip. No path here adds a trailing space, since Chinese and Japanese don't put spaces between words. <KeyCap>Enter</KeyCap> converts nothing: it confirms the reading exactly as typed and does nothing else, so no line break and no send. In Japanese that is the hiragana you see, which is how you keep a word in kana; in Chinese it is the letters you pressed, so with Double Pinyin on, `nihc` goes in as `nihc` and not as the `nihao` the composing line spells out. That makes Enter the quick way to drop a Latin word into a sentence without switching keyboards. Any other commit (punctuation, moving the cursor, switching layout, or leaving the field) instead flushes the whole buffer by repeatedly taking the top candidate until nothing's left, so you're never stuck holding an unconverted reading.
 
 If a reading has no dictionary match at all, it always falls back to committing what you typed as-is (raw pinyin letters, kana, or a stroke code) rather than trapping you in an empty buffer.
+
+### English words and emoji
+
+Pinyin, romaji and Jyutping are typed on the same letters as English, so with **English** turned on under the language's [Also suggest from](/languages/overview/#each-language-has-its-own-screen), the strip offers English words for those letters too. Type `hello` and *hello* sits right behind 和. When the top candidate already covers everything you typed, as 很 does for `hen`, the English waits behind the first three candidates instead. Space still commits the top candidate, never the English. Tapping an English word puts it in exactly as shown, in place of the whole reading, with no space after it. Only words that start with what you typed are offered, never corrections, since the letters are a reading first. T9, Zhuyin, Cangjie and Stroke layouts don't offer English, because their keys aren't the alphabet.
+
+Emoji come up the way they do on any other layout: the top candidate is looked up in the language's emoji keywords, so `xiao` showing 笑 brings 😄 alongside, and an English word brings its own. They need the language's emoji keyword pack, and they follow [Emoji suggestions](/emoji/customization/#emoji-suggestions-while-typing) and the strip's own switches, since these are suggestions rather than the input method. Tapping one with **Keep word** as the insert mode commits the candidates first and the emoji right after (笑😄); **Replace word** puts the emoji in place of the reading. A long press does the other one, as it does everywhere.
 
 ### Picking with space, the arrows and Enter
 
@@ -234,21 +258,39 @@ CJK picks live in a file of their own, but the **Delete the learned words** butt
 
 ### Conversion dictionaries are downloads, not bundled data
 
-None of the conversion dictionaries ship in the app. Until you download the matching pack, a Chinese or Cantonese layout still composes and shows the buffer, but the candidate list stays empty. Japanese is the exception: its plain hiragana, katakana and half-width katakana forms are appended to every ranking, so they're on offer with no pack at all.
+None of the conversion dictionaries ship in the app. Until you download the matching pack, or [import a list of your own](#your-own-word-lists), a Chinese or Cantonese layout still composes and shows the buffer, but the candidate list stays empty. Japanese is the exception: its plain hiragana, katakana and half-width katakana forms are appended to every ranking, so they're on offer with no pack at all.
 
 You don't have to know that in advance. The first time you type a reading on a keyboard whose pack isn't on the device, a chip appears on the strip naming the pack you need — "Download the Chinese Pinyin dictionary to type characters" — and tapping it opens that language's page, where the pack's row is. The chip asks once per pack, and the ✕ dismisses it. It never appears in a password field.
 
 | Language | Pack | Approx. size | Coverage |
 |---|---|---|---|
-| Chinese | Pinyin (also covers Zhuyin & T9 Pinyin) | ~2.5 MB | ~120k entries, CC-CEDICT-derived |
+| Chinese | Pinyin (also covers Zhuyin & T9 Pinyin) | ~2.6 MB | ~121k entries, CC-CEDICT-derived |
 | Chinese | Stroke | ~450 KB | Stroke-order table |
 | Chinese | Cangjie (also covers Cangjie Quick) | ~350 KB | ~29k characters |
+| Chinese, Cantonese | Traditional characters phrase table (optional, for [Traditional output](#traditional-characters-and-regional-wording)) | ~1 MB | ~50k phrases, OpenCC |
 | Cantonese | Jyutping | ~3.4 MB | ~163k entries |
 | Japanese | Kana → kanji | ~42 MB | ~1.08M entries, Mozc-derived |
 
 The two shape-based tables have a second source. **Import from FlorisBoard**, in the same group, reads a FlorisBoard language pack (`.flex`) and fills the Cangjie or Stroke pack from the SQLite table inside it, with no download at all. Only those two land, since Wubi, Zhengma and the rest have no composer here; the app names whatever else it found back to you. See [Importing other keyboards](/reference/importing-other-keyboards/).
 
 Each download is checksum-verified before it's used and, once on disk, needs no further network access. See [Network policy](/privacy/network/) for what the keyboard contacts and when, and [Downloadable dictionaries](/languages/dictionaries/) for how the separate word-list system (which does have entries for plain Japanese and Korean word suggestions, just not for the conversion dictionaries here) works.
+
+### Your own word lists
+
+<SettingsPath path="Languages & layouts / (a CJK language) / Dictionaries / Custom dictionaries" />
+
+A list you import for Chinese, Cantonese or Japanese goes into the candidates, next to the pack. It only needs a reading on each line, and the formats people already have all carry one:
+
+- **CC-CEDICT** and **CC-Canto** (`關係 关系 [guan1 xi4] /relation/`). Chinese takes the Simplified form, the one the Pinyin pack lists, and **Traditional characters** turns it into the other; Cantonese takes the Traditional form and the Jyutping in braces.
+- **Rime** dictionaries (`.dict.yaml`), such as Luna Pinyin: `word`, the spaced reading, then a count or a percentage. The YAML header is skipped.
+- **Mozc and Google Japanese Input** user dictionaries: `reading`, `word`, part of speech. A katakana reading is read as hiragana.
+- The packs' own format, `reading`, `word`, `frequency`, one tab between each.
+
+Tone numbers and tone marks are dropped and ü is spelt `v`, the same as in the packs. A line with no reading, such as a plain column of characters, is skipped, and the count on the Custom dictionaries screen is the number of lines that do have one.
+
+A word your list adds appears under its reading. A word the pack already has keeps its place in the pack's ranking, unless your list gives counts of its own (Rime's do), in which case it can move up but never down. Your [picks](#learning-from-your-picks) reorder both the same way. A list works on its own too: with no pack downloaded, the candidates come from your lists, and the missing-pack chip stops asking. **Use only my word lists** leaves the pack out once you have imported a list with something in it; with nothing imported it has no effect here, so it can't leave the language unable to type a character.
+
+A list goes live the next time you open a text field, and only the table for its own language is reloaded.
 
 ## Details & edge cases
 

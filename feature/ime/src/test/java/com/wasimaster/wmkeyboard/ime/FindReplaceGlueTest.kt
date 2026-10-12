@@ -41,4 +41,32 @@ class FindReplaceGlueTest {
         assertEquals(0, FindReplaceGlue.afterOffset(edits, 0))
         assertEquals(30 + 2 - 2, FindReplaceGlue.afterOffset(edits, 30))
     }
+
+    @Test
+    fun `the preview cuts at the radius and at line breaks, and marks what it left out`() {
+        val short = FindReplaceGlue.preview("the cat sat", 4..6)!!
+        assertEquals("the cat sat", short.text)
+        assertEquals(4..6, short.match)
+
+        val long = FindReplaceGlue.preview("a".repeat(40) + "cat" + "b".repeat(40), 40..42, radius = 5)!!
+        assertEquals("…aaaaacatbbbbb…", long.text)
+        assertEquals("cat", long.text.substring(long.match.first, long.match.last + 1))
+
+        val lines = FindReplaceGlue.preview("first line\nthe cat\nlast", 15..17)!!
+        assertEquals("the cat", lines.text)
+
+        val spanning = FindReplaceGlue.preview("a\nb", 0..2)!!
+        assertEquals("a⏎b", spanning.text)
+        assertEquals(null, FindReplaceGlue.preview("abc", 2..5))
+    }
+
+    @Test
+    fun `history keeps the newest first, once each, and only short one-line searches`() {
+        val full = (1..FindHistoryPrefs.MAX_ENTRIES).map { "q$it" }
+        assertEquals(listOf("new") + full.dropLast(1), FindHistoryPrefs.pushRecent(full, "new"))
+        assertEquals(listOf("q3", "q1", "q2"), FindHistoryPrefs.pushRecent(listOf("q1", "q2", "q3"), "q3"))
+        assertEquals(listOf("q1"), FindHistoryPrefs.pushRecent(listOf("q1"), "  "))
+        assertEquals(listOf("q1"), FindHistoryPrefs.pushRecent(listOf("q1"), "two\nlines"))
+        assertEquals(listOf("q1"), FindHistoryPrefs.pushRecent(listOf("q1"), "x".repeat(FindHistoryPrefs.MAX_LENGTH + 1)))
+    }
 }
